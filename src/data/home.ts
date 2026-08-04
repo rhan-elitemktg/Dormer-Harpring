@@ -14,6 +14,8 @@
 //    `renderVals()` carried plenty of those on its derived view-models; they
 //    are re-derived in CSS instead, because no editor will ever type one.
 
+import { pt, type PortableTextBlock } from "./portableText";
+
 export interface HomeHero {
   eyebrow: string;
   /** One entry per rendered line — the comp breaks after "All in." */
@@ -48,4 +50,130 @@ export async function getHomeStats(): Promise<HomeStat[]> {
     { _key: "fee", big: "No Fee", label: "Unless we win" },
     { _key: "travel", big: "We Come", label: "To you" },
   ];
+}
+
+export interface CaseResult {
+  _key: string;
+  tag: string;
+  /** Drives the badge's label and its filled-vs-outlined treatment. */
+  isTrialWin: boolean;
+  offered: string;
+  recovered: string;
+  story: string;
+}
+
+/**
+ * The comp derives a `badgeStyle` string per result — a whole CSS declaration,
+ * picked by a boolean. That collapses to `isTrialWin` here and a modifier class
+ * in the component; an editor can tick a box, they cannot write a font shorthand.
+ */
+export async function getRecentResults(): Promise<CaseResult[]> {
+  return [
+    {
+      _key: "kingsoopers",
+      tag: "Slip & Fall",
+      isTrialWin: true,
+      offered: "$250K",
+      recovered: "$2.1M",
+      story:
+        "King Soopers disputed liability and offered $250K. A Boulder jury awarded " +
+        "our client $1.77M — resolved at $2.1M with interest and costs.",
+    },
+    {
+      _key: "disputed-crash",
+      tag: "Car Accident",
+      isTrialWin: true,
+      offered: "$250K",
+      recovered: "$669K",
+      story:
+        "The insurer offered $250K on a disputed crash. We took it to a jury and " +
+        "won a $668,642 judgment for our client.",
+    },
+    {
+      _key: "low-speed",
+      tag: "Low-Speed Collision",
+      isTrialWin: true,
+      offered: "$15K",
+      recovered: "$263K",
+      story:
+        "A low-speed crash the insurer valued at just $15K. The jury awarded " +
+        "$263,121 — roughly 17× the offer.",
+    },
+  ];
+}
+
+export interface HelpPoint {
+  _key: string;
+  /** Rendered bold, ahead of the detail. */
+  lead: string;
+  text: string;
+}
+
+export interface HomeFirmIntro {
+  /** One entry per rendered line, same as the hero's headline. */
+  title: string[];
+  /** The Newsreader italic line carrying the hand-drawn underline. */
+  tagline: string;
+  body: PortableTextBlock[];
+  helpTitle: string;
+  helpPoints: HelpPoint[];
+  videoLabel: string;
+  quote: { text: string; name: string; role: string };
+  aside: { title: string; text: string; ctaLabel: string };
+}
+
+export async function getHomeFirmIntro(): Promise<HomeFirmIntro> {
+  return {
+    title: ["Denver's boutique", "personal injury law firm."],
+    tagline: "Fewer cases. All in on every one.",
+    body: pt(
+      "Injuries are never planned. They arrive with hospital bills, lost income, and " +
+        "a life that suddenly looks different. We understand how much is riding on " +
+        "your recovery — and **you don't have to face the insurance companies alone.**",
+      "When you're hurt and scared, the last thing you need is to feel like a case " +
+        "number. Dormer Harpring stays small on purpose — so when you call, you reach " +
+        "a named partner, not a stranger. **Your fight becomes our fight,** all the " +
+        "way to the final check.",
+      "In the days after a crash, the insurance company is often already calling — " +
+        "angling for a recorded statement and a fast, low offer before anyone knows " +
+        "how badly you're hurt. **You don't have to talk to them.** Make one call to " +
+        "us, and we take every conversation from there."
+    ),
+    helpTitle: "How can we help?",
+    helpPoints: [
+      {
+        _key: "mess",
+        lead: "We handle the mess.",
+        text: "So you can focus on getting better — we deal with the paperwork, calls, and liens.",
+      },
+      {
+        _key: "straight",
+        lead: "Straight talk, always.",
+        text: "Real answers from your attorney — never a sales pitch.",
+      },
+      {
+        _key: "trial",
+        lead: "An experienced trial lawyer, not just a settlement lawyer.",
+        text: "We prepare every case to be tried — insurers know it.",
+      },
+      {
+        _key: "care",
+        lead: "Care now, not later.",
+        text: "We help you get treatment right away, even before a settlement.",
+      },
+    ],
+    videoLabel: "Watch our firm video",
+    quote: {
+      text:
+        "You focus on getting better. We'll handle the insurance company, the " +
+        "paperwork, and the phone calls — and you'll always reach me, never a case number.",
+      name: "KC Harpring",
+      role: "Founding Partner",
+    },
+    aside: {
+      title: "Can we help? We're here.",
+      text: "Free case review, available 24/7. No fee unless we win.",
+      ctaLabel: "Get a free consultation",
+    },
+  };
 }

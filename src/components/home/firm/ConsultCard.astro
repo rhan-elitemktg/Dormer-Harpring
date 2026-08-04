@@ -1,0 +1,84 @@
+---
+// The dark "Can we help? We're here." card in the firm intro's aside.
+import { getFirmDetails } from "../../../data/site";
+import { ROUTES } from "../../../lib/routePaths";
+
+interface Props {
+  aside: { title: string; text: string; ctaLabel: string };
+}
+
+const { aside } = Astro.props;
+const firm = await getFirmDetails();
+---
+
+<div class="consult">
+  <h3 class="consult__title">{aside.title}</h3>
+  <p class="consult__text">{aside.text}</p>
+  <a class="consult__cta" href={ROUTES.contact}>{aside.ctaLabel}</a>
+  <a class="consult__call" href={`tel:${firm.phoneE164}`}>Call {firm.phone}</a>
+</div>
+
+<style>
+  .consult {
+    padding: var(--space-9) var(--space-9) var(--space-8);
+    background: var(--surface-dark);
+    border-radius: var(--radius-5);
+    box-shadow: 0 22px 50px -34px rgba(27, 36, 30, 0.5);
+  }
+
+  /* Newsreader rather than the display face: this is a spoken aside, and Anton
+     at this size in a small dark card reads as a shout. */
+  .consult__title {
+    margin-bottom: var(--space-2);
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: var(--display-6);
+    line-height: 1.1;
+    letter-spacing: 0;
+    text-transform: none;
+    color: #f6f2e8;
+  }
+
+  .consult__text {
+    margin-bottom: var(--space-5);
+    font-size: var(--text-base);
+    line-height: 1.5;
+    color: #aeb6a8;
+  }
+
+  .consult__cta {
+    display: block;
+    width: 100%;
+    padding: var(--space-5);
+    border-radius: var(--radius-2);
+    background: var(--accent-gold);
+    font-family: var(--font-body);
+    font-weight: 800;
+    font-size: var(--text-sm);
+    line-height: 1;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-align: center;
+    color: var(--dh-forest-400);
+  }
+
+  .consult__cta:hover {
+    background: var(--dh-gold-light);
+    color: var(--dh-forest-400);
+  }
+
+  .consult__call {
+    display: block;
+    margin-top: var(--space-4);
+    font-family: var(--font-body);
+    font-weight: 800;
+    font-size: var(--text-xl);
+    line-height: 1;
+    text-align: center;
+    color: #f6f2e8;
+  }
+
+  .consult__call:hover {
+    color: var(--dh-gold-light);
+  }
+</style>

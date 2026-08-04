@@ -1,0 +1,28 @@
+---
+// Renders a Portable Text body through the site's shared prose components.
+//
+// Use this wherever a `blockContent` field is displayed. The styling lives in
+// global.css as `.prose__*` rather than in a scoped block here, and that is
+// deliberate: Portable Text renderers are child components, so they never carry
+// the calling component's `data-astro-cid`. A scoped `.prose__p` rule in the
+// parent would compile fine and match nothing.
+import { PortableText } from "astro-portabletext";
+import { proseComponents } from "./components";
+
+interface Props {
+  /** Portable Text blocks. Renders nothing when empty or absent. */
+  value?: unknown;
+  class?: string;
+}
+
+const { value, class: className } = Astro.props;
+const hasContent = Array.isArray(value) && value.length > 0;
+---
+
+{
+  hasContent && (
+    <div class:list={["prose", className]}>
+      <PortableText value={value} components={proseComponents} />
+    </div>
+  )
+}

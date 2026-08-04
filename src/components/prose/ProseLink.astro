@@ -1,0 +1,16 @@
+---
+// Portable Text `link` mark. External links get rel="noopener"; the check is on
+// the href rather than a flag, so an editor pasting a full URL gets it right.
+import type { PortableTextMarkComponentProps } from "astro-portabletext/types";
+
+type Props = PortableTextMarkComponentProps<{ _type: "link"; href?: string }>;
+const { value } = Astro.props;
+const href = value?.href ?? "#";
+const external = /^https?:\/\//i.test(href);
+---
+
+<a
+  class="prose__link"
+  href={href}
+  target={external ? "_blank" : undefined}
+  rel={external ? "noopener" : undefined}><slot /></a>

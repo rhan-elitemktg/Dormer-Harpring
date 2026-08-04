@@ -1,0 +1,80 @@
+---
+// The founding-partner pull quote beside the firm intro.
+import Picture from "../../media/Picture.astro";
+import kcHarpring from "../../../assets/attorneys/kc-harpring.jpg";
+
+interface Props {
+  quote: { text: string; name: string; role: string };
+}
+
+const { quote } = Astro.props;
+---
+
+<figure class="quote">
+  <Picture src={kcHarpring} alt={quote.name} class="quote__portrait" />
+  <div>
+    <blockquote class="quote__text">{quote.text}</blockquote>
+    <figcaption class="quote__by">
+      <span class="quote__name">{quote.name}</span>
+      <span class="quote__role">{quote.role}</span>
+    </figcaption>
+  </div>
+</figure>
+
+<style>
+  .quote {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-4);
+    margin: 0;
+    padding: var(--space-7) var(--space-8);
+    background: var(--dh-cream-50);
+    border: 1px solid #e7dec9;
+    border-radius: var(--radius-5);
+    box-shadow: var(--shadow-panel);
+  }
+
+  .quote :global(.quote__portrait) {
+    width: 52px;
+    height: 52px;
+    margin-top: var(--space-1);
+    border-radius: var(--radius-full);
+    object-fit: cover;
+    object-position: top center;
+    flex: none;
+  }
+
+  .quote__text {
+    margin: 0 0 var(--space-4);
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-weight: 400;
+    font-size: var(--text-2xl);
+    line-height: 1.5;
+    color: #3a4c3e;
+  }
+
+  .quote__by {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .quote__name {
+    font-family: var(--font-script);
+    font-weight: 700;
+    font-size: var(--display-7);
+    line-height: 1;
+    white-space: nowrap;
+    color: var(--dh-ink-warm);
+  }
+
+  .quote__role {
+    font-weight: 700;
+    font-size: var(--text-micro);
+    line-height: 1.3;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--dh-gold-deep);
+  }
+</style>

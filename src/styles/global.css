@@ -544,6 +544,38 @@ select {
   }
 }
 
+/* ---- Arrow affordance -------------------------------------
+   Any link or button can carry a trailing arrow:
+
+     <a class="arrow-link">See all results <span class="arrow" aria-hidden="true">→</span></a>
+
+   `.arrow-link` supplies the flex box that actually centres the glyph — a
+   trailing inline span sits on the text baseline, and the → is drawn at the
+   font's mid-height, so as inline content it always rides low. `.btn` is
+   already inline-flex and centred, so an `.arrow` inside one needs nothing.
+   Reduced motion is handled by the global guard at the foot of this file. */
+.arrow-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* The hover nudge rides on a custom property so the optical -1px survives it.
+   Setting `transform: translateX(...)` on hover instead would replace the whole
+   declaration and drop the arrow back down mid-animation. */
+.arrow {
+  --arrow-shift: 0px;
+  display: inline-block;
+  line-height: 1;
+  transform: translate(var(--arrow-shift), -1px);
+  transition: transform var(--dur-fast) var(--ease);
+}
+
+:is(a, button):hover > .arrow,
+:is(a, button):focus-visible > .arrow {
+  --arrow-shift: 3px;
+}
+
 /* ---- Prose ------------------------------------------------
    The shared body styles. Built now, before any Portable Text
    exists, for two reasons: the comps' `bp-h2`/`bp-h3`/`bp-p`
