@@ -18,6 +18,12 @@ export interface FirmAddress {
   country: string;
 }
 
+export interface SocialLink {
+  /** Platform key — must match a glyph in `components/icons/SocialIcon.astro`. */
+  name: string;
+  href: string;
+}
+
 export interface FirmDetails {
   name: string;
   legalName: string;
@@ -25,12 +31,22 @@ export interface FirmDetails {
   phone: string;
   /** E.164, for `tel:` hrefs and JSON-LD. */
   phoneE164: string;
+  /** The footer's "Text" number. */
+  sms: string;
+  smsE164: string;
   email?: string;
   address: FirmAddress;
   geo: { lat: number; lng: number };
   mapUrl: string;
   hours: string;
-  socials: string[];
+  /** Rendered as icons in the footer. Each `name` needs a glyph. */
+  socials: SocialLink[];
+  /**
+   * Additional real profiles that are NOT shown in the footer but belong in
+   * JSON-LD `sameAs` — directory listings, review sites. Kept separate so the
+   * footer never has to render a glyph we don't actually have.
+   */
+  directoryProfiles: string[];
 }
 
 /**
@@ -47,6 +63,8 @@ export async function getFirmDetails(): Promise<FirmDetails> {
     legalName: "Dormer Harpring, LLC",
     phone: "(303) 756-3812",
     phoneE164: "+13037563812",
+    sms: "(720) 734-6230",
+    smsE164: "+17207346230",
     address: {
       street: "3457 Ringsby Court",
       unit: "Unit 110",
@@ -58,14 +76,17 @@ export async function getFirmDetails(): Promise<FirmDetails> {
     geo: { lat: 39.7726247, lng: -104.9820183 },
     mapUrl: "https://maps.app.goo.gl/8oWqkqUJtBrSS49s9",
     hours: "Mo-Fr 09:00-17:00",
+    // The five the comps draw, in their order. The live site's `sameAs` omits
+    // Instagram, TikTok and YouTube even though its footer links them — fixed
+    // here, since everything below feeds the JSON-LD too.
     socials: [
-      "https://www.facebook.com/DenverTrial",
-      "https://www.linkedin.com/company/dormer-harpring-llc/",
-      "https://www.youtube.com/@denvertrial",
-      "https://www.tiktok.com/@denvertrial",
-      "https://www.instagram.com/denver_trial/",
-      "https://www.yelp.com/biz/dormer-harpring-denver-5",
+      { name: "facebook", href: "https://www.facebook.com/DenverTrial" },
+      { name: "linkedin", href: "https://www.linkedin.com/company/dormer-harpring-llc/" },
+      { name: "youtube", href: "https://www.youtube.com/@denvertrial" },
+      { name: "tiktok", href: "https://www.tiktok.com/@denvertrial" },
+      { name: "instagram", href: "https://www.instagram.com/denver_trial/" },
     ],
+    directoryProfiles: ["https://www.yelp.com/biz/dormer-harpring-denver-5"],
   };
 }
 

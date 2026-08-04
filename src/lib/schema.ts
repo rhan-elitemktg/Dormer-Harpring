@@ -46,7 +46,7 @@ export function legalServiceSchema(
     openingHours: firm.hours,
     priceRange: "Free Consultation",
     areaServed: { "@type": "State", name: "Colorado" },
-    sameAs: firm.socials,
+    sameAs: [...firm.socials.map((s) => s.href), ...firm.directoryProfiles],
   };
 }
 

@@ -1,0 +1,379 @@
+---
+// The site header. ONE component with two variants, because the comps' solid
+// and transparent headers are byte-identical apart from the wrapper background:
+//   solid        interior pages — #151E19 with a bottom hairline
+//   transparent  homepage — absolutely positioned over the full-bleed hero
+import Picture from "./media/Picture.astro";
+import MobileNav from "./MobileNav.astro";
+import { getNavItems } from "../data/navigation";
+import { getFirmDetails } from "../data/site";
+import { ROUTES } from "../lib/routePaths";
+import logoWhite from "../assets/logo-white.webp";
+
+interface Props {
+  variant?: "solid" | "transparent";
+}
+
+const { variant = "solid" } = Astro.props;
+
+const [nav, firm] = await Promise.all([getNavItems(), getFirmDetails()]);
+
+// The caret marks an item that IS MEANT to have a submenu, which is a different
+// question from whether one has been authored yet — `children: []` is "menu
+// coming", `children` absent is "no menu". Testing `item.children` alone would
+// conflate them only by accident, since an empty array is truthy.
+const hasMenu = (item: (typeof nav)[number]) => item.children !== undefined;
+
+// Mark the current page so the nav can show it as active. Trailing slash is
+// stripped to match `ROUTES`, which never carries one.
+const current = Astro.url.pathname.replace(/\/+$/, "") || "/";
+---
+
+<header class:list={["header", `header--${variant}`]}>
+  <div class="header__inner container">
+    <a href={ROUTES.home} class="header__logo" aria-label="Dormer Harpring — home">
+      <Picture src={logoWhite} alt="Dormer Harpring" eager class="header__logo-img" />
+    </a>
+
+    <nav class="header__nav" aria-label="Main">
+      <ul class="header__list">
+        {
+          nav.map((item) => (
+            <li class:list={["header__item", hasMenu(item) && "header__item--menu"]}>
+              {item.href ? (
+                <a
+                  href={item.href}
+                  class="header__link"
+                  aria-current={current === item.href ? "page" : undefined}
+                >
+                  {item.label}
+                  {hasMenu(item) && <span class="header__caret" aria-hidden="true">▾</span>}
+                </a>
+              ) : (
+                /* No destination authored yet — plain text, not a dead link. */
+                <span class="header__link header__link--inert">
+                  {item.label}
+                  {hasMenu(item) && <span class="header__caret" aria-hidden="true">▾</span>}
+                </span>
+              )}
+
+              {
+                item.children && item.children.length > 0 && (
+                  <ul class="header__menu">
+                    {item.children.map((child) => (
+                      <li>
+                        <a
+                          class="header__menu-link"
+                          href={child.href ?? "#"}
+                          target={child.external ? "_blank" : undefined}
+                          rel={child.external ? "noopener" : undefined}
+                        >
+                          {child.label}
+                          {child.external && (
+                            <span class="header__ext" aria-hidden="true">
+                              ↗
+                            </span>
+                          )}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                )
+              }
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="header__aside">
+      {/* TODO(IA): no Spanish page exists yet. Rendered because every comp
+          shows it; wire to the Spanish landing page once there is one. */}
+      <button type="button" class="header__lang">En Español</button>
+
+      <a href={`tel:${firm.phoneE164}`} class="header__phone">
+        <span class="header__phone-number">{firm.phone}</span>
+        <span class="header__phone-note">It's free. Available 24/7</span>
+      </a>
+
+      <MobileNav items={nav} phone={firm.phone} phoneE164={firm.phoneE164} />
+    </div>
+  </div>
+</header>
+
+<style>
+  .header {
+    position: relative;
+    z-index: 20;
+  }
+
+  .header--solid {
+    background: var(--surface-chrome);
+    border-bottom: 1px solid var(--dh-line-dark);
+  }
+
+  /* Over the hero. Not absolute — the comp makes it a normal flex child of the
+     hero <section>, sitting above the hero's absolutely positioned photo and
+     gradient scrims on z-index alone. Rendered by Hero.astro, not Layout. */
+  .header--transparent {
+    z-index: 3;
+    background: transparent;
+  }
+
+  .header__inner {
+    display: flex;
+    align-items: center;
+    gap: var(--space-7);
+    padding-block: var(--space-6);
+  }
+
+  .header--transparent .header__inner {
+    padding-block: var(--space-8);
+  }
+
+  .header__logo {
+    flex: none;
+    display: block;
+  }
+
+  .header__logo :global(.header__logo-img) {
+    height: 44px;
+    width: auto;
+  }
+
+  .header__nav {
+    margin-left: var(--space-5);
+  }
+
+  .header__list {
+    display: flex;
+    align-items: center;
+    gap: var(--space-6);
+    list-style: none;
+    padding: 0;
+    white-space: nowrap;
+  }
+
+  .header__link {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-family: var(--font-ui);
+    font-weight: 600;
+    font-size: var(--text-sm);
+    line-height: 1;
+    letter-spacing: var(--tracking-nav);
+    text-transform: uppercase;
+    color: var(--dh-cream-300);
+    transition: color var(--transition);
+  }
+
+  .header__link:hover {
+    color: var(--dh-gold-light);
+  }
+
+  .header__link[aria-current="page"] {
+    color: var(--dh-gold-light);
+  }
+
+  .header__link--inert {
+    cursor: default;
+  }
+
+  /* The comp sets 8px, which is too small to read as a chevron at all — it
+     just looks like a speck. Bumped to the label size and given the gold so it
+     reads as an affordance rather than punctuation. The glyph sits high in its
+     em box, so a small nudge down optically centres it against the label. */
+  .header__caret {
+    font-size: var(--text-md);
+    line-height: 1;
+    color: var(--dh-gold-light);
+    transform: translateY(1px);
+  }
+
+  .header__link:hover .header__caret {
+    color: var(--dh-gold-light);
+  }
+
+  /* ---- Dropdowns -------------------------------------------
+     Opened by :hover and :focus-within — no JS, and tabbing into the submenu
+     keeps it open for keyboard users for free. Plain nested lists rather than
+     role="menu"/menuitem: these are navigation links, not application menu
+     commands, and the ARIA menu roles would promise arrow-key semantics we
+     deliberately don't implement. */
+  .header__item {
+    position: relative;
+  }
+
+  .header__item--menu {
+    /* Bridges the gap between the label and the panel so the pointer can cross
+       without the menu closing under it. */
+    padding-bottom: var(--space-4);
+    margin-bottom: calc(var(--space-4) * -1);
+  }
+
+  .header__menu {
+    position: absolute;
+    top: 100%;
+    left: calc(var(--space-4) * -1);
+    z-index: 30;
+    min-width: 230px;
+    padding: var(--space-3);
+    margin: 0;
+    list-style: none;
+    background: var(--surface-chrome);
+    border: 1px solid var(--dh-line-dark);
+    border-top: 2px solid var(--accent-gold);
+    border-radius: var(--radius-chip);
+    box-shadow: var(--shadow-card-dark);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-6px);
+    transition: opacity var(--dur-fast) var(--ease),
+      transform var(--dur-fast) var(--ease), visibility var(--dur-fast);
+  }
+
+  .header__item--menu:hover .header__menu,
+  .header__item--menu:focus-within .header__menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .header__menu-link {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-3);
+    border-radius: var(--radius-2);
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: var(--text-md);
+    line-height: 1.3;
+    text-transform: none;
+    letter-spacing: 0;
+    white-space: nowrap;
+    color: var(--text-on-dark-2);
+    transition: background-color var(--transition), color var(--transition);
+  }
+
+  .header__menu-link:hover,
+  .header__menu-link:focus-visible {
+    background: rgba(199, 154, 84, 0.16);
+    color: var(--dh-white);
+  }
+
+  .header__ext {
+    font-size: var(--text-sm);
+    color: var(--accent-gold);
+  }
+
+  .header__aside {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+  }
+
+  .header__lang {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-4);
+    border: 1px solid rgba(244, 239, 231, 0.4);
+    border-radius: var(--radius-pill);
+    background: rgba(20, 26, 22, 0.28);
+    font-family: var(--font-ui);
+    font-weight: 600;
+    font-size: var(--text-label);
+    line-height: 1;
+    color: var(--text-on-dark);
+    white-space: nowrap;
+    cursor: pointer;
+    transition: border-color var(--transition), color var(--transition);
+  }
+
+  .header__lang:hover {
+    border-color: var(--dh-gold-light);
+    color: var(--dh-gold-light);
+  }
+
+  .header__phone {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--space-1);
+    text-align: right;
+    white-space: nowrap;
+    color: var(--dh-white);
+  }
+
+  .header--transparent .header__phone {
+    text-shadow: 0 1px 10px rgba(20, 26, 22, 0.6);
+  }
+
+  .header__phone-number {
+    font-family: var(--font-ui);
+    font-weight: 600;
+    font-size: var(--text-phone);
+    line-height: 1;
+    letter-spacing: var(--tracking-tight);
+    color: var(--dh-white);
+  }
+
+  .header__phone-note {
+    font-family: var(--font-ui);
+    font-weight: 600;
+    font-size: var(--text-micro);
+    line-height: 1;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: #dce2d6;
+  }
+
+  .header__phone:hover .header__phone-number {
+    color: var(--dh-gold-light);
+  }
+
+  /* Six uppercase items plus the language pill plus a 27px phone number stop
+     fitting somewhere around 1080px — hand off to the drawer at 1100. */
+  @media (max-width: 1100px) {
+    .header__nav,
+    .header__lang {
+      display: none;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .header__inner,
+    .header--transparent .header__inner {
+      padding-block: var(--space-5);
+    }
+
+    .header__logo :global(.header__logo-img) {
+      height: 34px;
+    }
+
+    /* Below this the number is the only thing worth keeping; the reassurance
+       line costs a row and adds nothing at thumb size. */
+    .header__phone-note {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  // The dropdowns are pure CSS (:hover / :focus-within). The one thing CSS
+  // can't do is dismiss an open menu on Escape, because the menu is held open
+  // by focus living inside it — so move focus back out to the parent link.
+  document.querySelector(".header__nav")?.addEventListener("keydown", (event) => {
+    const e = event as KeyboardEvent;
+    if (e.key !== "Escape") return;
+
+    const item = (e.target as HTMLElement).closest(".header__item--menu");
+    if (!item) return;
+
+    e.stopPropagation();
+    item.querySelector<HTMLElement>(".header__link")?.focus();
+  });
+</script>

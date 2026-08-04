@@ -1,0 +1,341 @@
+---
+// The site footer: service-area band, then a three-column body (brand/contact,
+// practice areas, office + explore), then the legal bottom bar.
+import Picture from "./media/Picture.astro";
+import SocialIcon from "./icons/SocialIcon.astro";
+import ServiceAreaBand from "./footer/ServiceAreaBand.astro";
+import { getFirmDetails, formatAddress } from "../data/site";
+import {
+  getFooterNav,
+  getFooterPracticeAreas,
+  getServiceAreas,
+} from "../data/navigation";
+import { ROUTES } from "../lib/routePaths";
+import logoWhite from "../assets/logo-white.webp";
+
+const [firm, practiceAreas, footerNav, serviceAreas] = await Promise.all([
+  getFirmDetails(),
+  getFooterPracticeAreas(),
+  getFooterNav(),
+  getServiceAreas(),
+]);
+
+const year = new Date().getFullYear();
+const directionsUrl = `https://maps.google.com/?q=${encodeURIComponent(
+  formatAddress(firm.address)
+)}`;
+---
+
+<footer class="footer">
+  <ServiceAreaBand areas={serviceAreas} />
+
+  <div class="footer__body container">
+    <div class="footer__brand">
+      <Picture
+        src={logoWhite}
+        alt="Dormer Harpring — Denver personal injury lawyers"
+        class="footer__logo"
+      />
+      <p class="footer__blurb">
+        Denver personal injury lawyers who treat every client like a person, not a
+        case number — and try cases other firms settle.
+      </p>
+
+      <div class="footer__contacts">
+        <div>
+          <p class="footer__label">Call</p>
+          <a class="footer__number" href={`tel:${firm.phoneE164}`}>{firm.phone}</a>
+        </div>
+        <div>
+          <p class="footer__label">Text</p>
+          <a class="footer__number" href={`sms:${firm.smsE164}`}>{firm.sms}</a>
+        </div>
+      </div>
+
+      <ul class="footer__socials">
+        {
+          firm.socials.map((social) => (
+            <li>
+              <a
+                class="footer__social"
+                href={social.href}
+                aria-label={social.name}
+                rel="noopener"
+                target="_blank"
+              >
+                <SocialIcon name={social.name} />
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+
+    <nav class="footer__col" aria-labelledby="footer-practice">
+      <h2 class="footer__heading" id="footer-practice">Practice Areas</h2>
+      <ul class="footer__links">
+        {
+          practiceAreas.map((item) => (
+            <li>
+              <a class="footer__link" href={item.href ?? "#"}>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="footer__col">
+      <h2 class="footer__heading">Our Office</h2>
+      <p class="footer__address">
+        {firm.address.street}, {firm.address.unit}<br />
+        {firm.address.city}, {firm.address.region}
+        {firm.address.postalCode}
+      </p>
+      <a class="footer__directions" href={directionsUrl} rel="noopener" target="_blank">
+        Get directions <span aria-hidden="true">&rarr;</span>
+      </a>
+
+      <nav aria-labelledby="footer-explore">
+        <h2 class="footer__heading footer__heading--spaced" id="footer-explore">
+          Explore
+        </h2>
+        <ul class="footer__links footer__links--two">
+          {
+            footerNav.map((item) => (
+              <li>
+                <a class="footer__link" href={item.href ?? "#"}>
+                  {item.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+    </div>
+  </div>
+
+  <div class="footer__bottom">
+    <div class="footer__bottom-inner container">
+      <p class="footer__legal">
+        &copy; {year} {firm.legalName}. All rights reserved. The information on this
+        site is for general purposes only and is not legal advice. Prior results do
+        not guarantee a similar outcome.
+      </p>
+      <ul class="footer__legal-links">
+        <li><a href={ROUTES.privacy}>Privacy Policy</a></li>
+        <li><a href={ROUTES.editorialGuidelines}>Editorial Guidelines</a></li>
+        <li><a href="/sitemap.xml">Sitemap</a></li>
+      </ul>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    position: relative;
+    background: var(--surface-chrome);
+    color: var(--text-on-dark-2);
+    overflow: hidden;
+  }
+
+  .footer__body {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr;
+    gap: var(--space-14);
+    padding-block: var(--space-section-sm) var(--space-16);
+  }
+
+  .footer :global(.footer__logo) {
+    height: 52px;
+    width: auto;
+    margin-bottom: var(--space-6);
+  }
+
+  .footer__blurb {
+    max-width: 38ch;
+    margin-bottom: var(--space-8);
+    font-size: var(--text-base);
+    line-height: var(--leading-normal);
+    color: var(--text-on-dark-muted);
+  }
+
+  .footer__contacts {
+    display: flex;
+    gap: var(--space-10);
+    margin-bottom: var(--space-8);
+  }
+
+  .footer__label {
+    margin-bottom: var(--space-2);
+    font-family: var(--font-ui);
+    font-weight: 700;
+    font-size: var(--text-micro);
+    line-height: 1;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--dh-on-dark-4);
+  }
+
+  .footer__number {
+    font-family: var(--font-ui);
+    font-weight: 600;
+    font-size: var(--text-3xl);
+    letter-spacing: var(--tracking-tight);
+    color: var(--text-on-dark);
+  }
+
+  .footer__number:hover {
+    color: var(--dh-gold-light);
+  }
+
+  .footer__socials {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    list-style: none;
+    padding: 0;
+  }
+
+  .footer__social {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: var(--radius-full);
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-on-dark-2);
+    transition: background-color var(--transition), color var(--transition);
+  }
+
+  .footer__social:hover {
+    background: var(--accent);
+    color: var(--dh-white);
+  }
+
+  .footer__heading {
+    margin-bottom: var(--space-5);
+    font-family: var(--font-ui);
+    font-weight: 700;
+    font-size: var(--text-label);
+    line-height: 1;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent-gold);
+  }
+
+  .footer__heading--spaced {
+    margin-top: var(--space-8);
+  }
+
+  .footer__links {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    list-style: none;
+    padding: 0;
+  }
+
+  .footer__links--two {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3) var(--space-5);
+  }
+
+  .footer__link {
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: var(--text-base);
+    line-height: 1.2;
+    color: var(--text-on-dark-2);
+  }
+
+  .footer__link:hover {
+    color: var(--dh-white);
+  }
+
+  .footer__address {
+    margin-bottom: var(--space-2);
+    font-size: var(--text-base);
+    line-height: 1.7;
+    color: var(--text-on-dark-2);
+  }
+
+  .footer__directions {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-family: var(--font-body);
+    font-weight: 800;
+    font-size: var(--text-label);
+    line-height: 1;
+    letter-spacing: var(--tracking-btn);
+    text-transform: uppercase;
+    color: var(--dh-gold-bright);
+  }
+
+  .footer__bottom {
+    border-top: 1px solid var(--dh-line-dark);
+  }
+
+  .footer__bottom-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4) var(--space-7);
+    padding-block: var(--space-6);
+  }
+
+  .footer__legal {
+    max-width: 78ch;
+    font-size: var(--text-sm);
+    line-height: var(--leading-normal);
+    color: var(--dh-on-dark-4);
+  }
+
+  .footer__legal-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-5);
+    list-style: none;
+    padding: 0;
+    white-space: nowrap;
+  }
+
+  .footer__legal-links a {
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: var(--text-sm);
+    color: var(--text-on-dark-muted);
+  }
+
+  .footer__legal-links a:hover {
+    color: var(--dh-white);
+  }
+
+  @media (max-width: 980px) {
+    .footer__body {
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-12) var(--space-10);
+    }
+
+    /* The brand column carries the logo, blurb, both numbers and the socials —
+       it needs the full width once there are only two columns. */
+    .footer__brand {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .footer__body {
+      grid-template-columns: 1fr;
+    }
+
+    .footer__contacts {
+      gap: var(--space-8);
+    }
+  }
+</style>

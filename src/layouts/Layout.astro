@@ -6,6 +6,8 @@
 // editable-SEO layer is added, it attaches by filling this prop, with no edits
 // to any page and no change to the rendered titles.
 import Font from "astro/components/Font.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
 import { getFirmDetails } from "../data/site";
 import { resolveSeo, SITE_NAME, type SeoInput } from "../lib/seo";
 import { legalServiceSchema } from "../lib/schema";
@@ -87,12 +89,23 @@ const organization = legalServiceSchema(firm, siteUrl);
     </script>
   </head>
 
-  <body class={bodyClass} data-header={headerVariant}>
-    {/* Header lands here in the shell phase. */}
+  <body class={bodyClass}>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    {
+      /* Only the solid header lives here. The transparent one is a normal flex
+         child INSIDE the hero <section> (stacked above the hero's absolutely
+         positioned photo and scrims), exactly as the comp has it — so the
+         homepage's Hero renders it itself. Layout emitting it would put it
+         outside the hero's stacking context, where it has nothing to sit on. */
+      headerVariant === "solid" && <Header variant="solid" />
+    }
+
     <main id="main">
       <slot />
     </main>
-    {/* Footer lands here in the shell phase. */}
+
+    <Footer />
 
     <script>
       // Fade each lazy image in once it has actually decoded. Images already
