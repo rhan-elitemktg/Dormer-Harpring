@@ -1,0 +1,108 @@
+---
+// The "Recognized & awarded" trust bar.
+//
+// At src/components/ root rather than under home/ because the About page runs
+// the same band with identical markup — the first of the four shared bands.
+import Picture from "./media/Picture.astro";
+import type { Award } from "../data/awards";
+
+interface Props {
+  awards: Award[];
+  eyebrow?: string;
+}
+
+const { awards, eyebrow = "Recognized & awarded" } = Astro.props;
+---
+
+<section class="awards">
+  <div class="awards__inner">
+    <p class="awards__eyebrow">{eyebrow}</p>
+    <ul class="awards__list">
+      {
+        awards.map((award) => (
+          <li class="awards__item" data-height={award.height}>
+            <Picture src={award.image} alt={award.alt} class="awards__badge" />
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .awards {
+    background: var(--dh-cream-50);
+  }
+
+  .awards__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-8);
+    max-width: var(--measure-wide);
+    margin-inline: auto;
+    padding: var(--space-section-sm) var(--container-pad);
+  }
+
+  /* No gold rule here — this is a bar label, not a section opener, so it
+     deliberately isn't the shared `.eyebrow`. */
+  .awards__eyebrow {
+    font-family: var(--font-ui);
+    font-weight: 800;
+    font-size: var(--text-label);
+    line-height: 1;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--dh-gold-deep);
+  }
+
+  .awards__list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-6) var(--space-12);
+    list-style: none;
+    padding: 0;
+  }
+
+  /* Height comes from a data attribute rather than an inline style: the badges
+     are drawn at three different weights and need to be optically levelled, but
+     it's a closed set of values, so CSS can enumerate it. */
+  .awards__item[data-height="74"] {
+    --badge-h: 74px;
+  }
+
+  .awards__item[data-height="80"] {
+    --badge-h: 80px;
+  }
+
+  .awards__item[data-height="88"] {
+    --badge-h: 88px;
+  }
+
+  .awards__list :global(.awards__badge) {
+    height: var(--badge-h, 80px);
+    width: auto;
+  }
+
+  @media (max-width: 980px) {
+    .awards__list {
+      gap: var(--space-6) var(--space-10);
+    }
+
+    .awards__list :global(.awards__badge) {
+      height: calc(var(--badge-h, 80px) * 0.8);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .awards__list {
+      gap: var(--space-5) var(--space-7);
+    }
+
+    .awards__list :global(.awards__badge) {
+      height: calc(var(--badge-h, 80px) * 0.66);
+    }
+  }
+</style>

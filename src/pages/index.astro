@@ -5,18 +5,25 @@ import Layout from "../layouts/Layout.astro";
 import Hero from "../components/home/Hero.astro";
 import RecentResults from "../components/home/RecentResults.astro";
 import FirmIntro from "../components/home/FirmIntro.astro";
+import AwardsBar from "../components/AwardsBar.astro";
+import Testimonials from "../components/home/Testimonials.astro";
 import {
   getHomeHero,
   getHomeStats,
   getRecentResults,
   getHomeFirmIntro,
 } from "../data/home";
+import { getAwards } from "../data/awards";
+import { getHomeTestimonials, getReviewSummary } from "../data/testimonials";
 
-const [hero, stats, results, intro] = await Promise.all([
+const [hero, stats, results, intro, awards, testimonials, reviews] = await Promise.all([
   getHomeHero(),
   getHomeStats(),
   getRecentResults(),
   getHomeFirmIntro(),
+  getAwards(),
+  getHomeTestimonials(),
+  getReviewSummary(),
 ]);
 ---
 
@@ -28,4 +35,6 @@ const [hero, stats, results, intro] = await Promise.all([
   <Hero hero={hero} stats={stats} />
   <RecentResults results={results} />
   <FirmIntro intro={intro} />
+  <AwardsBar awards={awards} />
+  <Testimonials testimonials={testimonials} reviews={reviews} />
 </Layout>
