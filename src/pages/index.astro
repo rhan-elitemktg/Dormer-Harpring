@@ -12,9 +12,15 @@ import {
   getHomeStats,
   getRecentResults,
   getHomeFirmIntro,
+  getHomeWhyUs,
 } from "../data/home";
 import PracticeSelector from "../components/home/PracticeSelector.astro";
+import WhyUs from "../components/home/WhyUs.astro";
+import AttorneysBand from "../components/home/AttorneysBand.astro";
+import CoreValues from "../components/CoreValues.astro";
 import { getAwards } from "../data/awards";
+import { getAttorneysSection, getHomeAttorneys } from "../data/attorneys";
+import { getCoreValues, getCoreValuesSection } from "../data/coreValues";
 import { getHomeTestimonials, getReviewSummary } from "../data/testimonials";
 import {
   getPracticeSection,
@@ -35,6 +41,11 @@ const [
   areas,
   promise,
   catastrophic,
+  why,
+  attorneysSection,
+  attorneys,
+  valuesSection,
+  values,
 ] = await Promise.all([
   getHomeHero(),
   getHomeStats(),
@@ -47,6 +58,11 @@ const [
   getHomePracticeAreas(),
   getPracticePromise(),
   getCatastrophicAreas(),
+  getHomeWhyUs(),
+  getAttorneysSection(),
+  getHomeAttorneys(),
+  getCoreValuesSection(),
+  getCoreValues(),
 ]);
 ---
 
@@ -66,4 +82,7 @@ const [
     promise={promise}
     catastrophic={catastrophic}
   />
+  <WhyUs why={why} />
+  <AttorneysBand section={attorneysSection} attorneys={attorneys} />
+  <CoreValues section={valuesSection} values={values} />
 </Layout>

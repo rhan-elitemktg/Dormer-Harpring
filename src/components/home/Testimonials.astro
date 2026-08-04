@@ -69,7 +69,7 @@ const { testimonials, reviews } = Astro.props;
     }
     <div
       class="tmv__rail noscroll"
-      data-rail
+      data-rail="testimonials"
       tabindex="0"
       role="group"
       aria-label="Client testimonials, scrollable"
@@ -92,10 +92,20 @@ const { testimonials, reviews } = Astro.props;
         Read all reviews <span class="arrow" aria-hidden="true">&rarr;</span>
       </a>
       <div class="tmv__nav">
-        <button type="button" class="tmv__arrow" data-rail-prev aria-label="Previous testimonials">
+        <button
+          type="button"
+          class="tmv__arrow"
+          data-rail-prev="testimonials"
+          aria-label="Previous testimonials"
+        >
           <span aria-hidden="true">&larr;</span>
         </button>
-        <button type="button" class="tmv__arrow" data-rail-next aria-label="Next testimonials">
+        <button
+          type="button"
+          class="tmv__arrow"
+          data-rail-next="testimonials"
+          aria-label="Next testimonials"
+        >
           <span aria-hidden="true">&rarr;</span>
         </button>
       </div>
@@ -254,35 +264,6 @@ const { testimonials, reviews } = Astro.props;
 </style>
 
 <script>
-  // The comp puts `onclick="document.getElementById('tRail').scrollBy(...)"` on
-  // each button with a hardcoded 344px step. Moved onto data hooks here: inline
-  // handlers break a Content-Security-Policy, and the step is derived from the
-  // real card width so it stays correct when the card resizes at 640px.
-  for (const rail of document.querySelectorAll<HTMLElement>("[data-rail]")) {
-    const scope = rail.parentElement;
-    const prev = scope?.querySelector<HTMLButtonElement>("[data-rail-prev]");
-    const next = scope?.querySelector<HTMLButtonElement>("[data-rail-next]");
-    const track = rail.firstElementChild;
-
-    const step = () => {
-      const card = track?.firstElementChild as HTMLElement | null;
-      if (!card) return rail.clientWidth * 0.8;
-      const gap = parseFloat(getComputedStyle(track as Element).gap) || 0;
-      return card.offsetWidth + gap;
-    };
-
-    // Disable an arrow once the rail can go no further, so the control reflects
-    // what it will actually do. 1px of slack absorbs sub-pixel scroll positions.
-    const sync = () => {
-      const max = rail.scrollWidth - rail.clientWidth;
-      if (prev) prev.disabled = rail.scrollLeft <= 1;
-      if (next) next.disabled = rail.scrollLeft >= max - 1;
-    };
-
-    prev?.addEventListener("click", () => rail.scrollBy({ left: -step() }));
-    next?.addEventListener("click", () => rail.scrollBy({ left: step() }));
-    rail.addEventListener("scroll", sync, { passive: true });
-    window.addEventListener("resize", sync, { passive: true });
-    sync();
-  }
+  // Prev/next behaviour is shared with the attorneys rail.
+  import "../../scripts/rail";
 </script>

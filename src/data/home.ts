@@ -102,6 +102,63 @@ export async function getRecentResults(): Promise<CaseResult[]> {
   ];
 }
 
+export interface WhyPoint {
+  _key: string;
+  /** One entry per rendered line — the comp hard-breaks each card title. */
+  title: string[];
+  body: string;
+}
+
+export interface HomeWhyUs {
+  eyebrow: string;
+  /** Two-part heading; `accent` renders gold beneath `lead`. */
+  title: { lead: string; accent: string };
+  lede: string;
+  points: WhyPoint[];
+  ctaLabel: string;
+}
+
+export async function getHomeWhyUs(): Promise<HomeWhyUs> {
+  return {
+    eyebrow: "The Dormer difference",
+    title: { lead: "Why choose", accent: "Dormer Harpring?" },
+    lede:
+      "The difference between a quick settlement and the full amount you deserve " +
+      "comes down to who is in your corner.",
+    points: [
+      {
+        _key: "fewer-cases",
+        title: ["Fewer cases,", "full attention"],
+        body:
+          "We carry a fraction of a volume firm's caseload, so yours never becomes " +
+          "a file number in a queue.",
+      },
+      {
+        _key: "trial-lawyers",
+        title: ["Trial lawyers,", "not mills"],
+        body:
+          "Insurers know we'll take a case to a jury and win 98% of them. That " +
+          "credibility drives their offers higher.",
+      },
+      {
+        _key: "experienced",
+        title: ["Experienced", "trial lawyer"],
+        body:
+          "We build every case to be tried, not just settled — and insurers price " +
+          "cases accordingly.",
+      },
+      {
+        _key: "two-decades",
+        title: ["Two decades in", "Denver courts"],
+        body:
+          "20+ years trying injury cases in Denver. We know the local judges, " +
+          "juries, and defense firms, and how they value a case like yours.",
+      },
+    ],
+    ctaLabel: "Request a free consultation",
+  };
+}
+
 export interface HelpPoint {
   _key: string;
   /** Rendered bold, ahead of the detail. */

@@ -1,0 +1,303 @@
+---
+// "The people in your corner." — pull quote and partner signature on the left,
+// a scrolling rail of attorney cards on the right.
+import Picture from "../media/Picture.astro";
+import AttorneyCard from "./attorneys/AttorneyCard.astro";
+import type { AttorneyCardData, AttorneysSection } from "../../data/attorneys";
+import { ROUTES } from "../../lib/routePaths";
+
+interface Props {
+  section: AttorneysSection;
+  attorneys: AttorneyCardData[];
+}
+
+const { section, attorneys } = Astro.props;
+---
+
+<section class="section attys">
+  <div class="container attys__grid">
+    <div class="attys__intro">
+      <p class="attys__eyebrow">{section.eyebrow}</p>
+      <h2 class="attys__title">{section.title}</h2>
+
+      <figure class="attys__quote">
+        <span class="attys__mark" aria-hidden="true">&ldquo;</span>
+        <blockquote class="attys__quote-text">{section.quote}</blockquote>
+      </figure>
+
+      <div class="attys__sig">
+        <Picture
+          src={section.signature.portrait}
+          alt={section.signature.name}
+          class="attys__sig-photo"
+        />
+        <div>
+          <a class="attys__sig-name" href={section.signature.href}>
+            {section.signature.name}
+          </a>
+          <p class="attys__sig-role">{section.signature.role}</p>
+        </div>
+      </div>
+
+      <a class="attys__cta" href={ROUTES.attorneys}>
+        <span>{section.ctaLabel}</span>
+        <span class="attys__cta-icon" aria-hidden="true">&#8599;</span>
+      </a>
+    </div>
+
+    <div class="attys__column">
+      <div
+        class="attys__rail noscroll"
+        data-rail="attorneys"
+        tabindex="0"
+        role="group"
+        aria-label="Our attorneys, scrollable"
+      >
+        <div class="attys__track">
+          {attorneys.map((attorney) => <AttorneyCard attorney={attorney} />)}
+        </div>
+      </div>
+
+      {
+        /* Below the rail and aligned to the COLUMN's right edge, not the rail's
+           — the rail bleeds past the container into the gutter, so matching
+           that would leave the controls hanging off the page's measure. */
+      }
+      <div class="attys__nav">
+        <button
+          type="button"
+          class="attys__arrow"
+          data-rail-prev="attorneys"
+          aria-label="Previous attorneys"
+        >
+          <span aria-hidden="true">&larr;</span>
+        </button>
+        <button
+          type="button"
+          class="attys__arrow"
+          data-rail-next="attorneys"
+          aria-label="Next attorneys"
+        >
+          <span aria-hidden="true">&rarr;</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .attys {
+    background: var(--surface-sunk);
+  }
+
+  .attys__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
+    gap: var(--space-16);
+    align-items: center;
+  }
+
+  .attys__eyebrow {
+    margin-bottom: var(--space-4);
+    font-weight: 700;
+    font-size: var(--text-label);
+    line-height: 1;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--dh-gold-deep);
+  }
+
+  .attys__title {
+    margin-bottom: var(--space-7);
+    font-size: var(--display-3);
+    line-height: 1;
+    color: var(--dh-forest-100);
+  }
+
+  .attys__quote {
+    margin: 0 0 var(--space-8);
+  }
+
+  .attys__mark {
+    display: block;
+    margin-bottom: var(--space-2);
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: var(--display-4);
+    line-height: 0.6;
+    color: var(--accent-gold);
+  }
+
+  /* The measure lives here rather than on the <figure>, so `ch` resolves
+     against the quote's OWN font. On the parent it resolved against the
+     inherited body size, so the column stayed a fixed width and dropping the
+     font size just bought more, shorter lines. */
+  .attys__quote-text {
+    max-width: 44ch;
+    margin: 0;
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: var(--text-2xl);
+    line-height: 1.45;
+    color: #3a4c3e;
+  }
+
+  .attys__sig {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    margin-bottom: var(--space-9);
+  }
+
+  .attys__sig :global(.attys__sig-photo) {
+    width: 60px;
+    height: 60px;
+    border: 2px solid var(--dh-white);
+    border-radius: var(--radius-full);
+    object-fit: cover;
+    object-position: top center;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    flex: none;
+  }
+
+  .attys__sig-name {
+    font-family: var(--font-script);
+    font-weight: 700;
+    font-size: var(--display-5);
+    line-height: 1;
+    color: var(--dh-forest-100);
+  }
+
+  .attys__sig-role {
+    margin-top: var(--space-2);
+    font-weight: 700;
+    font-size: var(--text-micro);
+    line-height: 1;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--dh-gold-deep);
+  }
+
+  .attys__column {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+    /* Lets the rail's scroll box size to the track rather than the reverse. */
+    min-width: 0;
+  }
+
+  .attys__nav {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-3);
+  }
+
+  /* Ink on cream, where the testimonials rail's arrows are parchment on
+     forest — same control, inverted surface. */
+  .attys__arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 1px solid var(--dh-line-strong);
+    border-radius: var(--radius-2);
+    background: transparent;
+    font-weight: 800;
+    font-size: var(--text-base);
+    line-height: 1;
+    color: var(--dh-forest-100);
+    cursor: pointer;
+    transition: border-color var(--transition), background-color var(--transition),
+      color var(--transition);
+  }
+
+  .attys__arrow:hover:not(:disabled) {
+    border-color: var(--dh-forest-100);
+    background: var(--dh-forest-100);
+    color: var(--dh-cream-50);
+  }
+
+  .attys__arrow:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+
+  .attys__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    font-weight: 800;
+    font-size: var(--text-sm);
+    line-height: 1;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--dh-forest-100);
+  }
+
+  /* Not `.arrow`: this is a boxed glyph rather than a travelling one, so it
+     scales in place instead of sliding. */
+  .attys__cta-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: var(--radius-2);
+    background: var(--accent);
+    font-size: var(--text-base);
+    color: var(--dh-white);
+    transition: transform var(--transition);
+  }
+
+  .attys__cta:hover .attys__cta-icon {
+    transform: scale(1.1);
+  }
+
+  /* Bleeds off the right edge only — the rail is the grid's second column, so
+     its left edge stays on the column while its right runs to the viewport. */
+  .attys__rail {
+    overflow-x: auto;
+    margin-right: calc(var(--container-pad) * -1);
+    /* The scrollbar is hidden (`.noscroll`), so this is no longer clearing a
+       track — it keeps the cards' focus ring from being clipped by the scroll
+       box, which would leave keyboard users with no visible focus. */
+    padding-bottom: var(--space-3);
+    scroll-behavior: smooth;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline-start: 0;
+    overscroll-behavior-x: contain;
+  }
+
+  .attys__track {
+    display: flex;
+    gap: var(--space-5);
+    width: max-content;
+    padding-right: var(--container-pad);
+  }
+
+  @media (max-width: 980px) {
+    .attys__grid {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-10);
+    }
+
+    /* Once stacked the rail spans the full width, so it bleeds both ways like
+       every other rail on the page. */
+    .attys__rail {
+      margin-inline: calc(var(--container-pad) * -1);
+      padding-inline: var(--container-pad);
+      scroll-padding-inline: var(--container-pad);
+    }
+
+    .attys__track {
+      padding-right: 0;
+    }
+  }
+</style>
+
+<script>
+  // Prev/next behaviour is shared with the testimonials rail.
+  import "../../scripts/rail";
+</script>

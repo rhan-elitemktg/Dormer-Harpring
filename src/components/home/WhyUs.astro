@@ -1,0 +1,210 @@
+---
+// "Why choose Dormer Harpring?" — four numbered reason cards on a forest
+// gradient, with the team photograph filling the right column.
+import Eyebrow from "../Eyebrow.astro";
+import Picture from "../media/Picture.astro";
+import type { HomeWhyUs } from "../../data/home";
+import { ROUTES } from "../../lib/routePaths";
+import whyTeam from "../../assets/home/why-team.jpg";
+
+interface Props {
+  why: HomeWhyUs;
+}
+
+const { why } = Astro.props;
+---
+
+<section class="section section--forest why">
+  <div class="container why__grid">
+    <div class="why__copy">
+      <Eyebrow tone="on-dark" class="why__eyebrow">{why.eyebrow}</Eyebrow>
+      <h2 class="why__title">
+        <span class="why__title-lead">{why.title.lead}</span>
+        <span class="why__title-accent">{why.title.accent}</span>
+      </h2>
+      <p class="why__lede">{why.lede}</p>
+
+      <ol class="why__points">
+        {
+          why.points.map((point, i) => (
+            <li class="why__card">
+              <div class="why__card-head">
+                <h3 class="why__card-title">
+                  {point.title.map((line, l) => (
+                    <>
+                      {l > 0 && <br />}
+                      {line}
+                    </>
+                  ))}
+                </h3>
+                {/* Decorative counter — the list already conveys order. */}
+                <span class="why__num" aria-hidden="true">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+              </div>
+              <p class="why__card-body">{point.body}</p>
+            </li>
+          ))
+        }
+      </ol>
+
+      <a class="btn btn--red arrow-link why__cta" href={ROUTES.contact}>
+        {why.ctaLabel} <span class="arrow" aria-hidden="true">&rarr;</span>
+      </a>
+    </div>
+
+    <div class="why__media">
+      <Picture
+        src={whyTeam}
+        alt="The Dormer Harpring team"
+        widths={[600, 900]}
+        sizes="(max-width: 980px) 100vw, 40vw"
+        class="why__photo"
+      />
+    </div>
+  </div>
+</section>
+
+<style>
+  .why {
+    --forest-origin: 15%;
+  }
+
+  .why__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
+    gap: var(--space-16);
+    align-items: stretch;
+  }
+
+  .why__copy {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .why :global(.why__eyebrow) {
+    margin-bottom: var(--space-4);
+  }
+
+  .why__title {
+    margin-bottom: var(--space-5);
+    font-size: var(--display-2);
+  }
+
+  /* Spans rather than a <br>, because the two lines take different colours —
+     a line break alone gives nothing to hang the gold on. */
+  .why__title-lead,
+  .why__title-accent {
+    display: block;
+  }
+
+  .why__title-lead {
+    color: var(--text-on-dark);
+  }
+
+  .why__title-accent {
+    color: var(--accent-gold);
+  }
+
+  .why__lede {
+    max-width: 520px;
+    margin-bottom: var(--space-10);
+    font-size: var(--text-lg);
+    line-height: var(--leading-normal);
+    color: #aeb8ab;
+  }
+
+  .why__points {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-5);
+    list-style: none;
+    padding: 0;
+  }
+
+  .why__card {
+    padding: var(--space-7);
+    background: var(--dh-cream-50);
+    border-radius: var(--radius-2);
+    box-shadow: 0 24px 44px -28px rgba(0, 0, 0, 0.55);
+  }
+
+  .why__card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+  }
+
+  .why__card-title {
+    font-size: var(--display-6);
+    line-height: 1.02;
+    letter-spacing: 0.005em;
+    color: var(--dh-forest-300);
+  }
+
+  .why__num {
+    padding-top: 2px;
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    line-height: 1;
+    color: var(--accent-gold);
+    flex: none;
+  }
+
+  .why__card-body {
+    font-size: var(--text-md);
+    line-height: 1.62;
+    color: var(--dh-ink-body);
+  }
+
+  .why__cta {
+    align-self: flex-start;
+    margin-top: var(--space-9);
+  }
+
+  .why__media {
+    position: relative;
+    min-height: 640px;
+  }
+
+  .why__media :global(.why__photo) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+    border-radius: var(--radius-2);
+  }
+
+  @media (max-width: 980px) {
+    .why__grid {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-10);
+    }
+
+    /* Stacked, the photo no longer has a column to fill, so it stops being an
+       absolute overlay and becomes a banner with its own aspect. */
+    .why__media {
+      position: static;
+      min-height: 0;
+      aspect-ratio: 16 / 10;
+    }
+
+    .why__media :global(.why__photo) {
+      position: static;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .why__points {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .why__cta {
+      align-self: stretch;
+    }
+  }
+</style>
