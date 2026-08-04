@@ -3,9 +3,21 @@
 // passes props, and never holds content of its own.
 import Layout from "../layouts/Layout.astro";
 import Hero from "../components/home/Hero.astro";
-import { getHomeHero, getHomeStats } from "../data/home";
+import RecentResults from "../components/home/RecentResults.astro";
+import FirmIntro from "../components/home/FirmIntro.astro";
+import {
+  getHomeHero,
+  getHomeStats,
+  getRecentResults,
+  getHomeFirmIntro,
+} from "../data/home";
 
-const [hero, stats] = await Promise.all([getHomeHero(), getHomeStats()]);
+const [hero, stats, results, intro] = await Promise.all([
+  getHomeHero(),
+  getHomeStats(),
+  getRecentResults(),
+  getHomeFirmIntro(),
+]);
 ---
 
 <Layout
@@ -14,4 +26,6 @@ const [hero, stats] = await Promise.all([getHomeHero(), getHomeStats()]);
   headerVariant="transparent"
 >
   <Hero hero={hero} stats={stats} />
+  <RecentResults results={results} />
+  <FirmIntro intro={intro} />
 </Layout>

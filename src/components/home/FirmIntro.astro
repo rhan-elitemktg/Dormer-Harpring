@@ -1,0 +1,272 @@
+---
+// "Denver's boutique personal injury law firm." — copy column on the left,
+// firm video and the two aside cards on the right.
+import Picture from "../media/Picture.astro";
+import PlayButton from "../media/PlayButton.astro";
+import Prose from "../prose/Prose.astro";
+import AttorneyQuoteCard from "./firm/AttorneyQuoteCard.astro";
+import ConsultCard from "./firm/ConsultCard.astro";
+import type { HomeFirmIntro } from "../../data/home";
+import firmVideoCover from "../../assets/home/firm-video-cover.jpg";
+
+interface Props {
+  intro: HomeFirmIntro;
+}
+
+const { intro } = Astro.props;
+---
+
+<section class="section intro">
+  <div class="container intro__grid">
+    <div class="intro__copy">
+      {
+        /* The comp's heading carries `width:605px;height:129px` and is preceded
+           by an empty <p><br></p>. Both are canvas artifacts, dropped. */
+      }
+      <h2 class="intro__title">
+        {
+          intro.title.map((line, i) => (
+            <>
+              {i > 0 && <br />}
+              {line}
+            </>
+          ))
+        }
+      </h2>
+
+      <p class="intro__tagline">
+        <span class="intro__tagline-inner">
+          {intro.tagline}
+          {/* The hand-drawn underline. preserveAspectRatio="none" lets one path
+              stretch to whatever the line's width turns out to be. */}
+          <svg
+            class="intro__underline"
+            viewBox="0 0 340 14"
+            preserveAspectRatio="none"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path
+              d="M3 8C60 3 130 3 190 6C250 9 300 5 337 4"
+              stroke="var(--accent-gold)"
+              stroke-width="3.5"
+              stroke-linecap="round"></path>
+          </svg>
+        </span>
+      </p>
+
+      <Prose value={intro.body} class="intro__body" />
+
+      <h3 class="intro__help-title">{intro.helpTitle}</h3>
+      <ul class="intro__help">
+        {
+          intro.helpPoints.map((point) => (
+            <li class="intro__point">
+              <span class="intro__marker" aria-hidden="true" />
+              <span>
+                <strong class="intro__lead">{point.lead}</strong> {point.text}
+              </span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+
+    <aside class="intro__aside">
+      {
+        /* TODO(video): inert until the firm video has a host and an ID. */
+      }
+      <button type="button" class="intro__video">
+        <Picture
+          src={firmVideoCover}
+          alt="The Dormer Harpring team"
+          class="intro__video-img"
+        />
+        <span class="intro__video-scrim" aria-hidden="true"></span>
+        <PlayButton tone="light" size={88} class="intro__video-play" />
+        <span class="intro__video-label">{intro.videoLabel}</span>
+      </button>
+
+      <AttorneyQuoteCard quote={intro.quote} />
+      <ConsultCard aside={intro.aside} />
+    </aside>
+  </div>
+</section>
+
+<style>
+  .intro {
+    background: var(--surface-sunk);
+  }
+
+  .intro__grid {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: var(--space-16);
+    align-items: start;
+    /* This band runs narrower than the site container — the copy column would
+       otherwise set a line far past a comfortable measure. */
+    max-width: 1240px;
+  }
+
+  /* Sized off the longest line rather than off --display-2 (56px): at that
+     size "personal injury law firm." runs about 600px in this ~578px column
+     and drops "firm." onto a third line. The explicit break in the data sets
+     WHERE it wraps; this sets whether that line actually fits. */
+  .intro__title {
+    margin-bottom: var(--space-3);
+    font-size: clamp(2rem, 4.1vw, 3.125rem);
+    line-height: 1;
+    color: var(--dh-ink-warm);
+  }
+
+  .intro__tagline {
+    margin-bottom: var(--space-8);
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-weight: 500;
+    font-size: var(--display-6);
+    line-height: 1.15;
+    color: var(--dh-forest-100);
+  }
+
+  /* Inline-block so the underline can size itself to the text rather than the
+     paragraph, and relative so the SVG can hang beneath it. */
+  .intro__tagline-inner {
+    position: relative;
+    display: inline-block;
+  }
+
+  .intro__underline {
+    position: absolute;
+    left: 0;
+    bottom: -11px;
+    width: 100%;
+    height: 14px;
+    overflow: visible;
+  }
+
+  .intro :global(.intro__body) {
+    font-size: var(--text-lg);
+    line-height: var(--leading-prose);
+    color: var(--dh-ink-body);
+  }
+
+  .intro :global(.intro__body .prose__p) {
+    margin-bottom: var(--space-5);
+  }
+
+  .intro__help-title {
+    margin: var(--space-8) 0 var(--space-5);
+    font-family: var(--font-body);
+    font-weight: 800;
+    font-size: var(--text-sm);
+    line-height: 1;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--dh-gold-deep);
+  }
+
+  .intro__help {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    list-style: none;
+    padding: 0;
+  }
+
+  .intro__point {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-4);
+    font-size: var(--text-base);
+    line-height: var(--leading-normal);
+    color: var(--dh-ink-body);
+  }
+
+  /* A square, not a disc — the comps use a hard gold block throughout. */
+  .intro__marker {
+    width: 9px;
+    height: 9px;
+    margin-top: 7px;
+    background: var(--dh-gold-deep);
+    flex: none;
+  }
+
+  .intro__lead {
+    font-weight: 700;
+    color: var(--dh-ink-warm);
+  }
+
+  .intro__aside {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-7);
+    align-self: start;
+  }
+
+  .intro__video {
+    position: relative;
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    aspect-ratio: 4 / 3;
+    border-radius: var(--radius-5);
+    overflow: hidden;
+    background: #c9bda4;
+    cursor: pointer;
+  }
+
+  .intro__video :global(.intro__video-img) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .intro__video-scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(31, 40, 34, 0) 34%, rgba(31, 40, 34, 0.84) 100%);
+  }
+
+  .intro__video :global(.intro__video-play) {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  /* Sits at the foot of the poster, where the scrim is at full strength. The
+     comp puts it at the top, over the brightest part of the photograph, with
+     only a text-shadow holding it up. */
+  .intro__video-label {
+    position: absolute;
+    bottom: var(--space-5);
+    left: 0;
+    right: 0;
+    font-family: var(--font-body);
+    font-weight: 800;
+    font-size: var(--text-micro);
+    line-height: 1.3;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    text-align: center;
+    color: var(--dh-parchment);
+    text-shadow: 0 1px 8px rgba(20, 27, 22, 0.6);
+  }
+
+  @media (max-width: 980px) {
+    .intro__grid {
+      grid-template-columns: 1fr;
+      gap: var(--space-12);
+    }
+
+    /* Past this the aside is full width, and a 4:3 video that wide dwarfs
+       everything around it. */
+    .intro__video {
+      aspect-ratio: 16 / 9;
+    }
+  }
+</style>

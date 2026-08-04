@@ -1,0 +1,150 @@
+---
+// One case result: tag + badge, the offer-to-recovery figures, and the story.
+import type { CaseResult } from "../../../data/home";
+
+interface Props {
+  result: CaseResult;
+}
+
+const { result } = Astro.props;
+---
+
+<article class="result">
+  <div class="result__head">
+    <span class="result__tag">{result.tag}</span>
+    <span class:list={["result__badge", result.isTrialWin && "result__badge--trial"]}>
+      {result.isTrialWin ? "Trial Win" : "Settlement"}
+    </span>
+  </div>
+
+  <div class="result__figures">
+    <div class="result__offered">
+      <span class="result__label">Offered</span>
+      <span class="result__offer-amount">{result.offered}</span>
+    </div>
+    <span class="result__arrow" aria-hidden="true">&rarr;</span>
+    <div>
+      <span class="result__label result__label--won">We recovered</span>
+      <span class="result__amount">{result.recovered}</span>
+    </div>
+  </div>
+
+  <p class="result__story">{result.story}</p>
+</article>
+
+<style>
+  .result {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    padding: var(--space-8);
+    background: var(--dh-cream-50);
+    border: 1px solid var(--border-hairline);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+  }
+
+  .result__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+  }
+
+  .result__tag {
+    font-weight: 800;
+    font-size: var(--text-label);
+    line-height: 1;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #5a5142;
+  }
+
+  /* The comp swaps a whole CSS declaration per result; here the outlined form
+     is the base and the filled one is a modifier. */
+  .result__badge {
+    padding: var(--space-1) var(--space-3);
+    border: 1px solid #d2c6ae;
+    border-radius: var(--radius-pill);
+    font-weight: 700;
+    font-size: var(--text-micro);
+    line-height: 1;
+    letter-spacing: var(--tracking-btn);
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--dh-ink-3);
+  }
+
+  .result__badge--trial {
+    background: #2e4034;
+    border-color: #2e4034;
+    color: var(--dh-white);
+  }
+
+  .result__figures {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--space-5);
+  }
+
+  .result__offered {
+    flex: none;
+  }
+
+  .result__label {
+    display: block;
+    margin-bottom: var(--space-2);
+    font-weight: 700;
+    font-size: var(--text-nano);
+    line-height: 1;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--dh-ink-5);
+  }
+
+  .result__label--won {
+    font-weight: 800;
+    color: #3a4c3e;
+  }
+
+  .result__offer-amount {
+    font-weight: 600;
+    font-size: var(--text-3xl);
+    line-height: 1;
+    color: var(--dh-ink-5);
+    text-decoration: line-through;
+    text-decoration-thickness: 1.5px;
+  }
+
+  .result__arrow {
+    padding-bottom: 2px;
+    font-size: var(--text-2xl);
+    line-height: 1;
+    color: #b7ae9a;
+  }
+
+  .result__amount {
+    display: block;
+    font-family: var(--font-display);
+    font-size: var(--display-2);
+    line-height: 0.8;
+    color: var(--dh-red-verdict);
+  }
+
+  .result__story {
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--dh-line-soft);
+    font-size: var(--text-md);
+    line-height: var(--leading-normal);
+    color: var(--dh-ink-3);
+  }
+
+  /* The figures sit side by side until the card gets narrow, at which point the
+     60px recovered amount and the struck-through offer stop fitting on one line. */
+  @media (max-width: 1100px) {
+    .result__figures {
+      flex-wrap: wrap;
+      gap: var(--space-3) var(--space-4);
+    }
+  }
+</style>

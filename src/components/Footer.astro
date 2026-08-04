@@ -93,8 +93,8 @@ const directionsUrl = `https://maps.google.com/?q=${encodeURIComponent(
         {firm.address.city}, {firm.address.region}
         {firm.address.postalCode}
       </p>
-      <a class="footer__directions" href={directionsUrl} rel="noopener" target="_blank">
-        Get directions <span aria-hidden="true">&rarr;</span>
+      <a class="footer__directions arrow-link" href={directionsUrl} rel="noopener" target="_blank">
+        Get directions <span class="arrow" aria-hidden="true">&rarr;</span>
       </a>
 
       <nav aria-labelledby="footer-explore">
@@ -263,10 +263,8 @@ const directionsUrl = `https://maps.google.com/?q=${encodeURIComponent(
     color: var(--text-on-dark-2);
   }
 
+  /* Layout comes from `.arrow-link` in global.css — don't restate it here. */
   .footer__directions {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
     font-family: var(--font-body);
     font-weight: 800;
     font-size: var(--text-label);
