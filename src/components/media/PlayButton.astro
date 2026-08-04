@@ -1,0 +1,90 @@
+---
+// The pulsing play circle. Built as its own component because the homepage
+// alone has ten of them (hero, five testimonial cards, the firm video, the FAQ
+// panel), each needing the same ring animation on one of two backgrounds.
+//
+// `dark` is the glyph on a light surface (the hero's cream CTA); `light` is the
+// glyph on a photo, where the ring has to carry a drop shadow to stay visible.
+
+// `size` reaches CSS as an inline custom property, which is the one carve-out
+// from the project's no-inline-styles rule. Elsewhere a data-driven value gets
+// a `data-` attribute and an attribute selector, but that only works for a
+// closed set (the community mosaic's six span widths). Diameter is an open
+// numeric range, so enumerating it in CSS is not possible — and a custom
+// property is a parameter the stylesheet reads, not a style overriding it.
+
+interface Props {
+  tone?: "dark" | "light";
+  /** Diameter in px. The comps use 38 in buttons and 66–86 on video posters. */
+  size?: number;
+  class?: string;
+}
+
+const { tone = "dark", size = 38, class: className } = Astro.props;
+---
+
+<span
+  class:list={["play", `play--${tone}`, className]}
+  style={`--play-size:${size}px`}
+  aria-hidden="true"
+>
+  <span class="play__glyph"></span>
+</span>
+
+<style>
+  .play {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--play-size);
+    height: var(--play-size);
+    border-radius: var(--radius-full);
+    flex: none;
+  }
+
+  .play--dark {
+    background: var(--dh-parchment);
+    border: 1.5px solid rgba(27, 36, 30, 0.45);
+    animation: playPulseDark 1.8s ease-in-out infinite;
+  }
+
+  .play--light {
+    background: rgba(244, 239, 231, 0.94);
+    animation: playPulseLight 1.8s ease-in-out infinite;
+  }
+
+  /* The triangle is a CSS border trick rather than an SVG: it scales off the
+     circle's size with no extra markup, and there is only ever one of them. */
+  .play__glyph {
+    width: 0;
+    height: 0;
+    border-left: calc(var(--play-size) * 0.29) solid var(--dh-forest-400);
+    border-top: calc(var(--play-size) * 0.185) solid transparent;
+    border-bottom: calc(var(--play-size) * 0.185) solid transparent;
+    margin-left: calc(var(--play-size) * 0.08);
+  }
+
+  @keyframes playPulseDark {
+    0% {
+      box-shadow: 0 0 0 0 rgba(27, 36, 30, 0.32);
+    }
+    70% {
+      box-shadow: 0 0 0 13px rgba(27, 36, 30, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(27, 36, 30, 0);
+    }
+  }
+
+  @keyframes playPulseLight {
+    0% {
+      box-shadow: 0 0 0 0 rgba(246, 242, 232, 0.65), 0 10px 30px -8px rgba(0, 0, 0, 0.45);
+    }
+    70% {
+      box-shadow: 0 0 0 18px rgba(246, 242, 232, 0), 0 10px 30px -8px rgba(0, 0, 0, 0.45);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(246, 242, 232, 0), 0 10px 30px -8px rgba(0, 0, 0, 0.45);
+    }
+  }
+</style>

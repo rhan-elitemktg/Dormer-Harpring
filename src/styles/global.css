@@ -529,9 +529,13 @@ select {
   color: var(--dh-parchment);
 }
 
+/* The hero-scale CTA. `min-height` rather than `height` so the label can wrap
+   on a narrow phone instead of overflowing a fixed box; at desktop it resolves
+   to the comps' 64px. */
 .btn--lg {
-  padding: var(--space-6) var(--space-10);
-  font-size: var(--text-md);
+  min-height: 56px;
+  padding: var(--space-4) var(--space-8);
+  font-size: var(--text-base);
 }
 
 @media (max-width: 640px) {

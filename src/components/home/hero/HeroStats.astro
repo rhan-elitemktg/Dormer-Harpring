@@ -1,0 +1,103 @@
+---
+// The four-up figure row beneath the hero CTAs.
+//
+// The comp carries a per-item `cellStyle` string that adds a left padding and
+// divider to every cell after the first. That is presentation derived from an
+// index, so it becomes an adjacent-sibling rule here and disappears from the
+// data entirely.
+import type { HomeStat } from "../../../data/home";
+
+interface Props {
+  stats: HomeStat[];
+}
+
+const { stats } = Astro.props;
+---
+
+{/* A plain list, not a <dl>: the rule element can't legally sit inside a dl's
+    div wrapper, and "$70M+ / Recovered" is a figure with a caption rather than
+    a term with a definition. */}
+<ul class="stats">
+  {
+    stats.map((stat) => (
+      <li class="stats__cell">
+        <span class="stats__rule" aria-hidden="true" />
+        <span class="stats__big">{stat.big}</span>
+        <span class="stats__label">{stat.label}</span>
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    max-width: 900px;
+    margin: var(--space-14) 0 0;
+    padding: var(--space-9) 0 0;
+    list-style: none;
+    border-top: 1px solid var(--dh-line-gold);
+  }
+
+  .stats__cell {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .stats__cell + .stats__cell {
+    padding-left: var(--space-9);
+    border-left: 1px solid rgba(216, 178, 110, 0.28);
+  }
+
+  .stats__rule {
+    display: block;
+    width: 30px;
+    height: 2px;
+    margin-bottom: var(--space-5);
+    background: var(--accent-gold);
+  }
+
+  .stats__big {
+    font-family: var(--font-ui);
+    font-weight: 600;
+    font-size: var(--text-stat);
+    line-height: 1;
+    letter-spacing: var(--tracking-tight);
+    color: #f6f2e8;
+    white-space: nowrap;
+  }
+
+  .stats__label {
+    margin-top: var(--space-4);
+    font-family: var(--font-ui);
+    font-weight: 600;
+    font-size: var(--text-sm);
+    line-height: 1;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--dh-gold-tint);
+  }
+
+  @media (max-width: 760px) {
+    .stats {
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-8) 0;
+      margin-top: var(--space-10);
+    }
+
+    /* Reset the blanket sibling rule, then re-apply it only to the cells that
+       actually start a second column — otherwise cell 3 keeps a divider it no
+       longer sits beside, and row 2 has no separation from row 1. */
+    .stats__cell + .stats__cell {
+      padding-left: 0;
+      border-left: 0;
+    }
+
+    .stats__cell:nth-child(even) {
+      padding-left: var(--space-7);
+      border-left: 1px solid rgba(216, 178, 110, 0.28);
+    }
+  }
+</style>
