@@ -138,6 +138,32 @@ for (const [from, to] of Object.entries(MAP)) {
   );
 }
 
+// ---------------------------------------------------------------------------
+// Art-directed hero crop.
+//
+// The hero photograph is a 2.247:1 panorama with the four attorneys in its
+// right third. Below 980px the layout drops it into a fixed band at the foot of
+// the hero (see Hero.astro), so what's needed there is simply the team, framed
+// tight, at roughly square.
+const HERO_SRC = path.join(SRC, "wireframes/assets/hero-client-5.jpg");
+const TEAM_CROP = { left: 1769, top: 0, width: 1580, height: 1536 };
+
+{
+  const outPath = path.join(OUT, "home/hero-team.jpg");
+  await sharp(HERO_SRC)
+    .extract(TEAM_CROP)
+    .resize({ width: 1400 })
+    .jpeg({ quality: 82, mozjpeg: true })
+    .toFile(outPath);
+
+  const meta = await sharp(outPath).metadata();
+  const size = (await stat(outPath)).size;
+  outTotal += size;
+  rows.push(
+    `        ${mb(size).padStart(7)} MB  home/hero-team.jpg  (${meta.width}×${meta.height}, aspect ${(meta.width / meta.height).toFixed(2)})`
+  );
+}
+
 console.log(rows.sort().join("\n"));
 console.log(
   `\n${rows.length} files:  ${mb(inTotal)} MB → ${mb(outTotal)} MB  ` +

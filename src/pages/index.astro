@@ -1,36 +1,17 @@
 ---
-// Placeholder. The homepage proper is built section by section in the next
-// phase, starting with the hero — at which point this file awaits the data
-// modules and composes the section components, and `headerVariant` flips to
-// "transparent" so Hero can render the header over the photo.
+// The homepage. Sections are added in the comp's order; this file fetches and
+// passes props, and never holds content of its own.
 import Layout from "../layouts/Layout.astro";
+import Hero from "../components/home/Hero.astro";
+import { getHomeHero, getHomeStats } from "../data/home";
+
+const [hero, stats] = await Promise.all([getHomeHero(), getHomeStats()]);
 ---
 
 <Layout
   title="Denver Personal Injury Lawyers"
   description="Dormer Harpring is a boutique Denver personal injury law firm. We take on fewer cases — so yours gets our full attention, and our full fight."
+  headerVariant="transparent"
 >
-  <section class="section section--cream">
-    <div class="container">
-      <h1>All in. Every case.</h1>
-      <p class="lede">
-        Homepage sections land here next. The header above and the footer below are
-        the finished shell.
-      </p>
-    </div>
-  </section>
+  <Hero hero={hero} stats={stats} />
 </Layout>
-
-<style>
-  h1 {
-    font-size: var(--display-hero);
-  }
-
-  .lede {
-    max-width: var(--measure-ch);
-    margin-top: var(--space-5);
-    font-size: var(--text-lg);
-    line-height: var(--leading-prose);
-    color: var(--text-muted);
-  }
-</style>
