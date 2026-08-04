@@ -1,0 +1,142 @@
+---
+// "Our core values" — six columns on a forest gradient.
+//
+// At src/components/ root because the About page runs the same band. Second of
+// the four shared bands, alongside AwardsBar.
+import Eyebrow from "./Eyebrow.astro";
+import ValueIcon from "./icons/ValueIcon.astro";
+import type { CoreValue, CoreValuesSection } from "../data/coreValues";
+
+interface Props {
+  section: CoreValuesSection;
+  values: CoreValue[];
+}
+
+const { section, values } = Astro.props;
+---
+
+<section class="section section--forest values">
+  <div class="values__inner">
+    <header class="values__head">
+      <Eyebrow tone="on-dark" center class="values__eyebrow">{section.eyebrow}</Eyebrow>
+      <h2 class="values__title">{section.title}</h2>
+    </header>
+
+    <ul class="values__grid">
+      {
+        values.map((value) => (
+          <li class="values__col">
+            <span class="values__badge">
+              <ValueIcon name={value.iconKey} size={38} />
+            </span>
+            <h3 class="values__name">{value.title}</h3>
+            <p class="values__body">{value.body}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .values {
+    --forest-origin: 50%;
+  }
+
+  .values__inner {
+    max-width: 1220px;
+    margin-inline: auto;
+    padding-inline: var(--container-pad);
+  }
+
+  .values__head {
+    margin-bottom: var(--space-16);
+    text-align: center;
+  }
+
+  .values :global(.values__eyebrow) {
+    margin-bottom: var(--space-4);
+  }
+
+  .values__title {
+    font-size: var(--display-2);
+  }
+
+  .values__grid {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    list-style: none;
+    padding: 0;
+  }
+
+  .values__col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--space-1) var(--space-6);
+    text-align: center;
+  }
+
+  .values__col + .values__col {
+    border-left: 1px solid rgba(244, 239, 231, 0.13);
+  }
+
+  .values__badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 78px;
+    height: 78px;
+    border: 1px solid rgba(199, 154, 84, 0.4);
+    border-radius: var(--radius-full);
+    background: rgba(199, 154, 84, 0.14);
+    color: #d8ae66;
+    flex: none;
+  }
+
+  .values__name {
+    margin: var(--space-6) 0 var(--space-3);
+    font-size: var(--display-7);
+    line-height: 1.08;
+    letter-spacing: 0.02em;
+    color: var(--text-on-dark);
+  }
+
+  .values__body {
+    max-width: 20ch;
+    font-size: var(--text-base);
+    line-height: var(--leading-normal);
+    color: #aeb8ab;
+  }
+
+  @media (max-width: 1100px) {
+    .values__grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      row-gap: var(--space-10);
+    }
+
+    /* The vertical rules go entirely rather than being recomputed for each
+       column count — keeping `+ .values__col` correct across three layouts is
+       three brittle nth-child blocks for a 1px hairline. The comps' own About
+       page reaches the same conclusion and clears the border outright. */
+    .values__col + .values__col {
+      border-left: 0;
+    }
+  }
+
+  @media (max-width: 760px) {
+    .values__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .values__head {
+      margin-bottom: var(--space-12);
+    }
+  }
+
+  @media (max-width: 480px) {
+    .values__grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>
