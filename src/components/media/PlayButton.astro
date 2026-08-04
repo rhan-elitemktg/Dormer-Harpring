@@ -14,8 +14,15 @@
 // property is a parameter the stylesheet reads, not a style overriding it.
 
 interface Props {
-  tone?: "dark" | "light";
-  /** Diameter in px. The comps use 38 in buttons and 66–86 on video posters. */
+  /**
+   * `dark`   glyph on a light surface (the hero's cream CTA) — pulses
+   * `light`  glyph on a photo, ring carries a shadow to stay visible — pulses
+   * `accent` solid red on a photo. Deliberately static: these sit on a
+   *          horizontally scrolling rail of five, and five rings pulsing at
+   *          once is noise rather than emphasis.
+   */
+  tone?: "dark" | "light" | "accent";
+  /** Diameter in px. The comps use 38 in buttons and 60–88 on video posters. */
   size?: number;
   class?: string;
 }
@@ -53,15 +60,24 @@ const { tone = "dark", size = 38, class: className } = Astro.props;
     animation: playPulseLight 1.8s ease-in-out infinite;
   }
 
+  .play--accent {
+    background: var(--accent);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+  }
+
   /* The triangle is a CSS border trick rather than an SVG: it scales off the
      circle's size with no extra markup, and there is only ever one of them. */
   .play__glyph {
     width: 0;
     height: 0;
-    border-left: calc(var(--play-size) * 0.29) solid var(--dh-forest-400);
+    border-left: calc(var(--play-size) * 0.29) solid var(--glyph, var(--dh-forest-400));
     border-top: calc(var(--play-size) * 0.185) solid transparent;
     border-bottom: calc(var(--play-size) * 0.185) solid transparent;
     margin-left: calc(var(--play-size) * 0.08);
+  }
+
+  .play--accent {
+    --glyph: var(--dh-white);
   }
 
   @keyframes playPulseDark {

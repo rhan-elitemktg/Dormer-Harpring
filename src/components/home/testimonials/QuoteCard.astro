@@ -1,0 +1,95 @@
+---
+// A written review in the testimonials rail.
+import type { QuoteTestimonial } from "../../../data/testimonials";
+
+interface Props {
+  testimonial: QuoteTestimonial;
+}
+
+const { testimonial } = Astro.props;
+---
+
+<figure class="qcard">
+  <span class="qcard__mark display" aria-hidden="true">&ldquo;</span>
+  <h3 class="qcard__headline">{testimonial.headline}</h3>
+  <blockquote class="qcard__body">{testimonial.body}</blockquote>
+  <figcaption class="qcard__by">
+    <span class="qcard__name">{testimonial.name}</span>
+    {/* Five stars, labelled once for assistive tech rather than read as
+        five separate glyphs. */}
+    <span class="qcard__stars" role="img" aria-label="5 out of 5 stars">★★★★★</span>
+  </figcaption>
+</figure>
+
+<style>
+  .qcard {
+    display: flex;
+    flex-direction: column;
+    flex: none;
+    width: 320px;
+    margin: 0;
+    padding: var(--space-9) var(--space-8);
+    background: var(--dh-white);
+    border-radius: var(--radius-media);
+    scroll-snap-align: start;
+  }
+
+  .qcard__mark {
+    display: block;
+    margin-bottom: var(--space-5);
+    font-size: var(--display-5);
+    line-height: 0.7;
+    color: var(--accent-gold);
+  }
+
+  /* Sized past --text-3xl (24px max): this is the card's pull quote and the
+     thing a scanning reader actually stops on, so it carries more weight than
+     the body copy beneath it. */
+  .qcard__headline {
+    margin-bottom: var(--space-4);
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-size: clamp(1.375rem, 1.254rem + 0.518vw, 1.6875rem);
+    line-height: 1.22;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--dh-forest-100);
+  }
+
+  .qcard__body {
+    flex: 1;
+    margin-bottom: var(--space-6);
+    font-size: var(--text-md);
+    line-height: var(--leading-normal);
+    color: #5a5445;
+  }
+
+  .qcard__by {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding-top: var(--space-4);
+    border-top: 1px solid #e4dccb;
+  }
+
+  .qcard__name {
+    font-weight: 700;
+    font-size: var(--text-md);
+    line-height: 1;
+    color: var(--dh-forest-100);
+  }
+
+  .qcard__stars {
+    font-size: var(--text-md);
+    letter-spacing: 1.5px;
+    color: var(--accent-gold);
+  }
+
+  @media (max-width: 640px) {
+    .qcard {
+      width: 280px;
+      padding: var(--space-7) var(--space-6);
+    }
+  }
+</style>
