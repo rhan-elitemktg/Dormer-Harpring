@@ -208,6 +208,10 @@
      1340 − 2×48 = 1244px. EVERY section runs at this width —
      there is exactly one container width site-wide. */
   --container-max: 1340px;
+  /* The page gutter. Responsive at the token, not at each consumer: the rail
+     and the tab list bleed to the viewport edge with a negative margin that has
+     to cancel this exactly, and three components each re-declaring the same
+     breakpoints is how those drift apart. Overridden at the foot of this file. */
   --container-pad: 48px;
 
   /* Narrower measures for the prose-led sections. */
@@ -398,14 +402,14 @@ select {
 }
 
 @media (max-width: 1280px) {
-  .container {
-    padding-inline: var(--space-8);
+  :root {
+    --container-pad: 32px;
   }
 }
 
 @media (max-width: 640px) {
-  .container {
-    padding-inline: var(--space-6);
+  :root {
+    --container-pad: 24px;
   }
 }
 
@@ -571,8 +575,12 @@ select {
   transition: transform var(--dur-fast) var(--ease);
 }
 
-:is(a, button):hover > .arrow,
-:is(a, button):focus-visible > .arrow {
+/* Descendant, not child: the arrow is often wrapped — a card whose whole body
+   is the link, or a sentence with an inline CTA span — and a `>` combinator
+   silently skipped those. Only put `.arrow` on something that actually
+   navigates; a marker that merely indicates state should not travel on hover. */
+:is(a, button):hover .arrow,
+:is(a, button):focus-visible .arrow {
   --arrow-shift: 3px;
 }
 

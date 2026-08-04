@@ -223,14 +223,6 @@ const { testimonials, reviews } = Astro.props;
     cursor: default;
   }
 
-  @media (max-width: 1280px) {
-    .tmv__rail {
-      margin-inline: calc(var(--space-8) * -1);
-      padding-inline: var(--space-8);
-      scroll-padding-inline: var(--space-8);
-    }
-  }
-
   @media (max-width: 760px) {
     /* Arrows stay on touch, rather than swapping to dots: there are nine cards,
        so a dot per card would be nine 8px targets in a row — unreadable as
@@ -259,13 +251,6 @@ const { testimonials, reviews } = Astro.props;
     }
   }
 
-  @media (max-width: 640px) {
-    .tmv__rail {
-      margin-inline: calc(var(--space-6) * -1);
-      padding-inline: var(--space-6);
-      scroll-padding-inline: var(--space-6);
-    }
-  }
 </style>
 
 <script>

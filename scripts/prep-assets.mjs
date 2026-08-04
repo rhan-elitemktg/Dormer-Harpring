@@ -34,6 +34,16 @@ const MAP = {
   "wireframes/assets/hero-client-5.jpg": "home/hero.jpg",
   "wireframes/assets/why-walk.png": "home/promise-walk.jpg",
   "wireframes/assets/pa-car-accident.png": "home/practice-car-accident.jpg",
+  // The rest of the practice-area photography. It comes from `assets/`, which
+  // belongs to the abandoned design generation — but that rule is about token
+  // VALUES, not about photographs, and these are the only clean, text-free
+  // shots available. The live site's equivalents are 800×400 CTA banners with
+  // headlines baked into the pixels ("A Denver Truck Accident Attorney is Here
+  // For You"), which would put competing copy inside the panel.
+  "assets/practice-areas/truck-accident.jpg": "home/practice-truck.jpg",
+  "assets/practice-areas/motorcycle-accident.jpg": "home/practice-motorcycle.jpg",
+  "assets/practice-areas/bicycle-accident.jpg": "home/practice-bicycle.jpg",
+  "assets/practice-areas/premises-liability.jpg": "home/practice-slip-and-fall.jpg",
   "wireframes/assets/watch-firm-video.png": "home/firm-video-cover.jpg",
   "wireframes/assets/faq-video-cover.png": "home/faq-video-cover.jpg",
   "wireframes/assets/contact-attorneys.png": "home/contact-attorneys.jpg",
@@ -88,13 +98,31 @@ const MAP = {
   "wireframes/assets/community-shelter.png": "community/shelter.jpg",
 };
 
+/**
+ * Sources that don't live in the design package — client-supplied artwork.
+ * Keyed by absolute path, since SRC doesn't reach them.
+ *
+ * These are the fragile entries: if the file moves, re-running this script
+ * fails for that one image. That's tolerable because this is a one-off
+ * regeneration tool rather than a build step — the processed result under
+ * src/assets/ is committed and is what the site actually builds from.
+ */
+const EXTERNAL = {
+  "/Users/rhanpemberton/Downloads/pedestrian-accident.webp": "home/practice-pedestrian.jpg",
+};
+
 const mb = (n) => (n / 1048576).toFixed(2);
 let inTotal = 0;
 let outTotal = 0;
 const rows = [];
 
-for (const [from, to] of Object.entries(MAP)) {
-  const src = path.join(SRC, from);
+const entries = [
+  ...Object.entries(MAP).map(([from, to]) => [path.join(SRC, from), to]),
+  ...Object.entries(EXTERNAL),
+];
+
+for (const [src, to] of entries) {
+  const from = src.startsWith(SRC) ? path.relative(SRC, src) : src;
   if (!existsSync(src)) {
     console.error(`MISSING  ${from}`);
     continue;

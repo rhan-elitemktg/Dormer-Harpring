@@ -1,0 +1,98 @@
+---
+// Line icons for practice areas, lifted from the comps' `svg()` helper
+// (viewBox 0 0 24 24, stroke currentColor, width 1.6, round caps and joins).
+//
+// A key→shape lookup rather than a file per icon: the caller only ever holds an
+// `iconKey` string, which is exactly what a Sanity field will contain. Storing
+// SVG markup in the data — as the comp's `iconEl` effectively does — is not
+// something an editor can fill in.
+
+interface Props {
+  name: string;
+  size?: number;
+  class?: string;
+}
+
+const { name, size = 28, class: className } = Astro.props;
+
+type Shape = { d: string } | { cx: number; cy: number; r: number };
+
+const ICONS: Record<string, Shape[]> = {
+  "car-accident": [
+    { d: "M5 11l1.6-4.2A2 2 0 018.5 5.5h7A2 2 0 0117.4 6.8L19 11" },
+    { d: "M4 11h16v5H4z" },
+    { cx: 7.5, cy: 16.5, r: 1.4 },
+    { cx: 16.5, cy: 16.5, r: 1.4 },
+  ],
+  "truck-accident": [
+    { d: "M2 7h11v8H2z" },
+    { d: "M13 9h4l3 3v3h-7z" },
+    { cx: 6.5, cy: 17, r: 1.4 },
+    { cx: 16.5, cy: 17, r: 1.4 },
+  ],
+  "motorcycle-accident": [
+    { cx: 5.5, cy: 16, r: 3 },
+    { cx: 18.5, cy: 16, r: 3 },
+    { d: "M8.5 16l2.5-5h4l2 2" },
+    { d: "M11 11L9 8H7" },
+  ],
+  "bicycle-accident": [
+    { cx: 5.5, cy: 17, r: 3 },
+    { cx: 18.5, cy: 17, r: 3 },
+    { d: "M5.5 17l4-7h5" },
+    { d: "M9.5 10l4 7" },
+    { d: "M14.5 8h2l2 9" },
+  ],
+  "slip-and-fall": [{ d: "M12 4l9 16H3z" }, { d: "M12 10v4" }, { d: "M12 17.5h.01" }],
+  "pedestrian-accident": [
+    { cx: 13, cy: 5, r: 2 },
+    { d: "M13 8l-1.5 5 2.5 2v5" },
+    { d: "M11.5 13l-3.5-1.5" },
+    { d: "M14 15l2.5 4" },
+  ],
+  "brain-injury": [
+    { d: "M12 5a3 3 0 00-3 3v9a2 2 0 002 2h1" },
+    { d: "M12 5a3 3 0 013 3v9a2 2 0 01-2 2h-1" },
+    { d: "M9 8H7a2 2 0 000 4" },
+    { d: "M15 8h2a2 2 0 010 4" },
+  ],
+  "spinal-cord": [
+    { d: "M12 3v18" },
+    { d: "M9 6h6" },
+    { d: "M9 10h6" },
+    { d: "M9 14h6" },
+    { d: "M9 18h6" },
+  ],
+  burns: [{ d: "M12 3c2 3 4 4.5 4 8a4 4 0 01-8 0c0-2 1-3.2 2-4.2.4 2 2 2 2 3.7" }],
+  "wrongful-death": [
+    { d: "M12 20s-7-4.6-7-9.5A3.5 3.5 0 0112 8a3.5 3.5 0 017 2.5C19 15.4 12 20 12 20z" },
+  ],
+};
+
+const shapes = ICONS[name];
+
+if (!shapes) {
+  console.warn(`[PracticeIcon] no icon for "${name}" — add it to ICONS.`);
+}
+---
+
+{
+  shapes && (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.6"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+      class={className}
+    >
+      {shapes.map((shape) =>
+        "d" in shape ? <path d={shape.d} /> : <circle cx={shape.cx} cy={shape.cy} r={shape.r} />
+      )}
+    </svg>
+  )
+}
