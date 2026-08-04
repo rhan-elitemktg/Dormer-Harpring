@@ -1,17 +1,36 @@
 ---
-
+// Placeholder. The homepage proper is built section by section in the next
+// phase, starting with the hero — at which point this file awaits the data
+// modules and composes the section components, and `headerVariant` flips to
+// "transparent" so Hero can render the header over the photo.
+import Layout from "../layouts/Layout.astro";
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Harpring</title>
-	</head>
-	<body>
-		<h1>Harpring</h1>
-	</body>
-</html>
+<Layout
+  title="Denver Personal Injury Lawyers"
+  description="Dormer Harpring is a boutique Denver personal injury law firm. We take on fewer cases — so yours gets our full attention, and our full fight."
+>
+  <section class="section section--cream">
+    <div class="container">
+      <h1>All in. Every case.</h1>
+      <p class="lede">
+        Homepage sections land here next. The header above and the footer below are
+        the finished shell.
+      </p>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  h1 {
+    font-size: var(--display-hero);
+  }
+
+  .lede {
+    max-width: var(--measure-ch);
+    margin-top: var(--space-5);
+    font-size: var(--text-lg);
+    line-height: var(--leading-prose);
+    color: var(--text-muted);
+  }
+</style>

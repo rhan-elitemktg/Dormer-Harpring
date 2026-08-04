@@ -160,8 +160,15 @@
   --text-stat: clamp(1.75rem, 1.531rem + 0.933vw, 2.3125rem);    /* 28 → 37  hero stat numeral */
   --text-phone: clamp(1.25rem, 1.080rem + 0.725vw, 1.6875rem);   /* 20 → 27  header phone */
 
+  /* Leading ladder, tightest → loosest. `--leading-display` is Anton's default
+     (the comps' 0.98); `--leading-display-2` is for display headings that wrap
+     to two or three lines and need the extra air. `--leading-snug` sits between
+     tight and normal for short body paragraphs set beside a heading, where 1.6
+     reads too airy. */
   --leading-display: 0.98;
+  --leading-display-2: 1.1;
   --leading-tight: 1.2;
+  --leading-snug: 1.45;
   --leading-normal: 1.6;
   --leading-prose: 1.72;
 
@@ -632,6 +639,27 @@ select {
 .js .lazy-fade.is-loaded,
 .lazy-fade[data-loaded] {
   opacity: 1;
+}
+
+/* Keyboard escape hatch past the nav. Off-screen until focused. */
+.skip-link {
+  position: absolute;
+  top: var(--space-3);
+  left: var(--space-3);
+  z-index: 100;
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-chip);
+  background: var(--accent);
+  color: var(--dh-white);
+  font-family: var(--font-ui);
+  font-weight: 600;
+  font-size: var(--text-sm);
+  transform: translateY(-200%);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+  color: var(--dh-white);
 }
 
 .visually-hidden:not(:focus):not(:active) {
