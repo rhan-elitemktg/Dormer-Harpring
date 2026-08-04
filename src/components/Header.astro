@@ -91,7 +91,32 @@ const current = Astro.url.pathname.replace(/\/+$/, "") || "/";
           shows it; wire to the Spanish landing page once there is one. */}
       <button type="button" class="header__lang">En Español</button>
 
-      <a href={`tel:${firm.phoneE164}`} class="header__phone">
+      {
+        /* aria-label is set unconditionally and matches the visible text,
+           because below 420px the number is replaced by the icon and the link
+           would otherwise have no accessible name at all. */
+      }
+      <a
+        href={`tel:${firm.phoneE164}`}
+        class="header__phone"
+        aria-label={`Call ${firm.phone}`}
+      >
+        <svg
+          class="header__phone-icon"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path
+            d="M6.5 3h3l1.5 4-2 1.4a12 12 0 005.6 5.6L16 12l4 1.5v3a2 2 0 01-2.2 2A16.5 16.5 0 013.9 5.2 2 2 0 016 3z"
+          ></path>
+        </svg>
         <span class="header__phone-number">{firm.phone}</span>
         <span class="header__phone-note">It's free. Available 24/7</span>
       </a>
@@ -344,20 +369,62 @@ const current = Astro.url.pathname.replace(/\/+$/, "") || "/";
     }
   }
 
+  /* Hidden until the number itself has to go — see the 420px block. */
+  .header__phone-icon {
+    display: none;
+  }
+
   @media (max-width: 640px) {
     .header__inner,
     .header--transparent .header__inner {
       padding-block: var(--space-5);
+      gap: var(--space-4);
+    }
+
+    .header__aside {
+      gap: var(--space-3);
     }
 
     .header__logo :global(.header__logo-img) {
-      height: 34px;
+      height: 30px;
     }
 
-    /* Below this the number is the only thing worth keeping; the reassurance
-       line costs a row and adds nothing at thumb size. */
+    /* Nothing in this bar can shrink — the logo is flex:none, the number is
+       nowrap, and the drawer toggle is a fixed 44px — so the row has to be
+       sized down deliberately or it simply overflows the viewport. At 375px the
+       untrimmed row measures about 393px. */
+    .header__phone-number {
+      font-size: var(--text-xl);
+    }
+
+    /* The number is the only thing worth keeping at thumb size; the
+       reassurance line costs a whole row and earns nothing. */
     .header__phone-note {
       display: none;
+    }
+  }
+
+  @media (max-width: 420px) {
+    /* Even trimmed, logo + number + toggle cannot fit a 320–390px viewport.
+       The number becomes an icon: click-to-call is the single most valuable
+       control in this header for an injury firm, so it stays put while the
+       digits go. */
+    .header__phone-icon {
+      display: block;
+    }
+
+    .header__phone-number {
+      display: none;
+    }
+
+    .header__phone {
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border: 1px solid var(--dh-line-dark);
+      border-radius: var(--radius-chip);
+      background: rgba(255, 255, 255, 0.04);
     }
   }
 </style>

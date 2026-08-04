@@ -32,7 +32,7 @@ const { stats } = Astro.props;
 <style>
   .stats {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     max-width: 900px;
     margin: var(--space-14) 0 0;
     padding: var(--space-9) 0 0;
@@ -81,10 +81,22 @@ const { stats } = Astro.props;
   }
 
   @media (max-width: 760px) {
+    /* minmax(0, 1fr) rather than 1fr, and the figures may wrap.
+       A bare `1fr` track is `minmax(auto, 1fr)`, so it cannot shrink below its
+       content's min-content — and `white-space: nowrap` makes "20 Years" one
+       unbreakable 124px word. Two of those plus the divider padding exceed half
+       a narrow viewport, the grid pushes past the container, and the whole
+       DOCUMENT ends up wider than the screen. Every full-width element below
+       then stops short of the right edge, which reads as a gap somewhere else
+       entirely. */
     .stats {
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: var(--space-8) 0;
       margin-top: var(--space-10);
+    }
+
+    .stats__big {
+      white-space: normal;
     }
 
     /* Reset the blanket sibling rule, then re-apply it only to the cells that

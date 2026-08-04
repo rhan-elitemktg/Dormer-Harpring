@@ -13,10 +13,29 @@ import {
   getRecentResults,
   getHomeFirmIntro,
 } from "../data/home";
+import PracticeSelector from "../components/home/PracticeSelector.astro";
 import { getAwards } from "../data/awards";
 import { getHomeTestimonials, getReviewSummary } from "../data/testimonials";
+import {
+  getPracticeSection,
+  getHomePracticeAreas,
+  getPracticePromise,
+  getCatastrophicAreas,
+} from "../data/practiceAreas";
 
-const [hero, stats, results, intro, awards, testimonials, reviews] = await Promise.all([
+const [
+  hero,
+  stats,
+  results,
+  intro,
+  awards,
+  testimonials,
+  reviews,
+  practiceSection,
+  areas,
+  promise,
+  catastrophic,
+] = await Promise.all([
   getHomeHero(),
   getHomeStats(),
   getRecentResults(),
@@ -24,6 +43,10 @@ const [hero, stats, results, intro, awards, testimonials, reviews] = await Promi
   getAwards(),
   getHomeTestimonials(),
   getReviewSummary(),
+  getPracticeSection(),
+  getHomePracticeAreas(),
+  getPracticePromise(),
+  getCatastrophicAreas(),
 ]);
 ---
 
@@ -37,4 +60,10 @@ const [hero, stats, results, intro, awards, testimonials, reviews] = await Promi
   <FirmIntro intro={intro} />
   <AwardsBar awards={awards} />
   <Testimonials testimonials={testimonials} reviews={reviews} />
+  <PracticeSelector
+    section={practiceSection}
+    areas={areas}
+    promise={promise}
+    catastrophic={catastrophic}
+  />
 </Layout>

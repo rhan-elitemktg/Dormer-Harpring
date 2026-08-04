@@ -1,0 +1,137 @@
+---
+// "High-stakes cases we're built to take to verdict" — four catastrophic-injury
+// cards below the selector.
+import PracticeIcon from "../../icons/PracticeIcon.astro";
+import type { CatastrophicArea } from "../../../data/practiceAreas";
+
+interface Props {
+  areas: CatastrophicArea[];
+  title: string;
+}
+
+const { areas, title } = Astro.props;
+---
+
+<div class="cat">
+  <h3 class="cat__title">{title}</h3>
+  <ul class="cat__grid">
+    {
+      areas.map((area) => (
+        <li>
+          <a class="cat__card" href={area.href}>
+            <span class="cat__head">
+              <PracticeIcon name={area.iconKey} size={24} class="cat__icon" />
+              <span class="cat__name">{area.name}</span>
+            </span>
+            <span class="cat__insight">{area.insight}</span>
+            <span class="cat__more arrow-link">
+              Learn more <span class="arrow" aria-hidden="true">&rarr;</span>
+            </span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</div>
+
+<style>
+  .cat {
+    margin-top: var(--space-12);
+    padding-top: var(--space-9);
+    border-top: 1px solid var(--dh-line-strong);
+  }
+
+  .cat__title {
+    margin-bottom: var(--space-5);
+    font-family: var(--font-ui);
+    font-weight: 700;
+    font-size: var(--text-label);
+    line-height: 1;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: #8a7c60;
+  }
+
+  .cat__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-5);
+    list-style: none;
+    padding: 0;
+  }
+
+  .cat__card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    height: 100%;
+    min-height: 196px;
+    padding: var(--space-6);
+    background: var(--dh-cream-50);
+    border: 1px solid #e2d8c2;
+    /* The comp uses 6px here, which is not one of the eight shipped radii the
+       token set preserves — snapped to the nearest. */
+    border-radius: var(--radius-3);
+    box-shadow: 0 18px 40px -32px rgba(60, 52, 32, 0.5);
+    transition: border-color var(--transition), transform var(--transition);
+  }
+
+  .cat__card:hover {
+    border-color: var(--accent-gold);
+    transform: translateY(-2px);
+  }
+
+  .cat__head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .cat__card :global(.cat__icon) {
+    flex: none;
+    color: var(--dh-forest-100);
+  }
+
+  .cat__name {
+    font-family: var(--font-display);
+    font-size: var(--display-7);
+    line-height: 1.05;
+    letter-spacing: 0.005em;
+    text-transform: uppercase;
+    color: var(--dh-forest-300);
+  }
+
+  .cat__insight {
+    flex: 1;
+    font-family: var(--font-serif);
+    font-size: var(--text-lg);
+    line-height: 1.5;
+    color: var(--dh-ink-body);
+  }
+
+  .cat__more {
+    font-family: var(--font-body);
+    font-weight: 800;
+    font-size: var(--text-micro);
+    line-height: 1;
+    letter-spacing: var(--tracking-nav);
+    text-transform: uppercase;
+    color: var(--dh-red-verdict);
+  }
+
+  @media (max-width: 1100px) {
+    .cat__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .cat__grid {
+      grid-template-columns: 1fr;
+    }
+
+    .cat__card {
+      min-height: 0;
+    }
+  }
+</style>
