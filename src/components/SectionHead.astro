@@ -1,0 +1,85 @@
+---
+// Eyebrow + h2 + optional lede — the opener repeated at the top of a dozen
+// sections across the comps. Wrapping it keeps the eyebrow→heading gap and the
+// lede measure consistent, which is exactly where hand-built section openers
+// drift apart.
+import Eyebrow from "./Eyebrow.astro";
+
+interface Props {
+  eyebrow?: string;
+  title: string;
+  lede?: string;
+  /** `1` is the homepage's 64px h2; `3` the interior pages' 48px. */
+  size?: 1 | 2 | 3;
+  tone?: "light" | "dark";
+  center?: boolean;
+  class?: string;
+}
+
+const {
+  eyebrow,
+  title,
+  lede,
+  size = 1,
+  tone = "light",
+  center = false,
+  class: className,
+} = Astro.props;
+---
+
+<header class:list={["head", `head--${size}`, center && "head--center", className]}>
+  {
+    eyebrow && (
+      <Eyebrow tone={tone === "dark" ? "on-dark" : "gold"} center={center} class="head__eyebrow">
+        {eyebrow}
+      </Eyebrow>
+    )
+  }
+  <h2 class="head__title">{title}</h2>
+  {lede && <p class="head__lede">{lede}</p>}
+</header>
+
+<style>
+  /* `:global()` bounded by the scoped `.head` ancestor, because
+     `head__eyebrow` is passed as a prop to <Eyebrow> and therefore lands on
+     Eyebrow's markup — which never carries this component's cid. A plain
+     `.head__eyebrow` rule here compiles fine and matches nothing. */
+  .head :global(.head__eyebrow) {
+    margin-bottom: var(--space-5);
+  }
+
+  .head__title {
+    font-size: var(--display-1);
+  }
+
+  .head--2 .head__title {
+    font-size: var(--display-2);
+  }
+
+  .head--3 .head__title {
+    font-size: var(--display-3);
+  }
+
+  .head__lede {
+    max-width: var(--measure-ch);
+    margin-top: var(--space-5);
+    font-size: var(--text-lg);
+    line-height: var(--leading-prose);
+    color: var(--text-muted);
+  }
+
+  .head--center {
+    text-align: center;
+  }
+
+  .head--center .head__lede {
+    margin-inline: auto;
+  }
+
+  /* On a forest section the heading colour is inherited from
+     `.section--forest`, but the lede needs its own on-dark value. */
+  :global(.section--forest) .head__lede,
+  :global(.section--forest-flat) .head__lede {
+    color: var(--text-on-dark-muted);
+  }
+</style>
