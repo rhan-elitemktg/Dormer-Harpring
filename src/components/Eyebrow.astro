@@ -1,0 +1,29 @@
+---
+// The gold rule + uppercase label that opens roughly twenty sections across the
+// comps. The rule is part of the mark, not decoration — never render the label
+// without it.
+//
+// Styling lives in global.css (`.eyebrow`) rather than here because the same
+// treatment is needed inside Portable Text renderers later, which sit outside
+// this component's scoped-style boundary.
+interface Props {
+  /** `gold` on cream, `on-dark` on a forest section. */
+  tone?: "gold" | "on-dark";
+  /** Rules on both sides, for centred section openers. */
+  center?: boolean;
+  class?: string;
+}
+
+const { tone = "gold", center = false, class: className } = Astro.props;
+---
+
+<p
+  class:list={[
+    "eyebrow",
+    tone === "on-dark" && "eyebrow--on-dark",
+    center && "eyebrow--center",
+    className,
+  ]}
+>
+  <span><slot /></span>
+</p>

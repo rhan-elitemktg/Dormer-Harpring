@@ -1,0 +1,111 @@
+---
+// The shared shell: <head>, fonts, global stylesheet, site-wide JSON-LD.
+//
+// The `seo` prop is accepted and threaded through from day one even though
+// nothing supplies it yet — pages pass `null`. That is deliberate: when the
+// editable-SEO layer is added, it attaches by filling this prop, with no edits
+// to any page and no change to the rendered titles.
+import Font from "astro/components/Font.astro";
+import { getFirmDetails } from "../data/site";
+import { resolveSeo, SITE_NAME, type SeoInput } from "../lib/seo";
+import { legalServiceSchema } from "../lib/schema";
+import "../styles/global.css";
+
+interface Props {
+  title: string;
+  description?: string;
+  /** The page's Sanity `seo` block, once one exists. Every field optional. */
+  seo?: SeoInput | null;
+  /** Transparent over a full-bleed hero (homepage) vs solid (everywhere else). */
+  headerVariant?: "solid" | "transparent";
+  /** Extra classes on <body>, for page-level layout hooks. */
+  bodyClass?: string;
+}
+
+const {
+  title,
+  description,
+  seo = null,
+  headerVariant = "solid",
+  bodyClass,
+} = Astro.props;
+
+const firm = await getFirmDetails();
+
+const meta = resolveSeo(seo, {
+  fallbackTitle: title,
+  fallbackDescription: description,
+  pageUrl: Astro.url,
+});
+
+// `Astro.site` is set in astro.config.mjs; the fallback keeps a bare `astro dev`
+// (which can run without it) from throwing inside the template literal below.
+const siteUrl = (Astro.site?.href ?? "https://www.denvertrial.com/").replace(/\/+$/, "");
+const organization = legalServiceSchema(firm, siteUrl);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+
+    <title>{meta.title}</title>
+    {meta.description && <meta name="description" content={meta.description} />}
+    <link rel="canonical" href={meta.canonical} />
+    {meta.noIndex && <meta name="robots" content="noindex, nofollow" />}
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={SITE_NAME} />
+    <meta property="og:title" content={meta.title} />
+    {meta.description && <meta property="og:description" content={meta.description} />}
+    <meta property="og:url" content={meta.canonical} />
+    {meta.ogImage && <meta property="og:image" content={meta.ogImage} />}
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+
+    <Font cssVariable="--font-anton" preload />
+    <Font cssVariable="--font-hanken" preload />
+    <Font cssVariable="--font-geist" preload />
+    <Font cssVariable="--font-newsreader" />
+    <Font cssVariable="--font-caveat" />
+
+    <script
+      type="application/ld+json"
+      set:html={JSON.stringify(organization)}
+    />
+
+    {/* Marks JS as available before first paint, so `.lazy-fade` can start at
+        opacity 0. Without the class a no-JS visitor would never see the image,
+        since nothing would ever add `.is-loaded`. Inline and synchronous by
+        necessity — a deferred script would run after the first paint. */}
+    <script is:inline>
+      document.documentElement.classList.add("js");
+    </script>
+  </head>
+
+  <body class={bodyClass} data-header={headerVariant}>
+    {/* Header lands here in the shell phase. */}
+    <main id="main">
+      <slot />
+    </main>
+    {/* Footer lands here in the shell phase. */}
+
+    <script>
+      // Fade each lazy image in once it has actually decoded. Images already
+      // complete at hydration (cached, or decoded before this ran) are marked
+      // immediately, so nothing can get stuck invisible.
+      for (const img of document.querySelectorAll<HTMLImageElement>("img.lazy-fade")) {
+        if (img.complete) {
+          img.classList.add("is-loaded");
+        } else {
+          img.addEventListener("load", () => img.classList.add("is-loaded"), { once: true });
+          img.addEventListener("error", () => img.classList.add("is-loaded"), { once: true });
+        }
+      }
+    </script>
+  </body>
+</html>

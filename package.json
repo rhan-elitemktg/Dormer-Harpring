@@ -9,7 +9,9 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "check:styles": "python3 scripts/check-scoped-styles.py $(find dist -name '*.html' -not -path 'dist/admin/*')",
+    "prep:assets": "node scripts/prep-assets.mjs"
   },
   "dependencies": {
     "@astrojs/react": "^6.0.2",

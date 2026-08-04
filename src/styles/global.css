@@ -1,0 +1,693 @@
+/* =============================================================
+   Dormer Harpring — global.css
+
+   The site's ONE unscoped stylesheet: design tokens, reset, base
+   elements, the shared `.prose__*` Portable Text styles, and the
+   `.container` / `.section` / `.btn` / `.eyebrow` / `.lazy-fade` /
+   `.visually-hidden` helpers. Everything else lives in a
+   component's scoped <style>.
+
+   Change a token here and it moves site-wide — that is the point.
+   Add a --space-* step rather than hardcoding a one-off value.
+
+   SOURCE OF TRUTH: these values are a hex/px census of the 14
+   approved comps in "Dormer Harpring Claude Files" (the `DH - *.html`
+   set). They are NOT from the `_ds/` folder in that same directory —
+   `_ds/`, `home-*.jsx`, `homepage-v8/v9.css` and that folder's own
+   CLAUDE.md belong to an abandoned generation (Roboto Condensed /
+   #1C3436 / 1660px container). Nothing in the approved pages
+   references them. We kept _ds's NAMING schema and threw away its
+   values; do not reintroduce them.
+   ============================================================= */
+
+/* ---- Design tokens ---------------------------------------- */
+
+:root {
+  /* Color — gold. The brand accent: rules, eyebrows, icons, hairlines. */
+  --dh-gold: #c79a54;        /* 301 uses — the accent */
+  --dh-gold-deep: #b0873c;   /* eyebrow text on cream (gold needs to darken to pass contrast) */
+  --dh-gold-light: #d8b26e;  /* eyebrow on forest, hero stat rule */
+  --dh-gold-bright: #e9b45a; /* footer "Get directions" link */
+  --dh-gold-muted: #8a7c4e;  /* faint labels on cream */
+  --dh-gold-tint: #ede4cf;   /* active tab / pill track surface */
+
+  /* Color — red. CTAs ONLY. Never a surface, never body text. */
+  --dh-red: #e14a32;         /* 201 uses */
+  --dh-red-hover: #c43e28;
+  --dh-red-verdict: #c0491f; /* recovered figures, "Learn more →" */
+  --dh-red-link: #cf6624;    /* prose link hover */
+
+  /* Color — forest, light→dark. -100/-200/-500 are the gradient stops. */
+  --dh-forest-100: #2c3b31;  /* gradient top, dark chips */
+  --dh-forest-200: #212e25;  /* gradient mid */
+  --dh-forest-300: #1e2922;  /* <body> base */
+  --dh-forest-400: #1b241e;  /* flat dark section (testimonials) */
+  --dh-forest-500: #19221c;  /* gradient bottom, dark cards */
+  --dh-forest-600: #151e19;  /* header + footer, deepest */
+
+  /* Color — cream, light→dark. The page's warm neutral ladder. */
+  --dh-cream-50: #fbf8f1;    /* lifted cards on cream */
+  --dh-cream-100: #fbf7ed;   /* default page cream */
+  --dh-cream-200: #f7f4ec;   /* sunk panels, form inputs */
+  --dh-cream-300: #f4f2ec;   /* alternate section band */
+  --dh-cream-400: #ece6d8;   /* deepest sunk band */
+  --dh-white: #ffffff;
+
+  /* Text on cream. `--dh-ink` absorbs the comps' #1F2A23 / #1E2A22 /
+     #1B241E-as-text drift — all four are within ΔE 2 of each other. */
+  --dh-ink: #232e27;         /* 260 uses — headings */
+  --dh-ink-warm: #241e18;    /* firm-intro headline, inline <strong> */
+  --dh-ink-body: #4e463a;    /* strongest body copy */
+  --dh-ink-2: #5f5849;       /* default body */
+  --dh-ink-3: #6a6353;       /* lede / muted — absorbs #7A7160, #6E6455 */
+  --dh-ink-4: #8a8272;       /* meta, dates, captions */
+  --dh-ink-5: #a79a82;       /* struck-through "Offered", faintest */
+
+  /* Text on forest. */
+  --dh-parchment: #f4efe7;   /* 200 uses — absorbs #F6F2E8, #EDE8DB */
+  --dh-on-dark-2: #c4cdc5;   /* footer links — absorbs #DCE3DD, #CDD4C8 */
+  --dh-on-dark-3: #9da79e;   /* muted — absorbs #AEB8AB */
+  --dh-on-dark-4: #7f8a80;   /* faint labels — absorbs #79837A */
+
+  /* Hairlines. */
+  --dh-line: #e6dcc6;        /* 107 uses — card border on cream */
+  --dh-line-soft: #ede4d0;   /* faint divider inside a card */
+  --dh-line-strong: #d8cdb4; /* section rule on cream */
+  --dh-line-dark: rgba(255, 255, 255, 0.08);   /* on forest */
+  --dh-line-gold: rgba(216, 178, 110, 0.32);   /* hero stat rule */
+
+  /* ---- Semantic aliases -----------------------------------
+     COMPONENTS REFERENCE THESE, not the primitives above.
+     Retuning a primitive then moves the whole site at once. */
+  --surface-page: var(--dh-cream-100);
+  --surface-card: var(--dh-cream-50);
+  --surface-sunk: var(--dh-cream-400);
+  --surface-input: var(--dh-cream-200);
+  --surface-alt: var(--dh-cream-300);
+  --surface-dark: var(--dh-forest-400);
+  --surface-dark-card: var(--dh-forest-500);
+  --surface-chrome: var(--dh-forest-600);   /* header + footer */
+
+  --text-strong: var(--dh-ink);
+  --text-body: var(--dh-ink-2);
+  --text-muted: var(--dh-ink-3);
+  --text-meta: var(--dh-ink-4);
+  --text-on-dark: var(--dh-parchment);
+  --text-on-dark-2: var(--dh-on-dark-2);
+  --text-on-dark-muted: var(--dh-on-dark-3);
+
+  --accent: var(--dh-red);
+  --accent-hover: var(--dh-red-hover);
+  --accent-gold: var(--dh-gold);
+  --border-hairline: var(--dh-line);
+  --focus-ring: var(--dh-gold);
+
+  /* ---- The signature dark section -------------------------
+     Every forest section in the comps is this one radial gradient;
+     they differ ONLY in horizontal origin. A section overrides it:
+         .section--forest { --forest-origin: 15%; }
+     Origins used: 15% (Why us), 50% (Results, Core values),
+     85% (Take the first step). Size/stops are normalized from the
+     comps' 130% 120% / 130% 130% / 120% 120% and 52% / 55% —
+     sub-perceptual differences on a 3-stop dark green. */
+  --forest-origin: 50%;
+  --grad-forest: radial-gradient(
+    130% 125% at var(--forest-origin) -10%,
+    var(--dh-forest-100) 0%,
+    var(--dh-forest-200) 53%,
+    var(--dh-forest-500) 100%
+  );
+
+  /* ---- Typography -----------------------------------------
+     Self-hosted via Astro's Fonts API (see astro.config.mjs), which
+     defines the --font-* variables these build on. */
+  --font-display: var(--font-anton), "Arial Narrow", sans-serif;
+  --font-body: var(--font-hanken), system-ui, -apple-system, sans-serif;
+  --font-ui: var(--font-geist), system-ui, -apple-system, sans-serif;
+  --font-serif: var(--font-newsreader), Georgia, serif;
+  --font-script: var(--font-caveat), cursive;
+
+  /* Type scale — EVERY size fluid via clamp(min, preferred, max),
+     anchored 375px → 1340px (the container width). The comps carry
+     fixed px throughout (zero clamp anywhere), so the fluidity is
+     ours; but THE MAX IS ALWAYS THE COMP'S SHIPPED VALUE, so desktop
+     stays pixel-exact and only the descent to mobile is new.
+     Comment shows the px range.
+
+     Display — Anton, weight 400, uppercase. */
+  --display-hero: clamp(2.75rem, 1.487rem + 5.389vw, 6rem);      /* 44 → 96  homepage h1 */
+  --display-1: clamp(2.25rem, 1.570rem + 2.902vw, 4rem);         /* 36 → 64  homepage section h2 */
+  --display-2: clamp(2rem, 1.417rem + 2.487vw, 3.5rem);          /* 32 → 56  sub-band h2 */
+  --display-3: clamp(1.75rem, 1.264rem + 2.073vw, 3rem);         /* 28 → 48  interior section h2 */
+  --display-4: clamp(1.625rem, 1.236rem + 1.658vw, 2.625rem);    /* 26 → 42  card h3 */
+  --display-5: clamp(1.375rem, 1.084rem + 1.244vw, 2.125rem);    /* 22 → 34 */
+  --display-6: clamp(1.25rem, 1.129rem + 0.518vw, 1.5625rem);    /* 20 → 25  promise slide h3 */
+  --display-7: clamp(1.125rem, 1.076rem + 0.207vw, 1.25rem);     /* 18 → 20  core-value h3 */
+
+  /* UI + body. The comps are label-heavy: 12px alone is 289 uses.
+     Small labels get deliberately NARROW ranges — an 11px eyebrow
+     scaled by the display slope would be illegible on a phone. */
+  --text-nano: clamp(0.5rem, 0.476rem + 0.104vw, 0.5625rem);     /*  8 →  9  dropdown caret */
+  --text-micro: clamp(0.625rem, 0.601rem + 0.104vw, 0.6875rem);  /* 10 → 11 */
+  --text-label: clamp(0.6875rem, 0.663rem + 0.104vw, 0.75rem);   /* 11 → 12  eyebrows, 289 uses */
+  --text-sm: clamp(0.75rem, 0.726rem + 0.104vw, 0.8125rem);      /* 12 → 13  nav, meta */
+  --text-base: clamp(0.8125rem, 0.764rem + 0.207vw, 0.9375rem);  /* 13 → 15  default body, 195 uses */
+  --text-md: clamp(0.875rem, 0.826rem + 0.207vw, 1rem);          /* 14 → 16 */
+  --text-lg: clamp(0.9375rem, 0.889rem + 0.207vw, 1.0625rem);    /* 15 → 17  lede */
+  --text-xl: clamp(1rem, 0.951rem + 0.207vw, 1.125rem);          /* 16 → 18 */
+  --text-2xl: clamp(1.125rem, 1.052rem + 0.311vw, 1.3125rem);    /* 18 → 21 */
+  --text-3xl: clamp(1.25rem, 1.153rem + 0.415vw, 1.5rem);        /* 20 → 24 */
+  --text-stat: clamp(1.75rem, 1.531rem + 0.933vw, 2.3125rem);    /* 28 → 37  hero stat numeral */
+  --text-phone: clamp(1.25rem, 1.080rem + 0.725vw, 1.6875rem);   /* 20 → 27  header phone */
+
+  --leading-display: 0.98;
+  --leading-tight: 1.2;
+  --leading-normal: 1.6;
+  --leading-prose: 1.72;
+
+  --tracking-label: 0.16em;   /* eyebrows */
+  --tracking-nav: 0.06em;
+  --tracking-btn: 0.08em;
+  --tracking-tight: -0.01em;  /* Anton display */
+
+  /* ---- Spacing (4px grid) ---------------------------------
+     The comps' 18/22/26/34/38/66px one-offs snap onto this. */
+  --space-1: 0.25rem;   /*  4 */
+  --space-2: 0.5rem;    /*  8 */
+  --space-3: 0.75rem;   /* 12 */
+  --space-4: 1rem;      /* 16 */
+  --space-5: 1.25rem;   /* 20 */
+  --space-6: 1.5rem;    /* 24 */
+  --space-7: 1.75rem;   /* 28 */
+  --space-8: 2rem;      /* 32 */
+  --space-9: 2.25rem;   /* 36 */
+  --space-10: 2.5rem;   /* 40 */
+  --space-11: 2.75rem;  /* 44 */
+  --space-12: 3rem;     /* 48 */
+  --space-14: 3.5rem;   /* 56 */
+  --space-16: 4rem;     /* 64 */
+  --space-18: 4.5rem;   /* 72 */
+  --space-20: 5rem;     /* 80 */
+
+  /* Section vertical rhythm — two fluid steps.
+     --space-section absorbs the comps' 104/100/96/88;
+     --space-section-sm absorbs 76/72/64/60/58. */
+  --space-section: clamp(3.5rem, 7.5vw, 6.5rem);      /* 56 → 104 */
+  --space-section-sm: clamp(2.75rem, 5.5vw, 4.5rem);  /* 44 →  72 */
+
+  /* ---- Layout ---------------------------------------------
+     --container-max is a BORDER-BOX width (`* { box-sizing:
+     border-box }` below), so the readable column is
+     1340 − 2×48 = 1244px. EVERY section runs at this width —
+     there is exactly one container width site-wide. */
+  --container-max: 1340px;
+  --container-pad: 48px;
+
+  /* Narrower measures for the prose-led sections. */
+  --measure-wide: 1180px;    /* awards bar */
+  --measure: 1080px;         /* FAQ */
+  --measure-narrow: 980px;
+  --measure-prose: 760px;    /* blog body */
+  --measure-ch: 62ch;        /* lede paragraphs */
+
+  /* ---- Radii ----------------------------------------------
+     All 8 shipped values kept: 3px (hero CTA), 4px (why-us card)
+     and 5px (promise CTA) sit adjacent in the comps, so snapping
+     them would be visible. Use the semantic aliases below. */
+  --radius-1: 3px;
+  --radius-2: 4px;
+  --radius-3: 5px;
+  --radius-4: 8px;    /* 177 uses */
+  --radius-5: 12px;
+  --radius-6: 14px;
+  --radius-7: 16px;
+  --radius-8: 20px;   /* pills */
+  --radius-full: 50%;
+
+  --radius-btn: var(--radius-1);
+  --radius-input: var(--radius-4);
+  --radius-chip: var(--radius-4);
+  --radius-media: var(--radius-6);
+  --radius-card: var(--radius-7);
+  --radius-pill: var(--radius-8);
+
+  /* ---- Elevation ------------------------------------------ */
+  --shadow-card: 0 14px 38px rgba(45, 34, 22, 0.08);
+  --shadow-card-dark: 0 18px 44px rgba(0, 0, 0, 0.34);
+  --shadow-lift: 0 30px 70px rgba(31, 42, 35, 0.26);
+  --shadow-panel: 0 26px 70px rgba(31, 42, 35, 0.22);
+
+  /* ---- Motion ---------------------------------------------- */
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --dur-fast: 0.16s;
+  --dur: 0.3s;
+  --dur-slide: 0.5s;
+  --transition: var(--dur) var(--ease);
+
+  /* ---- Breakpoints (reference only) ------------------------
+     @media cannot read custom properties, so these are used as
+     LITERALS throughout. Rationalized from the comps' 13 ad-hoc
+     values (1180/1080/1000/980/900/860/768/760/720/700/640/600 —
+     1180 and 1080 do the same job 100px apart because two pages
+     were authored on different days):
+       1280px  container padding 48 → 32
+       1100px  nav → drawer; 4-col → 2-col; 6-col → 3-col
+        980px  every 2-col split stacks; 3-col → 2-col
+        760px  2-col → 1-col; stat rows 4 → 2; rail arrows hide
+        640px  container padding → 24; buttons full-width       */
+}
+
+/* ---- Reset + base ----------------------------------------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--surface-page);
+  color: var(--text-body);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* The comps set <body> to forest (#1E2922) because the canvas showed
+   one page at a time and the hero is dark. Here the page background
+   is cream and only .section--forest paints dark, so the overscroll
+   colour is what should match the top of the page. */
+
+img,
+picture,
+svg,
+video {
+  display: block;
+  max-width: 100%;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  /* Anton is the display face for every heading in the comps. The
+     `.anton` class they used is presentational — dropped in favour of
+     styling the element, plus the `.display` utility below for the
+     handful of non-heading uses (the ❝ glyph, big $ figures). */
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: var(--leading-display);
+  letter-spacing: var(--tracking-tight);
+  text-transform: uppercase;
+  color: var(--text-strong);
+  margin: 0;
+}
+
+h5,
+h6,
+p,
+figure,
+blockquote,
+ul,
+ol,
+dl {
+  margin: 0;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: color var(--transition);
+}
+
+a:hover {
+  color: var(--dh-red-link);
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
+/* ---- Layout helpers --------------------------------------- */
+
+.container {
+  width: 100%;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--container-pad);
+}
+
+.section {
+  padding-block: var(--space-section);
+}
+
+.section--sm {
+  padding-block: var(--space-section-sm);
+}
+
+.section--cream {
+  background: var(--surface-page);
+}
+
+.section--alt {
+  background: var(--surface-alt);
+}
+
+.section--sunk {
+  background: var(--surface-sunk);
+}
+
+/* The gradient dark section. Override --forest-origin per section. */
+.section--forest {
+  background: var(--grad-forest);
+  color: var(--text-on-dark);
+}
+
+/* The flat dark section (testimonials) — no gradient. */
+.section--forest-flat {
+  background: var(--surface-dark);
+  color: var(--text-on-dark);
+}
+
+.section--forest :is(h1, h2, h3, h4),
+.section--forest-flat :is(h1, h2, h3, h4) {
+  color: var(--text-on-dark);
+}
+
+@media (max-width: 1280px) {
+  .container {
+    padding-inline: var(--space-8);
+  }
+}
+
+@media (max-width: 640px) {
+  .container {
+    padding-inline: var(--space-6);
+  }
+}
+
+/* ---- Display utility --------------------------------------
+   For the non-heading uses of Anton: the ❝ ornament, the big
+   "$2.1M" verdict figures, the hero stat numerals' siblings.
+   Never use this where a real heading element belongs. */
+.display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: var(--leading-display);
+  letter-spacing: var(--tracking-tight);
+  text-transform: uppercase;
+}
+
+/* ---- Eyebrow ----------------------------------------------
+   The gold rule + uppercase label that opens ~20 sections. The
+   rule is not optional — it is the section-opening signature. */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: var(--text-label);
+  line-height: 1;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--dh-gold-deep);
+}
+
+.eyebrow::before {
+  content: "";
+  width: 38px;
+  height: 1px;
+  background: var(--accent-gold);
+  flex: none;
+}
+
+.eyebrow--on-dark {
+  color: var(--dh-gold-light);
+}
+
+/* Centred section openers put the rule on both sides. */
+.eyebrow--center::after {
+  content: "";
+  width: 38px;
+  height: 1px;
+  background: var(--accent-gold);
+  flex: none;
+}
+
+/* ---- Buttons ----------------------------------------------
+   The comps' `bp-btn` family, which recurs on all 14 pages.
+   Height is set by padding rather than a fixed px height so the
+   label can wrap on a narrow phone instead of overflowing. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-5) var(--space-8);
+  border: 0;
+  border-radius: var(--radius-btn);
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: var(--text-sm);
+  line-height: 1;
+  letter-spacing: var(--tracking-btn);
+  text-transform: uppercase;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color var(--transition), color var(--transition),
+    border-color var(--transition);
+}
+
+.btn--red {
+  background: var(--accent);
+  color: var(--dh-white);
+}
+
+.btn--red:hover {
+  background: var(--accent-hover);
+  color: var(--dh-white);
+}
+
+/* Cream-on-dark — the hero's "Watch our video". */
+.btn--light {
+  background: var(--dh-parchment);
+  border: 1px solid var(--dh-parchment);
+  color: var(--dh-forest-400);
+}
+
+.btn--light:hover {
+  background: var(--dh-white);
+  border-color: var(--dh-white);
+  color: var(--dh-forest-400);
+}
+
+/* Transparent with a hairline — secondary CTA on forest. */
+.btn--ghost {
+  background: transparent;
+  border: 1px solid var(--dh-line-dark);
+  color: var(--text-on-dark);
+}
+
+.btn--ghost:hover {
+  border-color: var(--dh-gold-light);
+  color: var(--dh-gold-light);
+}
+
+/* Outlined ink — the "View all" / "Learn more" on cream. */
+.btn--outline-ink {
+  background: transparent;
+  border: 1.5px solid var(--dh-forest-400);
+  color: var(--dh-forest-400);
+}
+
+.btn--outline-ink:hover {
+  background: var(--dh-forest-400);
+  color: var(--dh-parchment);
+}
+
+.btn--lg {
+  padding: var(--space-6) var(--space-10);
+  font-size: var(--text-md);
+}
+
+@media (max-width: 640px) {
+  .btn--block-sm {
+    width: 100%;
+  }
+}
+
+/* ---- Prose ------------------------------------------------
+   The shared body styles. Built now, before any Portable Text
+   exists, for two reasons: the comps' `bp-h2`/`bp-h3`/`bp-p`
+   already ARE this layer on all 14 pages, and putting it in the
+   global sheet means the astro-portabletext renderers added in
+   the Sanity phase need zero new CSS — and cannot fall foul of
+   Astro's scoped-style boundary, since child renderers carry no
+   parent cid. */
+.prose {
+  color: var(--text-body);
+  font-size: var(--text-lg);
+  line-height: var(--leading-prose);
+}
+
+.prose__h2 {
+  font-size: var(--display-3);
+  margin-block: var(--space-12) var(--space-5);
+}
+
+.prose__h3 {
+  font-size: var(--display-5);
+  margin-block: var(--space-10) var(--space-4);
+}
+
+.prose__h4 {
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: var(--text-xl);
+  line-height: var(--leading-tight);
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text-strong);
+  margin-block: var(--space-8) var(--space-3);
+}
+
+.prose__p {
+  margin-block: 0 var(--space-5);
+}
+
+.prose__list {
+  margin-block: 0 var(--space-5);
+  padding-left: var(--space-6);
+}
+
+.prose__list li {
+  margin-bottom: var(--space-2);
+}
+
+.prose__link {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+  text-decoration-thickness: 1px;
+}
+
+.prose__link:hover {
+  color: var(--dh-red-link);
+}
+
+.prose__strong {
+  font-weight: 700;
+  color: var(--dh-ink-warm);
+}
+
+.prose__quote {
+  margin-block: var(--space-8);
+  padding-left: var(--space-6);
+  border-left: 2px solid var(--accent-gold);
+  font-family: var(--font-serif);
+  font-size: var(--text-2xl);
+  font-style: italic;
+  line-height: var(--leading-normal);
+  color: var(--text-strong);
+}
+
+/* Headings that open a prose block shouldn't push a top margin
+   into the section padding above them. */
+.prose > :first-child {
+  margin-top: 0;
+}
+
+.prose > :last-child {
+  margin-bottom: 0;
+}
+
+/* ---- Utilities --------------------------------------------- */
+
+/* Lazy images fade in once decoded, so a slow connection shows a
+   soft reveal instead of a pop. Gated on `.js` (set by an inline
+   script in Layout.astro) so a no-JS visitor never gets a
+   permanently invisible image. */
+.js .lazy-fade {
+  opacity: 0;
+  transition: opacity var(--dur-slide) var(--ease);
+}
+
+.js .lazy-fade.is-loaded,
+.lazy-fade[data-loaded] {
+  opacity: 1;
+}
+
+.visually-hidden:not(:focus):not(:active) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Scroll lock while the mobile drawer is open. */
+body.drawer-open {
+  overflow: hidden;
+}
+
+/* Horizontal rails: hide the scrollbar but keep the scrolling. */
+.noscroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.noscroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* The visible gold rail scrollbar (testimonials, attorney rows). */
+.rail-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent-gold) var(--surface-sunk);
+}
+
+.rail-scroll::-webkit-scrollbar {
+  height: 8px;
+}
+
+.rail-scroll::-webkit-scrollbar-track {
+  background: var(--surface-sunk);
+  border-radius: var(--radius-4);
+}
+
+.rail-scroll::-webkit-scrollbar-thumb {
+  background: var(--accent-gold);
+  border-radius: var(--radius-4);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

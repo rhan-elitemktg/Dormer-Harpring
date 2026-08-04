@@ -1,0 +1,50 @@
+---
+// The ONE place the site decides how an image is rendered.
+//
+// Every component renders <Picture>, never <Image> or a bare <img>. That is not
+// style policing: most of these images (attorney portraits, practice-area
+// photos, the community mosaic, badges, video posters) become Sanity assets in
+// the CMS phase. With this wrapper that swap is a branch in one file; without
+// it, it is an edit to every component on the site.
+import { Image } from "astro:assets";
+import type { ImageMetadata } from "astro";
+
+// STYLING THIS FROM A PARENT: the `class` you pass lands on the <img> below,
+// which is in THIS component's template — so it carries this component's
+// data-astro-cid, never the caller's. A plain `.my-photo { … }` rule in the
+// parent's scoped <style> compiles without error and matches nothing.
+// Write it bounded by a scoped ancestor instead:
+//     .card :global(.my-photo) { … }
+// `scripts/check-scoped-styles.py` catches the mistake after a build; an HTML
+// diff cannot see it.
+
+interface Props {
+  src: ImageMetadata; // Sanity phase: | SanityImageSource
+  alt: string;
+  widths?: number[];
+  sizes?: string;
+  /** Above the fold. Loads eagerly at high priority; skips the fade-in. */
+  eager?: boolean;
+  class?: string;
+}
+
+const {
+  src,
+  alt,
+  widths,
+  sizes,
+  eager = false,
+  class: className,
+} = Astro.props;
+---
+
+<Image
+  src={src}
+  alt={alt}
+  widths={widths}
+  sizes={sizes}
+  loading={eager ? "eager" : "lazy"}
+  fetchpriority={eager ? "high" : undefined}
+  decoding={eager ? "sync" : "async"}
+  class:list={[className, !eager && "lazy-fade"]}
+/>

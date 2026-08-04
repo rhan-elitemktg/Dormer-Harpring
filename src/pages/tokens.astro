@@ -1,0 +1,410 @@
+---
+// THROWAWAY. A visual proof sheet for the token layer, so the palette, type
+// scale, radii and section surfaces can be checked against the approved comps
+// before any page is built on them. Delete once the homepage is signed off.
+import Layout from "../layouts/Layout.astro";
+import SectionHead from "../components/SectionHead.astro";
+import Eyebrow from "../components/Eyebrow.astro";
+import Picture from "../components/media/Picture.astro";
+import logoWhite from "../assets/logo-white.webp";
+import hero from "../assets/home/hero.jpg";
+import badge from "../assets/badges/badge-8.webp";
+
+const gold = [
+  ["--dh-gold", "#C79A54", "301 uses — the accent"],
+  ["--dh-gold-deep", "#B0873C", "eyebrow text on cream"],
+  ["--dh-gold-light", "#D8B26E", "eyebrow on forest"],
+  ["--dh-gold-bright", "#E9B45A", "footer directions link"],
+  ["--dh-gold-muted", "#8A7C4E", "faint labels"],
+  ["--dh-gold-tint", "#EDE4CF", "active tab surface"],
+];
+const red = [
+  ["--dh-red", "#E14A32", "201 uses — CTA"],
+  ["--dh-red-hover", "#C43E28", "CTA hover"],
+  ["--dh-red-verdict", "#C0491F", "recovered figures"],
+  ["--dh-red-link", "#CF6624", "prose link hover"],
+];
+const forest = [
+  ["--dh-forest-100", "#2C3B31", "gradient top"],
+  ["--dh-forest-200", "#212E25", "gradient mid"],
+  ["--dh-forest-300", "#1E2922", "body base"],
+  ["--dh-forest-400", "#1B241E", "flat dark section"],
+  ["--dh-forest-500", "#19221C", "gradient bottom"],
+  ["--dh-forest-600", "#151E19", "header + footer"],
+];
+const cream = [
+  ["--dh-cream-50", "#FBF8F1", "lifted card"],
+  ["--dh-cream-100", "#FBF7ED", "page cream"],
+  ["--dh-cream-200", "#F7F4EC", "sunk panel, input"],
+  ["--dh-cream-300", "#F4F2EC", "alt band"],
+  ["--dh-cream-400", "#ECE6D8", "deepest band"],
+  ["--dh-white", "#FFFFFF", "card"],
+];
+const inkOnCream = [
+  ["--dh-ink", "#232E27", "260 uses — headings"],
+  ["--dh-ink-warm", "#241E18", "firm-intro headline"],
+  ["--dh-ink-body", "#4E463A", "strongest body"],
+  ["--dh-ink-2", "#5F5849", "default body"],
+  ["--dh-ink-3", "#6A6353", "lede / muted"],
+  ["--dh-ink-4", "#8A8272", "meta, captions"],
+  ["--dh-ink-5", "#A79A82", "faintest"],
+];
+const inkOnForest = [
+  ["--dh-parchment", "#F4EFE7", "200 uses"],
+  ["--dh-on-dark-2", "#C4CDC5", "footer links"],
+  ["--dh-on-dark-3", "#9DA79E", "muted"],
+  ["--dh-on-dark-4", "#7F8A80", "faint labels"],
+];
+
+const display = [
+  ["--display-hero", "44 → 96", "homepage h1"],
+  ["--display-1", "36 → 64", "homepage section h2"],
+  ["--display-2", "32 → 56", "sub-band h2"],
+  ["--display-3", "28 → 48", "interior section h2"],
+  ["--display-4", "26 → 42", "card h3"],
+  ["--display-5", "22 → 34", ""],
+  ["--display-6", "20 → 25", "promise slide h3"],
+  ["--display-7", "18 → 20", "core-value h3"],
+];
+const body = [
+  ["--text-nano", "8 → 9", "caret"],
+  ["--text-micro", "10 → 11", ""],
+  ["--text-label", "11 → 12", "eyebrows, 289 uses"],
+  ["--text-sm", "12 → 13", "nav, meta"],
+  ["--text-base", "13 → 15", "body, 195 uses"],
+  ["--text-md", "14 → 16", ""],
+  ["--text-lg", "15 → 17", "lede"],
+  ["--text-xl", "16 → 18", ""],
+  ["--text-2xl", "18 → 21", ""],
+  ["--text-3xl", "20 → 24", ""],
+  ["--text-stat", "28 → 37", "hero stat numeral"],
+  ["--text-phone", "20 → 27", "header phone"],
+];
+const radii = [
+  ["--radius-1", "3px", "hero CTA, buttons"],
+  ["--radius-2", "4px", "why-us card"],
+  ["--radius-3", "5px", "promise CTA, FAQ chip"],
+  ["--radius-4", "8px", "177 uses — input, chip"],
+  ["--radius-5", "12px", "firm-intro media"],
+  ["--radius-6", "14px", "photo tile"],
+  ["--radius-7", "16px", "feature card"],
+  ["--radius-8", "20px", "pill, badge"],
+];
+---
+
+<Layout title="Design tokens" description="Token proof sheet — not a site page.">
+  <section class="section section--cream">
+    <div class="container">
+      <SectionHead
+        eyebrow="Proof sheet"
+        title="Design tokens"
+        lede="Every value below is a census of the fourteen approved comps. Resize the window — all type is fluid, and each size tops out at the comp's shipped pixel value."
+      />
+    </div>
+  </section>
+
+  <section class="section section--sunk">
+    <div class="container">
+      <h3 class="sub">Colour</h3>
+      {
+        [
+          ["Gold", gold],
+          ["Red — CTA only", red],
+          ["Forest", forest],
+          ["Cream", cream],
+          ["Ink on cream", inkOnCream],
+          ["Ink on forest", inkOnForest],
+        ].map(([label, rows]) => (
+          <>
+            <h4 class="grp">{label}</h4>
+            <ul class="swatches">
+              {(rows as string[][]).map(([token, hex, note]) => (
+                <li class="swatch">
+                  <span class="swatch__chip" style={`background:var(${token})`}></span>
+                  <code class="swatch__token">{token}</code>
+                  <span class="swatch__hex">{hex}</span>
+                  <span class="swatch__note">{note}</span>
+                </li>
+              ))}
+            </ul>
+          </>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="section section--cream">
+    <div class="container">
+      <h3 class="sub">Display — Anton</h3>
+      <ul class="scale">
+        {
+          display.map(([token, range, note]) => (
+            <li class="scale__row">
+              <span class="scale__meta">
+                <code>{token}</code>
+                <em>{range}{note && ` · ${note}`}</em>
+              </span>
+              <span class="scale__sample display" style={`font-size:var(${token})`}>
+                All in. Every case.
+              </span>
+            </li>
+          ))
+        }
+      </ul>
+
+      <h3 class="sub">Body + UI</h3>
+      <ul class="scale">
+        {
+          body.map(([token, range, note]) => (
+            <li class="scale__row">
+              <span class="scale__meta">
+                <code>{token}</code>
+                <em>{range}{note && ` · ${note}`}</em>
+              </span>
+              <span class="scale__sample" style={`font-size:var(${token})`}>
+                We take on fewer cases — so yours gets our full attention.
+              </span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="section section--forest" style="--forest-origin:15%">
+    <div class="container">
+      <Eyebrow tone="on-dark">The dormer difference</Eyebrow>
+      <h2 class="forest-h2">Forest section, origin 15%</h2>
+      <p class="forest-p">
+        One gradient recipe site-wide; sections vary only <code>--forest-origin</code>.
+        The comps use 15%, 50% and 85%.
+      </p>
+      <div class="btns">
+        <a class="btn btn--red" href="#0">Talk to a lawyer</a>
+        <a class="btn btn--light" href="#0">Watch our video</a>
+        <a class="btn btn--ghost" href="#0">See all results</a>
+      </div>
+
+      {/* Asset-pipeline proof: the wordmark must read as white here. If it
+          looks like a white block, its alpha channel was destroyed. */}
+      <div class="assets">
+        <Picture src={logoWhite} alt="Dormer Harpring" class="assets__logo" />
+        <Picture src={badge} alt="" class="assets__badge" />
+        <Picture src={hero} alt="" widths={[400, 800]} sizes="400px" class="assets__hero" />
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--alt">
+    <div class="container">
+      <h3 class="sub">Buttons on cream</h3>
+      <div class="btns">
+        <a class="btn btn--red" href="#0">Request a consultation</a>
+        <a class="btn btn--outline-ink" href="#0">View all practice areas</a>
+        <a class="btn btn--red btn--lg" href="#0">Large</a>
+      </div>
+
+      <h3 class="sub">Radii</h3>
+      <ul class="radii">
+        {
+          radii.map(([token, px, note]) => (
+            <li class="radius">
+              <span class="radius__box" style={`border-radius:var(${token})`}></span>
+              <code>{token}</code>
+              <span class="radius__px">{px}</span>
+              <span class="swatch__note">{note}</span>
+            </li>
+          ))
+        }
+      </ul>
+
+      <h3 class="sub">Prose</h3>
+      <div class="prose" style="max-width:var(--measure-prose)">
+        <h2 class="prose__h2">A heading inside prose</h2>
+        <p class="prose__p">
+          Body copy at <code>--text-lg</code> on the prose line height. When you're hurt,
+          everything changes. We take on fewer cases — so yours gets our full attention,
+          and our <strong class="prose__strong">full fight</strong>. Here is
+          <a class="prose__link" href="#0">a link</a> in running text.
+        </p>
+        <blockquote class="prose__quote">
+          A pull quote, set in Newsreader italic with the gold rule.
+        </blockquote>
+        <h3 class="prose__h3">A subheading</h3>
+        <ul class="prose__list">
+          <li>First list item</li>
+          <li>Second list item</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .sub {
+    font-family: var(--font-ui);
+    font-size: var(--text-label);
+    font-weight: 700;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--dh-gold-deep);
+    margin: var(--space-14) 0 var(--space-6);
+  }
+
+  .sub:first-child {
+    margin-top: 0;
+  }
+
+  .grp {
+    font-family: var(--font-ui);
+    font-size: var(--text-sm);
+    font-weight: 700;
+    color: var(--text-strong);
+    text-transform: none;
+    letter-spacing: 0;
+    margin: var(--space-8) 0 var(--space-3);
+  }
+
+  .swatches,
+  .radii,
+  .scale {
+    list-style: none;
+    padding: 0;
+  }
+
+  .swatches {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--space-2) var(--space-6);
+  }
+
+  .swatch {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    font-size: var(--text-sm);
+  }
+
+  .swatch__chip {
+    width: 40px;
+    height: 28px;
+    border-radius: var(--radius-2);
+    border: 1px solid var(--border-hairline);
+    flex: none;
+  }
+
+  .swatch__token {
+    font-size: var(--text-sm);
+    color: var(--text-strong);
+  }
+
+  .swatch__hex {
+    color: var(--text-meta);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .swatch__note {
+    color: var(--text-meta);
+    font-style: italic;
+  }
+
+  .scale__row {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: var(--space-6);
+    align-items: baseline;
+    padding-block: var(--space-4);
+    border-top: 1px solid var(--border-hairline);
+  }
+
+  .scale__meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: var(--text-sm);
+  }
+
+  .scale__meta em {
+    color: var(--text-meta);
+  }
+
+  .scale__sample {
+    color: var(--text-strong);
+    line-height: var(--leading-tight);
+  }
+
+  .btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+  }
+
+  .forest-h2 {
+    font-size: var(--display-1);
+    margin-block: var(--space-5) var(--space-4);
+  }
+
+  .forest-p {
+    max-width: var(--measure-ch);
+    color: var(--text-on-dark-muted);
+    margin-bottom: var(--space-8);
+  }
+
+  .assets {
+    display: flex;
+    align-items: center;
+    gap: var(--space-8);
+    flex-wrap: wrap;
+    margin-top: var(--space-10);
+  }
+
+  /* `:global()` under the scoped `.assets` ancestor — these classes are passed
+     to <Picture>, so they render on Picture's <img> and carry its cid, not
+     this page's. See the note in Picture.astro. */
+  .assets :global(.assets__logo) {
+    height: 44px;
+    width: auto;
+  }
+
+  .assets :global(.assets__badge) {
+    height: 80px;
+    width: auto;
+  }
+
+  .assets :global(.assets__hero) {
+    width: 400px;
+    height: auto;
+    border-radius: var(--radius-media);
+  }
+
+  .radii {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-6);
+  }
+
+  .radius {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    font-size: var(--text-sm);
+    width: 150px;
+  }
+
+  .radius__box {
+    width: 100%;
+    height: 64px;
+    background: var(--dh-forest-400);
+    margin-bottom: var(--space-2);
+  }
+
+  .radius__px {
+    color: var(--text-meta);
+  }
+
+  @media (max-width: 760px) {
+    .scale__row {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
