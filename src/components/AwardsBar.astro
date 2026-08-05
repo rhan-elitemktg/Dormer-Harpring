@@ -4,10 +4,10 @@
 // At src/components/ root rather than under home/ because the About page runs
 // the same band with identical markup — the first of the four shared bands.
 //
-// A wrapped row on desktop, a one-at-a-time carousel below 760px. The wrap is
-// what forces it: six badges on a phone break to 4 + 2, which reads as a
-// leftover row rather than a set, and shrinking them far enough to fit one row
-// makes the small print on the TopVerdict and Avvo seals unreadable.
+// A wrapped row on desktop, a two-up carousel below 760px. The wrap is what
+// forces it: six badges on a phone break to 4 + 2, which reads as a leftover
+// row rather than a set, and shrinking them far enough to fit one row makes
+// the small print on the TopVerdict and Avvo seals unreadable.
 import Picture from "./media/Picture.astro";
 import type { Award } from "../data/awards";
 
@@ -31,6 +31,7 @@ const { awards, eyebrow = "Recognized & awarded" } = Astro.props;
     <div
       class="awards__rail noscroll"
       data-rail="awards"
+      data-rail-step="2"
       tabindex="0"
       role="group"
       aria-label="Awards and recognition, scrollable"
@@ -176,12 +177,18 @@ const { awards, eyebrow = "Recognized & awarded" } = Astro.props;
     }
   }
 
-  /* One badge at a time, centred, inside the text column — not a rail that
-     bleeds past the edges with the neighbours half-showing. Each item is a
-     full-width slide, so the snap position is exact and every badge is on
-     screen whole or not at all. */
+  /* Two badges at a time, centred, inside the text column — not a rail that
+     bleeds past the edges with the neighbours half-showing. Each item is half
+     a slide, so the snap position is exact and every badge is on screen whole
+     or not at all. */
   @media (max-width: 760px) {
+    /* Capped and centred rather than filling the column. A slide is half the
+       rail, so an uncapped rail at 760px puts the two badges 350px apart and
+       they stop reading as a pair. Below ~470px the cap is moot and the rail
+       is simply the column. */
     .awards__rail {
+      max-width: 420px;
+      margin-inline: auto;
       overflow-x: auto;
       scroll-behavior: smooth;
       scroll-snap-type: x mandatory;
@@ -205,15 +212,27 @@ const { awards, eyebrow = "Recognized & awarded" } = Astro.props;
       display: flex;
       align-items: center;
       justify-content: center;
-      flex: 0 0 100%;
+      flex: 0 0 50%;
+      padding-inline: var(--space-3);
+    }
+
+    /* The snap points sit on the ODD items, so a swipe lands on a pair rather
+       than sliding a single badge along and leaving one half-showing. The
+       arrows agree because the rail declares data-rail-step="2". */
+    .awards__item:nth-child(odd) {
       scroll-snap-align: start;
     }
 
-    /* Full height, not the 0.8 the wrapped row needs at this width — a badge
-       with a whole slide to itself has no reason to be shrunk, and the small
-       print on the TopVerdict and Avvo seals is only legible at full size. */
+    /* Full height, not the 0.8 the wrapped row needs at this width — with only
+       two per slide there is no reason to shrink them, and the small print on
+       the TopVerdict and Avvo seals is only legible at full size. `max-`
+       rather than a fixed height so the one wide wordmark, which is 168px
+       across, scales down to fit its half instead of overflowing it. */
     .awards__list :global(.awards__badge) {
-      height: var(--badge-h, 80px);
+      width: auto;
+      height: auto;
+      max-width: 100%;
+      max-height: var(--badge-h, 80px);
     }
 
     .awards__nav {
