@@ -1,0 +1,130 @@
+---
+// "Where we can help." — the practice areas the firm takes on as co-counsel,
+// as a plain list of links rather than the homepage's illustrated selector.
+import Eyebrow from "../Eyebrow.astro";
+import type { CoCounselPage } from "../../data/coCounsel";
+import { ROUTES } from "../../lib/routePaths";
+
+interface Props {
+  areas: CoCounselPage["areas"];
+}
+
+const { areas } = Astro.props;
+---
+
+<section class="ccarea">
+  <div class="container">
+    <header class="ccarea__head">
+      <div>
+        <Eyebrow class="ccarea__eyebrow">{areas.eyebrow}</Eyebrow>
+        <h2 class="ccarea__title">{areas.title}</h2>
+      </div>
+      <a class="btn btn--soft" href={ROUTES.practiceAreas}>{areas.ctaLabel}</a>
+    </header>
+
+    <ul class="ccarea__grid">
+      {
+        areas.items.map((area) => (
+          <li>
+            <a class="ccarea__link" href={area.href}>
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+                class="ccarea__arrow"
+              >
+                <path d="M5 12h14M13 6l6 6-6 6"></path>
+              </svg>
+              {area.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .ccarea {
+    padding-block: var(--space-section);
+    background: var(--surface-page);
+  }
+
+  .ccarea__head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-8);
+    margin-bottom: var(--space-10);
+  }
+
+  .ccarea :global(.ccarea__eyebrow) {
+    margin-bottom: var(--space-4);
+  }
+
+  .ccarea__title {
+    font-size: var(--display-3);
+    line-height: 1;
+    color: var(--dh-ink);
+  }
+
+  .ccarea__grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-2) var(--space-6);
+    list-style: none;
+    padding: 0;
+  }
+
+  .ccarea__link {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding-block: var(--space-3);
+    border-bottom: 1px solid var(--dh-line-soft);
+    font-weight: 500;
+    font-size: var(--text-lg);
+    line-height: 1.35;
+    color: #3a4438;
+    transition: color var(--transition);
+  }
+
+  .ccarea__link:hover {
+    color: var(--accent);
+  }
+
+  /* Gold at rest, inheriting the link's red on hover — one colour change rather
+     than the glyph and the label moving independently. */
+  .ccarea__arrow {
+    flex: none;
+    color: var(--accent-gold);
+    transition: color var(--transition);
+  }
+
+  .ccarea__link:hover .ccarea__arrow {
+    color: currentColor;
+  }
+
+  @media (max-width: 1080px) {
+    .ccarea__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 700px) {
+    .ccarea__grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .ccarea__head .btn {
+      width: 100%;
+    }
+  }
+</style>

@@ -352,7 +352,10 @@ figure,
 blockquote,
 ul,
 ol,
-dl {
+dl,
+/* `dd` carries a 40px `margin-inline-start` from the UA stylesheet — zeroing
+   `dl` alone leaves every definition indented away from everything above it. */
+dd {
   margin: 0;
 }
 

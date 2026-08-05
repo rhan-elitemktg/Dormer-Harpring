@@ -1,0 +1,95 @@
+---
+// "Events we're proud to back." — two columns of sponsorships.
+import Eyebrow from "../Eyebrow.astro";
+import type { CommunityPage, Sponsorship } from "../../data/communityPage";
+
+interface Props {
+  section: CommunityPage["sponsorships"];
+  sponsorships: Sponsorship[];
+}
+
+const { section, sponsorships } = Astro.props;
+---
+
+<section class="spons">
+  <div class="container">
+    <header class="spons__head">
+      <Eyebrow class="spons__eyebrow">{section.eyebrow}</Eyebrow>
+      <h2 class="spons__title">{section.title}</h2>
+    </header>
+
+    {
+      /* The comp makes each name a link to its own write-up. Nothing to link to
+         yet, and unlike the volunteer cards these carry no "learn more"
+         affordance promising one — so they render as text rather than as links
+         that all land in the same place.
+         TODO(sanity): each becomes a `sponsorship` document with a slug. */
+    }
+    <ul class="spons__grid">
+      {
+        sponsorships.map((item) => (
+          <li class="spons__item">
+            <h3 class="spons__name">{item.name}</h3>
+            <p class="spons__body">{item.body}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .spons {
+    padding-block: var(--space-section);
+    background: var(--surface-sunk);
+  }
+
+  .spons__head {
+    margin-bottom: var(--space-10);
+  }
+
+  .spons :global(.spons__eyebrow) {
+    margin-bottom: var(--space-4);
+  }
+
+  .spons__title {
+    font-size: var(--display-3);
+    line-height: 1;
+    color: var(--dh-ink);
+  }
+
+  /* Column gap only. The rule between entries is each item's own top border, so
+     a row gap would push the rules apart from the text they divide. */
+  .spons__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--space-14);
+    list-style: none;
+    padding: 0;
+  }
+
+  .spons__item {
+    padding-block: var(--space-6);
+    border-top: 1px solid var(--dh-line);
+  }
+
+  .spons__name {
+    margin-bottom: var(--space-3);
+    font-size: var(--display-6);
+    line-height: 1.15;
+    color: var(--dh-ink);
+  }
+
+  .spons__body {
+    font-size: var(--text-lg);
+    line-height: 1.68;
+    color: var(--dh-ink-3);
+    text-wrap: pretty;
+  }
+
+  @media (max-width: 760px) {
+    .spons__grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

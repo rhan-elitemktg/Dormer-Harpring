@@ -1,0 +1,200 @@
+---
+// "The organizations we stand behind." — a card per partner.
+import Eyebrow from "../Eyebrow.astro";
+import Picture from "../media/Picture.astro";
+import type { CommunityPage, CommunityPartner } from "../../data/communityPage";
+import { ROUTES } from "../../lib/routePaths";
+
+interface Props {
+  section: CommunityPage["volunteer"];
+  partners: CommunityPartner[];
+}
+
+const { section, partners } = Astro.props;
+
+// TODO(sanity): every card points at the news index. The comp links each to its
+// own write-up, and those become `communityPost` documents with their own
+// slugs; until they exist, the index is where those stories actually live. A
+// card that says "Learn more" has to go somewhere real.
+const storyHref = ROUTES.blog;
+---
+
+<section class="vol">
+  <div class="container">
+    <header class="vol__head">
+      <div>
+        <Eyebrow class="vol__eyebrow">{section.eyebrow}</Eyebrow>
+        <h2 class="vol__title">{section.title}</h2>
+      </div>
+      <a class="btn btn--soft" href={ROUTES.blog}>{section.ctaLabel}</a>
+    </header>
+
+    <ul class="vol__grid">
+      {
+        partners.map((partner) => (
+          <li>
+            {/* The whole card is the link, so the target is the card's area
+                rather than the six words at the bottom of it. */}
+            <a class="vol__card" href={storyHref}>
+              <div class:list={["vol__media", !partner.photo && "vol__media--logo"]}>
+                <Picture
+                  src={partner.photo ?? partner.logo}
+                  alt=""
+                  widths={partner.photo ? [400, 640, 900] : [300, 600]}
+                  sizes="(max-width: 760px) 100vw, (max-width: 1080px) 50vw, 33vw"
+                  class="vol__image"
+                />
+              </div>
+
+              <div class="vol__body">
+                <h3 class="vol__org">{partner.org}</h3>
+                <p class="vol__desc">{partner.body}</p>
+                <span class="vol__more arrow-link">
+                  Learn more <span class="arrow" aria-hidden="true">&rarr;</span>
+                </span>
+              </div>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .vol {
+    padding-block: var(--space-section);
+    background: var(--surface-page);
+  }
+
+  .vol__head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-8);
+    margin-bottom: var(--space-10);
+  }
+
+  .vol :global(.vol__eyebrow) {
+    margin-bottom: var(--space-4);
+  }
+
+  .vol__title {
+    font-size: var(--display-3);
+    line-height: 1;
+    color: var(--dh-ink);
+  }
+
+  .vol__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-7);
+    list-style: none;
+    padding: 0;
+  }
+
+  .vol__card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    border: 1px solid var(--dh-line);
+    border-radius: var(--radius-4);
+    overflow: hidden;
+    background: var(--dh-white);
+    transition: transform var(--transition), box-shadow var(--transition);
+  }
+
+  .vol__card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 24px 50px -22px rgba(45, 34, 22, 0.35);
+  }
+
+  .vol__media {
+    flex: none;
+    height: 230px;
+    overflow: hidden;
+  }
+
+  .vol__media :global(.vol__image) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* No photography yet for four of the eleven. Rather than leave a hole, the
+     logo sits on white with room around it — visibly a placeholder standing in
+     for a picture, not a picture that failed. */
+  .vol__media--logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-9);
+    border-bottom: 1px solid var(--dh-line);
+    background: var(--dh-white);
+  }
+
+  .vol__media--logo :global(.vol__image) {
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 96px;
+    object-fit: contain;
+  }
+
+  .vol__body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: var(--space-7) var(--space-7) var(--space-8);
+  }
+
+  .vol__org {
+    margin-bottom: var(--space-3);
+    font-size: var(--display-6);
+    line-height: 1.15;
+    color: var(--dh-ink);
+    transition: color var(--transition);
+  }
+
+  .vol__card:hover .vol__org {
+    color: var(--accent);
+  }
+
+  .vol__desc {
+    flex: 1;
+    margin-bottom: var(--space-5);
+    font-size: var(--text-lg);
+    line-height: 1.68;
+    color: var(--dh-ink-3);
+    text-wrap: pretty;
+  }
+
+  /* On the floor of the card, so the prompts line up across a row whose
+     descriptions run to different lengths. */
+  .vol__more {
+    font-weight: 800;
+    font-size: var(--text-label);
+    line-height: 1;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  @media (max-width: 1080px) {
+    .vol__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 760px) {
+    .vol__grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .vol__head .btn {
+      width: 100%;
+    }
+  }
+</style>

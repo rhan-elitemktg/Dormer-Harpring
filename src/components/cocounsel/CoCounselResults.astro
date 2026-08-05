@@ -1,0 +1,90 @@
+---
+// "What partnership has produced." — the results won alongside another firm.
+import SectionHead from "../SectionHead.astro";
+import ResultCard from "../ResultCard.astro";
+import type { CaseResult } from "../../data/caseResults";
+import type { CoCounselPage } from "../../data/coCounsel";
+
+interface Props {
+  section: CoCounselPage["results"];
+  results: CaseResult[];
+}
+
+const { section, results } = Astro.props;
+---
+
+{
+  /* `.section--forest` rather than just painting the gradient here: the global
+     class also carries the on-forest text colours, including the one that turns
+     an h2 parchment. Setting the background alone left the heading at
+     `--dh-ink` — dark green on dark green, and all but invisible. */
+}
+<section class="section section--forest ccr">
+  <div class="container">
+    <SectionHead
+      eyebrow={section.eyebrow}
+      title={section.title}
+      lede={section.lede}
+      size={3}
+      tone="dark"
+      center
+      class="ccr__head"
+    />
+
+    <ul class="ccr__grid">
+      {
+        results.map((result) => (
+          <li class="ccr__item">
+            <ResultCard result={result} />
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  /* Off-centre, as the comp has it — the origin sits left so the lighter part
+     of the wash falls under the heading rather than the cards. */
+  .ccr {
+    --forest-origin: 15%;
+  }
+
+  .ccr :global(.ccr__head) {
+    max-width: 820px;
+    margin-inline: auto;
+    margin-bottom: var(--space-14);
+  }
+
+  /* A plain grid, not multicol: seven cards is one short of filling three
+     columns evenly, and multicol would balance by height and leave a ragged
+     last row anyway. Grid keeps the rows aligned. */
+  .ccr__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-7);
+    list-style: none;
+    padding: 0;
+  }
+
+  /* The <li> is the grid item and stretches; the card inside it would not. */
+  .ccr__item {
+    display: flex;
+  }
+
+  .ccr__item :global(.result) {
+    width: 100%;
+  }
+
+  @media (max-width: 1080px) {
+    .ccr__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 700px) {
+    .ccr__grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

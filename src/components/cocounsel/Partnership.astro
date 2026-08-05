@@ -1,0 +1,128 @@
+---
+// "Sometimes it really does take a village." — the two partners beside the
+// terms of a co-counsel arrangement.
+import Eyebrow from "../Eyebrow.astro";
+import Picture from "../media/Picture.astro";
+import Prose from "../prose/Prose.astro";
+import type { CoCounselPage } from "../../data/coCounsel";
+
+interface Props {
+  partnership: CoCounselPage["partnership"];
+}
+
+const { partnership } = Astro.props;
+---
+
+<section class="pship">
+  <div class="container pship__grid">
+    <div class="pship__frame">
+      <Picture
+        src={partnership.photo}
+        alt={partnership.photoAlt}
+        widths={[600, 900, 1400]}
+        sizes="(max-width: 1080px) 100vw, 42vw"
+        class="pship__photo"
+      />
+    </div>
+
+    <div class="pship__copy">
+      <Eyebrow class="pship__eyebrow">{partnership.eyebrow}</Eyebrow>
+      <h2 class="pship__title">{partnership.title}</h2>
+      <Prose value={partnership.intro} class="pship__body" />
+
+      {/* The one figure on the page, lifted out of the run of text. */}
+      <div class="pship__callout">
+        <Prose value={partnership.callout} class="pship__callout-text" />
+      </div>
+
+      <Prose value={partnership.terms} class="pship__body" />
+    </div>
+  </div>
+</section>
+
+<style>
+  .pship {
+    padding-block: var(--space-section);
+    background: var(--surface-sunk);
+  }
+
+  .pship__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: var(--space-16);
+    align-items: center;
+  }
+
+  .pship__frame {
+    border-radius: var(--radius-4);
+    overflow: hidden;
+    background: #dfd6c2;
+  }
+
+  .pship__frame :global(.pship__photo) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: 540px;
+    object-fit: cover;
+    object-position: center top;
+  }
+
+  .pship__copy {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-6);
+  }
+
+  .pship__title {
+    font-size: var(--display-3);
+    line-height: 1;
+    color: var(--dh-ink);
+    text-wrap: balance;
+  }
+
+  .pship :global(.pship__body .prose__p) {
+    font-size: var(--text-xl);
+    line-height: 1.67;
+    color: var(--dh-ink-2);
+    text-wrap: pretty;
+  }
+
+  .pship__callout {
+    width: 100%;
+    padding: var(--space-6) var(--space-7);
+    border: 1px solid #dcd1b8;
+    border-radius: var(--radius-4);
+    background: var(--dh-white);
+  }
+
+  .pship :global(.pship__callout-text .prose__p) {
+    font-weight: 600;
+    font-size: var(--text-2xl);
+    line-height: 1.58;
+    color: var(--dh-ink);
+    text-wrap: pretty;
+  }
+
+  /* The amount. `--prose-strong` would recolour every bold run on the site, so
+     this is scoped to the callout. */
+  .pship :global(.pship__callout-text strong) {
+    font-weight: 800;
+    color: var(--dh-gold-deep);
+  }
+
+  @media (max-width: 1080px) {
+    .pship__grid {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-10);
+    }
+
+    /* Stacked, the photo is a banner above the copy rather than a column beside
+       it — 540px of it before a word of text is most of a phone screen. */
+    .pship__frame :global(.pship__photo) {
+      min-height: 0;
+      aspect-ratio: 4 / 3;
+    }
+  }
+</style>

@@ -39,7 +39,10 @@ const { form } = Astro.props;
     action="/api/consult"
     aria-describedby="cform-disclaimer"
   >
-    {/* Where to send them, and which page asked — both read server-side. */}
+    {/* Which form, where to send them, and which page asked — all read
+        server-side. `kind` is how one endpoint tells a consultation request from
+        a co-counsel referral. */}
+    <input type="hidden" name="kind" value="consultation" />
     <input type="hidden" name="redirectTo" value={ROUTES.thankYou} />
     <input type="hidden" name="source" value={Astro.url.pathname} />
 
@@ -213,9 +216,15 @@ const { form } = Astro.props;
     outline: none;
   }
 
-  /* The browser flags this once a value has been entered and left invalid,
-     rather than reddening every empty field the moment the page loads. */
-  .cform__input:not(:placeholder-shown):invalid {
+  /* Flagged once the visitor has interacted with the field and left it wrong,
+     rather than reddening every empty required field on load.
+     `:user-invalid` means exactly that. It replaces
+     `:not(:placeholder-shown):invalid`, which used the placeholder as a proxy
+     for "has been typed in" — and silently inverts on any field that has no
+     placeholder, since `:placeholder-shown` cannot match one. Every field here
+     happens to have a placeholder; the co-counsel form's did not, and reddened
+     on load. */
+  .cform__input:user-invalid {
     border-color: var(--accent);
   }
 
@@ -267,44 +276,6 @@ const { form } = Astro.props;
 </style>
 
 <script>
-  // Types "(303) 555-0100" for the visitor as they enter digits, so the strict
-  // pattern on the field is something the form helps them satisfy rather than
-  // something it punishes them for missing.
-  //
-  // The caret is restored by counting DIGITS either side of it rather than
-  // characters: reformatting shifts every separator, so a character offset
-  // would jump the caret whenever someone edits the middle of the number.
-  const format = (digits: string) => {
-    if (digits.length <= 3) return digits.length ? `(${digits}` : "";
-    if (digits.length <= 6) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
-    return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
-  };
-
-  for (const input of document.querySelectorAll<HTMLInputElement>("[data-phone-mask]")) {
-    input.addEventListener("input", () => {
-      const caret = input.selectionStart ?? input.value.length;
-      const digitsBeforeCaret = (input.value.slice(0, caret).match(/\d/g) ?? []).length;
-
-      let digits = input.value.replace(/\D/g, "");
-      // A pasted "+1 303 756 3812" or "13037563812" carries the country code;
-      // drop it rather than shifting every digit one place left.
-      if (digits.length === 11 && digits.startsWith("1")) digits = digits.slice(1);
-      digits = digits.slice(0, 10);
-
-      input.value = format(digits);
-
-      // Walk the new value until the same number of digits has passed.
-      let seen = 0;
-      let position = input.value.length;
-      for (let i = 0; i < input.value.length; i++) {
-        if (/\d/.test(input.value[i])) seen++;
-        if (seen === digitsBeforeCaret) {
-          position = i + 1;
-          break;
-        }
-      }
-      if (digitsBeforeCaret === 0) position = input.value.length;
-      input.setSelectionRange(position, position);
-    });
-  }
+  // Shared with the co-counsel referral form.
+  import "../../scripts/phoneMask";
 </script>
