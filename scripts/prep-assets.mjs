@@ -30,8 +30,13 @@ const MAP = {
   // white — a white logo on a white background, i.e. invisible.
   "wireframes/assets/logo-white.png": "logo-white",
 
-  // Hero + home imagery
-  "wireframes/assets/hero-client-5.jpg": "home/hero.jpg",
+  // The firm's primary team photograph — four attorneys against the Denver
+  // skyline. Under team/ rather than home/ because five pages now use it: the
+  // homepage hero, Thank You, Testimonials, About and Practice Areas. The
+  // comps hand three slightly different crops of the same frame
+  // (hero-client-5, 111-192c78aa, pasted-1785212816747); at the sizes any of
+  // them render, they are the same picture, so one asset serves all of it.
+  "wireframes/assets/hero-client-5.jpg": "team/skyline.jpg",
   "wireframes/assets/why-walk.png": "home/promise-walk.jpg",
   "wireframes/assets/pa-car-accident.png": "home/practice-car-accident.jpg",
   // The rest of the practice-area photography. It comes from `assets/`, which
@@ -182,7 +187,7 @@ const HERO_SRC = path.join(SRC, "wireframes/assets/hero-client-5.jpg");
 const TEAM_CROP = { left: 1769, top: 0, width: 1580, height: 1536 };
 
 {
-  const outPath = path.join(OUT, "home/hero-team.jpg");
+  const outPath = path.join(OUT, "team/skyline-crop.jpg");
   await sharp(HERO_SRC)
     .extract(TEAM_CROP)
     .resize({ width: 1400 })

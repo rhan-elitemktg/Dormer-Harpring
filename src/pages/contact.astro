@@ -4,12 +4,16 @@ import PageHeader from "../components/PageHeader.astro";
 import ContactDetails from "../components/contact/ContactDetails.astro";
 import FindUs from "../components/contact/FindUs.astro";
 import { getContactPage } from "../data/contactPage";
-import { getContactBand } from "../data/contact";
+import { getContactBand, getContactDetails } from "../data/contact";
 
-// The form's copy is the shared consultation-form singleton, not page content —
-// it is the same form on twelve pages, and it should read the same on all of
-// them.
-const [page, band] = await Promise.all([getContactPage(), getContactBand()]);
+// The form's copy and the contact block are shared singletons, not page content
+// — they are the same on a dozen pages, and they should read the same on all of
+// them. Only the header and the map below are this page's own.
+const [page, band, details] = await Promise.all([
+  getContactPage(),
+  getContactBand(),
+  getContactDetails(),
+]);
 ---
 
 <Layout
@@ -22,6 +26,6 @@ const [page, band] = await Promise.all([getContactPage(), getContactBand()]);
     lede={page.lede}
     tone="forest"
   />
-  <ContactDetails page={page} form={band.form} />
+  <ContactDetails details={details} form={band.form} />
   <FindUs find={page.find} />
 </Layout>

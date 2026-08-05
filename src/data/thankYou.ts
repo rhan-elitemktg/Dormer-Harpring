@@ -14,9 +14,9 @@ import { getFirmDetails } from "./site";
 import { ROUTES } from "../lib/routePaths";
 // The firm portrait above the Denver skyline. The comp ships its own crop of
 // this frame, a couple of percent tighter than the homepage hero's; they are
-// the same photograph from the same shoot, so this reuses the processed asset
-// instead of carrying a second six-megabyte source for an invisible difference.
-import teamPhoto from "../assets/home/hero.jpg";
+// the same photograph from the same shoot, so five pages share one asset
+// rather than carrying five near-identical six-megabyte sources.
+import teamPhoto from "../assets/team/skyline.jpg";
 
 export interface ThankYouCta {
   _key: string;

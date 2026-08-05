@@ -4,16 +4,15 @@
 import Picture from "../media/Picture.astro";
 import InfoCard from "./InfoCard.astro";
 import ContactForm from "./ContactForm.astro";
-import type { ContactPage } from "../../data/contactPage";
-import type { ContactBand } from "../../data/contact";
+import type { ContactBand, ContactDetails } from "../../data/contact";
 
 interface Props {
-  page: ContactPage;
+  details: ContactDetails;
   /** The consultation form's copy — the same singleton the homepage band uses. */
   form: ContactBand["form"];
 }
 
-const { page, form } = Astro.props;
+const { details, form } = Astro.props;
 ---
 
 {/* Not `.section`: the padding here is asymmetric, so it sets its own. */}
@@ -23,8 +22,8 @@ const { page, form } = Astro.props;
       <div class="ct__aside">
         <div class="ct__frame">
           <Picture
-            src={page.photo}
-            alt={page.photoAlt}
+            src={details.photo}
+            alt={details.photoAlt}
             widths={[600, 900, 1200]}
             sizes="(max-width: 980px) 100vw, 45vw"
             class="ct__photo"
@@ -32,7 +31,7 @@ const { page, form } = Astro.props;
         </div>
 
         <ul class="ct__cards">
-          {page.cards.map((card) => <InfoCard card={card} />)}
+          {details.cards.map((card) => <InfoCard card={card} />)}
         </ul>
       </div>
 
@@ -43,12 +42,12 @@ const { page, form } = Astro.props;
 
     <div class="ct__hours">
       <div>
-        <p class="ct__hours-label">{page.hours.label}</p>
-        <p class="ct__hours-value">{page.hours.value}</p>
+        <p class="ct__hours-label">{details.hours.label}</p>
+        <p class="ct__hours-value">{details.hours.value}</p>
       </div>
-      <p class="ct__hours-note">{page.hours.note}</p>
-      <a class="btn btn--red ct__hours-cta" href={page.hours.ctaHref}>
-        {page.hours.ctaLabel}
+      <p class="ct__hours-note">{details.hours.note}</p>
+      <a class="btn btn--red ct__hours-cta" href={details.hours.ctaHref}>
+        {details.hours.ctaLabel}
       </a>
     </div>
   </div>

@@ -1,0 +1,90 @@
+---
+// One written review: quotation mark, pull quote, body, then the platform the
+// review came from and the reviewer's name.
+import GoogleIcon from "../icons/GoogleIcon.astro";
+import Stars from "../Stars.astro";
+import type { WrittenReview } from "../../data/testimonials";
+
+interface Props {
+  review: WrittenReview;
+}
+
+const { review } = Astro.props;
+---
+
+<figure class="rcard">
+  {/* Decorative: the <figure>/<blockquote> pair already says "this is a
+      quotation", so a screen reader announcing a stray “ adds nothing. */}
+  <span class="rcard__mark display" aria-hidden="true">&ldquo;</span>
+
+  <blockquote class="rcard__quote">{review.quote}</blockquote>
+  <p class="rcard__body">{review.body}</p>
+
+  <figcaption class="rcard__attr">
+    <GoogleIcon class="rcard__source" />
+    <span class="rcard__name">{review.name}</span>
+    <Stars class="rcard__stars" />
+  </figcaption>
+</figure>
+
+<style>
+  .rcard {
+    background: var(--dh-white);
+    border: 1px solid var(--dh-line);
+    border-radius: var(--radius-4);
+    padding: var(--space-9) var(--space-9) var(--space-8);
+  }
+
+  .rcard__mark {
+    display: block;
+    margin-bottom: var(--space-5);
+    font-size: var(--display-5);
+    /* Under 1 on purpose: the glyph's ink sits in the top third of its em box,
+       so normal leading leaves a hole beneath it. */
+    line-height: 0.7;
+    color: var(--accent-gold);
+  }
+
+  .rcard__quote {
+    margin-bottom: var(--space-4);
+    font-weight: 600;
+    font-size: var(--text-3xl);
+    line-height: 1.48;
+    color: var(--dh-ink);
+    text-wrap: pretty;
+  }
+
+  .rcard__body {
+    font-size: var(--text-xl);
+    line-height: 1.69;
+    color: var(--dh-ink-3);
+    text-wrap: pretty;
+  }
+
+  .rcard__attr {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-top: var(--space-6);
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--dh-line-soft);
+  }
+
+  .rcard__attr :global(.rcard__source) {
+    display: block;
+    flex: none;
+  }
+
+  .rcard__name {
+    font-family: var(--font-ui);
+    font-weight: 700;
+    font-size: var(--text-lg);
+    line-height: 1;
+    color: var(--dh-ink);
+  }
+
+  .rcard__attr :global(.rcard__stars) {
+    margin-left: auto;
+    font-size: var(--text-md);
+  }
+</style>

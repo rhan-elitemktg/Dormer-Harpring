@@ -1,0 +1,30 @@
+---
+// A five-star rating. The comps set it as five ★ characters, which a screen
+// reader reads as "black star black star black star…" — so the glyphs are
+// hidden and the row carries a label instead.
+
+interface Props {
+  /** Whole stars out of five. */
+  rating?: number;
+  class?: string;
+}
+
+const { rating = 5, class: className } = Astro.props;
+---
+
+<span
+  class:list={["stars", className]}
+  role="img"
+  aria-label={`Rated ${rating} out of 5`}
+>
+  <span aria-hidden="true">{"★".repeat(rating)}</span>
+</span>
+
+<style>
+  .stars {
+    display: inline-flex;
+    letter-spacing: 0.15em;
+    line-height: 1;
+    color: var(--accent-gold);
+  }
+</style>
