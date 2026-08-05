@@ -11,6 +11,7 @@ import type { ImageMetadata } from "astro";
 import { pt, type PortableTextBlock } from "./portableText";
 import type { VideoRef } from "../lib/video";
 import teamPhoto from "../assets/team/skyline.jpg";
+import teamCrop from "../assets/team/skyline-crop.jpg";
 import evelyn from "../assets/testimonials/evelyn.jpg";
 import ben from "../assets/testimonials/ben.jpg";
 import joel from "../assets/testimonials/joel.jpg";
@@ -130,6 +131,8 @@ export interface TestimonialsPage {
   title: string;
   lede: PortableTextBlock[];
   photo: ImageMetadata;
+  /** The narrow-viewport crop — see `PageHeader`'s `photoMobile`. */
+  photoMobile: ImageMetadata;
   photoAlt: string;
   ctaLabel: string;
   ctaNote: string;
@@ -146,6 +149,7 @@ export async function getTestimonialsPage(): Promise<TestimonialsPage> {
         "law. Don't take our word for it — hear it from the people we've represented."
     ),
     photo: teamPhoto,
+    photoMobile: teamCrop,
     photoAlt: "The Dormer Harpring attorneys in Denver",
     ctaLabel: "Talk to a lawyer",
     ctaNote: "No win, no fee",
