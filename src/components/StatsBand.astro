@@ -1,0 +1,129 @@
+---
+// The dark "by the numbers" band — four figures divided by hairlines.
+//
+// At src/components/ root because seven comps carry it: Testimonials, About,
+// Case Results, Attorneys, Community, Co-Counsel and Practice Areas.
+import type { FirmStat } from "../data/stats";
+
+interface Props {
+  stats: FirmStat[];
+}
+
+const { stats } = Astro.props;
+---
+
+<section class="stats">
+  <dl class="stats__grid">
+    {
+      stats.map((stat) => (
+        <div class="stats__cell">
+          <span class="stats__rule" aria-hidden="true" />
+          {/* <dd> before <dt>: the figure reads first and the label explains
+              it, which is the visual order and the sensible reading order. A
+              definition list allows either. */}
+          <dd class="stats__big">{stat.big}</dd>
+          <dt class="stats__label">{stat.label}</dt>
+        </div>
+      ))
+    }
+  </dl>
+</section>
+
+<style>
+  .stats {
+    background: var(--dh-forest-500);
+    border-block: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .stats__grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    max-width: var(--container-max);
+    margin-inline: auto;
+  }
+
+  /* The dividers are `border-left` on every cell plus `border-right` on the
+     last, rather than `:not(:last-child)`: at two columns and at one, the same
+     two rules still produce a closed box, where a nth-child scheme would need
+     rewriting per breakpoint. */
+  .stats__cell {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: var(--space-13) var(--space-10);
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .stats__cell:last-child {
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .stats__rule {
+    width: 28px;
+    height: 3px;
+    margin-bottom: var(--space-5);
+    background: var(--accent-gold);
+  }
+
+  .stats__big {
+    font-family: var(--font-ui);
+    font-weight: 600;
+    font-size: var(--display-3);
+    line-height: 1;
+    letter-spacing: var(--tracking-tight);
+    color: var(--dh-parchment);
+  }
+
+  .stats__label {
+    margin-top: var(--space-4);
+    font-family: var(--font-ui);
+    font-weight: 700;
+    font-size: var(--text-label);
+    line-height: 1.5;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #c3a56d;
+  }
+
+  @media (max-width: 980px) {
+    .stats__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    /* Now that cells wrap, the last one is no longer the right-hand edge —
+       every second cell is. */
+    .stats__cell:last-child {
+      border-right: 0;
+    }
+
+    .stats__cell:nth-child(2n) {
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .stats__cell:nth-child(n + 3) {
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .stats__cell {
+      padding: var(--space-10) var(--space-8);
+    }
+  }
+
+  @media (max-width: 560px) {
+    .stats__grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .stats__cell:nth-child(2n) {
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .stats__cell:nth-child(n + 2) {
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .stats__cell:last-child {
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+    }
+  }
+</style>

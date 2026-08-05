@@ -1,0 +1,141 @@
+---
+// One video testimonial: poster, play button, pull quote, name.
+//
+// The whole card is the link, and it goes to YouTube in a new tab, exactly as
+// the comp has it. These are the firm's own published videos with real ids —
+// see `getVideoReviews()`. When the lightbox on the launch list lands, this is
+// the component that changes; nothing about the data does.
+import Picture from "../media/Picture.astro";
+import Stars from "../Stars.astro";
+import type { VideoReview } from "../../data/testimonials";
+
+interface Props {
+  review: VideoReview;
+}
+
+const { review } = Astro.props;
+const href = `https://www.youtube.com/watch?v=${review.videoId}`;
+---
+
+<a class="vcard" href={href} target="_blank" rel="noopener">
+  <div class="vcard__thumb">
+    <Picture
+      src={review.poster}
+      alt=""
+      widths={[400, 640, 900]}
+      sizes="(max-width: 700px) 100vw, (max-width: 1080px) 50vw, 33vw"
+      class="vcard__poster"
+    />
+    <span class="vcard__scrim" aria-hidden="true"></span>
+    <span class="vcard__play" aria-hidden="true">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M8 5.5v13l11-6.5z"></path>
+      </svg>
+    </span>
+  </div>
+
+  <div class="vcard__body">
+    <Stars class="vcard__stars" />
+    <p class="vcard__quote">{review.quote}</p>
+    {/* The name is the accessible label the empty poster alt deliberately
+        leaves to it — "Video testimonial from Evelyn" on the image would then
+        be read twice. */}
+    <span class="vcard__name">Video testimonial from {review.name}</span>
+  </div>
+</a>
+
+<style>
+  /* `height: 100%` because the card is wrapped in an <li>: the <li> is the grid
+     item and stretches to the row, but the card inside it would not, leaving a
+     row of ragged bottoms wherever the quotes differ in length. */
+  .vcard {
+    display: block;
+    height: 100%;
+    background: var(--dh-white);
+    border: 1px solid var(--dh-line);
+    border-radius: var(--radius-4);
+    overflow: hidden;
+    transition: transform var(--transition), border-color var(--transition),
+      box-shadow var(--transition);
+  }
+
+  .vcard:hover {
+    transform: translateY(-4px);
+    border-color: var(--accent-gold);
+    box-shadow: 0 24px 50px -22px rgba(45, 34, 22, 0.35);
+  }
+
+  .vcard__thumb {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    background: var(--dh-forest-600);
+  }
+
+  .vcard__thumb :global(.vcard__poster) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .vcard__scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      rgba(16, 24, 19, 0) 40%,
+      rgba(16, 24, 19, 0.75) 100%
+    );
+  }
+
+  .vcard__play {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 70px;
+    height: 70px;
+    border-radius: var(--radius-full);
+    background: rgba(225, 74, 50, 0.94);
+    color: var(--dh-white);
+    /* Both transforms in one declaration: a hover rule that set only `scale`
+       would drop the centring translate and throw the button to the corner. */
+    transform: translate(-50%, -50%) scale(1);
+    transition: transform var(--transition);
+  }
+
+  .vcard:hover .vcard__play,
+  .vcard:focus-visible .vcard__play {
+    transform: translate(-50%, -50%) scale(1.08);
+  }
+
+  .vcard__body {
+    padding: var(--space-6) var(--space-7) var(--space-7);
+  }
+
+  .vcard :global(.vcard__stars) {
+    margin-bottom: var(--space-4);
+    font-size: var(--text-lg);
+  }
+
+  .vcard__quote {
+    margin-bottom: var(--space-4);
+    font-weight: 600;
+    font-size: var(--text-2xl);
+    line-height: 1.53;
+    color: var(--dh-ink);
+    text-wrap: pretty;
+  }
+
+  .vcard__name {
+    display: block;
+    font-weight: 800;
+    font-size: var(--text-label);
+    line-height: 1;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-meta);
+  }
+</style>

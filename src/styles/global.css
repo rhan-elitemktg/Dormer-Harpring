@@ -148,12 +148,15 @@
   --display-7: clamp(1.125rem, 1.076rem + 0.207vw, 1.25rem);     /* 18 → 20  core-value h3 */
 
   /* Interior page titles. The homepage h1 is --display-hero; the interior comps
-     carry their own, and the census across all thirteen gives two real tiers —
-     a statement title (Thank You, Contact, Blog) and a listing title (Case
-     Results, Attorneys, Community). The comps' 70px and 72px variants collapse
-     into the first: they share the same 44px min and the same 4.8vw slope and
-     differ only in the max, which is authoring drift, not three sizes. */
+     carry their own, and the census across all thirteen gives three tiers —
+     read off the clamp SIGNATURES, not the maxes:
+       fixed 76px, no clamp        → Thank You, Contact, Blog
+       clamp(44px, 4.8vw, 70|72px) → Testimonials, About, Practice Areas, Co-Counsel
+       clamp(40px, 4.4vw, 62px)    → Case Results, Attorneys, Community
+     Only the 70/72 pair inside the middle family is drift; the three families
+     are genuinely different sizes, so they get three tokens. */
   --display-page: clamp(2.75rem, 1.973rem + 3.316vw, 4.75rem);    /* 44 → 76 */
+  --display-page-2: clamp(2.75rem, 2.119rem + 2.694vw, 4.375rem); /* 44 → 70 */
   --display-page-sm: clamp(2.5rem, 1.966rem + 2.280vw, 3.875rem); /* 40 → 62 */
 
   /* UI + body. The comps are label-heavy: 12px alone is 289 uses.
