@@ -9,6 +9,7 @@
 // and the rail's order is content, not code.
 import type { ImageMetadata } from "astro";
 import { pt, type PortableTextBlock } from "./portableText";
+import type { VideoRef } from "../lib/video";
 import teamPhoto from "../assets/team/skyline.jpg";
 import evelyn from "../assets/testimonials/evelyn.jpg";
 import ben from "../assets/testimonials/ben.jpg";
@@ -103,8 +104,12 @@ export async function getHomeTestimonials(): Promise<Testimonial[]> {
 
 export interface VideoReview {
   _key: string;
-  /** YouTube id. Also names the committed poster file. */
-  videoId: string;
+  /**
+   * Provider + id, never a URL. The firm is moving from YouTube to Wistia, and
+   * that migration should be a change to these records rather than a hunt
+   * through components — `src/lib/video.ts` is what turns this into a link.
+   */
+  video: VideoRef;
   name: string;
   quote: string;
   poster: ImageMetadata;
@@ -178,28 +183,28 @@ export async function getVideoReviews(): Promise<VideoReview[]> {
   return [
     {
       _key: "evelyn",
-      videoId: "kFdrOgblr6A",
+      video: { provider: "youtube", id: "kFdrOgblr6A" },
       name: "Evelyn",
       quote: "They made me feel like part of the family — I had a good team on my side.",
       poster: evelyn,
     },
     {
       _key: "ben",
-      videoId: "sMGtyzxGaxY",
+      video: { provider: "youtube", id: "sMGtyzxGaxY" },
       name: "Ben",
       quote: "Jessica is a great lawyer. She cares about people.",
       poster: ben,
     },
     {
       _key: "joel",
-      videoId: "AhfhEBczLcY",
+      video: { provider: "youtube", id: "AhfhEBczLcY" },
       name: "Joel",
       quote: "Stay away from the billboards — these guys are the best.",
       poster: joel,
     },
     {
       _key: "elijah",
-      videoId: "aqX7B7vu1ZI",
+      video: { provider: "youtube", id: "aqX7B7vu1ZI" },
       name: "Elijah",
       quote:
         "It really made me so grateful that there are people out there helping " +
@@ -208,7 +213,7 @@ export async function getVideoReviews(): Promise<VideoReview[]> {
     },
     {
       _key: "kelly",
-      videoId: "B3-hJPujs0U",
+      video: { provider: "youtube", id: "B3-hJPujs0U" },
       name: "Kelly",
       quote:
         "This team of champions were so attentive, so responsive, so professional, " +
@@ -217,7 +222,7 @@ export async function getVideoReviews(): Promise<VideoReview[]> {
     },
     {
       _key: "sean-client",
-      videoId: "-cSgLpR2TfA",
+      video: { provider: "youtube", id: "-cSgLpR2TfA" },
       name: "Former client",
       quote: "Sean guided me every step of the way.",
       poster: videoCover1,

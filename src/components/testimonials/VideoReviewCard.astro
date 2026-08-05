@@ -7,6 +7,7 @@
 // the component that changes; nothing about the data does.
 import Picture from "../media/Picture.astro";
 import Stars from "../Stars.astro";
+import { videoWatchUrl } from "../../lib/video";
 import type { VideoReview } from "../../data/testimonials";
 
 interface Props {
@@ -14,7 +15,9 @@ interface Props {
 }
 
 const { review } = Astro.props;
-const href = `https://www.youtube.com/watch?v=${review.videoId}`;
+// Never built here: the host is a property of the record, and the firm is
+// moving from YouTube to Wistia.
+const href = videoWatchUrl(review.video);
 ---
 
 <a class="vcard" href={href} target="_blank" rel="noopener">
@@ -47,9 +50,11 @@ const href = `https://www.youtube.com/watch?v=${review.videoId}`;
 <style>
   /* `height: 100%` because the card is wrapped in an <li>: the <li> is the grid
      item and stretches to the row, but the card inside it would not, leaving a
-     row of ragged bottoms wherever the quotes differ in length. */
+     row of ragged bottoms wherever the quotes differ in length. The column then
+     carries that height down to the body, so the name can sit on the floor. */
   .vcard {
-    display: block;
+    display: flex;
+    flex-direction: column;
     height: 100%;
     background: var(--dh-white);
     border: 1px solid var(--dh-line);
@@ -67,6 +72,7 @@ const href = `https://www.youtube.com/watch?v=${review.videoId}`;
 
   .vcard__thumb {
     position: relative;
+    flex: none;
     aspect-ratio: 16 / 9;
     background: var(--dh-forest-600);
   }
@@ -112,6 +118,9 @@ const href = `https://www.youtube.com/watch?v=${review.videoId}`;
   }
 
   .vcard__body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
     padding: var(--space-6) var(--space-7) var(--space-7);
   }
 
@@ -129,8 +138,15 @@ const href = `https://www.youtube.com/watch?v=${review.videoId}`;
     text-wrap: pretty;
   }
 
+  /* On the floor of the card, so the names line up across a row whose quotes
+     run to different lengths. Safe to bottom-align here where it was not on the
+     contact info cards: every card in a row is the same height and the poster
+     above is a fixed ratio, so the names land on one line rather than drifting
+     to wherever each card happens to end. `margin-bottom` on the quote is the
+     minimum gap when a quote is long enough to fill the space. */
   .vcard__name {
     display: block;
+    margin-top: auto;
     font-weight: 800;
     font-size: var(--text-label);
     line-height: 1;

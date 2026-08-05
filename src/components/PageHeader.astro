@@ -163,9 +163,11 @@ if (tone === "photo" && !photo) {
     padding-block: var(--space-section-sm);
   }
 
-  .ph--photo .ph__title,
-  .ph--photo :global(.ph__lede) {
-    max-width: 56ch;
+  /* The comp wraps the whole block at 720px. `ch` would be the wrong unit for
+     the heading: 56ch at Anton's 70px is nearly 2000px, i.e. no cap at all,
+     which is how the title came to run the full container. */
+  .ph--photo .ph__title {
+    max-width: 720px;
   }
 
   /* Asymmetric on purpose: the comps give the cream band 72px above and 44px
@@ -238,7 +240,10 @@ if (tone === "photo" && !photo) {
     color: var(--text-on-dark-2);
   }
 
+  /* Narrower than the cream/forest 76ch, and it has to be declared AFTER that
+     rule: both selectors weigh the same, so source order is what decides. */
   .ph--photo :global(.ph__lede) {
+    max-width: 56ch;
     margin-top: var(--space-7);
   }
 
