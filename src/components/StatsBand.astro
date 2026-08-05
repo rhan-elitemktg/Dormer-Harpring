@@ -42,20 +42,19 @@ const { stats } = Astro.props;
     margin-inline: auto;
   }
 
-  /* The dividers are `border-left` on every cell plus `border-right` on the
-     last, rather than `:not(:last-child)`: at two columns and at one, the same
-     two rules still produce a closed box, where a nth-child scheme would need
-     rewriting per breakpoint. */
   .stats__cell {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     padding: var(--space-13) var(--space-10);
-    border-left: 1px solid rgba(255, 255, 255, 0.1);
   }
 
-  .stats__cell:last-child {
-    border-right: 1px solid rgba(255, 255, 255, 0.1);
+  /* Dividers BETWEEN cells only — the band's outer edges are closed by the
+     section's own top and bottom rules, and a vertical rule at the left and
+     right of the row reads as a box drawn around nothing. The adjacent-sibling
+     selector gets this for free: the first cell has no preceding sibling. */
+  .stats__cell + .stats__cell {
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   .stats__rule {
@@ -90,22 +89,19 @@ const { stats } = Astro.props;
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    /* Now that cells wrap, the last one is no longer the right-hand edge —
-       every second cell is. */
-    .stats__cell:last-child {
-      border-right: 0;
+    .stats__cell {
+      padding: var(--space-10) var(--space-8);
     }
 
-    .stats__cell:nth-child(2n) {
-      border-right: 1px solid rgba(255, 255, 255, 0.1);
+    /* The third cell now STARTS a row, so "the cell before it" is on the line
+       above and its left rule would land on the band's edge. Same specificity
+       as the rule it undoes, so it has to come after it — which it does. */
+    .stats__cell:nth-child(2n + 1) {
+      border-left: 0;
     }
 
     .stats__cell:nth-child(n + 3) {
       border-top: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .stats__cell {
-      padding: var(--space-10) var(--space-8);
     }
   }
 
@@ -114,16 +110,15 @@ const { stats } = Astro.props;
       grid-template-columns: minmax(0, 1fr);
     }
 
-    .stats__cell:nth-child(2n) {
-      border-right: 1px solid rgba(255, 255, 255, 0.1);
+    /* Written against the same selector rather than plain `.stats__cell`: one
+       class would lose to `.stats__cell + .stats__cell` on specificity and the
+       rules would survive into the single-column layout. */
+    .stats__cell + .stats__cell {
+      border-left: 0;
     }
 
     .stats__cell:nth-child(n + 2) {
       border-top: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .stats__cell:last-child {
-      border-right: 1px solid rgba(255, 255, 255, 0.1);
     }
   }
 </style>
