@@ -28,6 +28,20 @@ npm run build && npm run check
   whole declaration. `padding: var(--space-11) var(--space-13)` with no
   `--space-13` renders *no* padding, not most of it.
 
+`check:styles` has one known blind spot: it catches a passed-in class used as
+the **target** of a scoped rule, but not one used as its **ancestor**.
+
+```css
+/* In a page that renders <PageHeader class="cr-header" />. Compiles, matches
+   nothing: `.cr-header` lands on PageHeader's <section>, which never carries
+   this file's cid. */
+.cr-header :global(.ph__title) { font-size: var(--display-page-sm); }
+```
+
+The rule to follow: **bound `:global()` by an element in your own template**,
+never by a class you handed to a child. If the child has no such wrapper, the
+styling belongs to the child as a prop.
+
 ## Before launch
 
 Everything below is deliberately unfinished, not overlooked.
@@ -45,6 +59,7 @@ Everything below is deliberately unfinished, not overlooked.
 | **Email** | The contact page shows `info@dormerharpring.com`, which is the comp's. **The live site publishes no contact address anywhere** — the only one in its markup is a WordPress author account leaking into blog JSON-LD. Confirm it exists, or clear `firmDetails.email` and the card disappears on its own. |
 | **Office hours** | `Mo-Fr 09:00-17:00`, which is what the live site's JSON-LD asserts. The Contact comp shows **8:30am – 5:30pm**. `hours` and `hoursDisplay` sit together in `firmDetails` so the page and the structured data cannot drift apart; both change together. |
 | **Third-party tags** | The old site loads GA4, GTM, CallRail, Clarity, Ahrefs, Intaker and reCAPTCHA — roughly 600 KB. Recommend GTM only, with the rest configured inside it. The contact page's Google Maps embed also sets cookies on load, so it belongs in the same consent decision. |
+| **Duplicate case results** | Three of the 89 results on `/results` are the same cases the homepage leads with, in different words — the King Soopers slip-and-fall is "Denied → $2.1M" on one and "$250K offered → $2.1M" on the other. Both are the comps'. They become one document each at the Sanity phase; which wording is right is the firm's call. |
 | **Attorney portraits** | Three of seven attorneys have photography. The homepage rail takes the rest as they arrive. |
 | **Eyebrow contrast** | Section eyebrows are 12px uppercase gold on cream. The comps use `#C79A54` (≈2.5:1) on News/Insights/Community and `#B0873C` (≈3.1:1) elsewhere; both fall short of WCAG AA, and neither qualifies as large text at this size. Built to match the comps — worth a decision before launch. |
 
