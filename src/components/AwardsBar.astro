@@ -4,10 +4,10 @@
 // At src/components/ root rather than under home/ because the About page runs
 // the same band with identical markup — the first of the four shared bands.
 //
-// A wrapped row on desktop, a swipeable rail below 760px. The wrap is what
-// forces it: six badges on a phone break to 4 + 2, which reads as a leftover
-// row rather than a set, and shrinking them far enough to fit one row makes
-// the small print on the TopVerdict and Avvo seals unreadable.
+// A wrapped row on desktop, a one-at-a-time carousel below 760px. The wrap is
+// what forces it: six badges on a phone break to 4 + 2, which reads as a
+// leftover row rather than a set, and shrinking them far enough to fit one row
+// makes the small print on the TopVerdict and Avvo seals unreadable.
 import Picture from "./media/Picture.astro";
 import type { Award } from "../data/awards";
 
@@ -176,38 +176,44 @@ const { awards, eyebrow = "Recognized & awarded" } = Astro.props;
     }
   }
 
+  /* One badge at a time, centred, inside the text column — not a rail that
+     bleeds past the edges with the neighbours half-showing. Each item is a
+     full-width slide, so the snap position is exact and every badge is on
+     screen whole or not at all. */
   @media (max-width: 760px) {
-    /* Full-bleed: the negative margin cancels the inner's padding so a badge
-       can scroll past the edge of the text column, and the matching padding
-       plus scroll-padding keeps the first and last ones off the screen edge. */
     .awards__rail {
       overflow-x: auto;
-      margin-inline: calc(var(--container-pad) * -1);
-      padding-inline: var(--container-pad);
       scroll-behavior: smooth;
       scroll-snap-type: x mandatory;
-      scroll-padding-inline: var(--container-pad);
       overscroll-behavior-x: contain;
     }
 
+    /* No `width: max-content` here: the list must stay exactly as wide as the
+       rail, because that is what the slides below take their 100% from. The
+       overflow comes from six of them, not from the track being oversized. */
+    /* `flex-start` is load-bearing, not tidiness: the base rule centres the
+       row, and a centred nowrap flex line splits its overflow evenly to both
+       sides. The first three slides would sit at a negative offset, which
+       scrollLeft cannot reach — they would simply never be shown. */
     .awards__list {
       flex-wrap: nowrap;
       justify-content: flex-start;
-      gap: var(--space-9);
-      width: max-content;
+      gap: 0;
     }
 
-    /* `start`, as every other rail on the site does — with
-       scroll-padding-inline it lands each badge exactly on the text column's
-       left edge rather than floating it mid-rail. */
     .awards__item {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 100%;
       scroll-snap-align: start;
     }
 
-    /* Bigger than the wrapped row was allowed to be at this width: the badges
-       no longer have to fit together, so they can be read. */
+    /* Full height, not the 0.8 the wrapped row needs at this width — a badge
+       with a whole slide to itself has no reason to be shrunk, and the small
+       print on the TopVerdict and Avvo seals is only legible at full size. */
     .awards__list :global(.awards__badge) {
-      height: calc(var(--badge-h, 80px) * 0.95);
+      height: var(--badge-h, 80px);
     }
 
     .awards__nav {
