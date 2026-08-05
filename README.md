@@ -40,7 +40,6 @@ Everything below is deliberately unfinished, not overlooked.
 | **"En Español"** | Renders in the header (every comp shows it) with no target. |
 | **Phone** | `(303) 756-3812` site-wide. Decide the display vs CallRail tracking split before any number swap goes in. |
 | **Third-party tags** | The old site loads GA4, GTM, CallRail, Clarity, Ahrefs, Intaker and reCAPTCHA — roughly 600 KB. Recommend GTM only, with the rest configured inside it. |
-| **`/thank-you`** | Referenced by the form's `redirectTo`; the page itself is Phase 3. |
 | **Attorney portraits** | Three of seven attorneys have photography. The homepage rail takes the rest as they arrive. |
 | **Eyebrow contrast** | Section eyebrows are 12px uppercase gold on cream. The comps use `#C79A54` (≈2.5:1) on News/Insights/Community and `#B0873C` (≈3.1:1) elsewhere; both fall short of WCAG AA, and neither qualifies as large text at this size. Built to match the comps — worth a decision before launch. |
 

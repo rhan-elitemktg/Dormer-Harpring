@@ -1,0 +1,257 @@
+---
+// "While you wait." — the firm's pitch, set over the team portrait, on the page
+// a visitor lands on immediately after submitting the form.
+import Eyebrow from "../Eyebrow.astro";
+import Picture from "../media/Picture.astro";
+import type { ThankYouPage } from "../../data/thankYou";
+
+interface Props {
+  panel: ThankYouPage["panel"];
+}
+
+const { panel } = Astro.props;
+---
+
+<section class="wait">
+  <div class="container">
+    <div class="wait__box">
+      <div class="wait__media">
+        <Picture
+          src={panel.image}
+          alt={panel.imageAlt}
+          widths={[800, 1200, 1800, 2400]}
+          sizes="(max-width: 1388px) 100vw, 1244px"
+          class="wait__photo"
+        />
+        <span class="wait__scrim" aria-hidden="true"></span>
+        <span class="wait__foot" aria-hidden="true"></span>
+      </div>
+
+      <div class="wait__text">
+        <Eyebrow tone="on-dark" class="wait__eyebrow">{panel.eyebrow}</Eyebrow>
+
+        <h2 class="wait__title">
+          {
+            panel.title.map((line, i) => (
+              <>
+                {i > 0 && <br />}
+                {line}
+              </>
+            ))
+          }
+        </h2>
+
+        <p class="wait__lede">{panel.lede}</p>
+
+        <ul class="wait__points">
+          {
+            panel.reassurances.map((point) => (
+              <li class="wait__point">
+                <span class="wait__tick" aria-hidden="true">
+                  &#10003;
+                </span>
+                {point}
+              </li>
+            ))
+          }
+        </ul>
+
+        <div class="wait__ctas">
+          {
+            panel.ctas.map((cta, i) => (
+              <a
+                class:list={["btn", "btn--lg", i === 0 ? "btn--red" : "btn--outline-light"]}
+                href={cta.href}
+              >
+                {cta.label}
+              </a>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* No top padding: the page header above ends flush, and its own bottom
+     padding is the gap. */
+  .wait {
+    background: var(--surface-page);
+    padding-bottom: var(--space-5);
+  }
+
+  .wait__box {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 720px;
+    border-radius: var(--radius-8);
+    overflow: hidden;
+    background: var(--surface-dark-card);
+  }
+
+  .wait__media {
+    position: absolute;
+    inset: 0;
+  }
+
+  .wait__media :global(.wait__photo) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* The four attorneys stand in the right third of the frame; the copy takes
+       the left. */
+    object-position: right top;
+  }
+
+  /* Horizontal, opaque under the copy and clear over the faces. The stops are
+     the comp's: it holds near-solid until 34% so the eyebrow and headline never
+     sit on skyline detail, then falls away quickly. */
+  .wait__scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      rgba(21, 30, 25, 0.97) 0%,
+      rgba(21, 30, 25, 0.93) 34%,
+      rgba(21, 30, 25, 0.72) 52%,
+      rgba(21, 30, 25, 0.28) 68%,
+      rgba(21, 30, 25, 0) 82%
+    );
+  }
+
+  /* Weights the foot of the frame so the CTAs keep their footing on the
+     lighter foreground tarmac. */
+  .wait__foot {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      0deg,
+      rgba(18, 24, 20, 0.5) 0%,
+      rgba(18, 24, 20, 0) 30%
+    );
+  }
+
+  .wait__text {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    max-width: 700px;
+    padding-left: var(--space-18);
+  }
+
+  .wait :global(.wait__eyebrow) {
+    margin-bottom: var(--space-5);
+  }
+
+  .wait__title {
+    margin-bottom: var(--space-7);
+    font-size: var(--display-1);
+    line-height: 0.96;
+    color: var(--dh-parchment);
+  }
+
+  .wait__lede {
+    max-width: 46ch;
+    margin-bottom: var(--space-9);
+    font-size: var(--text-xl);
+    line-height: var(--leading-prose);
+    color: var(--text-on-dark-2);
+    text-wrap: pretty;
+  }
+
+  .wait__points {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    margin-bottom: var(--space-10);
+    list-style: none;
+    padding: 0;
+  }
+
+  .wait__point {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    font-weight: 600;
+    font-size: var(--text-base);
+    line-height: 1.4;
+    color: var(--dh-parchment);
+  }
+
+  .wait__tick {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 26px;
+    height: 26px;
+    border-radius: var(--radius-full);
+    background: var(--accent);
+    font-size: var(--text-sm);
+    color: var(--dh-white);
+  }
+
+  .wait__ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+  }
+
+  /* Stacked below 980: the photograph becomes a banner and the copy sits on
+     flat forest beneath it. The comp instead keeps the photo as a full
+     background and lets the copy run the full width — over that horizontal
+     scrim the last third of every line lands on the bright sky. */
+  @media (max-width: 980px) {
+    .wait__box {
+      display: block;
+      height: auto;
+      border-radius: var(--radius-card);
+    }
+
+    .wait__media {
+      position: relative;
+      height: clamp(200px, 42vw, 300px);
+    }
+
+    .wait__media :global(.wait__photo) {
+      object-position: 62% top;
+    }
+
+    /* The horizontal scrim would now darken the left of the banner, which is
+       where the least is happening. Feather the foot instead, so the band
+       dissolves into the panel rather than ending on a hard edge. */
+    .wait__scrim {
+      background: linear-gradient(
+        0deg,
+        var(--surface-dark-card) 0%,
+        rgba(25, 34, 28, 0) 42%
+      );
+    }
+
+    .wait__foot {
+      display: none;
+    }
+
+    .wait__text {
+      max-width: none;
+      padding: var(--space-11) var(--space-10) var(--space-14);
+    }
+  }
+
+  @media (max-width: 560px) {
+    .wait__text {
+      padding: var(--space-9) var(--space-6) var(--space-12);
+    }
+
+    .wait__ctas {
+      width: 100%;
+    }
+
+    .wait__ctas .btn {
+      flex: 1 1 100%;
+    }
+  }
+</style>

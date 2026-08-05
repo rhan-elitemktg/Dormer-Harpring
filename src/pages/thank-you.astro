@@ -1,0 +1,26 @@
+---
+// Where the consultation form lands on success (`ContactForm`'s `redirectTo`).
+import Layout from "../layouts/Layout.astro";
+import PageHeader from "../components/PageHeader.astro";
+import WhileYouWait from "../components/thankyou/WhileYouWait.astro";
+import AwardsBar from "../components/AwardsBar.astro";
+import { getThankYouPage } from "../data/thankYou";
+import { getAwards } from "../data/awards";
+
+const [page, awards] = await Promise.all([getThankYouPage(), getAwards()]);
+---
+
+<Layout
+  title="Thank you"
+  description="We've received your request. An attorney will reach out within one business day."
+  seo={{ noIndex: true }}
+>
+  {
+    /* noIndex, and not merely for tidiness: a thank-you page that ranks gets
+       arrived at directly, which both tells a stranger their case was received
+       and turns every conversion metric keyed on this URL into noise. */
+  }
+  <PageHeader eyebrow={page.eyebrow} title={page.title} lede={page.lede} />
+  <WhileYouWait panel={page.panel} />
+  <AwardsBar awards={awards} />
+</Layout>

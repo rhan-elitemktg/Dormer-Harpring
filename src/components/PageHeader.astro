@@ -1,0 +1,96 @@
+---
+// The band that opens an interior page: eyebrow, h1, lede.
+//
+// SectionHead's sibling, not its variant — this one emits the page's single
+// <h1> and owns the section element and its padding, where SectionHead is an
+// <h2> opener dropped inside a section someone else laid out. Collapsing the
+// two would mean a `level` prop that changes which element is emitted, and a
+// component that can emit the wrong heading level is a component that
+// eventually does.
+//
+// Today it renders the cream, centred variant the Thank You and Blog comps
+// share. The forest-backed page headers (Contact, Testimonials, Case Results)
+// arrive with those pages — several sit on a photograph, and guessing at that
+// treatment from a partial read is how the wrong abstraction gets locked in.
+import Eyebrow from "./Eyebrow.astro";
+import Prose from "./prose/Prose.astro";
+import type { PortableTextBlock } from "../data/portableText";
+
+interface Props {
+  eyebrow?: string;
+  title: string;
+  /**
+   * Portable Text rather than a string: these ledes carry inline links — the
+   * Thank You page puts a `tel:` link on the phone number mid-sentence.
+   */
+  lede?: PortableTextBlock[];
+  align?: "center" | "left";
+  class?: string;
+}
+
+const { eyebrow, title, lede, align = "center", class: className } = Astro.props;
+---
+
+<section class:list={["ph", align === "center" && "ph--center", className]}>
+  <div class="container ph__inner">
+    {
+      eyebrow && (
+        <Eyebrow center={align === "center"} class="ph__eyebrow">
+          {eyebrow}
+        </Eyebrow>
+      )
+    }
+    <h1 class="ph__title">{title}</h1>
+    <Prose value={lede} class="ph__lede" />
+    <slot />
+  </div>
+</section>
+
+<style>
+  .ph {
+    background: var(--surface-page);
+  }
+
+  /* Asymmetric on purpose: the comps give this band 72px above and 44px below,
+     because the 44px is not the band's own breathing room — it is the gap to
+     whatever follows, which starts flush. */
+  .ph__inner {
+    padding-block: var(--space-section-sm) var(--space-11);
+  }
+
+  .ph--center .ph__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  /* `:global()` bounded by the scoped ancestor: both classes are passed as
+     props to child components, so they land on markup that never carries this
+     component's cid. Plain rules here would compile and match nothing. */
+  .ph :global(.ph__eyebrow) {
+    margin-bottom: var(--space-5);
+  }
+
+  .ph__title {
+    font-size: var(--display-page);
+    line-height: 0.94;
+    /* Anton's caps sit tight at this size; the comps open the tracking back up
+       rather than using the display default's negative value. */
+    letter-spacing: 0.005em;
+    color: var(--dh-ink);
+    text-wrap: balance;
+  }
+
+  .ph :global(.ph__lede) {
+    max-width: var(--measure-ch);
+    margin-top: var(--space-5);
+  }
+
+  .ph :global(.ph__lede .prose__p) {
+    font-size: var(--text-2xl);
+    line-height: var(--leading-normal);
+    color: var(--text-muted);
+    text-wrap: pretty;
+  }
+</style>

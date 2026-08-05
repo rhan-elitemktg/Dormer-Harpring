@@ -75,6 +75,9 @@
   --dh-line-strong: #d8cdb4; /* section rule on cream */
   --dh-line-dark: rgba(255, 255, 255, 0.08);   /* on forest */
   --dh-line-gold: rgba(216, 178, 110, 0.32);   /* hero stat rule */
+  /* Deliberately far brighter than --dh-line-dark: this one outlines a control
+     sitting on a PHOTOGRAPH, where a .08 alpha rule vanishes completely. */
+  --dh-line-on-photo: rgba(244, 239, 231, 0.55);
 
   /* ---- Semantic aliases -----------------------------------
      COMPONENTS REFERENCE THESE, not the primitives above.
@@ -143,6 +146,15 @@
   --display-5: clamp(1.375rem, 1.084rem + 1.244vw, 2.125rem);    /* 22 → 34 */
   --display-6: clamp(1.25rem, 1.129rem + 0.518vw, 1.5625rem);    /* 20 → 25  promise slide h3 */
   --display-7: clamp(1.125rem, 1.076rem + 0.207vw, 1.25rem);     /* 18 → 20  core-value h3 */
+
+  /* Interior page titles. The homepage h1 is --display-hero; the interior comps
+     carry their own, and the census across all thirteen gives two real tiers —
+     a statement title (Thank You, Contact, Blog) and a listing title (Case
+     Results, Attorneys, Community). The comps' 70px and 72px variants collapse
+     into the first: they share the same 44px min and the same 4.8vw slope and
+     differ only in the max, which is authoring drift, not three sizes. */
+  --display-page: clamp(2.75rem, 1.973rem + 3.316vw, 4.75rem);    /* 44 → 76 */
+  --display-page-sm: clamp(2.5rem, 1.966rem + 2.280vw, 3.875rem); /* 40 → 62 */
 
   /* UI + body. The comps are label-heavy: 12px alone is 289 uses.
      Small labels get deliberately NARROW ranges — an 11px eyebrow
@@ -542,6 +554,22 @@ select {
 .btn--ghost:hover {
   border-color: var(--dh-gold-light);
   color: var(--dh-gold-light);
+}
+
+/* Like --ghost, but for a button standing on a PHOTOGRAPH rather than a flat
+   forest panel. The hairline is bright enough to survive whatever is behind it,
+   and the hover fills rather than merely recolouring the rule — over a busy
+   image a border-colour change is nearly invisible. */
+.btn--outline-light {
+  background: transparent;
+  border: 1px solid var(--dh-line-on-photo);
+  color: var(--text-on-dark);
+}
+
+.btn--outline-light:hover {
+  background: var(--dh-parchment);
+  border-color: var(--dh-parchment);
+  color: var(--dh-forest-400);
 }
 
 /* Outlined ink — the "View all" / "Learn more" on cream. */

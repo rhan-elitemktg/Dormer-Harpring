@@ -24,12 +24,27 @@ export interface Award {
   height: number;
 }
 
+/**
+ * The alt text on the first four is NOT the comp's. Every comp captions
+ * badge-1 as Avvo, badge-2 as TopVerdict, badge-3 as Million Dollar and
+ * badge-4 as Multi-Million — and all four files are something else. Read in
+ * order, the artwork is Multi-Million, Million, TopVerdict, Avvo: the labels
+ * were shifted against the images somewhere upstream and copied across all
+ * fourteen pages. The rendered ORDER here still matches the comps exactly;
+ * only the descriptions are corrected, so a screen reader and Google stop
+ * being told the firm holds four awards in the wrong order.
+ */
 export async function getAwards(): Promise<Award[]> {
   return [
-    { _key: "avvo", image: badge1, alt: "Avvo Rating 10.0 Superb", height: 74 },
-    { _key: "topverdict", image: badge2, alt: "TopVerdict Top 20 Colorado 2023", height: 74 },
-    { _key: "mdaf", image: badge3, alt: "Million Dollar Advocates Forum", height: 80 },
-    { _key: "mmdaf", image: badge4, alt: "Multi-Million Dollar Advocates Forum", height: 80 },
+    { _key: "mmdaf", image: badge1, alt: "Multi-Million Dollar Advocates Forum", height: 74 },
+    { _key: "mdaf", image: badge2, alt: "Million Dollar Advocates Forum", height: 74 },
+    {
+      _key: "topverdict",
+      image: badge3,
+      alt: "TopVerdict Top 20 Jury Verdicts Colorado 2023",
+      height: 80,
+    },
+    { _key: "avvo", image: badge4, alt: "Avvo Rating 10.0 Superb", height: 80 },
     {
       _key: "ntl-40",
       image: badge5,
