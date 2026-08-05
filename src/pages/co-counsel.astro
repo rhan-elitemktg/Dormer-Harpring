@@ -1,0 +1,68 @@
+---
+import Layout from "../layouts/Layout.astro";
+import PageHeader from "../components/PageHeader.astro";
+import Partnership from "../components/cocounsel/Partnership.astro";
+import CoCounselResults from "../components/cocounsel/CoCounselResults.astro";
+import PracticeAreaLinks from "../components/cocounsel/PracticeAreaLinks.astro";
+import StatsBand from "../components/StatsBand.astro";
+import CoreValues from "../components/CoreValues.astro";
+import CoCounselForm from "../components/cocounsel/CoCounselForm.astro";
+import { getCoCounselPage, getCoCounselResults } from "../data/coCounsel";
+import { getFirmStats } from "../data/stats";
+import { getCoreValues, getCoreValuesSection } from "../data/coreValues";
+
+const [page, results, stats, valuesSection, values] = await Promise.all([
+  getCoCounselPage(),
+  getCoCounselResults(),
+  getFirmStats(),
+  getCoreValuesSection(),
+  getCoreValues(),
+]);
+---
+
+<Layout
+  title="Co-Counsel Opportunities"
+  description="Dormer Harpring partners with firms across Colorado and the country as co-counsel and trial counsel. We shoulder the case costs."
+>
+  <PageHeader
+    eyebrow={page.eyebrow}
+    title={page.title}
+    lede={page.lede}
+    tone="photo"
+    photo={page.photo}
+    photoMobile={page.photoMobile}
+    photoAlt={page.photoAlt}
+    minHeight={600}
+  >
+    <div class="cc-hero__cta">
+      <a class="btn btn--red btn--lg" href="#contact">{page.ctaLabel}</a>
+      <span class="cc-hero__note">{page.ctaNote}</span>
+    </div>
+  </PageHeader>
+
+  <Partnership partnership={page.partnership} />
+  <CoCounselResults section={page.results} results={results} />
+  <PracticeAreaLinks areas={page.areas} />
+  <StatsBand stats={stats} />
+  <CoreValues section={valuesSection} values={values} />
+  <CoCounselForm form={page.form} />
+</Layout>
+
+<style>
+  .cc-hero__cta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-5);
+    margin-top: var(--space-10);
+  }
+
+  .cc-hero__note {
+    font-weight: 800;
+    font-size: var(--text-label);
+    line-height: 1;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--dh-gold-light);
+  }
+</style>

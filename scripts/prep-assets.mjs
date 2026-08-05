@@ -60,6 +60,13 @@ const MAP = {
   // home/ rather than being owned by whichever page happened to need it first.
   "uploads/pasted-1785212437457-0.png": "team/attorneys-skyline.jpg",
 
+  // Co-counsel. From `assets/`, which belongs to the abandoned design
+  // generation — the same carve-out as the practice-area photography above:
+  // that rule is about token VALUES, not about pictures, and nothing else in
+  // the package shows the two partners together.
+  "assets/photos/cocounsel-hero.png": "cocounsel/hero.jpg",
+  "assets/photos/cocounsel-duo.png": "cocounsel/duo.jpg",
+
   // Attorneys
   "wireframes/assets/attorney-1.png": "attorneys/attorney-1.jpg",
   "wireframes/assets/attorney-2.png": "attorneys/attorney-2.jpg",
@@ -177,19 +184,38 @@ for (const [src, to] of entries) {
 }
 
 // ---------------------------------------------------------------------------
-// Art-directed hero crop.
+// Art-directed crops.
 //
-// The hero photograph is a 2.247:1 panorama with the four attorneys in its
-// right third. Below 980px the layout drops it into a fixed band at the foot of
-// the hero (see Hero.astro), so what's needed there is simply the team, framed
-// tight, at roughly square.
-const HERO_SRC = path.join(SRC, "wireframes/assets/hero-client-5.jpg");
-const TEAM_CROP = { left: 1769, top: 0, width: 1580, height: 1536 };
+// These are the NARROW-VIEWPORT sources: a wide landscape photograph with its
+// subject off to one side loses that subject entirely in a portrait viewport,
+// and no `object-position` recovers it. Each entry re-cuts the same frame
+// around the people, at roughly square.
+const CROPS = [
+  {
+    // The four attorneys sit in the right third of a 2.25:1 panorama.
+    from: "wireframes/assets/hero-client-5.jpg",
+    to: "team/skyline-crop.jpg",
+    extract: { left: 1769, top: 0, width: 1580, height: 1536 },
+  },
+  {
+    // The two partners stand centre-right, from about 51% to 89% across.
+    from: "assets/photos/cocounsel-hero.png",
+    to: "cocounsel/hero-crop.jpg",
+    extract: { left: 1700, top: 0, width: 1500, height: 1536 },
+  },
+];
 
-{
-  const outPath = path.join(OUT, "team/skyline-crop.jpg");
-  await sharp(HERO_SRC)
-    .extract(TEAM_CROP)
+for (const { from, to, extract } of CROPS) {
+  const src = path.join(SRC, from);
+  if (!existsSync(src)) {
+    console.error(`MISSING  ${from}`);
+    continue;
+  }
+
+  const outPath = path.join(OUT, to);
+  await mkdir(path.dirname(outPath), { recursive: true });
+  await sharp(src)
+    .extract(extract)
     .resize({ width: 1400 })
     .jpeg({ quality: 82, mozjpeg: true })
     .toFile(outPath);
@@ -198,7 +224,7 @@ const TEAM_CROP = { left: 1769, top: 0, width: 1580, height: 1536 };
   const size = (await stat(outPath)).size;
   outTotal += size;
   rows.push(
-    `        ${mb(size).padStart(7)} MB  home/hero-team.jpg  (${meta.width}×${meta.height}, aspect ${(meta.width / meta.height).toFixed(2)})`
+    `        ${mb(size).padStart(7)} MB  ${to}  (${meta.width}\u00d7${meta.height}, aspect ${(meta.width / meta.height).toFixed(2)})`
   );
 }
 
