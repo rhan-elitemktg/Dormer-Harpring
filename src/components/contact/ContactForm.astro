@@ -1,0 +1,235 @@
+---
+// The consultation request form.
+//
+// A REAL form: method="post" to a real endpoint, with the browser's own
+// validation and a server redirect to /thank-you on success.
+//
+// The comp does something different and worse — `onSubmit` calls
+// preventDefault() and flips a state flag to show a "Thank you." panel. Nothing
+// is ever sent. That is a prototype gesture, not a design: shipped, it would
+// tell every injured person their case had been received while silently
+// discarding it. So the success panel is not ported, and the page it would have
+// faked is a real route.
+//
+// TODO(launch): /api/consult does not exist yet — it needs a server adapter and
+// a mail provider (see the README's launch list). Until then this form will
+// 404 on submit, which is the correct failure: visibly broken beats
+// invisibly broken.
+import type { ContactBand } from "../../data/contact";
+import { ROUTES } from "../../lib/routePaths";
+
+interface Props {
+  form: ContactBand["form"];
+}
+
+const { form } = Astro.props;
+---
+
+<div class="cform">
+  <h3 class="cform__title">{form.title}</h3>
+  <p class="cform__lede">{form.lede}</p>
+
+  <form
+    class="cform__form"
+    method="post"
+    action="/api/consult"
+    aria-describedby="cform-disclaimer"
+  >
+    {/* Where to send them, and which page asked — both read server-side. */}
+    <input type="hidden" name="redirectTo" value={ROUTES.thankYou} />
+    <input type="hidden" name="source" value={Astro.url.pathname} />
+
+    <div class="cform__row">
+      <label class="cform__field">
+        <span class="cform__label">Full name</span>
+        <input
+          class="cform__input"
+          type="text"
+          name="name"
+          autocomplete="name"
+          placeholder="Jane Doe"
+          required
+        />
+      </label>
+
+      <label class="cform__field">
+        <span class="cform__label">Phone</span>
+        <input
+          class="cform__input"
+          type="tel"
+          name="phone"
+          autocomplete="tel"
+          placeholder="(303) 555-0100"
+          required
+        />
+      </label>
+    </div>
+
+    <label class="cform__field">
+      <span class="cform__label">Email</span>
+      <input
+        class="cform__input"
+        type="email"
+        name="email"
+        autocomplete="email"
+        placeholder="jane@email.com"
+        required
+      />
+    </label>
+
+    <label class="cform__field">
+      <span class="cform__label">What happened?</span>
+      <textarea
+        class="cform__input cform__input--area"
+        name="message"
+        rows="4"
+        placeholder="A few sentences about your injury or accident…"></textarea>
+    </label>
+
+    {
+      /* Honeypot. Hidden from sight and from assistive tech, and skipped by
+         Tab — a human never fills it, so anything non-empty is a bot and the
+         endpoint drops it. `hidden` is not used because some bots skip those. */
+    }
+    <div class="cform__trap" aria-hidden="true">
+      <label>
+        Company
+        <input type="text" name="company" tabindex="-1" autocomplete="off" />
+      </label>
+    </div>
+
+    <button type="submit" class="btn btn--red cform__submit arrow-link">
+      {form.submitLabel} <span class="arrow" aria-hidden="true">&rarr;</span>
+    </button>
+
+    <p class="cform__disclaimer" id="cform-disclaimer">{form.disclaimer}</p>
+  </form>
+</div>
+
+<style>
+  .cform {
+    padding: var(--space-14) var(--space-14) var(--space-12);
+    background: var(--dh-white);
+  }
+
+  .cform__title {
+    margin-bottom: var(--space-2);
+    font-size: var(--display-5);
+    line-height: 1.02;
+    color: var(--dh-ink);
+  }
+
+  .cform__lede {
+    margin-bottom: var(--space-8);
+    font-size: var(--text-md);
+    line-height: var(--leading-normal);
+    color: var(--dh-ink-3);
+  }
+
+  .cform__row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-4);
+  }
+
+  .cform__field {
+    display: block;
+    margin-bottom: var(--space-4);
+  }
+
+  .cform__row .cform__field {
+    margin-bottom: 0;
+  }
+
+  .cform__row {
+    margin-bottom: var(--space-4);
+  }
+
+  .cform__label {
+    display: block;
+    margin-bottom: var(--space-2);
+    font-weight: 700;
+    font-size: var(--text-label);
+    line-height: 1;
+    letter-spacing: var(--tracking-nav);
+    text-transform: uppercase;
+    color: var(--dh-ink-3);
+  }
+
+  .cform__input {
+    width: 100%;
+    padding: var(--space-4);
+    border: 1px solid #e4dcc8;
+    border-radius: var(--radius-input);
+    background: var(--surface-input);
+    /* 16px minimum: iOS Safari zooms the viewport on focus below that, which
+       throws the layout sideways mid-form. */
+    font-family: var(--font-body);
+    font-size: 1rem;
+    line-height: 1.3;
+    color: var(--dh-ink);
+    transition: border-color var(--transition), background-color var(--transition);
+  }
+
+  .cform__input::placeholder {
+    color: var(--dh-ink-5);
+  }
+
+  .cform__input:focus {
+    border-color: var(--accent-gold);
+    background: var(--dh-white);
+    outline: none;
+  }
+
+  /* The browser flags this once a value has been entered and left invalid,
+     rather than reddening every empty field the moment the page loads. */
+  .cform__input:not(:placeholder-shown):invalid {
+    border-color: var(--accent);
+  }
+
+  .cform__input--area {
+    resize: vertical;
+    line-height: 1.5;
+  }
+
+  .cform__trap {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .cform__submit {
+    width: 100%;
+    margin-top: var(--space-2);
+    border-radius: var(--radius-input);
+    font-size: var(--text-md);
+  }
+
+  .cform__disclaimer {
+    margin-top: var(--space-4);
+    font-size: var(--text-sm);
+    line-height: 1.5;
+    text-align: center;
+    color: #9a917e;
+  }
+
+  @media (max-width: 980px) {
+    .cform {
+      padding: var(--space-10) var(--space-8) var(--space-9);
+    }
+  }
+
+  @media (max-width: 560px) {
+    .cform__row {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0;
+    }
+
+    .cform__row .cform__field {
+      margin-bottom: var(--space-4);
+    }
+  }
+</style>

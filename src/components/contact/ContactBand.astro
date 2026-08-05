@@ -1,0 +1,221 @@
+---
+// "Talk to an attorney about your case." — photograph and reassurances on the
+// left, the consultation form on the right.
+//
+// At src/components/ root because 12 of the 14 comps carry this band. Third of
+// the four shared bands, with AwardsBar and CoreValues.
+import Eyebrow from "../Eyebrow.astro";
+import Picture from "../media/Picture.astro";
+import ContactForm from "./ContactForm.astro";
+import type { ContactBand } from "../../data/contact";
+import { getFirmDetails } from "../../data/site";
+import contactPhoto from "../../assets/home/contact-attorneys.jpg";
+
+interface Props {
+  band: ContactBand;
+}
+
+const { band } = Astro.props;
+const firm = await getFirmDetails();
+---
+
+{/* The id is the target of every "Request a free consultation" on the page. */}
+<section class="section section--forest consult" id="contact">
+  <div class="container">
+    <div class="consult__panel">
+      <div class="consult__aside">
+        <Picture
+          src={contactPhoto}
+          alt="Dormer Harpring attorneys"
+          widths={[600, 900, 1200]}
+          sizes="(max-width: 980px) 100vw, 45vw"
+          class="consult__photo"
+        />
+        <span class="consult__scrim" aria-hidden="true"></span>
+
+        <div class="consult__copy">
+          <Eyebrow tone="on-dark" class="consult__eyebrow">{band.eyebrow}</Eyebrow>
+          <h2 class="consult__title">{band.title}</h2>
+
+          <ul class="consult__points">
+            {
+              band.reassurances.map((point) => (
+                <li class="consult__point">
+                  <span class="consult__tick" aria-hidden="true">
+                    &#10003;
+                  </span>
+                  {point}
+                </li>
+              ))
+            }
+          </ul>
+
+          <div class="consult__call">
+            <p class="consult__call-prompt">{band.callPrompt}</p>
+            <a class="consult__call-link" href={`tel:${firm.phoneE164}`}>
+              <span class="consult__call-number">{firm.phone}</span>
+              <span class="consult__call-badge">{band.callBadge}</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <ContactForm form={band.form} />
+    </div>
+  </div>
+</section>
+
+<style>
+  .consult {
+    --forest-origin: 85%;
+  }
+
+  .consult__panel {
+    display: grid;
+    grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+    /* --radius-8 rather than its --radius-pill alias: same 20px, but this is a
+       panel, not a pill. */
+    border-radius: var(--radius-8);
+    overflow: hidden;
+    box-shadow: 0 30px 80px rgba(60, 52, 32, 0.16);
+  }
+
+  .consult__aside {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    min-height: 640px;
+    padding: var(--space-13) var(--space-12);
+  }
+
+  .consult__aside :global(.consult__photo) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+  }
+
+  .consult__scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      rgba(20, 32, 25, 0.35) 0%,
+      rgba(18, 26, 21, 0.55) 55%,
+      rgba(15, 22, 17, 0.9) 100%
+    );
+  }
+
+  .consult__copy {
+    position: relative;
+  }
+
+  .consult :global(.consult__eyebrow) {
+    margin-bottom: var(--space-4);
+  }
+
+  .consult__title {
+    margin-bottom: var(--space-7);
+    font-size: var(--display-3);
+    color: #f6f2e8;
+  }
+
+  .consult__points {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    margin-bottom: var(--space-9);
+    list-style: none;
+    padding: 0;
+  }
+
+  .consult__point {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    font-weight: 600;
+    font-size: var(--text-base);
+    line-height: 1.4;
+    color: #ede8db;
+  }
+
+  .consult__tick {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: var(--radius-full);
+    background: var(--accent);
+    font-size: var(--text-sm);
+    color: var(--dh-white);
+    flex: none;
+  }
+
+  .consult__call {
+    padding-top: var(--space-5);
+    border-top: 1px solid rgba(244, 239, 231, 0.22);
+  }
+
+  .consult__call-prompt {
+    margin-bottom: var(--space-2);
+    font-weight: 600;
+    font-size: var(--text-label);
+    line-height: 1;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #9fab97;
+  }
+
+  .consult__call-link {
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--space-3);
+  }
+
+  .consult__call-number {
+    font-family: var(--font-ui);
+    font-weight: 600;
+    font-size: var(--display-7);
+    line-height: 1;
+    letter-spacing: var(--tracking-tight);
+    color: var(--dh-white);
+    transition: color var(--transition);
+  }
+
+  .consult__call-link:hover .consult__call-number {
+    color: var(--dh-gold-light);
+  }
+
+  .consult__call-badge {
+    font-weight: 800;
+    font-size: var(--text-micro);
+    line-height: 1;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--dh-gold-light);
+  }
+
+  @media (max-width: 980px) {
+    .consult__panel {
+      grid-template-columns: minmax(0, 1fr);
+      border-radius: var(--radius-card);
+    }
+
+    /* Stacked, the photo is a banner rather than a full-height column — 640px
+       of it above the form would push the fields off the first screen. */
+    .consult__aside {
+      min-height: 0;
+      padding: var(--space-16) var(--space-8) var(--space-9);
+    }
+  }
+
+  @media (max-width: 560px) {
+    .consult__aside {
+      padding: var(--space-12) var(--space-6) var(--space-8);
+    }
+  }
+</style>
