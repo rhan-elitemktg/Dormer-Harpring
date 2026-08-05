@@ -21,10 +21,12 @@ import AttorneysBand from "../components/home/AttorneysBand.astro";
 import CoreValues from "../components/CoreValues.astro";
 import PromiseBand from "../components/home/PromiseBand.astro";
 import FaqBand from "../components/home/FaqBand.astro";
+import ContactBand from "../components/contact/ContactBand.astro";
 import { getAwards } from "../data/awards";
 import { getAttorneysSection, getHomeAttorneys } from "../data/attorneys";
 import { getCoreValues, getCoreValuesSection } from "../data/coreValues";
 import { getFaqSection, getHomeFaqs } from "../data/faqs";
+import { getContactBand } from "../data/contact";
 import { getHomeTestimonials, getReviewSummary } from "../data/testimonials";
 import {
   getPracticeSection,
@@ -53,6 +55,7 @@ const [
   promise,
   faqSection,
   faqs,
+  contactBand,
 ] = await Promise.all([
   getHomeHero(),
   getHomeStats(),
@@ -73,6 +76,7 @@ const [
   getHomePromise(),
   getFaqSection(),
   getHomeFaqs(),
+  getContactBand(),
 ]);
 ---
 
@@ -97,4 +101,5 @@ const [
   <CoreValues section={valuesSection} values={values} />
   <PromiseBand promise={promise} />
   <FaqBand section={faqSection} faqs={faqs} />
+  <ContactBand band={contactBand} />
 </Layout>
