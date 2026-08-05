@@ -73,22 +73,16 @@ const { attorney } = Astro.props;
     background: linear-gradient(180deg, rgba(31, 40, 34, 0) 55%, rgba(31, 40, 34, 0.45) 100%);
   }
 
-  /* PlayButton pulses on a loop by default. Three of these sitting in a row
-     draws the eye away from the portraits, so the animation is parked at frame
-     zero and only runs while the card is hovered or focused — which also makes
-     it read as a response to the pointer rather than ambient motion. */
+  /* No hover scale. The glyph is a CSS border triangle, so scaling puts its
+     edges on fractional pixels and it visibly shifts inside the ring — and a
+     `transform: scale()` on hover would replace this centring translate
+     outright, throwing the button into the corner. The pulse is the hover
+     feedback; it doesn't need a second one. */
   .acard :global(.acard__play) {
     position: absolute;
-    left: var(--space-3);
-    bottom: var(--space-3);
-    animation-play-state: paused;
-    transition: transform var(--transition);
-  }
-
-  .acard:hover :global(.acard__play),
-  .acard:focus-visible :global(.acard__play) {
-    animation-play-state: running;
-    transform: scale(1.08);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
   }
 
   .acard__name {

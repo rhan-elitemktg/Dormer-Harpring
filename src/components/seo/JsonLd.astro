@@ -1,0 +1,16 @@
+---
+// Emits one structured-data block.
+//
+// A component rather than an inline <script> at each call site so the
+// serialisation is done in exactly one place — `set:html` with JSON.stringify
+// is correct here (Astro does not escape inside <script type="application/ld+json">,
+// and escaping it as HTML would corrupt the JSON).
+
+interface Props {
+  schema: unknown;
+}
+
+const { schema } = Astro.props;
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(schema)} />

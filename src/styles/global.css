@@ -191,6 +191,7 @@
   --space-10: 2.5rem;   /* 40 */
   --space-11: 2.75rem;  /* 44 */
   --space-12: 3rem;     /* 48 */
+  --space-13: 3.25rem;  /* 52 — card and panel padding, used throughout the comps */
   --space-14: 3.5rem;   /* 56 */
   --space-16: 4rem;     /* 64 */
   --space-18: 4.5rem;   /* 72 */
@@ -269,6 +270,14 @@
 }
 
 /* ---- Reset + base ----------------------------------------- */
+
+:root {
+  /* Lets a transition interpolate to and from `auto`, which is what makes the
+     FAQ disclosure animate to its natural height rather than a guessed
+     max-height. Inherited, so it has to sit on the root. Ignored by browsers
+     that don't support it — there the panel simply opens instantly. */
+  interpolate-size: allow-keywords;
+}
 
 *,
 *::before,
@@ -582,6 +591,27 @@ select {
 :is(a, button):hover .arrow,
 :is(a, button):focus-visible .arrow {
   --arrow-shift: 3px;
+}
+
+/* ---- Play buttons -----------------------------------------
+   PlayButton defines the pulse; this decides WHEN it runs. Parked at frame
+   zero by default and running only while its control is hovered or focused —
+   a ring looping unprompted is ambient motion, and several at once is noise.
+
+   The rule reaches into the component's own class rather than the component
+   owning the behaviour, because "should this pulse" is a question about the
+   surrounding control, not about the button. `[data-video]` covers the panels
+   that are not yet real controls; they become <button>s once the lightbox
+   lands, at which point that half of the selector can go. */
+.play {
+  animation-play-state: paused;
+}
+
+:is(a, button):hover .play,
+:is(a, button):focus-visible .play,
+[data-video]:hover .play,
+[data-video]:focus-within .play {
+  animation-play-state: running;
 }
 
 /* ---- Prose ------------------------------------------------
