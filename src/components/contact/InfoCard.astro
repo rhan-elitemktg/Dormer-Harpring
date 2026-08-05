@@ -1,0 +1,106 @@
+---
+// One of the contact page's ways to reach the firm: glyph, label, the value as
+// a link, and a line of reassurance under it.
+import ContactIcon from "../icons/ContactIcon.astro";
+import type { ContactInfoCard } from "../../data/contactPage";
+
+interface Props {
+  card: ContactInfoCard;
+}
+
+const { card } = Astro.props;
+const external = /^https?:\/\//i.test(card.href);
+---
+
+<li class="info">
+  <p class="info__head">
+    <span class="info__glyph" aria-hidden="true">
+      <ContactIcon name={card.iconKey} />
+    </span>
+    <span class="info__label">{card.label}</span>
+  </p>
+
+  <a
+    class="info__value"
+    href={card.href}
+    target={external ? "_blank" : undefined}
+    rel={external ? "noopener" : undefined}
+  >
+    {card.value}
+    {card.value2 && <span class="info__value2">{card.value2}</span>}
+  </a>
+
+  <p class="info__note">{card.note}</p>
+</li>
+
+<style>
+  .info {
+    display: flex;
+    flex-direction: column;
+    min-height: 158px;
+    padding: var(--space-6) var(--space-6) var(--space-6);
+    border: 1px solid var(--dh-line);
+    border-radius: var(--radius-7);
+    background: var(--dh-white);
+  }
+
+  .info__head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+  }
+
+  .info__glyph {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 34px;
+    height: 34px;
+    border-radius: var(--radius-full);
+    background: var(--dh-gold-tint);
+    color: var(--dh-gold-muted);
+  }
+
+  .info__label {
+    font-weight: 800;
+    font-size: var(--text-micro);
+    line-height: 1;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--text-meta);
+  }
+
+  .info__value {
+    display: block;
+    font-family: var(--font-ui);
+    font-weight: 600;
+    font-size: var(--text-lg);
+    line-height: 1.35;
+    letter-spacing: -0.015em;
+    color: var(--dh-ink);
+    /* The email address is one unbreakable token and the card is narrow; without
+       this it pushes the card wider than its grid track. */
+    overflow-wrap: anywhere;
+    transition: color var(--transition);
+  }
+
+  .info__value:hover {
+    color: var(--accent);
+  }
+
+  .info__value2 {
+    display: block;
+  }
+
+  /* Pushed to the foot so the notes line up across a row of cards whose values
+     wrap to different numbers of lines. */
+  .info__note {
+    margin-top: auto;
+    padding-top: var(--space-2);
+    font-size: var(--text-md);
+    line-height: 1.5;
+    color: var(--dh-ink-3);
+  }
+</style>

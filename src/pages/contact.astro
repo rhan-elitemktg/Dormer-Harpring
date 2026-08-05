@@ -1,0 +1,27 @@
+---
+import Layout from "../layouts/Layout.astro";
+import PageHeader from "../components/PageHeader.astro";
+import ContactDetails from "../components/contact/ContactDetails.astro";
+import FindUs from "../components/contact/FindUs.astro";
+import { getContactPage } from "../data/contactPage";
+import { getContactBand } from "../data/contact";
+
+// The form's copy is the shared consultation-form singleton, not page content —
+// it is the same form on twelve pages, and it should read the same on all of
+// them.
+const [page, band] = await Promise.all([getContactPage(), getContactBand()]);
+---
+
+<Layout
+  title="Contact Us"
+  description="Talk to a Denver personal injury attorney. Free, confidential case review — call, text, email, or visit our RiNo office."
+>
+  <PageHeader
+    eyebrow={page.eyebrow}
+    title={page.title}
+    lede={page.lede}
+    tone="forest"
+  />
+  <ContactDetails page={page} form={band.form} />
+  <FindUs find={page.find} />
+</Layout>

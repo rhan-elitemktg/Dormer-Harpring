@@ -1,0 +1,72 @@
+---
+// "Visit our Denver office." — the address, then the map.
+import SectionHead from "../SectionHead.astro";
+import type { ContactPage } from "../../data/contactPage";
+
+interface Props {
+  find: ContactPage["find"];
+}
+
+const { find } = Astro.props;
+---
+
+<section class="findus">
+  <div class="container">
+    <SectionHead
+      eyebrow={find.eyebrow}
+      title={find.title}
+      lede={find.lede}
+      size={2}
+      center
+      class="findus__head"
+    />
+
+    {
+      /* Lazy, so the ~1 MB of Maps payload is not on the critical path for a
+         page whose job is the form above it. TODO(launch): this embed sets
+         Google cookies on load — it needs to sit behind whatever consent
+         decision the third-party tag review lands on (see the README). */
+    }
+    <iframe
+      class="findus__map"
+      title={find.mapTitle}
+      src={find.mapSrc}
+      loading="lazy"
+      referrerpolicy="no-referrer-when-downgrade"></iframe>
+  </div>
+</section>
+
+<style>
+  /* No top padding: the section above ends with its own full padding, and the
+     comp runs the two together. */
+  .findus {
+    padding-bottom: var(--space-section);
+    background: var(--surface-page);
+  }
+
+  .findus :global(.findus__head) {
+    margin-bottom: var(--space-11);
+  }
+
+  .findus__map {
+    display: block;
+    width: 1280px;
+    max-width: 100%;
+    height: 600px;
+    margin-inline: auto;
+    border: 0;
+    border-radius: var(--radius-7);
+  }
+
+  @media (max-width: 980px) {
+    .findus__map {
+      height: 440px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .findus__map {
+      height: 340px;
+    }
+  }
+</style>
