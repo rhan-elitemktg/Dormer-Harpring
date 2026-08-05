@@ -34,7 +34,7 @@ const INITIAL = 6;
          ordered list and the browser balances it — and `break-inside: avoid`
          is what keeps a card from being sliced across a column boundary. */
     }
-    <ul class="reviews__grid" data-reviews data-initial={INITIAL}>
+    <ul class="reviews__grid" data-load-more="reviews" data-initial={INITIAL}>
       {
         reviews.map((review, i) => (
           <li class="reviews__item" data-index={i}>
@@ -50,7 +50,7 @@ const INITIAL = 6;
          appears — the comp's version is inert in every state. */
     }
     <div class="reviews__foot">
-      <button type="button" class="btn reviews__more" data-reviews-more hidden>
+      <button type="button" class="btn btn--soft" data-load-more-button="reviews" hidden>
         {section.moreLabel}
       </button>
     </div>
@@ -94,25 +94,6 @@ const INITIAL = 6;
     margin-top: var(--space-13);
   }
 
-  /* The comps' soft tan outline, not `--outline-ink`: on a page of white cards
-     a 1.5px forest rule reads as another card edge. */
-  .reviews__more {
-    width: 300px;
-    max-width: 100%;
-    min-height: 60px;
-    border: 1px solid #c6b896;
-    border-radius: var(--radius-3);
-    background: transparent;
-    letter-spacing: 0.1em;
-    color: var(--dh-forest-100);
-  }
-
-  .reviews__more:hover {
-    border-color: var(--dh-forest-100);
-    background: var(--dh-forest-100);
-    color: var(--dh-parchment);
-  }
-
   @media (max-width: 1180px) {
     .reviews__grid {
       column-count: 2;
@@ -127,31 +108,6 @@ const INITIAL = 6;
 </style>
 
 <script>
-  // Progressive disclosure, wired only when there is genuinely more to show.
-  // Everything is server-rendered — this hides the tail, rather than fetching
-  // one — so the reviews are all in the HTML for a crawler and for a visitor
-  // with no JS.
-  for (const grid of document.querySelectorAll<HTMLElement>("[data-reviews]")) {
-    const items = [...grid.querySelectorAll<HTMLElement>(".reviews__item")];
-    const initial = Number(grid.dataset.initial) || items.length;
-    const button = document.querySelector<HTMLButtonElement>("[data-reviews-more]");
-    if (!button || items.length <= initial) continue;
-
-    for (const item of items.slice(initial)) item.hidden = true;
-    button.hidden = false;
-
-    button.addEventListener("click", () => {
-      const revealed = items.filter((item) => item.hidden);
-      for (const item of revealed) item.hidden = false;
-      button.hidden = true;
-
-      // Send the caret to the first card that just appeared. Without this,
-      // pressing the button removes the focused element from the page and
-      // focus falls back to <body> — a keyboard user is dumped at the top.
-      const first = revealed[0];
-      if (!first) return;
-      first.tabIndex = -1;
-      first.focus({ preventScroll: true });
-    });
-  }
+  // Shared with the case-results list.
+  import "../../scripts/loadMore";
 </script>

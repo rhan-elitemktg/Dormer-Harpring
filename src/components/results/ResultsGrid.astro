@@ -1,0 +1,94 @@
+---
+// Every verdict and settlement, in one balanced field of cards.
+import ResultCard from "../ResultCard.astro";
+import type { CaseResult } from "../../data/caseResults";
+
+interface Props {
+  results: CaseResult[];
+  moreLabel: string;
+}
+
+const { results, moreLabel } = Astro.props;
+
+/**
+ * Eighty-nine cards is several screens of scrolling before the contact form.
+ * Twelve fills the three columns four deep — enough to read as a substantial
+ * record — and each press adds another twelve.
+ */
+const INITIAL = 12;
+---
+
+<section class="cr">
+  <div class="container">
+    {
+      /* CSS multi-column, not the comp's three pre-balanced arrays. The comp
+         distributes the results in JS by a `200 + story.length` weight, which
+         is a layout algorithm living in the content: it assumes three columns,
+         so it is wrong at every breakpoint below 1080, and it has to re-run
+         whenever an editor adds a case. The browser already does this, and does
+         it per breakpoint. */
+    }
+    <ul class="cr__grid" data-load-more="results" data-initial={INITIAL}>
+      {
+        results.map((result) => (
+          <li class="cr__item">
+            <ResultCard result={result} />
+          </li>
+        ))
+      }
+    </ul>
+
+    <div class="cr__foot">
+      <button type="button" class="btn btn--soft" data-load-more-button="results" hidden>
+        {moreLabel}
+      </button>
+    </div>
+  </div>
+</section>
+
+<style>
+  .cr {
+    padding-block: var(--space-section);
+    background: var(--surface-page);
+  }
+
+  .cr__grid {
+    column-count: 3;
+    column-gap: var(--space-7);
+    list-style: none;
+    padding: 0;
+  }
+
+  .cr__item {
+    break-inside: avoid;
+    /* Multicol has no row gap; the space between stacked cards is this margin. */
+    margin-bottom: var(--space-7);
+  }
+
+  .cr__item[hidden] {
+    display: none;
+  }
+
+  .cr__foot {
+    display: flex;
+    justify-content: center;
+    margin-top: var(--space-13);
+  }
+
+  @media (max-width: 1080px) {
+    .cr__grid {
+      column-count: 2;
+    }
+  }
+
+  @media (max-width: 700px) {
+    .cr__grid {
+      column-count: 1;
+    }
+  }
+</style>
+
+<script>
+  // Shared with the written reviews.
+  import "../../scripts/loadMore";
+</script>

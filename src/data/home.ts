@@ -52,27 +52,18 @@ export async function getHomeStats(): Promise<HomeStat[]> {
   ];
 }
 
-export interface CaseResult {
-  _key: string;
-  tag: string;
-  /** Drives the badge's label and its filled-vs-outlined treatment. */
-  isTrialWin: boolean;
-  offered: string;
-  recovered: string;
-  story: string;
-}
-
 /**
- * The comp derives a `badgeStyle` string per result — a whole CSS declaration,
- * picked by a boolean. That collapses to `isTrialWin` here and a modifier class
- * in the component; an editor can tick a box, they cannot write a font shorthand.
+ * The three results the homepage leads with. The TYPE and the full list live in
+ * `caseResults.ts` — these are the same cases in different words, and the note
+ * there covers reconciling the two at the Sanity phase.
  */
 export async function getRecentResults(): Promise<CaseResult[]> {
   return [
     {
       _key: "kingsoopers",
       tag: "Slip & Fall",
-      isTrialWin: true,
+      badge: "Trial Win",
+      wonInCourt: true,
       offered: "$250K",
       recovered: "$2.1M",
       story:
@@ -82,7 +73,8 @@ export async function getRecentResults(): Promise<CaseResult[]> {
     {
       _key: "disputed-crash",
       tag: "Car Accident",
-      isTrialWin: true,
+      badge: "Trial Win",
+      wonInCourt: true,
       offered: "$250K",
       recovered: "$669K",
       story:
@@ -92,7 +84,8 @@ export async function getRecentResults(): Promise<CaseResult[]> {
     {
       _key: "low-speed",
       tag: "Low-Speed Collision",
-      isTrialWin: true,
+      badge: "Trial Win",
+      wonInCourt: true,
       offered: "$15K",
       recovered: "$263K",
       story:

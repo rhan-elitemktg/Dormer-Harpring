@@ -559,6 +559,26 @@ select {
   color: var(--dh-gold-light);
 }
 
+/* The "Load more" beneath a long list. A soft tan outline rather than
+   --outline-ink's 1.5px forest: these sit under a field of white cards, where a
+   heavy dark rule reads as one more card edge. */
+.btn--soft {
+  width: 300px;
+  max-width: 100%;
+  min-height: 60px;
+  border: 1px solid #c6b896;
+  border-radius: var(--radius-3);
+  background: transparent;
+  letter-spacing: 0.1em;
+  color: var(--dh-forest-100);
+}
+
+.btn--soft:hover {
+  border-color: var(--dh-forest-100);
+  background: var(--dh-forest-100);
+  color: var(--dh-parchment);
+}
+
 /* Like --ghost, but for a button standing on a PHOTOGRAPH rather than a flat
    forest panel. The hairline is bright enough to survive whatever is behind it,
    and the hover fills rather than merely recolouring the rule — over a busy

@@ -1,0 +1,34 @@
+---
+import Layout from "../layouts/Layout.astro";
+import PageHeader from "../components/PageHeader.astro";
+import ResultsGrid from "../components/results/ResultsGrid.astro";
+import StatsBand from "../components/StatsBand.astro";
+import ContactDetails from "../components/contact/ContactDetails.astro";
+import { getCaseResults, getCaseResultsPage } from "../data/caseResults";
+import { getFirmStats } from "../data/stats";
+import { getContactBand, getContactDetails } from "../data/contact";
+
+const [page, results, stats, band, details] = await Promise.all([
+  getCaseResultsPage(),
+  getCaseResults(),
+  getFirmStats(),
+  getContactBand(),
+  getContactDetails(),
+]);
+---
+
+<Layout
+  title="Case Results"
+  description="Verdicts and settlements Dormer Harpring has obtained for injured Coloradans, including cases other firms turned down."
+>
+  <PageHeader
+    eyebrow={page.eyebrow}
+    title={page.title}
+    lede={page.lede}
+    tone="forest"
+    size="sm"
+  />
+  <ResultsGrid results={results} moreLabel={page.moreLabel} />
+  <StatsBand stats={stats} />
+  <ContactDetails details={details} form={band.form} />
+</Layout>

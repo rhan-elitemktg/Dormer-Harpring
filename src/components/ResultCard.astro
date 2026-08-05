@@ -1,19 +1,28 @@
 ---
 // One case result: tag + badge, the offer-to-recovery figures, and the story.
-import type { CaseResult } from "../../../data/home";
+//
+// At src/components/ root: the homepage runs three of these and /results runs
+// eighty-nine.
+import type { CaseResult } from "../data/caseResults";
 
 interface Props {
   result: CaseResult;
 }
 
 const { result } = Astro.props;
+
+// The recovered figure is set at 60px when it is a number and 30px when it is
+// the word "Confidential", which would otherwise wrap or overflow. Measured off
+// the string rather than stored as a field, because it is a typographic
+// consequence of the value — nothing for an editor to set, or to get wrong.
+const compact = result.recovered.length <= 8;
 ---
 
 <article class="result">
   <div class="result__head">
     <span class="result__tag">{result.tag}</span>
-    <span class:list={["result__badge", result.isTrialWin && "result__badge--trial"]}>
-      {result.isTrialWin ? "Trial Win" : "Settlement"}
+    <span class:list={["result__badge", result.wonInCourt && "result__badge--court"]}>
+      {result.badge}
     </span>
   </div>
 
@@ -25,7 +34,9 @@ const { result } = Astro.props;
     <span class="result__arrow" aria-hidden="true">&rarr;</span>
     <div>
       <span class="result__label result__label--won">We recovered</span>
-      <span class="result__amount">{result.recovered}</span>
+      <span class:list={["result__amount", !compact && "result__amount--long"]}>
+        {result.recovered}
+      </span>
     </div>
   </div>
 
@@ -75,7 +86,7 @@ const { result } = Astro.props;
     color: var(--dh-ink-3);
   }
 
-  .result__badge--trial {
+  .result__badge--court {
     background: #2e4034;
     border-color: #2e4034;
     color: var(--dh-white);
@@ -129,6 +140,13 @@ const { result } = Astro.props;
     font-size: var(--display-2);
     line-height: 0.8;
     color: var(--dh-red-verdict);
+  }
+
+  /* "Confidential" instead of a figure. Half the size and normal leading — at
+     60px it is wider than the card. */
+  .result__amount--long {
+    font-size: var(--display-4);
+    line-height: 1;
   }
 
   .result__story {

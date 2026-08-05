@@ -32,6 +32,13 @@ interface Props {
    */
   lede?: PortableTextBlock[];
   tone?: "cream" | "forest" | "photo";
+  /**
+   * Which h1 tier. The comps use two on the flat backgrounds: 76px for the
+   * statement titles (Thank You, Contact, Blog) and 62px for the listing ones
+   * (Case Results, Attorneys, Community). `tone` does not imply it — Contact
+   * and Case Results are both forest and differ.
+   */
+  size?: "lg" | "sm";
   align?: "center" | "left";
   /** Required by `tone="photo"`, ignored otherwise. */
   photo?: ImageMetadata;
@@ -56,6 +63,7 @@ const {
   title,
   lede,
   tone = "cream",
+  size = "lg",
   align = tone === "photo" ? "left" : "center",
   photo,
   photoMobile,
@@ -97,6 +105,7 @@ const fallback = narrow ?? wide;
   class:list={[
     "ph",
     `ph--${tone}`,
+    size === "sm" && "ph--sm",
     align === "center" && "ph--center",
     narrow && "ph--art",
     className,
@@ -268,6 +277,11 @@ const fallback = narrow ?? wide;
   .ph--photo .ph__title {
     font-size: var(--display-page-2);
     line-height: 0.96;
+  }
+
+  .ph--sm .ph__title {
+    font-size: var(--display-page-sm);
+    line-height: 1;
   }
 
   /* Wider than --measure-ch (62ch), which is the measure for a paragraph
