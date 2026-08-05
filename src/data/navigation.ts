@@ -5,7 +5,7 @@
 // refactor — nav was the one thing the previous build never finished migrating,
 // precisely because it was a static import.
 
-import { ROUTES, attorneyPath } from "../lib/routePaths";
+import { ROUTES } from "../lib/routePaths";
 
 export interface NavItem {
   label: string;
@@ -29,8 +29,14 @@ export interface NavItem {
  *
  * No comp defines a menu behind any caret (they are decorative spans), so the
  * About and Practice Areas lists below are lifted from the CURRENT site's
- * working dropdowns; Attorneys and Locations are proposed, since the live site
- * has no dropdown for either.
+ * working dropdowns; Locations is proposed, since the live site has no dropdown
+ * for it.
+ *
+ * The team sits inside About as "Our Team" rather than at the top level. The
+ * comps put an "Attorneys" item there, but the live site's own nav files the
+ * team under About, and dropping it frees the slot that "Testimonials" now
+ * takes. The individual attorney links that hung off the old top-level item go
+ * with it: they were proposed rather than lifted, and /attorneys lists them.
  *
  * Two deliberate departures from the live nav, both flagged for review:
  *  - Its Practice Areas menu opens with "Personal Injury → /" because there the
@@ -70,20 +76,7 @@ export async function getNavItems(): Promise<NavItem[]> {
       ],
     },
     { label: "Results", href: ROUTES.results },
-    {
-      label: "Attorneys",
-      href: ROUTES.attorneys,
-      children: [
-        { label: "Sean Dormer", href: attorneyPath("sean-dormer") },
-        { label: "K.C. Harpring", href: attorneyPath("k-c-harpring") },
-        { label: "Tim Garvey", href: attorneyPath("tim-garvey") },
-        { label: "Laura Browne", href: attorneyPath("laura-browne") },
-        { label: "Jessica Mauser", href: attorneyPath("jessica-mauser") },
-        { label: "Amy Rogers", href: attorneyPath("amy-rogers") },
-        { label: "Greg Bentley", href: attorneyPath("greg-bentley") },
-        { label: "View all attorneys", href: ROUTES.attorneys },
-      ],
-    },
+    { label: "Testimonials", href: ROUTES.testimonials },
     {
       // Still no hub page to link the parent at — the legacy site has ~52
       // city×practice pages but nothing that lists them. The parent stays plain
@@ -125,7 +118,7 @@ export async function getFooterNav(): Promise<NavItem[]> {
   return [
     { label: "Home", href: ROUTES.home },
     { label: "About", href: ROUTES.about },
-    { label: "Attorneys", href: ROUTES.attorneys },
+    { label: "Our Team", href: ROUTES.attorneys },
     { label: "Results", href: ROUTES.results },
     { label: "Testimonials", href: ROUTES.testimonials },
     { label: "Co-Counsel", href: ROUTES.coCounsel },

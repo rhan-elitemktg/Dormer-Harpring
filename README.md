@@ -36,7 +36,7 @@ Everything below is deliberately unfinished, not overlooked.
 |---|---|
 | **Consultation form** | `ContactForm.astro` posts to `/api/consult`, which **does not exist**. Needs a server adapter plus a mail provider, then a 303 to `/thank-you`. Until then the form 404s on submit. The comp's fake success panel was deliberately not ported — it told every visitor their case had been received while discarding it. |
 | **Video** | 18 play buttons across the homepage are inert. Needs a host (YouTube? Wistia?) and IDs, then a lightbox. The `[data-video]` panels become real `<button>`s at that point. |
-| **Nav submenus** | About and Practice Areas use the current site's IA; Attorneys and Locations are proposed and need sign-off. "Locations" has no hub page, so its parent renders as plain text. |
+| **Nav submenus** | About and Practice Areas use the current site's IA; Locations is proposed and needs sign-off. "Locations" has no hub page, so its parent renders as plain text. The team sits inside About as "Our Team"; the comps' top-level "Attorneys" item is gone, and "Testimonials" takes the slot. |
 | **"En Español"** | Renders in the header (every comp shows it) with no target. |
 | **Phone** | `(866) 683-6894` site-wide, from `firmDetails`. The live site still publishes `(303) 756-3812` in its JSON-LD and on its contact page — decide whether that one is retired or kept as a local number, and settle the display vs CallRail tracking split, before launch. |
 | **Text number** | `(720) 734-6230`, from every comp. The live site publishes `(720) 730-7997` (864 uses) and has the comps' number only inside commented-out markup. One of the two is stale — confirm which. |

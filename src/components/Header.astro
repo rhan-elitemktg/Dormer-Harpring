@@ -360,9 +360,14 @@ const current = Astro.url.pathname.replace(/\/+$/, "") || "/";
     color: var(--dh-gold-light);
   }
 
-  /* Six uppercase items plus the language pill plus a 27px phone number stop
-     fitting somewhere around 1080px — hand off to the drawer at 1100. */
-  @media (max-width: 1100px) {
+  /* MEASURED, not guessed: logo 144 + nav 640 + aside 300, plus the gaps and
+     2×32px of container padding, needs 1192px. Below that the row cannot
+     shrink — the logo is `flex: none`, the phone is nowrap — so it pushes the
+     document wider than the viewport rather than wrapping. Hand off to the
+     drawer at 1200.
+     Re-measure this if a nav label changes length: "Testimonials" replacing
+     "Attorneys" is what moved it from ~1150 to 1192. */
+  @media (max-width: 1200px) {
     .header__nav,
     .header__lang {
       display: none;
