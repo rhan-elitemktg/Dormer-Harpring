@@ -82,8 +82,11 @@ const { eyebrow, title, lede, align = "center", class: className } = Astro.props
     text-wrap: balance;
   }
 
+  /* Wider than --measure-ch (62ch), which is the measure for a paragraph
+     someone reads down. This one is a two-line standfirst under a 76px
+     headline; at 62ch it broke to three ragged lines and read as body copy. */
   .ph :global(.ph__lede) {
-    max-width: var(--measure-ch);
+    max-width: 76ch;
     margin-top: var(--space-5);
   }
 
@@ -91,6 +94,15 @@ const { eyebrow, title, lede, align = "center", class: className } = Astro.props
     font-size: var(--text-2xl);
     line-height: var(--leading-normal);
     color: var(--text-muted);
-    text-wrap: pretty;
+    /* `balance`, not `pretty`: at two lines the job is to split them evenly,
+       not to avoid a short last line. */
+    text-wrap: balance;
+  }
+
+  /* The comps weight the inline link in these ledes — it is a phone number in
+     an otherwise quiet paragraph, and the one thing on the page still worth
+     acting on. */
+  .ph :global(.ph__lede .prose__link) {
+    font-weight: 700;
   }
 </style>

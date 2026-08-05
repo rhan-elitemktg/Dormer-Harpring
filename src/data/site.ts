@@ -50,10 +50,14 @@ export interface FirmDetails {
 }
 
 /**
- * Phone: the comps carry three different numbers — (866) 683-6894 on the
- * interior headers and a clearly placeholder (303) 555-0100 on the homepage.
- * Neither is used. (303) 756-3812 is the firm's number per the live site's
- * JSON-LD and contact page, and it is what ships site-wide.
+ * Phone: (866) 683-6894 site-wide — the number the comps carry on every
+ * interior header, and the firm's choice over the (303) 756-3812 the live
+ * site's JSON-LD and contact page still list. The homepage comp's
+ * (303) 555-0100 is a placeholder and is not used anywhere.
+ *
+ * Changing it is this one line plus `phoneE164`: nothing else in the codebase
+ * may hardcode a number, so the header, the footer, every `tel:` href, the
+ * JSON-LD and the Thank You lede all follow.
  * TODO(launch): if CallRail dynamic insertion returns, this stays the static
  * fallback and the swap pool is configured in the CallRail dashboard.
  */
@@ -61,8 +65,8 @@ export async function getFirmDetails(): Promise<FirmDetails> {
   return {
     name: "Dormer Harpring",
     legalName: "Dormer Harpring, LLC",
-    phone: "(303) 756-3812",
-    phoneE164: "+13037563812",
+    phone: "(866) 683-6894",
+    phoneE164: "+18666836894",
     sms: "(720) 734-6230",
     smsE164: "+17207346230",
     address: {

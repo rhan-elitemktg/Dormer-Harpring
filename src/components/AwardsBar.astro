@@ -3,6 +3,11 @@
 //
 // At src/components/ root rather than under home/ because the About page runs
 // the same band with identical markup — the first of the four shared bands.
+//
+// A wrapped row on desktop, a swipeable rail below 760px. The wrap is what
+// forces it: six badges on a phone break to 4 + 2, which reads as a leftover
+// row rather than a set, and shrinking them far enough to fit one row makes
+// the small print on the TopVerdict and Avvo seals unreadable.
 import Picture from "./media/Picture.astro";
 import type { Award } from "../data/awards";
 
@@ -17,15 +22,48 @@ const { awards, eyebrow = "Recognized & awarded" } = Astro.props;
 <section class="awards">
   <div class="awards__inner">
     <p class="awards__eyebrow">{eyebrow}</p>
-    <ul class="awards__list">
-      {
-        awards.map((award) => (
-          <li class="awards__item" data-height={award.height}>
-            <Picture src={award.image} alt={award.alt} class="awards__badge" />
-          </li>
-        ))
-      }
-    </ul>
+
+    {
+      /* `role="group"` + tabindex so the rail is reachable and announced by a
+         keyboard user, who has no swipe. The arrows below are the pointer
+         affordance; this is the other half. */
+    }
+    <div
+      class="awards__rail noscroll"
+      data-rail="awards"
+      tabindex="0"
+      role="group"
+      aria-label="Awards and recognition, scrollable"
+    >
+      <ul class="awards__list">
+        {
+          awards.map((award) => (
+            <li class="awards__item" data-height={award.height}>
+              <Picture src={award.image} alt={award.alt} class="awards__badge" />
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+
+    <div class="awards__nav">
+      <button
+        type="button"
+        class="awards__arrow"
+        data-rail-prev="awards"
+        aria-label="Previous awards"
+      >
+        <span aria-hidden="true">&larr;</span>
+      </button>
+      <button
+        type="button"
+        class="awards__arrow"
+        data-rail-next="awards"
+        aria-label="Next awards"
+      >
+        <span aria-hidden="true">&rarr;</span>
+      </button>
+    </div>
   </div>
 </section>
 
@@ -54,6 +92,13 @@ const { awards, eyebrow = "Recognized & awarded" } = Astro.props;
     letter-spacing: var(--tracking-label);
     text-transform: uppercase;
     color: var(--dh-gold-deep);
+  }
+
+  /* `stretch`, not `width: 100%`: the inner is a centred column, and a 100%-wide
+     item carrying the negative margins below would keep its width and simply
+     shift left, overflowing the page by one --container-pad. */
+  .awards__rail {
+    align-self: stretch;
   }
 
   .awards__list {
@@ -86,6 +131,41 @@ const { awards, eyebrow = "Recognized & awarded" } = Astro.props;
     width: auto;
   }
 
+  /* Hidden until the rail can actually scroll. Kept in the DOM at every width
+     rather than rendered conditionally, because the breakpoint is a CSS fact —
+     the server has no idea how wide the viewport is. */
+  .awards__nav {
+    display: none;
+    gap: var(--space-3);
+  }
+
+  .awards__arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 1px solid var(--dh-line-strong);
+    border-radius: var(--radius-2);
+    background: transparent;
+    font-size: var(--text-lg);
+    line-height: 1;
+    color: var(--dh-ink-2);
+    cursor: pointer;
+    transition: border-color var(--transition), color var(--transition);
+  }
+
+  .awards__arrow:hover:not(:disabled) {
+    border-color: var(--accent-gold);
+    color: var(--dh-gold-deep);
+  }
+
+  .awards__arrow:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+
   @media (max-width: 980px) {
     .awards__list {
       gap: var(--space-6) var(--space-10);
@@ -96,13 +176,47 @@ const { awards, eyebrow = "Recognized & awarded" } = Astro.props;
     }
   }
 
-  @media (max-width: 640px) {
-    .awards__list {
-      gap: var(--space-5) var(--space-7);
+  @media (max-width: 760px) {
+    /* Full-bleed: the negative margin cancels the inner's padding so a badge
+       can scroll past the edge of the text column, and the matching padding
+       plus scroll-padding keeps the first and last ones off the screen edge. */
+    .awards__rail {
+      overflow-x: auto;
+      margin-inline: calc(var(--container-pad) * -1);
+      padding-inline: var(--container-pad);
+      scroll-behavior: smooth;
+      scroll-snap-type: x mandatory;
+      scroll-padding-inline: var(--container-pad);
+      overscroll-behavior-x: contain;
     }
 
+    .awards__list {
+      flex-wrap: nowrap;
+      justify-content: flex-start;
+      gap: var(--space-9);
+      width: max-content;
+    }
+
+    /* `start`, as every other rail on the site does — with
+       scroll-padding-inline it lands each badge exactly on the text column's
+       left edge rather than floating it mid-rail. */
+    .awards__item {
+      scroll-snap-align: start;
+    }
+
+    /* Bigger than the wrapped row was allowed to be at this width: the badges
+       no longer have to fit together, so they can be read. */
     .awards__list :global(.awards__badge) {
-      height: calc(var(--badge-h, 80px) * 0.66);
+      height: calc(var(--badge-h, 80px) * 0.95);
+    }
+
+    .awards__nav {
+      display: flex;
     }
   }
 </style>
+
+<script>
+  // Prev/next behaviour is shared with the testimonials and attorney rails.
+  import "../scripts/rail";
+</script>
