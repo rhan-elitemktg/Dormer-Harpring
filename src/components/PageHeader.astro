@@ -292,9 +292,13 @@ const fallback = narrow ?? wide;
     margin-top: var(--space-5);
   }
 
+  /* 18px at desktop, not --text-2xl's 21. Across the eleven interior comps
+     this lede is 18px three times, 19px five times and 20px once — never 21.
+     That spread is drift, so it snaps to the existing --text-xl rather than
+     earning a token for a 1px difference. 1.67 leading is the comps' 30/18. */
   .ph :global(.ph__lede .prose__p) {
-    font-size: var(--text-2xl);
-    line-height: var(--leading-normal);
+    font-size: var(--text-xl);
+    line-height: 1.67;
     color: var(--text-muted);
     /* `balance`, not `pretty`: at two lines the job is to split them evenly,
        not to avoid a short last line. */
