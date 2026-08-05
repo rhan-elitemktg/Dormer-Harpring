@@ -159,6 +159,59 @@ export async function getHomeWhyUs(): Promise<HomeWhyUs> {
   };
 }
 
+export interface PromiseSlide {
+  _key: string;
+  label: string;
+  body: string;
+}
+
+export interface HomePromise {
+  eyebrow: string;
+  title: string;
+  slides: PromiseSlide[];
+  ctaLabel: string;
+}
+
+/**
+ * The comp's `promisesData` carries an `href` per slide and the derived
+ * `promiseSlides` adds `num`/`total`; no markup renders any of the three.
+ * Labels are also half-shouted there ("WE'LL Walk you through every step") —
+ * stored in sentence case here, since the caps are `text-transform` in CSS.
+ */
+export async function getHomePromise(): Promise<HomePromise> {
+  return {
+    eyebrow: "The promise",
+    title: "What you can expect working with us.",
+    slides: [
+      {
+        _key: "walk-through",
+        label: "We'll walk you through every step",
+        body:
+          "You will always know exactly where your case stands. We explain each " +
+          "decision in plain English, return your calls the same day, and never let " +
+          "you feel lost in the process.",
+      },
+      {
+        _key: "take-stress",
+        label: "We take the stress off your plate",
+        body:
+          "From medical bills to insurance adjusters and mountains of paperwork, we " +
+          "handle the parts that keep clients up at night — so you can put your " +
+          "energy into healing.",
+      },
+      {
+        _key: "fight",
+        label: "We'll fight relentlessly for your family",
+        body:
+          "We prepare every case as if it is going to trial. Insurers know we will " +
+          "not settle for less than your claim is worth, and that pressure is what " +
+          "drives full-value results.",
+      },
+    ],
+    ctaLabel: "Request a free consultation",
+  };
+}
+
 export interface HelpPoint {
   _key: string;
   /** Rendered bold, ahead of the detail. */

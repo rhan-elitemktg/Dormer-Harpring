@@ -49,15 +49,29 @@ const { tone = "dark", size = 38, class: className } = Astro.props;
     flex: none;
   }
 
+  /* Longhands, not the `animation` shorthand. The shorthand resets every
+     sub-property it doesn't name — including animation-play-state, which it
+     would force back to `running` — and it does so at a higher specificity
+     than the global `.play` rule that parks the pulse. That rule then silently
+     loses and the ring loops on its own. Whether it runs is decided by the
+     `.play` rules in global.css — which alone give a no-JS fallback of pulse
+     on hover, freeze on leave; the script below upgrades that to finishing the
+     cycle. This block only describes the animation itself. */
   .play--dark {
     background: var(--dh-parchment);
     border: 1.5px solid rgba(27, 36, 30, 0.45);
-    animation: playPulseDark 1.8s ease-in-out infinite;
+    animation-name: playPulseDark;
+    animation-duration: 1.8s;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
   }
 
   .play--light {
     background: rgba(244, 239, 231, 0.94);
-    animation: playPulseLight 1.8s ease-in-out infinite;
+    animation-name: playPulseLight;
+    animation-duration: 1.8s;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
   }
 
   .play--accent {
@@ -104,3 +118,43 @@ const { tone = "dark", size = 38, class: className } = Astro.props;
     }
   }
 </style>
+
+<script>
+  // Let the ring finish the cycle it is in when the pointer leaves.
+  //
+  // `animation-play-state: paused` freezes at the CURRENT frame, so a ring
+  // caught mid-expansion just stops there — it reads as a glitch rather than a
+  // rest state. CSS has no way to say "stop at the end of this iteration", so
+  // the pause is deferred until the next `animationiteration` event.
+  //
+  // The inline style set here outranks the stylesheet, which is what keeps the
+  // animation running after :hover has already stopped matching.
+  for (const play of document.querySelectorAll<HTMLElement>(".play")) {
+    const control = play.closest<HTMLElement>("a, button, [data-video]");
+    if (!control) continue;
+
+    let hovered = false;
+
+    const start = () => {
+      hovered = true;
+      play.style.animationPlayState = "running";
+    };
+
+    const stop = () => {
+      hovered = false;
+      play.addEventListener(
+        "animationiteration",
+        () => {
+          // Re-entered before the cycle closed — leave it running.
+          if (!hovered) play.style.animationPlayState = "paused";
+        },
+        { once: true }
+      );
+    };
+
+    control.addEventListener("pointerenter", start);
+    control.addEventListener("pointerleave", stop);
+    control.addEventListener("focusin", start);
+    control.addEventListener("focusout", stop);
+  }
+</script>

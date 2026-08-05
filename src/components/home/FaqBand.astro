@@ -1,0 +1,163 @@
+---
+// "Answers, straight from your attorney." — an eight-item accordion plus the
+// "have a question you don't see?" card.
+import Eyebrow from "../Eyebrow.astro";
+import Picture from "../media/Picture.astro";
+import FaqItem from "./faq/FaqItem.astro";
+import JsonLd from "../seo/JsonLd.astro";
+import type { Faq, FaqSection } from "../../data/faqs";
+import { faqSchema } from "../../lib/schema";
+
+interface Props {
+  section: FaqSection;
+  faqs: Faq[];
+}
+
+const { section, faqs } = Astro.props;
+
+// Safe to emit: every question and answer below is rendered into the page, and
+// <details> keeps the closed ones in the DOM — Google requires the marked-up
+// text to be present and visible to the user.
+const schema = faqSchema(faqs.map((f) => ({ question: f.question, answer: f.answer })));
+---
+
+<section class="section faqs">
+  <div class="faqs__inner">
+    <header class="faqs__head">
+      <Eyebrow center class="faqs__eyebrow">{section.eyebrow}</Eyebrow>
+      <h2 class="faqs__title">{section.title}</h2>
+      <p class="faqs__lede">{section.lede}</p>
+    </header>
+
+    <div class="faqs__list">
+      {
+        faqs.map((faq, i) => (
+          <FaqItem faq={faq} ctaLabel={section.answerCtaLabel} open={i === 0} />
+        ))
+      }
+    </div>
+
+    <div class="faqs__ask">
+      <Picture
+        src={section.ask.portrait}
+        alt={section.ask.portraitAlt}
+        class="faqs__ask-photo"
+      />
+      <div class="faqs__ask-copy">
+        <p class="faqs__ask-title">{section.ask.title}</p>
+        <p class="faqs__ask-body">{section.ask.body}</p>
+      </div>
+      <a class="btn btn--red arrow-link faqs__ask-cta" href={section.ask.ctaHref}>
+        {section.ask.ctaLabel} <span class="arrow" aria-hidden="true">&rarr;</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<JsonLd schema={schema} />
+
+<style>
+  .faqs {
+    background: var(--surface-alt);
+  }
+
+  .faqs__inner {
+    max-width: var(--measure);
+    margin-inline: auto;
+    padding-inline: var(--container-pad);
+  }
+
+  .faqs__head {
+    margin-bottom: var(--space-13);
+    text-align: center;
+  }
+
+  .faqs :global(.faqs__eyebrow) {
+    margin-bottom: var(--space-5);
+  }
+
+  .faqs__title {
+    margin-bottom: var(--space-4);
+    font-size: var(--display-2);
+    color: var(--dh-ink);
+  }
+
+  .faqs__lede {
+    max-width: 62ch;
+    margin-inline: auto;
+    font-size: var(--text-lg);
+    line-height: var(--leading-normal);
+    color: var(--dh-ink-3);
+  }
+
+  .faqs__list {
+    background: #fbf8f0;
+    border: 1px solid #e7dec9;
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    box-shadow: 0 14px 44px rgba(60, 52, 32, 0.07);
+  }
+
+  .faqs__ask {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-6);
+    margin-top: var(--space-7);
+    padding: var(--space-8) var(--space-10);
+    /* The one place the forest gradient appears on a card rather than a full
+       section, so it sets its own origin. */
+    --forest-origin: 85%;
+    background: var(--grad-forest);
+    border-radius: var(--radius-card);
+    box-shadow: 0 22px 56px rgba(31, 42, 35, 0.24);
+  }
+
+  .faqs__ask :global(.faqs__ask-photo) {
+    width: 74px;
+    height: 74px;
+    border: 2px solid rgba(216, 178, 110, 0.5);
+    border-radius: var(--radius-full);
+    object-fit: cover;
+    object-position: center top;
+    flex: none;
+  }
+
+  .faqs__ask-copy {
+    flex: 1;
+    min-width: 230px;
+  }
+
+  .faqs__ask-title {
+    margin-bottom: var(--space-1);
+    font-weight: 700;
+    font-size: var(--text-2xl);
+    line-height: 1.28;
+    color: #f3eee1;
+  }
+
+  .faqs__ask-body {
+    font-size: var(--text-base);
+    line-height: 1.55;
+    color: #b9c2b3;
+  }
+
+  .faqs__ask-cta {
+    flex: none;
+  }
+
+  @media (max-width: 760px) {
+    .faqs__head {
+      margin-bottom: var(--space-10);
+    }
+
+    .faqs__ask {
+      padding: var(--space-7) var(--space-6);
+      gap: var(--space-5);
+    }
+
+    .faqs__ask-cta {
+      width: 100%;
+    }
+  }
+</style>

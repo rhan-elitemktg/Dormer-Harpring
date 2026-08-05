@@ -1,0 +1,343 @@
+---
+// "What you can expect working with us." — a full-bleed photograph with a white
+// card overlaid, carrying a three-slide carousel.
+import Eyebrow from "../Eyebrow.astro";
+import Picture from "../media/Picture.astro";
+import type { HomePromise } from "../../data/home";
+import { ROUTES } from "../../lib/routePaths";
+import promiseWalk from "../../assets/home/promise-walk.jpg";
+
+interface Props {
+  promise: HomePromise;
+}
+
+const { promise } = Astro.props;
+---
+
+<section class="promise">
+  <div class="promise__media">
+    <Picture
+      src={promiseWalk}
+      alt="Sean and KC walking in downtown Denver"
+      widths={[900, 1400, 2000]}
+      sizes="100vw"
+      class="promise__photo"
+    />
+  </div>
+
+  <div class="promise__overlay">
+    <div class="promise__card">
+      <Eyebrow class="promise__eyebrow">{promise.eyebrow}</Eyebrow>
+      <h2 class="promise__title">{promise.title}</h2>
+
+      <div class="promise__viewport" data-promise>
+        <div class="promise__track" data-promise-track>
+          {
+            promise.slides.map((slide, i) => (
+              <div
+                class="promise__slide"
+                role="group"
+                aria-roledescription="slide"
+                aria-label={`${i + 1} of ${promise.slides.length}`}
+                aria-hidden={i === 0 ? undefined : "true"}
+              >
+                <h3 class="promise__slide-title">{slide.label}</h3>
+                <p class="promise__slide-body">{slide.body}</p>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+
+      <div class="promise__controls">
+        <div class="promise__dots" role="tablist" aria-label="Choose a promise">
+          {
+            promise.slides.map((slide, i) => (
+              <button
+                type="button"
+                class="promise__dot"
+                data-promise-dot={i}
+                role="tab"
+                aria-selected={i === 0 ? "true" : "false"}
+                aria-label={slide.label}
+              />
+            ))
+          }
+        </div>
+
+        <div class="promise__arrows">
+          <button
+            type="button"
+            class="promise__arrow"
+            data-promise-prev
+            aria-label="Previous promise"
+          >
+            <span aria-hidden="true">&larr;</span>
+          </button>
+          <button
+            type="button"
+            class="promise__arrow promise__arrow--next"
+            data-promise-next
+            aria-label="Next promise"
+          >
+            <span aria-hidden="true">&rarr;</span>
+          </button>
+        </div>
+      </div>
+
+      <a class="btn btn--red arrow-link promise__cta" href={ROUTES.contact}>
+        {promise.ctaLabel} <span class="arrow" aria-hidden="true">&rarr;</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .promise {
+    position: relative;
+    background: var(--dh-cream-100);
+  }
+
+  .promise__media {
+    position: relative;
+    height: 860px;
+    overflow: hidden;
+    box-shadow: var(--shadow-panel);
+  }
+
+  .promise__media :global(.promise__photo) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 32%;
+  }
+
+  /* Constrained to the page measure so the card lands on the container's left
+     edge rather than the viewport's; pointer-events pass through the empty
+     area so the photograph is not covered by an invisible box. */
+  .promise__overlay {
+    position: absolute;
+    inset: 0;
+    max-width: var(--container-max);
+    margin-inline: auto;
+    padding-inline: var(--container-pad);
+    pointer-events: none;
+  }
+
+  .promise__card {
+    position: absolute;
+    top: 50%;
+    left: var(--container-pad);
+    transform: translateY(-50%);
+    width: 588px;
+    max-width: calc(100% - var(--container-pad) * 2);
+    padding: var(--space-13) var(--space-13) var(--space-12);
+    background: var(--dh-white);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-lift);
+    pointer-events: auto;
+  }
+
+  .promise :global(.promise__eyebrow) {
+    margin-bottom: var(--space-5);
+  }
+
+  .promise__title {
+    margin-bottom: var(--space-5);
+    font-size: var(--display-2);
+    line-height: 0.96;
+    color: var(--dh-ink);
+  }
+
+  .promise__viewport {
+    overflow: hidden;
+    border-top: 1px solid #e7dec9;
+  }
+
+  .promise__track {
+    display: flex;
+    transition: transform var(--dur-slide) var(--ease);
+  }
+
+  .promise__slide {
+    flex: 0 0 100%;
+    min-height: 170px;
+    padding-top: var(--space-7);
+  }
+
+  .promise__slide-title {
+    margin-bottom: var(--space-3);
+    font-size: var(--display-6);
+    line-height: 1.1;
+    letter-spacing: 0.01em;
+    color: var(--dh-forest-300);
+  }
+
+  .promise__slide-body {
+    font-size: var(--text-md);
+    line-height: 1.65;
+    color: var(--dh-ink-2);
+  }
+
+  .promise__controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-5);
+    margin: var(--space-2) 0 var(--space-9);
+  }
+
+  .promise__dots {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  /* The active dot stretches rather than changing colour alone, so position in
+     the set is legible without relying on a colour difference. */
+  .promise__dot {
+    width: 9px;
+    height: 9px;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: var(--dh-line-strong);
+    cursor: pointer;
+    transition: width var(--transition), background-color var(--transition);
+  }
+
+  .promise__dot[aria-selected="true"] {
+    width: 26px;
+    background: var(--dh-forest-100);
+  }
+
+  .promise__arrows {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .promise__arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    border: 1px solid var(--dh-forest-100);
+    border-radius: var(--radius-full);
+    background: transparent;
+    font-size: var(--text-xl);
+    line-height: 1;
+    color: var(--dh-forest-100);
+    cursor: pointer;
+    transition: background-color var(--transition), color var(--transition),
+      border-color var(--transition), opacity var(--transition);
+  }
+
+  .promise__arrow--next {
+    border-color: var(--dh-forest-100);
+    background: var(--dh-forest-100);
+    color: var(--dh-white);
+  }
+
+  .promise__arrow:hover:not(:disabled) {
+    background: var(--dh-forest-300);
+    border-color: var(--dh-forest-300);
+    color: var(--dh-white);
+  }
+
+  .promise__arrow:disabled {
+    border-color: #e1d8c2;
+    background: transparent;
+    color: #c6baa0;
+    opacity: 0.6;
+    cursor: default;
+  }
+
+  @media (max-width: 1100px) {
+    /* The card stops being an overlay: at this width it would cover most of the
+       photograph, so the image becomes a banner and the card sits beneath it,
+       overlapping just enough to keep the two reading as one block. */
+    .promise__media {
+      height: 420px;
+    }
+
+    .promise__overlay {
+      position: static;
+      pointer-events: auto;
+    }
+
+    .promise__card {
+      position: static;
+      width: auto;
+      max-width: none;
+      margin-top: -80px;
+      transform: none;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .promise__media {
+      height: 300px;
+    }
+
+    .promise__card {
+      margin-top: 0;
+      padding: var(--space-8) var(--space-6) var(--space-9);
+      border-radius: 0;
+    }
+
+    .promise__slide {
+      min-height: 200px;
+    }
+
+    .promise__cta {
+      width: 100%;
+    }
+  }
+</style>
+
+<script>
+  // Slide carousel. The track translates by whole viewport widths, so the
+  // slides stay in the DOM and in the accessibility tree order.
+  for (const root of document.querySelectorAll<HTMLElement>("[data-promise]")) {
+    const card = root.closest(".promise__card") ?? root.parentElement;
+    if (!card) continue;
+
+    const track = root.querySelector<HTMLElement>("[data-promise-track]");
+    const slides = [...root.querySelectorAll<HTMLElement>(".promise__slide")];
+    const dots = [...card.querySelectorAll<HTMLButtonElement>("[data-promise-dot]")];
+    const prev = card.querySelector<HTMLButtonElement>("[data-promise-prev]");
+    const next = card.querySelector<HTMLButtonElement>("[data-promise-next]");
+    if (!track || slides.length === 0) continue;
+
+    const last = slides.length - 1;
+    let index = 0;
+
+    const show = (to: number) => {
+      index = Math.max(0, Math.min(last, to));
+      track.style.transform = `translateX(-${index * 100}%)`;
+
+      slides.forEach((slide, i) => {
+        // Off-screen slides are hidden from assistive tech and from Tab, so a
+        // keyboard user is not walked through content they cannot see.
+        const on = i === index;
+        slide.toggleAttribute("aria-hidden", !on);
+        slide.toggleAttribute("inert", !on);
+      });
+
+      dots.forEach((dot, i) => dot.setAttribute("aria-selected", String(i === index)));
+      if (prev) prev.disabled = index === 0;
+      if (next) next.disabled = index === last;
+    };
+
+    prev?.addEventListener("click", () => show(index - 1));
+    next?.addEventListener("click", () => show(index + 1));
+    dots.forEach((dot, i) => dot.addEventListener("click", () => show(i)));
+
+    show(0);
+  }
+</script>

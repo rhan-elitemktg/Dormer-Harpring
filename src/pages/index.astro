@@ -13,14 +13,18 @@ import {
   getRecentResults,
   getHomeFirmIntro,
   getHomeWhyUs,
+  getHomePromise,
 } from "../data/home";
 import PracticeSelector from "../components/home/PracticeSelector.astro";
 import WhyUs from "../components/home/WhyUs.astro";
 import AttorneysBand from "../components/home/AttorneysBand.astro";
 import CoreValues from "../components/CoreValues.astro";
+import PromiseBand from "../components/home/PromiseBand.astro";
+import FaqBand from "../components/home/FaqBand.astro";
 import { getAwards } from "../data/awards";
 import { getAttorneysSection, getHomeAttorneys } from "../data/attorneys";
 import { getCoreValues, getCoreValuesSection } from "../data/coreValues";
+import { getFaqSection, getHomeFaqs } from "../data/faqs";
 import { getHomeTestimonials, getReviewSummary } from "../data/testimonials";
 import {
   getPracticeSection,
@@ -39,13 +43,16 @@ const [
   reviews,
   practiceSection,
   areas,
-  promise,
+  practicePromise,
   catastrophic,
   why,
   attorneysSection,
   attorneys,
   valuesSection,
   values,
+  promise,
+  faqSection,
+  faqs,
 ] = await Promise.all([
   getHomeHero(),
   getHomeStats(),
@@ -63,6 +70,9 @@ const [
   getHomeAttorneys(),
   getCoreValuesSection(),
   getCoreValues(),
+  getHomePromise(),
+  getFaqSection(),
+  getHomeFaqs(),
 ]);
 ---
 
@@ -79,10 +89,12 @@ const [
   <PracticeSelector
     section={practiceSection}
     areas={areas}
-    promise={promise}
+    promise={practicePromise}
     catastrophic={catastrophic}
   />
   <WhyUs why={why} />
   <AttorneysBand section={attorneysSection} attorneys={attorneys} />
   <CoreValues section={valuesSection} values={values} />
+  <PromiseBand promise={promise} />
+  <FaqBand section={faqSection} faqs={faqs} />
 </Layout>

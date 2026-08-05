@@ -1,0 +1,251 @@
+---
+// One FAQ row: a <details> disclosure holding the answer and its video panel.
+//
+// CSS-only, via `<details name="faq">` — the shared name makes the group
+// exclusive with no JS at all. That matters beyond simplicity: this block is
+// the source for FAQPage structured data, and Google requires the answer text
+// to be present in the page. A JS-swapped panel would put it out of the DOM.
+import Picture from "../../media/Picture.astro";
+import PlayButton from "../../media/PlayButton.astro";
+import type { Faq } from "../../../data/faqs";
+import { ROUTES } from "../../../lib/routePaths";
+import faqCover from "../../../assets/home/faq-video-cover.jpg";
+
+interface Props {
+  faq: Faq;
+  ctaLabel: string;
+  open: boolean;
+}
+
+const { faq, ctaLabel, open } = Astro.props;
+---
+
+<details class="faq" name="faq" open={open}>
+  <summary class="faq__q">
+    <span class="faq__q-text">{faq.question}</span>
+    <span class="faq__sign" aria-hidden="true"></span>
+  </summary>
+
+  <div class="faq__body">
+    {
+      /* TODO(video): inert until the attorney answers have a host and IDs. */
+    }
+    <div class="faq__video" data-video>
+      <Picture
+        src={faqCover}
+        alt="Attorney answering a question on camera"
+        widths={[400, 800]}
+        sizes="(max-width: 760px) 100vw, 400px"
+        class="faq__video-img"
+      />
+      <span class="faq__video-scrim" aria-hidden="true"></span>
+      <span class="faq__watch">&#9654; Watch &middot; {faq.videoLength}</span>
+      <PlayButton tone="light" size={62} class="faq__play" />
+      <span class="faq__video-label">Attorney video</span>
+    </div>
+
+    <div>
+      <p class="faq__a">{faq.answer}</p>
+      <a class="faq__cta arrow-link" href={ROUTES.contact}>
+        {ctaLabel} <span class="arrow" aria-hidden="true">&rarr;</span>
+      </a>
+    </div>
+  </div>
+</details>
+
+<style>
+  .faq + .faq {
+    border-top: 1px solid var(--dh-line-soft);
+  }
+
+  .faq__q {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-6);
+    padding: var(--space-7) var(--space-9);
+    cursor: pointer;
+    list-style: none;
+  }
+
+  /* Safari still paints the default triangle without this. */
+  .faq__q::-webkit-details-marker {
+    display: none;
+  }
+
+  .faq__q-text {
+    font-weight: 700;
+    font-size: var(--text-3xl);
+    line-height: 1.32;
+    color: var(--dh-ink);
+  }
+
+  /* A plus built from two bars rather than a glyph, so the horizontal one can
+     rotate into the vertical and read as a single mark turning into a minus. */
+  .faq__sign {
+    position: relative;
+    width: 18px;
+    height: 18px;
+    flex: none;
+  }
+
+  .faq__sign::before,
+  .faq__sign::after {
+    content: "";
+    position: absolute;
+    inset: 50% 0 auto;
+    height: 2px;
+    background: var(--accent-gold);
+    transform: translateY(-50%);
+    transition: transform var(--transition), opacity var(--transition);
+  }
+
+  .faq__sign::after {
+    transform: translateY(-50%) rotate(90deg);
+  }
+
+  .faq[open] .faq__sign::after {
+    transform: translateY(-50%) rotate(0deg);
+  }
+
+  /* Animates the disclosure itself. A closed <details> doesn't render its
+     content at all, so there is no box to transition — `::details-content` is
+     the only handle on it. `content-visibility` needs `allow-discrete` so the
+     panel stays painted for the duration of the CLOSING transition instead of
+     vanishing on frame one, and `block-size: auto` only interpolates because
+     of `interpolate-size` on :root.
+
+     Same `--transition` as the +/- mark, so the two move together. Browsers
+     without ::details-content ignore all of this and open instantly, which is
+     exactly the behaviour this replaces. */
+  .faq::details-content {
+    block-size: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: block-size var(--transition), opacity var(--transition),
+      content-visibility var(--transition) allow-discrete;
+  }
+
+  .faq[open]::details-content {
+    block-size: auto;
+    opacity: 1;
+  }
+
+  .faq__body {
+    display: grid;
+    grid-template-columns: 400px minmax(0, 1fr);
+    gap: var(--space-10);
+    align-items: start;
+    padding: 2px var(--space-9) var(--space-9);
+  }
+
+  .faq__video {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    border-radius: var(--radius-5);
+    overflow: hidden;
+    background: #e6dbc3;
+    cursor: pointer;
+  }
+
+  .faq__video :global(.faq__video-img) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+  }
+
+  .faq__video-scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(31, 40, 34, 0) 40%, rgba(31, 40, 34, 0.55) 100%);
+  }
+
+  .faq__watch {
+    position: absolute;
+    top: var(--space-3);
+    left: var(--space-3);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-3);
+    background: var(--accent);
+    font-weight: 800;
+    font-size: var(--text-micro);
+    line-height: 1;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--dh-white);
+  }
+
+  /* PlayButton rather than a bespoke circle, so the pulse keyframes live in one
+     place. `--glyph` is the hook the component exposes for exactly this: the
+     comp draws a red triangle here, where every other play button on the page
+     is forest or white. */
+  .faq__video :global(.faq__play) {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    --glyph: var(--accent);
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.2);
+    transition: transform var(--transition);
+  }
+
+  /* Pulse timing is global (see `.play` in global.css); this is only the lift. */
+  .faq__video:hover :global(.faq__play),
+  .faq__video:focus-within :global(.faq__play) {
+    transform: translate(-50%, -50%) scale(1.06);
+  }
+
+  .faq__video-label {
+    position: absolute;
+    bottom: var(--space-3);
+    left: var(--space-4);
+    font-weight: 800;
+    font-size: var(--text-micro);
+    line-height: 1;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--dh-parchment);
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
+  }
+
+  .faq__a {
+    margin-bottom: var(--space-5);
+    font-size: var(--text-lg);
+    line-height: 1.72;
+    color: #4a4534;
+  }
+
+  .faq__cta {
+    font-family: var(--font-body);
+    font-weight: 800;
+    font-size: var(--text-sm);
+    line-height: 1;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  @media (max-width: 760px) {
+    .faq__q {
+      padding: var(--space-5) var(--space-6);
+      gap: var(--space-4);
+    }
+
+    .faq__q-text {
+      font-size: var(--text-xl);
+    }
+
+    .faq__body {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-6);
+      padding: 2px var(--space-6) var(--space-7);
+    }
+  }
+</style>
