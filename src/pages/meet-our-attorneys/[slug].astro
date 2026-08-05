@@ -1,0 +1,442 @@
+---
+// The full attorney profile.
+//
+// Only the two founding partners have one today — `getStaticPaths` builds a
+// page per PROFILE rather than per team member, so an attorney without one
+// simply has no page and nothing linking to it, rather than a route that
+// renders an empty shell.
+import type { GetStaticPaths } from "astro";
+import Layout from "../../layouts/Layout.astro";
+import Picture from "../../components/media/Picture.astro";
+import Prose from "../../components/prose/Prose.astro";
+import AttorneyFacts from "../../components/team/AttorneyFacts.astro";
+import ContactDetails from "../../components/contact/ContactDetails.astro";
+import { getAttorneyProfiles, getTeam } from "../../data/team";
+import { getFirmDetails } from "../../data/site";
+import { getContactBand, getContactDetails } from "../../data/contact";
+import { videoWatchUrl } from "../../lib/video";
+import { ROUTES } from "../../lib/routePaths";
+
+export const getStaticPaths = (async () => {
+  const [profiles, team] = await Promise.all([getAttorneyProfiles(), getTeam()]);
+  return profiles.map((profile) => ({
+    params: { slug: profile.slug },
+    props: { profile, member: team.find((m) => m._key === profile.slug)! },
+  }));
+}) satisfies GetStaticPaths;
+
+const { profile, member } = Astro.props;
+const [firm, band, details] = await Promise.all([
+  getFirmDetails(),
+  getContactBand(),
+  getContactDetails(),
+]);
+
+const firstName = member.name.split(" ")[0];
+const portrait = member.photoLarge ?? member.photo;
+---
+
+<Layout
+  title={member.name}
+  description={`${member.name}, ${member.role} at Dormer Harpring — Denver personal injury trial lawyers.`}
+>
+  <section class="bio">
+    <div class="container bio__grid">
+      <article class="bio__main">
+        <p class="bio__cat">{profile.category}</p>
+        <h1 class="bio__title">{member.name}</h1>
+
+        {
+          /* Phone and city only. The comp puts a personal email here; the firm
+             publishes none — see the note on `email` in site.ts. */
+        }
+        <p class="bio__meta">
+          <a href={`tel:${firm.phoneE164}`}>{firm.phone}</a>
+          <span aria-hidden="true">·</span>
+          <span>{firm.address.city}, Colorado</span>
+        </p>
+
+        {profile.facts && <AttorneyFacts facts={profile.facts} />}
+
+        {
+          member.awards && member.awards.length > 0 && (
+            <ul class="bio__awards">
+              {member.awards.map((award) => (
+                <li>
+                  <Picture
+                    src={award.image}
+                    alt={award.alt}
+                    widths={[160, 320]}
+                    class="bio__award"
+                  />
+                </li>
+              ))}
+            </ul>
+          )
+        }
+
+        {
+          profile.video && (
+            <a
+              class="bio__video"
+              href={videoWatchUrl(profile.video.ref)}
+              target="_blank"
+              rel="noopener"
+            >
+              <Picture
+                src={profile.video.poster}
+                alt={profile.video.alt}
+                widths={[640, 900, 1280]}
+                sizes="(max-width: 980px) 100vw, 60vw"
+                class="bio__poster"
+              />
+              <span class="bio__play" aria-hidden="true">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M8 5.5v13l11-6.5z" />
+                </svg>
+              </span>
+              <span class="visually-hidden">
+                Watch {member.name}'s profile film on YouTube
+              </span>
+            </a>
+          )
+        }
+
+        <Prose value={profile.body} class="bio__body" />
+
+        <aside class="bio__cta">
+          <div>
+            <p class="bio__cta-note">Talk to {firstName}</p>
+            <a class="bio__cta-num" href={`tel:${firm.phoneE164}`}>{firm.phone}</a>
+          </div>
+          <a class="btn btn--red btn--lg" href={ROUTES.contact}>Request a free case review</a>
+        </aside>
+      </article>
+
+      <aside class="bio__side">
+        <div class="bio__card">
+          {
+            portrait && (
+              <Picture
+                src={portrait}
+                alt={member.name}
+                widths={[320, 600]}
+                sizes="(max-width: 980px) 100vw, 25vw"
+                class="bio__portrait"
+              />
+            )
+          }
+          <div class="bio__card-body">
+            <p class="bio__card-name">{member.name}</p>
+            <p class="bio__card-role">{member.role}</p>
+            <a class="btn btn--red bio__card-cta" href={ROUTES.contact}>Talk to {firstName}</a>
+          </div>
+        </div>
+
+        {
+          profile.education && (
+            <div class="bio__scard">
+              <h2 class="bio__scard-head">Education</h2>
+              <ul class="bio__list">
+                {profile.education.map((line) => (
+                  <li>{line}</li>
+                ))}
+              </ul>
+            </div>
+          )
+        }
+
+        {
+          /* Rendered as text, not links: the comp points every one at "#", and
+             these are press mentions whose destinations we do not have.
+             TODO(launch): each needs a real URL, or the card comes out. */
+          profile.links && (
+            <div class="bio__scard">
+              <h2 class="bio__scard-head">In the press</h2>
+              <ul class="bio__list">
+                {profile.links.map((line) => (
+                  <li>{line}</li>
+                ))}
+              </ul>
+            </div>
+          )
+        }
+      </aside>
+    </div>
+  </section>
+
+  <ContactDetails details={details} form={band.form} />
+</Layout>
+
+<style>
+  .bio {
+    padding-block: var(--space-section-sm) var(--space-section);
+    background: var(--surface-page);
+  }
+
+  .bio__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-18);
+    align-items: start;
+  }
+
+  .bio__main {
+    grid-column: span 2;
+    min-width: 0;
+  }
+
+  .bio__cat {
+    font-weight: 800;
+    font-size: var(--text-sm);
+    line-height: 1;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--dh-gold-deep);
+  }
+
+  .bio__title {
+    margin-top: var(--space-4);
+    font-size: var(--display-page-sm);
+    line-height: 1.02;
+    letter-spacing: 0.005em;
+    color: var(--dh-ink);
+    text-wrap: balance;
+  }
+
+  .bio__meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-top: var(--space-5);
+    font-size: var(--text-md);
+    line-height: var(--leading-normal);
+    color: var(--text-meta);
+  }
+
+  .bio__meta a {
+    font-weight: 700;
+    color: var(--dh-ink-3);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  /* `auto-fit`, not the comp's fixed six tracks: the comp hardcodes six because
+     it shows six for Sean, and four badges in six tracks leaves two empty ones
+     with the row bunched to the left. Attorneys hold different numbers of
+     accolades, so the count is content. */
+  .bio__awards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: var(--space-6);
+    align-items: center;
+    margin-block: var(--space-9) var(--space-10);
+    padding-block: var(--space-6);
+    padding-inline: 0;
+    border-block: 1px solid var(--dh-line);
+    list-style: none;
+  }
+
+  .bio__awards li {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* `max-height` with `width: auto` — the badges run from square seals to wide
+     wordmarks, and filling the track would treble the square ones. */
+  .bio__awards :global(.bio__award) {
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 74px;
+    object-fit: contain;
+  }
+
+  .bio__video {
+    position: relative;
+    display: block;
+    aspect-ratio: 16 / 9;
+    margin-bottom: var(--space-9);
+    border-radius: var(--radius-6);
+    overflow: hidden;
+    background: var(--dh-forest-500);
+  }
+
+  .bio__video :global(.bio__poster) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .bio__play {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 78px;
+    height: 78px;
+    border-radius: var(--radius-full);
+    background: rgba(225, 74, 50, 0.94);
+    color: var(--dh-white);
+    /* Both transforms in one declaration — a hover rule setting only `scale`
+       would drop the centring translate. */
+    transform: translate(-50%, -50%) scale(1);
+    transition: transform var(--transition);
+  }
+
+  .bio__video:hover .bio__play,
+  .bio__video:focus-visible .bio__play {
+    transform: translate(-50%, -50%) scale(1.08);
+  }
+
+  .bio :global(.bio__body .prose__p) {
+    margin-bottom: var(--space-5);
+    font-size: var(--text-lg);
+    line-height: 1.71;
+    color: var(--dh-ink-2);
+    text-wrap: pretty;
+  }
+
+  .bio__cta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-6);
+    margin-top: var(--space-11);
+    padding: var(--space-8) var(--space-11);
+    border-radius: var(--radius-7);
+    background: var(--dh-forest-500);
+  }
+
+  .bio__cta-note {
+    margin-bottom: var(--space-2);
+    font-family: var(--font-ui);
+    font-weight: 700;
+    font-size: var(--text-label);
+    line-height: 1;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--dh-on-dark-3);
+  }
+
+  .bio__cta-num {
+    font-family: var(--font-ui);
+    font-weight: 600;
+    font-size: var(--display-6);
+    letter-spacing: var(--tracking-tight);
+    color: var(--dh-gold-light);
+  }
+
+  /* Sticky on a long page: the portrait and the CTA stay in view through two
+     thousand words of biography. */
+  .bio__side {
+    position: sticky;
+    top: var(--space-8);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+
+  .bio__card {
+    border: 1px solid var(--dh-line);
+    border-radius: var(--radius-4);
+    overflow: hidden;
+    background: var(--dh-white);
+  }
+
+  .bio__card :global(.bio__portrait) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .bio__card-body {
+    padding: var(--space-5) var(--space-6) var(--space-6);
+  }
+
+  .bio__card-name {
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: var(--display-7);
+    line-height: 1.2;
+    color: var(--dh-ink);
+  }
+
+  .bio__card-role {
+    margin-top: var(--space-1);
+    font-weight: 600;
+    font-size: var(--text-sm);
+    line-height: 1.4;
+    color: #8a806e;
+  }
+
+  .bio__card-cta {
+    width: 100%;
+    margin-top: var(--space-5);
+  }
+
+  .bio__scard {
+    padding: var(--space-6);
+    border: 1px solid var(--dh-line);
+    border-radius: var(--radius-4);
+    background: var(--dh-white);
+  }
+
+  .bio__scard-head {
+    margin-bottom: var(--space-4);
+    font-family: var(--font-body);
+    font-weight: 800;
+    font-size: var(--text-label);
+    line-height: 1;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--dh-gold-deep);
+  }
+
+  .bio__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    list-style: none;
+    padding: 0;
+  }
+
+  .bio__list li {
+    font-size: var(--text-md);
+    line-height: 1.5;
+    color: var(--dh-ink-3);
+  }
+
+  @media (max-width: 980px) {
+    .bio__grid {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-10);
+    }
+
+    .bio__main {
+      grid-column: auto;
+    }
+
+    .bio__side {
+      position: static;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .bio__cta {
+      padding: var(--space-7) var(--space-6);
+    }
+
+    .bio__cta .btn {
+      width: 100%;
+    }
+  }
+</style>

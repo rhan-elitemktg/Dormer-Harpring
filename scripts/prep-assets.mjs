@@ -307,6 +307,31 @@ for (const { from, to, extract } of CROPS) {
   );
 }
 
+// ---------------------------------------------------------------------------
+// Sean's profile-video poster, pulled from YouTube once and committed.
+//
+// Unlike the client testimonials — vertical, so every thumbnail YouTube serves
+// is a letterboxed title card — this one is a true 16:9 frame of him
+// presenting, which is a better poster than any headshot would be.
+{
+  const url = "https://img.youtube.com/vi/LT-oU3yqtmA/maxresdefault.jpg";
+  const response = await fetch(url);
+  if (response.ok) {
+    const outPath = path.join(OUT, "team/sean-dormer-video.jpg");
+    await mkdir(path.dirname(outPath), { recursive: true });
+    const buffer = Buffer.from(await response.arrayBuffer());
+    await sharp(buffer)
+      .resize({ width: 1280, withoutEnlargement: true })
+      .jpeg({ quality: 82, mozjpeg: true })
+      .toFile(outPath);
+    const after = (await stat(outPath)).size;
+    outTotal += after;
+    rows.push(`        ${mb(after).padStart(7)} MB  team/sean-dormer-video.jpg`);
+  } else {
+    console.error(`MISSING  ${url} (${response.status})`);
+  }
+}
+
 console.log(rows.sort().join("\n"));
 console.log(
   `\n${rows.length} files:  ${mb(inTotal)} MB → ${mb(outTotal)} MB  ` +

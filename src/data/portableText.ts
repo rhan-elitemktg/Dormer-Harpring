@@ -27,7 +27,7 @@ export interface PortableTextLink {
 export interface PortableTextBlock {
   _type: "block";
   _key: string;
-  style: "normal";
+  style: "normal" | "blockquote";
   markDefs: PortableTextLink[];
   children: PortableTextSpan[];
 }
@@ -44,7 +44,11 @@ const INLINE = /\*\*([^*]+)\*\*|\[([^\]]+)\]\(([^)]+)\)/g;
  * shim, not of Portable Text, and it has never come up in this copy.
  */
 export function pt(...paragraphs: string[]): PortableTextBlock[] {
-  return paragraphs.map((text, blockIndex) => {
+  return paragraphs.map((raw, blockIndex) => {
+    // A leading "> " marks the paragraph as a pull quote, the way the same
+    // character does in Markdown.
+    const quoted = raw.startsWith("> ");
+    const text = quoted ? raw.slice(2) : raw;
     const children: PortableTextSpan[] = [];
     const markDefs: PortableTextLink[] = [];
 
@@ -82,7 +86,7 @@ export function pt(...paragraphs: string[]): PortableTextBlock[] {
     return {
       _type: "block" as const,
       _key: `b${blockIndex}`,
-      style: "normal" as const,
+      style: quoted ? ("blockquote" as const) : ("normal" as const),
       markDefs,
       children,
     };

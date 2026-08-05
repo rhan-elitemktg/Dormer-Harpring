@@ -12,6 +12,7 @@ import ProseStrong from "./ProseStrong.astro";
 import ProseLink from "./ProseLink.astro";
 import ProseH2 from "./ProseH2.astro";
 import ProseH3 from "./ProseH3.astro";
+import ProseQuote from "./ProseQuote.astro";
 import ProseList from "./ProseList.astro";
 import ProseListItem from "./ProseListItem.astro";
 
@@ -20,6 +21,7 @@ export const proseComponents = {
     normal: ProseParagraph,
     h2: ProseH2,
     h3: ProseH3,
+    blockquote: ProseQuote,
   },
   list: {
     bullet: ProseList,

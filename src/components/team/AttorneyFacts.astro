@@ -1,0 +1,71 @@
+---
+// The three-up dark band under an attorney's name.
+import type { AttorneyFact } from "../../data/team";
+
+interface Props {
+  facts: AttorneyFact[];
+}
+
+const { facts } = Astro.props;
+---
+
+<dl class="afacts">
+  {
+    facts.map((fact) => (
+      <div class="afacts__cell">
+        {/* <dd> before <dt>: the figure reads first and the label explains it. */}
+        <dd class="afacts__value">{fact.value}</dd>
+        <dt class="afacts__label">{fact.label}</dt>
+      </div>
+    ))
+  }
+</dl>
+
+<style>
+  .afacts {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-top: var(--space-9);
+    border-radius: var(--radius-6);
+    overflow: hidden;
+    background: var(--dh-forest-500);
+  }
+
+  .afacts__cell {
+    padding: var(--space-6);
+  }
+
+  .afacts__cell + .afacts__cell {
+    border-left: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .afacts__value {
+    font-family: var(--font-ui);
+    font-weight: 600;
+    font-size: var(--display-6);
+    line-height: 1;
+    letter-spacing: var(--tracking-tight);
+    color: var(--dh-parchment);
+  }
+
+  .afacts__label {
+    margin-top: var(--space-2);
+    font-weight: 800;
+    font-size: var(--text-micro);
+    line-height: 1.4;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #c3a56d;
+  }
+
+  @media (max-width: 760px) {
+    .afacts {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .afacts__cell + .afacts__cell {
+      border-left: 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+    }
+  }
+</style>
