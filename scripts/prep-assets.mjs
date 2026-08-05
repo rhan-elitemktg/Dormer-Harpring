@@ -141,6 +141,47 @@ const MAP = {
  * regeneration tool rather than a build step — the processed result under
  * src/assets/ is committed and is what the site actually builds from.
  */
+const SCRAPE =
+  "/Users/rhanpemberton/Downloads/Dormer Harpring/sitesucker/www.denvertrial.com/wp-content/uploads";
+
+/**
+ * Team headshots, lifted from the LIVE SITE rather than the design package.
+ * The comps ship generic stand-ins for three attorneys and nothing for the
+ * rest; denvertrial.com/meet-our-attorneys carries a real, consistent set —
+ * one backdrop, one lighting setup, 460x580 apiece — for 25 of the 27 people
+ * the comp lists.
+ *
+ * TODO(launch): Alexandra Petroff and Dinorah Gutierrez appear in the comp but
+ * nowhere in the scrape, so they have no photograph. The card falls back to a
+ * monogram until the firm supplies one.
+ */
+const TEAM = {
+  "2020/12/att-bio-06.jpg": "team/sean-dormer.jpg",
+  "2022/12/att-kc-harping.jpg": "team/kc-harpring.jpg",
+  "2022/12/att-tim-garvey.jpg": "team/tim-garvey.jpg",
+  "2026/05/LMB-1.png": "team/laura-browne.jpg",
+  "2024/05/Untitled-design-1.png": "team/jessica-mauser.jpg",
+  "2024/07/ANR-1.png": "team/amy-rogers.jpg",
+  "2024/10/13.png": "team/greg-bentley.jpg",
+  "2022/12/att-marcie-emch.jpg": "team/marcie-emch.jpg",
+  "2023/07/att-bio-kmb.jpg": "team/kassandra-burival.jpg",
+  "2024/05/BEF-1.png": "team/brittany-freeman.jpg",
+  "2024/12/Cindy2-woodbkgd.jpg": "team/cindy-waller.jpg",
+  "2025/09/BLL.png": "team/brittany-lesmeister.jpg",
+  "2022/12/att-julie-althehofen.jpg": "team/julie-altenhofen.jpg",
+  "2024/07/AAR.png": "team/ashley-reisman.jpg",
+  "2024/10/Website-Headshots.png": "team/david-garber.jpg",
+  "2024/10/14.png": "team/abby-houk.jpg",
+  "2025/08/JAA.png": "team/jessica-ayala.jpg",
+  "2024/11/Untitled-design-1.png": "team/livi-lesch.jpg",
+  "2025/01/Untitled-design-2.png": "team/leana-kim.jpg",
+  "2025/11/MMR-1.png": "team/maddy-ricciardi.jpg",
+  "2024/09/MPJ.png": "team/morgan-jewel.jpg",
+  "2026/05/RAP-3.png": "team/rachel-pavelko.jpg",
+  "2024/09/EKN.png": "team/ella-nelson.jpg",
+  "2024/10/15.png": "team/michael-greer.jpg",
+  "2026/03/MPM-2.png": "team/marilyn-morales.jpg",
+};
 const EXTERNAL = {
   "/Users/rhanpemberton/Downloads/pedestrian-accident.webp": "home/practice-pedestrian.jpg",
 };
@@ -152,6 +193,7 @@ const rows = [];
 
 const entries = [
   ...Object.entries(MAP).map(([from, to]) => [path.join(SRC, from), to]),
+  ...Object.entries(TEAM).map(([from, to]) => [path.join(SCRAPE, from), to]),
   ...Object.entries(EXTERNAL),
 ];
 
