@@ -82,6 +82,23 @@ const MAP = {
   "wireframes/assets/vid-cover-1.png": "testimonials/video-cover-1.jpg",
   "wireframes/assets/vid-cover-3.png": "testimonials/video-cover-3.jpg",
 
+  // Community partner logos. A SECOND set of the same brands the homepage's
+  // NGO row uses — six overlap, and only Metro Caring is byte-identical; the
+  // rest are different crops. Kept apart rather than merged, because picking
+  // one crop over the other would silently restyle an approved homepage.
+  // TODO(sanity): one asset per organisation once an editor owns them.
+  "assets/partners/clothes-to-kids.png": "partners/clothes-to-kids",
+  "assets/partners/craig-hospital.jpg": "partners/craig-hospital",
+  "assets/partners/humane-colorado.png": "partners/humane-colorado",
+  "assets/partners/metro-caring.webp": "partners/metro-caring",
+  "assets/partners/pikes-peak-challenge.jpg": "partners/pikes-peak-challenge",
+  "assets/partners/project-angel-heart.png": "partners/project-angel-heart",
+  "assets/partners/project-cure.jpg": "partners/project-cure",
+  "assets/partners/rmhc-denver.png": "partners/rmhc-denver",
+  "assets/partners/the-park-people.png": "partners/the-park-people",
+  "assets/partners/true-companions.png": "partners/true-companions",
+  "assets/partners/we-dont-waste.png": "partners/we-dont-waste",
+
   // Award badges
   "wireframes/assets/badge-1.png": "badges/badge-1",
   "wireframes/assets/badge-2.png": "badges/badge-2",

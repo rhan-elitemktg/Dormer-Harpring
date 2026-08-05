@@ -1,0 +1,102 @@
+---
+// The full row of partner logos, on white.
+import Picture from "../media/Picture.astro";
+import type { CommunityPage, CommunityPartner } from "../../data/communityPage";
+
+interface Props {
+  section: CommunityPage["partners"];
+  partners: CommunityPartner[];
+}
+
+const { section, partners } = Astro.props;
+---
+
+<section class="plogos">
+  <div class="container">
+    <p class="plogos__label">{section.label}</p>
+    <ul class="plogos__grid">
+      {
+        partners.map((partner) => (
+          <li class="plogos__item">
+            <Picture
+              src={partner.logo}
+              alt={partner.org}
+              widths={[200, 400]}
+              sizes="(max-width: 760px) 45vw, (max-width: 1080px) 22vw, 15vw"
+              class="plogos__logo"
+            />
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  /* White, not cream: eleven logos drawn for white backgrounds, several with a
+     hard white box baked into the artwork. On cream those boxes show. */
+  .plogos {
+    padding-block: var(--space-section-sm);
+    background: var(--dh-white);
+  }
+
+  .plogos__label {
+    margin-bottom: var(--space-9);
+    font-family: var(--font-ui);
+    font-weight: 800;
+    font-size: var(--text-label);
+    line-height: 1;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    text-align: center;
+    color: var(--dh-gold-deep);
+  }
+
+  .plogos__grid {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: var(--space-7);
+    align-items: center;
+    list-style: none;
+    padding: 0;
+  }
+
+  .plogos__item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* `max-height` with `width: auto`, not the comp's `width: 100%`: these run
+     from 132px to 400px wide at wildly different aspects, and forcing them all
+     to the track width blows the square ones up to three times the size of the
+     wordmarks. Capping the height levels them optically instead. */
+  .plogos__grid :global(.plogos__logo) {
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 60px;
+    object-fit: contain;
+    filter: grayscale(1);
+    opacity: 0.62;
+    transition: filter var(--transition), opacity var(--transition);
+  }
+
+  .plogos__item:hover :global(.plogos__logo) {
+    filter: grayscale(0);
+    opacity: 1;
+  }
+
+  @media (max-width: 1080px) {
+    .plogos__grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 760px) {
+    .plogos__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-8);
+    }
+  }
+</style>

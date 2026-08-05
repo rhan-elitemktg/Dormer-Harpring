@@ -1,0 +1,43 @@
+---
+import Layout from "../layouts/Layout.astro";
+import PageHeader from "../components/PageHeader.astro";
+import VolunteerGrid from "../components/community/VolunteerGrid.astro";
+import Sponsorships from "../components/community/Sponsorships.astro";
+import PartnerLogos from "../components/community/PartnerLogos.astro";
+import StatsBand from "../components/StatsBand.astro";
+import ContactDetails from "../components/contact/ContactDetails.astro";
+import {
+  getCommunityPage,
+  getCommunityPartners,
+  getSponsorships,
+} from "../data/communityPage";
+import { getFirmStats } from "../data/stats";
+import { getContactBand, getContactDetails } from "../data/contact";
+
+const [page, partners, sponsorships, stats, band, details] = await Promise.all([
+  getCommunityPage(),
+  getCommunityPartners(),
+  getSponsorships(),
+  getFirmStats(),
+  getContactBand(),
+  getContactDetails(),
+]);
+---
+
+<Layout
+  title="Community Involvement"
+  description="Where the Dormer Harpring team spends its time outside the courtroom — the Colorado organizations we volunteer with and the events we sponsor."
+>
+  <PageHeader
+    eyebrow={page.eyebrow}
+    title={page.title}
+    lede={page.lede}
+    tone="forest"
+    size="sm"
+  />
+  <VolunteerGrid section={page.volunteer} partners={partners} />
+  <Sponsorships section={page.sponsorships} sponsorships={sponsorships} />
+  <PartnerLogos section={page.partners} partners={partners} />
+  <StatsBand stats={stats} />
+  <ContactDetails details={details} form={band.form} />
+</Layout>
