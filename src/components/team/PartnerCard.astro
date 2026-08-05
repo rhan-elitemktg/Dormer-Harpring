@@ -70,12 +70,22 @@ const portrait = member.photoLarge ?? member.photo;
     background: var(--dh-white);
   }
 
+  /* `position: relative` + an absolutely positioned image, not just
+     `aspect-ratio` on the box. On its own the ratio only sets a PREFERRED
+     height: the in-flow <img> still contributes its intrinsic 3:4, the box
+     grows to fit, and the crop never happens — which is why the portrait ran
+     to the waist instead of stopping at the tie. Taking the image out of flow
+     is what makes the ratio binding. */
   .pcard__frame {
+    position: relative;
     aspect-ratio: 1 / 1;
+    overflow: hidden;
     background: var(--surface-sunk);
   }
 
   .pcard__frame :global(.pcard__photo) {
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
