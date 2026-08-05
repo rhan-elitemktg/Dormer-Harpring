@@ -7,8 +7,12 @@
 // treatment is needed inside Portable Text renderers later, which sit outside
 // this component's scoped-style boundary.
 interface Props {
-  /** `gold` on cream, `on-dark` on a forest section. */
-  tone?: "gold" | "on-dark";
+  /**
+   * `gold`        the deep gold most light sections use (#B0873C)
+   * `gold-bright` the brighter #C79A54 — News, Insights and Community only
+   * `on-dark`     on a forest section
+   */
+  tone?: "gold" | "gold-bright" | "on-dark";
   /** Rules on both sides, for centred section openers. */
   center?: boolean;
   class?: string;
@@ -21,6 +25,7 @@ const { tone = "gold", center = false, class: className } = Astro.props;
   class:list={[
     "eyebrow",
     tone === "on-dark" && "eyebrow--on-dark",
+    tone === "gold-bright" && "eyebrow--gold-bright",
     center && "eyebrow--center",
     className,
   ]}
