@@ -60,6 +60,20 @@ const MAP = {
   // home/ rather than being owned by whichever page happened to need it first.
   "uploads/pasted-1785212437457-0.png": "team/attorneys-skyline.jpg",
 
+  // The two founding partners at 600x800 — the same shot as their headshot,
+  // at the resolution the partner cards need for a square crop.
+  "assets/team/dormer-photo.jpg": "team/sean-dormer-lg.jpg",
+  "assets/team/harpring-photo.jpg": "team/kc-harpring-lg.jpg",
+
+  // The badges shown on a partner's card. A different set from the firm-wide
+  // trust bar in badges/ — these are personal accolades.
+  "assets/awards/top-20-verdicts.png": "awards/top-20-verdicts",
+  "assets/awards/multi-million.png": "awards/multi-million",
+  "assets/awards/avvo-10.png": "awards/avvo-10",
+  "assets/awards/best-lawyers.png": "awards/best-lawyers",
+  "assets/awards/national-trial-40.png": "awards/national-trial-40",
+  "assets/awards/ones-to-watch.png": "awards/ones-to-watch",
+
   // Co-counsel. From `assets/`, which belongs to the abandoned design
   // generation — the same carve-out as the practice-area photography above:
   // that rule is about token VALUES, not about pictures, and nothing else in
@@ -156,6 +170,12 @@ const SCRAPE =
  * monogram until the firm supplies one.
  */
 const TEAM = {
+  // The office dogs. On the live site's team page with the rest, and Jane is
+  // marked "In Loving Memory" there.
+  "2022/11/IMG_7462-scaled-e1759265649797.jpeg": "team/randy-sawpring.jpg",
+  "2022/12/jane-thedog-e1759266062602.jpg": "team/jane-gonzales-dormer.jpg",
+  "2022/11/IMG_0585-e1759266158161.jpeg": "team/bella-sawpring.jpg",
+
   "2020/12/att-bio-06.jpg": "team/sean-dormer.jpg",
   "2022/12/att-kc-harping.jpg": "team/kc-harpring.jpg",
   "2022/12/att-tim-garvey.jpg": "team/tim-garvey.jpg",
