@@ -94,11 +94,13 @@ const external = /^https?:\/\//i.test(card.href);
     display: block;
   }
 
-  /* Pushed to the foot so the notes line up across a row of cards whose values
-     wrap to different numbers of lines. */
+  /* Fixed to the value above it, NOT pushed to the foot of the card. Bottom-
+     aligning the notes reads as deliberate only when every value in the row is
+     the same height — and they are not: "(720) 734-6230" is one line where the
+     address is two, so its note floated away from the number it belongs to.
+     The cards still finish level, because the grid stretches them. */
   .info__note {
-    margin-top: auto;
-    padding-top: var(--space-2);
+    margin-top: var(--space-2);
     font-size: var(--text-md);
     line-height: 1.5;
     color: var(--dh-ink-3);
