@@ -37,11 +37,13 @@ const { find } = Astro.props;
 </section>
 
 <style>
-  /* No top padding: the section above ends with its own full padding, and the
-     comp runs the two together. */
+  /* One step down the cream ladder from the section above, so the map reads as
+     its own band rather than as more of the contact section. The comp runs both
+     on the same cream; the pair splits the gap between them, matching the
+     rhythm the News and Community bands already set on the homepage. */
   .findus {
-    padding-bottom: var(--space-section);
-    background: var(--surface-page);
+    padding-block: var(--space-section-sm) var(--space-section);
+    background: var(--surface-alt);
   }
 
   .findus :global(.findus__head) {

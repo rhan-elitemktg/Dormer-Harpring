@@ -37,7 +37,16 @@ export interface FirmDetails {
   email?: string;
   address: FirmAddress;
   geo: { lat: number; lng: number };
+  /** THE canonical external map link. Every "Get directions" points here. */
   mapUrl: string;
+  /**
+   * The numeric Google Business Profile id behind `mapUrl`. An embedded map
+   * cannot use the short link — it redirects to a `/maps/place/` page, which
+   * refuses to be framed — and an address query drops an anonymous pin instead
+   * of showing the listing. `?cid=` is the keyless way to embed the profile
+   * itself, and it is the same place `mapUrl` opens.
+   */
+  mapPlaceCid: string;
   /** schema.org `openingHours`. Must describe the same hours as `hoursDisplay`. */
   hours: string;
   /** The same hours written for a human. Shown on the contact page. */
@@ -85,7 +94,11 @@ export async function getFirmDetails(): Promise<FirmDetails> {
       country: "US",
     },
     geo: { lat: 39.7726247, lng: -104.9820183 },
-    mapUrl: "https://maps.app.goo.gl/8oWqkqUJtBrSS49s9",
+    mapUrl: "https://maps.app.goo.gl/eHCD8AG7775NpvgP9",
+    // Resolved from the link above: it lands on
+    // /maps/place/Dormer+Harpring+Denver+Personal+Injury+Lawyers/@39.7726247,-104.9820183
+    // whose data segment carries 0xb26d4f70291b281e — this in decimal.
+    mapPlaceCid: "12857019854357211166",
     // TODO(launch): the Contact comp shows "Mon–Fri, 8:30am – 5:30pm". These
     // are the hours the live site actually publishes in its JSON-LD, so they
     // ship until someone confirms otherwise — and the two fields are kept

@@ -43,7 +43,7 @@ export interface ContactPage {
     eyebrow: string;
     title: string;
     lede: string;
-    /** Google Maps embed src, built from the address rather than pasted. */
+    /** Google Maps embed src, built from the firm's place id rather than pasted. */
     mapSrc: string;
     mapTitle: string;
   };
@@ -121,7 +121,9 @@ export async function getContactPage(): Promise<ContactPage> {
       eyebrow: "Find us",
       title: "Visit our Denver office.",
       lede: `${address} — in the RiNo district, with free parking on site.`,
-      mapSrc: `https://www.google.com/maps?q=${encodeURIComponent(address)}&output=embed`,
+      // Same place as `mapUrl`, embedded rather than linked. See the note on
+      // `mapPlaceCid` for why this is not the short link or an address query.
+      mapSrc: `https://maps.google.com/maps?cid=${firm.mapPlaceCid}&output=embed`,
       mapTitle: `${firm.name} — Denver office`,
     },
   };

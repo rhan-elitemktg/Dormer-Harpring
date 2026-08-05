@@ -16,7 +16,8 @@ interface Props {
 const { page, form } = Astro.props;
 ---
 
-<section class="section ct" id="contact">
+{/* Not `.section`: the padding here is asymmetric, so it sets its own. */}
+<section class="ct" id="contact">
   <div class="container">
     <div class="ct__grid">
       <div class="ct__aside">
@@ -54,7 +55,10 @@ const { page, form } = Astro.props;
 </section>
 
 <style>
+  /* Asymmetric: the band below now carries its own background and its own top
+     padding, so this one only owes half the gap. */
   .ct {
+    padding-block: var(--space-section) var(--space-section-sm);
     background: var(--surface-page);
   }
 
