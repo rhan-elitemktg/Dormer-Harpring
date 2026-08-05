@@ -27,13 +27,19 @@ function initRail(rail: HTMLElement) {
 
   const track = rail.firstElementChild;
 
+  // How many cards one press moves. Defaults to 1 — the card rails advance a
+  // card at a time. A rail whose snap points sit on every Nth card (the awards
+  // carousel pages two badges at a time) sets `data-rail-step="2"`, so the
+  // arrow lands exactly on a snap point instead of halfway between two.
+  const cards = Number(rail.dataset.railStep) || 1;
+
   // Measured, not hardcoded: the card width changes at the mobile breakpoint,
   // and a fixed step would scroll to the wrong place there.
   const step = () => {
     const card = track?.firstElementChild as HTMLElement | null;
     if (!card || !track) return rail.clientWidth * 0.8;
     const gap = parseFloat(getComputedStyle(track).gap) || 0;
-    return card.offsetWidth + gap;
+    return (card.offsetWidth + gap) * cards;
   };
 
   // Disable an arrow once the rail can go no further, so the control reflects
