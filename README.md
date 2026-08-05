@@ -39,7 +39,10 @@ Everything below is deliberately unfinished, not overlooked.
 | **Nav submenus** | About and Practice Areas use the current site's IA; Attorneys and Locations are proposed and need sign-off. "Locations" has no hub page, so its parent renders as plain text. |
 | **"En Español"** | Renders in the header (every comp shows it) with no target. |
 | **Phone** | `(866) 683-6894` site-wide, from `firmDetails`. The live site still publishes `(303) 756-3812` in its JSON-LD and on its contact page — decide whether that one is retired or kept as a local number, and settle the display vs CallRail tracking split, before launch. |
-| **Third-party tags** | The old site loads GA4, GTM, CallRail, Clarity, Ahrefs, Intaker and reCAPTCHA — roughly 600 KB. Recommend GTM only, with the rest configured inside it. |
+| **Text number** | `(720) 734-6230`, from every comp. The live site publishes `(720) 730-7997` (864 uses) and has the comps' number only inside commented-out markup. One of the two is stale — confirm which. |
+| **Email** | The contact page shows `info@dormerharpring.com`, which is the comp's. **The live site publishes no contact address anywhere** — the only one in its markup is a WordPress author account leaking into blog JSON-LD. Confirm it exists, or clear `firmDetails.email` and the card disappears on its own. |
+| **Office hours** | `Mo-Fr 09:00-17:00`, which is what the live site's JSON-LD asserts. The Contact comp shows **8:30am – 5:30pm**. `hours` and `hoursDisplay` sit together in `firmDetails` so the page and the structured data cannot drift apart; both change together. |
+| **Third-party tags** | The old site loads GA4, GTM, CallRail, Clarity, Ahrefs, Intaker and reCAPTCHA — roughly 600 KB. Recommend GTM only, with the rest configured inside it. The contact page's Google Maps embed also sets cookies on load, so it belongs in the same consent decision. |
 | **Attorney portraits** | Three of seven attorneys have photography. The homepage rail takes the rest as they arrive. |
 | **Eyebrow contrast** | Section eyebrows are 12px uppercase gold on cream. The comps use `#C79A54` (≈2.5:1) on News/Insights/Community and `#B0873C` (≈3.1:1) elsewhere; both fall short of WCAG AA, and neither qualifies as large text at this size. Built to match the comps — worth a decision before launch. |
 

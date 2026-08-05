@@ -4,7 +4,7 @@
 import Picture from "./media/Picture.astro";
 import SocialIcon from "./icons/SocialIcon.astro";
 import ServiceAreaBand from "./footer/ServiceAreaBand.astro";
-import { getFirmDetails, formatAddress } from "../data/site";
+import { getFirmDetails } from "../data/site";
 import {
   getFooterNav,
   getFooterPracticeAreas,
@@ -21,9 +21,10 @@ const [firm, practiceAreas, footerNav, serviceAreas] = await Promise.all([
 ]);
 
 const year = new Date().getFullYear();
-const directionsUrl = `https://maps.google.com/?q=${encodeURIComponent(
-  formatAddress(firm.address)
-)}`;
+// `firm.mapUrl`, not an address search: the short link opens the firm's own
+// Google Business Profile, where an address query opens a dropped pin with no
+// hours, no reviews and no "Directions" already primed.
+const directionsUrl = firm.mapUrl;
 ---
 
 <footer class="footer">

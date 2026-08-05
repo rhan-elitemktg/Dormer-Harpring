@@ -37,8 +37,20 @@ export interface FirmDetails {
   email?: string;
   address: FirmAddress;
   geo: { lat: number; lng: number };
+  /** THE canonical external map link. Every "Get directions" points here. */
   mapUrl: string;
+  /**
+   * The numeric Google Business Profile id behind `mapUrl`. An embedded map
+   * cannot use the short link — it redirects to a `/maps/place/` page, which
+   * refuses to be framed — and an address query drops an anonymous pin instead
+   * of showing the listing. `?cid=` is the keyless way to embed the profile
+   * itself, and it is the same place `mapUrl` opens.
+   */
+  mapPlaceCid: string;
+  /** schema.org `openingHours`. Must describe the same hours as `hoursDisplay`. */
   hours: string;
+  /** The same hours written for a human. Shown on the contact page. */
+  hoursDisplay: string;
   /** Rendered as icons in the footer. Each `name` needs a glyph. */
   socials: SocialLink[];
   /**
@@ -70,7 +82,11 @@ export async function getFirmDetails(): Promise<FirmDetails> {
     sms: "(720) 734-6230",
     smsE164: "+17207346230",
     address: {
-      street: "3457 Ringsby Court",
+      // "Ct", not "Court": the live site publishes both (866 uses to 571) and
+      // every comp uses the short form, which is also what fits the contact
+      // card and the footer column without wrapping "Unit 110" onto its own
+      // line. NAP text should be identical everywhere it appears.
+      street: "3457 Ringsby Ct",
       unit: "Unit 110",
       city: "Denver",
       region: "CO",
@@ -78,8 +94,24 @@ export async function getFirmDetails(): Promise<FirmDetails> {
       country: "US",
     },
     geo: { lat: 39.7726247, lng: -104.9820183 },
-    mapUrl: "https://maps.app.goo.gl/8oWqkqUJtBrSS49s9",
+    mapUrl: "https://maps.app.goo.gl/eHCD8AG7775NpvgP9",
+    // Resolved from the link above: it lands on
+    // /maps/place/Dormer+Harpring+Denver+Personal+Injury+Lawyers/@39.7726247,-104.9820183
+    // whose data segment carries 0xb26d4f70291b281e — this in decimal.
+    mapPlaceCid: "12857019854357211166",
+    // TODO(launch): the Contact comp shows "Mon–Fri, 8:30am – 5:30pm". These
+    // are the hours the live site actually publishes in its JSON-LD, so they
+    // ship until someone confirms otherwise — and the two fields are kept
+    // side by side because a page showing one set while the structured data
+    // asserts another is worse than either being wrong alone.
     hours: "Mo-Fr 09:00-17:00",
+    hoursDisplay: "Mon–Fri, 9:00am – 5:00pm",
+    // TODO(launch): UNVERIFIED. The comp's contact card shows this address;
+    // the live site publishes no contact email anywhere (the only address in
+    // its markup is a WordPress author account leaking into blog JSON-LD).
+    // The card renders only when this is set, so clearing it is the whole
+    // change if the firm would rather not publish one.
+    email: "info@dormerharpring.com",
     // The five the comps draw, in their order. The live site's `sameAs` omits
     // Instagram, TikTok and YouTube even though its footer links them — fixed
     // here, since everything below feeds the JSON-LD too.

@@ -8,10 +8,10 @@
 // component that can emit the wrong heading level is a component that
 // eventually does.
 //
-// Today it renders the cream, centred variant the Thank You and Blog comps
-// share. The forest-backed page headers (Contact, Testimonials, Case Results)
-// arrive with those pages — several sit on a photograph, and guessing at that
-// treatment from a partial read is how the wrong abstraction gets locked in.
+// Two backgrounds so far: the cream one the Thank You and Blog comps share,
+// and the forest gradient Contact uses. The remaining forest headers
+// (Testimonials, Case Results, Co-Counsel) carry CTAs and in one case a
+// photograph; those arrive with their pages rather than being guessed at now.
 import Eyebrow from "./Eyebrow.astro";
 import Prose from "./prose/Prose.astro";
 import type { PortableTextBlock } from "../data/portableText";
@@ -24,18 +24,32 @@ interface Props {
    * Thank You page puts a `tel:` link on the phone number mid-sentence.
    */
   lede?: PortableTextBlock[];
+  tone?: "cream" | "forest";
   align?: "center" | "left";
   class?: string;
 }
 
-const { eyebrow, title, lede, align = "center", class: className } = Astro.props;
+const {
+  eyebrow,
+  title,
+  lede,
+  tone = "cream",
+  align = "center",
+  class: className,
+} = Astro.props;
 ---
 
-<section class:list={["ph", align === "center" && "ph--center", className]}>
+<section
+  class:list={["ph", `ph--${tone}`, align === "center" && "ph--center", className]}
+>
   <div class="container ph__inner">
     {
       eyebrow && (
-        <Eyebrow center={align === "center"} class="ph__eyebrow">
+        <Eyebrow
+          tone={tone === "forest" ? "on-dark" : "gold"}
+          center={align === "center"}
+          class="ph__eyebrow"
+        >
           {eyebrow}
         </Eyebrow>
       )
@@ -47,15 +61,25 @@ const { eyebrow, title, lede, align = "center", class: className } = Astro.props
 </section>
 
 <style>
-  .ph {
+  .ph--cream {
     background: var(--surface-page);
   }
 
-  /* Asymmetric on purpose: the comps give this band 72px above and 44px below,
-     because the 44px is not the band's own breathing room — it is the gap to
-     whatever follows, which starts flush. */
-  .ph__inner {
+  .ph--forest {
+    background: var(--grad-forest);
+    --forest-origin: 50%;
+  }
+
+  /* Asymmetric on purpose: the comps give the cream band 72px above and 44px
+     below, because the 44px is not the band's own breathing room — it is the
+     gap to whatever follows, which starts flush. The forest band sits above a
+     section with its own full padding, so it is symmetrical. */
+  .ph--cream .ph__inner {
     padding-block: var(--space-section-sm) var(--space-11);
+  }
+
+  .ph--forest .ph__inner {
+    padding-block: clamp(2.5rem, 4.4vw, 3.75rem); /* 40 → 60 */
   }
 
   .ph--center .ph__inner {
@@ -82,6 +106,10 @@ const { eyebrow, title, lede, align = "center", class: className } = Astro.props
     text-wrap: balance;
   }
 
+  .ph--forest .ph__title {
+    color: var(--text-on-dark);
+  }
+
   /* Wider than --measure-ch (62ch), which is the measure for a paragraph
      someone reads down. This one is a two-line standfirst under a 76px
      headline; at 62ch it broke to three ragged lines and read as body copy. */
@@ -97,6 +125,10 @@ const { eyebrow, title, lede, align = "center", class: className } = Astro.props
     /* `balance`, not `pretty`: at two lines the job is to split them evenly,
        not to avoid a short last line. */
     text-wrap: balance;
+  }
+
+  .ph--forest :global(.ph__lede .prose__p) {
+    color: var(--text-on-dark-2);
   }
 
   /* The comps weight the inline link in these ledes — it is a phone number in

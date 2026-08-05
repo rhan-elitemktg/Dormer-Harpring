@@ -50,6 +50,11 @@ const MAP = {
   // Opaque source name; this is the Why-us team photograph.
   "uploads/pasted-1785214904589-0.png": "home/why-team.jpg",
 
+  // The four attorneys against the Denver skyline — a tighter crop of the same
+  // frame as the hero. Ten of the fourteen comps use it, so it lives outside
+  // home/ rather than being owned by whichever page happened to need it first.
+  "uploads/pasted-1785212437457-0.png": "team/attorneys-skyline.jpg",
+
   // Attorneys
   "wireframes/assets/attorney-1.png": "attorneys/attorney-1.jpg",
   "wireframes/assets/attorney-2.png": "attorneys/attorney-2.jpg",

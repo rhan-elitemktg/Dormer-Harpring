@@ -1,0 +1,181 @@
+---
+// The contact page's working half: the ways to reach the firm on the left, the
+// consultation form on the right, and the office-hours band beneath both.
+import Picture from "../media/Picture.astro";
+import InfoCard from "./InfoCard.astro";
+import ContactForm from "./ContactForm.astro";
+import type { ContactPage } from "../../data/contactPage";
+import type { ContactBand } from "../../data/contact";
+
+interface Props {
+  page: ContactPage;
+  /** The consultation form's copy — the same singleton the homepage band uses. */
+  form: ContactBand["form"];
+}
+
+const { page, form } = Astro.props;
+---
+
+{/* Not `.section`: the padding here is asymmetric, so it sets its own. */}
+<section class="ct" id="contact">
+  <div class="container">
+    <div class="ct__grid">
+      <div class="ct__aside">
+        <div class="ct__frame">
+          <Picture
+            src={page.photo}
+            alt={page.photoAlt}
+            widths={[600, 900, 1200]}
+            sizes="(max-width: 980px) 100vw, 45vw"
+            class="ct__photo"
+          />
+        </div>
+
+        <ul class="ct__cards">
+          {page.cards.map((card) => <InfoCard card={card} />)}
+        </ul>
+      </div>
+
+      <div class="ct__formcard">
+        <ContactForm form={form} />
+      </div>
+    </div>
+
+    <div class="ct__hours">
+      <div>
+        <p class="ct__hours-label">{page.hours.label}</p>
+        <p class="ct__hours-value">{page.hours.value}</p>
+      </div>
+      <p class="ct__hours-note">{page.hours.note}</p>
+      <a class="btn btn--red ct__hours-cta" href={page.hours.ctaHref}>
+        {page.hours.ctaLabel}
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Asymmetric: the band below now carries its own background and its own top
+     padding, so this one only owes half the gap. */
+  .ct {
+    padding-block: var(--space-section) var(--space-section-sm);
+    background: var(--surface-page);
+  }
+
+  .ct__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+    gap: var(--space-14);
+    align-items: stretch;
+  }
+
+  .ct__aside {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .ct__frame {
+    flex: none;
+    height: 282px;
+    margin-bottom: var(--space-3);
+    border-radius: var(--radius-7);
+    overflow: hidden;
+  }
+
+  .ct__frame :global(.ct__photo) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+  }
+
+  .ct__cards {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-3);
+    list-style: none;
+    padding: 0;
+  }
+
+  /* The border and radius live out here rather than on `.cform`, because the
+     same form component is dropped straight onto the homepage's forest band,
+     where it is one half of a panel that carries its own. `overflow: hidden`
+     so the form's white background is clipped to this radius. */
+  .ct__formcard {
+    border: 1px solid var(--dh-line);
+    border-radius: var(--radius-8);
+    overflow: hidden;
+    box-shadow: 0 24px 60px rgba(60, 52, 32, 0.08);
+  }
+
+  .ct__hours {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-6) var(--space-12);
+    margin-top: var(--space-6);
+    padding: var(--space-8) var(--space-10);
+    border-radius: var(--radius-7);
+    background: var(--dh-forest-100);
+  }
+
+  .ct__hours-label {
+    margin-bottom: var(--space-2);
+    font-weight: 800;
+    font-size: var(--text-micro);
+    line-height: 1;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--dh-gold-light);
+  }
+
+  .ct__hours-value {
+    font-weight: 500;
+    font-size: var(--text-lg);
+    line-height: var(--leading-normal);
+    color: var(--dh-parchment);
+  }
+
+  .ct__hours-note {
+    max-width: 40ch;
+    font-size: var(--text-xl);
+    line-height: var(--leading-normal);
+    color: var(--text-on-dark-muted);
+  }
+
+  /* The one button on the site the comps give a soft radius rather than the
+     3px `--radius-btn`: it sits inside a 16px-radius panel, where a near-square
+     corner reads as a mistake. */
+  .ct__hours-cta {
+    flex: none;
+    min-height: 56px;
+    padding-inline: var(--space-9);
+    border-radius: var(--radius-4);
+  }
+
+  @media (max-width: 980px) {
+    .ct__grid {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-8);
+    }
+
+    .ct__hours {
+      padding: var(--space-7) var(--space-8);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .ct__frame {
+      height: 220px;
+    }
+
+    .ct__cards {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .ct__hours-cta {
+      width: 100%;
+    }
+  }
+</style>
