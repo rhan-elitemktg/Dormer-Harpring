@@ -270,7 +270,13 @@ const { form } = Astro.props;
     outline: none;
   }
 
-  .ccform__input:not(:placeholder-shown):invalid {
+  /* `:user-invalid`, NOT `:not(:placeholder-shown):invalid`. That older trick
+     leans on the placeholder as a proxy for "has been typed in", and four
+     fields here have no placeholder at all — `:placeholder-shown` can never
+     match them, so they reddened the moment the page loaded, before anyone had
+     touched them. `:user-invalid` means what we actually want: the visitor
+     interacted with this field and left it wrong. */
+  .ccform__input:user-invalid {
     border-color: var(--accent);
   }
 

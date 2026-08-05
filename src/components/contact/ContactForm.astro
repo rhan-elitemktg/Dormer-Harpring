@@ -216,9 +216,15 @@ const { form } = Astro.props;
     outline: none;
   }
 
-  /* The browser flags this once a value has been entered and left invalid,
-     rather than reddening every empty field the moment the page loads. */
-  .cform__input:not(:placeholder-shown):invalid {
+  /* Flagged once the visitor has interacted with the field and left it wrong,
+     rather than reddening every empty required field on load.
+     `:user-invalid` means exactly that. It replaces
+     `:not(:placeholder-shown):invalid`, which used the placeholder as a proxy
+     for "has been typed in" — and silently inverts on any field that has no
+     placeholder, since `:placeholder-shown` cannot match one. Every field here
+     happens to have a placeholder; the co-counsel form's did not, and reddened
+     on load. */
+  .cform__input:user-invalid {
     border-color: var(--accent);
   }
 
