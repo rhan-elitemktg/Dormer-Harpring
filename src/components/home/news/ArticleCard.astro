@@ -1,0 +1,115 @@
+---
+// One blog teaser: a tinted icon plate, category, read time, title.
+import InsightIcon from "../../icons/InsightIcon.astro";
+import type { InsightPost } from "../../../data/news";
+
+interface Props {
+  post: InsightPost;
+}
+
+const { post } = Astro.props;
+---
+
+{
+  /* <div>, not <span>: a span is phrasing content and cannot legally contain
+     the <h3>. An <a> may wrap flow content, so the divs are fine inside it. */
+}
+<a class="artcard" href={post.href} data-icon={post.iconKey}>
+  <div class="artcard__plate">
+    <InsightIcon name={post.iconKey} size={52} />
+  </div>
+  <div class="artcard__body">
+    <span class="artcard__meta">{post.category} &middot; {post.readTime}</span>
+    <h3 class="artcard__title">{post.title}</h3>
+    <span class="artcard__more arrow-link">
+      Read article <span class="arrow" aria-hidden="true">&rarr;</span>
+    </span>
+  </div>
+</a>
+
+<style>
+  .artcard {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: var(--dh-white);
+    border-radius: var(--radius-6);
+    overflow: hidden;
+    box-shadow: 0 14px 40px rgba(60, 52, 32, 0.08);
+    transition: transform var(--transition), box-shadow var(--transition);
+  }
+
+  .artcard:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 20px 48px rgba(60, 52, 32, 0.14);
+  }
+
+  .artcard__plate {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 16 / 11;
+    background: var(--plate-bg, var(--dh-cream-200));
+    color: var(--plate-ink, var(--dh-gold-deep));
+  }
+
+  /* Tint and ink come from the category via a data attribute, not from a hex on
+     the record. A closed set, so CSS can enumerate it — and an editor picking a
+     category should not also be picking two colours. */
+  .artcard[data-icon="value"] {
+    --plate-bg: #f4ecd8;
+    --plate-ink: var(--dh-gold-deep);
+  }
+
+  .artcard[data-icon="clock"] {
+    --plate-bg: #e5ede4;
+    --plate-ink: #2e4034;
+  }
+
+  .artcard[data-icon="shield"] {
+    --plate-bg: #f7e1d9;
+    --plate-ink: var(--accent);
+  }
+
+  .artcard[data-icon="steps"] {
+    --plate-bg: #e7e5d6;
+    --plate-ink: var(--dh-gold-muted);
+  }
+
+  .artcard__body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: var(--space-6) var(--space-6) var(--space-7);
+  }
+
+  .artcard__meta {
+    margin-bottom: var(--space-3);
+    font-weight: 700;
+    font-size: var(--text-micro);
+    line-height: 1;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: #9a8c6e;
+  }
+
+  .artcard__title {
+    flex: 1;
+    margin-bottom: var(--space-5);
+    font-size: var(--display-7);
+    line-height: 1.2;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--dh-forest-300);
+  }
+
+  .artcard__more {
+    font-family: var(--font-body);
+    font-weight: 800;
+    font-size: var(--text-label);
+    line-height: 1;
+    letter-spacing: var(--tracking-nav);
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+</style>

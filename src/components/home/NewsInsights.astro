@@ -1,0 +1,246 @@
+---
+// A two-tab feed: press coverage and blog articles.
+//
+// Both panels render server-side and toggle with `hidden`, same as the
+// practice-area selector — that is eight cards of crawlable content, and it has
+// to survive JS failing. No-JS shows the news panel.
+import Eyebrow from "../Eyebrow.astro";
+import NewsCard from "./news/NewsCard.astro";
+import ArticleCard from "./news/ArticleCard.astro";
+import type { FeedSection, NewsMention, InsightPost } from "../../data/news";
+import { ROUTES } from "../../lib/routePaths";
+
+interface Props {
+  section: FeedSection;
+  news: NewsMention[];
+  insights: InsightPost[];
+}
+
+const { section, news, insights } = Astro.props;
+---
+
+<section class="section feed">
+  <div class="container">
+    <div class="feed__switch" role="tablist" aria-label="News and insights">
+      <button
+        type="button"
+        class="feed__tab"
+        id="feed-tab-news"
+        role="tab"
+        aria-selected="true"
+        aria-controls="feed-panel-news"
+        tabindex="0"
+      >
+        {section.tabs.news}
+      </button>
+      <button
+        type="button"
+        class="feed__tab"
+        id="feed-tab-insights"
+        role="tab"
+        aria-selected="false"
+        aria-controls="feed-panel-insights"
+        tabindex="-1"
+      >
+        {section.tabs.insights}
+      </button>
+    </div>
+
+    <div id="feed-panel-news" role="tabpanel" aria-labelledby="feed-tab-news" tabindex="0">
+      <header class="feed__head">
+        <Eyebrow tone="gold-bright" center class="feed__eyebrow">{section.news.eyebrow}</Eyebrow>
+        <h2 class="feed__title">{section.news.title}</h2>
+        <p class="feed__lede">{section.news.lede}</p>
+      </header>
+
+      <div class="feed__grid">
+        {news.map((item) => <NewsCard item={item} />)}
+      </div>
+
+      <div class="feed__foot">
+        <a class="btn feed__more arrow-link" href={ROUTES.blog}>
+          {section.news.ctaLabel} <span class="arrow" aria-hidden="true">&rarr;</span>
+        </a>
+      </div>
+    </div>
+
+    <div
+      id="feed-panel-insights"
+      role="tabpanel"
+      aria-labelledby="feed-tab-insights"
+      tabindex="0"
+      hidden
+    >
+      <header class="feed__head">
+        <Eyebrow tone="gold-bright" center class="feed__eyebrow">{section.insights.eyebrow}</Eyebrow>
+        <h2 class="feed__title">{section.insights.title}</h2>
+        <p class="feed__lede">{section.insights.lede}</p>
+      </header>
+
+      <div class="feed__grid">
+        {insights.map((post) => <ArticleCard post={post} />)}
+      </div>
+
+      <div class="feed__foot">
+        <a class="btn feed__more arrow-link" href={ROUTES.blog}>
+          {section.insights.ctaLabel} <span class="arrow" aria-hidden="true">&rarr;</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .feed {
+    background: var(--dh-cream-100);
+  }
+
+  .feed__switch {
+    display: flex;
+    justify-content: center;
+    width: fit-content;
+    margin: 0 auto var(--space-11);
+    padding: 5px;
+    background: var(--dh-gold-tint);
+    border-radius: var(--radius-capsule);
+  }
+
+  .feed__tab {
+    padding: var(--space-4) var(--space-6);
+    border: 0;
+    border-radius: var(--radius-capsule);
+    background: transparent;
+    font-family: var(--font-body);
+    font-weight: 800;
+    font-size: var(--text-label);
+    line-height: 1;
+    letter-spacing: var(--tracking-nav);
+    text-transform: uppercase;
+    color: var(--dh-ink-3);
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color var(--transition), color var(--transition);
+  }
+
+  .feed__tab:hover:not([aria-selected="true"]) {
+    color: var(--dh-forest-100);
+  }
+
+  /* Forest fill, parchment text — the inverse of the resting chip, so the
+     selected tab reads as pressed into the track. */
+  .feed__tab[aria-selected="true"] {
+    background: var(--dh-forest-100);
+    color: var(--dh-parchment);
+  }
+
+  .feed__head {
+    margin-bottom: var(--space-13);
+    text-align: center;
+  }
+
+  .feed :global(.feed__eyebrow) {
+    margin-bottom: var(--space-4);
+  }
+
+  .feed__title {
+    margin-bottom: var(--space-4);
+    font-size: var(--display-2);
+    color: var(--dh-ink);
+  }
+
+  .feed__lede {
+    max-width: 60ch;
+    margin-inline: auto;
+    font-size: var(--text-lg);
+    line-height: var(--leading-normal);
+    color: var(--dh-ink-3);
+  }
+
+  .feed__grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-6);
+    align-items: stretch;
+  }
+
+  .feed__foot {
+    margin-top: var(--space-12);
+    text-align: center;
+  }
+
+  /* Not .btn--outline-ink: that is the 1.5px forest outline the practice-area
+     section uses. Here the comp draws a softer 1px tan rule, which sits back
+     against the cream rather than competing with the cards above it. */
+  .feed__more {
+    border: 1px solid #c6b896;
+    border-radius: var(--radius-2);
+    background: transparent;
+    color: var(--dh-forest-100);
+    letter-spacing: var(--tracking-btn);
+  }
+
+  .feed__more:hover {
+    border-color: var(--dh-forest-100);
+    background: var(--dh-forest-100);
+    color: var(--dh-cream-50);
+  }
+
+  @media (max-width: 1100px) {
+    .feed__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 640px) {
+    .feed__grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .feed__head {
+      margin-bottom: var(--space-10);
+    }
+
+    .feed__tab {
+      padding: var(--space-3) var(--space-5);
+      font-size: var(--text-label);
+    }
+  }
+</style>
+
+<script>
+  // Same pattern as the practice-area selector: both panels stay in the DOM and
+  // only `hidden` moves, so the eight cards are crawlable and survive JS
+  // failing to load.
+  for (const list of document.querySelectorAll<HTMLElement>('[aria-label="News and insights"]')) {
+    const tabs = [...list.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+
+    const select = (index: number, moveFocus = false) => {
+      tabs.forEach((tab, i) => {
+        const on = i === index;
+        tab.setAttribute("aria-selected", String(on));
+        tab.tabIndex = on ? 0 : -1;
+        const panel = document.getElementById(tab.getAttribute("aria-controls") ?? "");
+        if (panel) panel.hidden = !on;
+      });
+      if (moveFocus) tabs[index].focus();
+    };
+
+    tabs.forEach((tab, i) => tab.addEventListener("click", () => select(i)));
+
+    list.addEventListener("keydown", (event) => {
+      const current = tabs.indexOf(document.activeElement as HTMLButtonElement);
+      if (current === -1) return;
+
+      const next = {
+        ArrowRight: (current + 1) % tabs.length,
+        ArrowLeft: (current - 1 + tabs.length) % tabs.length,
+        Home: 0,
+        End: tabs.length - 1,
+      }[event.key];
+
+      if (next === undefined) return;
+      event.preventDefault();
+      select(next, true);
+    });
+  }
+</script>

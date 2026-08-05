@@ -22,11 +22,19 @@ import CoreValues from "../components/CoreValues.astro";
 import PromiseBand from "../components/home/PromiseBand.astro";
 import FaqBand from "../components/home/FaqBand.astro";
 import ContactBand from "../components/contact/ContactBand.astro";
+import NewsInsights from "../components/home/NewsInsights.astro";
+import CommunityBand from "../components/home/CommunityBand.astro";
 import { getAwards } from "../data/awards";
 import { getAttorneysSection, getHomeAttorneys } from "../data/attorneys";
 import { getCoreValues, getCoreValuesSection } from "../data/coreValues";
 import { getFaqSection, getHomeFaqs } from "../data/faqs";
 import { getContactBand } from "../data/contact";
+import { getFeedSection, getNewsMentions, getInsightPosts } from "../data/news";
+import {
+  getCommunitySection,
+  getCommunityPhotos,
+  getNgoPartners,
+} from "../data/community";
 import { getHomeTestimonials, getReviewSummary } from "../data/testimonials";
 import {
   getPracticeSection,
@@ -56,6 +64,12 @@ const [
   faqSection,
   faqs,
   contactBand,
+  feedSection,
+  newsItems,
+  insights,
+  communitySection,
+  communityPhotos,
+  ngoPartners,
 ] = await Promise.all([
   getHomeHero(),
   getHomeStats(),
@@ -77,6 +91,12 @@ const [
   getFaqSection(),
   getHomeFaqs(),
   getContactBand(),
+  getFeedSection(),
+  getNewsMentions(),
+  getInsightPosts(),
+  getCommunitySection(),
+  getCommunityPhotos(),
+  getNgoPartners(),
 ]);
 ---
 
@@ -102,4 +122,10 @@ const [
   <PromiseBand promise={promise} />
   <FaqBand section={faqSection} faqs={faqs} />
   <ContactBand band={contactBand} />
+  <NewsInsights section={feedSection} news={newsItems} insights={insights} />
+  <CommunityBand
+    section={communitySection}
+    photos={communityPhotos}
+    partners={ngoPartners}
+  />
 </Layout>

@@ -1,0 +1,93 @@
+---
+// One press mention: outlet logo, date, headline.
+import Picture from "../../media/Picture.astro";
+import type { NewsMention } from "../../../data/news";
+
+interface Props {
+  item: NewsMention;
+}
+
+const { item } = Astro.props;
+// Press coverage lives on the outlet's own site.
+const external = /^https?:\/\//i.test(item.href);
+---
+
+<a
+  class="ncard"
+  href={item.href}
+  target={external ? "_blank" : undefined}
+  rel={external ? "noopener" : undefined}
+>
+  <span class="ncard__logo">
+    <Picture src={item.logo} alt={item.outlet} class="ncard__logo-img" />
+  </span>
+  <span class="ncard__date">{item.date}</span>
+  <h3 class="ncard__headline">{item.headline}</h3>
+  <span class="ncard__more arrow-link">
+    Read more <span class="arrow" aria-hidden="true">&rarr;</span>
+  </span>
+</a>
+
+<style>
+  .ncard {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: var(--space-8) var(--space-7);
+    background: var(--dh-white);
+    border-radius: var(--radius-6);
+    box-shadow: 0 14px 40px rgba(60, 52, 32, 0.08);
+    transition: transform var(--transition), box-shadow var(--transition);
+  }
+
+  .ncard:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 20px 48px rgba(60, 52, 32, 0.14);
+  }
+
+  /* Fixed height so logos of different proportions all sit on one baseline —
+     they range from a wordmark to a stacked lockup. */
+  .ncard__logo {
+    display: flex;
+    align-items: center;
+    height: 52px;
+    margin-bottom: var(--space-6);
+  }
+
+  .ncard :global(.ncard__logo-img) {
+    max-height: 44px;
+    max-width: 150px;
+    width: auto;
+    object-fit: contain;
+  }
+
+  .ncard__date {
+    margin-bottom: var(--space-3);
+    font-weight: 700;
+    font-size: var(--text-micro);
+    line-height: 1;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #9a8c6e;
+  }
+
+  .ncard__headline {
+    flex: 1;
+    margin-bottom: var(--space-6);
+    font-size: var(--display-7);
+    line-height: 1.18;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--dh-forest-300);
+  }
+
+  .ncard__more {
+    font-family: var(--font-body);
+    font-weight: 800;
+    font-size: var(--text-label);
+    line-height: 1;
+    letter-spacing: var(--tracking-nav);
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+</style>

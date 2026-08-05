@@ -234,6 +234,10 @@
   --radius-6: 14px;
   --radius-7: 16px;
   --radius-8: 20px;   /* pills */
+  /* Fully rounded whatever the height. --radius-8 reads as a pill only on the
+     small chips it was measured from; on a taller element like the feed's tab
+     switch (the comp uses 30px and 40px there) it visibly falls short. */
+  --radius-capsule: 999px;
   --radius-full: 50%;
 
   --radius-btn: var(--radius-1);
@@ -462,7 +466,17 @@ select {
   color: var(--dh-gold-light);
 }
 
-/* Centred section openers put the rule on both sides. */
+/* The News, Insights and Community openers use the brighter #C79A54 where
+   every other light section uses the deeper #B0873C. Both fall short of AA
+   against cream at this size — see the README's launch list. */
+.eyebrow--gold-bright {
+  color: var(--accent-gold);
+}
+
+/* Centred openers are flanked on both sides — a single rule reads as
+   off-balance once the label is centred. Project convention, and it overrides
+   the comps: they draw one rule on the News and Insights openers even though
+   both are centred. Left-aligned openers keep the single leading rule. */
 .eyebrow--center::after {
   content: "";
   width: 38px;
