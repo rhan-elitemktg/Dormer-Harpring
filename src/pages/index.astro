@@ -6,7 +6,7 @@ import Hero from "../components/home/Hero.astro";
 import RecentResults from "../components/home/RecentResults.astro";
 import FirmIntro from "../components/home/FirmIntro.astro";
 import AwardsBar from "../components/AwardsBar.astro";
-import Testimonials from "../components/home/Testimonials.astro";
+import TestimonialRail from "../components/TestimonialRail.astro";
 import {
   getHomeHero,
   getHomeStats,
@@ -109,7 +109,7 @@ const [
   <RecentResults results={results} />
   <FirmIntro intro={intro} />
   <AwardsBar awards={awards} />
-  <Testimonials testimonials={testimonials} reviews={reviews} />
+  <TestimonialRail testimonials={testimonials} reviews={reviews} />
   <PracticeSelector
     section={practiceSection}
     areas={areas}

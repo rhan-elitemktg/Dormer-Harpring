@@ -402,8 +402,10 @@ export interface TeamProfile {
    */
   category?: string;
   /**
-   * The single sentence the live site pulls out beside the portrait. Two of the
-   * staff bios have none and simply open on the body.
+   * The single sentence the live site pulls out beside the portrait. STAFF
+   * ONLY — the attorney comp has no standfirst, and its opening sentence is
+   * the first body paragraph, so the seven attorneys carry theirs in `body`.
+   * Two of the staff bios have none and simply open on the body.
    */
   lede?: string;
   /** The three-up dark band under the name. Optional — only Sean has them. */
@@ -431,12 +433,11 @@ const PROFILES: TeamProfile[] = [
       { _key: "slip", value: "$2.1M", label: "Largest slip & fall recovery" },
       { _key: "ctla", value: "CTLA", label: "Trial technique speaker" },
     ],
-    lede:
-      "Sean was most shaped by his tenure as a student attorney in CU Law School’s " +
-      "Defense Clinic. The Defense Clinic gave Sean the opportunity to represent " +
-      "clients with limited financial means for free, including those facing " +
-      "combinations of both criminal and immigration charges.",
     body: pt(
+        "Sean was most shaped by his tenure as a student attorney in CU Law School’s " +
+          "Defense Clinic. The Defense Clinic gave Sean the opportunity to represent " +
+          "clients with limited financial means for free, including those facing " +
+          "combinations of both criminal and immigration charges.",
         "If you ask Sean why he does personal injury work, this is the story he tells:",
         "> You know, I guess I’ve been picking fights with bullies since I was a kid. I was " +
         "riding the bus home one day in middle school, and I saw another boy picking on " +
@@ -565,11 +566,10 @@ const PROFILES: TeamProfile[] = [
   {
     slug: "k-c-harpring",
     category: "Attorney · Founding Partner",
-    lede:
-      "K.C. has always had a desire to do meaningful work that improves the day-to-day " +
-      "lives of real people, as opposed to aiding the bottom line of some large, " +
-      "faceless company.",
     body: pt(
+        "K.C. has always had a desire to do meaningful work that improves the day-to-day " +
+          "lives of real people, as opposed to aiding the bottom line of some large, " +
+          "faceless company.",
         "K.C. went to law school in the aftermath of the 2008 financial crisis without being " +
         "completely sure where he would end up. K.C. first tried out the life of a corporate " +
         "lawyer. But after spending two years learning about antitrust, corporate mergers and " +
@@ -643,10 +643,9 @@ const PROFILES: TeamProfile[] = [
   },
   {
     slug: "tim-garvey",
-    lede:
-      "When asked what he does for a living, Tim often explains: “I sue insurance " +
-      "companies when they act like jerks. They keep me very busy.”",
     body: pt(
+        "When asked what he does for a living, Tim often explains: “I sue insurance " +
+          "companies when they act like jerks. They keep me very busy.”",
         "Tim Garvey is an experienced Denver personal injury attorney dedicated to " +
         "helping regular people fight insurance company greed, and he specializes in " +
         "insurance bad faith, catastrophic personal injury, and wrongful death.",
@@ -800,10 +799,9 @@ const PROFILES: TeamProfile[] = [
   },
   {
     slug: "laura-browne",
-    lede:
-      "Laura is an experienced personal injury attorney who has successfully resolved " +
-      "hundreds of cases where her clients were injured through the negligence of others.",
     body: pt(
+        "Laura is an experienced personal injury attorney who has successfully resolved " +
+          "hundreds of cases where her clients were injured through the negligence of others.",
         "Laura Browne is originally from Cape Girardeau, Missouri. She attended the " +
         "University of Missouri (Mizzou) where she earned degrees in Political Science " +
         "and History before going on to complete her law degree. Laura is licensed to " +
@@ -842,10 +840,9 @@ const PROFILES: TeamProfile[] = [
   },
   {
     slug: "jessica-mauser",
-    lede:
-      "Jessica Mauser joined the Dormer Harpring team in early 2024. She is motivated by " +
-      "representing clients who have suffered injuries due to the negligence of another.",
     body: pt(
+        "Jessica Mauser joined the Dormer Harpring team in early 2024. She is motivated by " +
+          "representing clients who have suffered injuries due to the negligence of another.",
         "Jessica Mauser is a Colorado native whose childhood dream was to practice law. " +
         "She attended Cornell College where she earned a degree in Political Science " +
         "before going on to complete her law degree at the Appalachian School of Law in " +
@@ -886,10 +883,9 @@ const PROFILES: TeamProfile[] = [
   },
   {
     slug: "amy-rogers",
-    lede:
-      "Amy Rogers combines her extensive legal expertise with a compassionate approach to " +
-      "representing clients in complex personal injury cases across Denver and Colorado.",
     body: pt(
+        "Amy Rogers combines her extensive legal expertise with a compassionate approach to " +
+          "representing clients in complex personal injury cases across Denver and Colorado.",
         "Ms. Rogers earned her Juris Doctor with honors from West Virginia University " +
         "College of Law. During her time in law school, Ms. Rogers was actively involved " +
         "in the Immigration Law Clinic, where she represented clients seeking asylum in " +
@@ -928,12 +924,11 @@ const PROFILES: TeamProfile[] = [
   },
   {
     slug: "greg-bentley",
-    lede:
-      "Greg Bentley is a skilled and dedicated trial lawyer with a proven track record of " +
-      "advocating for his clients. As Dormer Harpring’s primary trucking attorney, he " +
-      "represents clients in complex trucking and transportation cases, bringing deep " +
-      "industry knowledge and strategic courtroom experience to every case.",
     body: pt(
+        "Greg Bentley is a skilled and dedicated trial lawyer with a proven track record of " +
+          "advocating for his clients. As Dormer Harpring’s primary trucking attorney, he " +
+          "represents clients in complex trucking and transportation cases, bringing deep " +
+          "industry knowledge and strategic courtroom experience to every case.",
         "Greg Bentley is a civil trial lawyer with substantial experience in complex " +
         "civil and commercial litigation. He primarily focuses on helping clients who " +
         "have suffered catastrophic injuries and represents clients in state and federal " +

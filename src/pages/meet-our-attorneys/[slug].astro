@@ -12,10 +12,12 @@ import type { GetStaticPaths } from "astro";
 import Layout from "../../layouts/Layout.astro";
 import AttorneyBio from "../../components/team/AttorneyBio.astro";
 import StaffBio from "../../components/team/StaffBio.astro";
+import TestimonialRail from "../../components/TestimonialRail.astro";
 import ContactDetails from "../../components/contact/ContactDetails.astro";
 import { getTeamProfiles, getTeam } from "../../data/team";
 import { getFirmDetails } from "../../data/site";
 import { getContactBand, getContactDetails } from "../../data/contact";
+import { getHomeTestimonials, getReviewSummary } from "../../data/testimonials";
 
 export const getStaticPaths = (async () => {
   const [profiles, team] = await Promise.all([getTeamProfiles(), getTeam()]);
@@ -38,10 +40,12 @@ export const getStaticPaths = (async () => {
 }) satisfies GetStaticPaths;
 
 const { profile, member, reviewer } = Astro.props;
-const [firm, band, details] = await Promise.all([
+const [firm, band, details, testimonials, reviews] = await Promise.all([
   getFirmDetails(),
   getContactBand(),
   getContactDetails(),
+  getHomeTestimonials(),
+  getReviewSummary(),
 ]);
 
 const isAttorney = member.kind === "partner" || member.kind === "attorney";
@@ -58,5 +62,11 @@ const isAttorney = member.kind === "partner" || member.kind === "attorney";
       <StaffBio member={member} profile={profile} />
     )
   }
+  {
+    /* The comp puts the rail on the attorney bio only. Firm-wide reviews under
+       a paralegal's profile would read as that person's, so the staff layout
+       goes straight to the contact band. */
+  }
+  {isAttorney && <TestimonialRail testimonials={testimonials} reviews={reviews} />}
   <ContactDetails details={details} form={band.form} />
 </Layout>
