@@ -27,6 +27,7 @@
   --dh-gold: #c79a54;        /* 301 uses — the accent */
   --dh-gold-deep: #b0873c;   /* eyebrow text on cream (gold needs to darken to pass contrast) */
   --dh-gold-light: #d8b26e;  /* eyebrow on forest, hero stat rule */
+  --dh-gold-label: #c3a56d;  /* stat-cell label on forest — gold-light shouts beside a numeral */
   --dh-gold-bright: #e9b45a; /* footer "Get directions" link */
   --dh-gold-muted: #8a7c4e;  /* faint labels on cream */
   --dh-gold-tint: #ede4cf;   /* active tab / pill track surface */

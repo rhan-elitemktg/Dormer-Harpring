@@ -1,0 +1,51 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import PageHeader from "../../components/PageHeader.astro";
+import FoundingPartners from "../../components/team/FoundingPartners.astro";
+import TeamGrid from "../../components/team/TeamGrid.astro";
+import StatsBand from "../../components/StatsBand.astro";
+import CoreValues from "../../components/CoreValues.astro";
+import ContactDetails from "../../components/contact/ContactDetails.astro";
+import { getTeam } from "../../data/team";
+import { getTeamPage } from "../../data/teamPage";
+import { getFirmStats } from "../../data/stats";
+import { getCoreValues, getCoreValuesSection } from "../../data/coreValues";
+import { getContactBand, getContactDetails } from "../../data/contact";
+
+const [page, team, stats, valuesSection, values, band, details] = await Promise.all([
+  getTeamPage(),
+  getTeam(),
+  getFirmStats(),
+  getCoreValuesSection(),
+  getCoreValues(),
+  getContactBand(),
+  getContactDetails(),
+]);
+
+// The partners get their own cards above; everyone else — attorneys, staff and
+// the dogs — shares the grid, in roster order.
+const partners = team.filter((m) => m.kind === "partner");
+const rest = team.filter((m) => m.kind !== "partner");
+---
+
+<Layout
+  title="Meet Our Attorneys"
+  description="The Dormer Harpring team — trial lawyers and the staff behind every case, in Denver's RiNo district."
+>
+  <PageHeader
+    eyebrow={page.eyebrow}
+    title={page.title}
+    lede={page.lede}
+    tone="forest"
+    size="sm"
+  />
+  <FoundingPartners
+    eyebrow={page.partners.eyebrow}
+    title={page.partners.title}
+    partners={partners}
+  />
+  <TeamGrid eyebrow={page.team.eyebrow} title={page.team.title} members={rest} />
+  <StatsBand stats={stats} />
+  <CoreValues section={valuesSection} values={values} />
+  <ContactDetails details={details} form={band.form} />
+</Layout>

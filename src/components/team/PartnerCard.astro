@@ -1,0 +1,176 @@
+---
+// A founding partner: square portrait, bio, and their personal accolades.
+import Picture from "../media/Picture.astro";
+import Prose from "../prose/Prose.astro";
+import type { TeamMember } from "../../data/team";
+
+interface Props {
+  member: TeamMember;
+}
+
+const { member } = Astro.props;
+const portrait = member.photoLarge ?? member.photo;
+---
+
+<article class="pcard">
+  {
+    portrait && (
+      <div class="pcard__frame">
+        <Picture
+          src={portrait}
+          alt={member.name}
+          widths={[400, 600, 900]}
+          sizes="(max-width: 900px) 100vw, 45vw"
+          class="pcard__photo"
+        />
+      </div>
+    )
+  }
+
+  <div class="pcard__body">
+    <h3 class="pcard__name">{member.name}</h3>
+    <p class="pcard__role">{member.role}</p>
+
+    {/* Clamped to three lines — the full bio is on their page. */}
+    <Prose value={member.bio} class="pcard__bio" />
+
+    {
+      member.awards && member.awards.length > 0 && (
+        <ul class="pcard__awards">
+          {member.awards.map((award) => (
+            <li>
+              <Picture src={award.image} alt={award.alt} widths={[140, 300]} class="pcard__award" />
+            </li>
+          ))}
+        </ul>
+      )
+    }
+
+    {
+      member.href && (
+        <a class="btn btn--outline-ink pcard__cta arrow-link" href={member.href}>
+          Read {member.name.split(" ")[0]}'s story{" "}
+          <span class="arrow" aria-hidden="true">
+            &rarr;
+          </span>
+        </a>
+      )
+    }
+  </div>
+</article>
+
+<style>
+  .pcard {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    border: 1px solid var(--dh-line);
+    border-radius: var(--radius-4);
+    overflow: hidden;
+    background: var(--dh-white);
+  }
+
+  /* `position: relative` + an absolutely positioned image, not just
+     `aspect-ratio` on the box. On its own the ratio only sets a PREFERRED
+     height: the in-flow <img> still contributes its intrinsic 3:4, the box
+     grows to fit, and the crop never happens — which is why the portrait ran
+     to the waist instead of stopping at the tie. Taking the image out of flow
+     is what makes the ratio binding. */
+  .pcard__frame {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    background: var(--surface-sunk);
+  }
+
+  .pcard__frame :global(.pcard__photo) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+    display: block;
+  }
+
+  .pcard__body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: var(--space-9) var(--space-10) var(--space-10);
+  }
+
+  .pcard__name {
+    margin-bottom: var(--space-2);
+    font-size: var(--display-5);
+    line-height: 1;
+    color: var(--dh-ink);
+  }
+
+  .pcard__role {
+    margin-bottom: var(--space-5);
+    font-weight: 800;
+    font-size: var(--text-micro);
+    line-height: 1;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--dh-gold-deep);
+  }
+
+  /* Three lines and no more. The rest is on their own page, and an unclamped
+     790-word bio makes the two cards different heights on a two-up row. */
+  .pcard :global(.pcard__bio .prose__p) {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-size: var(--text-lg);
+    line-height: 1.7;
+    color: var(--dh-ink-3);
+    text-wrap: pretty;
+  }
+
+  /* `margin-top: auto` on the awards, so the row and the CTA under it sit on
+     the floor of the card and line up across the pair. */
+  .pcard__awards {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-5);
+    margin-top: auto;
+    padding-block: var(--space-6);
+    border-block: 1px solid var(--dh-line-soft);
+    list-style: none;
+  }
+
+  .pcard__awards li {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .pcard__awards :global(.pcard__award) {
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 60px;
+    object-fit: contain;
+  }
+
+  .pcard__cta {
+    align-self: flex-start;
+    margin-top: var(--space-7);
+  }
+
+  @media (max-width: 640px) {
+    .pcard__body {
+      padding: var(--space-8) var(--space-6) var(--space-8);
+    }
+
+    .pcard__cta {
+      align-self: stretch;
+    }
+  }
+</style>

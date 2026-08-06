@@ -13,21 +13,22 @@
 
 /** URL shape decision: the legacy WordPress site is flat at the root
  *  (`/denver-car-accident-lawyer`, `/what-is-my-claim-worth`), and we keep it
- *  that way so ~300 live URLs need no redirect. The one exception is attorneys,
- *  which move from `/meet-our-attorneys/<slug>` to `/attorneys/<slug>`. */
+ *  that way so ~300 live URLs need no redirect. Team pages keep their legacy
+ *  `/meet-our-attorneys/<slug>` shape for the same reason — the live site has
+ *  25 of them indexed, and `/attorneys/<slug>` would have cost 26 redirects to
+ *  buy a slightly shorter URL. */
 export const practiceAreaPath = (slug: string) => `/${slug}`;
 export const locationPath = (slug: string) => `/${slug}`;
 export const blogPath = (slug: string) => `/${slug}`;
 export const communityPath = (slug: string) => `/${slug}`;
 export const resourcePath = (slug: string) => `/${slug}`;
-export const attorneyPath = (slug: string) => `/attorneys/${slug}`;
 export const blogCategoryPath = (slug: string) => `/category/${slug}`;
 
 /** Fixed routes. Referenced by the nav, the footer, and the sitemap. */
 export const ROUTES = {
   home: "/",
   about: "/about",
-  attorneys: "/attorneys",
+  attorneys: "/meet-our-attorneys",
   practiceAreas: "/practice-areas",
   results: "/results",
   testimonials: "/testimonials",
@@ -39,6 +40,9 @@ export const ROUTES = {
   privacy: "/privacy-policy",
   editorialGuidelines: "/editorial-guidelines",
 } as const;
+
+/** Declared after ROUTES so the shared prefix is read from one place. */
+export const attorneyPath = (slug: string) => `${ROUTES.attorneys}/${slug}`;
 
 /**
  * Paths owned by a page file rather than a content document. A redirect may

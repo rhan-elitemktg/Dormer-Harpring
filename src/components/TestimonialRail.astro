@@ -1,11 +1,14 @@
 ---
 // "We do it for these moments." — a horizontally scrolling rail alternating
 // client videos and written reviews.
-import Eyebrow from "../Eyebrow.astro";
-import VideoCard from "./testimonials/VideoCard.astro";
-import QuoteCard from "./testimonials/QuoteCard.astro";
-import type { Testimonial, ReviewSummary } from "../../data/testimonials";
-import { ROUTES } from "../../lib/routePaths";
+//
+// Not home-only: the attorney bio comp carries the same band verbatim, which
+// is why this sits at the components root rather than under home/.
+import Eyebrow from "./Eyebrow.astro";
+import RailVideoCard from "./testimonials/RailVideoCard.astro";
+import RailQuoteCard from "./testimonials/RailQuoteCard.astro";
+import type { Testimonial, ReviewSummary } from "../data/testimonials";
+import { ROUTES } from "../lib/routePaths";
 
 interface Props {
   testimonials: Testimonial[];
@@ -78,9 +81,9 @@ const { testimonials, reviews } = Astro.props;
         {
           testimonials.map((testimonial) =>
             testimonial.kind === "video" ? (
-              <VideoCard testimonial={testimonial} />
+              <RailVideoCard testimonial={testimonial} />
             ) : (
-              <QuoteCard testimonial={testimonial} />
+              <RailQuoteCard testimonial={testimonial} />
             )
           )
         }
@@ -265,5 +268,5 @@ const { testimonials, reviews } = Astro.props;
 
 <script>
   // Prev/next behaviour is shared with the attorneys rail.
-  import "../../scripts/rail";
+  import "../scripts/rail";
 </script>

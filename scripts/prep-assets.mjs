@@ -60,6 +60,25 @@ const MAP = {
   // home/ rather than being owned by whichever page happened to need it first.
   "uploads/pasted-1785212437457-0.png": "team/attorneys-skyline.jpg",
 
+  // The two founding partners at 600x800 — the same shot as their headshot,
+  // at the resolution the partner cards need for a square crop.
+  "assets/team/dormer-photo.jpg": "team/sean-dormer-lg.jpg",
+  "assets/team/harpring-photo.jpg": "team/kc-harpring-lg.jpg",
+
+  // The badges shown on a partner's card. A different set from the firm-wide
+  // trust bar in badges/ — these are personal accolades.
+  "assets/awards/top-20-verdicts.png": "awards/top-20-verdicts",
+  "assets/awards/multi-million.png": "awards/multi-million",
+  "assets/awards/avvo-10.png": "awards/avvo-10",
+  "assets/awards/best-lawyers.png": "awards/best-lawyers",
+  "assets/awards/national-trial-40.png": "awards/national-trial-40",
+  "assets/awards/ones-to-watch.png": "awards/ones-to-watch",
+  // The Expertise.com pair. In the package all along but never pulled, which
+  // left both partners a badge short of the six the bio comp lays out — the
+  // personal-injury one is Sean's, the truck one is K.C.'s.
+  "assets/awards/expertise-pi.png": "awards/expertise-pi",
+  "assets/awards/expertise-truck.png": "awards/expertise-truck",
+
   // Co-counsel. From `assets/`, which belongs to the abandoned design
   // generation — the same carve-out as the practice-area photography above:
   // that rule is about token VALUES, not about pictures, and nothing else in
@@ -141,6 +160,63 @@ const MAP = {
  * regeneration tool rather than a build step — the processed result under
  * src/assets/ is committed and is what the site actually builds from.
  */
+const SCRAPE =
+  "/Users/rhanpemberton/Downloads/Dormer Harpring/sitesucker/www.denvertrial.com/wp-content/uploads";
+
+/**
+ * Team headshots, lifted from the LIVE SITE rather than the design package.
+ * The comps ship generic stand-ins for three attorneys and nothing for the
+ * rest; denvertrial.com/meet-our-attorneys carries a real, consistent set —
+ * one backdrop, one lighting setup, 460x580 apiece — for 25 of the 27 people
+ * the comp lists.
+ *
+ * TODO(launch): Alexandra Petroff and Dinorah Gutierrez appear in the comp but
+ * nowhere in the scrape, so they have no photograph. The card falls back to a
+ * monogram until the firm supplies one.
+ */
+const TEAM = {
+  // The office dogs. On the live site's team page with the rest, and Jane is
+  // marked "In Loving Memory" there.
+  "2022/11/IMG_7462-scaled-e1759265649797.jpeg": "team/randy-sawpring.jpg",
+  "2022/12/jane-thedog-e1759266062602.jpg": "team/jane-gonzales-dormer.jpg",
+  "2022/11/IMG_0585-e1759266158161.jpeg": "team/bella-sawpring.jpg",
+
+  "2020/12/att-bio-06.jpg": "team/sean-dormer.jpg",
+  "2022/12/att-kc-harping.jpg": "team/kc-harpring.jpg",
+  "2022/12/att-tim-garvey.jpg": "team/tim-garvey.jpg",
+  "2026/05/LMB-1.png": "team/laura-browne.jpg",
+  "2024/05/Untitled-design-1.png": "team/jessica-mauser.jpg",
+  "2024/07/ANR-1.png": "team/amy-rogers.jpg",
+  "2024/10/13.png": "team/greg-bentley.jpg",
+  "2022/12/att-marcie-emch.jpg": "team/marcie-emch.jpg",
+  "2023/07/att-bio-kmb.jpg": "team/kassandra-burival.jpg",
+  "2024/05/BEF-1.png": "team/brittany-freeman.jpg",
+  "2024/12/Cindy2-woodbkgd.jpg": "team/cindy-waller.jpg",
+  "2025/09/BLL.png": "team/brittany-lesmeister.jpg",
+  "2022/12/att-julie-althehofen.jpg": "team/julie-altenhofen.jpg",
+  "2024/07/AAR.png": "team/ashley-reisman.jpg",
+  "2024/10/Website-Headshots.png": "team/david-garber.jpg",
+  "2024/10/14.png": "team/abby-houk.jpg",
+  "2025/08/JAA.png": "team/jessica-ayala.jpg",
+  "2024/11/Untitled-design-1.png": "team/livi-lesch.jpg",
+  "2025/01/Untitled-design-2.png": "team/leana-kim.jpg",
+  "2025/11/MMR-1.png": "team/maddy-ricciardi.jpg",
+  "2024/09/MPJ.png": "team/morgan-jewel.jpg",
+  "2026/05/RAP-3.png": "team/rachel-pavelko.jpg",
+  "2024/09/EKN.png": "team/ella-nelson.jpg",
+  "2024/10/15.png": "team/michael-greer.jpg",
+  "2026/03/MPM-2.png": "team/marilyn-morales.jpg",
+};
+
+/**
+ * Two accolades the design package has no artwork for. Both are on the
+ * partners' live bio pages and both are personal rather than firm-wide, so
+ * they cannot be substituted from the package's set.
+ */
+const BADGES = {
+  "2020/10/award-15.png": "awards/top-100-litigators",
+  "2020/10/award-12.png": "awards/super-lawyers-kc",
+};
 const EXTERNAL = {
   "/Users/rhanpemberton/Downloads/pedestrian-accident.webp": "home/practice-pedestrian.jpg",
 };
@@ -152,6 +228,8 @@ const rows = [];
 
 const entries = [
   ...Object.entries(MAP).map(([from, to]) => [path.join(SRC, from), to]),
+  ...Object.entries(TEAM).map(([from, to]) => [path.join(SCRAPE, from), to]),
+  ...Object.entries(BADGES).map(([from, to]) => [path.join(SCRAPE, from), to]),
   ...Object.entries(EXTERNAL),
 ];
 
@@ -243,6 +321,31 @@ for (const { from, to, extract } of CROPS) {
   rows.push(
     `        ${mb(size).padStart(7)} MB  ${to}  (${meta.width}\u00d7${meta.height}, aspect ${(meta.width / meta.height).toFixed(2)})`
   );
+}
+
+// ---------------------------------------------------------------------------
+// Sean's profile-video poster, pulled from YouTube once and committed.
+//
+// Unlike the client testimonials — vertical, so every thumbnail YouTube serves
+// is a letterboxed title card — this one is a true 16:9 frame of him
+// presenting, which is a better poster than any headshot would be.
+{
+  const url = "https://img.youtube.com/vi/LT-oU3yqtmA/maxresdefault.jpg";
+  const response = await fetch(url);
+  if (response.ok) {
+    const outPath = path.join(OUT, "team/sean-dormer-video.jpg");
+    await mkdir(path.dirname(outPath), { recursive: true });
+    const buffer = Buffer.from(await response.arrayBuffer());
+    await sharp(buffer)
+      .resize({ width: 1280, withoutEnlargement: true })
+      .jpeg({ quality: 82, mozjpeg: true })
+      .toFile(outPath);
+    const after = (await stat(outPath)).size;
+    outTotal += after;
+    rows.push(`        ${mb(after).padStart(7)} MB  team/sean-dormer-video.jpg`);
+  } else {
+    console.error(`MISSING  ${url} (${response.status})`);
+  }
 }
 
 console.log(rows.sort().join("\n"));

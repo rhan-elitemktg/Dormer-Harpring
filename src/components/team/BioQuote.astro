@@ -1,0 +1,110 @@
+---
+// The comp's `.bp-quote`: a white card with a gold left edge, the quote set
+// large in the serif, and the attorney cited beneath it with their portrait.
+//
+// It takes the quote as a plain string rather than a Portable Text block
+// because it is not prose — AttorneyBio lifts the one `blockquote` out of the
+// body and hands it here, so the card and its citation are one component
+// instead of a global rule that has nowhere to put the citation.
+import Picture from "../media/Picture.astro";
+import type { TeamMember } from "../../data/team";
+
+interface Props {
+  text: string;
+  member: TeamMember;
+}
+
+const { text, member } = Astro.props;
+---
+
+<figure class="bq">
+  <blockquote class="bq__text">{text}</blockquote>
+  <figcaption class="bq__cite">
+    {
+      member.photo && (
+        <Picture
+          src={member.photo}
+          alt=""
+          widths={[60, 120]}
+          sizes="60px"
+          class="bq__photo"
+        />
+      )
+    }
+    <span>
+      <span class="bq__name">{member.name}</span>
+      <span class="bq__role">{member.role}</span>
+    </span>
+  </figcaption>
+</figure>
+
+<style>
+  .bq {
+    margin-block: var(--space-11);
+    padding: var(--space-10);
+    background: var(--dh-white);
+    border: 1px solid var(--dh-line);
+    border-left: 3px solid var(--dh-gold);
+    border-radius: var(--radius-5);
+  }
+
+  /* Upright serif is the site's standfirst; the pull quote is the italic.
+     Deliberately smaller than the comp's 29px, which is a display size for a
+     three-line quote and shouts across the ten lines this one actually runs
+     to. --text-2xl tops out at 21, and the leading opens to 1.5 to carry it —
+     the comp's tight 1.41 was tuned for the larger face. */
+  .bq__text {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-weight: 400;
+    font-size: var(--text-2xl);
+    line-height: 1.5;
+    color: var(--dh-ink);
+    text-wrap: pretty;
+  }
+
+  .bq__cite {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-top: var(--space-5);
+  }
+
+  /* `object-position` high on the frame: these are 3:4 portraits and a centred
+     circular crop of one lands on the sitter's chest. */
+  .bq__cite :global(.bq__photo) {
+    flex: none;
+    width: 60px;
+    height: 60px;
+    border-radius: var(--radius-full);
+    border: 2px solid var(--dh-gold);
+    object-fit: cover;
+    object-position: center 18%;
+  }
+
+  .bq__name {
+    display: block;
+    font-weight: 700;
+    font-size: var(--text-md);
+    line-height: 1;
+    color: var(--dh-ink);
+  }
+
+  .bq__role {
+    display: block;
+    margin-top: 5px;
+    font-weight: 800;
+    font-size: var(--text-label);
+    line-height: 1;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--dh-gold-deep);
+  }
+
+  @media (max-width: 640px) {
+    .bq {
+      padding: var(--space-7);
+    }
+  }
+</style>

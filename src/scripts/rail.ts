@@ -55,6 +55,20 @@ function initRail(rail: HTMLElement) {
   next?.addEventListener("click", () => rail.scrollBy({ left: step() }));
   rail.addEventListener("scroll", sync, { passive: true });
   window.addEventListener("resize", sync, { passive: true });
+
+  // Re-sync when the track's own box changes, not just the window's.
+  //
+  // Load order is the reason: on a rail whose slides are sized in percentages
+  // and whose height comes from lazy images, the items are laid out at zero
+  // height before those images arrive, and a zero-height row contributes no
+  // scrollable overflow — so at the moment this module first runs, scrollWidth
+  // equals clientWidth and `next` disables itself. Neither `scroll` nor
+  // `resize` fires when the images finally land, so without this the arrow
+  // would stay dead on a rail that can perfectly well scroll.
+  if (track && "ResizeObserver" in window) {
+    new ResizeObserver(sync).observe(track);
+  }
+
   sync();
 }
 

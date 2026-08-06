@@ -1,0 +1,75 @@
+---
+// "The lawyers who will try your case." — the two founding partners, side by side.
+import Eyebrow from "../Eyebrow.astro";
+import PartnerCard from "./PartnerCard.astro";
+import type { TeamMember } from "../../data/team";
+
+interface Props {
+  eyebrow: string;
+  title: string;
+  partners: TeamMember[];
+}
+
+const { eyebrow, title, partners } = Astro.props;
+---
+
+<section class="fp">
+  <div class="container">
+    <header class="fp__head">
+      <Eyebrow class="fp__eyebrow">{eyebrow}</Eyebrow>
+      <h2 class="fp__title">{title}</h2>
+    </header>
+
+    <ul class="fp__grid">
+      {
+        partners.map((partner) => (
+          <li class="fp__item">
+            <PartnerCard member={partner} />
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .fp {
+    padding-block: var(--space-section);
+    background: var(--surface-page);
+  }
+
+  .fp__head {
+    max-width: 760px;
+    margin-bottom: var(--space-11);
+  }
+
+  .fp :global(.fp__eyebrow) {
+    margin-bottom: var(--space-4);
+  }
+
+  .fp__title {
+    font-size: var(--display-3);
+    line-height: 1;
+    color: var(--dh-ink);
+  }
+
+  .fp__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-8);
+    list-style: none;
+    padding: 0;
+  }
+
+  /* The <li> is the grid item and stretches to the row; the card inside would
+     not, so the two cards would finish at different heights. */
+  .fp__item {
+    display: flex;
+  }
+
+  @media (max-width: 900px) {
+    .fp__grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>
