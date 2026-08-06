@@ -25,7 +25,7 @@ const { awards, eyebrow = "Recognized & awarded" } = Astro.props;
 
     {
       /* `role="group"` + tabindex so the rail is reachable and announced by a
-         keyboard user, who has no swipe. The arrows below are the pointer
+         keyboard user, who has no swipe. The dots below are the pointer
          affordance; this is the other half. */
     }
     <div
@@ -47,24 +47,12 @@ const { awards, eyebrow = "Recognized & awarded" } = Astro.props;
       </ul>
     </div>
 
-    <div class="awards__nav">
-      <button
-        type="button"
-        class="awards__arrow"
-        data-rail-prev="awards"
-        aria-label="Previous awards"
-      >
-        <span aria-hidden="true">&larr;</span>
-      </button>
-      <button
-        type="button"
-        class="awards__arrow"
-        data-rail-next="awards"
-        aria-label="Next awards"
-      >
-        <span aria-hidden="true">&rarr;</span>
-      </button>
-    </div>
+    {
+      /* Dots only, no arrows: this rail carousels below 760px and is a static
+         row above it, so the arrows it used to carry were mobile-only anyway
+         and the dots replace them outright. Filled by scripts/rail.ts. */
+    }
+    <div class="rail-dots" data-rail-dots="awards"></div>
   </div>
 </section>
 
@@ -135,38 +123,6 @@ const { awards, eyebrow = "Recognized & awarded" } = Astro.props;
   /* Hidden until the rail can actually scroll. Kept in the DOM at every width
      rather than rendered conditionally, because the breakpoint is a CSS fact —
      the server has no idea how wide the viewport is. */
-  .awards__nav {
-    display: none;
-    gap: var(--space-3);
-  }
-
-  .awards__arrow {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    height: 44px;
-    padding: 0;
-    border: 1px solid var(--dh-line-strong);
-    border-radius: var(--radius-2);
-    background: transparent;
-    font-size: var(--text-lg);
-    line-height: 1;
-    color: var(--dh-ink-2);
-    cursor: pointer;
-    transition: border-color var(--transition), color var(--transition);
-  }
-
-  .awards__arrow:hover:not(:disabled) {
-    border-color: var(--accent-gold);
-    color: var(--dh-gold-deep);
-  }
-
-  .awards__arrow:disabled {
-    opacity: 0.35;
-    cursor: default;
-  }
-
   @media (max-width: 980px) {
     .awards__list {
       gap: var(--space-6) var(--space-10);
@@ -234,14 +190,10 @@ const { awards, eyebrow = "Recognized & awarded" } = Astro.props;
       max-width: 100%;
       max-height: var(--badge-h, 80px);
     }
-
-    .awards__nav {
-      display: flex;
-    }
   }
 </style>
 
 <script>
-  // Prev/next behaviour is shared with the testimonials and attorney rails.
+  // Paging behaviour is shared with the testimonials and attorney rails.
   import "../scripts/rail";
 </script>

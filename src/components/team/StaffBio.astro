@@ -11,7 +11,6 @@
 import Picture from "../media/Picture.astro";
 import Prose from "../prose/Prose.astro";
 import { initialsOf, type TeamMember, type TeamProfile } from "../../data/team";
-import { ROUTES } from "../../lib/routePaths";
 
 interface Props {
   member: TeamMember;
@@ -23,10 +22,6 @@ const { member, profile } = Astro.props;
 
 <section class="sbio">
   <div class="container sbio__inner">
-    <a class="sbio__back" href={ROUTES.attorneys}>
-      <span aria-hidden="true">&larr;</span> Meet our team
-    </a>
-
     <header class="sbio__head">
       <div class="sbio__thumb">
         {
@@ -34,8 +29,8 @@ const { member, profile } = Astro.props;
             <Picture
               src={member.photo}
               alt=""
-              widths={[260, 420]}
-              sizes="(max-width: 720px) 160px, 220px"
+              widths={[260, 420, 720]}
+              sizes="(max-width: 720px) calc(100vw - 2 * var(--container-pad)), 220px"
               class="sbio__photo"
             />
           ) : (
@@ -80,22 +75,6 @@ const { member, profile } = Astro.props;
      runs to about 140 characters a line. */
   .sbio__inner {
     max-width: 820px;
-  }
-
-  .sbio__back {
-    display: inline-block;
-    margin-bottom: var(--space-9);
-    font-weight: 700;
-    font-size: var(--text-sm);
-    line-height: 1;
-    letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
-    color: var(--dh-ink-4);
-    transition: color var(--transition);
-  }
-
-  .sbio__back:hover {
-    color: var(--accent);
   }
 
   .sbio__head {
@@ -231,8 +210,13 @@ const { member, profile } = Astro.props;
       gap: var(--space-7);
     }
 
+    /* Full bleed to the column, not a thumbnail. The header is a single-column
+       grid here, so `flex: 0 0 auto` no longer pins the width and 100% is the
+       whole measure. `aspect-ratio` still governs the height, so a 3:4 crop on
+       a 375px screen is about 500px tall — deliberate: this is the only image
+       on a staff page. */
     .sbio__thumb {
-      width: 160px;
+      width: 100%;
     }
 
     .sbio__name {

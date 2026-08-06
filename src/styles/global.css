@@ -852,6 +852,73 @@ body.drawer-open {
   border-radius: var(--radius-4);
 }
 
+/* ---- Rail paging dots -------------------------------------
+   The AWARDS carousels only — AwardsBar and the attorney bio's.
+   Those two are a static row above 760px and a carousel below
+   it, so dots are their whole control and they render no arrows
+   at all. The card rails (testimonials, the homepage attorneys
+   band) keep arrows at every width: they hold eight or nine
+   cards, which is more dots than a phone can usefully show, and
+   an arrow reports the ends by disabling where a dot cannot.
+   The buttons themselves are built by scripts/rail.ts: how many
+   there are is one per viewport-width page, which is a
+   measurement that changes with the width, not a fact about the
+   content that markup could state. */
+.rail-dots {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-top: var(--space-6);
+}
+
+@media (max-width: 760px) {
+  .rail-dots {
+    display: flex;
+  }
+}
+
+/* Beats the media query above: the script sets `hidden` on a rail
+   whose content fits one page, and one lone dot that does nothing
+   is worse than no control. */
+.rail-dots[hidden] {
+  display: none;
+}
+
+/* 24px of button around an 8px dot. The dot is the ::before so the
+   touch target can meet the 24px minimum without drawing a lozenge
+   that size. */
+.rail-dots__dot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+/* `currentColor` so one rule serves the cream rails and the forest
+   one — the dots take the colour of the section they sit in. */
+.rail-dots__dot::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.28;
+  transition:
+    opacity var(--transition),
+    background-color var(--transition);
+}
+
+.rail-dots__dot[aria-current="true"]::before {
+  background: var(--accent-gold);
+  opacity: 1;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
