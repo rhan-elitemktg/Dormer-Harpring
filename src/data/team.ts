@@ -64,7 +64,10 @@ export interface TeamMember {
    * back to their initials rather than leaving a hole.
    */
   photo?: ImageMetadata;
-  /** The larger crop the founding-partner cards need. */
+  /**
+   * The wider crop the founding-partner cards on the index need. The bio page
+   * deliberately uses the tight `photo` instead — see AttorneyBio.astro.
+   */
   photoLarge?: ImageMetadata;
   /**
    * Set by `getTeam` for anyone who has a profile below, and by nobody else —
@@ -420,7 +423,7 @@ export interface TeamProfile {
    * firm cannot confirm them, clear the field and the line closes up.
    */
   email?: string;
-  /** The three-up dark band under the name. Optional — only Sean has them. */
+  /** The three-up dark band under the name. Optional — the two partners only. */
   facts?: AttorneyFact[];
   /** A `> ` paragraph becomes the pull quote. */
   body: PortableTextBlock[];
@@ -580,6 +583,18 @@ const PROFILES: TeamProfile[] = [
     slug: "k-c-harpring",
     category: "Attorney · Founding Partner",
     email: "kc@dormerharpring.com",
+    // PLACEHOLDER — copied from Sean verbatim so the two partner bios read
+    // alike. The comp gives K.C. no band at all and the firm has supplied no
+    // figures for him. Two of these three are Sean's and are wrong here: he
+    // passed the Colorado bar in 2014 (not 20 years), and the $2.1M slip &
+    // fall was Sean's 2017 verdict. His own body copy below says as much.
+    // TODO(launch): replace with K.C.'s own figures, or delete the field —
+    // the band closes up and the page is correct without it.
+    facts: [
+      { _key: "years", value: "20 Years", label: "Trying cases in Colorado" },
+      { _key: "slip", value: "$2.1M", label: "Largest slip & fall recovery" },
+      { _key: "ctla", value: "CTLA", label: "Trial technique speaker" },
+    ],
     body: pt(
         "K.C. has always had a desire to do meaningful work that improves the day-to-day " +
           "lives of real people, as opposed to aiding the bottom line of some large, " +

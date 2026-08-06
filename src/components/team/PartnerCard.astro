@@ -1,5 +1,9 @@
 ---
-// A founding partner: square portrait, bio, and their personal accolades.
+// A founding partner: square portrait, clamped bio, link to their page.
+//
+// Their award badges came out by request. `member.awards` is still populated —
+// the attorney bio renders the same six as a rail — so this is a display
+// decision here, not a gap in the data.
 import Picture from "../media/Picture.astro";
 import Prose from "../prose/Prose.astro";
 import type { TeamMember } from "../../data/team";
@@ -33,18 +37,6 @@ const portrait = member.photoLarge ?? member.photo;
 
     {/* Clamped to three lines — the full bio is on their page. */}
     <Prose value={member.bio} class="pcard__bio" />
-
-    {
-      member.awards && member.awards.length > 0 && (
-        <ul class="pcard__awards">
-          {member.awards.map((award) => (
-            <li>
-              <Picture src={award.image} alt={award.alt} widths={[140, 300]} class="pcard__award" />
-            </li>
-          ))}
-        </ul>
-      )
-    }
 
     {
       member.href && (
@@ -130,38 +122,21 @@ const portrait = member.photoLarge ?? member.photo;
     text-wrap: pretty;
   }
 
-  /* `margin-top: auto` on the awards, so the row and the CTA under it sit on
-     the floor of the card and line up across the pair. */
-  .pcard__awards {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-5);
-    margin-top: auto;
-    padding-block: var(--space-6);
-    border-block: 1px solid var(--dh-line-soft);
-    list-style: none;
+  /* The gap above the button belongs to the BIO, not the button. Setting it as
+     the button's own `padding-top` overrides one half of `.btn`'s symmetric
+     `padding: var(--space-5) var(--space-8)`, which pushes the label off centre
+     inside a taller box — and the outline variant draws a border, so it shows.
+     Flex item margins never collapse, so this is a guaranteed minimum. */
+  .pcard :global(.pcard__bio) {
+    margin-bottom: var(--space-7);
   }
 
-  .pcard__awards li {
-    display: flex;
-    flex: 1;
-    min-width: 0;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .pcard__awards :global(.pcard__award) {
-    width: auto;
-    height: auto;
-    max-width: 100%;
-    max-height: 60px;
-    object-fit: contain;
-  }
-
+  /* `margin-top: auto` so the CTA sits on the floor of the card and the pair
+     line up across the row — it absorbs whatever slack the clamped bio leaves,
+     on top of the minimum above. */
   .pcard__cta {
     align-self: flex-start;
-    margin-top: var(--space-7);
+    margin-top: auto;
   }
 
   @media (max-width: 640px) {

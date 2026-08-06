@@ -21,25 +21,17 @@ import { getHomeTestimonials, getReviewSummary } from "../../data/testimonials";
 
 export const getStaticPaths = (async () => {
   const [profiles, team] = await Promise.all([getTeamProfiles(), getTeam()]);
-  const partners = team.filter((m) => m.kind === "partner");
 
   return profiles.map((profile) => {
     const member = team.find((m) => m._key === profile.slug)!;
-    // Whoever signed off the profile — a founding partner, and never the
-    // subject of it. The comp shows K.C. approving Sean's.
-    const reviewer = partners.find((p) => p._key !== profile.slug);
     return {
       params: { slug: profile.slug },
-      props: {
-        profile,
-        member,
-        reviewer: reviewer && { name: reviewer.name, href: reviewer.href },
-      },
+      props: { profile, member },
     };
   });
 }) satisfies GetStaticPaths;
 
-const { profile, member, reviewer } = Astro.props;
+const { profile, member } = Astro.props;
 const [firm, band, details, testimonials, reviews] = await Promise.all([
   getFirmDetails(),
   getContactBand(),
@@ -57,16 +49,18 @@ const isAttorney = member.kind === "partner" || member.kind === "attorney";
 >
   {
     isAttorney ? (
-      <AttorneyBio member={member} profile={profile} firm={firm} reviewer={reviewer} />
+      <AttorneyBio member={member} profile={profile} firm={firm} />
     ) : (
       <StaffBio member={member} profile={profile} />
     )
   }
   {
-    /* The comp puts the rail on the attorney bio only. Firm-wide reviews under
-       a paralegal's profile would read as that person's, so the staff layout
-       goes straight to the contact band. */
+    /* Every profile, attorney and staff alike — by request, and against the
+       comp, which carries the rail on the attorney bio only. It reads as the
+       firm's band rather than the page subject's because nothing on it is
+       attributed to them: the heading speaks for the firm and every card names
+       its own client. */
   }
-  {isAttorney && <TestimonialRail testimonials={testimonials} reviews={reviews} />}
+  <TestimonialRail testimonials={testimonials} reviews={reviews} />
   <ContactDetails details={details} form={band.form} />
 </Layout>
