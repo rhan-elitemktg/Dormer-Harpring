@@ -48,16 +48,18 @@ const { text, member } = Astro.props;
     border-radius: var(--radius-5);
   }
 
-  /* Upright serif is the site's standfirst; the pull quote is the italic. The
-     comp sets 29/41, which is a ratio of 1.41 rather than one off the leading
-     ladder — a quote this size needs the extra air between lines. */
+  /* Upright serif is the site's standfirst; the pull quote is the italic.
+     Deliberately smaller than the comp's 29px, which is a display size for a
+     three-line quote and shouts across the ten lines this one actually runs
+     to. --text-2xl tops out at 21, and the leading opens to 1.5 to carry it —
+     the comp's tight 1.41 was tuned for the larger face. */
   .bq__text {
     margin: 0;
     font-family: var(--font-serif);
     font-style: italic;
     font-weight: 400;
-    font-size: clamp(1.375rem, 1.16rem + 0.9vw, 1.8125rem); /* 22 → 29 */
-    line-height: 1.41;
+    font-size: var(--text-2xl);
+    line-height: 1.5;
     color: var(--dh-ink);
     text-wrap: pretty;
   }

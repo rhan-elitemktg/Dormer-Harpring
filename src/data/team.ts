@@ -408,6 +408,18 @@ export interface TeamProfile {
    * Two of the staff bios have none and simply open on the body.
    */
   lede?: string;
+  /**
+   * Personal address, shown in the bio's contact line.
+   *
+   * TODO(launch): VERIFY EVERY ONE OF THESE. The live site publishes no
+   * attorney email anywhere — the only address in the whole 433-page scrape is
+   * `lcl@denvertrial.com`, a WordPress author account leaking into blog
+   * JSON-LD. These follow the comp's single example, `sean@dormerharpring.com`,
+   * so the pattern is <first name>@dormerharpring.com and the rest are
+   * inferred. A published address that bounces is worse than none, so if the
+   * firm cannot confirm them, clear the field and the line closes up.
+   */
+  email?: string;
   /** The three-up dark band under the name. Optional — only Sean has them. */
   facts?: AttorneyFact[];
   /** A `> ` paragraph becomes the pull quote. */
@@ -428,6 +440,7 @@ const PROFILES: TeamProfile[] = [
   {
     slug: "sean-dormer",
     category: "Attorney · Founding Partner",
+    email: "sean@dormerharpring.com",
     facts: [
       { _key: "years", value: "20 Years", label: "Trying cases in Colorado" },
       { _key: "slip", value: "$2.1M", label: "Largest slip & fall recovery" },
@@ -566,6 +579,7 @@ const PROFILES: TeamProfile[] = [
   {
     slug: "k-c-harpring",
     category: "Attorney · Founding Partner",
+    email: "kc@dormerharpring.com",
     body: pt(
         "K.C. has always had a desire to do meaningful work that improves the day-to-day " +
           "lives of real people, as opposed to aiding the bottom line of some large, " +
@@ -643,6 +657,7 @@ const PROFILES: TeamProfile[] = [
   },
   {
     slug: "tim-garvey",
+    email: "tim@dormerharpring.com",
     body: pt(
         "When asked what he does for a living, Tim often explains: “I sue insurance " +
           "companies when they act like jerks. They keep me very busy.”",
@@ -799,6 +814,7 @@ const PROFILES: TeamProfile[] = [
   },
   {
     slug: "laura-browne",
+    email: "laura@dormerharpring.com",
     body: pt(
         "Laura is an experienced personal injury attorney who has successfully resolved " +
           "hundreds of cases where her clients were injured through the negligence of others.",
@@ -840,6 +856,7 @@ const PROFILES: TeamProfile[] = [
   },
   {
     slug: "jessica-mauser",
+    email: "jessica@dormerharpring.com",
     body: pt(
         "Jessica Mauser joined the Dormer Harpring team in early 2024. She is motivated by " +
           "representing clients who have suffered injuries due to the negligence of another.",
@@ -883,6 +900,7 @@ const PROFILES: TeamProfile[] = [
   },
   {
     slug: "amy-rogers",
+    email: "amy@dormerharpring.com",
     body: pt(
         "Amy Rogers combines her extensive legal expertise with a compassionate approach to " +
           "representing clients in complex personal injury cases across Denver and Colorado.",
@@ -924,6 +942,7 @@ const PROFILES: TeamProfile[] = [
   },
   {
     slug: "greg-bentley",
+    email: "greg@dormerharpring.com",
     body: pt(
         "Greg Bentley is a skilled and dedicated trial lawyer with a proven track record of " +
           "advocating for his clients. As Dormer Harpring’s primary trucking attorney, he " +

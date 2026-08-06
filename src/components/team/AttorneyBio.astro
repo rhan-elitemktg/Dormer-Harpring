@@ -58,32 +58,76 @@ const quoteText = hasQuote
            staff layout's alone. */
       }
       {
-        /* Phone and city only. The comp puts a personal email here; the firm
-           publishes none — see the note on `email` in site.ts. */
+        /* The email is per-person and unverified — see the note on `email` in
+           team.ts. Absent, the line closes up to phone and city. */
       }
       <p class="bio__meta">
         <a href={`tel:${firm.phoneE164}`}>{firm.phone}</a>
         <span aria-hidden="true">·</span>
+        {
+          profile.email && (
+            <>
+              <a href={`mailto:${profile.email}`}>{profile.email}</a>
+              <span aria-hidden="true">·</span>
+            </>
+          )
+        }
         <span>{firm.address.city}, Colorado</span>
       </p>
 
       {profile.facts && <AttorneyFacts facts={profile.facts} />}
 
       {
+        /* A bordered strip on desktop, a two-up carousel below 760 — the same
+           treatment AwardsBar carries, for the same reason: six badges wrapped
+           onto a phone read as a leftover row, and shrinking them to one row
+           makes the small print on the seals unreadable. The rail is named so
+           the shared script finds its arrows. */
+      }
+      {
         member.awards && member.awards.length > 0 && (
-          <ul class="bio__awards">
-            {member.awards.map((award) => (
-              <li>
-                <Picture
-                  src={award.image}
-                  alt={award.alt}
-                  widths={[210, 420]}
-                  sizes="(max-width: 760px) 45vw, (max-width: 1180px) 26vw, 13vw"
-                  class="bio__award"
-                />
-              </li>
-            ))}
-          </ul>
+          <div class="bio__awards">
+            <div
+              class="bio__awards-rail noscroll"
+              data-rail="bio-awards"
+              data-rail-step="2"
+              tabindex="0"
+              role="group"
+              aria-label="Awards and recognition, scrollable"
+            >
+              <ul class="bio__awards-list">
+                {member.awards.map((award) => (
+                  <li class="bio__awards-item">
+                    <Picture
+                      src={award.image}
+                      alt={award.alt}
+                      widths={[210, 420]}
+                      sizes="(max-width: 760px) 45vw, (max-width: 1180px) 26vw, 13vw"
+                      class="bio__award"
+                    />
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div class="bio__awards-nav">
+              <button
+                type="button"
+                class="bio__awards-arrow"
+                data-rail-prev="bio-awards"
+                aria-label="Previous awards"
+              >
+                <span aria-hidden="true">&larr;</span>
+              </button>
+              <button
+                type="button"
+                class="bio__awards-arrow"
+                data-rail-next="bio-awards"
+                aria-label="Next awards"
+              >
+                <span aria-hidden="true">&rarr;</span>
+              </button>
+            </div>
+          </div>
         )
       }
 
@@ -263,22 +307,27 @@ const quoteText = hasQuote
     text-underline-offset: 2px;
   }
 
+  /* The bordered strip. The rules belong to the wrapper, not the list, so they
+     stay put when the list inside becomes a scrolling track. */
+  .bio__awards {
+    margin-block: var(--space-9) var(--space-10);
+    padding-block: var(--space-6);
+    border-block: 1px solid var(--dh-line);
+  }
+
   /* Six fixed tracks, dropping to three then two — the comp's. Not `auto-fit`:
      the badges are different shapes, and letting the track size follow the
      artwork gives a ragged row where the comp has a rhythm. */
-  .bio__awards {
+  .bio__awards-list {
     display: grid;
     grid-template-columns: repeat(6, minmax(0, 1fr));
     gap: var(--space-6);
     align-items: center;
-    margin-block: var(--space-9) var(--space-10);
-    padding-block: var(--space-6);
-    padding-inline: 0;
-    border-block: 1px solid var(--dh-line);
+    padding: 0;
     list-style: none;
   }
 
-  .bio__awards li {
+  .bio__awards-item {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -292,6 +341,43 @@ const quoteText = hasQuote
     height: auto;
     max-height: 74px;
     object-fit: contain;
+  }
+
+  /* Hidden until the rail can actually scroll. Kept in the DOM at every width
+     rather than rendered conditionally, because the breakpoint is a CSS fact —
+     the server has no idea how wide the viewport is. */
+  .bio__awards-nav {
+    display: none;
+    gap: var(--space-3);
+    justify-content: center;
+    margin-top: var(--space-5);
+  }
+
+  .bio__awards-arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 1px solid var(--dh-line-strong);
+    border-radius: var(--radius-2);
+    background: transparent;
+    font-size: var(--text-lg);
+    line-height: 1;
+    color: var(--dh-ink-2);
+    cursor: pointer;
+    transition: border-color var(--transition), color var(--transition);
+  }
+
+  .bio__awards-arrow:hover:not(:disabled) {
+    border-color: var(--accent-gold);
+    color: var(--dh-gold-deep);
+  }
+
+  .bio__awards-arrow:disabled {
+    opacity: 0.35;
+    cursor: default;
   }
 
   .bio__video {
@@ -511,7 +597,7 @@ const quoteText = hasQuote
       gap: var(--space-12);
     }
 
-    .bio__awards {
+    .bio__awards-list {
       grid-template-columns: repeat(3, minmax(0, 1fr));
     }
   }
@@ -527,9 +613,54 @@ const quoteText = hasQuote
     }
   }
 
+  /* Two badges at a time, centred inside the column — not a rail that bleeds
+     past the edges with the neighbours half-showing. Each item is half a
+     slide, so the snap position is exact and every badge is on screen whole or
+     not at all. Same treatment as AwardsBar. */
   @media (max-width: 760px) {
-    .bio__awards {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+    .bio__awards-rail {
+      max-width: 420px;
+      margin-inline: auto;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      scroll-snap-type: x mandatory;
+      overscroll-behavior-x: contain;
+    }
+
+    /* Flex, not grid: the track must stay exactly as wide as the rail, because
+       that is what the 50% slides below take their width from. The overflow
+       comes from six of them, not from an oversized track. `flex-start` is
+       load-bearing — a centred nowrap line splits its overflow to BOTH sides,
+       putting the first slides at a negative offset scrollLeft cannot reach. */
+    .bio__awards-list {
+      display: flex;
+      flex-wrap: nowrap;
+      justify-content: flex-start;
+      gap: 0;
+    }
+
+    .bio__awards-item {
+      flex: 0 0 50%;
+      padding-inline: var(--space-3);
+    }
+
+    /* Snap on the ODD items so a swipe lands on a pair rather than sliding a
+       single badge along. The arrows agree via data-rail-step="2". */
+    .bio__awards-item:nth-child(odd) {
+      scroll-snap-align: start;
+    }
+
+    /* `max-` rather than a fixed height so the wide wordmarks scale down into
+       their half instead of overflowing it. */
+    .bio__awards :global(.bio__award) {
+      width: auto;
+      height: auto;
+      max-width: 100%;
+      max-height: 74px;
+    }
+
+    .bio__awards-nav {
+      display: flex;
     }
   }
 
@@ -543,3 +674,8 @@ const quoteText = hasQuote
     }
   }
 </style>
+
+<script>
+  // Prev/next behaviour is shared with the awards bar and the card rails.
+  import "../../scripts/rail";
+</script>
