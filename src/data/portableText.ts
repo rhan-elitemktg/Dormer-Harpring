@@ -27,28 +27,45 @@ export interface PortableTextLink {
 export interface PortableTextBlock {
   _type: "block";
   _key: string;
-  style: "normal" | "blockquote";
+  style: "normal" | "blockquote" | "h2" | "h3";
   markDefs: PortableTextLink[];
   children: PortableTextSpan[];
+  /** Present only on list items. Consecutive ones are grouped into one <ul> by
+   *  the renderer, which is why a list is a run of blocks and not a block. */
+  listItem?: "bullet";
+  /** Portable Text nests lists by level. Nothing here nests, so it is always 1,
+   *  but the field has to be there or the renderer treats the item as loose. */
+  level?: number;
 }
 
 /** `**bold**` or `[label](href)`, whichever comes first. */
 const INLINE = /\*\*([^*]+)\*\*|\[([^\]]+)\]\(([^)]+)\)/g;
+
+/** Leading markers, longest first so "### " is not read as "## " plus a hash. */
+const PREFIXES = [
+  { mark: "### ", style: "h3" as const },
+  { mark: "## ", style: "h2" as const },
+  { mark: "> ", style: "blockquote" as const },
+  { mark: "- ", style: "normal" as const, listItem: "bullet" as const },
+];
 
 /**
  * Build Portable Text blocks, one per argument.
  *
  *   pt("Plain, then **bold**, then [a link](/somewhere).")
  *
+ * A leading marker sets the block's style, the way the same characters do in
+ * Markdown: `## ` and `### ` for headings, `> ` for a pull quote, `- ` for a
+ * bullet. Consecutive bullets become one list — that is the renderer's job, not
+ * this shim's, because it is also how Sanity stores them.
+ *
  * Marks are not nestable — a link's label is plain text. That is a limit of the
  * shim, not of Portable Text, and it has never come up in this copy.
  */
 export function pt(...paragraphs: string[]): PortableTextBlock[] {
   return paragraphs.map((raw, blockIndex) => {
-    // A leading "> " marks the paragraph as a pull quote, the way the same
-    // character does in Markdown.
-    const quoted = raw.startsWith("> ");
-    const text = quoted ? raw.slice(2) : raw;
+    const prefix = PREFIXES.find((candidate) => raw.startsWith(candidate.mark));
+    const text = prefix ? raw.slice(prefix.mark.length) : raw;
     const children: PortableTextSpan[] = [];
     const markDefs: PortableTextLink[] = [];
 
@@ -86,9 +103,10 @@ export function pt(...paragraphs: string[]): PortableTextBlock[] {
     return {
       _type: "block" as const,
       _key: `b${blockIndex}`,
-      style: quoted ? ("blockquote" as const) : ("normal" as const),
+      style: prefix?.style ?? ("normal" as const),
       markDefs,
       children,
+      ...(prefix?.listItem ? { listItem: prefix.listItem, level: 1 } : {}),
     };
   });
 }

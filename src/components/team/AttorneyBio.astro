@@ -1,0 +1,544 @@
+---
+// The full attorney profile — the `DH - Attorney Bio.html` comp.
+//
+// Order is the comp's: category, name, contact line, facts band, accolades,
+// film, body, get-in-touch panel, fact-check strip; portrait card and sidebar
+// cards alongside. Every block but the name and the body is optional and the
+// page closes up without it — K.C. has no facts band and no film.
+//
+// The staff bios are a different layout rather than a further-degraded version
+// of this one; see StaffBio.astro.
+import Picture from "../media/Picture.astro";
+import Prose from "../prose/Prose.astro";
+import AttorneyFacts from "./AttorneyFacts.astro";
+import BioQuote from "./BioQuote.astro";
+import BioFactCheck from "./BioFactCheck.astro";
+import type { TeamMember, TeamProfile } from "../../data/team";
+import type { FirmDetails } from "../../data/site";
+import { videoWatchUrl } from "../../lib/video";
+import { ROUTES } from "../../lib/routePaths";
+
+interface Props {
+  member: TeamMember;
+  profile: TeamProfile;
+  firm: FirmDetails;
+  /** The partner who signed off this profile — never the subject of it. */
+  reviewer?: { name: string; href?: string };
+}
+
+const { member, profile, firm, reviewer } = Astro.props;
+
+const firstName = member.name.split(" ")[0];
+const portrait = member.photoLarge ?? member.photo;
+
+// The comp sets the pull quote as a card with the attorney cited underneath,
+// which is more than a `blockquote` block can carry. So the body is split
+// around it here and the card rendered between the halves: the CMS field stays
+// one `blockContent` with a blockquote in it, and the split is derived.
+const blocks = profile.body;
+const quoteAt = blocks.findIndex((block) => block.style === "blockquote");
+const hasQuote = quoteAt !== -1;
+const bodyBefore = hasQuote ? blocks.slice(0, quoteAt) : blocks;
+const bodyAfter = hasQuote ? blocks.slice(quoteAt + 1) : [];
+const quoteText = hasQuote
+  ? blocks[quoteAt].children.map((span) => span.text).join("")
+  : "";
+---
+
+<section class="bio">
+  <div class="container bio__grid">
+    <article class="bio__main">
+      <p class="bio__cat">{profile.category ?? member.role}</p>
+      <h1 class="bio__title">{member.name}</h1>
+
+      {
+        /* No standfirst here. The comp goes straight from the name to the
+           contact line — `profile.lede` is the staff layout's, where it is the
+           whole bio rather than a pull-out from one. */
+      }
+      {
+        /* Phone and city only. The comp puts a personal email here; the firm
+           publishes none — see the note on `email` in site.ts. */
+      }
+      <p class="bio__meta">
+        <a href={`tel:${firm.phoneE164}`}>{firm.phone}</a>
+        <span aria-hidden="true">·</span>
+        <span>{firm.address.city}, Colorado</span>
+      </p>
+
+      {profile.facts && <AttorneyFacts facts={profile.facts} />}
+
+      {
+        member.awards && member.awards.length > 0 && (
+          <ul class="bio__awards">
+            {member.awards.map((award) => (
+              <li>
+                <Picture
+                  src={award.image}
+                  alt={award.alt}
+                  widths={[210, 420]}
+                  sizes="(max-width: 760px) 45vw, (max-width: 1180px) 26vw, 13vw"
+                  class="bio__award"
+                />
+              </li>
+            ))}
+          </ul>
+        )
+      }
+
+      {
+        profile.video && (
+          <a
+            class="bio__video"
+            href={videoWatchUrl(profile.video.ref)}
+            target="_blank"
+            rel="noopener"
+          >
+            <Picture
+              src={profile.video.poster}
+              alt={profile.video.alt}
+              widths={[640, 900, 1280]}
+              sizes="(max-width: 980px) 100vw, 60vw"
+              class="bio__poster"
+            />
+            <span class="bio__play" aria-hidden="true">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5.5v13l11-6.5z" />
+              </svg>
+            </span>
+            <span class="visually-hidden">
+              Watch {member.name}'s profile film on YouTube
+            </span>
+          </a>
+        )
+      }
+
+      <Prose value={bodyBefore} class="bio__body" />
+      {hasQuote && <BioQuote text={quoteText} member={member} />}
+      <Prose value={bodyAfter} class="bio__body" />
+
+      {
+        /* Three flex children, not two — the panel is too wide for one row in
+           a two-thirds column and wraps, and `space-between` only distributes
+           what it is given. Grouping the number and the button would land them
+           together at the left of the second row instead of at its edges. */
+      }
+      <aside class="bio__cta">
+        <h2 class="bio__cta-head">Want {firstName} on your case?</h2>
+        <div>
+          <p class="bio__cta-note">Free consultation · 24/7</p>
+          <a class="bio__cta-num" href={`tel:${firm.phoneE164}`}>{firm.phone}</a>
+        </div>
+        <a class="btn btn--red btn--lg" href={ROUTES.contact}>Request a case review</a>
+      </aside>
+
+      {reviewer && <BioFactCheck reviewer={reviewer} />}
+    </article>
+
+    <aside class="bio__side">
+      <div class="bio__card">
+        {
+          portrait && (
+            <Picture
+              src={portrait}
+              alt={member.name}
+              widths={[320, 600]}
+              sizes="(max-width: 980px) 100vw, 25vw"
+              class="bio__portrait"
+            />
+          )
+        }
+        <div class="bio__card-body">
+          <p class="bio__card-name">{member.name}</p>
+          <p class="bio__card-role">{member.role}</p>
+          <a class="btn btn--red bio__card-cta" href={ROUTES.contact}>Talk to {firstName}</a>
+        </div>
+      </div>
+
+      {
+        profile.education && (
+          <div class="bio__scard">
+            <div class="bio__scard-head">
+              <h2>Education</h2>
+            </div>
+            {/* Rows, not links: the comp links each degree, but a degree has no
+                destination and the site does not ship hrefs that go nowhere. */}
+            <ul class="bio__rows">
+              {profile.education.map((line) => (
+                <li>{line}</li>
+              ))}
+            </ul>
+          </div>
+        )
+      }
+
+      {
+        profile.links && (
+          <div class="bio__scard">
+            <div class="bio__scard-head">
+              <h2>Links</h2>
+            </div>
+            <ul class="bio__rows">
+              {profile.links.map((link) => (
+                <li>
+                  {/* Only the off-site ones open in a new tab — an internal
+                      link that does is a tab the visitor did not ask for. */}
+                  <a
+                    href={link.href}
+                    {...(link.href.startsWith("http")
+                      ? { target: "_blank", rel: "noopener" }
+                      : {})}
+                  >
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )
+      }
+    </aside>
+  </div>
+</section>
+
+<style>
+  .bio {
+    padding-block: var(--space-section-sm) var(--space-section);
+    background: var(--surface-page);
+  }
+
+  .bio__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-18);
+    align-items: start;
+  }
+
+  .bio__main {
+    grid-column: span 2;
+    min-width: 0;
+  }
+
+  .bio__cat {
+    font-weight: 800;
+    font-size: var(--text-sm);
+    line-height: 1;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--dh-gold-deep);
+  }
+
+  /* Local clamp, not `--display-page-sm`. That token maxes at 62px because it
+     was read off the Case Results / Attorneys / Community family; this comp's
+     own signature is clamp(40px, 4vw, 58px) — a name is not a page title, and
+     four pixels shows on an Anton face this size. */
+  .bio__title {
+    margin-top: var(--space-4);
+    font-size: clamp(2.5rem, 2.063rem + 1.865vw, 3.625rem); /* 40 → 58 */
+    line-height: 1.02;
+    letter-spacing: 0.005em;
+    color: var(--dh-ink);
+    text-wrap: balance;
+  }
+
+  /* --text-base, a step up from the eyebrow above it: the comp sets the
+     category at 13px and this line at 14, and collapsing both onto --text-sm
+     would flatten a distinction it draws on purpose. */
+  .bio__meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-top: var(--space-5);
+    font-size: var(--text-base);
+    line-height: var(--leading-normal);
+    color: var(--dh-ink-4);
+  }
+
+  .bio__meta a {
+    font-weight: 700;
+    color: var(--dh-ink-3);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  /* Six fixed tracks, dropping to three then two — the comp's. Not `auto-fit`:
+     the badges are different shapes, and letting the track size follow the
+     artwork gives a ragged row where the comp has a rhythm. */
+  .bio__awards {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: var(--space-6);
+    align-items: center;
+    margin-block: var(--space-9) var(--space-10);
+    padding-block: var(--space-6);
+    padding-inline: 0;
+    border-block: 1px solid var(--dh-line);
+    list-style: none;
+  }
+
+  .bio__awards li {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Fill the track, cap the height. The badges run from square seals to wide
+     wordmarks; `object-fit: contain` keeps each one's own proportions inside
+     the box the track gives it. */
+  .bio__awards :global(.bio__award) {
+    width: 100%;
+    height: auto;
+    max-height: 74px;
+    object-fit: contain;
+  }
+
+  .bio__video {
+    position: relative;
+    display: block;
+    aspect-ratio: 16 / 9;
+    margin-bottom: var(--space-9);
+    border-radius: var(--radius-6);
+    overflow: hidden;
+    background: var(--dh-forest-500);
+  }
+
+  .bio__video :global(.bio__poster) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .bio__play {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 78px;
+    height: 78px;
+    border-radius: var(--radius-full);
+    background: rgba(225, 74, 50, 0.94);
+    color: var(--dh-white);
+    /* Both transforms in one declaration — a hover rule setting only `scale`
+       would drop the centring translate. */
+    transform: translate(-50%, -50%) scale(1);
+    transition: transform var(--transition);
+  }
+
+  .bio__video:hover .bio__play,
+  .bio__video:focus-visible .bio__play {
+    transform: translate(-50%, -50%) scale(1.08);
+  }
+
+  .bio :global(.bio__body .prose__p) {
+    margin-bottom: var(--space-5);
+    font-size: var(--text-lg);
+    line-height: 1.71;
+    color: var(--dh-ink-2);
+    text-wrap: pretty;
+  }
+
+  /* Tim's twenty-one notable cases and Greg's eleven representative ones. Tight
+     against the paragraph that introduces them, since that paragraph ends on a
+     colon and the list is its object. */
+  .bio :global(.bio__body .prose__list) {
+    margin-block: calc(var(--space-5) * -1 + var(--space-2)) var(--space-7);
+    font-size: var(--text-md);
+    line-height: 1.6;
+    color: var(--dh-ink-2);
+  }
+
+  .bio :global(.bio__body .prose__list li) {
+    margin-bottom: var(--space-3);
+  }
+
+  .bio__cta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-6);
+    margin-top: var(--space-11);
+    padding: var(--space-9) var(--space-11);
+    border-radius: var(--radius-7);
+    background: var(--dh-forest-500);
+  }
+
+  /* The scale steps 25 → 34 and the comp sets 28, so this is a local clamp
+     rather than the wrong end of that gap. */
+  .bio__cta-head {
+    font-family: var(--font-display);
+    font-size: clamp(1.375rem, 1.229rem + 0.622vw, 1.75rem); /* 22 → 28 */
+    line-height: 1.1;
+    color: var(--dh-parchment);
+    text-wrap: balance;
+  }
+
+  .bio__cta-note {
+    margin-bottom: var(--space-2);
+    font-family: var(--font-ui);
+    font-weight: 700;
+    font-size: var(--text-micro);
+    line-height: 1;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--dh-on-dark-3);
+  }
+
+  /* Larger than the heading beside it, which is the comp's ordering — the
+     number is the action on this panel and the headline is the label for it. */
+  .bio__cta-num {
+    font-family: var(--font-ui);
+    font-weight: 600;
+    font-size: clamp(1.5rem, 1.3rem + 0.83vw, 2rem); /* 24 → 32 */
+    letter-spacing: var(--tracking-tight);
+    color: var(--dh-gold-light);
+  }
+
+  /* Not sticky. The comp pins the rail at `top:32px`, but the cards scroll away
+     with the biography by request — a portrait that follows you down two
+     thousand words competes with the copy it is meant to introduce. */
+  .bio__side {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-7);
+  }
+
+  /* The gold top edge is the comp's card signature — every card in the rail
+     carries it, which is what ties the portrait to the two below it. */
+  .bio__card,
+  .bio__scard {
+    border: 1px solid var(--dh-line);
+    border-top: 3px solid var(--dh-gold);
+    border-radius: var(--radius-6);
+    overflow: hidden;
+    background: var(--dh-white);
+  }
+
+  /* The crop is fixed at 3:4 rather than left to the file: the source portraits
+     are 460x580 and the founding partners' larger crops are taller again, so an
+     unconstrained image makes this card twice the height of the comp's.
+     `object-position` high on the frame keeps the sitter's face in the crop. */
+  .bio__card :global(.bio__portrait) {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    object-position: center 15%;
+  }
+
+  .bio__card-body {
+    padding: var(--space-6) var(--space-6) var(--space-6);
+  }
+
+  .bio__card-name {
+    font-family: var(--font-display);
+    font-size: var(--display-6);
+    line-height: 1.1;
+    color: var(--dh-ink);
+  }
+
+  .bio__card-role {
+    margin-top: var(--space-2);
+    font-weight: 800;
+    font-size: var(--text-micro);
+    line-height: 1;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--dh-gold-deep);
+  }
+
+  .bio__card-cta {
+    width: 100%;
+    height: 54px;
+    margin-top: var(--space-5);
+  }
+
+  /* A bordered head bar, not a floating label: it is what separates a card of
+     links from the list of links inside it. */
+  .bio__scard-head {
+    padding: var(--space-5) var(--space-6);
+    border-bottom: 1px solid var(--dh-line-soft);
+  }
+
+  .bio__scard-head h2 {
+    font-family: var(--font-display);
+    font-size: var(--display-7);
+    line-height: 1.2;
+    color: var(--dh-ink);
+  }
+
+  .bio__rows {
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-1) var(--space-6) var(--space-4);
+    list-style: none;
+  }
+
+  /* The hairline belongs to the row, so the last one drops it rather than the
+     list needing a bottom border it would then have to cancel. */
+  .bio__rows li {
+    padding-block: var(--space-4);
+    border-bottom: 1px solid var(--dh-line-soft);
+    font-weight: 600;
+    font-size: var(--text-md);
+    line-height: 1.5;
+    color: var(--dh-ink);
+  }
+
+  .bio__rows li:last-child {
+    border-bottom: 0;
+  }
+
+  .bio__rows a {
+    color: inherit;
+    transition: color var(--transition);
+  }
+
+  .bio__rows a:hover {
+    color: var(--accent);
+  }
+
+  @media (max-width: 1180px) {
+    .bio__grid {
+      gap: var(--space-12);
+    }
+
+    .bio__awards {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 980px) {
+    .bio__grid {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-10);
+    }
+
+    .bio__main {
+      grid-column: auto;
+    }
+  }
+
+  @media (max-width: 760px) {
+    .bio__awards {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 640px) {
+    .bio__cta {
+      padding: var(--space-7) var(--space-6);
+    }
+
+    .bio__cta .btn {
+      width: 100%;
+    }
+  }
+</style>

@@ -73,6 +73,11 @@ const MAP = {
   "assets/awards/best-lawyers.png": "awards/best-lawyers",
   "assets/awards/national-trial-40.png": "awards/national-trial-40",
   "assets/awards/ones-to-watch.png": "awards/ones-to-watch",
+  // The Expertise.com pair. In the package all along but never pulled, which
+  // left both partners a badge short of the six the bio comp lays out — the
+  // personal-injury one is Sean's, the truck one is K.C.'s.
+  "assets/awards/expertise-pi.png": "awards/expertise-pi",
+  "assets/awards/expertise-truck.png": "awards/expertise-truck",
 
   // Co-counsel. From `assets/`, which belongs to the abandoned design
   // generation — the same carve-out as the practice-area photography above:
@@ -202,6 +207,16 @@ const TEAM = {
   "2024/10/15.png": "team/michael-greer.jpg",
   "2026/03/MPM-2.png": "team/marilyn-morales.jpg",
 };
+
+/**
+ * Two accolades the design package has no artwork for. Both are on the
+ * partners' live bio pages and both are personal rather than firm-wide, so
+ * they cannot be substituted from the package's set.
+ */
+const BADGES = {
+  "2020/10/award-15.png": "awards/top-100-litigators",
+  "2020/10/award-12.png": "awards/super-lawyers-kc",
+};
 const EXTERNAL = {
   "/Users/rhanpemberton/Downloads/pedestrian-accident.webp": "home/practice-pedestrian.jpg",
 };
@@ -214,6 +229,7 @@ const rows = [];
 const entries = [
   ...Object.entries(MAP).map(([from, to]) => [path.join(SRC, from), to]),
   ...Object.entries(TEAM).map(([from, to]) => [path.join(SCRAPE, from), to]),
+  ...Object.entries(BADGES).map(([from, to]) => [path.join(SCRAPE, from), to]),
   ...Object.entries(EXTERNAL),
 ];
 

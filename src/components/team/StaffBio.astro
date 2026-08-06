@@ -1,0 +1,242 @@
+---
+// The short bio: paralegals, intake, the law clerks, the office.
+//
+// Not a degraded AttorneyBio. That layout is a two-thirds column against a
+// sticky rail, which is the right shape for two thousand words and the wrong
+// one for two hundred — three paragraphs beside a sticky sidebar leaves the
+// rail hanging in white space, and the rail's "Talk to Marcie" phone CTA sends
+// a case call to someone who does not take them. So: one centred column, the
+// portrait in the header rather than the margin, and the page's only call to
+// action is the shared contact band the route renders underneath.
+import Picture from "../media/Picture.astro";
+import Prose from "../prose/Prose.astro";
+import { initialsOf, type TeamMember, type TeamProfile } from "../../data/team";
+import { ROUTES } from "../../lib/routePaths";
+
+interface Props {
+  member: TeamMember;
+  profile: TeamProfile;
+}
+
+const { member, profile } = Astro.props;
+---
+
+<section class="sbio">
+  <div class="container sbio__inner">
+    <a class="sbio__back" href={ROUTES.attorneys}>
+      <span aria-hidden="true">&larr;</span> Meet our team
+    </a>
+
+    <header class="sbio__head">
+      <div class="sbio__thumb">
+        {
+          member.photo ? (
+            <Picture
+              src={member.photo}
+              alt=""
+              widths={[260, 420]}
+              sizes="(max-width: 720px) 160px, 220px"
+              class="sbio__photo"
+            />
+          ) : (
+            <span class="sbio__initials" aria-hidden="true">
+              {initialsOf(member.name)}
+            </span>
+          )
+        }
+      </div>
+
+      <div class="sbio__id">
+        <p class="sbio__role">{profile.category ?? member.role}</p>
+        <h1 class="sbio__name">{member.name}</h1>
+        {profile.lede && <p class="sbio__lede">{profile.lede}</p>}
+      </div>
+    </header>
+
+    <Prose value={profile.body} class="sbio__body" />
+
+    {
+      profile.education && (
+        <div class="sbio__edu">
+          <h2 class="sbio__edu-head">Education</h2>
+          <ul class="sbio__edu-list">
+            {profile.education.map((line) => (
+              <li>{line}</li>
+            ))}
+          </ul>
+        </div>
+      )
+    }
+  </div>
+</section>
+
+<style>
+  .sbio {
+    padding-block: var(--space-9) var(--space-section);
+    background: var(--surface-page);
+  }
+
+  /* Narrower than the container: a 200-word bio set the full width of the page
+     runs to about 140 characters a line. */
+  .sbio__inner {
+    max-width: 820px;
+  }
+
+  .sbio__back {
+    display: inline-block;
+    margin-bottom: var(--space-9);
+    font-weight: 700;
+    font-size: var(--text-sm);
+    line-height: 1;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--dh-ink-4);
+    transition: color var(--transition);
+  }
+
+  .sbio__back:hover {
+    color: var(--accent);
+  }
+
+  .sbio__head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-9);
+    padding-bottom: var(--space-9);
+    border-bottom: 1px solid var(--dh-line);
+  }
+
+  /* Fixed basis rather than a percentage — the header is a flex row, and a
+     percentage width on the portrait would shrink it on a long name. */
+  .sbio__thumb {
+    position: relative;
+    flex: 0 0 auto;
+    width: 220px;
+    aspect-ratio: 3 / 4;
+    border: 1px solid #d2c7af;
+    border-radius: var(--radius-4);
+    overflow: hidden;
+    background: repeating-linear-gradient(
+      45deg,
+      #e0d8c6,
+      #e0d8c6 9px,
+      #dad1bd 9px,
+      #dad1bd 18px
+    );
+  }
+
+  /* Absolute, not in flow: `aspect-ratio` sets a preferred height, and an
+     in-flow image at 3:4 of its own would still grow the box past it. */
+  .sbio__thumb :global(.sbio__photo) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+  }
+
+  .sbio__initials {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-size: var(--display-4);
+    letter-spacing: 0.04em;
+    color: rgba(44, 59, 49, 0.32);
+  }
+
+  .sbio__id {
+    min-width: 0;
+  }
+
+  .sbio__role {
+    font-weight: 800;
+    font-size: var(--text-sm);
+    line-height: 1;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--dh-gold-deep);
+  }
+
+  .sbio__name {
+    margin-top: var(--space-4);
+    font-size: var(--display-2);
+    line-height: 1.04;
+    color: var(--dh-ink);
+    text-wrap: balance;
+  }
+
+  .sbio__lede {
+    margin-top: var(--space-5);
+    font-family: var(--font-serif);
+    font-size: var(--text-xl);
+    line-height: var(--leading-normal);
+    color: var(--dh-ink-2);
+    text-wrap: pretty;
+  }
+
+  .sbio :global(.sbio__body) {
+    margin-top: var(--space-9);
+  }
+
+  .sbio :global(.sbio__body .prose__p) {
+    margin-bottom: var(--space-5);
+    font-size: var(--text-lg);
+    line-height: 1.71;
+    color: var(--dh-ink-2);
+    text-wrap: pretty;
+  }
+
+  /* A rule and a label rather than the attorney pages' bordered card: there is
+     no sidebar here for a card to sit in, and one card alone under a short
+     column reads as a leftover. */
+  .sbio__edu {
+    margin-top: var(--space-10);
+    padding-top: var(--space-7);
+    border-top: 1px solid var(--dh-line);
+  }
+
+  .sbio__edu-head {
+    margin-bottom: var(--space-4);
+    font-family: var(--font-body);
+    font-weight: 800;
+    font-size: var(--text-label);
+    line-height: 1;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--dh-gold-deep);
+  }
+
+  .sbio__edu-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    list-style: none;
+    padding: 0;
+  }
+
+  .sbio__edu-list li {
+    font-size: var(--text-md);
+    line-height: 1.5;
+    color: var(--dh-ink-3);
+  }
+
+  @media (max-width: 720px) {
+    .sbio__head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-7);
+    }
+
+    .sbio__thumb {
+      width: 160px;
+    }
+
+    .sbio__name {
+      font-size: var(--display-3);
+    }
+  }
+</style>

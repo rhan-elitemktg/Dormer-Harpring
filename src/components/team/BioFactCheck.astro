@@ -1,0 +1,115 @@
+---
+// The comp's `.bp-fact` — the strip that closes an attorney profile and says
+// who reviewed it.
+//
+// It is an E-E-A-T signal, not decoration: a lawyer's biography is
+// Your-Money-or-Your-Life content, and naming the attorney who approved it is
+// the thing that separates a reviewed profile from an unattributed one. The
+// reviewer is a prop because it is a different partner on each page — nobody
+// signs off their own profile.
+import { ROUTES } from "../../lib/routePaths";
+
+interface Props {
+  /** The attorney who approved this profile. */
+  reviewer: { name: string; href?: string };
+}
+
+const { reviewer } = Astro.props;
+---
+
+<aside class="fchk">
+  <p class="fchk__left">
+    <span class="fchk__ico" aria-hidden="true">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 8.5 6.2 12 13 4.5" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+    </span>
+    <span class="fchk__label">Fact checked</span>
+  </p>
+  {
+    /* The `{" "}` are load-bearing: Astro trims the whitespace between an
+       expression and the tag next to it, so without them this reads
+       "following oureditorial guidelines". */
+  }
+  <p class="fchk__body">
+    This profile has been written, edited, and reviewed by our team following our{" "}
+    <a href={ROUTES.editorialGuidelines}>editorial guidelines</a>, and approved by
+    attorney{" "}
+    {reviewer.href ? <a href={reviewer.href}>{reviewer.name}</a> : reviewer.name}.
+  </p>
+</aside>
+
+<style>
+  .fchk {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--space-8);
+    align-items: center;
+    margin-top: var(--space-14);
+    padding: var(--space-7) var(--space-9);
+    background: var(--dh-cream-200);
+    border: 1px solid var(--dh-line);
+    border-radius: var(--radius-6);
+  }
+
+  .fchk__left {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding-right: var(--space-8);
+    border-right: 1px solid var(--dh-line-strong);
+  }
+
+  .fchk__ico {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    border: 1.5px solid var(--dh-gold);
+    border-radius: var(--radius-full);
+    color: var(--dh-gold-deep);
+  }
+
+  /* `nowrap` so "Fact checked" holds one line against its rule — it is a label,
+     and a two-line label beside a vertical divider reads as a heading. */
+  .fchk__label {
+    font-family: var(--font-display);
+    font-size: var(--display-7);
+    line-height: 1.1;
+    color: var(--dh-ink);
+    white-space: nowrap;
+  }
+
+  .fchk__body {
+    font-size: var(--text-md);
+    line-height: var(--leading-prose);
+    color: var(--dh-ink-2);
+    text-wrap: pretty;
+  }
+
+  .fchk__body a {
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .fchk__body a:hover {
+    color: var(--dh-red-link);
+  }
+
+  @media (max-width: 640px) {
+    .fchk {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-5);
+      padding: var(--space-7);
+    }
+
+    .fchk__left {
+      padding-right: 0;
+      padding-bottom: var(--space-5);
+      border-right: 0;
+      border-bottom: 1px solid var(--dh-line-strong);
+    }
+  }
+</style>
