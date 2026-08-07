@@ -624,8 +624,20 @@ select {
   font-size: var(--text-base);
 }
 
+/* Below 640 every button spans its container. A CTA that stops two-thirds
+   across a phone reads as a desktop layout that was not thought about, and at
+   this width there is no second column for it to sit beside anyway.
+
+   Safe as a blanket rule because only three places on the site put two buttons
+   in one row — the homepage hero, Thank You's "while you wait" panel, and the
+   internal token reference — and all three are `flex-wrap: wrap`, so each
+   button takes its own line rather than overflowing. The carousel prev/next
+   controls are not `.btn` and are untouched.
+
+   This replaces `.btn--block-sm`, which did the same thing opt-in and which
+   only two buttons ever carried. */
 @media (max-width: 640px) {
-  .btn--block-sm {
+  .btn {
     width: 100%;
   }
 }
@@ -663,8 +675,9 @@ select {
    note onto its own line is what the flex row did anyway at this width, but it
    left the button two-thirds across and the note hard against the left margin,
    which reads as a layout that ran out of room rather than one made for it.
-   `align-items: stretch` is what widens the button — no `width: 100%` on the
-   `.btn` itself, so this cannot fight `.btn--block-sm` if a page adds it. */
+   The button is already full width here from the blanket `.btn` rule above;
+   what this adds is the column direction, so the note drops beneath rather than
+   beside, and the stretch that lets `text-align` centre it. */
 @media (max-width: 640px) {
   .hero-cta {
     flex-direction: column;

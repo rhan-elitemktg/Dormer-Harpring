@@ -83,7 +83,7 @@ const [desktop, teamCrop] = await Promise.all([
     <p class="hero__lede">{hero.lede}</p>
 
     <div class="hero__ctas">
-      <a class="btn btn--red btn--lg btn--block-sm" href={hero.primaryCta.href}>
+      <a class="btn btn--red btn--lg" href={hero.primaryCta.href}>
         {hero.primaryCta.label}
       </a>
 
@@ -92,7 +92,7 @@ const [desktop, teamCrop] = await Promise.all([
            yet. Rendered as designed but inert — it gets a data-video-id and the
            lightbox once we have a host and IDs. */
       }
-      <button type="button" class="btn btn--light btn--lg btn--block-sm hero__video">
+      <button type="button" class="btn btn--light btn--lg hero__video">
         <PlayButton tone="dark" size={38} />
         {hero.videoCta.label}
       </button>
