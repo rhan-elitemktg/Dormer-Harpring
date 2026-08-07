@@ -1,0 +1,76 @@
+---
+// The white "300+ Client Reviews · 5.0 on Google" card that sits beside a
+// section heading.
+//
+// At src/components/ root because three comps carry it byte-identically — the
+// homepage testimonial rail, the About page's reviews band, and the attorney
+// bio. Extracted from TestimonialRail, which held the only copy.
+//
+// PRESENTATIONAL ONLY. This must NOT become AggregateRating JSON-LD: self-
+// serving review markup on an organization is a Google policy violation, and
+// it is one of the things wrong with the site this one replaces.
+import GoogleIcon from "./icons/GoogleIcon.astro";
+import Stars from "./Stars.astro";
+import type { ReviewSummary } from "../data/testimonials";
+
+interface Props {
+  reviews: ReviewSummary;
+  class?: string;
+}
+
+const { reviews, class: className } = Astro.props;
+---
+
+<div class:list={["rrate", className]}>
+  <GoogleIcon size={34} class="rrate__google" />
+  <div>
+    <Stars class="rrate__stars" />
+    <span class="rrate__count">
+      <strong>{reviews.count}</strong> Client Reviews &middot; {reviews.rating} on {
+        reviews.source
+      }
+    </span>
+  </div>
+</div>
+
+<style>
+  .rrate {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-4) var(--space-6);
+    background: var(--dh-white);
+    border-radius: var(--radius-5);
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.28);
+  }
+
+  /* `:global()` bounded by `.rrate`, an element in this template: both classes
+     are passed to child components and land on THEIR markup, so they never
+     carry this file's cid. */
+  .rrate :global(.rrate__google) {
+    display: block;
+    flex-shrink: 0;
+  }
+
+  .rrate :global(.rrate__stars) {
+    display: block;
+    font-size: var(--text-xl);
+    letter-spacing: 2px;
+    /* Not `--accent-gold`: on white the mark reads as a rating rather than the
+       site's accent, and the comps use this warmer yellow for it. */
+    color: #e8b84b;
+  }
+
+  .rrate__count {
+    display: block;
+    margin-top: var(--space-1);
+    font-weight: 600;
+    font-size: var(--text-sm);
+    line-height: 1.3;
+    color: #3a342b;
+  }
+
+  .rrate__count strong {
+    font-weight: 800;
+  }
+</style>

@@ -624,9 +624,69 @@ select {
   font-size: var(--text-base);
 }
 
+/* Below 640 every button spans its container. A CTA that stops two-thirds
+   across a phone reads as a desktop layout that was not thought about, and at
+   this width there is no second column for it to sit beside anyway.
+
+   Safe as a blanket rule because only three places on the site put two buttons
+   in one row — the homepage hero, Thank You's "while you wait" panel, and the
+   internal token reference — and all three are `flex-wrap: wrap`, so each
+   button takes its own line rather than overflowing. The carousel prev/next
+   controls are not `.btn` and are untouched.
+
+   This replaces `.btn--block-sm`, which did the same thing opt-in and which
+   only two buttons ever carried. */
 @media (max-width: 640px) {
-  .btn--block-sm {
+  .btn {
     width: 100%;
+  }
+}
+
+/* ---- Hero CTA row -----------------------------------------
+   Four interior photo heroes put ONE red button beside a gold no-fee line and
+   nothing else — About, Co-Counsel, Practice Areas and Testimonials. Each held
+   its own byte-identical copy of this; here once instead.
+
+     <div class="hero-cta">
+       <a class="btn btn--red btn--lg" href="…">Request free consultation</a>
+       <span class="hero-cta__note">No win, no fee</span>
+     </div>
+
+   Only for the ONE-button case. The homepage hero pairs two buttons and lays
+   them out differently, so it keeps its own row. */
+.hero-cta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-5);
+  margin-top: var(--space-10);
+}
+
+.hero-cta__note {
+  font-weight: 800;
+  font-size: var(--text-label);
+  line-height: 1;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--dh-gold-light);
+}
+
+/* Stacked on a phone: full-width button, note centred beneath it. Wrapping the
+   note onto its own line is what the flex row did anyway at this width, but it
+   left the button two-thirds across and the note hard against the left margin,
+   which reads as a layout that ran out of room rather than one made for it.
+   The button is already full width here from the blanket `.btn` rule above;
+   what this adds is the column direction, so the note drops beneath rather than
+   beside, and the stretch that lets `text-align` centre it. */
+@media (max-width: 640px) {
+  .hero-cta {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-4);
+  }
+
+  .hero-cta__note {
+    text-align: center;
   }
 }
 

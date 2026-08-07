@@ -323,37 +323,85 @@ const fallback = narrow ?? wide;
     text-wrap: pretty;
   }
 
-  /* Below 760 the scrim's horizontal falloff puts the end of every line on the
-     bright half of the picture. Swap to a vertical one and let the band size to
-     its content. */
+  /* Below 760 the photograph stops being a full-height background and becomes a
+     BAND across the top, with the copy beneath it on the forest gradient.
+     Same construction as the homepage hero, which arrived at it first.
+
+     Two things force it. The scrim's horizontal falloff puts the end of every
+     line on the bright half of the picture, so it has to go vertical — and once
+     it is vertical, copy over the picture means darkening the whole picture.
+     Worse, `cover` on a full-height portrait box takes its crop entirely out of
+     the SIDES: at 390x700 this 1400x1370 crop renders 718px wide, so 46% of its
+     width is gone and with it the outer two of the four attorneys.
+
+     A band sized off the viewport WIDTH keeps the frame near the crop's own 1:1,
+     so the whole group stays in shot, and it is deterministic — nothing about it
+     drifts as the copy above or below it changes length. */
   @media (max-width: 760px) {
     .ph--photo {
+      --ph-band: min(104vw, 30rem);
       min-height: 0;
+      /* FLAT, not the radial — see the matching note in Hero.astro. The wash
+         has to end in exactly the colour behind the band's foot. */
+      background: var(--dh-forest-500);
     }
 
-    /* Centred, because below this width the source has ALREADY swapped to the
-       crop framed on the team — there is no longer a right third to chase. A
-       header with no `photoMobile` still gets the panorama here, so the offset
-       stays as the fallback for that case. */
+    .ph__media {
+      inset: 0 0 auto;
+      height: var(--ph-band);
+    }
+
+    /* Anchored top: the crops run a little taller than the band, so what goes
+       is the feet rather than the faces. The 68% is the fallback for a header
+       with no `photoMobile`, which still gets the panorama here and still needs
+       its right third; `.ph--art` centres the ones that swapped. */
     .ph__photo {
       object-position: 68% top;
     }
 
     .ph--art .ph__photo {
-      object-position: center;
+      object-position: center top;
     }
 
+    /* A light vignette, not a wash. No copy sits on the picture now, and the
+       header above an interior page is a solid bar rather than a transparent
+       one, so there is nothing here that needs contrast. */
     .ph__scrim {
       background: linear-gradient(
         180deg,
-        rgba(18, 29, 22, 0.72) 0%,
-        rgba(20, 32, 25, 0.88) 45%,
-        rgba(24, 37, 29, 0.96) 100%
+        rgba(18, 29, 22, 0.3) 0%,
+        rgba(18, 29, 22, 0) 26%
       );
     }
 
+    /* The dark green wash, bottom to top — the same stops as the homepage hero.
+       Clear across the top third where the faces are, opaque enough by 50% to
+       carry the copy that overlaps the lower half, and fully `--dh-forest-500`
+       by 80%, so it reaches the section background before the photo's own
+       bottom edge does and there is nothing left to see a seam at.
+
+       That last stop moved out from 68% when the copy moved down to 72%: at 68%
+       the copy would have landed on flat colour with no picture left behind it,
+       which is the overlap this is for. */
+    .ph__media::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        180deg,
+        rgba(25, 34, 28, 0) 34%,
+        rgba(25, 34, 28, 0.55) 50%,
+        var(--dh-forest-500) 80%
+      );
+    }
+
+    /* The copy OVERLAPS the photograph, starting 72% down the band — below the
+       faces, which end at 32%, and inside the wash that carries it. A fraction
+       of the band rather than a fixed offset, because the band is itself a
+       fraction of the viewport: the relationship that has to hold is to the
+       faces, not to a pixel count. */
     .ph--photo .ph__inner {
-      padding-block: var(--space-section);
+      padding-block: calc(var(--ph-band) * 0.72) var(--space-12);
     }
   }
 

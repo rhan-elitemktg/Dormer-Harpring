@@ -93,6 +93,15 @@ const MAP = {
   "assets/photos/cocounsel-hero.png": "cocounsel/hero.jpg",
   "assets/photos/cocounsel-duo.png": "cocounsel/duo.jpg",
 
+  // About. Same `assets/photos/` carve-out. Only three: the About comp's hero
+  // (`uploads/111-192c78aa.jpg`) and its contact photograph
+  // (`uploads/pasted-1785212437457-0.png`) are the skyline frame already
+  // extracted above, so About reuses team/skyline.jpg and the contact
+  // singleton's own photo rather than carrying a fourth and fifth copy.
+  "assets/photos/founders-duo.png": "about/founders-duo.jpg",
+  "assets/photos/firm-bg-c.jpg": "about/quote-bg.jpg",
+  "assets/photos/hiw-boardroom.jpg": "about/boardroom.jpg",
+
   // Attorneys
   "wireframes/assets/attorney-1.png": "attorneys/attorney-1.jpg",
   "wireframes/assets/attorney-2.png": "attorneys/attorney-2.jpg",

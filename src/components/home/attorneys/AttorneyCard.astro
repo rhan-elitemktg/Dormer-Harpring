@@ -1,23 +1,38 @@
 ---
-// One attorney in the homepage rail: portrait, name, role.
+// One attorney: portrait, name, role.
+//
+// Two layouts, because two comps draw the same card at different widths — the
+// homepage rail fixes it at 272px, the About grid lets the track set it. That
+// and the matching `sizes` is the whole difference, so it is a prop rather than
+// a second component with a hundred duplicated lines of CSS. The About comp
+// also moves the play glyph to the bottom-left corner; not adopted, so the
+// glyph is centred on every attorney card the site draws.
 import Picture from "../../media/Picture.astro";
 import PlayButton from "../../media/PlayButton.astro";
 import type { AttorneyCardData } from "../../../data/attorneys";
 
 interface Props {
   attorney: AttorneyCardData;
+  layout?: "rail" | "grid";
 }
 
-const { attorney } = Astro.props;
+const { attorney, layout = "rail" } = Astro.props;
+
+// The rail's card is 272px at every width; the grid's is a quarter of the
+// container on desktop and the full width of a phone.
+const sizes =
+  layout === "rail"
+    ? "272px"
+    : "(max-width: 640px) 100vw, (max-width: 1080px) 50vw, 25vw";
 ---
 
-<a class="acard" href={attorney.href}>
+<a class:list={["acard", `acard--${layout}`]} href={attorney.href}>
   <span class="acard__media">
     <Picture
       src={attorney.portrait}
       alt={attorney.name}
-      widths={[272, 544]}
-      sizes="272px"
+      widths={[272, 544, 700]}
+      sizes={sizes}
       class="acard__portrait"
     />
     <span class="acard__scrim" aria-hidden="true"></span>
@@ -36,6 +51,9 @@ const { attorney } = Astro.props;
   .acard {
     display: flex;
     flex-direction: column;
+  }
+
+  .acard--rail {
     flex: 0 0 272px;
     scroll-snap-align: start;
   }
@@ -78,6 +96,9 @@ const { attorney } = Astro.props;
      `transform: scale()` on hover would replace this centring translate
      outright, throwing the button into the corner. The pulse is the hover
      feedback; it doesn't need a second one. */
+  /* Centred in BOTH layouts. The About comp tucks it into the bottom-left
+     corner; overridden by request, so the glyph sits in the same place on
+     every attorney card the site draws. */
   .acard :global(.acard__play) {
     position: absolute;
     top: 50%;
@@ -109,7 +130,7 @@ const { attorney } = Astro.props;
   }
 
   @media (max-width: 640px) {
-    .acard {
+    .acard--rail {
       flex-basis: 232px;
     }
   }

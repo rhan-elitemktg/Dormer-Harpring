@@ -17,6 +17,22 @@ interface Props {
 }
 
 const { items, phone, phoneE164 } = Astro.props;
+
+// A parent with children renders as a <summary>, which TOGGLES rather than
+// navigates — so unless one of its children points at the parent's own page,
+// that page is unreachable from the drawer entirely. The header has no such
+// problem: there the parent is a real link with the caret beside it.
+//
+// Most menus author that link themselves (Practice Areas ends with "View all
+// practice areas"). This supplies one where none exists, so removing an entry
+// that is redundant in the header cannot silently strip the only way in on a
+// phone — and so a menu authored in the CMS later never depends on an editor
+// remembering to add a link back to the section they are already inside.
+const subItemsOf = (item: NavItem) => {
+  const children = item.children ?? [];
+  if (!item.href || children.some((child) => child.href === item.href)) return children;
+  return [{ label: item.label, href: item.href }, ...children];
+};
 ---
 
 <div class="mnav">
@@ -68,7 +84,7 @@ const { items, phone, phoneE164 } = Astro.props;
                     <span class="mnav__chev" aria-hidden="true" />
                   </summary>
                   <ul class="mnav__sublist">
-                    {item.children.map((child) => (
+                    {subItemsOf(item).map((child) => (
                       <li>
                         <a class="mnav__sublink" href={child.href ?? "#"}>
                           {child.label}
