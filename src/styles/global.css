@@ -63,6 +63,10 @@
   --dh-ink-3: #6a6353;       /* lede / muted — absorbs #7A7160, #6E6455 */
   --dh-ink-4: #8a8272;       /* meta, dates, captions */
   --dh-ink-5: #a79a82;       /* struck-through "Offered", faintest */
+  /* Not a step on the ladder above — a distinctly greener ink the comps use
+     only for the chevroned practice-area link lists (Co-Counsel, Practice
+     Areas), where the label sits beside a gold glyph. */
+  --dh-ink-link: #3a4438;
 
   /* Text on forest. */
   --dh-parchment: #f4efe7;   /* 200 uses — absorbs #F6F2E8, #EDE8DB */
