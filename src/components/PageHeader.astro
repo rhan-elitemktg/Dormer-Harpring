@@ -343,17 +343,35 @@ const fallback = narrow ?? wide;
       object-position: center;
     }
 
+    /* Nearly clear over the top third, then a hard ramp to full strength just
+       above where the copy starts. The old flat-ish 0.72→0.96 was legible but
+       it muddied the photograph everywhere, including the part of it no text
+       ever sat on. */
     .ph__scrim {
       background: linear-gradient(
         180deg,
-        rgba(18, 29, 22, 0.72) 0%,
-        rgba(20, 32, 25, 0.88) 45%,
+        rgba(18, 29, 22, 0.12) 0%,
+        rgba(18, 29, 22, 0.28) 28%,
+        rgba(20, 32, 25, 0.9) 38%,
         rgba(24, 37, 29, 0.96) 100%
       );
     }
 
+    /* Every mobile crop frames its subject in the top third of the frame — the
+       team photograph puts their faces at 12–32% of it, the Co-Counsel one at
+       12–32% too. The band is portrait and the sources are near-square, so
+       `cover` scales by HEIGHT and crops nothing vertically: that third maps to
+       the top third of the band however tall the band grows. The copy used to
+       start one `--space-section` in, which put the eyebrow and the h1 straight
+       across their faces.
+
+       So the top padding clears the subject rather than sitting on it, and it
+       is a vw clamp rather than a fixed value because the band's height scales
+       with the copy — a proportion is what has to hold, not a pixel count. The
+       bottom is trimmed to match: with a tall photograph above the copy, the
+       band no longer needs an equally deep skirt below it. */
     .ph--photo .ph__inner {
-      padding-block: var(--space-section);
+      padding-block: clamp(15rem, 62vw, 20rem) var(--space-12);
     }
   }
 
