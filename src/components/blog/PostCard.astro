@@ -1,0 +1,262 @@
+---
+// One card in the blog grid: thumbnail, category and date, byline, title,
+// excerpt, and a read-more affordance.
+//
+// THE WHOLE CARD IS ONE LINK, not four. The comp wires the thumbnail, the
+// title and the "Read more" as three separate anchors to the same post — an
+// image link with no accessible name among them — and the two byline links get
+// `position:relative;z-index:2` to stay clickable above the rest. That z-index
+// is the tell: the intended construction is a stretched link. So the title
+// carries the only anchor and covers the card through `::after`, the byline
+// links sit above it, and "Read more" is a span. ArticleCard on the homepage
+// arrived at the same shape.
+//
+// A post with no page renders with no link at all — see `href: null` in
+// `data/blog.ts`. Eight of the twelve are in that state until the firm
+// supplies real articles.
+import Picture from "../media/Picture.astro";
+import type { BlogPost } from "../../data/blog";
+import { formatPostDate } from "../../lib/dates";
+
+interface Props {
+  post: BlogPost;
+  /** From the page singleton, so the label is editable in one place. */
+  readMoreLabel: string;
+}
+
+const { post, readMoreLabel } = Astro.props;
+---
+
+{/* `data-category` is what the tab filter matches on — see scripts/blogFeed.ts. */}
+<li class="pcard" data-category={post.category.slug}>
+  <div class="pcard__thumb">
+    {
+      /* Empty alt: this is card art, not content. The comp sets the post title
+         as the alt, which a screen reader then reads immediately before the
+         same title in the heading below it. The photographs are drawn from the
+         practice-area set and chosen loosely — the uninsured-motorist card gets
+         the dog-bite photograph — so they illustrate nothing to describe. */
+    }
+    <Picture
+      src={post.image}
+      alt=""
+      widths={[400, 600, 800]}
+      sizes="(max-width: 760px) 100vw, (max-width: 1180px) 50vw, 33vw"
+      class="pcard__img"
+    />
+  </div>
+
+  <p class="pcard__meta">
+    <span class="pcard__cat">{post.category.title}</span>
+    <span class="pcard__dot" aria-hidden="true"></span>
+    <time class="pcard__date" datetime={post.publishedAt}>
+      {formatPostDate(post.publishedAt)}
+    </time>
+  </p>
+
+  <p class="pcard__byline">
+    Written by <a class="pcard__person" href={post.author.href}>{post.author.name}</a>,
+    reviewed by <a class="pcard__person" href={post.reviewer.href}>{post.reviewer.name}</a>
+  </p>
+
+  <h3 class="pcard__title">
+    {post.href ? <a class="pcard__link" href={post.href}>{post.title}</a> : post.title}
+  </h3>
+
+  <p class="pcard__excerpt">{post.excerpt}</p>
+
+  {
+    post.href && (
+      <span class="pcard__more arrow-link">
+        {readMoreLabel} <span class="arrow" aria-hidden="true">&rarr;</span>
+      </span>
+    )
+  }
+</li>
+
+<style>
+  .pcard {
+    position: relative; /* the stretched link's containing block */
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Cards fade up when a category is picked, so the grid reads as having
+     re-populated rather than silently swapping. Deliberately small — 6px and
+     240ms — because the whole grid moves at once and anything further is a
+     page transition.
+
+     `data-enter` is set by scripts/blogFeed.ts only on a filter change, never
+     on load: at load the images are still fading in under `.lazy-fade` and two
+     entrances on top of each other read as a glitch. The stagger index arrives
+     as `--enter-i`, which is the custom-property-as-PARAMETER carve-out — a
+     continuous number, not a closed set an attribute selector could enumerate. */
+  @keyframes pcard-in {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+  }
+
+  .pcard[data-enter] {
+    animation: pcard-in 240ms var(--ease) both;
+    animation-delay: calc(var(--enter-i, 0) * 25ms);
+  }
+
+  /* The global reduced-motion guard collapses animation DURATION but not delay,
+     and `both` holds the from-state through it — so without this rule a
+     reduced-motion visitor gets cards parked at opacity 0 for up to 200ms. */
+  @media (prefers-reduced-motion: reduce) {
+    .pcard[data-enter] {
+      animation: none;
+    }
+  }
+
+  .pcard__thumb {
+    margin-bottom: var(--space-6);
+    border-radius: var(--radius-media);
+    overflow: hidden;
+    /* Behind the image while it decodes, so the card does not flash white. */
+    background: var(--dh-cream-400);
+  }
+
+  /* `:global()` bounded by an element in this template: the class is passed to
+     Picture and lands on ITS <img>, carrying Picture's cid rather than this
+     file's. A plain rule here would compile and match nothing — the exact case
+     `check:styles` exists to catch. */
+  .pcard__thumb :global(.pcard__img) {
+    display: block;
+    width: 100%;
+    height: 240px;
+    object-fit: cover;
+    transition: transform var(--transition);
+  }
+
+  .pcard:hover .pcard__thumb :global(.pcard__img) {
+    transform: scale(1.04);
+  }
+
+  .pcard__meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+    margin-bottom: var(--space-1);
+  }
+
+  .pcard__cat {
+    font-weight: 800;
+    font-size: var(--text-micro);
+    line-height: 1;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--dh-gold-deep);
+  }
+
+  /* The comp's #B7AE9A sits between --dh-ink-5 and --dh-line-strong; on a 4px
+     dot the difference is not perceptible, so it snaps to the ink ladder. */
+  .pcard__dot {
+    width: 4px;
+    height: 4px;
+    border-radius: var(--radius-full);
+    background: var(--dh-ink-5);
+  }
+
+  .pcard__date {
+    font-size: var(--text-sm);
+    line-height: 1;
+    color: var(--text-meta);
+  }
+
+  .pcard__byline {
+    margin-bottom: var(--space-3);
+    font-size: var(--text-sm);
+    line-height: var(--leading-snug);
+    color: var(--text-meta);
+  }
+
+  /* Above the stretched link, so the two people in the byline stay reachable —
+     this is the z-index the comp already carries. */
+  .pcard__person {
+    position: relative;
+    z-index: 2;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .pcard__person:hover {
+    color: var(--accent);
+  }
+
+  .pcard__title {
+    margin-bottom: var(--space-4);
+    font-size: var(--display-7);
+    line-height: var(--leading-tight);
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--dh-ink);
+    transition: color var(--dur-fast) var(--ease);
+  }
+
+  .pcard:hover .pcard__title {
+    color: var(--accent);
+  }
+
+  .pcard__link {
+    color: inherit;
+  }
+
+  .pcard__link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    /* Under the byline links, which lift themselves to 2. */
+    z-index: 1;
+  }
+
+  /* The focus ring belongs on the whole card, not on the two words of the
+     title — the click target is the card. */
+  .pcard__link:focus-visible {
+    outline: none;
+  }
+
+  .pcard:has(.pcard__link:focus-visible) {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 6px;
+    border-radius: var(--radius-2);
+  }
+
+  /* Three lines, then clipped. `-webkit-line-clamp` is the only way to clamp by
+     line count and is supported everywhere the site targets; without a clamp
+     the twelve cards' excerpts run 2–4 lines and the grid rows go ragged. */
+  .pcard__excerpt {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-size: var(--text-md);
+    line-height: var(--leading-prose);
+    color: var(--text-muted);
+  }
+
+  .pcard__more {
+    align-self: flex-start;
+    margin-top: var(--space-5);
+    font-weight: 800;
+    font-size: var(--text-sm);
+    line-height: 1;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  /* The arrow's nudge normally rides on `:is(a, button):hover`, and here the
+     anchor is the title — the arrow is a sibling, outside it. Driving the shift
+     from the card is exactly why that global rule parks the offset in a custom
+     property rather than a whole transform. */
+  .pcard:hover .arrow {
+    --arrow-shift: 3px;
+  }
+</style>

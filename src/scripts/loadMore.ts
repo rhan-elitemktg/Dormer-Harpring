@@ -1,5 +1,11 @@
 // Progressive disclosure for long lists — the written reviews and the case
-// results, and the blog archive after them.
+// results.
+//
+// NOT the blog index, which was expected to land here and did not: its feed
+// also has a category filter, and a filter and a pager both writing `hidden` on
+// the same cards race with each other. That page owns its visibility in one
+// place instead — see scripts/blogFeed.ts, which keeps this module's wiring
+// convention and its focus handling.
 //
 // Everything is SERVER-RENDERED. This hides the tail rather than fetching one,
 // so a crawler and a visitor with no JS get the whole list, and the button only

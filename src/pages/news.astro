@@ -1,0 +1,74 @@
+---
+// The blog index. Six sections, two of which — the core values band and the
+// contact block — are bands this site already builds elsewhere.
+//
+// At /news, not /blog: the legacy WordPress site serves its index there and has
+// 167 posts hanging off it, so the route is `ROUTES.blog` and the shape stays.
+import Layout from "../layouts/Layout.astro";
+import PageHeader from "../components/PageHeader.astro";
+import CategoryTabs from "../components/blog/CategoryTabs.astro";
+import FeaturedPost from "../components/blog/FeaturedPost.astro";
+import PostGrid from "../components/blog/PostGrid.astro";
+import CoreValues from "../components/CoreValues.astro";
+import ContactDetails from "../components/contact/ContactDetails.astro";
+import { getBlogCategories, getBlogPage, getBlogPosts, getFeaturedPost } from "../data/blog";
+import { getCoreValues, getCoreValuesSection } from "../data/coreValues";
+import { getContactBand, getContactDetails } from "../data/contact";
+
+const [page, categories, featured, posts, valuesSection, values, band, details] =
+  await Promise.all([
+    getBlogPage(),
+    getBlogCategories(),
+    getFeaturedPost(),
+    getBlogPosts(),
+    getCoreValuesSection(),
+    getCoreValues(),
+    getContactBand(),
+    getContactDetails(),
+  ]);
+---
+
+<Layout
+  title="Blog"
+  description="Plain-English answers on insurance, injuries, and what happens after a crash in Colorado, written by the Denver trial lawyers who handle these cases."
+>
+  <PageHeader eyebrow={page.eyebrow} title={page.title} lede={page.lede} tone="cream" />
+
+  <FeaturedPost
+    post={featured}
+    badge={page.featuredBadge}
+    readMoreLabel={page.readMoreLabel}
+  />
+
+  {
+    /* The comp puts the category row directly under the page header, above the
+       featured panel. Moved down to sit against the grid it filters, by
+       request: as the comp has it, the tabs are separated from the twelve cards
+       by a 560px-tall panel, and nothing on screen connects the control to what
+       it controls. The featured post is deliberately NOT filtered — see the
+       note in scripts/blogFeed.ts. */
+  }
+  <CategoryTabs
+    label={page.categoryLabel}
+    allLabel={page.allLabel}
+    categories={categories}
+  />
+
+  <PostGrid
+    posts={posts}
+    readMoreLabel={page.readMoreLabel}
+    loadMoreLabel={page.loadMoreLabel}
+    emptyLabel={page.emptyLabel}
+  />
+
+  <CoreValues section={valuesSection} values={values} />
+  <ContactDetails details={details} form={band.form} />
+</Layout>
+
+<script>
+  // Imported by the PAGE rather than by one of the three components it wires,
+  // because it wires all three — the tabs, the featured panel and the grid sit
+  // in different sections, and having any one of them own the import would make
+  // the other two silently depend on it being rendered.
+  import "../scripts/blogFeed";
+</script>
