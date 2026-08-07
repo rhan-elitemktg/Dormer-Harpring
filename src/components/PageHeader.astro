@@ -377,8 +377,12 @@ const fallback = narrow ?? wide;
     /* The dark green wash, bottom to top — the same stops as the homepage hero.
        Clear across the top third where the faces are, opaque enough by 50% to
        carry the copy that overlaps the lower half, and fully `--dh-forest-500`
-       by 68%, so it reaches the section background before the photo's own
-       bottom edge does and there is nothing left to see a seam at. */
+       by 80%, so it reaches the section background before the photo's own
+       bottom edge does and there is nothing left to see a seam at.
+
+       That last stop moved out from 68% when the copy moved down to 72%: at 68%
+       the copy would have landed on flat colour with no picture left behind it,
+       which is the overlap this is for. */
     .ph__media::after {
       content: "";
       position: absolute;
@@ -387,17 +391,17 @@ const fallback = narrow ?? wide;
         180deg,
         rgba(25, 34, 28, 0) 34%,
         rgba(25, 34, 28, 0.55) 50%,
-        var(--dh-forest-500) 68%
+        var(--dh-forest-500) 80%
       );
     }
 
-    /* The copy OVERLAPS the photograph, starting 62% down the band — below the
+    /* The copy OVERLAPS the photograph, starting 72% down the band — below the
        faces, which end at 32%, and inside the wash that carries it. A fraction
        of the band rather than a fixed offset, because the band is itself a
        fraction of the viewport: the relationship that has to hold is to the
        faces, not to a pixel count. */
     .ph--photo .ph__inner {
-      padding-block: calc(var(--ph-band) * 0.62) var(--space-12);
+      padding-block: calc(var(--ph-band) * 0.72) var(--space-12);
     }
   }
 
