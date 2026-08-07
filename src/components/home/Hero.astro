@@ -227,21 +227,27 @@ const [desktop, teamCrop] = await Promise.all([
   }
 
   @media (max-width: 980px) {
-    /* The photo stops being a full-bleed background and becomes a fixed band
-       anchored to the hero's bottom, with the copy in the gradient above it.
-       `cover` on a portrait hero always takes its crop out of the SIDES, which
-       is what cut the outer two attorneys off; and because the hero's height is
-       set by its content, no `object-position` value stays correct as that
-       content changes. A band is deterministic: --band is the one number that
-       positions the photo and reserves the space, so the two cannot drift. */
+    /* The photo stops being a full-bleed background and becomes a fixed band,
+       with the copy on the gradient beside it. `cover` on a portrait hero always
+       takes its crop out of the SIDES, which is what cut the outer two attorneys
+       off; and because the hero's height is set by its content, no
+       `object-position` value stays correct as that content changes. A band is
+       deterministic: --band is the one number that positions the photo and
+       reserves the space, so the two cannot drift.
+
+       The band sits at the TOP and the copy runs beneath it — by request, and
+       matching the interior photo headers, which now use the same construction.
+       It reads as a photograph the page opens with rather than a strip the copy
+       stands on, and it puts the four of them above the fold instead of below
+       three paragraphs of it. */
     .hero {
-      --band: min(97vw, 520px);
+      --band: min(104vw, 520px);
       background: var(--grad-forest);
     }
 
     .hero__media picture {
       position: absolute;
-      inset: auto 0 0;
+      inset: 0 0 auto;
       height: var(--band);
     }
 
@@ -251,54 +257,55 @@ const [desktop, teamCrop] = await Promise.all([
       object-position: center top;
     }
 
-    /* Feathers the band's bright sky into the gradient above it, so the join
-       reads as one image rather than a seam. */
+    /* Feathers the band's foot into the gradient below it, so the join reads as
+       one image rather than a seam. */
     .hero__media::after {
       content: "";
       position: absolute;
-      inset: auto 0 0;
+      inset: 0 0 auto;
       height: var(--band);
       background: linear-gradient(
         180deg,
-        var(--dh-forest-500) 0%,
-        rgba(25, 34, 28, 0) 34%
+        rgba(25, 34, 28, 0) 58%,
+        var(--dh-forest-500) 100%
       );
     }
 
-    /* The left-weighted wash only works while there is empty space on the left
-       to darken; with the team centred there isn't. It becomes a top-down wash
-       instead — heavy under the copy, clearing before it reaches the faces. The
-       comp's separate top scrim would double up on that, so it goes. */
-    .hero__scrim--side {
-      background: linear-gradient(
-        180deg,
-        rgba(18, 29, 22, 0.9) 0%,
-        rgba(19, 30, 23, 0.7) 55%,
-        rgba(22, 34, 27, 0.2) 100%
-      );
-    }
-
-    .hero__scrim--top {
+    /* The left-weighted wash and the flat tint both existed to carry copy over
+       the picture. Nothing sits on it now, so both go and the photograph is left
+       at full strength. The top scrim comes BACK, though — unlike the interior
+       headers, this hero's header is transparent and does sit on the picture. */
+    .hero__scrim--side,
+    .hero__scrim--flat,
+    .hero__scrim--bottom {
       display: none;
     }
 
+    .hero__scrim--top {
+      display: block;
+      background: linear-gradient(180deg, rgba(20, 26, 22, 0.62) 0%, rgba(20, 26, 22, 0) 20%);
+    }
+
+    /* Clears the band so the eyebrow starts at its foot, inside the last of the
+       feather rather than below a visible edge.
+
+       The subtraction is the TRANSPARENT HEADER's height, not a nudge: it is a
+       flex child of this section sitting above `.ph__inner`, so it has already
+       pushed the copy down by its own ~70px before this padding applies. The
+       interior headers need no equivalent, because there the header is rendered
+       by the layout and sits outside the section entirely. Worth re-checking if
+       the mobile header's 20px padding or 30px logo ever change. */
     .hero__inner {
       justify-content: flex-start;
-      padding-bottom: var(--band);
+      padding-top: calc(var(--band) - var(--space-18));
     }
   }
 
   @media (max-width: 640px) {
-    /* Phones get a shallower band, cutting the photo at the waist so it reads
-       as a portrait of the four of them rather than a full-length group shot —
-       at this width the legs are a third of the hero and carry nothing. The
-       band is anchored top, so shortening it trims from the bottom. */
+    /* No cap on a phone: at this width the band is already near the crop's own
+       1:1, which is what keeps all four of them in frame. */
     .hero {
-      --band: 52vw;
-    }
-
-    .hero__inner {
-      padding-top: var(--space-8);
+      --band: 104vw;
     }
 
     .hero__ctas {

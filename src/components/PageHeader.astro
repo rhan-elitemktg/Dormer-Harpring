@@ -323,55 +323,69 @@ const fallback = narrow ?? wide;
     text-wrap: pretty;
   }
 
-  /* Below 760 the scrim's horizontal falloff puts the end of every line on the
-     bright half of the picture. Swap to a vertical one and let the band size to
-     its content. */
+  /* Below 760 the photograph stops being a full-height background and becomes a
+     BAND across the top, with the copy beneath it on the forest gradient.
+     Same construction as the homepage hero, which arrived at it first.
+
+     Two things force it. The scrim's horizontal falloff puts the end of every
+     line on the bright half of the picture, so it has to go vertical — and once
+     it is vertical, copy over the picture means darkening the whole picture.
+     Worse, `cover` on a full-height portrait box takes its crop entirely out of
+     the SIDES: at 390x700 this 1400x1370 crop renders 718px wide, so 46% of its
+     width is gone and with it the outer two of the four attorneys.
+
+     A band sized off the viewport WIDTH keeps the frame near the crop's own 1:1,
+     so the whole group stays in shot, and it is deterministic — nothing about it
+     drifts as the copy above or below it changes length. */
   @media (max-width: 760px) {
     .ph--photo {
+      --ph-band: min(104vw, 30rem);
       min-height: 0;
+      background: var(--grad-forest);
     }
 
-    /* Centred, because below this width the source has ALREADY swapped to the
-       crop framed on the team — there is no longer a right third to chase. A
-       header with no `photoMobile` still gets the panorama here, so the offset
-       stays as the fallback for that case. */
+    .ph__media {
+      inset: 0 0 auto;
+      height: var(--ph-band);
+    }
+
+    /* Anchored top: the crops run a little taller than the band, so what goes
+       is the feet rather than the faces. The 68% is the fallback for a header
+       with no `photoMobile`, which still gets the panorama here and still needs
+       its right third; `.ph--art` centres the ones that swapped. */
     .ph__photo {
       object-position: 68% top;
     }
 
     .ph--art .ph__photo {
-      object-position: center;
+      object-position: center top;
     }
 
-    /* Nearly clear over the top third, then a hard ramp to full strength just
-       above where the copy starts. The old flat-ish 0.72→0.96 was legible but
-       it muddied the photograph everywhere, including the part of it no text
-       ever sat on. */
+    /* A light vignette, not a wash. No copy sits on the picture now, and the
+       header above an interior page is a solid bar rather than a transparent
+       one, so there is nothing here that needs contrast. */
     .ph__scrim {
       background: linear-gradient(
         180deg,
-        rgba(18, 29, 22, 0.12) 0%,
-        rgba(18, 29, 22, 0.28) 28%,
-        rgba(20, 32, 25, 0.9) 38%,
-        rgba(24, 37, 29, 0.96) 100%
+        rgba(18, 29, 22, 0.3) 0%,
+        rgba(18, 29, 22, 0) 26%
       );
     }
 
-    /* Every mobile crop frames its subject in the top third of the frame — the
-       team photograph puts their faces at 12–32% of it, the Co-Counsel one at
-       12–32% too. The band is portrait and the sources are near-square, so
-       `cover` scales by HEIGHT and crops nothing vertically: that third maps to
-       the top third of the band however tall the band grows. The copy used to
-       start one `--space-section` in, which put the eyebrow and the h1 straight
-       across their faces.
+    /* Feathers the band's foot into the gradient below it, so the join reads as
+       one picture rather than a seam. */
+    .ph__media::after {
+      content: "";
+      position: absolute;
+      inset: auto 0 0;
+      height: 42%;
+      background: linear-gradient(180deg, rgba(25, 34, 28, 0) 0%, var(--dh-forest-500) 88%);
+    }
 
-       So the top padding clears the subject rather than sitting on it, and it
-       is a vw clamp rather than a fixed value because the band's height scales
-       with the copy — a proportion is what has to hold, not a pixel count. The
-       bottom is trimmed to match: with a tall photograph above the copy, the
-       band no longer needs an equally deep skirt below it. */
+    /* Clears the band, less a little, so the eyebrow starts inside the feather
+       rather than below a visible edge. */
     .ph--photo .ph__inner {
-      padding-block: clamp(15rem, 62vw, 20rem) var(--space-12);
+      padding-block: calc(var(--ph-band) - var(--space-10)) var(--space-12);
     }
   }
 
