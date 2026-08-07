@@ -1,11 +1,22 @@
 ---
-// Line icons for practice areas, lifted from the comps' `svg()` helper
-// (viewBox 0 0 24 24, stroke currentColor, width 1.6, round caps and joins).
+// Line icons for practice areas. ONE set, used by every page.
 //
 // A key→shape lookup rather than a file per icon: the caller only ever holds an
 // `iconKey` string, which is exactly what a Sanity field will contain. Storing
 // SVG markup in the data — as the comp's `iconEl` effectively does — is not
 // something an editor can fill in.
+//
+// GEOMETRY COMES FROM `assets/pa-icons-line/*.svg`, the file set the Practice
+// Areas and Car Accidents comps load as <img>. The homepage comps inline a
+// SECOND, different drawing of the same subjects in their own `svg()` helper —
+// its car is a wedge cabin over a slab body where this one is a full van
+// outline. That set is deliberately NOT used: brain injury has to look the same
+// on the homepage as it does on /practice-areas, and the Practice Areas page is
+// the source of truth for which drawing that is. Do not re-import the homepage
+// shapes; matching across pages beats matching one comp.
+//
+// The files are `#1e352f` and 1.8 stroke; these render `currentColor` at 1.6 so
+// the caller owns the colour and the weight sits right at 26–28px.
 
 interface Props {
   name: string;
@@ -19,42 +30,82 @@ type Shape = { d: string } | { cx: number; cy: number; r: number };
 
 const ICONS: Record<string, Shape[]> = {
   "car-accident": [
-    { d: "M5 11l1.6-4.2A2 2 0 018.5 5.5h7A2 2 0 0117.4 6.8L19 11" },
-    { d: "M4 11h16v5H4z" },
-    { cx: 7.5, cy: 16.5, r: 1.4 },
-    { cx: 16.5, cy: 16.5, r: 1.4 },
+    { d: "M5 17H3v-4l2-5h11l3 5h1v4h-2" },
+    { d: "M8 8V5h5l2 3" },
+    { cx: 7.5, cy: 17, r: 1.8 },
+    { cx: 16.5, cy: 17, r: 1.8 },
+    { d: "M9.3 17h5.4" },
   ],
   "truck-accident": [
-    { d: "M2 7h11v8H2z" },
-    { d: "M13 9h4l3 3v3h-7z" },
-    { cx: 6.5, cy: 17, r: 1.4 },
-    { cx: 16.5, cy: 17, r: 1.4 },
+    { d: "M2 6h11v10H2z" },
+    { d: "M13 9h4l4 4v3h-8" },
+    { cx: 6, cy: 18, r: 1.8 },
+    { cx: 17, cy: 18, r: 1.8 },
   ],
   "motorcycle-accident": [
-    { cx: 5.5, cy: 16, r: 3 },
-    { cx: 18.5, cy: 16, r: 3 },
-    { d: "M8.5 16l2.5-5h4l2 2" },
-    { d: "M11 11L9 8H7" },
+    { cx: 5, cy: 16, r: 3 },
+    { cx: 19, cy: 16, r: 3 },
+    { d: "M5 16l3.5-5H14l1.8 5" },
+    { d: "M8 11h4" },
+    { d: "M14 11l1.4-3H18" },
   ],
   "bicycle-accident": [
-    { cx: 5.5, cy: 17, r: 3 },
-    { cx: 18.5, cy: 17, r: 3 },
-    { d: "M5.5 17l4-7h5" },
-    { d: "M9.5 10l4 7" },
-    { d: "M14.5 8h2l2 9" },
+    { cx: 5.5, cy: 16, r: 3.3 },
+    { cx: 18.5, cy: 16, r: 3.3 },
+    { d: "M5.5 16l3.7-5.6H14" },
+    { d: "M9.2 10.4L12.6 16" },
+    { d: "M12.6 16l3.1-5.6" },
+    { d: "M13.5 10.4h3" },
   ],
-  "slip-and-fall": [{ d: "M12 4l9 16H3z" }, { d: "M12 10v4" }, { d: "M12 17.5h.01" }],
+  // A figure mid-fall above a floor line, not the comps' warning triangle.
+  "slip-and-fall": [
+    { cx: 8, cy: 5, r: 1.8 },
+    { d: "M8 7l-.8 4.5L11 14" },
+    { d: "M7.2 11.5L4.5 16" },
+    { d: "M11 14l3 1" },
+    { d: "M3 20h18" },
+    { d: "M16 19l3-3" },
+  ],
+  "brain-injury": [
+    { d: "M12 5.5A2.8 2.8 0 009 8a2.4 2.4 0 00-1.4 4.3A2.4 2.4 0 009 16.6a2.4 2.4 0 003 .3" },
+    { d: "M12 5.5A2.8 2.8 0 0115 8a2.4 2.4 0 011.4 4.3A2.4 2.4 0 0115 16.6a2.4 2.4 0 01-3 .3" },
+    { d: "M12 5.6v11.6" },
+  ],
+  burns: [
+    {
+      d:
+        "M12 3c1 3.2 4.2 4.6 4.2 8.2A4.2 4.2 0 018 11.5c0-1.4.5-2.4 1.3-3.3.1 " +
+        "1.4 1 2.3 1.9 2.3.1-2.6-.9-4.7.8-7.5z",
+    },
+  ],
+  // A heart with a downward arrow through it, not a bare heart.
+  "wrongful-death": [
+    { d: "M12 20s-6.5-4.2-6.5-9A3.6 3.6 0 0112 8.2 3.6 3.6 0 0118.5 11c0 4.8-6.5 9-6.5 9z" },
+    { d: "M12 7.5l-1.6 3.2h3.2L12 14" },
+  ],
+  /* `pa-icons-line/dog-bite.svg` is the one icon in the set drawn as a FILL.
+     Stroked here like its siblings: an outlined paw reads as a line icon, where
+     a filled one beside them would look like a different set. */
+  "dog-bite": [
+    { cx: 8, cy: 9.5, r: 1.6 },
+    { cx: 12, cy: 8, r: 1.6 },
+    { cx: 16, cy: 9.5, r: 1.6 },
+    {
+      d:
+        "M12 11.4c-2.5 0-4.2 1.9-4.2 3.8 0 1.5 1.1 2.5 2.6 2.5.85 0 1.15-.42 " +
+        "1.6-.42s.75.42 1.6.42c1.5 0 2.6-1 2.6-2.5 0-1.9-1.7-3.8-4.2-3.8z",
+    },
+  ],
+
+  /* The two subjects `pa-icons-line` has no file for. These keep the homepage
+     comps' drawings because there is nothing to replace them with — not because
+     they belong to a second set. If the designer ships either as a line icon,
+     swap it here and both pages follow. */
   "pedestrian-accident": [
     { cx: 13, cy: 5, r: 2 },
     { d: "M13 8l-1.5 5 2.5 2v5" },
     { d: "M11.5 13l-3.5-1.5" },
     { d: "M14 15l2.5 4" },
-  ],
-  "brain-injury": [
-    { d: "M12 5a3 3 0 00-3 3v9a2 2 0 002 2h1" },
-    { d: "M12 5a3 3 0 013 3v9a2 2 0 01-2 2h-1" },
-    { d: "M9 8H7a2 2 0 000 4" },
-    { d: "M15 8h2a2 2 0 010 4" },
   ],
   "spinal-cord": [
     { d: "M12 3v18" },
@@ -62,10 +113,6 @@ const ICONS: Record<string, Shape[]> = {
     { d: "M9 10h6" },
     { d: "M9 14h6" },
     { d: "M9 18h6" },
-  ],
-  burns: [{ d: "M12 3c2 3 4 4.5 4 8a4 4 0 01-8 0c0-2 1-3.2 2-4.2.4 2 2 2 2 3.7" }],
-  "wrongful-death": [
-    { d: "M12 20s-7-4.6-7-9.5A3.5 3.5 0 0112 8a3.5 3.5 0 017 2.5C19 15.4 12 20 12 20z" },
   ],
 };
 

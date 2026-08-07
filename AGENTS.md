@@ -126,6 +126,34 @@ no horizontal padding). Verify against the markup before trusting any line of it
 `{{ }}` placeholders in the comps mark what the designer treated as repeatable data: those
 loops become Sanity document types, the static text becomes page-singleton fields.
 
+**The values behind those placeholders are IN THE FILE — read them before you build.** Every
+comp ends with a `<script type="text/x-dc" data-dc-script>` block holding a `renderVals()`
+that returns the real arrays: the card copy, the list items, the group titles, the stats,
+in the designer's intended order. `<sc-for list="{{ featured }}" hint-placeholder-count="9">`
+is not "nine unspecified cards" — it is nine specific cards defined 300 lines further down.
+
+So: **open the tail of the comp, not just its markup.** A page built from the markup alone
+gets the layout right and every string, every label and every ordering wrong, and it looks
+finished. That has cost this project a full rebuild of one page already. If a comp seems to
+have no content, `grep -n 'data-dc-script'` it before sourcing that content anywhere else.
+
+`scripts/diff-comp-practice-areas.py` is the check that catches it — it diffs the built page
+against that block's arrays and fails on any text or ordering difference. Worth copying for
+the next content-heavy page; neither linter can see this class of error, because the build is
+green whenever the *layout* is right.
+
+Two corollaries worth knowing:
+
+- **The comp is the source for content; the live-site scrape is the source for URLs.** The
+  comps' links are all `href="#"` — they specify labels and order, never destinations. The
+  scrape at `~/Downloads/Dormer Harpring/sitesucker/www.denvertrial.com` is the only place
+  the real URLs exist. Its WordPress body class separates the two kinds of page cleanly:
+  `page page-id-*` is a service page, `single single-post` is a blog post.
+- **Two comps can carry different copy for the same thing.** The homepage and Practice Areas
+  ship different blurbs for the same nine practice areas — a short label on one, a
+  two-sentence pitch on the other. Don't collapse them into one shared field on the
+  assumption they are one string; check both.
+
 ## Where things live
 
 ```
@@ -137,7 +165,8 @@ src/lib/        routePaths · schema · seo · video
 src/styles/     global.css — tokens, .btn, .container, .section, .prose, .rail-dots
 src/scripts/    rail · loadMore · phoneMask (self-executing, imported by components)
 src/assets/     optimized images, by subject
-scripts/        the two check:* linters + prep-assets.mjs (one-off comp extraction)
+scripts/        the two check:* linters · prep-assets.mjs (one-off comp extraction)
+                diff-comp-practice-areas.py (built page vs comp content, run by hand)
 ```
 
 ## Hard noes

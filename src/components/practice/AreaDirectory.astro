@@ -1,0 +1,196 @@
+---
+// "Every case we handle, by location." — the full practice-area directory,
+// grouped by city and set in four columns of chevroned links.
+//
+// The nine groups are wildly uneven (Denver has 46 entries, Grand Junction 2),
+// which is why each group is its own four-column grid rather than one grid the
+// groups flow through: a shared grid would let Grand Junction's two links sit
+// beside Denver's tail and read as part of it.
+import Eyebrow from "../Eyebrow.astro";
+import type { AreaGroup, PracticeAreasPage } from "../../data/practiceAreas";
+
+interface Props {
+  section: PracticeAreasPage["directory"];
+  groups: AreaGroup[];
+}
+
+const { section, groups } = Astro.props;
+---
+
+<section class="dir">
+  <div class="container">
+    <header class="dir__head">
+      <Eyebrow class="dir__eyebrow">{section.eyebrow}</Eyebrow>
+      <h2 class="dir__title">{section.title}</h2>
+    </header>
+
+    {
+      groups.map((group) => (
+        <div class="dir__group">
+          <h3 class="dir__group-title">{group.title}</h3>
+          <ul class="dir__cols">
+            {group.items.map((item) => {
+              const Tag = item.href ? "a" : "span";
+              return (
+                <li>
+                  {/* An entry with no page renders as a <span>: the firm lists
+                      the area, but there is nowhere to send anyone yet. Same
+                      convention as a null `NavItem.href`. */}
+                  <Tag
+                    class:list={["dir__link", !item.href && "dir__link--plain"]}
+                    href={item.href ?? undefined}
+                  >
+                    <svg
+                      width="13"
+                      height="13"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.4"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                      class="dir__chevron"
+                    >
+                      <path d="M9 6l6 6-6 6" />
+                    </svg>
+                    {item.label}
+                  </Tag>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ))
+    }
+  </div>
+</section>
+
+<style>
+  .dir {
+    background: var(--surface-page);
+    padding-block: var(--space-section);
+  }
+
+  .dir__head {
+    max-width: 900px;
+    margin-bottom: var(--space-13);
+  }
+
+  /* Bounded `:global()`: the class is passed to <Eyebrow> and therefore lands
+     on Eyebrow's markup, which never carries this file's cid. */
+  .dir :global(.dir__eyebrow) {
+    margin-bottom: var(--space-4);
+  }
+
+  .dir__title {
+    font-size: var(--display-2);
+    line-height: 1;
+    letter-spacing: var(--tracking-tight);
+    color: var(--dh-ink);
+  }
+
+  /* The comp's `wrapStyle` spacing — 44px below every group, 44px above every
+     group after the first. Its hairline between groups is deliberately NOT
+     ported: by request. The group headings and the 88px of combined padding
+     carry the separation on their own. */
+  .dir__group {
+    padding-bottom: var(--space-11);
+  }
+
+  .dir__group + .dir__group {
+    padding-top: var(--space-11);
+  }
+
+  /* The comp sets 28px, which occurs exactly once across all sixteen comps —
+     drift rather than a tier. Snapped to the nearest one (--display-6, 25px)
+     rather than up to --display-5's 34, which would overshoot by 6. */
+  .dir__group-title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--display-6);
+    line-height: 1.1;
+    color: var(--dh-ink);
+    margin-bottom: var(--space-6);
+  }
+
+  .dir__cols {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0 var(--space-6);
+    list-style: none;
+    padding: 0;
+  }
+
+  /* Equal heights across a row. The grid already stretches each <li> to the
+     tallest cell in its row, but the link inside was sized by its own text — so
+     where one label wrapped to two lines ("Uninsured & Underinsured Motorists"),
+     its neighbours' underlines sat ~23px higher than its own and the row read
+     as broken. Making the <li> a flex container stretches the link to fill it,
+     which puts every rule on the row at one baseline. */
+  .dir__cols > li {
+    display: flex;
+  }
+
+  .dir__cols > li > * {
+    flex: 1;
+  }
+
+  /* Matches the co-counsel page's area list, which is the same affordance on a
+     shorter list — keep the two in step if either changes. */
+  .dir__link {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding-block: var(--space-3);
+    border-bottom: 1px solid var(--dh-line-soft);
+    font-weight: 500;
+    font-size: var(--text-lg);
+    line-height: 1.35;
+    color: var(--dh-ink-link);
+    transition: color var(--transition);
+  }
+
+  .dir__link:hover {
+    color: var(--accent);
+  }
+
+  /* No hover shift and no pointer — it is not a link. */
+  .dir__link--plain {
+    color: var(--text-muted);
+  }
+
+  .dir__link--plain:hover {
+    color: var(--text-muted);
+  }
+
+  /* Gold at rest, then inheriting the link's red — the glyph and the label move
+     together rather than as two separate colour changes. */
+  .dir__chevron {
+    flex: none;
+    color: var(--accent-gold);
+    transition: color var(--transition);
+  }
+
+  .dir__link:hover .dir__chevron {
+    color: currentColor;
+  }
+
+  @media (max-width: 1180px) {
+    .dir__cols {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 860px) {
+    .dir__cols {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 640px) {
+    .dir__cols {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

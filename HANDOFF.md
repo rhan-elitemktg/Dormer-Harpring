@@ -10,8 +10,9 @@ _Last updated: 2026-08-07._
 
 ## State
 
-Everything is merged to `master` and nothing is in flight. Build is green: **35 pages**, 285
-optimized images, `npm run check` passing.
+Build is green: **36 pages**, 311 optimized images, `npm run check` passing. The Practice
+Areas template is built and pushed but **not yet merged** — see `git status` for the branch,
+and open a PR against `master` when it's approved.
 
 Run `git status` for where you are. This file deliberately does **not** name the working
 branch — that line went stale three times in the session that wrote it, twice within minutes
@@ -19,13 +20,14 @@ of being written.
 
 Live at `https://dormer-harpring.vercel.app` — `/` and `/admin` both 200.
 
-Phases 0 → 3g are done: design tokens and shell, header/drawer/footer, the homepage section
+Phases 0 → 3h are done: design tokens and shell, header/drawer/footer, the homepage section
 by section, then Thank You, Contact, Testimonials, Case Results, Co-Counsel, Community
-Involvement, the Attorneys index and the Attorney bio.
+Involvement, the Attorneys index, the Attorney bio and Practice Areas.
 
 **Built:** `index`, `contact`, `thank-you`, `testimonials`, `results`, `co-counsel`,
-`community-involvement`, `meet-our-attorneys/` + `meet-our-attorneys/[slug]`, and
-`tokens.astro` (an internal design-token reference, not public-facing).
+`community-involvement`, `practice-areas`, `meet-our-attorneys/` +
+`meet-our-attorneys/[slug]`, and `tokens.astro` (an internal design-token reference, not
+public-facing).
 
 The `[slug]` route serves 25 profiles from two layouts, picked on `member.kind`:
 `AttorneyBio.astro` for the 7 attorneys, `StaffBio.astro` for the 18 staff. The 3 dogs on
@@ -34,12 +36,11 @@ the roster have no profile, so no page.
 ## Next
 
 Remaining templates, ordered easiest → hardest by section count (the order this project has
-been working in). All five comps exist.
+been working in). All four comps exist.
 
 | Page | Sections | Notes |
 |---|---|---|
-| **Practice Areas** | 7 | **Next up**, and the `pa_index` branch exists for it. Comp: `DH - Practice Areas.html`. Two of the seven already exist as components — "The people in your corner." is `AttorneysBand.astro`, "Serving injured Coloradans" is `ServiceAreaBand.astro`. `src/data/practiceAreas.ts` already has `getPracticeSection()`, `getHomePracticeAreas()`, `getCatastrophicAreas()`, `getPracticePromise()`. That leaves three new: the hero ("How we help injured Coloradans."), "Our core practice areas.", and "Every case we handle, by location." |
-| About | 11 | Three exist (those two plus `CoreValues.astro`). New: "We take the cases other firms turn down.", "You only get one shot at this.", "What you can expect when you hire us.", and an "In their words." testimonials variant. |
+| **About** | 11 | **Next up.** Three exist (`AttorneysBand.astro`, `ServiceAreaBand.astro`, `CoreValues.astro`). New: "We take the cases other firms turn down.", "You only get one shot at this.", "What you can expect when you hire us.", and an "In their words." testimonials variant. |
 | Blog index | 6 | Fewer sections than About but more new work — introduces a post content type. `src/data/news.ts` has an `InsightPost` shape and `getInsightPosts()` from the homepage feed; posts will still need slugs, dates, probably categories. |
 | Blog post | 3 | Depends on the type the index introduces. Reuses the proven `[slug]` + `Prose` pattern from the attorney bios. |
 | Car Accidents | 29 | The practice-area **detail** template and by far the largest comp — 29 sections, 88 placeholders. Last. |
@@ -70,8 +71,22 @@ After the templates:
   `display: flex` to the items, the `min-width` difference between the two rails, and making
   `.bio__awards` a centred flex column.
 
+**Decide before launch**
+
+- `/practice-areas`'s directory ships **87 links to legacy WordPress URLs that this build
+  does not serve** — the whole point of the section, and the same thing the nav and footer
+  already do with 21 of them, but at four times the scale. They resolve today because the
+  WordPress site is still live at those paths, and they keep resolving after cutover only if
+  the practice-area detail pages are built or redirected first. Nothing renders 404 while
+  both sites are up; the day this one replaces it, all 87 do. The Car Accidents template
+  (last on the list above) is the first of those pages.
+- Three entries the comp lists have **no page anywhere** — Legal Malpractice, Life Insurance
+  Bad Faith, Pet Insurance Bad Faith. The legacy hub's own links to them are broken (written
+  relative, so they resolve under `/practice-areas/`). They render as plain text via
+  `href: null` rather than as dead links. Marked `TODO(launch)`.
+
 **Waiting on the firm** — these are content, not code. `README.md` has the full table; the
-short version is that 12 `TODO(launch)` markers are open in `src/`, covering the seven
+short version is that 13 `TODO(launch)` markers are open in `src/`, covering the seven
 attorney emails (six inferred from a pattern), the office address and hours, the `$70M+ /
 20 Years` stat claims, and K.C.'s facts band — which currently duplicates Sean's copy
 verbatim, and two of its three cells are false on K.C.'s page and contradicted by his own
@@ -83,6 +98,18 @@ body copy on it.
   with different checksums. Nobody has said which is final. The homepage was built from the
   comps as they stood.
 - Whether the copy in the comps is final or placeholder.
+- **The homepage's practice-area icons no longer match the homepage comp**, deliberately.
+  The package draws these subjects twice — the shapes the homepage comps inline, and the
+  `assets/pa-icons-line/*.svg` files Practice Areas and Car Accidents load. `PracticeIcon`
+  now carries one set, the `pa-icons-line` one, so brain injury looks the same on every
+  page. Confirm that's the intended drawing before launch; reverting is one file.
+- The Practice Areas directory has **eight groups and omits Greeley, Fort Collins and Grand
+  Junction**, which have eight live landing pages between them and appear on the legacy hub.
+  The page matches the comp, so those eight are unreachable from it. Add three groups, or
+  leave them to the nav?
+- That section's heading is "Every case we handle, by **location**", but the comp's last two
+  groups — "Premises Liability" and "Other Legal Services" — are topical. Built as the comp
+  has it. Either the heading or those two groups wants changing.
 
 **Blockers for launch, not for building**
 

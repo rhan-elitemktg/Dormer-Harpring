@@ -49,6 +49,13 @@ const MAP = {
   "assets/practice-areas/motorcycle-accident.jpg": "home/practice-motorcycle.jpg",
   "assets/practice-areas/bicycle-accident.jpg": "home/practice-bicycle.jpg",
   "assets/practice-areas/premises-liability.jpg": "home/practice-slip-and-fall.jpg",
+  // The four the Practice Areas page adds on top of the homepage's six. Its
+  // featured grid is nine panels, and the comp's own `featured` array names
+  // exactly these images.
+  "assets/practice-areas/brain-injury.jpg": "home/practice-brain-injury.jpg",
+  "assets/practice-areas/wrongful-death.jpg": "home/practice-wrongful-death.jpg",
+  "assets/practice-areas/burn-injury.jpg": "home/practice-burns.jpg",
+  "assets/practice-areas/dog-bite.jpg": "home/practice-dog-bite.jpg",
   "wireframes/assets/watch-firm-video.png": "home/firm-video-cover.jpg",
   "wireframes/assets/faq-video-cover.png": "home/faq-video-cover.jpg",
   "wireframes/assets/contact-attorneys.png": "home/contact-attorneys.jpg",
