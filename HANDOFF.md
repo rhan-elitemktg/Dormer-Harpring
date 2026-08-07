@@ -10,9 +10,9 @@ _Last updated: 2026-08-07._
 
 ## State
 
-Build is green: **36 pages**, 311 optimized images, `npm run check` passing. The Practice
-Areas template is built and pushed but **not yet merged** — see `git status` for the branch,
-and open a PR against `master` when it's approved.
+Build is green: **37 pages**, 325 optimized images, `npm run check` passing. Practice Areas
+is merged. **About is built and committed but not yet merged** — see `git status` for the
+branch, and open a PR against `master` when it's approved.
 
 Run `git status` for where you are. This file deliberately does **not** name the working
 branch — that line went stale three times in the session that wrote it, twice within minutes
@@ -20,14 +20,25 @@ of being written.
 
 Live at `https://dormer-harpring.vercel.app` — `/` and `/admin` both 200.
 
-Phases 0 → 3h are done: design tokens and shell, header/drawer/footer, the homepage section
+Phases 0 → 3i are done: design tokens and shell, header/drawer/footer, the homepage section
 by section, then Thank You, Contact, Testimonials, Case Results, Co-Counsel, Community
-Involvement, the Attorneys index, the Attorney bio and Practice Areas.
+Involvement, the Attorneys index, the Attorney bio, Practice Areas and About.
 
-**Built:** `index`, `contact`, `thank-you`, `testimonials`, `results`, `co-counsel`,
+**Built:** `index`, `about`, `contact`, `thank-you`, `testimonials`, `results`, `co-counsel`,
 `community-involvement`, `practice-areas`, `meet-our-attorneys/` +
 `meet-our-attorneys/[slug]`, and `tokens.astro` (an internal design-token reference, not
 public-facing).
+
+Two shared pieces came out of the About build and now serve two pages each:
+`ReviewRating.astro` (the white "300+ Client Reviews · 5.0 on Google" card, extracted from
+`TestimonialRail` where it was inline) and a `layout` prop on `AttorneyCard` (`"rail"` for
+the homepage's fixed 272px card with a centred play glyph, `"grid"` for About's track-width
+card with the glyph bottom-left).
+
+`scripts/diff-comp-about.py` is the second comp-diff script, built from the Practice Areas
+one. It also **asserts the four deliberate differences** from the comp, so a later session
+that reverts one is told rather than left to guess. Worth copying again for the Blog and Car
+Accidents pages.
 
 The `[slug]` route serves 25 profiles from two layouts, picked on `member.kind`:
 `AttorneyBio.astro` for the 7 attorneys, `StaffBio.astro` for the 18 staff. The 3 dogs on
@@ -40,8 +51,7 @@ been working in). All four comps exist.
 
 | Page | Sections | Notes |
 |---|---|---|
-| **About** | 11 | **Next up.** Three exist (`AttorneysBand.astro`, `ServiceAreaBand.astro`, `CoreValues.astro`). New: "We take the cases other firms turn down.", "You only get one shot at this.", "What you can expect when you hire us.", and an "In their words." testimonials variant. |
-| Blog index | 6 | Fewer sections than About but more new work — introduces a post content type. `src/data/news.ts` has an `InsightPost` shape and `getInsightPosts()` from the homepage feed; posts will still need slugs, dates, probably categories. |
+| **Blog index** | 6 | **Next up.** Fewer sections than About was but more new work — introduces a post content type. `src/data/news.ts` has an `InsightPost` shape and `getInsightPosts()` from the homepage feed; posts will still need slugs, dates, probably categories. The comp also carries a category tab row (`.bx-tabs`) and a featured block (`.bx-feat`) — check its `data-dc-script` block for both before building. |
 | Blog post | 3 | Depends on the type the index introduces. Reuses the proven `[slug]` + `Prose` pattern from the attorney bios. |
 | Car Accidents | 29 | The practice-area **detail** template and by far the largest comp — 29 sections, 88 placeholders. Last. |
 
@@ -86,11 +96,15 @@ After the templates:
   `href: null` rather than as dead links. Marked `TODO(launch)`.
 
 **Waiting on the firm** — these are content, not code. `README.md` has the full table; the
-short version is that 13 `TODO(launch)` markers are open in `src/`, covering the seven
+short version is that 14 `TODO(launch)` markers are open in `src/`, covering the seven
 attorney emails (six inferred from a pattern), the office address and hours, the `$70M+ /
-20 Years` stat claims, and K.C.'s facts band — which currently duplicates Sean's copy
-verbatim, and two of its three cells are false on K.C.'s page and contradicted by his own
-body copy on it.
+20 Years` stat claims, K.C.'s facts band — which currently duplicates Sean's copy verbatim,
+and two of its three cells are false on K.C.'s page and contradicted by his own body copy on
+it — and, new, **who is in the About page's founders photograph**. The man on the left is
+unmistakably K.C.; the man on the right wears glasses and is clean-shaven where Sean's
+headshot has neither, so the alt text names him by inference. The comp's own alt text there
+was "Michael Dormer and Zachary Harpring" — two people who do not exist — so it is not a
+source for this.
 
 **Waiting on the designer**
 
@@ -110,6 +124,12 @@ body copy on it.
 - That section's heading is "Every case we handle, by **location**", but the comp's last two
   groups — "Premises Liability" and "Other Legal Services" — are topical. Built as the comp
   has it. Either the heading or those two groups wants changing.
+- The About comp and the homepage comp carry the **same six core values with two of them
+  written differently** — "We don't" / "We're" on the homepage, "We do not" / "We are" on
+  About. It is one singleton serving both pages, so it keeps the homepage's wording (that
+  comp is the approved one). Same shape of thing in the reviews panel: About trims two of the
+  three review headlines by a clause. Both are asserted in `diff-comp-about.py`, so reversing
+  either is a one-line change there plus one in the data.
 
 **Blockers for launch, not for building**
 
