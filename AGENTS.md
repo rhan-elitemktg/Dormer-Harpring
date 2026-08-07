@@ -1,5 +1,18 @@
 # Dormer Harpring
 
+## Read HANDOFF.md now, before anything else
+
+`HANDOFF.md` holds the current state — what's built, what's next, what's open, and what is
+deliberately unfinished. **This file does not, on purpose**, so what you have in front of you
+is only half the picture. Read it at the start of every session, including when the request
+looks small enough not to need it: the last three things that went wrong here were all
+already written down.
+
+Also read `README.md` when the task touches setup, the two `check:` scripts, or anything on
+the pre-launch decision list.
+
+---
+
 Marketing site for a Denver personal-injury law firm, built by Elite Legal Marketing to
 replace a WordPress site. Astro 7 (static, TS strict) · Sanity 6 Studio embedded at `/admin`
 · Vercel · React only to host the Studio.
@@ -7,10 +20,8 @@ replace a WordPress site. Astro 7 (static, TS strict) · Sanity 6 Studio embedde
 > `CLAUDE.md` is a symlink to this file — one source of truth, read by both Claude Code and
 > other agent tools. Edit this file; don't replace the link with a copy.
 
-**This is the durable half — architecture and conventions.** For current status (what's
-built, what's next, open questions) read `HANDOFF.md`. For setup and the pre-launch decision
-list read `README.md`. Don't put status in this file: it loads every session, and stale
-status is worse than none.
+**This file is the durable half — architecture and conventions.** Don't put status in it: it
+loads every session, and stale status is worse than none.
 
 ## Commands
 
