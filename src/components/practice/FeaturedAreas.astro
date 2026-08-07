@@ -53,8 +53,11 @@ const { section, areas, moreLabel = "Learn more" } = Astro.props;
                 </span>
                 <h3 class="feat__title">{area.name}</h3>
                 <p class="feat__desc">{area.blurb}</p>
+                {/* `.arrow` even though the span is buried in the card: the
+                    whole card is the <a>, and the utility uses a descendant
+                    selector for exactly this case. */}
                 <span class="feat__more">
-                  {moreLabel} <span aria-hidden="true">&rarr;</span>
+                  {moreLabel} <span class="arrow" aria-hidden="true">&rarr;</span>
                 </span>
               </div>
             </a>

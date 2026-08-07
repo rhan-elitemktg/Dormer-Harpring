@@ -78,7 +78,9 @@ const quotes = testimonials.filter((item) => item.kind === "quote").slice(0, 3);
   <StatsBand stats={stats} />
   <QuoteBand quote={page.quote} />
   <TeamPreview section={page.team} attorneys={attorneys} />
-  <AwardsBar awards={awards} />
+  {/* `sunk`: the team grid above is plain cream, so the comp's near-white
+      leaves no visible boundary between the two. See AwardsBar's `tone`. */}
+  <AwardsBar awards={awards} tone="sunk" />
   <InTheirWords section={page.reviews} reviews={quotes} summary={summary} />
   <OneShot story={page.oneShot} />
   <WhatToExpect expect={page.expect} />

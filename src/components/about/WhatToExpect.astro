@@ -61,10 +61,14 @@ const { expect } = Astro.props;
     text-wrap: balance;
   }
 
+  /* The UA `ul` defaults — global.css zeroes list margins but not the 40px
+     `padding-inline-start` or the marker. Both grids below clear them. */
   .expect__cards {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: var(--space-6);
+    list-style: none;
+    padding: 0;
   }
 
   .expect__card {
@@ -111,6 +115,10 @@ const { expect } = Astro.props;
     border-radius: var(--radius-6);
     overflow: hidden;
     background: var(--dh-white);
+    list-style: none;
+    /* Zeroed rather than left to the UA's 40px inline-start, which indented the
+       whole bordered box away from everything above it. */
+    padding: 0;
   }
 
   .expect__mile {

@@ -40,7 +40,9 @@ const { story } = Astro.props;
         story.ctaHref && (
           <a class="btn btn--outline-ink who__cta" href={story.ctaHref}>
             <span>{story.ctaLabel}</span>
-            <span class="who__cta-icon" aria-hidden="true">
+            {/* `.arrow` is the shared nudge-on-hover from global.css — every
+                arrow that sits inside something navigable carries it. */}
+            <span class="arrow" aria-hidden="true">
               &rarr;
             </span>
           </a>
@@ -111,10 +113,6 @@ const { story } = Astro.props;
   .who__cta {
     margin-top: var(--space-7);
     gap: var(--space-3);
-  }
-
-  .who__cta-icon {
-    font-size: var(--text-md);
   }
 
   @media (max-width: 980px) {

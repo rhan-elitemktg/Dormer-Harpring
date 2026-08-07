@@ -69,11 +69,17 @@ const { story } = Astro.props;
     align-items: center;
   }
 
+  /* `align-self: stretch` with no tall floor: the photograph takes its height
+     from the copy beside it, so the band is exactly as tall as the words need.
+     The comp's `min-height: 500px` was 140px more than the three paragraphs
+     occupy, and since the source is square that height was also cropping the
+     frame harder than it needed to. The floor that remains only engages if the
+     copy ever gets much shorter. */
   .shot :global(.shot__photo) {
     align-self: stretch;
     display: block;
     width: 100%;
-    min-height: 500px;
+    min-height: 340px;
     object-fit: cover;
     border-radius: var(--radius-7);
   }

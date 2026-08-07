@@ -31,7 +31,8 @@ const { section, attorneys } = Astro.props;
 
       <a class="btn btn--outline-ink tp__cta" href={section.ctaHref}>
         <span>{section.ctaLabel}</span>
-        <span class="tp__cta-icon" aria-hidden="true">&rarr;</span>
+        {/* `.arrow` — the shared nudge-on-hover from global.css. */}
+        <span class="arrow" aria-hidden="true">&rarr;</span>
       </a>
     </div>
 
@@ -75,14 +76,15 @@ const { section, attorneys } = Astro.props;
     gap: var(--space-3);
   }
 
-  .tp__cta-icon {
-    font-size: var(--text-md);
-  }
-
+  /* The UA `ul` defaults. global.css zeroes the margin on lists but not the
+     40px `padding-inline-start` or the marker, so every grid built on a <ul>
+     clears both itself — same as `.values__grid` and the rest. */
   .tp__grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: var(--space-6);
+    list-style: none;
+    padding: 0;
   }
 
   @media (max-width: 1080px) {

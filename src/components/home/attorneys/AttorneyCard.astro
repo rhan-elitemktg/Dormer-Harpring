@@ -1,11 +1,12 @@
 ---
 // One attorney: portrait, name, role.
 //
-// Two layouts, because two comps draw the same card differently — the homepage
-// rail fixes it at 272px and centres the play glyph, the About grid lets the
-// track set the width and tucks the glyph into the bottom-left corner. Nothing
-// else differs, so this is a prop rather than a second component with a hundred
-// duplicated lines of CSS.
+// Two layouts, because two comps draw the same card at different widths — the
+// homepage rail fixes it at 272px, the About grid lets the track set it. That
+// and the matching `sizes` is the whole difference, so it is a prop rather than
+// a second component with a hundred duplicated lines of CSS. The About comp
+// also moves the play glyph to the bottom-left corner; not adopted, so the
+// glyph is centred on every attorney card the site draws.
 import Picture from "../../media/Picture.astro";
 import PlayButton from "../../media/PlayButton.astro";
 import type { AttorneyCardData } from "../../../data/attorneys";
@@ -95,20 +96,14 @@ const sizes =
      `transform: scale()` on hover would replace this centring translate
      outright, throwing the button into the corner. The pulse is the hover
      feedback; it doesn't need a second one. */
-  .acard--rail :global(.acard__play) {
+  /* Centred in BOTH layouts. The About comp tucks it into the bottom-left
+     corner; overridden by request, so the glyph sits in the same place on
+     every attorney card the site draws. */
+  .acard :global(.acard__play) {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-  }
-
-  /* The About comp's placement. No translate here, so the "no hover scale"
-     note above does not apply — but it stays unscaled anyway, for the same
-     reason: the glyph is a CSS border triangle. */
-  .acard--grid :global(.acard__play) {
-    position: absolute;
-    bottom: var(--space-3);
-    left: var(--space-3);
   }
 
   .acard__name {

@@ -14,12 +14,23 @@ import type { Award } from "../data/awards";
 interface Props {
   awards: Award[];
   eyebrow?: string;
+  /**
+   * How far the band sits below the section above it.
+   *
+   * `lifted` is the comps' own near-white, which reads as a boundary only when
+   * what precedes it is darker — true on the homepage, where FirmIntro is
+   * already `--surface-sunk`, and on Thank You. On About the band follows a
+   * plain cream section and the two run together, so it takes `sunk` instead.
+   * NOT a global change for that reason: making every awards bar sunk would
+   * erase the homepage's FirmIntro boundary entirely.
+   */
+  tone?: "lifted" | "sunk";
 }
 
-const { awards, eyebrow = "Recognized & awarded" } = Astro.props;
+const { awards, eyebrow = "Recognized & awarded", tone = "lifted" } = Astro.props;
 ---
 
-<section class="awards">
+<section class:list={["awards", `awards--${tone}`]}>
   <div class="awards__inner">
     <p class="awards__eyebrow">{eyebrow}</p>
 
@@ -57,8 +68,12 @@ const { awards, eyebrow = "Recognized & awarded" } = Astro.props;
 </section>
 
 <style>
-  .awards {
+  .awards--lifted {
     background: var(--dh-cream-50);
+  }
+
+  .awards--sunk {
+    background: var(--surface-sunk);
   }
 
   .awards__inner {

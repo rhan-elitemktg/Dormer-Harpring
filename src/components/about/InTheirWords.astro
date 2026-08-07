@@ -82,11 +82,16 @@ const { section, reviews, summary } = Astro.props;
     font-size: var(--display-2);
   }
 
+  /* `padding: 0` is load-bearing, not tidiness: the UA gives every <ul> a 40px
+     `padding-inline-start`, which pushed the first card off the container and
+     out of line with the heading above it. */
   .itw__grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: var(--space-6);
     align-items: stretch;
+    list-style: none;
+    padding: 0;
   }
 
   /* The <li> is the grid item, so the card has to fill it or three cards of
