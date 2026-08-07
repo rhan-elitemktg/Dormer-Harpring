@@ -28,13 +28,23 @@ const { story } = Astro.props;
     </header>
 
     <div class="shot__grid">
-      <Picture
-        src={story.photo}
-        alt={story.photoAlt}
-        widths={[600, 900, 1300]}
-        sizes="(max-width: 980px) 100vw, 45vw"
-        class="shot__photo"
-      />
+      {
+        /* The photograph is wrapped rather than being the grid item itself.
+           <Picture> emits the source's intrinsic `width`/`height` attributes,
+           and a bare `width: 100%` on that leaves the HEIGHT at the attribute —
+           1377px for this square source, which `object-fit: cover` then crops
+           into a tall strip and which sets the whole band's height. The frame
+           owns the box; the image fills it. Same shape as WhoWeAre. */
+      }
+      <div class="shot__frame">
+        <Picture
+          src={story.photo}
+          alt={story.photoAlt}
+          widths={[600, 900, 1300]}
+          sizes="(max-width: 980px) 100vw, 45vw"
+          class="shot__photo"
+        />
+      </div>
       <Prose value={story.body} class="shot__body" />
     </div>
   </div>
@@ -69,19 +79,32 @@ const { story } = Astro.props;
     align-items: center;
   }
 
-  /* `align-self: stretch` with no tall floor: the photograph takes its height
-     from the copy beside it, so the band is exactly as tall as the words need.
-     The comp's `min-height: 500px` was 140px more than the three paragraphs
-     occupy, and since the source is square that height was also cropping the
-     frame harder than it needed to. The floor that remains only engages if the
-     copy ever gets much shorter. */
-  .shot :global(.shot__photo) {
-    align-self: stretch;
+  /* An aspect ratio rather than the comp's `min-height: 500px`. The height is
+     then a function of the column, so it stays proportionate at every width and
+     there is no magic number to re-tune — and 4:3 is a gentle crop of a square
+     source, where 500px against a ~510px column was very nearly none at all.
+     The copy runs shorter than this and centres beside it, which is what the
+     comp's `align-items: center` intends. */
+  .shot__frame {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    border-radius: var(--radius-7);
+    overflow: hidden;
+    /* The comp's placeholder ground, behind a photograph that has not decoded
+       yet rather than as a state of its own. */
+    background: #efe7d6;
+  }
+
+  /* Absolutely positioned, so the frame alone decides the box: a percentage
+     height on a replaced element resolves against an auto-height parent as
+     `auto`, which is what let the intrinsic 1377px through in the first place. */
+  .shot__frame :global(.shot__photo) {
+    position: absolute;
+    inset: 0;
     display: block;
     width: 100%;
-    min-height: 340px;
+    height: 100%;
     object-fit: cover;
-    border-radius: var(--radius-7);
   }
 
   .shot :global(.shot__body) {
@@ -103,9 +126,7 @@ const { story } = Astro.props;
       row-gap: var(--space-10);
     }
 
-    .shot :global(.shot__photo) {
-      min-height: 0;
-      aspect-ratio: 4 / 3;
-    }
+    /* Nothing to undo on the photograph now — the frame's aspect ratio already
+       follows the column, which at one column is the container. */
   }
 </style>

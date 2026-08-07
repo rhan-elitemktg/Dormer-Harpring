@@ -64,7 +64,14 @@ const { story } = Astro.props;
     align-items: center;
   }
 
+  /* The frame owns the box, and does it with an aspect ratio rather than a
+     `min-height` on the image. <Picture> emits the source's intrinsic
+     `width`/`height` attributes, so an image sized only by `width: 100%` keeps
+     the ATTRIBUTE height — for this 1469x1467 source, 1467px. A `min-height`
+     hid that here by coincidence; it is not something to rely on. */
   .who__frame {
+    position: relative;
+    aspect-ratio: 1 / 1;
     border-radius: var(--radius-4);
     overflow: hidden;
     /* The comp's placeholder ground, kept as the backdrop behind a photograph
@@ -76,13 +83,14 @@ const { story } = Astro.props;
      class is passed to <Picture> and therefore lands on Picture's markup,
      which never carries this file's cid. */
   .who__frame :global(.who__photo) {
+    position: absolute;
+    inset: 0;
     display: block;
     width: 100%;
     height: 100%;
-    /* The comp's floor. Below it the founders' heads crop into the frame edge
-       on a 1:1 split; `object-position: center top` keeps them clear. */
-    min-height: 520px;
     object-fit: cover;
+    /* The founders' heads sit high in the frame; `top` keeps them clear of the
+       crop at every column width. */
     object-position: center top;
   }
 
@@ -121,8 +129,9 @@ const { story } = Astro.props;
       row-gap: var(--space-10);
     }
 
-    .who__frame :global(.who__photo) {
-      min-height: 0;
+    /* Wider than tall once it spans the container — a square photograph at
+       full width would push the copy most of a screen down. */
+    .who__frame {
       aspect-ratio: 4 / 3;
     }
   }
