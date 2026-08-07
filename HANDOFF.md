@@ -1,148 +1,98 @@
-# Dormer Harpring — session handoff
+# Handoff — current state
 
-Marketing site for **Dormer Harpring**, a Denver personal-injury law firm. Built by Elite
-Legal Marketing. Replaces a WordPress site.
+Where the project is right now. **Volatile by design** — rewrite it, don't append to it.
 
-## Stack
+Architecture, conventions and the design source of truth live in `AGENTS.md` (symlinked as
+`CLAUDE.md`, loaded automatically). Pre-launch decisions live in `README.md`. Don't restate
+either here, and don't record anything `git log` already knows.
 
-Astro 7 (static, TS strict) · Sanity 6 embedded Studio at `/admin` · Vercel · React (only
-to host the Studio). One `npm run dev` serves both site and Studio on port 4321.
+_Last updated: 2026-08-07._
 
-- Sanity project `74nyy5mh`, dataset `production`. `.env` is gitignored; the same two
-  `PUBLIC_SANITY_*` vars are set in Vercel (all environments, **not** marked Sensitive —
-  they're public by design and you want to be able to read them back).
-- `sanity.config.ts` reads env from `import.meta.env` **or** `process.env` — the browser
-  Studio gets the first, the Sanity CLI (`schema extract` / `typegen`) only the second.
-- Fonts are **self-hosted via Astro's Fonts API** (`astro.config.mjs`), not the comps'
-  render-blocking `fonts.googleapis.com` request. Five families: Anton (display headings),
-  Hanken Grotesk (body), Geist (nav/eyebrows/numerals), Newsreader (pull quotes), Caveat
-  (signatures).
-- `site:` in `astro.config.mjs` is `https://www.denvertrial.com`. **Unconfirmed** — there's
-  a `TODO(launch)` to settle www vs apex before the first production deploy. Every canonical
-  tag, `og:url`, and sitemap entry derives from it.
+## State
 
-## Where we are
-
-Phases 0 → 3g are done and merged. Build is green: **35 pages, 293 optimized images.**
-
-| Phase | Scope | State |
-|---|---|---|
-| 0 | Design tokens, shell scaffolding, asset pipeline | done |
-| 1 | Header, mobile drawer, footer | done |
-| 2a–2h | Homepage, section by section | done |
-| 3a–3g | Thank You, Contact, Testimonials, Case Results, Co-Counsel, Community Involvement, Attorneys index, Attorney bio | done |
+Branch `dh_internals`, level with `master` — PRs #15–#19 are all merged, nothing outstanding.
+Build is green: **35 pages**, 285 optimized images, `npm run check` passing.
 
 Live at `https://dormer-harpring.vercel.app` — `/` and `/admin` both 200.
 
-**Pages built:** `index`, `contact`, `thank-you`, `testimonials`, `results`, `co-counsel`,
-`community-involvement`, `meet-our-attorneys/` + `meet-our-attorneys/[slug]`, plus
-`tokens.astro` (an internal design-token reference page, not public-facing).
+Phases 0 → 3g are done: design tokens and shell, header/drawer/footer, the homepage section
+by section, then Thank You, Contact, Testimonials, Case Results, Co-Counsel, Community
+Involvement, the Attorneys index and the Attorney bio.
 
-**Pages still to build**, all of which have comps waiting:
+**Built:** `index`, `contact`, `thank-you`, `testimonials`, `results`, `co-counsel`,
+`community-involvement`, `meet-our-attorneys/` + `meet-our-attorneys/[slug]`, and
+`tokens.astro` (an internal design-token reference, not public-facing).
 
-- About
-- Practice Areas (index)
-- Car Accidents (the practice-area detail template — the largest comp at 187 KB)
-- Blog index
-- Blog post template
-- Privacy policy / disclaimer — **no comp exists**; needs design or a plain-text treatment.
-  `/new-seo-setup` later expects a `legalPage` type for these.
-- 404 — no comp either.
+The `[slug]` route serves 25 profiles from two layouts, picked on `member.kind`:
+`AttorneyBio.astro` for the 7 attorneys, `StaffBio.astro` for the 18 staff. The 3 dogs on
+the roster have no profile, so no page.
 
-## Architecture — read this before touching data
+## Next
 
-**Content is currently static TypeScript in `src/data/*.ts`. Sanity holds nothing yet;
-`src/sanity/schemaTypes/index.ts` is still an empty array.**
+Remaining templates, ordered easiest → hardest by section count (the order this project has
+been working in). All five comps exist.
 
-This is deliberate, not an oversight. Each module in `src/data/` is a documented
-**"SANITY SWAP POINT"** — every export is already shaped the way the future GROQ projection
-will return it: flat, pre-coalesced, free of presentation. The getters are already `async`,
-so when the CMS phase lands each function body becomes a `sanityClient.fetch(...)` and the
-call sites don't move.
+| Page | Sections | Notes |
+|---|---|---|
+| **Practice Areas** | 7 | Next up. Two sections already exist as components — "The people in your corner." is `AttorneysBand.astro`, "Serving injured Coloradans" is `ServiceAreaBand.astro`. `src/data/practiceAreas.ts` already has `getHomePracticeAreas()`, `getCatastrophicAreas()`, `getPracticePromise()`. Leaves ~3 new sections. |
+| About | 11 | Three exist (those two plus `CoreValues.astro`). New: "We take the cases other firms turn down.", "You only get one shot at this.", "What you can expect when you hire us.", and an "In their words." testimonials variant. |
+| Blog index | 6 | Fewer sections than About but more new work — introduces a post content type. `src/data/news.ts` has an `InsightPost` shape and `getInsightPosts()` from the homepage feed; posts will still need slugs, dates, probably categories. |
+| Blog post | 3 | Depends on the type the index introduces. Reuses the proven `[slug]` + `Prose` pattern from the attorney bios. |
+| Car Accidents | 29 | The practice-area **detail** template and by far the largest comp — 29 sections, 88 placeholders. Last. |
 
-Two rules the data layer holds to, and which any new work must also hold to:
+No comp exists for **privacy / disclaimer** or **404**. Both need a design decision or a
+plain-text treatment; `/new-seo-setup` later expects a `legalPage` type for the former.
 
-1. **No component owns content.** Components take props; the page fetches and passes down.
-   Component-level private arrays drift out of sync with the data module and nobody notices
-   until migration.
-2. **No hex codes, style strings, or SVG markup in the data layer.** Those get re-derived in
-   CSS. No editor will ever type a hex code into the CMS, so it must not be in the shape.
+After the templates:
 
-The flow is: `src/pages/*.astro` → `await` getters from `src/data/*.ts` → props into
-components. `src/pages/index.astro` is the clearest example — 26 getters in one
-`Promise.all`, then 14 section components.
+1. **CMS phase** — write the Sanity schema types, then convert each `src/data/*.ts` getter
+   body to a `sanityClient.fetch()`. The shapes are already right, so this is mechanical.
+2. `/new-seo-setup` — per-page meta, a Global SEO Settings singleton with a crawl switch,
+   JSON-LD, `sitemap.xml`, `robots.txt`, editor-managed redirects. Needs real pages and
+   content types to attach to, hence after.
+3. `/studio-polish ux` — desk grouping into Pages/Collections/Site Settings, unique icons,
+   length caps, preview fixes. Audits the filled-out schema, so it also waits.
 
-Data modules: `attorneys`, `awards`, `caseResults`, `coCounsel`, `community`,
-`communityPage`, `contact`, `contactPage`, `coreValues`, `faqs`, `home`, `navigation`,
-`news`, `portableText`, `practiceAreas`, `site`, `stats`, `team`, `teamPage`,
-`testimonials`, `thankYou`.
+## Open
 
-## Design source of truth
+**Bugs**
 
-`~/Downloads/Dormer Harpring/Dormer Harpring Claude Files/` (791 MB, from the designer).
-**It needs triage — roughly half is dead weight from abandoned directions.**
+- The attorney-bio awards carousel doesn't scroll on mobile. Its six badges lay out to
+  ~1006px inside a 327px rail, but the rail reports no scrollable overflow. Pre-existing —
+  replicating the pre-change CSS reproduces it exactly — and the identical carousel in
+  `AwardsBar.astro` works. Only 2 of 6 badges have ever been reachable there. Its dots
+  correctly stay hidden as a result; fixing the scroll makes them appear with no script
+  change. Four causes already ruled out: `display: contents` on `.bio__main`, adding
+  `display: flex` to the items, the `min-width` difference between the two rails, and making
+  `.bio__awards` a centred flex column.
 
-**Canonical:** the 16 `DH - *.html` files at the folder root. Self-contained, no dependency
-on `_ds/` or the `homepage-v8/v9.css` files. All 46 local asset references resolve — nothing
-missing. `DH - Index.html` is the designer's directory page linking them all. Images live in
-`wireframes/assets/` and `uploads/`.
+**Waiting on the firm** — these are content, not code. `README.md` has the full table; the
+short version is that 12 `TODO(launch)` markers are open in `src/`, covering the seven
+attorney emails (six inferred from a pattern), the office address and hours, the `$70M+ /
+20 Years` stat claims, and K.C.'s facts band — which currently duplicates Sean's copy
+verbatim, and two of its three cells are false on K.C.'s page and contradicted by his own
+body copy on it.
 
-**Ignore these — all stale:**
+**Waiting on the designer**
 
-| Item | Why |
-|---|---|
-| `v4`–`v7`, `new_v1`–`new_v3`, root `*.jsx` | Earlier React/Babel generation |
-| `production-build/` | `build.mjs` targets `Dormer Harpring - Homepage V4.html`, which isn't in the folder — the script is broken. Moot anyway, we're on Astro |
-| `_ds/` (both design systems) | Declare a *different* font stack (Libre Caslon Display, Archivo, Roboto Condensed, Alex Brush, Cormorant Garamond). Only Anton overlaps the approved pages |
-| `homepage-v8.css` / `v9.css`, `old/`, `scraps/` | Not referenced by any approved page |
+- `DH - Homepage approved.html` and `DH - Homepage approved v2.html` are the same byte size
+  with different checksums. Nobody has said which is final. The homepage was built from the
+  comps as they stood.
+- Whether the copy in the comps is final or placeholder.
 
-**The designer's `CLAUDE.md` in that folder is partly stale.** It claims "Single font: Geist
-(used for everything)" — the approved pages use five families. Its layout notes do hold
-(`.wrap{max-width:1660px}` with no horizontal padding is confirmed in the markup). Verify
-before trusting any individual line.
+**Blockers for launch, not for building**
 
-The comps use `{{ }}` template placeholders (`{{ t.img }}`, `{{ a.href }}`,
-`{{ activeArea.img }}`). That's the designer having already marked what's repeatable data —
-those loops map onto Sanity document types, the static text onto page-singleton fields.
+- `/api/consult` does not exist. Both forms post to it and 404 on submit.
+- The production URL is not yet a Sanity CORS origin, so the deployed `/admin` loads but
+  fails sign-in. `http://localhost:4321` is registered.
+- `site:` in `astro.config.mjs` — www vs apex, unsettled.
 
-**Open question for the designer:** `DH - Homepage approved.html` and
-`DH - Homepage approved v2.html` are the same byte size but different checksums. Nobody has
-said which is final. The homepage was built from the comps as they stood; worth confirming
-nothing was missed.
+## Studio
 
-Also unresolved: whether the copy in the comps is final or placeholder.
-
-## Studio state
-
-Elite brand theme is applied (scaffold-time `/studio-polish brand`): light-locked palette,
-ELITE emblem as workspace `icon`, centered login card. The login-card layout uses a scoped
-CSS hook into Sanity's internal DOM, attached to the icon component because
-`studio.components.layout` doesn't wrap the unauthenticated login screen. Cosmetic only,
+Elite brand theme applied (scaffold-time `/studio-polish brand`): light-locked palette,
+ELITE emblem as the workspace `icon`, centred login card. That login-card layout uses a
+scoped CSS hook into Sanity's internal DOM, attached to the icon component because
+`studio.components.layout` doesn't wrap the unauthenticated login screen. Cosmetic only and
 fails gracefully — worth a glance after major Sanity upgrades.
 
-Desk is empty because there are no content types yet. That's expected.
-
-`http://localhost:4321` is registered as a Sanity CORS origin with credentials. **The
-production URL still needs adding** to Sanity → API → CORS origins with credentials, or the
-deployed `/admin` will load but fail sign-in.
-
-## Repo
-
-Branch **`dh_internals`**, 3 commits ahead of origin (the Attorney-bio polish commits).
-`master` is the PR target; work merges via PR (last was #17).
-
-Commit style: sentence-case, describes the visible change ("Attorney bio: email in the
-contact line, awards carousel, smaller pull quote"), phase-tagged where it completes a phase.
-
-## What comes next
-
-1. Finish the remaining page templates (About, Practice Areas, Car Accidents detail, Blog,
-   Blog post).
-2. **CMS phase** — write the Sanity schema types, then convert each `src/data/*.ts` getter
-   body to a `sanityClient.fetch()`. The shapes are already right, so this is mechanical.
-3. `/new-seo-setup` — per-page meta, Global SEO Settings singleton with a crawl switch,
-   JSON-LD, `sitemap.xml`, `robots.txt`, editor-managed redirects. Needs the real pages and
-   content types to attach to, hence last.
-4. `/studio-polish ux` — desk grouping into Pages/Collections/Site Settings, unique icons,
-   length caps, preview fixes. Audits the filled-out schema, so it also waits.
-5. Settle the `site:` TODO (www vs apex) before the first production deploy.
+The desk is empty because there are no content types yet. Expected.
