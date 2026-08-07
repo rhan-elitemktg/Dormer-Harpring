@@ -29,27 +29,36 @@ const { section, groups } = Astro.props;
         <div class="dir__group">
           <h3 class="dir__group-title">{group.title}</h3>
           <ul class="dir__cols">
-            {group.items.map((item) => (
-              <li>
-                <a class="dir__link" href={item.href}>
-                  <svg
-                    width="13"
-                    height="13"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2.4"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    aria-hidden="true"
-                    class="dir__chevron"
+            {group.items.map((item) => {
+              const Tag = item.href ? "a" : "span";
+              return (
+                <li>
+                  {/* An entry with no page renders as a <span>: the firm lists
+                      the area, but there is nowhere to send anyone yet. Same
+                      convention as a null `NavItem.href`. */}
+                  <Tag
+                    class:list={["dir__link", !item.href && "dir__link--plain"]}
+                    href={item.href ?? undefined}
                   >
-                    <path d="M9 6l6 6-6 6" />
-                  </svg>
-                  {item.label}
-                </a>
-              </li>
-            ))}
+                    <svg
+                      width="13"
+                      height="13"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.4"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                      class="dir__chevron"
+                    >
+                      <path d="M9 6l6 6-6 6" />
+                    </svg>
+                    {item.label}
+                  </Tag>
+                </li>
+              );
+            })}
           </ul>
         </div>
       ))
@@ -81,8 +90,17 @@ const { section, groups } = Astro.props;
     color: var(--dh-ink);
   }
 
+  /* The comp's `wrapStyle`: every group padded 44px below, and every group
+     after the first padded 44px above with a hairline across the top. The rule
+     is what separates Denver's 36 entries from Aurora's 6 — without it the two
+     lists read as one continuous column. */
+  .dir__group {
+    padding-bottom: var(--space-11);
+  }
+
   .dir__group + .dir__group {
-    margin-top: var(--space-12);
+    padding-top: var(--space-11);
+    border-top: 1px solid var(--dh-line);
   }
 
   /* The comp sets 28px, which occurs exactly once across all sixteen comps —
@@ -122,6 +140,15 @@ const { section, groups } = Astro.props;
 
   .dir__link:hover {
     color: var(--accent);
+  }
+
+  /* No hover shift and no pointer — it is not a link. */
+  .dir__link--plain {
+    color: var(--text-muted);
+  }
+
+  .dir__link--plain:hover {
+    color: var(--text-muted);
   }
 
   /* Gold at rest, then inheriting the link's red — the glyph and the label move

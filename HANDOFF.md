@@ -72,18 +72,27 @@ After the templates:
 
 **Decide before launch**
 
-- `/practice-areas`'s directory ships **95 links to legacy WordPress URLs that this build
+- `/practice-areas`'s directory ships **87 links to legacy WordPress URLs that this build
   does not serve** — the whole point of the section, and the same thing the nav and footer
   already do with 21 of them, but at four times the scale. They resolve today because the
   WordPress site is still live at those paths, and they keep resolving after cutover only if
   the practice-area detail pages are built or redirected first. Nothing renders 404 while
-  both sites are up; the day this one replaces it, all 95 do. The Car Accidents template
+  both sites are up; the day this one replaces it, all 87 do. The Car Accidents template
   (last on the list above) is the first of those pages.
-- Three practice areas the legacy hub advertises have **no page anywhere** — legal
-  malpractice, life insurance bad faith, pet insurance bad faith. Its own links to them are
-  broken (written relative, so they resolve under `/practice-areas/`). They are left out
-  rather than ported as 404s; if the firm still offers them they need pages. Marked
-  `TODO(launch)` in `src/data/practiceAreas.ts`.
+- Three entries the comp lists have **no page anywhere** — Legal Malpractice, Life Insurance
+  Bad Faith, Pet Insurance Bad Faith. The legacy hub's own links to them are broken (written
+  relative, so they resolve under `/practice-areas/`). They render as plain text via
+  `href: null` rather than as dead links. Marked `TODO(launch)`.
+
+**Ask the designer**
+
+- The Practice Areas comp's directory has **eight groups and omits Greeley, Fort Collins and
+  Grand Junction**, which have eight live landing pages between them and appear on the
+  legacy hub. The page matches the comp; those eight pages are currently unreachable from
+  it. Add three groups, or leave them to the nav?
+- That section's heading is "Every case we handle, by **location**", but the comp's last two
+  groups — "Premises Liability" and "Other Legal Services" — are topical. Built as the comp
+  has it. Either the heading or the last two groups wants changing.
 
 **Waiting on the firm** — these are content, not code. `README.md` has the full table; the
 short version is that 13 `TODO(launch)` markers are open in `src/`, covering the seven

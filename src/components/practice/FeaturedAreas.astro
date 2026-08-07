@@ -146,7 +146,11 @@ const { section, areas, moreLabel = "Learn more" } = Astro.props;
     border: 1px solid rgba(199, 154, 84, 0.42);
     border-radius: var(--radius-full);
     background: var(--surface-card);
-    color: var(--accent-gold);
+    /* Dark, not gold. The comp's plate has a gold RING but the glyph inside it
+       is `#1e352f`, baked into the `pa-icons-line/*.svg` files it loads as
+       images. That value appears nowhere in the comps themselves, so it snaps
+       to --dh-ink — the same ink the card title beside it already uses. */
+    color: var(--dh-ink);
   }
 
   /* The comp sets 23px here, between --display-6's 25 and --display-7's 20.
