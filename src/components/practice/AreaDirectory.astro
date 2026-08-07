@@ -90,17 +90,16 @@ const { section, groups } = Astro.props;
     color: var(--dh-ink);
   }
 
-  /* The comp's `wrapStyle`: every group padded 44px below, and every group
-     after the first padded 44px above with a hairline across the top. The rule
-     is what separates Denver's 36 entries from Aurora's 6 — without it the two
-     lists read as one continuous column. */
+  /* The comp's `wrapStyle` spacing — 44px below every group, 44px above every
+     group after the first. Its hairline between groups is deliberately NOT
+     ported: by request. The group headings and the 88px of combined padding
+     carry the separation on their own. */
   .dir__group {
     padding-bottom: var(--space-11);
   }
 
   .dir__group + .dir__group {
     padding-top: var(--space-11);
-    border-top: 1px solid var(--dh-line);
   }
 
   /* The comp sets 28px, which occurs exactly once across all sixteen comps —
@@ -121,6 +120,20 @@ const { section, groups } = Astro.props;
     gap: 0 var(--space-6);
     list-style: none;
     padding: 0;
+  }
+
+  /* Equal heights across a row. The grid already stretches each <li> to the
+     tallest cell in its row, but the link inside was sized by its own text — so
+     where one label wrapped to two lines ("Uninsured & Underinsured Motorists"),
+     its neighbours' underlines sat ~23px higher than its own and the row read
+     as broken. Making the <li> a flex container stretches the link to fill it,
+     which puts every rule on the row at one baseline. */
+  .dir__cols > li {
+    display: flex;
+  }
+
+  .dir__cols > li > * {
+    flex: 1;
   }
 
   /* Matches the co-counsel page's area list, which is the same affordance on a
