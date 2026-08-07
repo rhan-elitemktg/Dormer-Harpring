@@ -11,8 +11,9 @@ _Last updated: 2026-08-07._
 ## State
 
 Build is green: **37 pages**, 325 optimized images, `npm run check` passing. Practice Areas
-is merged. **About is built and committed but not yet merged** — see `git status` for the
-branch, and open a PR against `master` when it's approved.
+is merged. **About is built and reviewed but not yet merged** — see `git status` for the
+branch, and open a PR against `master`. It has been through a full design pass with Rhan on
+desktop and mobile; the page itself is signed off.
 
 Run `git status` for where you are. This file deliberately does **not** name the working
 branch — that line went stale three times in the session that wrote it, twice within minutes
@@ -29,20 +30,59 @@ Involvement, the Attorneys index, the Attorney bio, Practice Areas and About.
 `meet-our-attorneys/[slug]`, and `tokens.astro` (an internal design-token reference, not
 public-facing).
 
-Two shared pieces came out of the About build and now serve two pages each:
-`ReviewRating.astro` (the white "300+ Client Reviews · 5.0 on Google" card, extracted from
-`TestimonialRail` where it was inline) and a `layout` prop on `AttorneyCard` (`"rail"` for
-the homepage's fixed 272px card with a centred play glyph, `"grid"` for About's track-width
-card with the glyph bottom-left).
-
-`scripts/diff-comp-about.py` is the second comp-diff script, built from the Practice Areas
-one. It also **asserts the four deliberate differences** from the comp, so a later session
-that reverts one is told rather than left to guess. Worth copying again for the Blog and Car
-Accidents pages.
-
 The `[slug]` route serves 25 profiles from two layouts, picked on `member.kind`:
 `AttorneyBio.astro` for the 7 attorneys, `StaffBio.astro` for the 18 staff. The 3 dogs on
 the roster have no profile, so no page.
+
+`scripts/diff-comp-about.py` is the second comp-diff script, built from the Practice Areas
+one. It also **asserts the five deliberate differences** from the comp, so a later session
+that reverts one is told rather than left to guess. Worth copying again for the Blog and Car
+Accidents pages.
+
+### Shared pieces the About work produced
+
+New pages should reach for these rather than re-solving them. All are in use on two or more
+pages already, so a change to one is a change to all of them — check before editing.
+
+- **`ReviewRating.astro`** — the white "300+ Client Reviews · 5.0 on Google" card. Extracted
+  from `TestimonialRail`, which held the only copy.
+- **`AttorneyCard`'s `layout` prop** — `"rail"` fixes the card at 272px for the homepage,
+  `"grid"` lets the track set it for About. The play glyph is centred in both; the About
+  comp puts it bottom-left and that was **not** adopted.
+- **`AwardsBar`'s `tone` prop** — `lifted` (default) is the comps' near-white; `sunk` is for
+  pages where the band follows a plain cream section and would otherwise be invisible. Not a
+  global change, because the homepage runs this band under `FirmIntro`, which is already
+  `--surface-sunk`.
+- **`.hero-cta` / `.hero-cta__note`** in `global.css` — the one-button-plus-gold-note row
+  under four photo heroes. They each carried a byte-identical copy.
+- **`.btn` is full width below 640px**, as the rule rather than the exception.
+  `.btn--block-sm` is gone. Verified that nothing sets a competing width, and that the three
+  rows pairing two buttons all wrap.
+- **`.arrow` on every arrow inside something that navigates.** Three documented exclusions,
+  each commented where it lives: `.pa__tab`'s chevron marks selection, `.attys__cta`'s badge
+  scales instead of sliding, and the carousel prev/next are controls rather than CTAs.
+- **`MobileNav`'s `subItemsOf`** — a parent with children renders as a `<summary>`, which
+  toggles rather than navigates, so its own page is unreachable from the drawer. This adds a
+  link to it when no child already points there. Don't hand-author one in `navigation.ts`.
+
+### The mobile heroes
+
+`Hero.astro` and `PageHeader.astro`'s `tone="photo"` share one construction below their
+breakpoints, and it is worth reading the comments before touching either. The photograph is
+a **band across the top**, sized off the viewport WIDTH; the copy starts 72% down it and
+overlaps the lower half under a bottom-to-top wash.
+
+Three things that look arbitrary and are not:
+
+- The band is sized off **width**, not content. `cover` on a full-height portrait box takes
+  its whole crop out of the SIDES — measured at 42–49% of the frame across phone widths,
+  which is the outer two of the four attorneys. Off width it is 6%.
+- The **0.72 and the wash stops are proportions of the band**, because the band is itself a
+  proportion of the viewport. What has to hold is the copy's relationship to the faces, which
+  sit at 12–32% of the frame in every crop — not a pixel count.
+- The mobile background is **flat `--dh-forest-500`, not `--grad-forest`**. The wash has to
+  end in exactly the colour behind the band's foot, and the radial is a different green at
+  every y.
 
 ## Next
 
@@ -108,6 +148,12 @@ source for this.
 
 **Waiting on the designer**
 
+- **No comp specifies a mobile layout for anything** — every comp is a desktop frame, and the
+  drawer, the mobile heroes and the stacked CTA rows are all ours. The most visible of those
+  is the homepage hero: on a phone the photograph is now a band across the TOP with the copy
+  over its lower half, where it used to be a strip anchored to the hero's bottom. Rhan asked
+  for that and signed it off, but the designer has not seen it and the homepage is nominally
+  an approved page.
 - `DH - Homepage approved.html` and `DH - Homepage approved v2.html` are the same byte size
   with different checksums. Nobody has said which is final. The homepage was built from the
   comps as they stood.
