@@ -137,6 +137,11 @@ gets the layout right and every string, every label and every ordering wrong, an
 finished. That has cost this project a full rebuild of one page already. If a comp seems to
 have no content, `grep -n 'data-dc-script'` it before sourcing that content anywhere else.
 
+`scripts/diff-comp-practice-areas.py` is the check that catches it — it diffs the built page
+against that block's arrays and fails on any text or ordering difference. Worth copying for
+the next content-heavy page; neither linter can see this class of error, because the build is
+green whenever the *layout* is right.
+
 Two corollaries worth knowing:
 
 - **The comp is the source for content; the live-site scrape is the source for URLs.** The
@@ -160,7 +165,8 @@ src/lib/        routePaths · schema · seo · video
 src/styles/     global.css — tokens, .btn, .container, .section, .prose, .rail-dots
 src/scripts/    rail · loadMore · phoneMask (self-executing, imported by components)
 src/assets/     optimized images, by subject
-scripts/        the two check:* linters + prep-assets.mjs (one-off comp extraction)
+scripts/        the two check:* linters · prep-assets.mjs (one-off comp extraction)
+                diff-comp-practice-areas.py (built page vs comp content, run by hand)
 ```
 
 ## Hard noes

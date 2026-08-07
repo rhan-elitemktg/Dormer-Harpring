@@ -10,8 +10,9 @@ _Last updated: 2026-08-07._
 
 ## State
 
-Build is green: **36 pages**, 309 optimized images, `npm run check` passing. The Practice
-Areas template is built but **not yet merged** — see `git status` for the branch.
+Build is green: **36 pages**, 311 optimized images, `npm run check` passing. The Practice
+Areas template is built and pushed but **not yet merged** — see `git status` for the branch,
+and open a PR against `master` when it's approved.
 
 Run `git status` for where you are. This file deliberately does **not** name the working
 branch — that line went stale three times in the session that wrote it, twice within minutes
@@ -84,16 +85,6 @@ After the templates:
   relative, so they resolve under `/practice-areas/`). They render as plain text via
   `href: null` rather than as dead links. Marked `TODO(launch)`.
 
-**Ask the designer**
-
-- The Practice Areas comp's directory has **eight groups and omits Greeley, Fort Collins and
-  Grand Junction**, which have eight live landing pages between them and appear on the
-  legacy hub. The page matches the comp; those eight pages are currently unreachable from
-  it. Add three groups, or leave them to the nav?
-- That section's heading is "Every case we handle, by **location**", but the comp's last two
-  groups — "Premises Liability" and "Other Legal Services" — are topical. Built as the comp
-  has it. Either the heading or the last two groups wants changing.
-
 **Waiting on the firm** — these are content, not code. `README.md` has the full table; the
 short version is that 13 `TODO(launch)` markers are open in `src/`, covering the seven
 attorney emails (six inferred from a pattern), the office address and hours, the `$70M+ /
@@ -107,6 +98,18 @@ body copy on it.
   with different checksums. Nobody has said which is final. The homepage was built from the
   comps as they stood.
 - Whether the copy in the comps is final or placeholder.
+- **The homepage's practice-area icons no longer match the homepage comp**, deliberately.
+  The package draws these subjects twice — the shapes the homepage comps inline, and the
+  `assets/pa-icons-line/*.svg` files Practice Areas and Car Accidents load. `PracticeIcon`
+  now carries one set, the `pa-icons-line` one, so brain injury looks the same on every
+  page. Confirm that's the intended drawing before launch; reverting is one file.
+- The Practice Areas directory has **eight groups and omits Greeley, Fort Collins and Grand
+  Junction**, which have eight live landing pages between them and appear on the legacy hub.
+  The page matches the comp, so those eight are unreachable from it. Add three groups, or
+  leave them to the nav?
+- That section's heading is "Every case we handle, by **location**", but the comp's last two
+  groups — "Premises Liability" and "Other Legal Services" — are topical. Built as the comp
+  has it. Either the heading or those two groups wants changing.
 
 **Blockers for launch, not for building**
 
