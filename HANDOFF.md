@@ -10,10 +10,11 @@ _Last updated: 2026-08-07._
 
 ## State
 
-Build is green: **37 pages**, 325 optimized images, `npm run check` passing. Practice Areas
-is merged. **About is built and reviewed but not yet merged** — see `git status` for the
-branch, and open a PR against `master`. It has been through a full design pass with Rhan on
-desktop and mobile; the page itself is signed off.
+Build is green: **38 pages**, 327 optimized images, `npm run check` passing. About is
+merged. **The Blog index is built and has had one round of review notes from Rhan, but is
+not merged** — see `git status` for the branch, and open a PR against `master`. Those notes
+are applied (see below); it has not yet had the full desktop-and-mobile pass About went
+through, so expect another round.
 
 Run `git status` for where you are. This file deliberately does **not** name the working
 branch — that line went stale three times in the session that wrote it, twice within minutes
@@ -21,12 +22,12 @@ of being written.
 
 Live at `https://dormer-harpring.vercel.app` — `/` and `/admin` both 200.
 
-Phases 0 → 3i are done: design tokens and shell, header/drawer/footer, the homepage section
+Phases 0 → 3j are done: design tokens and shell, header/drawer/footer, the homepage section
 by section, then Thank You, Contact, Testimonials, Case Results, Co-Counsel, Community
-Involvement, the Attorneys index, the Attorney bio, Practice Areas and About.
+Involvement, the Attorneys index, the Attorney bio, Practice Areas, About and the Blog index.
 
 **Built:** `index`, `about`, `contact`, `thank-you`, `testimonials`, `results`, `co-counsel`,
-`community-involvement`, `practice-areas`, `meet-our-attorneys/` +
+`community-involvement`, `practice-areas`, `news` (the blog index), `meet-our-attorneys/` +
 `meet-our-attorneys/[slug]`, and `tokens.astro` (an internal design-token reference, not
 public-facing).
 
@@ -34,10 +35,60 @@ The `[slug]` route serves 25 profiles from two layouts, picked on `member.kind`:
 `AttorneyBio.astro` for the 7 attorneys, `StaffBio.astro` for the 18 staff. The 3 dogs on
 the roster have no profile, so no page.
 
-`scripts/diff-comp-about.py` is the second comp-diff script, built from the Practice Areas
-one. It also **asserts the five deliberate differences** from the comp, so a later session
-that reverts one is told rather than left to guess. Worth copying again for the Blog and Car
-Accidents pages.
+`scripts/diff-comp-blog.py` is the third comp-diff script, after the Practice Areas and
+About ones. Each **asserts its page's deliberate differences** as well as diffing the text,
+so a later session that reverts one is told rather than left to guess — the blog's are nine.
+Worth copying again for the Blog post and Car Accidents pages. None are wired into
+`npm run check`, which has to stay runnable without the design folder; run them by hand.
+
+### What the Blog index turned up, and what was decided
+
+**The comp's feed is 5 real posts and 8 invented ones.** Its featured post and first four
+cards are the live blog's June 2026 entries verbatim — same titles, same dates, same
+reviewer as `/news` pages 1–2 in the scrape. The other eight exist nowhere in the 167 legacy
+posts, and four of them are the placeholder articles the homepage's insights tab already
+carries. This is the first comp found to be quoting the live site rather than inventing;
+check the next one the same way.
+
+Rhan chose, with the alternatives on the table:
+
+- **Ship the comp's thirteen verbatim.** The five real ones link to their legacy slugs; the
+  eight invented ones get `href: null` and render without a link — the same treatment
+  Practice Areas gives its three page-less entries. The alternative considered and rejected
+  was filling the eight from the real feed, which would have made every card link at the
+  cost of eight deviations from the comp.
+- **The category tabs filter client-side.** They do not link to `/category/<slug>`; those
+  archives are live WordPress and this build does not serve them, so linking would have put
+  five more URLs on the cutover list.
+
+One consequence worth knowing: `blogFeed.ts` owns the feed's visibility **instead of**
+`loadMore.ts` — a filter and a pager both writing `hidden` on the same cards race, and which
+you get depends on click order; the note in `loadMore.ts` records this.
+
+### The review notes, and what they changed
+
+Rhan's first round on the built page. All five are applied, and the two structural ones are
+asserted in `diff-comp-blog.py` so a later session cannot quietly restore the comp's order.
+
+- **The category row moved below the featured panel**, where the comp puts it directly under
+  the page header. As the comp has it, a 560px-tall panel separates the tabs from the twelve
+  cards they filter. Spacing was rebalanced rather than just reordered: 72px above the tabs,
+  40px below, so the label and the row read as one block with the grid.
+- **The featured post is no longer filtered.** It is the page's editorial lead, not a member
+  of the feed, and hiding it made the top of the page collapse and re-expand on every tab
+  press. A category matching no card now shows the featured post above the empty-state line.
+- **Cards fade up when a category is picked** — 6px, 240ms, 25ms stagger capped at 8. Set
+  only on a filter change, never on load, where it would collide with `.lazy-fade` on the
+  images. The global reduced-motion guard collapses animation *duration* but not *delay*, so
+  `PostCard` carries its own `prefers-reduced-motion` rule; without it a card would sit at
+  opacity 0 for the length of its delay.
+- **The tab row is a scrolling rail at every width**, replacing the comp's fixed six-column
+  grid — same construction as the homepage practice tablist below 980px, gutter bleed
+  included. The comp draws six categories; the live blog has **twenty-three**, and the CMS
+  phase lets an editor add more. `flex: 1 1 0` keeps six looking like the comp's grid, and
+  because a flex item will not shrink below its min-content width, the row starts scrolling
+  on its own once they stop fitting — no count threshold to maintain.
+- `.pcard__meta` bottom margin down to 4px.
 
 ### Shared pieces the About work produced
 
@@ -91,8 +142,7 @@ been working in). All four comps exist.
 
 | Page | Sections | Notes |
 |---|---|---|
-| **Blog index** | 6 | **Next up.** Fewer sections than About was but more new work — introduces a post content type. `src/data/news.ts` has an `InsightPost` shape and `getInsightPosts()` from the homepage feed; posts will still need slugs, dates, probably categories. The comp also carries a category tab row (`.bx-tabs`) and a featured block (`.bx-feat`) — check its `data-dc-script` block for both before building. |
-| Blog post | 3 | Depends on the type the index introduces. Reuses the proven `[slug]` + `Prose` pattern from the attorney bios. |
+| **Blog post** | 3 | **Next up.** The type is built — `BlogPost` in `src/data/blog.ts`, with the slug already in `href`. Reuses the proven `[slug]` + `Prose` pattern from the attorney bios. Only five posts have a slug to build a page from, and none has a body yet; the legacy post markup in the scrape is the source for both. Getting those five built is also what turns the index's five links from cutover liabilities into pages this site serves. |
 | Car Accidents | 29 | The practice-area **detail** template and by far the largest comp — 29 sections, 88 placeholders. Last. |
 
 No comp exists for **privacy / disclaimer** or **404**. Both need a design decision or a
@@ -130,13 +180,19 @@ After the templates:
   the practice-area detail pages are built or redirected first. Nothing renders 404 while
   both sites are up; the day this one replaces it, all 87 do. The Car Accidents template
   (last on the list above) is the first of those pages.
-- Three entries the comp lists have **no page anywhere** — Legal Malpractice, Life Insurance
-  Bad Faith, Pet Insurance Bad Faith. The legacy hub's own links to them are broken (written
-  relative, so they resolve under `/practice-areas/`). They render as plain text via
-  `href: null` rather than as dead links. Marked `TODO(launch)`.
+- The Blog index adds **five more legacy links to the same pile** — the featured post and
+  four cards point at live WordPress post URLs this build does not serve. Same mechanism as
+  the 87 above and the same fix: the Blog post template, which is next.
+- Eight of the Blog index's twelve cards **have no post behind them at all** and render
+  without a link. README.md's table has the full account. Either real articles replace them
+  or they come out; a blog index two-thirds of whose cards go nowhere cannot ship.
+- Three entries the Practice Areas comp lists have **no page anywhere** — Legal Malpractice,
+  Life Insurance Bad Faith, Pet Insurance Bad Faith. The legacy hub's own links to them are
+  broken (written relative, so they resolve under `/practice-areas/`). They render as plain
+  text via `href: null` rather than as dead links. Marked `TODO(launch)`.
 
 **Waiting on the firm** — these are content, not code. `README.md` has the full table; the
-short version is that 14 `TODO(launch)` markers are open in `src/`, covering the seven
+short version is that 16 `TODO(launch)` markers are open in `src/`, covering the seven
 attorney emails (six inferred from a pattern), the office address and hours, the `$70M+ /
 20 Years` stat claims, K.C.'s facts band — which currently duplicates Sean's copy verbatim,
 and two of its three cells are false on K.C.'s page and contradicted by his own body copy on
@@ -154,6 +210,12 @@ source for this.
   over its lower half, where it used to be a strip anchored to the hero's bottom. Rhan asked
   for that and signed it off, but the designer has not seen it and the homepage is nominally
   an approved page.
+- **The Blog index's layout departs from its comp in three visible ways**, all at Rhan's
+  request and none of them mobile-only: the category row sits under the featured panel rather
+  than above it, the featured post stays visible through every filter, and the tab row is a
+  scrolling rail rather than a fixed six-column grid. The last one is forced by content — the
+  comp draws six categories and the live blog has twenty-three. Same standing as the mobile
+  hero above: signed off by Rhan, not seen by the designer.
 - `DH - Homepage approved.html` and `DH - Homepage approved v2.html` are the same byte size
   with different checksums. Nobody has said which is final. The homepage was built from the
   comps as they stood.
