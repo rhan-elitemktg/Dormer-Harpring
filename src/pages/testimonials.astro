@@ -38,9 +38,9 @@ const [page, videos, written, stats, band, details] = await Promise.all([
     photoAlt={page.photoAlt}
     minHeight={520}
   >
-    <div class="tm-hero__cta">
+    <div class="hero-cta">
       <a class="btn btn--red btn--lg" href={ROUTES.contact}>{page.ctaLabel}</a>
-      <span class="tm-hero__note">{page.ctaNote}</span>
+      <span class="hero-cta__note">{page.ctaNote}</span>
     </div>
   </PageHeader>
 
@@ -50,21 +50,3 @@ const [page, videos, written, stats, band, details] = await Promise.all([
   <ContactDetails details={details} form={band.form} />
 </Layout>
 
-<style>
-  .tm-hero__cta {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: var(--space-5);
-    margin-top: var(--space-10);
-  }
-
-  .tm-hero__note {
-    font-weight: 800;
-    font-size: var(--text-label);
-    line-height: 1;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--dh-gold-light);
-  }
-</style>

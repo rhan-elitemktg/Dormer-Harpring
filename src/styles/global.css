@@ -630,6 +630,53 @@ select {
   }
 }
 
+/* ---- Hero CTA row -----------------------------------------
+   Four interior photo heroes put ONE red button beside a gold no-fee line and
+   nothing else — About, Co-Counsel, Practice Areas and Testimonials. Each held
+   its own byte-identical copy of this; here once instead.
+
+     <div class="hero-cta">
+       <a class="btn btn--red btn--lg" href="…">Request free consultation</a>
+       <span class="hero-cta__note">No win, no fee</span>
+     </div>
+
+   Only for the ONE-button case. The homepage hero pairs two buttons and lays
+   them out differently, so it keeps its own row. */
+.hero-cta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-5);
+  margin-top: var(--space-10);
+}
+
+.hero-cta__note {
+  font-weight: 800;
+  font-size: var(--text-label);
+  line-height: 1;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--dh-gold-light);
+}
+
+/* Stacked on a phone: full-width button, note centred beneath it. Wrapping the
+   note onto its own line is what the flex row did anyway at this width, but it
+   left the button two-thirds across and the note hard against the left margin,
+   which reads as a layout that ran out of room rather than one made for it.
+   `align-items: stretch` is what widens the button — no `width: 100%` on the
+   `.btn` itself, so this cannot fight `.btn--block-sm` if a page adds it. */
+@media (max-width: 640px) {
+  .hero-cta {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-4);
+  }
+
+  .hero-cta__note {
+    text-align: center;
+  }
+}
+
 /* ---- Arrow affordance -------------------------------------
    Any link or button can carry a trailing arrow:
 

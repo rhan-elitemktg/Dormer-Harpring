@@ -68,9 +68,9 @@ const quotes = testimonials.filter((item) => item.kind === "quote").slice(0, 3);
     photoAlt={page.photoAlt}
     minHeight={620}
   >
-    <div class="ab-hero__cta">
+    <div class="hero-cta">
       <a class="btn btn--red btn--lg" href={ROUTES.contact}>{page.ctaLabel}</a>
-      <span class="ab-hero__note">{page.ctaNote}</span>
+      <span class="hero-cta__note">{page.ctaNote}</span>
     </div>
   </PageHeader>
 
@@ -88,21 +88,3 @@ const quotes = testimonials.filter((item) => item.kind === "quote").slice(0, 3);
   <ContactDetails details={details} form={band.form} />
 </Layout>
 
-<style>
-  .ab-hero__cta {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: var(--space-5);
-    margin-top: var(--space-10);
-  }
-
-  .ab-hero__note {
-    font-weight: 800;
-    font-size: var(--text-label);
-    line-height: 1;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--dh-gold-light);
-  }
-</style>
