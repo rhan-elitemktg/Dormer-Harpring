@@ -50,7 +50,11 @@ export async function getNavItems(): Promise<NavItem[]> {
       label: "About",
       href: ROUTES.about,
       children: [
-        { label: "About Us", href: ROUTES.about },
+        // No "About Us" entry pointing back at /about: the parent "About" is
+        // itself a link to it in the header, so the dropdown's first item
+        // repeated the thing directly above it. The mobile drawer renders a
+        // parent as a <summary>, which toggles rather than navigates, so it
+        // supplies this link itself — see `subItemsOf` in MobileNav.astro.
         { label: "Our Team", href: ROUTES.attorneys },
         { label: "Community Involvement", href: ROUTES.community },
         { label: "Co-Counsel", href: ROUTES.coCounsel },
