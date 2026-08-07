@@ -1,0 +1,57 @@
+---
+// The three glyphs on the About page's "what you can expect" cards, lifted from
+// that comp's `eIcon()` helper (viewBox 0 0 24 24, stroke width 1.6, round caps
+// and joins).
+//
+// A set of its own rather than an addition to ValueIcon or ContactIcon, matching
+// how those two are already split: each set carries its own stroke weight baked
+// into the <svg>, and 1.6 is neither ValueIcon's 1.5 nor ContactIcon's 1.8.
+// `compassion` is deliberately the same drawing as the core value of that name —
+// the comp reuses the glyph, and so does this.
+
+interface Props {
+  name: string;
+  size?: number;
+  class?: string;
+}
+
+const { name, size = 26, class: className } = Astro.props;
+
+const ICONS: Record<string, string[]> = {
+  compassion: [
+    "M12 20s-6.5-4.3-8.5-8.2C2.2 9.3 3.3 6.5 6 6c1.8-.3 3.2.8 4 2 .8-1.2 2.2-2.3 4-2 2.7.5 3.8 3.3 2.5 5.8",
+    "M13 14l2.5-2.4 2.5 2.4",
+  ],
+  phone: [
+    "M6 3h3l2 5-2.2 1.3a12 12 0 005.9 5.9L16 13l5 2v3a2 2 0 01-2.2 2A16.5 16.5 0 014 6.2 2 2 0 016 3z",
+  ],
+  fee: ["M12 3v18", "M6 7h9a3 3 0 010 6H6", "M6 13h11"],
+};
+
+const paths = ICONS[name];
+
+if (!paths) {
+  console.warn(`[ExpectIcon] no icon for "${name}" — add it to ICONS.`);
+}
+---
+
+{
+  paths && (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.6"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+      class={className}
+    >
+      {paths.map((d) => (
+        <path d={d} />
+      ))}
+    </svg>
+  )
+}

@@ -1,0 +1,183 @@
+---
+// "What you can expect when you hire us." — three promise cards, then the
+// Then / Now / Always / With you band beneath them.
+import ExpectIcon from "../icons/ExpectIcon.astro";
+import type { AboutPage } from "../../data/aboutPage";
+
+interface Props {
+  expect: AboutPage["expect"];
+}
+
+const { expect } = Astro.props;
+---
+
+{
+  /* Not `.section`: OneShot above sits on the same cream field and pads the top
+     of the pair, so this one owes only the bottom. */
+}
+<section class="expect">
+  <div class="container">
+    <h2 class="expect__title">{expect.title}</h2>
+
+    <ul class="expect__cards">
+      {
+        expect.promises.map((promise) => (
+          <li class="expect__card">
+            <span class="expect__badge">
+              <ExpectIcon name={promise.iconKey} />
+            </span>
+            <h3 class="expect__card-title">{promise.title}</h3>
+            <p class="expect__card-body">{promise.body}</p>
+          </li>
+        ))
+      }
+    </ul>
+
+    <ul class="expect__miles">
+      {
+        expect.milestones.map((milestone) => (
+          <li class="expect__mile">
+            <span class="expect__tag">{milestone.tag}</span>
+            <h3 class="expect__mile-title">{milestone.title}</h3>
+            <p class="expect__mile-body">{milestone.body}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .expect {
+    padding-top: var(--space-section-sm);
+    padding-bottom: var(--space-section);
+    background: var(--surface-page);
+  }
+
+  .expect__title {
+    margin-bottom: var(--space-11);
+    font-size: var(--display-4);
+    text-align: center;
+    text-wrap: balance;
+  }
+
+  .expect__cards {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-6);
+  }
+
+  .expect__card {
+    padding: var(--space-10) var(--space-9);
+    background: var(--dh-white);
+    border: 1px solid var(--dh-line);
+    border-radius: var(--radius-7);
+  }
+
+  .expect__badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    margin-bottom: var(--space-6);
+    border-radius: var(--radius-full);
+    background: rgba(199, 154, 84, 0.16);
+    border: 1px solid rgba(199, 154, 84, 0.45);
+    color: var(--dh-gold-deep);
+  }
+
+  .expect__card-title {
+    margin-bottom: var(--space-3);
+    font-size: var(--text-3xl);
+    line-height: 1.15;
+  }
+
+  .expect__card-body {
+    font-size: var(--text-md);
+    line-height: var(--leading-prose);
+    color: var(--text-muted);
+    text-wrap: pretty;
+  }
+
+  /* One bordered box divided by hairlines, not four bordered cards — so the
+     `overflow: hidden` is what stops the first and last cells' corners from
+     squaring off against the rounded frame. */
+  .expect__miles {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin-top: var(--space-14);
+    border: 1px solid var(--dh-line);
+    border-radius: var(--radius-6);
+    overflow: hidden;
+    background: var(--dh-white);
+  }
+
+  .expect__mile {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-9) var(--space-8);
+  }
+
+  /* The divider belongs to the cell on its left, so the row's outer edges stay
+     clear of a double rule against the frame. `:first-child` on each row is
+     handled by the breakpoints below, where the column count changes. */
+  .expect__mile + .expect__mile {
+    border-left: 1px solid var(--dh-line);
+  }
+
+  .expect__tag {
+    font-weight: 800;
+    font-size: var(--text-micro);
+    line-height: 1;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--dh-gold-deep);
+  }
+
+  .expect__mile-title {
+    font-size: var(--text-3xl);
+    line-height: 1.1;
+  }
+
+  .expect__mile-body {
+    font-size: var(--text-base);
+    line-height: var(--leading-normal);
+    color: var(--text-muted);
+    text-wrap: pretty;
+  }
+
+  @media (max-width: 1080px) {
+    .expect__miles {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    /* Two-up: the third cell opens a new row, so its left rule would hang off
+       the frame's edge. It gets a top rule instead, as does the fourth. */
+    .expect__mile:nth-child(odd) {
+      border-left: 0;
+    }
+
+    .expect__mile:nth-child(n + 3) {
+      border-top: 1px solid var(--dh-line);
+    }
+  }
+
+  @media (max-width: 980px) {
+    .expect__cards {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .expect__miles {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .expect__mile + .expect__mile {
+      border-left: 0;
+      border-top: 1px solid var(--dh-line);
+    }
+  }
+</style>

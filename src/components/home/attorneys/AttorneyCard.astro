@@ -1,23 +1,37 @@
 ---
-// One attorney in the homepage rail: portrait, name, role.
+// One attorney: portrait, name, role.
+//
+// Two layouts, because two comps draw the same card differently — the homepage
+// rail fixes it at 272px and centres the play glyph, the About grid lets the
+// track set the width and tucks the glyph into the bottom-left corner. Nothing
+// else differs, so this is a prop rather than a second component with a hundred
+// duplicated lines of CSS.
 import Picture from "../../media/Picture.astro";
 import PlayButton from "../../media/PlayButton.astro";
 import type { AttorneyCardData } from "../../../data/attorneys";
 
 interface Props {
   attorney: AttorneyCardData;
+  layout?: "rail" | "grid";
 }
 
-const { attorney } = Astro.props;
+const { attorney, layout = "rail" } = Astro.props;
+
+// The rail's card is 272px at every width; the grid's is a quarter of the
+// container on desktop and the full width of a phone.
+const sizes =
+  layout === "rail"
+    ? "272px"
+    : "(max-width: 640px) 100vw, (max-width: 1080px) 50vw, 25vw";
 ---
 
-<a class="acard" href={attorney.href}>
+<a class:list={["acard", `acard--${layout}`]} href={attorney.href}>
   <span class="acard__media">
     <Picture
       src={attorney.portrait}
       alt={attorney.name}
-      widths={[272, 544]}
-      sizes="272px"
+      widths={[272, 544, 700]}
+      sizes={sizes}
       class="acard__portrait"
     />
     <span class="acard__scrim" aria-hidden="true"></span>
@@ -36,6 +50,9 @@ const { attorney } = Astro.props;
   .acard {
     display: flex;
     flex-direction: column;
+  }
+
+  .acard--rail {
     flex: 0 0 272px;
     scroll-snap-align: start;
   }
@@ -78,11 +95,20 @@ const { attorney } = Astro.props;
      `transform: scale()` on hover would replace this centring translate
      outright, throwing the button into the corner. The pulse is the hover
      feedback; it doesn't need a second one. */
-  .acard :global(.acard__play) {
+  .acard--rail :global(.acard__play) {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+  }
+
+  /* The About comp's placement. No translate here, so the "no hover scale"
+     note above does not apply — but it stays unscaled anyway, for the same
+     reason: the glyph is a CSS border triangle. */
+  .acard--grid :global(.acard__play) {
+    position: absolute;
+    bottom: var(--space-3);
+    left: var(--space-3);
   }
 
   .acard__name {
@@ -109,7 +135,7 @@ const { attorney } = Astro.props;
   }
 
   @media (max-width: 640px) {
-    .acard {
+    .acard--rail {
       flex-basis: 232px;
     }
   }

@@ -1,0 +1,127 @@
+---
+// The full-bleed pull quote: a photograph under a heavy scrim, the firm's line
+// set in the serif, and the attribution beneath it.
+import Picture from "../media/Picture.astro";
+import Prose from "../prose/Prose.astro";
+import type { AboutPage } from "../../data/aboutPage";
+
+interface Props {
+  quote: AboutPage["quote"];
+}
+
+const { quote } = Astro.props;
+---
+
+<section class="qb">
+  {/* Decorative — the quotation is the content, and the backdrop says nothing
+      a screen-reader user needs. `alt=""` plus aria-hidden on the scrim. */}
+  <Picture
+    src={quote.photo}
+    alt=""
+    widths={[900, 1400, 2000]}
+    sizes="100vw"
+    class="qb__photo"
+  />
+  <span class="qb__scrim" aria-hidden="true"></span>
+
+  <figure class="qb__inner">
+    {/* Decorative: the <figure>/<blockquote> pair already announces a
+        quotation, so a stray “ read aloud adds nothing. */}
+    <span class="qb__mark display" aria-hidden="true">&ldquo;</span>
+    <blockquote class="qb__quote">
+      <Prose value={quote.text} class="qb__text" />
+    </blockquote>
+    <figcaption class="qb__attr">{quote.attribution}</figcaption>
+  </figure>
+</section>
+
+<style>
+  .qb {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    min-height: 460px;
+    padding: var(--space-section) var(--space-10);
+    background: var(--dh-forest-500);
+  }
+
+  /* `:global()` bounded by `.qb`, an element in this template — the class is
+     passed to <Picture> and lands on Picture's markup, not on this file's. */
+  .qb :global(.qb__photo) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: right top;
+  }
+
+  /* Vertical rather than the horizontal scrim the photo headers use: the copy
+     here is centred, so there is no quiet side to push the image into. */
+  .qb__scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      rgba(21, 30, 25, 0.9) 0%,
+      rgba(21, 30, 25, 0.82) 50%,
+      rgba(21, 30, 25, 0.92) 100%
+    );
+  }
+
+  .qb__inner {
+    position: relative;
+    z-index: 1;
+    max-width: 1020px;
+    text-align: center;
+  }
+
+  .qb__mark {
+    display: block;
+    margin-bottom: var(--space-4);
+    font-family: var(--font-serif);
+    font-size: 88px;
+    /* Under 1 on purpose: the glyph's ink sits in the top third of its em box,
+       so normal leading leaves a hole beneath it. */
+    line-height: 0.6;
+    color: var(--accent-gold);
+  }
+
+  .qb :global(.qb__text .prose__p) {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(1.75rem, 3.4vw, 2.875rem); /* 28 → 46 */
+    line-height: 1.26;
+    color: var(--text-on-dark);
+    text-wrap: balance;
+  }
+
+  /* The emphasised clause. The DATA says "this run is emphasised"; that it
+     reads as gold rather than bold is this band's decision, so the weight is
+     pulled back to the surrounding text's. */
+  .qb :global(.qb__text .prose__strong) {
+    font-weight: 400;
+    color: var(--dh-gold-light);
+  }
+
+  .qb__attr {
+    display: inline-block;
+    margin-top: var(--space-7);
+    font-family: var(--font-ui);
+    font-weight: 700;
+    font-size: var(--text-label);
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--dh-on-dark-3);
+  }
+
+  @media (max-width: 760px) {
+    .qb {
+      min-height: 0;
+      padding-inline: var(--container-pad);
+    }
+  }
+</style>

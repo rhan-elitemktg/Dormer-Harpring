@@ -1,0 +1,106 @@
+---
+// The About page. Eleven sections, six of which are bands this site already
+// builds elsewhere — only the two story bands, the pull quote, the team grid,
+// the reviews panel and the promises band are this page's own.
+import Layout from "../layouts/Layout.astro";
+import PageHeader from "../components/PageHeader.astro";
+import WhoWeAre from "../components/about/WhoWeAre.astro";
+import QuoteBand from "../components/about/QuoteBand.astro";
+import TeamPreview from "../components/about/TeamPreview.astro";
+import InTheirWords from "../components/about/InTheirWords.astro";
+import OneShot from "../components/about/OneShot.astro";
+import WhatToExpect from "../components/about/WhatToExpect.astro";
+import StatsBand from "../components/StatsBand.astro";
+import AwardsBar from "../components/AwardsBar.astro";
+import CoreValues from "../components/CoreValues.astro";
+import ContactDetails from "../components/contact/ContactDetails.astro";
+import { getAboutPage } from "../data/aboutPage";
+import { getAboutAttorneys } from "../data/attorneys";
+import { getFirmStats } from "../data/stats";
+import { getAwards } from "../data/awards";
+import { getHomeTestimonials, getReviewSummary } from "../data/testimonials";
+import { getCoreValues, getCoreValuesSection } from "../data/coreValues";
+import { getContactBand, getContactDetails } from "../data/contact";
+import { ROUTES } from "../lib/routePaths";
+
+const [
+  page,
+  attorneys,
+  stats,
+  awards,
+  testimonials,
+  summary,
+  valuesSection,
+  values,
+  band,
+  details,
+] = await Promise.all([
+  getAboutPage(),
+  getAboutAttorneys(),
+  getFirmStats(),
+  getAwards(),
+  getHomeTestimonials(),
+  getReviewSummary(),
+  getCoreValuesSection(),
+  getCoreValues(),
+  getContactBand(),
+  getContactDetails(),
+]);
+
+// The comp's reviews panel carries the same three Google reviews the homepage
+// rail does — see the note in InTheirWords. Filtered by `kind` rather than
+// sliced blind, so a video moving in or out of the rail cannot silently put a
+// poster-and-runtime record into a text card.
+const quotes = testimonials.filter((item) => item.kind === "quote").slice(0, 3);
+---
+
+<Layout
+  title="About Us"
+  description="Dormer Harpring is a small Denver personal injury firm by design — a deliberately small caseload, tried cases, and the results other firms turned down."
+>
+  <PageHeader
+    eyebrow={page.eyebrow}
+    title={page.title}
+    lede={page.lede}
+    tone="photo"
+    photo={page.photo}
+    photoMobile={page.photoMobile}
+    photoAlt={page.photoAlt}
+    minHeight={620}
+  >
+    <div class="ab-hero__cta">
+      <a class="btn btn--red btn--lg" href={ROUTES.contact}>{page.ctaLabel}</a>
+      <span class="ab-hero__note">{page.ctaNote}</span>
+    </div>
+  </PageHeader>
+
+  <WhoWeAre story={page.whoWeAre} />
+  <StatsBand stats={stats} />
+  <QuoteBand quote={page.quote} />
+  <TeamPreview section={page.team} attorneys={attorneys} />
+  <AwardsBar awards={awards} />
+  <InTheirWords section={page.reviews} reviews={quotes} summary={summary} />
+  <OneShot story={page.oneShot} />
+  <WhatToExpect expect={page.expect} />
+  <CoreValues section={valuesSection} values={values} />
+  <ContactDetails details={details} form={band.form} />
+</Layout>
+
+<style>
+  .ab-hero__cta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-5);
+    margin-top: var(--space-10);
+  }
+
+  .ab-hero__note {
+    font-weight: 800;
+    font-size: var(--text-label);
+    line-height: 1;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--dh-gold-light);
+  }
+</style>

@@ -1,0 +1,183 @@
+---
+// "In their words." — three written reviews on the forest gradient, with the
+// Google rating card beside the heading.
+//
+// The reviews are the homepage rail's quote records, not a second copy: the
+// About comp names the same three Google reviews. It trims two of the three
+// headlines by a clause ("…explain every step." for "…explain every step of the
+// process."), which is a length preference for a narrower card rather than
+// different content, so one field serves both. DELIBERATE — if the firm ever
+// wants them genuinely different, that is a second field in the CMS, not a
+// second array here.
+import Eyebrow from "../Eyebrow.astro";
+import ReviewRating from "../ReviewRating.astro";
+import Stars from "../Stars.astro";
+import type { QuoteTestimonial, ReviewSummary } from "../../data/testimonials";
+import type { AboutPage } from "../../data/aboutPage";
+
+interface Props {
+  section: AboutPage["reviews"];
+  reviews: QuoteTestimonial[];
+  summary: ReviewSummary;
+}
+
+const { section, reviews, summary } = Astro.props;
+---
+
+<section class="section section--forest itw">
+  <div class="container">
+    <header class="itw__head">
+      <div>
+        <Eyebrow tone="on-dark" class="itw__eyebrow">{section.eyebrow}</Eyebrow>
+        <h2 class="itw__title">{section.title}</h2>
+      </div>
+
+      <ReviewRating reviews={summary} />
+    </header>
+
+    <ul class="itw__grid">
+      {
+        reviews.map((review) => (
+          <li>
+            <figure class="itw__card">
+              <Stars class="itw__stars" />
+              <blockquote class="itw__headline">{review.headline}</blockquote>
+              <p class="itw__body">{review.body}</p>
+
+              <figcaption class="itw__attr">
+                {/* The monogram is derived, not stored: an initial is the first
+                    letter of a name, and asking an editor to type it is asking
+                    them to keep two fields in step forever. */}
+                <span class="itw__initial" aria-hidden="true">
+                  {review.name.charAt(0)}
+                </span>
+                <span>
+                  <span class="itw__name">{review.name}</span>
+                  <span class="itw__source">Google review</span>
+                </span>
+              </figcaption>
+            </figure>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .itw__head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-5);
+    margin-bottom: var(--space-11);
+  }
+
+  .itw :global(.itw__eyebrow) {
+    margin-bottom: var(--space-4);
+  }
+
+  .itw__title {
+    font-size: var(--display-2);
+  }
+
+  .itw__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-6);
+    align-items: stretch;
+  }
+
+  /* The <li> is the grid item, so the card has to fill it or three cards of
+     unequal copy length stop short of one another's bottom edge. */
+  .itw__grid > li {
+    display: flex;
+  }
+
+  .itw__card {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: var(--space-9) var(--space-9) var(--space-8);
+    background: #fdfbf5;
+    border: 1px solid var(--dh-line);
+    border-radius: var(--radius-7);
+  }
+
+  .itw :global(.itw__stars) {
+    margin-bottom: var(--space-5);
+    font-size: var(--text-xl);
+    letter-spacing: 2.5px;
+    color: var(--dh-gold-light);
+  }
+
+  /* A <blockquote> rather than an <h3>: it is the reviewer's words pulled out
+     larger, not a heading for the paragraph beneath it. The display face is
+     therefore set here rather than inherited from the base heading rule. */
+  .itw__headline {
+    margin-bottom: var(--space-4);
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--text-3xl);
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-tight);
+    text-transform: uppercase;
+    color: var(--text-strong);
+  }
+
+  .itw__body {
+    /* `flex: 1` pushes the attribution to the bottom of every card, so the
+       three rules line up across the row however long the quotes run. */
+    flex: 1;
+    margin-bottom: var(--space-7);
+    font-size: var(--text-md);
+    line-height: var(--leading-normal);
+    color: var(--text-muted);
+  }
+
+  .itw__attr {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--dh-line-soft);
+  }
+
+  .itw__initial {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-full);
+    background: var(--dh-gold-tint);
+    font-weight: 800;
+    font-size: var(--text-md);
+    line-height: 1;
+    color: var(--dh-gold-muted);
+  }
+
+  .itw__name {
+    display: block;
+    font-weight: 700;
+    font-size: var(--text-lg);
+    line-height: var(--leading-tight);
+    color: var(--text-strong);
+  }
+
+  .itw__source {
+    display: block;
+    margin-top: var(--space-1);
+    font-size: var(--text-sm);
+    line-height: 1;
+    color: var(--text-meta);
+  }
+
+  @media (max-width: 1080px) {
+    .itw__grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

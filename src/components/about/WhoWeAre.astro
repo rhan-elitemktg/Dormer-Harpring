@@ -1,0 +1,131 @@
+---
+// "We take the cases other firms turn down." — the founders' photograph beside
+// the firm's own account of itself.
+//
+// Separate from OneShot despite the shared `AboutStory` shape: this one is a
+// 1:1 split with the copy vertically centred against a full-bleed portrait, and
+// that one is a heading spanning both columns above a wider photo. Same data,
+// two layouts — a `variant` prop switching between them would be one component
+// that has to be read twice to know what it renders.
+import Eyebrow from "../Eyebrow.astro";
+import Picture from "../media/Picture.astro";
+import Prose from "../prose/Prose.astro";
+import type { AboutStory } from "../../data/aboutPage";
+
+interface Props {
+  story: AboutStory;
+}
+
+const { story } = Astro.props;
+---
+
+<section class="section who">
+  <div class="container who__grid">
+    <div class="who__frame">
+      <Picture
+        src={story.photo}
+        alt={story.photoAlt}
+        widths={[600, 900, 1300]}
+        sizes="(max-width: 980px) 100vw, 46vw"
+        class="who__photo"
+      />
+    </div>
+
+    <div class="who__copy">
+      <Eyebrow class="who__eyebrow">{story.eyebrow}</Eyebrow>
+      <h2 class="who__title">{story.title}</h2>
+      <Prose value={story.body} class="who__body" />
+
+      {
+        story.ctaHref && (
+          <a class="btn btn--outline-ink who__cta" href={story.ctaHref}>
+            <span>{story.ctaLabel}</span>
+            <span class="who__cta-icon" aria-hidden="true">
+              &rarr;
+            </span>
+          </a>
+        )
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .who {
+    background: var(--surface-page);
+  }
+
+  .who__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--space-20);
+    align-items: center;
+  }
+
+  .who__frame {
+    border-radius: var(--radius-4);
+    overflow: hidden;
+    /* The comp's placeholder ground, kept as the backdrop behind a photograph
+       that has not decoded yet rather than as a state of its own. */
+    background: #efe7d6;
+  }
+
+  /* `:global()` bounded by `.who__frame`, an element in THIS template: the
+     class is passed to <Picture> and therefore lands on Picture's markup,
+     which never carries this file's cid. */
+  .who__frame :global(.who__photo) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    /* The comp's floor. Below it the founders' heads crop into the frame edge
+       on a 1:1 split; `object-position: center top` keeps them clear. */
+    min-height: 520px;
+    object-fit: cover;
+    object-position: center top;
+  }
+
+  .who__copy {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .who :global(.who__eyebrow) {
+    margin-bottom: var(--space-5);
+  }
+
+  /* Face, case, tracking and colour come from the base h1–h4 rule in
+     global.css — only the size and the spacing below it are this band's. */
+  .who__title {
+    margin-bottom: var(--space-6);
+    font-size: var(--display-3);
+    text-wrap: balance;
+  }
+
+  .who :global(.who__body .prose__p) {
+    font-size: var(--text-xl);
+    line-height: var(--leading-normal);
+    color: var(--text-body);
+  }
+
+  .who__cta {
+    margin-top: var(--space-7);
+    gap: var(--space-3);
+  }
+
+  .who__cta-icon {
+    font-size: var(--text-md);
+  }
+
+  @media (max-width: 980px) {
+    .who__grid {
+      grid-template-columns: minmax(0, 1fr);
+      row-gap: var(--space-10);
+    }
+
+    .who__frame :global(.who__photo) {
+      min-height: 0;
+      aspect-ratio: 4 / 3;
+    }
+  }
+</style>

@@ -1,0 +1,99 @@
+---
+// "The lawyers on your case." — the section opener with its CTA pushed to the
+// right, then a four-up grid of attorney cards.
+//
+// The cards are the homepage rail's, in `layout="grid"`. Same four documents,
+// two arrangements — see the note in AttorneyCard.
+import Eyebrow from "../Eyebrow.astro";
+import AttorneyCard from "../home/attorneys/AttorneyCard.astro";
+import type { AttorneyCardData } from "../../data/attorneys";
+import type { AboutPage } from "../../data/aboutPage";
+
+interface Props {
+  section: AboutPage["team"];
+  attorneys: AttorneyCardData[];
+}
+
+const { section, attorneys } = Astro.props;
+---
+
+{
+  /* Not `.section`: the awards bar below it sits on the same cream field and
+     brings its own top padding, so this band only owes the top half. */
+}
+<section class="tp">
+  <div class="container">
+    <div class="tp__head">
+      <div>
+        <Eyebrow class="tp__eyebrow">{section.eyebrow}</Eyebrow>
+        <h2 class="tp__title">{section.title}</h2>
+      </div>
+
+      <a class="btn btn--outline-ink tp__cta" href={section.ctaHref}>
+        <span>{section.ctaLabel}</span>
+        <span class="tp__cta-icon" aria-hidden="true">&rarr;</span>
+      </a>
+    </div>
+
+    <ul class="tp__grid">
+      {
+        attorneys.map((attorney) => (
+          <li>
+            <AttorneyCard attorney={attorney} layout="grid" />
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .tp {
+    padding-top: var(--space-section);
+    padding-bottom: var(--space-section-sm);
+    background: var(--surface-page);
+  }
+
+  .tp__head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-5);
+    margin-bottom: var(--space-11);
+  }
+
+  .tp :global(.tp__eyebrow) {
+    margin-bottom: var(--space-4);
+  }
+
+  .tp__title {
+    font-size: var(--display-2);
+  }
+
+  .tp__cta {
+    gap: var(--space-3);
+  }
+
+  .tp__cta-icon {
+    font-size: var(--text-md);
+  }
+
+  .tp__grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-6);
+  }
+
+  @media (max-width: 1080px) {
+    .tp__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 640px) {
+    .tp__grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

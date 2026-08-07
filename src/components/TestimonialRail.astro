@@ -5,6 +5,7 @@
 // Not home-only: the attorney bio comp carries the same band verbatim, which
 // is why this sits at the components root rather than under home/.
 import Eyebrow from "./Eyebrow.astro";
+import ReviewRating from "./ReviewRating.astro";
 import RailVideoCard from "./testimonials/RailVideoCard.astro";
 import RailQuoteCard from "./testimonials/RailQuoteCard.astro";
 import type { Testimonial, ReviewSummary } from "../data/testimonials";
@@ -26,43 +27,7 @@ const { testimonials, reviews } = Astro.props;
         <h2 class="tmv__title">We do it for these moments.</h2>
       </div>
 
-      {
-        /* Presentational only. This must NOT become AggregateRating JSON-LD —
-           self-serving review markup on an organization is a Google policy
-           violation, and it is one of the things wrong with the current site. */
-      }
-      <div class="tmv__rating">
-        <svg class="tmv__google" width="34" height="34" viewBox="0 0 48 48" aria-hidden="true">
-          <path
-            fill="#4285F4"
-            d="M45.12 24.5c0-1.56-.14-3.06-.4-4.5H24v8.51h11.84c-.51 2.75-2.06 5.08-4.39 6.64v5.52h7.11c4.16-3.83 6.56-9.47 6.56-16.17z"
-          ></path>
-          <path
-            fill="#34A853"
-            d="M24 46c5.94 0 10.92-1.97 14.56-5.33l-7.11-5.52c-1.97 1.32-4.49 2.1-7.45 2.1-5.73 0-10.58-3.87-12.31-9.07H4.34v5.7C7.96 41.07 15.4 46 24 46z"
-          ></path>
-          <path
-            fill="#FBBC05"
-            d="M11.69 28.18c-.44-1.32-.69-2.73-.69-4.18s.25-2.86.69-4.18v-5.7H4.34C2.85 17.09 2 20.45 2 24s.85 6.91 2.34 9.88l7.35-5.7z"
-          ></path>
-          <path
-            fill="#EA4335"
-            d="M24 10.75c3.23 0 6.13 1.11 8.41 3.29l6.31-6.31C34.91 4.18 29.93 2 24 2 15.4 2 7.96 6.93 4.34 14.12l7.35 5.7c1.73-5.2 6.58-9.07 12.31-9.07z"
-          ></path>
-        </svg>
-        <div>
-          <span
-            class="tmv__stars"
-            role="img"
-            aria-label={`${reviews.rating} out of 5 stars`}>★★★★★</span
-          >
-          <span class="tmv__count">
-            <strong>{reviews.count}</strong> Client Reviews &middot; {reviews.rating} on {
-              reviews.source
-            }
-          </span>
-        </div>
-      </div>
+      <ReviewRating reviews={reviews} />
     </header>
 
     {
@@ -139,41 +104,7 @@ const { testimonials, reviews } = Astro.props;
     font-size: var(--display-1);
   }
 
-  .tmv__rating {
-    display: flex;
-    align-items: center;
-    gap: var(--space-4);
-    padding: var(--space-4) var(--space-6);
-    background: var(--dh-white);
-    border-radius: var(--radius-5);
-    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.28);
-  }
-
-  .tmv__google {
-    display: block;
-    flex-shrink: 0;
-  }
-
-  .tmv__stars {
-    display: block;
-    font-size: var(--text-xl);
-    line-height: 1;
-    letter-spacing: 2px;
-    color: #e8b84b;
-  }
-
-  .tmv__count {
-    display: block;
-    margin-top: var(--space-1);
-    font-weight: 600;
-    font-size: var(--text-sm);
-    line-height: 1.3;
-    color: #3a342b;
-  }
-
-  .tmv__count strong {
-    font-weight: 800;
-  }
+  /* The rating card's styling moved to ReviewRating.astro with the markup. */
 
   /* Negative margin plus matching padding lets the rail bleed to the viewport
      edge while its first card still lines up with the container. */
