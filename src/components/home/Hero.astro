@@ -242,7 +242,11 @@ const [desktop, teamCrop] = await Promise.all([
        three paragraphs of it. */
     .hero {
       --band: min(104vw, 520px);
-      background: var(--grad-forest);
+      /* FLAT, not the radial. The wash below has to end in exactly the colour
+         sitting behind the band's foot or the join shows as a hard edge, and
+         `--grad-forest` is a different green at every y — around `--forest-100`
+         near the top, where this band ends. */
+      background: var(--dh-forest-500);
     }
 
     .hero__media picture {
@@ -257,8 +261,11 @@ const [desktop, teamCrop] = await Promise.all([
       object-position: center top;
     }
 
-    /* Feathers the band's foot into the gradient below it, so the join reads as
-       one image rather than a seam. */
+    /* The dark green wash, bottom to top. Clear across the top third, where the
+       faces are; opaque enough by 50% to carry the copy that overlaps the lower
+       half; and fully `--dh-forest-500` by 68%, so it reaches the section
+       background before the photo's own bottom edge does and there is nothing
+       left to see a seam at. */
     .hero__media::after {
       content: "";
       position: absolute;
@@ -266,8 +273,9 @@ const [desktop, teamCrop] = await Promise.all([
       height: var(--band);
       background: linear-gradient(
         180deg,
-        rgba(25, 34, 28, 0) 58%,
-        var(--dh-forest-500) 100%
+        rgba(25, 34, 28, 0) 34%,
+        rgba(25, 34, 28, 0.55) 50%,
+        var(--dh-forest-500) 68%
       );
     }
 
@@ -286,18 +294,22 @@ const [desktop, teamCrop] = await Promise.all([
       background: linear-gradient(180deg, rgba(20, 26, 22, 0.62) 0%, rgba(20, 26, 22, 0) 20%);
     }
 
-    /* Clears the band so the eyebrow starts at its foot, inside the last of the
-       feather rather than below a visible edge.
+    /* The copy OVERLAPS the photograph, starting 62% down the band — below the
+       faces, which end at 32%, and inside the wash that carries it. A fraction
+       of the band rather than a fixed offset, because the band itself is a
+       fraction of the viewport: the relationship that has to hold is to the
+       faces, not to a pixel count.
 
        The subtraction is the TRANSPARENT HEADER's height, not a nudge: it is a
-       flex child of this section sitting above `.ph__inner`, so it has already
-       pushed the copy down by its own ~70px before this padding applies. The
-       interior headers need no equivalent, because there the header is rendered
-       by the layout and sits outside the section entirely. Worth re-checking if
-       the mobile header's 20px padding or 30px logo ever change. */
+       flex child of this section sitting above `.hero__inner`, so it has
+       already pushed the copy down by its own ~70px before this padding
+       applies. The interior headers need no equivalent, because there the
+       header is rendered by the layout and sits outside the section entirely.
+       Worth re-checking if the mobile header's 20px padding or 30px logo ever
+       change. */
     .hero__inner {
       justify-content: flex-start;
-      padding-top: calc(var(--band) - var(--space-18));
+      padding-top: calc(var(--band) * 0.62 - var(--space-18));
     }
   }
 
