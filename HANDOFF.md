@@ -10,8 +10,12 @@ _Last updated: 2026-08-07._
 
 ## State
 
-Branch `dh_internals`, level with `master` — PRs #15–#19 are all merged, nothing outstanding.
-Build is green: **35 pages**, 285 optimized images, `npm run check` passing.
+Everything is merged to `master` and nothing is in flight. Build is green: **35 pages**, 285
+optimized images, `npm run check` passing.
+
+Run `git status` for where you are. This file deliberately does **not** name the working
+branch — that line went stale three times in the session that wrote it, twice within minutes
+of being written.
 
 Live at `https://dormer-harpring.vercel.app` — `/` and `/admin` both 200.
 
@@ -34,7 +38,7 @@ been working in). All five comps exist.
 
 | Page | Sections | Notes |
 |---|---|---|
-| **Practice Areas** | 7 | Next up. Two sections already exist as components — "The people in your corner." is `AttorneysBand.astro`, "Serving injured Coloradans" is `ServiceAreaBand.astro`. `src/data/practiceAreas.ts` already has `getHomePracticeAreas()`, `getCatastrophicAreas()`, `getPracticePromise()`. Leaves ~3 new sections. |
+| **Practice Areas** | 7 | **Next up**, and the `pa_index` branch exists for it. Comp: `DH - Practice Areas.html`. Two of the seven already exist as components — "The people in your corner." is `AttorneysBand.astro`, "Serving injured Coloradans" is `ServiceAreaBand.astro`. `src/data/practiceAreas.ts` already has `getPracticeSection()`, `getHomePracticeAreas()`, `getCatastrophicAreas()`, `getPracticePromise()`. That leaves three new: the hero ("How we help injured Coloradans."), "Our core practice areas.", and "Every case we handle, by location." |
 | About | 11 | Three exist (those two plus `CoreValues.astro`). New: "We take the cases other firms turn down.", "You only get one shot at this.", "What you can expect when you hire us.", and an "In their words." testimonials variant. |
 | Blog index | 6 | Fewer sections than About but more new work — introduces a post content type. `src/data/news.ts` has an `InsightPost` shape and `getInsightPosts()` from the homepage feed; posts will still need slugs, dates, probably categories. |
 | Blog post | 3 | Depends on the type the index introduces. Reuses the proven `[slug]` + `Prose` pattern from the attorney bios. |
