@@ -1,0 +1,156 @@
+---
+// The category filter above the feed.
+//
+// NOT `role="tablist"`. The homepage's news/insights switch is a real tab set —
+// two tabs, two panels, one shown at a time. This is six buttons narrowing ONE
+// list, which is a filter toolbar: a group of toggles, each reporting its own
+// state through `aria-pressed`. Borrowing the tab roles here would promise a
+// `tabpanel` per tab that does not exist.
+//
+// The comp's buttons filter nothing on their own; the behaviour is in
+// scripts/blogFeed.ts, wired by name through `data-blog-tabs`. Without JS every
+// post is already rendered and visible, and these do nothing — which is why
+// they are buttons rather than links to `/category/<slug>` archives this build
+// does not serve.
+import type { BlogCategory } from "../../data/blog";
+
+interface Props {
+  label: string;
+  allLabel: string;
+  categories: BlogCategory[];
+}
+
+const { label, allLabel, categories } = Astro.props;
+---
+
+<section class="cats">
+  <div class="container">
+    <span class="cats__label" id="cats-label">{label}</span>
+    <div class="cats__row" role="group" aria-labelledby="cats-label" data-blog-tabs="posts">
+      {/* The unfiltered state. `all` is a sentinel, not a category slug — there
+          is no `/category/all` and no document behind it. */}
+      <button type="button" class="cats__tab" data-filter="all" aria-pressed="true">
+        {allLabel}
+      </button>
+      {
+        categories.map((category) => (
+          <button
+            type="button"
+            class="cats__tab"
+            data-filter={category.slug}
+            aria-pressed="false"
+          >
+            {category.title}
+          </button>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Clear of the dark featured panel above; the grid below then follows at a
+     deliberately smaller gap, so the label and the row read as belonging to the
+     cards they filter rather than floating between two sections. */
+  .cats {
+    padding-top: var(--space-18);
+    background: var(--surface-page);
+  }
+
+  /* The comp tracks this label at .22em against the site's .16em eyebrow. A
+     6/1000em difference on a 12px label is drift, not a decision, so it snaps
+     to the token — the same call the type scale made on the 19px/20px ledes. */
+  .cats__label {
+    display: block;
+    margin-bottom: var(--space-5);
+    font-family: var(--font-ui);
+    font-weight: 700;
+    font-size: var(--text-label);
+    line-height: 1;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    text-align: center;
+    color: var(--text-meta);
+  }
+
+  /* A SCROLLING RAIL at every width, not the comp's fixed 6-column grid.
+     The comp draws exactly six categories; the live blog has twenty-three, and
+     the CMS phase lets an editor add more. A grid answers that by shrinking
+     columns until the labels wrap to three lines, then clipping — so the row
+     scrolls instead, the same construction the homepage's practice tablist uses
+     below 980px.
+
+     `flex: 1 1 0` gives every tab an equal share of the row while they fit,
+     which is what keeps the six the comp specifies looking like its grid. A
+     flex item will not shrink below its min-content width, and `nowrap` makes
+     that the full label — so past the point where they fit, the row overflows
+     and becomes scrollable on its own, with no count threshold to maintain. */
+  .cats__row {
+    display: flex;
+    gap: var(--space-4);
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    /* Bleeds to the viewport edge so the rail can be scrolled from anywhere;
+       the negative margin cancels the page gutter, which is why it reads the
+       same token rather than restating the breakpoints. */
+    margin-inline: calc(var(--container-pad) * -1);
+    padding-inline: var(--container-pad);
+    scroll-padding-inline: var(--container-pad);
+    /* `overflow-x` makes the block axis scrollable too, which would otherwise
+       clip a focus ring drawn outside the tab. */
+    padding-block: 3px;
+  }
+
+  .cats__row::-webkit-scrollbar {
+    display: none;
+  }
+
+  .cats__tab {
+    display: flex;
+    flex: 1 1 0;
+    align-items: center;
+    justify-content: center;
+    min-height: 56px;
+    padding: var(--space-2) var(--space-5);
+    white-space: nowrap;
+    scroll-snap-align: start;
+    border: 1px solid var(--border-hairline);
+    border-radius: var(--radius-chip);
+    background: var(--dh-white);
+    font-family: var(--font-body);
+    font-weight: 800;
+    font-size: var(--text-label);
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-btn);
+    text-transform: uppercase;
+    text-align: center;
+    color: var(--dh-ink-3);
+    cursor: pointer;
+    transition: border-color var(--transition), background-color var(--transition),
+      color var(--transition);
+  }
+
+  .cats__tab:hover {
+    border-color: var(--accent-gold);
+    color: var(--dh-ink);
+  }
+
+  .cats__tab[aria-pressed="true"] {
+    border-color: var(--accent-gold);
+    background: var(--dh-gold-tint);
+    color: var(--dh-ink);
+  }
+
+  /* No column-count breakpoints any more — the rail handles every width by
+     overflowing. Below 640 the tabs stop stretching: an equal share of a 375px
+     viewport is narrower than most of the labels, so `1 1 0` would have every
+     one of them at its min-content width anyway, and `none` says that outright
+     rather than arriving at it. */
+  @media (max-width: 640px) {
+    .cats__tab {
+      flex: none;
+      min-height: 48px;
+    }
+  }
+</style>

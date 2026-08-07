@@ -1,0 +1,89 @@
+---
+// The three-column feed, its empty state, and the "Load more posts" button.
+import PostCard from "./PostCard.astro";
+import type { BlogPost } from "../../data/blog";
+
+interface Props {
+  posts: BlogPost[];
+  readMoreLabel: string;
+  loadMoreLabel: string;
+  emptyLabel: string;
+}
+
+const { posts, readMoreLabel, loadMoreLabel, emptyLabel } = Astro.props;
+---
+
+<section class="posts">
+  <div class="container">
+    {/* Every post is server-rendered; the script hides the tail. Six is two
+        full rows at three columns, so what the button reveals is another two. */}
+    <ul class="posts__grid" data-blog-grid="posts" data-initial="6" data-step="6">
+      {posts.map((post) => <PostCard post={post} readMoreLabel={readMoreLabel} />)}
+    </ul>
+
+    {/* `role="status"`, so filtering to a category with nothing in it is
+        announced rather than leaving a screen-reader user on a silent page. */}
+    <p class="posts__empty" role="status" data-blog-empty="posts" hidden>{emptyLabel}</p>
+
+    <div class="posts__foot">
+      {/* Hidden until the script confirms there is a tail behind it — the same
+          contract loadMore.ts holds for the reviews and the case results. */}
+      <button type="button" class="btn btn--soft arrow-link" data-blog-more="posts" hidden>
+        {loadMoreLabel} <span class="arrow" aria-hidden="true">&rarr;</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* 40px above, against the comp's 80: the tab row now sits directly on top of
+     this grid, and the pair has to read as one control-and-result block. The
+     72px above the tabs is what separates the whole thing from the section
+     before it. */
+  .posts {
+    padding-block: var(--space-10) var(--space-section);
+    background: var(--surface-page);
+  }
+
+  /* The global reset zeroes list `margin` only, so the marker and the UA's 40px
+     `padding-inline-start` are cleared here — the same two lines CoreValues and
+     ResultsGrid carry. */
+  .posts__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: var(--space-10);
+    row-gap: var(--space-16);
+    list-style: none;
+    padding: 0;
+  }
+
+  .posts__empty {
+    padding-block: var(--space-16);
+    font-size: var(--text-lg);
+    text-align: center;
+    color: var(--text-muted);
+  }
+
+  .posts__foot {
+    display: flex;
+    justify-content: center;
+    margin-top: var(--space-18);
+  }
+
+  @media (max-width: 1180px) {
+    .posts__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 760px) {
+    .posts__grid {
+      grid-template-columns: minmax(0, 1fr);
+      row-gap: var(--space-12);
+    }
+
+    .posts {
+      padding-block: var(--space-8) var(--space-section);
+    }
+  }
+</style>

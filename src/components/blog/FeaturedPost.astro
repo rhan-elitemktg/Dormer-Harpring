@@ -1,0 +1,235 @@
+---
+// The dark two-up panel above the grid: photograph on the left, the lead post's
+// copy on the right.
+//
+// Unlike PostCard this is NOT a stretched link — the panel carries a real
+// button, which is the comp's own construction and the right one here: at this
+// size the copy runs long enough that a card-wide click target would swallow
+// text selection.
+import Picture from "../media/Picture.astro";
+import type { FeaturedPost } from "../../data/blog";
+import { formatPostDate } from "../../lib/dates";
+
+interface Props {
+  post: FeaturedPost;
+  badge: string;
+  readMoreLabel: string;
+}
+
+const { post, badge, readMoreLabel } = Astro.props;
+---
+
+{/* Carries no `data-category` and no filter wiring: the featured post stays
+    visible whichever category is selected. It is the page's editorial lead, not
+    a member of the feed below it. */}
+<section class="feat">
+  <div class="container">
+    <article class="feat__panel">
+      <div class="feat__media">
+        <Picture
+          src={post.image}
+          alt={post.imageAlt}
+          widths={[700, 1000, 1400]}
+          sizes="(max-width: 1180px) 100vw, 50vw"
+          class="feat__photo"
+        />
+        <span class="feat__badge">{badge}</span>
+      </div>
+
+      <div class="feat__body">
+        <p class="feat__meta">
+          <span class="feat__cat">{post.category.title}</span>
+          <span class="feat__dot" aria-hidden="true"></span>
+          <time class="feat__date" datetime={post.publishedAt}>
+            {formatPostDate(post.publishedAt)}
+          </time>
+        </p>
+
+        <p class="feat__byline">
+          Written by <a class="feat__person" href={post.author.href}>{post.author.name}</a>,
+          reviewed by <a class="feat__person" href={post.reviewer.href}>{post.reviewer.name}</a>
+        </p>
+
+        <h2 class="feat__title">{post.title}</h2>
+        <p class="feat__excerpt">{post.excerpt}</p>
+
+        {
+          /* The visible label is two vague words, so the accessible name names
+             the post. It OPENS with the visible text, which is what keeps a
+             voice-control user's "click Read more" working. */
+          post.href && (
+            <a
+              class="btn btn--red btn--lg feat__cta"
+              href={post.href}
+              aria-label={`${readMoreLabel}: ${post.title}`}
+            >
+              {readMoreLabel}
+            </a>
+          )
+        }
+      </div>
+    </article>
+  </div>
+</section>
+
+<style>
+  /* 20px, not the comp's 64: this now follows the page header directly, and
+     that band's 44px bottom is documented as the gap to whatever comes next
+     rather than its own breathing room. The two sum to the 64 the comp puts
+     between the header and the first thing under it. */
+  .feat {
+    padding-top: var(--space-5);
+    background: var(--surface-page);
+  }
+
+  .feat__panel {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    /* --radius-8 rather than its --radius-pill alias: same 20px, but this is a
+       panel, not a pill — the same call ContactBand makes. */
+    border-radius: var(--radius-8);
+    overflow: hidden;
+    background: var(--surface-dark-card);
+  }
+
+  .feat__media {
+    position: relative;
+    min-height: 560px;
+  }
+
+  /* `:global()` bounded by this template's own element — the class rides on
+     Picture's <img> and carries Picture's cid, not this file's. */
+  .feat__media :global(.feat__photo) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .feat__badge {
+    position: absolute;
+    top: var(--space-6);
+    left: var(--space-6);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-btn);
+    background: var(--accent);
+    font-weight: 800;
+    font-size: var(--text-micro);
+    line-height: 1;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--dh-white);
+  }
+
+  .feat__body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: var(--space-18);
+  }
+
+  .feat__meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+    margin-bottom: var(--space-4);
+  }
+
+  .feat__cat {
+    font-weight: 800;
+    font-size: var(--text-micro);
+    line-height: 1;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--dh-gold-light);
+  }
+
+  .feat__dot {
+    width: 4px;
+    height: 4px;
+    border-radius: var(--radius-full);
+    background: var(--dh-on-dark-4);
+  }
+
+  .feat__date {
+    font-size: var(--text-sm);
+    line-height: 1;
+    color: var(--text-on-dark-muted);
+  }
+
+  .feat__byline {
+    margin-bottom: var(--space-5);
+    font-size: var(--text-sm);
+    line-height: var(--leading-snug);
+    color: var(--text-on-dark-muted);
+  }
+
+  .feat__person {
+    font-weight: 700;
+    color: var(--text-on-dark-2);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .feat__person:hover {
+    color: var(--dh-gold-light);
+  }
+
+  .feat__title {
+    margin-bottom: var(--space-5);
+    font-size: var(--display-3);
+    line-height: 1;
+    letter-spacing: var(--tracking-tight);
+    color: var(--text-on-dark);
+    text-wrap: balance;
+  }
+
+  .feat__excerpt {
+    max-width: 52ch;
+    margin-bottom: var(--space-8);
+    font-size: var(--text-lg);
+    line-height: var(--leading-prose);
+    color: var(--text-on-dark-2);
+  }
+
+  /* `flex-start` is load-bearing: the column is `justify-content: center`, so
+     without it the button stretches the full width of the copy. */
+  .feat__cta {
+    align-self: flex-start;
+    width: 220px;
+  }
+
+  /* The comp's own breakpoint for this panel. Below it the photograph becomes a
+     band across the top: at half of a 1000px viewport the picture is 500px wide
+     against 560px of copy, and the consultation table in it is unreadable. */
+  @media (max-width: 1180px) {
+    .feat__panel {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .feat__media {
+      min-height: 0;
+      /* Not `min-height`: with the panel stacked the media row has no content
+         of its own to give it height, so the aspect ratio has to supply it. */
+      aspect-ratio: 16 / 9;
+    }
+
+    .feat__body {
+      padding: var(--space-12);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .feat__body {
+      padding: var(--space-8) var(--space-6) var(--space-10);
+    }
+
+    /* The global rule takes every .btn to full width here; the 220px above
+       would otherwise win on specificity and leave this one CTA short. */
+    .feat__cta {
+      width: 100%;
+    }
+  }
+</style>

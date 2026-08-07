@@ -56,6 +56,12 @@ const MAP = {
   "assets/practice-areas/wrongful-death.jpg": "home/practice-wrongful-death.jpg",
   "assets/practice-areas/burn-injury.jpg": "home/practice-burns.jpg",
   "assets/practice-areas/dog-bite.jpg": "home/practice-dog-bite.jpg",
+  // The tenth and last of the set, added for the Blog index — its card art is
+  // this same practice-area photography, and the twelve cards name nine of
+  // these ten. Under home/ with its siblings rather than under blog/: the
+  // folder is the SUBJECT, and this is a practice-area photograph that the
+  // blog happens to be the first page to use.
+  "assets/practice-areas/personal-injury.jpg": "home/practice-personal-injury.jpg",
   "wireframes/assets/watch-firm-video.png": "home/firm-video-cover.jpg",
   "wireframes/assets/faq-video-cover.png": "home/faq-video-cover.jpg",
   "wireframes/assets/contact-attorneys.png": "home/contact-attorneys.jpg",
@@ -101,6 +107,11 @@ const MAP = {
   "assets/photos/founders-duo.png": "about/founders-duo.jpg",
   "assets/photos/firm-bg-c.jpg": "about/quote-bg.jpg",
   "assets/photos/hiw-boardroom.jpg": "about/boardroom.jpg",
+
+  // Blog. One image only — the Blog comp's featured-post photograph, which it
+  // also reuses on the last card of the grid. Every other card in that comp
+  // names a practice-area photo already extracted above.
+  "assets/photos/hiw-consult-wide.jpg": "blog/consult.jpg",
 
   // Attorneys
   "wireframes/assets/attorney-1.png": "attorneys/attorney-1.jpg",
