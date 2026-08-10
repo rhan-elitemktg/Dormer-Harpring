@@ -11,9 +11,10 @@ _Last updated: 2026-08-10._
 ## State
 
 Build is green: **39 pages**, `npm run check` passing, all four comp-diff scripts exiting 0.
-The Blog post template is built and awaiting review; run `git status` for where you are.
-This file deliberately does **not** name the working branch — that line went stale three
-times in the session that wrote it.
+The Blog post template is built and **reviewed by Rhan** — three rounds of notes on the
+related-posts cards are in. Nothing is in flight; run `git status` for where you are. This
+file deliberately does **not** name the working branch — that line went stale three times in
+the session that wrote it.
 
 Live at `https://dormer-harpring.vercel.app` — `/` and `/admin` both 200.
 
@@ -75,6 +76,27 @@ Three things that constrain what comes next:
   with two departures README.md records: a sentence the live copy leaves truncated, and its
   closing phone number.
 
+### Two traps the review turned up, both worth knowing on any new card
+
+Neither is blog-specific and both cost a round of notes here.
+
+- **A light card inside `.section--forest` must declare its own heading colour.** global.css
+  paints every heading in such a section with `.section--forest :is(h1, h2, h3, h4) { color:
+  var(--text-on-dark) }` — aimed at headings sitting ON the dark background. A heading on a
+  cream panel inside that band, with no colour of its own, inherits parchment-on-cream and
+  renders at 1.08:1. The testimonial quote card and both forms all declare one already;
+  `RelatedCard` did not, and it was invisible. It is not a specificity fight —
+  `:is(h1, h2, h3, h4)` contributes only a type selector, so any scoped class rule outranks
+  it. The rule just has to say something.
+- **`color: inherit` on a link re-interpolates on the ANCHOR's timing.** A card whose title
+  is an `<h3>` with a stretched `<a>` inside it paints the text from the anchor, and the
+  anchor picks up global.css's `a { transition: color var(--transition) }` — so the h3's own
+  duration is not what anyone sees. On `RelatedCard` that put the colour at nearly twice the
+  card's lift and the gesture arrived in pieces. Every animated property on one hover should
+  name the same duration, the anchor's included. `PostCard` has the same shape and is left
+  alone deliberately: with no transform on that card, the anchor's 0.3s already agrees with
+  its thumbnail's scale.
+
 ### Shared pieces to reach for
 
 New pages should use these rather than re-solving them. All are in use on two or more pages
@@ -134,9 +156,50 @@ Three things that look arbitrary and are not:
 
 ## Next
 
-| Page | Sections | Notes |
-|---|---|---|
-| **Car Accidents** | 29 | **Next up.** The practice-area **detail** template and by far the largest comp — 29 sections, 88 placeholders. Read the root-`[slug].astro` note above before starting. |
+**Car Accidents** — the practice-area **detail** template, and the last one. `DH - Car
+Accidents.html`, 1,783 lines: **31 content sections, 88 placeholders, 23 `sc-for` loops**,
+against the Blog post's 3 sections. It is bigger than the homepage. The live page is
+`/denver-car-accident-lawyer`, and the scrape has it.
+
+### What the Car Accidents template needs
+
+**Read the root-`[slug].astro` note above before writing a line of it** — that is the one
+decision that cannot be deferred, and it shapes where the file goes.
+
+The comp's `data-dc-script` block holds **23 arrays**. Grouped by what they cost:
+
+| Weight | Arrays |
+|---|---|
+| Large, page-specific | `lawQuestionsData` (12 Q&As, 5.1k chars — the page's spine), `crashSteps` (8), `crashTypes` (8), `injuries` (6), `resultStories` (3 long-form), `damageCols` (3 × 5 items) |
+| Medium, page-specific | `corridors` (5), `courts` (4), `faultBranches` (4), `processSteps` (4), `keyPoints` (4), `denverData` (4), `firmData` (3) |
+| **Already in `src/data/`** | `leadAttorneys` / `otherAttorneys` (→ `team.ts`), `testimonials` + `quoteReviews` + `videoTestimonials` (→ `testimonials.ts`), `infoCardsData` + `socials` + `serviceAreas` + `footerAreas` + `footerNav` (→ `contact.ts` / `site.ts` / `navigation.ts`) |
+
+So roughly **a third of the comp is bands this site already builds** — the testimonials rail,
+the awards bar, the results cards, the contact block, the footer's service areas. Budget the
+work against the other two thirds.
+
+Four things to decide before building rather than during:
+
+- **`relatedAreas` and `relatedArticles` are five strings each, with no destinations.** Both
+  are the same problem the Blog post's sidebar had: the five articles ("Colorado filing
+  deadlines", "Recorded statements", "MedPay explained", …) match no post in the 167, and the
+  five practice areas point at pages this build does not serve. Decide the treatment once —
+  `href: null` like the Practice Areas directory, or drop.
+- **The section nav.** The comp draws an in-page jump list across 31 sections.
+  `lib/headings.ts` already does exactly this for the blog post's contents box, and
+  `scroll-behavior: smooth` is already global — but these are *sections*, not prose headings,
+  so the ids come from the section components rather than from Portable Text. Extend the
+  helper rather than writing a second slugifier.
+- **The FAQ.** `lawQuestionsData` is 12 entries with a `faqLens` array of reading times
+  beside it. `faqs.ts` and the existing FAQ component already exist and already carry
+  `faqSchema` in `lib/schema.ts`. Check whether this is that type with more rows or a
+  genuinely different one before adding a second.
+- **A transcript toggle** (`transcriptOpen` / `toggleTranscript`) is the one new interaction,
+  on the video block.
+
+Copy `scripts/diff-comp-blog-post.py` for this page. With 88 placeholders it is the page
+where building from the markup alone would look finished and be wrong — which `AGENTS.md`
+records as having already cost this project one full rebuild.
 
 No comp exists for **privacy / disclaimer** or **404**. Both need a design decision or a
 plain-text treatment; `/new-seo-setup` later expects a `legalPage` type for the former.
