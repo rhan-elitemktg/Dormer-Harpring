@@ -85,13 +85,18 @@ function initBlogFeed(grid: HTMLElement) {
     });
   };
 
-  const select = (next: string) => {
+  /** Everything a filter change does EXCEPT the entrance — see `select`. */
+  const applyFilter = (next: string) => {
     filter = next;
     shown = initial;
     for (const tab of tabs?.querySelectorAll<HTMLButtonElement>("[data-filter]") ?? []) {
       tab.setAttribute("aria-pressed", String(tab.dataset.filter === next));
     }
     render();
+  };
+
+  const select = (next: string) => {
+    applyFilter(next);
     animateIn();
   };
 
@@ -115,7 +120,25 @@ function initBlogFeed(grid: HTMLElement) {
     first.focus({ preventScroll: true });
   });
 
-  render();
+  // A blog post's sidebar links its categories here as `/news?category=<slug>`
+  // — see `blogFilterUrl` in lib/routePaths.ts. Real links rather than buttons,
+  // because they cross a page boundary, so the selection has to survive the
+  // navigation.
+  //
+  // `applyFilter`, NOT `select`: the entrance animation is deliberately not run
+  // on load, for the reason PostCard.astro records — the cards' images are
+  // still fading in under `.lazy-fade` and two entrances on top of each other
+  // read as a glitch. The page should simply arrive filtered.
+  //
+  // A slug matching no tab is ignored rather than applied, so a stale or
+  // hand-edited link lands on the whole feed instead of an empty one.
+  const requested = new URLSearchParams(window.location.search).get("category");
+  const known = requested
+    ? tabs?.querySelector(`[data-filter="${CSS.escape(requested)}"]`)
+    : null;
+
+  if (requested && known) applyFilter(requested);
+  else render();
 }
 
 for (const grid of document.querySelectorAll<HTMLElement>("[data-blog-grid]")) {

@@ -1,0 +1,242 @@
+---
+// The article and its sidebar — the post page's first and largest section.
+//
+// Owns its own section wrapper and grid, the way AttorneyBio.astro does, so the
+// page file stays a list of bands.
+//
+// No PageHeader: the comp runs the site header straight into this cream
+// section, with the post's own category, title and byline standing in for one.
+// That is right for an article — a page header would put a second heading above
+// the H1.
+import Prose from "../prose/Prose.astro";
+import PostContents from "./PostContents.astro";
+import PostSidebar from "./PostSidebar.astro";
+import type {
+  BlogCategory,
+  BlogPost,
+  BlogPostArticle,
+  BlogPostPageCopy,
+} from "../../data/blog";
+import { formatPostDate } from "../../lib/dates";
+
+interface Props {
+  post: BlogPost;
+  article: BlogPostArticle;
+  page: BlogPostPageCopy;
+  categories: BlogCategory[];
+  related: BlogPost[];
+}
+
+const { post, article, page, categories, related } = Astro.props;
+---
+
+<section class="post">
+  <div class="container">
+    <div class="post__grid">
+      <article class="post__main">
+        <p class="post__cat">{post.category.title}</p>
+        <h1 class="post__title">{post.title}</h1>
+
+        {
+          /* The byline the index's cards carry, plus the date and the read
+             time the comp adds here. `formatPostDate` pins the date to UTC so
+             the build machine's timezone cannot shift it by a day; the machine-
+             readable form stays on the <time>. */
+        }
+        <p class="post__meta">
+          Written by <a class="post__person" href={post.author.href}>{post.author.name}</a>
+          <span class="post__sep" aria-hidden="true">·</span>
+          reviewed by <a class="post__person" href={post.reviewer.href}>{post.reviewer.name}</a>
+          <span class="post__sep" aria-hidden="true">·</span>
+          <time datetime={post.publishedAt}>{formatPostDate(post.publishedAt)}</time>
+          <span class="post__sep" aria-hidden="true">·</span>
+          {article.readTime}
+        </p>
+
+        <PostContents label={page.contentsLabel} body={article.body} />
+        <Prose value={article.body} />
+      </article>
+
+      {
+        /* Spans both columns, by request — it speaks for the whole page rather
+           than for the article column it would otherwise sit under. Placed
+           before the sidebar in the DOM and pinned to row 2 explicitly, so the
+           single-column order reads article → fact-check → sidebar rather than
+           burying the fact-check under the form. */
+      }
+      <div class="post__fact">
+        <p class="post__factlabel">
+          <span class="post__factmark" aria-hidden="true">&#10003;</span>
+          {page.factCheckLabel}
+        </p>
+        <Prose value={article.factCheck} class="post__factbody" />
+      </div>
+
+      <PostSidebar page={page} categories={categories} related={related} />
+    </div>
+  </div>
+</section>
+
+<style>
+  .post {
+    padding-block: var(--space-18) var(--space-section);
+    background: var(--surface-page);
+  }
+
+  .post__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-18);
+    align-items: start;
+  }
+
+  .post__main {
+    grid-column: 1 / span 2;
+    grid-row: 1;
+    min-width: 0;
+  }
+
+  /* Explicit placement rather than source order — see the note by the markup. */
+  .post__fact {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .post :global(.pside) {
+    grid-column: 3;
+    grid-row: 1;
+  }
+
+  .post__cat {
+    font-weight: 800;
+    font-size: var(--text-sm);
+    line-height: 1;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--dh-gold-deep);
+  }
+
+  /* Mixed case, and the interior page title size rather than a display one:
+     this is a sentence, often a question, and set in caps it stops reading as
+     one. `text-wrap: balance` keeps a three-line question from dropping a
+     single word onto the last line. */
+  .post__title {
+    margin-top: var(--space-4);
+    font-size: var(--display-page-sm);
+    line-height: 1.02;
+    letter-spacing: 0.005em;
+    text-transform: none;
+    text-wrap: balance;
+  }
+
+  .post__meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+    margin-top: var(--space-5);
+    font-size: var(--text-sm);
+    line-height: var(--leading-normal);
+    color: var(--text-meta);
+  }
+
+  .post__person {
+    font-weight: 700;
+    color: var(--text-muted);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .post__person:hover {
+    color: var(--accent);
+  }
+
+  .post__fact {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--space-8);
+    align-items: center;
+    /* No top margin: this is its own grid ROW, so the grid's gap already sets
+       it off. The comp's 56px is a margin because there it is the last child of
+       the article column rather than a band of its own. */
+    padding: var(--space-7) var(--space-9);
+    border: 1px solid var(--border-hairline);
+    border-radius: var(--radius-media);
+    background: var(--surface-input);
+  }
+
+  .post__factlabel {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding-right: var(--space-8);
+    border-right: 1px solid var(--dh-line-strong);
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    line-height: 1;
+    letter-spacing: var(--tracking-tight);
+    color: var(--text-strong);
+    white-space: nowrap;
+  }
+
+  .post__factmark {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 46px;
+    height: 46px;
+    border: 1.5px solid var(--accent-gold);
+    border-radius: var(--radius-full);
+    font-size: var(--text-xl);
+    color: var(--dh-gold-deep);
+  }
+
+  /* `:global()` bounded by an element in THIS template: the class is handed to
+     Prose and lands on its own wrapper, carrying Prose's cid rather than this
+     file's. A bare `.post__factbody` rule here would compile and match nothing
+     — the case `check:styles` exists to catch. */
+  .post__fact :global(.post__factbody) {
+    font-size: var(--text-md);
+  }
+
+  @media (max-width: 1180px) {
+    .post__grid {
+      gap: var(--space-12);
+    }
+  }
+
+  @media (max-width: 980px) {
+    .post {
+      padding-block: var(--space-12) var(--space-section);
+    }
+
+    /* One column, and every explicit placement released with it — a
+       `grid-row: 2` left in place here would leave an empty first row. */
+    .post__grid {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-12);
+    }
+
+    .post__main,
+    .post__fact,
+    .post :global(.pside) {
+      grid-column: auto;
+      grid-row: auto;
+    }
+
+    .post__fact {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-5);
+    }
+
+    /* The divider was a vertical rule between two columns; stacked, it becomes
+       a horizontal one under the label. */
+    .post__factlabel {
+      padding-right: 0;
+      padding-bottom: var(--space-5);
+      border-right: 0;
+      border-bottom: 1px solid var(--dh-line-strong);
+    }
+  }
+</style>

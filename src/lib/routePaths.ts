@@ -45,6 +45,18 @@ export const ROUTES = {
 export const attorneyPath = (slug: string) => `${ROUTES.attorneys}/${slug}`;
 
 /**
+ * The blog index with one category already selected.
+ *
+ * NOT `blogCategoryPath`, which is the legacy WordPress `/category/<slug>`
+ * archive — this build does not serve those and the tab row deliberately does
+ * not link to them. This lands on `/news` and `scripts/blogFeed.ts` presses the
+ * matching tab on load, so the link works as a link (right-click, new tab,
+ * shareable) while the filtering stays client-side. With JS off it is still the
+ * blog index with every post on it.
+ */
+export const blogFilterUrl = (slug: string) => `${ROUTES.blog}?category=${slug}`;
+
+/**
  * Paths owned by a page file rather than a content document. A redirect may
  * never point *from* one of these — the file would win and the redirect would
  * silently never fire.

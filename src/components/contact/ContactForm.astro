@@ -24,20 +24,59 @@ import { ROUTES } from "../../lib/routePaths";
 
 interface Props {
   form: ContactBand["form"];
+  /**
+   * `panel` is the white card beside the info column on Contact, Testimonials
+   * and the rest. `sidebar` is the blog post's narrow dark card.
+   *
+   * A prop rather than a class the caller styles: these are scoped styles, so
+   * a `.cform { … }` rule in the parent would compile and match nothing —
+   * exactly the case `check:styles` exists to catch. Same shape as AwardsBar's
+   * `tone` and AttorneyCard's `layout`.
+   *
+   * THE FIELDS DO NOT CHANGE between the two. The comp's sidebar form splits
+   * the name in two and drops the honeypot; neither was adopted, so
+   * `/api/consult` has one payload to validate rather than two, and the
+   * sidebar keeps the phone mask, the patterns and the spam trap.
+   */
+  variant?: "panel" | "sidebar";
 }
 
-const { form } = Astro.props;
+const { form, variant = "panel" } = Astro.props;
+
+// The blog post renders this component TWICE — once in the sidebar, once in
+// the contact block at the foot. A hardcoded id would appear twice on that
+// page, which is invalid and silently resolves every `aria-describedby` to the
+// first one. Keyed off the variant, since no page has ever shown two of the
+// same variant.
+const disclaimerId = `cform-disclaimer-${variant}`;
+
 ---
 
-<div class="cform">
-  <h3 class="cform__title">{form.title}</h3>
+<div class:list={["cform", `cform--${variant}`]}>
+  {
+    /* In a panel this sits under the section's own h2, so h3 is the right
+       level. In the sidebar there is no h2 above it — the card is one of three
+       top-level blocks inside a `complementary` landmark, and the other two
+       head themselves with h2. Matching them keeps that landmark navigable by
+       heading level.
+
+       Two literal tags rather than a `<Title>` variable: a dynamic tag is
+       treated as a component, so Astro passes the scope as a PROP and it
+       renders `data-astro-cid-…="true"` instead of a bare attribute. It still
+       matches, but it is noise in the output of every page on the site. */
+    variant === "sidebar" ? (
+      <h2 class="cform__title">{form.title}</h2>
+    ) : (
+      <h3 class="cform__title">{form.title}</h3>
+    )
+  }
   <p class="cform__lede">{form.lede}</p>
 
   <form
     class="cform__form"
     method="post"
     action="/api/consult"
-    aria-describedby="cform-disclaimer"
+    aria-describedby={disclaimerId}
   >
     {/* Which form, where to send them, and which page asked — all read
         server-side. `kind` is how one endpoint tells a consultation request from
@@ -137,7 +176,7 @@ const { form } = Astro.props;
       {form.submitLabel} <span class="arrow" aria-hidden="true">&rarr;</span>
     </button>
 
-    <p class="cform__disclaimer" id="cform-disclaimer">{form.disclaimer}</p>
+    <p class="cform__disclaimer" id={disclaimerId}>{form.disclaimer}</p>
   </form>
 </div>
 
@@ -272,6 +311,83 @@ const { form } = Astro.props;
     .cform__row .cform__field {
       margin-bottom: var(--space-4);
     }
+  }
+
+  /* ---- The sidebar variant --------------------------------------------
+     The blog post's dark card. Everything below is surface and spacing; the
+     markup, the fields, the validation and the endpoint are the panel's. */
+
+  .cform--sidebar {
+    padding: var(--space-8) var(--space-7);
+    border-radius: var(--radius-media);
+    /* The gold rule is on the TOP border rather than a pseudo-element so it
+       follows the radius, matching the two sidebar cards below it. */
+    border-top: 3px solid var(--accent-gold);
+    background: var(--surface-dark-card);
+  }
+
+  .cform--sidebar .cform__title {
+    margin-top: var(--space-1);
+    font-size: var(--display-6);
+    color: var(--text-on-dark);
+  }
+
+  .cform--sidebar .cform__lede {
+    margin-bottom: var(--space-5);
+    font-size: var(--text-md);
+    line-height: var(--leading-normal);
+    color: var(--text-on-dark-muted);
+  }
+
+  /* One column at EVERY width, not just below 560px: the sidebar is ~300px
+     wide on the desktop frame this variant exists for, and two fields side by
+     side there leaves each about 140px. */
+  .cform--sidebar .cform__row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  .cform--sidebar .cform__row .cform__field {
+    margin-bottom: var(--space-3);
+  }
+
+  .cform--sidebar .cform__field {
+    margin-bottom: var(--space-3);
+  }
+
+  /* The comp gives these inputs no labels at all, relying on placeholders. The
+     labels stay and are hidden from sight only — a placeholder disappears the
+     moment someone types, which leaves anyone who looks away with four filled
+     boxes and no idea which is which, and leaves a screen reader with the
+     field's name only while it is empty. */
+  .cform--sidebar .cform__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* White rather than the cream input surface: on forest, `--surface-input`
+     reads as a muddy grey. This is the comp's own treatment. */
+  .cform--sidebar .cform__input {
+    background: var(--dh-white);
+  }
+
+  .cform--sidebar .cform__submit {
+    margin-top: var(--space-1);
+  }
+
+  /* `disclaimer` carries the comp's "Free & confidential" note here rather
+     than a sentence, so it is set as the label it is. */
+  .cform--sidebar .cform__disclaimer {
+    font-weight: 800;
+    font-size: var(--text-micro);
+    line-height: 1;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--dh-gold-light);
   }
 </style>
 

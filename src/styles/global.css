@@ -309,6 +309,15 @@
   box-sizing: border-box;
 }
 
+/* In-page jumps glide rather than teleport — the blog post's contents box is
+   what asks for it. Safe to set globally: the reduced-motion block at the foot
+   of this file forces `scroll-behavior: auto` back, and it governs only
+   scrolling the page itself initiates (an anchor, `scrollIntoView`), never the
+   visitor's own wheel or trackpad. */
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
   background: var(--surface-page);
@@ -761,14 +770,44 @@ select {
   line-height: var(--leading-prose);
 }
 
+/* Both carry an id (see ProseH2.astro), so both are jump targets. The offset
+   buys air above a heading landed on from a contents link — the header is not
+   sticky, so this only has to stop the heading sitting flush to the edge. */
+.prose__h2,
+.prose__h3 {
+  scroll-margin-top: var(--space-8);
+}
+
+/* h2 and h3 are the Blog Post comp's `bp-h2` and `bp-h3`, which is
+   the ONLY comp that draws a prose body with section headings.
+   Both depart from the base heading rule above, and deliberately:
+   an article's section headings are not section titles.
+     - No uppercase. 34px of Anton set in caps reads as a banner
+       and breaks the scan down a long article; the comp sets both
+       of these in mixed case.
+     - h3 is not Anton at all — the comp gives it Hanken 700, which
+       subordinates it to the h2 by FACE rather than only by size,
+       the way `.prose__h4` already does with Geist.
+   These were previously --display-3 uppercase and --display-5
+   uppercase. Nothing rendered them: no `## ` or `### ` existed in
+   any body copy before this post, so this corrects a guess rather
+   than changing a shipped page. */
 .prose__h2 {
-  font-size: var(--display-3);
-  margin-block: var(--space-12) var(--space-5);
+  font-size: var(--display-5);
+  line-height: var(--leading-display-2);
+  letter-spacing: 0;
+  text-transform: none;
+  margin-block: var(--space-11) var(--space-4);
 }
 
 .prose__h3 {
-  font-size: var(--display-5);
-  margin-block: var(--space-10) var(--space-4);
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: var(--text-3xl);
+  line-height: var(--leading-tight);
+  letter-spacing: 0;
+  text-transform: none;
+  margin-block: var(--space-9) var(--space-3);
 }
 
 .prose__h4 {
@@ -820,6 +859,22 @@ select {
   font-style: italic;
   line-height: var(--leading-normal);
   color: var(--text-strong);
+}
+
+/* A photograph in the flow of the body. Full width of the measure
+   rather than the comp's 460px left float — see ProseImage.astro
+   for why. Styled here and not there for the reason at the top of
+   Prose.astro: renderers are child components and carry no calling
+   cid, so `.prose__img` — which is handed to Picture — could not be
+   reached by a scoped rule anywhere. */
+.prose__figure {
+  margin-block: var(--space-8);
+}
+
+.prose__figure .prose__img {
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-media);
 }
 
 /* Headings that open a prose block shouldn't push a top margin

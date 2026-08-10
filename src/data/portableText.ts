@@ -9,6 +9,7 @@
 //
 // THIS IS SCAFFOLDING. Every call to it disappears when the matching field
 // moves into the CMS; the field's TYPE is already correct, which is the point.
+import type { ImageMetadata } from "astro";
 
 export interface PortableTextSpan {
   _type: "span";
@@ -23,6 +24,25 @@ export interface PortableTextLink {
   _key: string;
   href: string;
 }
+
+/**
+ * An image placed in the flow of a body.
+ *
+ * In Sanity this is an `image` field inside the `blockContent` array, and the
+ * projection returns an asset reference where `src` holds an `ImageMetadata`
+ * today — which is exactly the swap `Picture.astro` already exists to absorb.
+ * `alt` is a field on the object rather than on the asset: the same photograph
+ * describes differently in two articles.
+ */
+export interface PortableTextImage {
+  _type: "image";
+  _key: string;
+  src: ImageMetadata; // Sanity phase: | SanityImageSource
+  alt: string;
+}
+
+/** Anything that can appear in a body field. */
+export type PortableTextNode = PortableTextBlock | PortableTextImage;
 
 export interface PortableTextBlock {
   _type: "block";
@@ -109,4 +129,30 @@ export function pt(...paragraphs: string[]): PortableTextBlock[] {
       ...(prefix?.listItem ? { listItem: prefix.listItem, level: 1 } : {}),
     };
   });
+}
+
+/**
+ * An image in the flow of a body, composed alongside `pt()` by spreading:
+ *
+ *   [...pt("…"), ptImage(hero, "Denver attorneys reviewing a case"), ...pt("…")]
+ *
+ * A sibling helper rather than another `PREFIXES` marker, because `pt()` takes
+ * strings and an image is a module import — there is nothing to put in the
+ * string that would resolve to one.
+ *
+ * `_key` is slugified from the alt text. Portable Text only requires it to be
+ * unique within its own array, and two images in one body described identically
+ * would be the same image; if that ever happens, pass `key` explicitly.
+ */
+export function ptImage(
+  src: ImageMetadata,
+  alt: string,
+  key?: string
+): PortableTextImage {
+  return {
+    _type: "image",
+    _key: key ?? `i-${alt.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")}`,
+    src,
+    alt,
+  };
 }
