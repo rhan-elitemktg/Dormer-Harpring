@@ -121,12 +121,22 @@ const { post, readMoreLabel } = Astro.props;
     color: var(--text-meta);
   }
 
+  /* THE `color` IS LOAD-BEARING — this heading is one of the few on the site
+     that must state its own. The card is a CREAM panel inside a forest
+     section, and global.css paints every heading in such a section with
+     `.section--forest :is(h1, h2, h3, h4) { color: var(--text-on-dark) }`.
+     That rule is aimed at headings sitting ON the dark background; here it
+     lands on one sitting on near-white, and left undeclared it was the only
+     rule setting a colour at all, so the title rendered parchment on cream.
+     Every other light card inside a forest band — the testimonial quote, the
+     two forms — already declares one for the same reason. */
   .rcard__title {
     margin-bottom: var(--space-3);
     font-size: var(--display-7);
     line-height: var(--leading-tight);
     letter-spacing: 0;
     text-transform: none;
+    color: var(--text-strong);
     transition: color var(--dur-fast) var(--ease);
   }
 
