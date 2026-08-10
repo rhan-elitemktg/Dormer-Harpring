@@ -6,15 +6,13 @@ Architecture, conventions and the design source of truth live in `AGENTS.md` (sy
 `CLAUDE.md`, loaded automatically). Pre-launch decisions live in `README.md`. Don't restate
 either here, and don't record anything `git log` already knows.
 
-_Last updated: 2026-08-07._
+_Last updated: 2026-08-10._
 
 ## State
 
-Build is green: **38 pages**, 327 optimized images, `npm run check` passing. About is
-merged. **The Blog index is built and has had one round of review notes from Rhan, but is
-not merged** — see `git status` for the branch, and open a PR against `master`. Those notes
-are applied (see below); it has not yet had the full desktop-and-mobile pass About went
-through, so expect another round.
+Build is green: **38 pages**, 327 optimized images, `npm run check` passing. The Blog index
+is merged and signed off. Nothing is in flight — the branch you are on is a fresh one off
+`master` for the next template.
 
 Run `git status` for where you are. This file deliberately does **not** name the working
 branch — that line went stale three times in the session that wrote it, twice within minutes
@@ -41,60 +39,36 @@ so a later session that reverts one is told rather than left to guess — the bl
 Worth copying again for the Blog post and Car Accidents pages. None are wired into
 `npm run check`, which has to stay runnable without the design folder; run them by hand.
 
-### What the Blog index turned up, and what was decided
+### What the Blog work established
 
-**The comp's feed is 5 real posts and 8 invented ones.** Its featured post and first four
-cards are the live blog's June 2026 entries verbatim — same titles, same dates, same
-reviewer as `/news` pages 1–2 in the scrape. The other eight exist nowhere in the 167 legacy
-posts, and four of them are the placeholder articles the homepage's insights tab already
-carries. This is the first comp found to be quoting the live site rather than inventing;
-check the next one the same way.
+**A comp can be quoting the live site rather than inventing.** The Blog index comp's
+featured post and first four cards are the real top of the blog — same titles, same dates,
+same reviewer as `/news` pages 1–2 in the scrape — and the Blog Post comp is a full worked
+example of the first of them. Its other eight cards exist nowhere in the 167 legacy posts.
+Nothing about the markup distinguishes the two halves. **Check the next comp the same way**:
+take a title from its `data-dc-script` block and grep the scrape for it before assuming
+anything is placeholder.
 
-Rhan chose, with the alternatives on the table:
+Three decisions from that page still constrain what comes next:
 
-- **Ship the comp's thirteen verbatim.** The five real ones link to their legacy slugs; the
-  eight invented ones get `href: null` and render without a link — the same treatment
-  Practice Areas gives its three page-less entries. The alternative considered and rejected
-  was filling the eight from the real feed, which would have made every card link at the
-  cost of eight deviations from the comp.
-- **The category tabs filter client-side.** They do not link to `/category/<slug>`; those
-  archives are live WordPress and this build does not serve them, so linking would have put
-  five more URLs on the cutover list.
+- **The eight invented posts ship with `href: null`** and render without a link, rather than
+  being replaced with real ones. So `getBlogPosts()` is a mix, and anything iterating it has
+  to handle a null href.
+- **Category tabs filter client-side.** No `/category/<slug>` archive is built, and the live
+  WordPress ones are deliberately not linked.
+- **`blogFeed.ts` owns that feed's visibility instead of `loadMore.ts`** — a filter and a
+  pager both writing `hidden` on the same cards race, and which you get depends on click
+  order. `loadMore.ts` still serves the reviews and the case results; its comment records
+  why it did not get the blog.
 
-One consequence worth knowing: `blogFeed.ts` owns the feed's visibility **instead of**
-`loadMore.ts` — a filter and a pager both writing `hidden` on the same cards race, and which
-you get depends on click order; the note in `loadMore.ts` records this.
+### Shared pieces to reach for
 
-### The review notes, and what they changed
+New pages should use these rather than re-solving them. All are in use on two or more pages
+already, so a change to one is a change to all of them — check before editing.
 
-Rhan's first round on the built page. All five are applied, and the two structural ones are
-asserted in `diff-comp-blog.py` so a later session cannot quietly restore the comp's order.
-
-- **The category row moved below the featured panel**, where the comp puts it directly under
-  the page header. As the comp has it, a 560px-tall panel separates the tabs from the twelve
-  cards they filter. Spacing was rebalanced rather than just reordered: 72px above the tabs,
-  40px below, so the label and the row read as one block with the grid.
-- **The featured post is no longer filtered.** It is the page's editorial lead, not a member
-  of the feed, and hiding it made the top of the page collapse and re-expand on every tab
-  press. A category matching no card now shows the featured post above the empty-state line.
-- **Cards fade up when a category is picked** — 6px, 240ms, 25ms stagger capped at 8. Set
-  only on a filter change, never on load, where it would collide with `.lazy-fade` on the
-  images. The global reduced-motion guard collapses animation *duration* but not *delay*, so
-  `PostCard` carries its own `prefers-reduced-motion` rule; without it a card would sit at
-  opacity 0 for the length of its delay.
-- **The tab row is a scrolling rail at every width**, replacing the comp's fixed six-column
-  grid — same construction as the homepage practice tablist below 980px, gutter bleed
-  included. The comp draws six categories; the live blog has **twenty-three**, and the CMS
-  phase lets an editor add more. `flex: 1 1 0` keeps six looking like the comp's grid, and
-  because a flex item will not shrink below its min-content width, the row starts scrolling
-  on its own once they stop fitting — no count threshold to maintain.
-- `.pcard__meta` bottom margin down to 4px.
-
-### Shared pieces the About work produced
-
-New pages should reach for these rather than re-solving them. All are in use on two or more
-pages already, so a change to one is a change to all of them — check before editing.
-
+- **`lib/dates.ts`'s `formatPostDate`** — ISO in, "June 23, 2026" out, pinned to UTC so the
+  build machine's timezone cannot shift a published date by a day. The Blog post template
+  needs the same byline the index cards carry.
 - **`ReviewRating.astro`** — the white "300+ Client Reviews · 5.0 on Google" card. Extracted
   from `TestimonialRail`, which held the only copy.
 - **`AttorneyCard`'s `layout` prop** — `"rail"` fixes the card at 272px for the homepage,
@@ -138,12 +112,50 @@ Three things that look arbitrary and are not:
 ## Next
 
 Remaining templates, ordered easiest → hardest by section count (the order this project has
-been working in). All four comps exist.
+been working in). Both comps exist.
 
 | Page | Sections | Notes |
 |---|---|---|
-| **Blog post** | 3 | **Next up.** The type is built — `BlogPost` in `src/data/blog.ts`, with the slug already in `href`. Reuses the proven `[slug]` + `Prose` pattern from the attorney bios. Only five posts have a slug to build a page from, and none has a body yet; the legacy post markup in the scrape is the source for both. Getting those five built is also what turns the index's five links from cutover liabilities into pages this site serves. |
+| **Blog post** | 3 | **Next up.** See the section below — the comp is smaller than its section count suggests, but the sidebar is most of the work. |
 | Car Accidents | 29 | The practice-area **detail** template and by far the largest comp — 29 sections, 88 placeholders. Last. |
+
+### What the Blog post template needs
+
+Three sections: the article with its sidebar, a dark three-card "Related posts" band, and
+the contact block this site already builds. `Prose` and the `[slug]` + `getStaticPaths`
+pattern from the attorney bios both carry over, so the article body is the easy half.
+
+**The comp renders one specific post, and it is a real one** — "Can you sue a trampoline
+park if you signed a waiver?", which is the Blog index's featured post and a live legacy
+article. So the comp gives the full treatment of a single post, and
+`can-you-sue-a-trampoline-park-if-you-signed-a-waiver/index.html` in the scrape gives its
+actual body. The comp's key-takeaways block is that post's own, near-verbatim.
+
+Only the **five real posts** can get a page; the other eight have no body and no slug. Build
+those five and the Blog index's five links stop being cutover liabilities and become pages
+this site serves.
+
+What the type does not have yet:
+
+- **`body`** — Portable Text. `pt()` is the authoring shim; the legacy markup is the source.
+- **`readTime`** — the comp's byline reads "· 7 min read", which the index's cards do not
+  show. `InsightPost` in `news.ts` already carries one, so match that field name.
+- **Key takeaways** — a list block above the body, on every legacy post as well as the comp.
+
+Three things worth deciding before building rather than during:
+
+- **The sidebar is the bulk of it**: an author card with a click-away popover, a categories
+  list, a consultation form card, and a related-articles card. The popover is the only new
+  interaction on the page.
+- **The two Blog comps disagree about the categories.** The index's tab row is Auto
+  Accident, Personal Injury, Product Liability, Premises Liability, Trials. The post's
+  sidebar is the same five with Product and Premises **swapped** and a sixth, **"Colorado
+  Law"**, added — which is probably the legacy `laws` category that `blog.ts` already calls
+  "Laws". Exactly the drift `AGENTS.md` warns about; pick one and record which.
+- **The sidebar's five "related articles" are all posts that do not exist** — every one of
+  them is among the eight the index leaves unlinked. The three cards in the dark band at the
+  foot are the real ones. So the sidebar list needs a real source or it needs dropping;
+  it cannot ship as five dead entries.
 
 No comp exists for **privacy / disclaimer** or **404**. Both need a design decision or a
 plain-text treatment; `/new-seo-setup` later expects a `legalPage` type for the former.
@@ -196,7 +208,7 @@ short version is that 16 `TODO(launch)` markers are open in `src/`, covering the
 attorney emails (six inferred from a pattern), the office address and hours, the `$70M+ /
 20 Years` stat claims, K.C.'s facts band — which currently duplicates Sean's copy verbatim,
 and two of its three cells are false on K.C.'s page and contradicted by his own body copy on
-it — and, new, **who is in the About page's founders photograph**. The man on the left is
+it — and **who is in the About page's founders photograph**. The man on the left is
 unmistakably K.C.; the man on the right wears glasses and is clean-shaven where Sean's
 headshot has neither, so the alt text names him by inference. The comp's own alt text there
 was "Michael Dormer and Zachary Harpring" — two people who do not exist — so it is not a
