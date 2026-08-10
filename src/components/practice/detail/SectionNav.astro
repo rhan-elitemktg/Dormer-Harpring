@@ -1,0 +1,123 @@
+---
+// The in-page jump list under the hero. Sticky, and a horizontally scrolling
+// row below its breakpoint rather than a wrap — a second line of it would push
+// the page content down on every scroll.
+//
+// The hrefs come from `CA_SECTION_IDS` in the data module, which is also what
+// each section renders as its own `id`. See the note there on why these are not
+// run through `lib/headings.ts` — they are handles, not slugified headings, so
+// there is nothing for a slugifier to do and no second one to drift from.
+//
+// `scroll-behavior: smooth` is already global; nothing here needs script.
+import type { PracticeAreaDetail } from "../../../data/carAccidents";
+import type { FirmDetails } from "../../../data/site";
+
+interface Props {
+  nav: PracticeAreaDetail["nav"];
+  firm: FirmDetails;
+  ctaHref: string;
+}
+
+const { nav, firm, ctaHref } = Astro.props;
+---
+
+<nav class="subnav" aria-label="On this page">
+  <div class="subnav__in">
+    {nav.items.map((item) => <a class="subnav__link" href={item.href}>{item.label}</a>)}
+    <a class="subnav__tel" href={`tel:${firm.phoneE164}`}>{firm.phone}</a>
+    <a class="subnav__cta" href={ctaHref}>{nav.ctaLabel}</a>
+  </div>
+</nav>
+
+<style>
+  .subnav {
+    position: sticky;
+    top: 0;
+    z-index: 60;
+    background: color-mix(in srgb, var(--surface-page) 96%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border-hairline);
+    box-shadow: 0 8px 24px rgba(25, 34, 28, 0.07);
+  }
+
+  .subnav__in {
+    display: flex;
+    align-items: center;
+    gap: var(--space-8);
+    height: 66px;
+    max-width: var(--container-max);
+    margin-inline: auto;
+    padding-inline: var(--container-pad);
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .subnav__in::-webkit-scrollbar {
+    display: none;
+  }
+
+  .subnav__link {
+    font-weight: 700;
+    font-size: var(--text-sm);
+    line-height: 1;
+    letter-spacing: var(--tracking-btn);
+    text-transform: uppercase;
+    color: var(--text-body);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .subnav__link:hover {
+    color: var(--accent);
+  }
+
+  .subnav__tel {
+    margin-left: auto;
+    font-family: var(--font-ui);
+    font-weight: 600;
+    font-size: var(--text-2xl);
+    letter-spacing: var(--tracking-tight);
+    color: var(--text-strong);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .subnav__tel:hover {
+    color: var(--accent);
+  }
+
+  .subnav__cta {
+    display: inline-flex;
+    align-items: center;
+    height: 42px;
+    padding-inline: var(--space-6);
+    border-radius: var(--radius-3);
+    background: var(--accent);
+    color: var(--dh-white);
+    font-weight: 800;
+    font-size: var(--text-micro);
+    line-height: 1;
+    letter-spacing: var(--tracking-btn);
+    text-transform: uppercase;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .subnav__cta:hover {
+    background: var(--accent-hover);
+    color: var(--dh-white);
+  }
+
+  /* The number drops out before the links do — it is repeated in the hero
+     directly above and again in the closing block. */
+  @media (max-width: 900px) {
+    .subnav__tel {
+      display: none;
+    }
+
+    .subnav__cta {
+      margin-left: auto;
+    }
+  }
+</style>

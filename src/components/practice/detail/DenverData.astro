@@ -1,0 +1,189 @@
+---
+// "Car accidents in Denver" — four city figures and the five corridors the firm
+// sees most.
+import type { DenverSection } from "../../../data/carAccidents";
+
+interface Props {
+  denver: DenverSection;
+}
+
+const { denver } = Astro.props;
+---
+
+<section class="section section--sunk denver">
+  <div class="container">
+    <h2 class="denver__title">{denver.title}</h2>
+
+    <div class="denver__split">
+      <div>
+        <dl class="data">
+          {
+            denver.stats.map((stat) => (
+              <div class="data__cell">
+                <dd class="data__big">{stat.big}</dd>
+                <dt class="data__label">{stat.label}</dt>
+              </div>
+            ))
+          }
+        </dl>
+
+        {denver.body.map((paragraph) => <p class="denver__body">{paragraph}</p>)}
+      </div>
+
+      <div class="corr">
+        <p class="corr__label">{denver.corridorsLabel}</p>
+        {
+          denver.corridors.map((corridor) => (
+            <div class="corr__i">
+              <b>{corridor.name}</b>
+              <p>{corridor.body}</p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+
+    <p class="denver__source">{denver.source}</p>
+  </div>
+</section>
+
+<style>
+  .denver__title {
+    margin: 0 0 var(--space-10);
+    font-size: var(--display-3);
+  }
+
+  .denver__split {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: var(--space-11);
+    align-items: start;
+  }
+
+  .data {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin: 0 0 var(--space-8);
+    background: var(--surface-dark-card);
+    border-radius: var(--radius-4);
+    overflow: hidden;
+  }
+
+  .data__cell {
+    padding: var(--space-8) var(--space-7);
+    border-left: 1px solid var(--dh-line-dark);
+  }
+
+  .data__cell:nth-child(odd) {
+    border-left: 0;
+  }
+
+  .data__cell:nth-child(n + 3) {
+    border-top: 1px solid var(--dh-line-dark);
+  }
+
+  .data__big {
+    margin: 0;
+    font-family: var(--font-ui);
+    font-weight: 600;
+    font-size: var(--display-4);
+    line-height: 1;
+    letter-spacing: var(--tracking-tight);
+    color: var(--text-on-dark);
+  }
+
+  .data__label {
+    margin-top: var(--space-3);
+    font-family: var(--font-ui);
+    font-weight: 700;
+    font-size: var(--text-micro);
+    line-height: var(--leading-snug);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--dh-gold-label);
+  }
+
+  .denver__body {
+    margin: 0 0 var(--space-5);
+    font-size: var(--text-lg);
+    line-height: var(--leading-prose);
+    color: var(--text-body);
+    text-wrap: pretty;
+  }
+
+  .denver__body:last-child {
+    margin-bottom: 0;
+  }
+
+  .corr {
+    padding: var(--space-7) var(--space-8);
+    background: var(--dh-white);
+    border: 1px solid var(--border-hairline);
+    border-radius: var(--radius-4);
+  }
+
+  .corr__label {
+    margin: 0 0 var(--space-5);
+    font-weight: 800;
+    font-size: var(--text-micro);
+    line-height: 1;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--dh-gold-muted);
+  }
+
+  .corr__i {
+    padding-block: var(--space-5);
+    border-top: 1px solid var(--dh-line-soft);
+  }
+
+  .corr__i:first-of-type {
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  .corr__i b {
+    display: block;
+    margin-bottom: var(--space-2);
+    font-family: var(--font-ui);
+    font-weight: 700;
+    font-size: var(--text-lg);
+    line-height: var(--leading-tight);
+    color: var(--text-strong);
+  }
+
+  .corr__i p {
+    margin: 0;
+    font-size: var(--text-md);
+    line-height: var(--leading-snug);
+    color: var(--text-muted);
+  }
+
+  .denver__source {
+    margin: var(--space-9) 0 0;
+    font-size: var(--text-sm);
+    line-height: var(--leading-normal);
+    color: var(--text-meta);
+  }
+
+  @media (max-width: 980px) {
+    .denver__split {
+      grid-template-columns: 1fr;
+      gap: var(--space-9);
+    }
+  }
+
+  @media (max-width: 700px) {
+    .data {
+      grid-template-columns: 1fr;
+    }
+
+    .data__cell {
+      border-left: 0;
+    }
+
+    .data__cell + .data__cell {
+      border-top: 1px solid var(--dh-line-dark);
+    }
+  }
+</style>

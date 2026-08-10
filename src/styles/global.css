@@ -151,6 +151,11 @@
   --display-5: clamp(1.375rem, 1.084rem + 1.244vw, 2.125rem);    /* 22 → 34 */
   --display-6: clamp(1.25rem, 1.129rem + 0.518vw, 1.5625rem);    /* 20 → 25  promise slide h3 */
   --display-7: clamp(1.125rem, 1.076rem + 0.207vw, 1.25rem);     /* 18 → 20  core-value h3 */
+  /* Larger than --display-hero's 96 would suggest it should be allowed to get,
+     and deliberately so: this is the practice-area detail page's one-word
+     answer card ("$0", "No"), which is a FIGURE rather than a heading and is
+     read against the paragraph beside it, not against the page's h1. */
+  --display-answer: clamp(3.5rem, 2.362rem + 4.855vw, 5.375rem);  /* 56 → 86 */
 
   /* Interior page titles. The homepage h1 is --display-hero; the interior comps
      carry their own, and the census across all thirteen gives three tiers —

@@ -1,0 +1,209 @@
+---
+// The two icon-tile grids: "Types of car accidents we handle" (eight, linked)
+// and "Injuries we see" (six, not linked).
+//
+// One component because the tiles are the same object with and without a
+// destination — which is also why the linked ones degrade to a <div> rather
+// than to an <a href="#">. Six of the eight crash types have a live legacy URL;
+// the two that don't render as plain tiles, the same convention the Practice
+// Areas directory uses for Legal Malpractice.
+import PracticeIcon from "../../icons/PracticeIcon.astro";
+import type { TileSection } from "../../../data/carAccidents";
+
+interface Props {
+  section: TileSection;
+  /** `4` for the crash types, `3` for the injuries. */
+  columns: 3 | 4;
+  surface: "cream" | "alt" | "sunk";
+}
+
+const { section, columns, surface } = Astro.props;
+---
+
+<section
+  class:list={["section", `section--${surface}`, "tiles"]}
+  id={section.id}
+>
+  <div class="container">
+    <header class="tiles__head">
+      <h2 class="tiles__title">{section.title}</h2>
+      <p class="tiles__lede">{section.lede}</p>
+    </header>
+
+    <ul class="tiles__grid" data-cols={columns}>
+      {
+        section.tiles.map((tile) => {
+          const inner = (
+            <>
+              <span class="tile__hd">
+                <span class="tile__ico">
+                  <PracticeIcon name={tile.iconKey} size={22} />
+                </span>
+                <h3 class="tile__name">{tile.name}</h3>
+              </span>
+              <p class="tile__body">{tile.body}</p>
+              {/* The label stays on the two tiles with no page — it is the
+                  comp's content — but the ARROW does not. `.arrow` travels on
+                  hover and belongs only on something that actually navigates;
+                  on a tile that goes nowhere it promises a destination twice
+                  over. Same reason the carousel's prev/next are excluded. */}
+              {tile.linkLabel && (
+                <span class:list={["tile__link", !tile.href && "tile__link--inert"]}>
+                  {tile.linkLabel}
+                  {tile.href && (
+                    <span class="arrow" aria-hidden="true">
+                      {" "}
+                      &rarr;
+                    </span>
+                  )}
+                </span>
+              )}
+            </>
+          );
+
+          return (
+            <li>
+              {tile.href ? (
+                <a class="tile tile--link" href={tile.href}>
+                  {inner}
+                </a>
+              ) : (
+                <div class="tile">{inner}</div>
+              )}
+            </li>
+          );
+        })
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .tiles__head {
+    max-width: 760px;
+    margin: 0 0 var(--space-11);
+  }
+
+  .tiles__title {
+    margin: 0 0 var(--space-4);
+    font-size: var(--display-3);
+  }
+
+  .tiles__lede {
+    margin: 0;
+    max-width: 52ch;
+    font-size: var(--text-xl);
+    line-height: var(--leading-normal);
+    color: var(--text-muted);
+    text-wrap: pretty;
+  }
+
+  .tiles__grid {
+    display: grid;
+    gap: var(--space-6);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .tiles__grid[data-cols="4"] {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .tiles__grid[data-cols="3"] {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .tiles__grid > li {
+    display: flex;
+  }
+
+  .tile {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: var(--space-8) var(--space-7) var(--space-7);
+    background: var(--dh-white);
+    border-radius: var(--radius-4);
+    text-decoration: none;
+    box-shadow: 0 14px 38px rgba(45, 34, 22, 0.06);
+  }
+
+  .tile--link {
+    transition: transform var(--transition), box-shadow var(--transition);
+  }
+
+  .tile--link:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 24px 50px -22px rgba(45, 34, 22, 0.35);
+  }
+
+  .tile__hd {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    margin-bottom: var(--space-4);
+  }
+
+  .tile__ico {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-full);
+    background: var(--dh-gold-tint);
+    border: 1px solid var(--dh-line-gold);
+    color: var(--dh-gold-deep);
+  }
+
+  .tile__name {
+    margin: 0;
+    font-size: var(--display-7);
+    line-height: 1.15;
+  }
+
+  .tile__body {
+    margin: 0 0 var(--space-5);
+    flex: 1;
+    font-size: var(--text-md);
+    line-height: var(--leading-normal);
+    color: var(--text-muted);
+    text-wrap: pretty;
+  }
+
+  /* No bottom margin where the tile has no link under it, or the injuries grid
+     grows a phantom row of whitespace. */
+  .tile:not(.tile--link) .tile__body {
+    margin-bottom: 0;
+  }
+
+  .tile__link {
+    font-weight: 800;
+    font-size: var(--text-micro);
+    line-height: 1;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  /* Red is the site's link colour, so an inert label must not wear it. */
+  .tile__link--inert {
+    color: var(--text-meta);
+  }
+
+  @media (max-width: 1180px) {
+    .tiles__grid[data-cols="4"],
+    .tiles__grid[data-cols="3"] {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 700px) {
+    .tiles__grid[data-cols="4"],
+    .tiles__grid[data-cols="3"] {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

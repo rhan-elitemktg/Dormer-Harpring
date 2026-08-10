@@ -1,0 +1,512 @@
+---
+// The practice-area detail hero: a full-bleed photograph with a white panel
+// floated over its right-hand third, carrying the breadcrumb, h1, lede, a
+// three-figure proof row, the CTA pair and the "Reviewed by" disclosure.
+//
+// MOBILE IS OURS, like every other hero on this site — no comp specifies one.
+// It follows the construction `Hero.astro` and `PageHeader.astro`'s
+// `tone="photo"` already share, for the reason recorded there: `cover` on a
+// full-height portrait box takes its crop out of the SIDES. Below 1180px the
+// photograph becomes a band across the top sized off the viewport WIDTH and the
+// panel goes static beneath it, which is exactly what the comp's own
+// `@media (max-width:1180px)` block does — the one place a comp specifies any
+// narrow-viewport behaviour at all.
+import Picture from "../../media/Picture.astro";
+import Stars from "../../Stars.astro";
+import GoogleIcon from "../../icons/GoogleIcon.astro";
+import type { DetailHero } from "../../../data/carAccidents";
+import type { FirmDetails } from "../../../data/site";
+
+interface Props {
+  hero: DetailHero;
+  firm: FirmDetails;
+  ctaHref: string;
+}
+
+const { hero, firm, ctaHref } = Astro.props;
+---
+
+<section class="dhero">
+  <div class="dhero__bg">
+    <Picture
+      src={hero.photo}
+      alt={hero.photoAlt}
+      widths={[800, 1200, 1600, 2000]}
+      sizes="100vw"
+      eager
+      class="dhero__img"
+    />
+  </div>
+
+  <div class="dhero__panel">
+    <nav class="dhero__crumb" aria-label="Breadcrumb">
+      <ol class="dhero__trail">
+        {
+          hero.trail.map((crumb) => (
+            <li>
+              {crumb.href ? <a href={crumb.href}>{crumb.label}</a> : crumb.label}
+            </li>
+          ))
+        }
+      </ol>
+    </nav>
+
+    <h1 class="dhero__title">{hero.title}</h1>
+    <p class="dhero__lede">{hero.lede}</p>
+
+    <ul class="dhero__proof">
+      {
+        hero.proof.map((item) => {
+          const figure = item.google ? (
+            <b class="dhero__fig dhero__fig--g">
+              <GoogleIcon size={24} />
+              {item.big}
+              <Stars class="dhero__stars" />
+            </b>
+          ) : (
+            <b class="dhero__fig">{item.big}</b>
+          );
+
+          return (
+            <li>
+              {item.href ? (
+                <a href={item.href} target="_blank" rel="noopener">
+                  {figure}
+                  <span class="dhero__proof-label">{item.label}</span>
+                </a>
+              ) : (
+                <>
+                  {figure}
+                  <span class="dhero__proof-label">{item.label}</span>
+                </>
+              )}
+            </li>
+          );
+        })
+      }
+    </ul>
+
+    <div class="dhero__cta">
+      <a class="btn btn--red dhero__btn" href={ctaHref}>{hero.ctaLabel}</a>
+      <a class="dhero__tel" href={`tel:${firm.phoneE164}`}>
+        <span>{hero.telLabel}</span>
+        <b>{firm.phone}</b>
+      </a>
+    </div>
+
+    {/* E-E-A-T: who reviewed this page and when. Closed by default — it is
+        reassurance for the visitor who looks for it, not the first thing
+        someone in pain has to read past. */}
+    <details class="cred">
+      <summary class="cred__summary">
+        <Picture
+          src={hero.reviewer.photo}
+          alt={hero.reviewer.name}
+          widths={[80, 160]}
+          sizes="76px"
+          class="cred__photo"
+        />
+        <p class="cred__by">
+          Reviewed by <b>{hero.reviewer.name}</b>, {hero.reviewer.role} &middot;{" "}
+          {hero.reviewer.updated}
+        </p>
+        <svg
+          class="cred__chev"
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.2"
+          stroke-linecap="round"
+          aria-hidden="true"
+        >
+          <path d="M6 9l6 6 6-6"></path>
+        </svg>
+      </summary>
+
+      <div class="cred__body">
+        <ul class="cred__list">
+          {hero.reviewer.credentials.map((line) => <li>{line}</li>)}
+        </ul>
+        <a class="cred__link arrow-link" href={hero.reviewer.bioHref}>
+          {hero.reviewer.bioLabel}
+          <span class="arrow" aria-hidden="true">&rarr;</span>
+        </a>
+      </div>
+    </details>
+  </div>
+</section>
+
+<style>
+  .dhero {
+    position: relative;
+    min-height: 660px;
+    overflow: hidden;
+    background: var(--surface-dark-card);
+    /* The panel grows when the credentials open. Animating min-height keeps the
+       section from snapping a third of a viewport taller under the reader. */
+    transition: min-height var(--dur) var(--ease);
+  }
+
+  .dhero:has(.cred[open]) {
+    min-height: 838px;
+  }
+
+  .dhero__bg {
+    position: absolute;
+    inset: 0;
+  }
+
+  .dhero__bg :global(.dhero__img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* 45%, not centre: the frame's horizon and the wreckage sit low, and a
+       centred crop fills the panel's left edge with sky. */
+    object-position: center 45%;
+    display: block;
+  }
+
+  .dhero__panel {
+    position: absolute;
+    z-index: 2;
+    inset: var(--space-10) var(--space-10) var(--space-10) auto;
+    width: 40%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: var(--space-11);
+    background: var(--dh-white);
+    border-radius: var(--radius-4);
+    box-shadow: 0 24px 60px rgba(8, 14, 10, 0.35);
+  }
+
+  .dhero__crumb {
+    margin-bottom: var(--space-5);
+  }
+
+  .dhero__trail {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-weight: 600;
+    font-size: var(--text-sm);
+    line-height: 1;
+    letter-spacing: 0.06em;
+    color: var(--text-meta);
+  }
+
+  .dhero__trail li + li::before {
+    content: "\203A";
+    margin-right: var(--space-2);
+  }
+
+  .dhero__trail a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .dhero__trail a:hover {
+    color: var(--accent);
+  }
+
+  .dhero__title {
+    margin: 0 0 var(--space-7);
+    font-size: var(--display-3);
+    text-wrap: balance;
+  }
+
+  .dhero__lede {
+    margin: 0 0 var(--space-9);
+    font-size: var(--text-xl);
+    line-height: var(--leading-normal);
+    color: var(--text-body);
+    text-wrap: pretty;
+  }
+
+  .dhero__proof {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    margin: 0 0 var(--space-10);
+    padding-block: var(--space-7);
+    list-style: none;
+    border-block: 1px solid var(--border-hairline);
+  }
+
+  .dhero__proof li {
+    padding-inline: var(--space-6);
+  }
+
+  .dhero__proof li:first-child {
+    padding-left: 0;
+  }
+
+  .dhero__proof li + li {
+    border-left: 1px solid var(--border-hairline);
+  }
+
+  .dhero__proof a {
+    display: block;
+    margin: calc(var(--space-3) * -1) calc(var(--space-3) * -1);
+    padding: var(--space-3);
+    border-radius: var(--radius-3);
+    text-decoration: none;
+    transition: background var(--transition);
+  }
+
+  .dhero__proof a:hover {
+    background: var(--surface-page);
+  }
+
+  .dhero__fig {
+    display: block;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--display-5);
+    line-height: 1;
+    color: var(--dh-forest-100);
+    white-space: nowrap;
+  }
+
+  .dhero__fig--g {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .dhero__proof a:hover .dhero__fig {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .dhero__proof :global(.dhero__stars) {
+    font-size: var(--text-sm);
+  }
+
+  .dhero__proof-label {
+    display: block;
+    margin-top: var(--space-2);
+    font-weight: 700;
+    font-size: var(--text-micro);
+    line-height: 1.3;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-meta);
+  }
+
+  .dhero__cta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-5);
+    flex-wrap: wrap;
+  }
+
+  .dhero__btn {
+    width: 300px;
+  }
+
+  .dhero__tel {
+    display: inline-flex;
+    flex-direction: column;
+    flex: 0 0 auto;
+    width: max-content;
+    font-size: var(--text-sm);
+    line-height: var(--leading-snug);
+    color: var(--text-meta);
+    text-decoration: none;
+  }
+
+  .dhero__tel b {
+    display: block;
+    font-family: var(--font-ui);
+    font-weight: 700;
+    font-size: var(--text-lg);
+    letter-spacing: var(--tracking-tight);
+    color: var(--text-strong);
+  }
+
+  /* ---- The reviewed-by disclosure ---- */
+
+  .cred {
+    margin-top: var(--space-9);
+    padding-top: var(--space-7);
+    border-top: 1px solid var(--border-hairline);
+  }
+
+  .cred__summary {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin: calc(var(--space-2) * -1) calc(var(--space-3) * -1);
+    padding: var(--space-2) var(--space-3);
+    list-style: none;
+    cursor: pointer;
+    border-radius: var(--radius-3);
+    transition: background var(--transition);
+  }
+
+  .cred__summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .cred__summary:hover {
+    background: var(--surface-page);
+  }
+
+  .cred :global(.cred__photo) {
+    width: 60px;
+    height: 60px;
+    flex: none;
+    border-radius: var(--radius-full);
+    object-fit: cover;
+    object-position: center 18%;
+    transition: width var(--dur) var(--ease), height var(--dur) var(--ease);
+  }
+
+  .cred[open] :global(.cred__photo) {
+    width: 76px;
+    height: 76px;
+  }
+
+  .cred__by {
+    margin: 0;
+    flex: 1;
+    font-size: var(--text-sm);
+    line-height: var(--leading-snug);
+    color: var(--text-meta);
+  }
+
+  .cred__by b {
+    color: var(--text-strong);
+    font-weight: 700;
+  }
+
+  .cred__chev {
+    flex: none;
+    color: var(--text-meta);
+    transition: transform var(--dur) var(--ease);
+  }
+
+  .cred[open] .cred__chev {
+    transform: rotate(180deg);
+  }
+
+  .cred__body {
+    margin-top: var(--space-5);
+    /* Aligned to the copy beside the portrait, not to the portrait. */
+    padding-left: 73px;
+  }
+
+  .cred__list {
+    display: grid;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .cred__list li {
+    position: relative;
+    padding-left: var(--space-4);
+    font-size: var(--text-sm);
+    line-height: var(--leading-snug);
+    color: var(--text-body);
+  }
+
+  .cred__list li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 8px;
+    width: 4px;
+    height: 4px;
+    border-radius: var(--radius-full);
+    background: var(--accent-gold);
+  }
+
+  .cred__link {
+    margin-top: var(--space-4);
+    font-weight: 800;
+    font-size: var(--text-micro);
+    line-height: 1;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  /* ---- Below the comp's own 1180px break ---- */
+
+  @media (max-width: 1180px) {
+    .dhero,
+    .dhero:has(.cred[open]) {
+      min-height: 0;
+    }
+
+    .dhero__bg {
+      position: relative;
+      /* Sized off WIDTH, not content — see the header comment. */
+      height: min(56vw, 420px);
+    }
+
+    .dhero__panel {
+      position: static;
+      width: auto;
+      padding: var(--space-10) var(--container-pad) var(--space-12);
+      border-radius: 0;
+      box-shadow: none;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .dhero__proof li {
+      padding-inline: var(--space-4);
+    }
+
+    .dhero__cta {
+      flex-direction: column;
+      align-items: stretch;
+      gap: var(--space-3);
+    }
+
+    /* The number comes FIRST and takes the solid fill on a phone: someone
+       reading this page on a kerb is likelier to call than to fill in a form.
+       The comp's own narrow-viewport block makes the same swap. */
+    .dhero__tel {
+      order: 1;
+      width: auto;
+      align-items: center;
+      justify-content: center;
+      height: 60px;
+      gap: 3px;
+      border-radius: var(--radius-3);
+      background: var(--accent);
+      color: rgba(255, 255, 255, 0.82);
+      font-size: var(--text-micro);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .dhero__tel b {
+      font-size: var(--text-2xl);
+      color: var(--dh-white);
+      text-transform: none;
+    }
+
+    .dhero__btn {
+      order: 2;
+      width: auto;
+      background: transparent;
+      border: 1.5px solid var(--accent);
+      color: var(--accent);
+    }
+
+    .cred__body {
+      padding-left: 0;
+    }
+  }
+</style>

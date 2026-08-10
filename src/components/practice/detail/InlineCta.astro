@@ -1,0 +1,58 @@
+---
+// The comp's `.ca-inline` — a dark bar closing a section with one line of copy
+// and one gold link. Four sections use it.
+import type { InlineCta } from "../../../data/carAccidents";
+
+interface Props {
+  cta: InlineCta;
+  class?: string;
+}
+
+const { cta, class: className } = Astro.props;
+---
+
+<div class:list={["inline-cta", className]}>
+  <p class="inline-cta__text">{cta.text}</p>
+  <a class="inline-cta__link arrow-link" href={cta.href}>
+    {cta.label}
+    <span class="arrow" aria-hidden="true">&rarr;</span>
+  </a>
+</div>
+
+<style>
+  .inline-cta {
+    margin-top: var(--space-7);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-5);
+    flex-wrap: wrap;
+    padding: var(--space-7) var(--space-8);
+    background: var(--surface-dark-card);
+    border-radius: var(--radius-4);
+  }
+
+  .inline-cta__text {
+    margin: 0;
+    font-family: var(--font-ui);
+    font-weight: 700;
+    font-size: var(--text-xl);
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-tight);
+    color: var(--text-on-dark);
+  }
+
+  .inline-cta__link {
+    font-weight: 800;
+    font-size: var(--text-sm);
+    line-height: 1;
+    letter-spacing: var(--tracking-btn);
+    text-transform: uppercase;
+    color: var(--dh-gold-bright);
+    white-space: nowrap;
+  }
+
+  .inline-cta__link:hover {
+    color: var(--dh-gold);
+  }
+</style>

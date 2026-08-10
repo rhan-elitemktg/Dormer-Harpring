@@ -1,0 +1,214 @@
+---
+// "What to do after a car accident in Denver" — eight steps alternating either
+// side of a vertical spine.
+//
+// The spine is decoration and the steps are an ordered list, so the markup is
+// an <ol> and the alternation is CSS. `data-side` carries which column an item
+// takes; it is content order that decides, and the comp's own array says which.
+import CrashStepIcon from "../../icons/CrashStepIcon.astro";
+import type { ChecklistSection } from "../../../data/carAccidents";
+
+interface Props {
+  checklist: ChecklistSection;
+}
+
+const { checklist } = Astro.props;
+---
+
+<section class="section section--cream checklist">
+  <div class="container">
+    <header class="checklist__head">
+      <h2 class="checklist__title">{checklist.title}</h2>
+      <p class="checklist__lede">{checklist.lede}</p>
+    </header>
+
+    <ol class="tl">
+      <span class="tl__spine" aria-hidden="true"></span>
+      {
+        checklist.steps.map((step, i) => (
+          <li class="tl__item" data-side={i % 2 === 0 ? "l" : "r"}>
+            <span class="tl__pill">
+              {checklist.stepLabel} {step.n}
+            </span>
+            <CrashStepIcon name={step.iconKey} class="tl__ico" />
+            <h3 class="tl__title">{step.title}</h3>
+            <p class="tl__body">{step.body}</p>
+          </li>
+        ))
+      }
+    </ol>
+
+    <p class="checklist__cta">
+      <a class="btn btn--red btn--lg" href={checklist.ctaHref}>{checklist.ctaLabel}</a>
+    </p>
+  </div>
+</section>
+
+<style>
+  .checklist__head {
+    text-align: center;
+    margin: 0 auto var(--space-14);
+  }
+
+  .checklist__title {
+    margin: 0 0 var(--space-4);
+    font-size: var(--display-3);
+    text-wrap: balance;
+  }
+
+  .checklist__lede {
+    margin: 0;
+    font-size: var(--text-xl);
+    line-height: var(--leading-normal);
+    color: var(--text-body);
+  }
+
+  .tl {
+    position: relative;
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 0 92px;
+    list-style: none;
+    display: grid;
+    grid-template-columns: 1fr 76px 1fr;
+    grid-auto-rows: 260px;
+  }
+
+  .tl__spine {
+    position: absolute;
+    left: calc(50% - 1px);
+    top: 49px;
+    bottom: -20px;
+    width: 2px;
+    background: var(--dh-line-strong);
+  }
+
+  .tl__item {
+    grid-column: 1;
+    align-self: start;
+    position: relative;
+    padding: var(--space-7) var(--space-8) var(--space-7);
+    background: var(--dh-white);
+    border: 1px solid var(--dh-line-soft);
+    border-radius: var(--radius-4);
+  }
+
+  /* The right column starts half a row down, so the two columns interleave
+     rather than sitting in pairs — which is what makes the spine read as one
+     sequence instead of two lists. */
+  .tl__item[data-side="r"] {
+    grid-column: 3;
+    transform: translateY(130px);
+  }
+
+  /* The node on the spine, and the card's little pointer at it. */
+  .tl__item::after {
+    content: "";
+    position: absolute;
+    top: 44px;
+    right: -43.5px;
+    width: 11px;
+    height: 11px;
+    border-radius: var(--radius-full);
+    background: var(--dh-forest-100);
+    box-shadow: 0 0 0 4px var(--surface-page), 0 0 0 5px var(--dh-line-strong);
+  }
+
+  .tl__item[data-side="r"]::after {
+    right: auto;
+    left: -43.5px;
+  }
+
+  .tl__item::before {
+    content: "";
+    position: absolute;
+    top: 42px;
+    right: -8px;
+    width: 15px;
+    height: 15px;
+    background: var(--dh-white);
+    border: 1px solid var(--dh-line-soft);
+    border-left: 0;
+    border-bottom: 0;
+    transform: rotate(45deg);
+  }
+
+  .tl__item[data-side="r"]::before {
+    right: auto;
+    left: -8px;
+    border: 1px solid var(--dh-line-soft);
+    border-right: 0;
+    border-top: 0;
+  }
+
+  .tl__pill {
+    display: inline-flex;
+    align-items: center;
+    height: 26px;
+    margin-bottom: var(--space-4);
+    padding-inline: 11px;
+    border-radius: var(--radius-1);
+    background: var(--accent);
+    color: var(--dh-white);
+    font-weight: 800;
+    font-size: var(--text-sm);
+    line-height: 1;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .tl :global(.tl__ico) {
+    display: block;
+    margin-bottom: var(--space-4);
+    color: var(--accent-gold);
+  }
+
+  .tl__title {
+    margin: 0 0 var(--space-2);
+    font-family: var(--font-ui);
+    font-weight: 700;
+    font-size: var(--text-2xl);
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-tight);
+    color: var(--text-strong);
+  }
+
+  .tl__body {
+    margin: 0;
+    font-size: var(--text-md);
+    line-height: var(--leading-normal);
+    color: var(--text-muted);
+    text-wrap: pretty;
+  }
+
+  .checklist__cta {
+    margin: var(--space-5) 0 0;
+    text-align: center;
+  }
+
+  /* One column below 860px: the interleave needs both halves visible at once
+     to read as a sequence, and at this width it reads as two lists. */
+  @media (max-width: 860px) {
+    .tl {
+      grid-template-columns: 1fr;
+      grid-auto-rows: auto;
+      gap: var(--space-5);
+      padding-bottom: 0;
+    }
+
+    .tl__spine {
+      display: none;
+    }
+
+    .tl__item,
+    .tl__item[data-side="r"] {
+      grid-column: 1;
+      transform: none;
+    }
+
+    .tl__item::after,
+    .tl__item::before {
+      display: none;
+    }
+  }
+</style>

@@ -1,0 +1,49 @@
+---
+// The comp's `.ca-tr-src` — the statute citations under a section.
+//
+// The comp links all eight of these to `law.justia.com/codes/colorado/`, the
+// index rather than the section, so the citation is the content and the URL is
+// a placeholder used eight times. Rendered as TEXT here rather than as eight
+// links that all land in the same wrong place: a citation that reads as a link
+// and doesn't take you to the statute is worse than one that doesn't pretend.
+// See the `StatuteSource` note in `data/carAccidents.ts`.
+import type { SourceNote } from "../../../data/carAccidents";
+
+interface Props {
+  source: SourceNote;
+  tone?: "light" | "dark";
+  class?: string;
+}
+
+const { source, tone = "light", class: className } = Astro.props;
+---
+
+<p class:list={["src", tone === "dark" && "src--dark", className]}>
+  {source.label}{" "}
+  {
+    source.items.map((item, i) => (
+      <>
+        {i > 0 && ", "}
+        <cite class="src__cite">{item.label}</cite>
+        {item.note && ` (${item.note})`}
+      </>
+    ))
+  }.
+</p>
+
+<style>
+  .src {
+    margin: var(--space-4) 0 0;
+    font-size: var(--text-sm);
+    line-height: var(--leading-prose);
+    color: var(--dh-ink-5);
+  }
+
+  .src--dark {
+    color: var(--text-on-dark-muted);
+  }
+
+  .src__cite {
+    font-style: normal;
+  }
+</style>

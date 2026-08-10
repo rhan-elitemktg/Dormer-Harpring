@@ -1,0 +1,112 @@
+---
+// "The adjuster is not on your side" — four things the firm sees carriers do,
+// on the page's second forest band.
+import Eyebrow from "../../Eyebrow.astro";
+import PhoneAsk from "./PhoneAsk.astro";
+import type { TacticsSection } from "../../../data/carAccidents";
+import type { FirmDetails } from "../../../data/site";
+
+interface Props {
+  tactics: TacticsSection;
+  firm: FirmDetails;
+}
+
+const { tactics, firm } = Astro.props;
+---
+
+<section class="section section--forest tactics">
+  <div class="container">
+    <header class="tactics__head">
+      <Eyebrow tone="on-dark" class="tactics__eyebrow">{tactics.eyebrow}</Eyebrow>
+      <h2 class="tactics__title">{tactics.title}</h2>
+      <p class="tactics__lede">{tactics.lede}</p>
+    </header>
+
+    <ul class="tac">
+      {
+        tactics.cards.map((card) => (
+          <li class="tac__c">
+            <h3 class="tac__title">{card.title}</h3>
+            {card.body.map((paragraph) => (
+              <p class="tac__body">{paragraph}</p>
+            ))}
+          </li>
+        ))
+      }
+    </ul>
+
+    <PhoneAsk text={tactics.foot.text} firm={firm} tone="quote" />
+  </div>
+</section>
+
+<style>
+  /* The gradient's origin mirrors the results band's, so the two dark sections
+     on this page do not read as the same photograph twice. */
+  .tactics {
+    --forest-origin: 82%;
+  }
+
+  .tactics__head {
+    max-width: 900px;
+    margin: 0 0 var(--space-11);
+  }
+
+  .tactics :global(.tactics__eyebrow) {
+    margin-bottom: var(--space-4);
+  }
+
+  .tactics__title {
+    margin: 0 0 var(--space-4);
+    font-size: var(--display-3);
+  }
+
+  .tactics__lede {
+    margin: 0;
+    font-size: var(--text-xl);
+    line-height: var(--leading-normal);
+    color: var(--text-on-dark-2);
+    text-wrap: pretty;
+  }
+
+  .tac {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-6);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .tac__c {
+    padding: var(--space-8);
+    background: rgba(244, 239, 231, 0.05);
+    border: 1px solid var(--dh-line-gold);
+    border-radius: var(--radius-4);
+  }
+
+  .tac__title {
+    margin: 0 0 var(--space-3);
+    font-size: var(--display-6);
+    line-height: 1.12;
+  }
+
+  .tac__body {
+    margin: 0;
+    font-size: var(--text-md);
+    line-height: var(--leading-prose);
+    color: var(--text-on-dark-2);
+    text-wrap: pretty;
+  }
+
+  @media (max-width: 1180px) {
+    .tac {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 700px) {
+    .tac {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

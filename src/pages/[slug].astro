@@ -1,5 +1,5 @@
 ---
-// One page per blog post.
+// TWO PAGE SHAPES, ONE ROUTE FILE: blog posts and practice-area detail pages.
 //
 // THIS FILE IS AT THE SITE ROOT, and that is not a shortcut. `blogPath()` is
 // `/${slug}` — the legacy WordPress site is flat at the root and ~300 live URLs
@@ -7,22 +7,25 @@
 // static routes priority over dynamic ones, so `/about`, `/news` and the rest
 // still win, and only the paths `getStaticPaths` returns are ever built.
 //
-// READ THIS BEFORE BUILDING THE PRACTICE-AREA DETAIL TEMPLATE. `practiceAreaPath()`
-// is ALSO `/${slug}`, and Astro allows exactly one `[slug].astro` per directory
-// — so the Car Accidents page cannot add a second one here. It has to union its
-// paths into the `getStaticPaths` below and branch on which collection the
-// record came from, the same way `meet-our-attorneys/[slug].astro` branches on
-// `member.kind`. Adding `src/pages/practice/[slug].astro` instead would change
-// the URL, which is the one thing the flat shape exists to prevent.
+// `practiceAreaPath()` is ALSO `/${slug}`, and Astro allows exactly one
+// `[slug].astro` per directory — so the two collections have to share this one.
+// `getStaticPaths` unions them and every record carries a `kind`, which the
+// template branches on, the same way `meet-our-attorneys/[slug].astro` branches
+// on `member.kind`. Adding `src/pages/practice/[slug].astro` instead would
+// change the URL, which is the one thing the flat shape exists to prevent.
 //
-// ONE ARTICLE IS BUILT. See `getBlogPostArticles()` in data/blog.ts for why the
-// other four real posts wait for the Sanity import rather than being
-// transcribed by hand.
+// A slug collision between the two collections would silently build one page
+// and drop the other, so it is checked below and throws instead.
+//
+// ONE ARTICLE and ONE PRACTICE AREA are built. See `getBlogPostArticles()` in
+// data/blog.ts and `getPracticeAreaDetails()` in data/carAccidents.ts for why
+// the rest wait for the Sanity import rather than being transcribed by hand.
 import type { GetStaticPaths } from "astro";
 import Layout from "../layouts/Layout.astro";
 import PostArticle from "../components/blog/PostArticle.astro";
 import RelatedPosts from "../components/blog/RelatedPosts.astro";
 import ContactDetails from "../components/contact/ContactDetails.astro";
+import DetailPage from "../components/practice/detail/DetailPage.astro";
 import {
   getBlogCategories,
   getBlogPostArticles,
@@ -31,13 +34,25 @@ import {
   getFeaturedPost,
   getRelatedPosts,
 } from "../data/blog";
+import { CA_SECTION_IDS, getPracticeAreaDetails } from "../data/carAccidents";
 import { getContactBand, getContactDetails } from "../data/contact";
+import { getCarAccidentFaqSection, getCarAccidentFaqs } from "../data/faqs";
+import { getAwards } from "../data/awards";
+import { getFirmStats } from "../data/stats";
+import { getFirmDetails } from "../data/site";
+import { getTeam } from "../data/team";
+import {
+  getHomeTestimonials,
+  getReviewSummary,
+  getVideoReviews,
+} from "../data/testimonials";
 
 export const getStaticPaths = (async () => {
-  const [articles, featured, posts] = await Promise.all([
+  const [articles, featured, posts, details] = await Promise.all([
     getBlogPostArticles(),
     getFeaturedPost(),
     getBlogPosts(),
+    getPracticeAreaDetails(),
   ]);
   const feed = [featured, ...posts];
 
@@ -45,7 +60,7 @@ export const getStaticPaths = (async () => {
   // `meet-our-attorneys/[slug].astro` holds. A post with no body has no page,
   // and its card on the index keeps pointing at the legacy URL it already
   // points at, rather than at a route that was never built.
-  return Promise.all(
+  const postPaths = await Promise.all(
     articles.map(async (article) => {
       const post = feed.find((entry) => entry._key === article._key);
       if (!post) {
@@ -55,6 +70,7 @@ export const getStaticPaths = (async () => {
       return {
         params: { slug: article.slug },
         props: {
+          kind: "post" as const,
           article,
           post,
           // Resolved here rather than in the component so the page stays one
@@ -65,33 +81,167 @@ export const getStaticPaths = (async () => {
       };
     })
   );
+
+  const detailPaths = details.map((detail) => ({
+    params: { slug: detail.slug },
+    props: { kind: "practice-area" as const, detail },
+  }));
+
+  const seen = new Set<string>();
+  for (const entry of [...postPaths, ...detailPaths]) {
+    if (seen.has(entry.params.slug)) {
+      throw new Error(
+        `/${entry.params.slug} is claimed by both a blog post and a practice ` +
+          `area. Astro would build one and silently drop the other.`
+      );
+    }
+    seen.add(entry.params.slug);
+  }
+
+  return [...postPaths, ...detailPaths];
 }) satisfies GetStaticPaths;
 
-const { article, post, sidebarRelated, bandRelated } = Astro.props;
+const props = Astro.props;
 
-const [page, categories, band, details] = await Promise.all([
-  getBlogPostPage(),
-  getBlogCategories(),
-  getContactBand(),
-  getContactDetails(),
-]);
+// Each branch awaits only what its own shape renders. Both are resolved in one
+// `Promise.all` for the same reason every other page here is: one await of
+// everything the page shows, and no component fetching behind the page's back.
+const blog =
+  props.kind === "post"
+    ? await (async () => {
+        const [page, categories, band, details] = await Promise.all([
+          getBlogPostPage(),
+          getBlogCategories(),
+          getContactBand(),
+          getContactDetails(),
+        ]);
+        return { page, categories, band, details };
+      })()
+    : null;
+
+const area =
+  props.kind === "practice-area"
+    ? await (async () => {
+        const [
+          firm,
+          team,
+          videoReviews,
+          awards,
+          stats,
+          testimonials,
+          reviewSummary,
+          faqs,
+          faqSection,
+          contact,
+          band,
+        ] = await Promise.all([
+          getFirmDetails(),
+          getTeam(),
+          getVideoReviews(),
+          getAwards(),
+          getFirmStats(),
+          getHomeTestimonials(),
+          getReviewSummary(),
+          getCarAccidentFaqs(),
+          getCarAccidentFaqSection(`#${CA_SECTION_IDS.contact}`),
+          getContactDetails(),
+          getContactBand(),
+        ]);
+
+        // The lawyers band names seven people by key. Resolved in the DATA's
+        // order rather than the roster's — the comp leads with the two founding
+        // partners, and `getTeam()` is ordered for the team index.
+        const byKey = new Map(team.map((member) => [member._key, member]));
+        const keys = [
+          ...props.detail.lawyers.leadKeys,
+          ...props.detail.lawyers.otherKeys,
+        ];
+        const lawyers = keys.map((key) => {
+          const member = byKey.get(key);
+          if (!member) {
+            throw new Error(
+              `${props.detail.slug}: no team member with _key "${key}". ` +
+                `Fix the key in data/carAccidents.ts or add them to data/team.ts.`
+            );
+          }
+          return member;
+        });
+
+        // The three result stories each key into a real client video.
+        const reviews = Object.fromEntries(
+          props.detail.results.stories.map((story) => {
+            const review = videoReviews.find((r) => r._key === story.reviewKey);
+            if (!review) {
+              throw new Error(
+                `${props.detail.slug}: result "${story._key}" names review ` +
+                  `"${story.reviewKey}", which is not in getVideoReviews().`
+              );
+            }
+            return [story.reviewKey, review];
+          })
+        );
+
+        return {
+          firm,
+          lawyers,
+          reviews,
+          awards,
+          stats,
+          testimonials,
+          reviewSummary,
+          faqs,
+          faqSection,
+          contact,
+          contactForm: band.form,
+        };
+      })()
+    : null;
+
+const title = props.kind === "post" ? props.post.title : props.detail.metaTitle;
+const description =
+  props.kind === "post" ? props.post.excerpt : props.detail.metaDescription;
 ---
 
-<Layout title={post.title} description={post.excerpt}>
-  <PostArticle
-    post={post}
-    article={article}
-    page={page}
-    categories={categories}
-    related={sidebarRelated}
-  />
+<Layout title={title} description={description}>
+  {
+    props.kind === "post" && blog && (
+      <>
+        <PostArticle
+          post={props.post}
+          article={props.article}
+          page={blog.page}
+          categories={blog.categories}
+          related={props.sidebarRelated}
+        />
 
-  <RelatedPosts
-    title={page.relatedTitle}
-    posts={bandRelated}
-    readMoreLabel={page.readMoreLabel}
-  />
+        <RelatedPosts
+          title={blog.page.relatedTitle}
+          posts={props.bandRelated}
+          readMoreLabel={blog.page.readMoreLabel}
+        />
 
-  {/* The same contact block /news and every interior page already close on. */}
-  <ContactDetails details={details} form={band.form} />
+        {/* The same contact block /news and every interior page already close on. */}
+        <ContactDetails details={blog.details} form={blog.band.form} />
+      </>
+    )
+  }
+
+  {
+    props.kind === "practice-area" && area && (
+      <DetailPage
+        detail={props.detail}
+        firm={area.firm}
+        lawyers={area.lawyers}
+        reviews={area.reviews}
+        awards={area.awards}
+        stats={area.stats}
+        testimonials={area.testimonials}
+        reviewSummary={area.reviewSummary}
+        faqs={area.faqs}
+        faqSection={area.faqSection}
+        contact={area.contact}
+        contactForm={area.contactForm}
+      />
+    )
+  }
 </Layout>

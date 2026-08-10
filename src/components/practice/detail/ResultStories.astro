@@ -1,0 +1,369 @@
+---
+// "What we were offered, and what we recovered." — three long-form case
+// stories, one per screen, on the shared rail.
+//
+// Each story pairs its figures with a REAL client video: the story carries a
+// `reviewKey` into `getVideoReviews()`, which already holds that client's
+// portrait, pull quote and verified YouTube id. The comp inlines a poster path
+// and a quote per story instead, and pairs Joel's quote with Ben's photograph —
+// see the note on `ResultStory.reviewKey`. Keying into the collection fixes
+// that and makes these the only video panels on the page that actually play.
+import Picture from "../../media/Picture.astro";
+import PlayButton from "../../media/PlayButton.astro";
+import Eyebrow from "../../Eyebrow.astro";
+import { videoWatchUrl } from "../../../lib/video";
+import type { VideoReview } from "../../../data/testimonials";
+import type { ResultsSection } from "../../../data/carAccidents";
+
+interface Props {
+  results: ResultsSection;
+  /** Resolved by the page from `results.stories[].reviewKey`. */
+  reviews: Record<string, VideoReview>;
+  id: string;
+}
+
+const { results, reviews, id } = Astro.props;
+---
+
+<section class="section section--forest stories" id={id}>
+  <div class="container">
+    <header class="stories__head">
+      <Eyebrow tone="on-dark" class="stories__eyebrow">{results.eyebrow}</Eyebrow>
+      <h2 class="stories__title">{results.title}</h2>
+    </header>
+
+    <div
+      class="stories__rail noscroll"
+      data-rail="ca-results"
+      tabindex="0"
+      role="group"
+      aria-label="Car accident case results, scrollable"
+    >
+      <div class="stories__track">
+        {
+          results.stories.map((story) => {
+            const review = reviews[story.reviewKey];
+            return (
+              <article class="res">
+                <div class="res__main">
+                  <div class="res__fig">
+                    <p class="res__figrow">
+                      <span class="res__lbl">{results.offeredLabel}</span>
+                      <span class="res__off">{story.offered}</span>
+                    </p>
+                    <p class="res__figrow res__figrow--rec">
+                      <span class="res__lbl">{results.recoveredLabel}</span>
+                      <span class="res__rec">{story.recovered}</span>
+                    </p>
+                  </div>
+
+                  <h3 class="res__title">{story.title}</h3>
+                  <p class="res__story">{story.story}</p>
+
+                  <div class="res__changed">
+                    <p class="res__lbl">{story.changedLabel}</p>
+                    <p class="res__story">{story.changed}</p>
+                  </div>
+                </div>
+
+                <div class="res__aside">
+                  {review && (
+                    <>
+                      <a
+                        class="res__vid"
+                        href={videoWatchUrl(review.video)}
+                        target="_blank"
+                        rel="noopener"
+                      >
+                        <Picture
+                          src={review.poster}
+                          alt={`${review.name} — client testimonial video`}
+                          widths={[400, 800]}
+                          sizes="(max-width: 1080px) 100vw, 360px"
+                          class="res__vid-img"
+                        />
+                        <PlayButton tone="accent" size={56} class="res__play" />
+                      </a>
+                      <blockquote class="res__quote">
+                        <p>{review.quote}</p>
+                        <cite class="res__who">{review.name}</cite>
+                      </blockquote>
+                    </>
+                  )}
+                </div>
+              </article>
+            );
+          })
+        }
+      </div>
+    </div>
+
+    <div class="stories__foot">
+      <p class="stories__disc">{results.disclaimer}</p>
+      <div class="stories__nav">
+        <button
+          type="button"
+          class="stories__arrow"
+          data-rail-prev="ca-results"
+          aria-label="Previous result"
+        >
+          <span aria-hidden="true">&larr;</span>
+        </button>
+        <button
+          type="button"
+          class="stories__arrow"
+          data-rail-next="ca-results"
+          aria-label="Next result"
+        >
+          <span aria-hidden="true">&rarr;</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .stories {
+    --forest-origin: 15%;
+  }
+
+  .stories__head {
+    margin-bottom: var(--space-14);
+  }
+
+  .stories :global(.stories__eyebrow) {
+    margin-bottom: var(--space-4);
+  }
+
+  .stories__title {
+    margin: 0;
+    font-size: var(--display-3);
+    text-wrap: balance;
+  }
+
+  .stories__rail {
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    padding-bottom: 4px;
+  }
+
+  .stories__track {
+    display: flex;
+    gap: var(--space-7);
+  }
+
+  .res {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: var(--space-11);
+    align-items: start;
+    flex: 0 0 100%;
+    min-width: 0;
+    scroll-snap-align: start;
+    padding: var(--space-10) var(--space-11) var(--space-9);
+    background: var(--dh-white);
+    border-radius: var(--radius-4);
+    box-shadow: 0 14px 38px rgba(10, 16, 12, 0.22);
+  }
+
+  /* A light card inside a forest section HAS TO declare its own heading colour:
+     `.section--forest :is(h1,h2,h3,h4)` in global.css paints every heading
+     parchment for the ones sitting on the dark background, and a heading that
+     inherits it here renders parchment-on-white. Only a type selector, so any
+     class rule outranks it — the rule just has to exist. */
+  .res__title {
+    margin: 0 0 var(--space-4);
+    font-size: var(--display-6);
+    line-height: 1.12;
+    color: var(--text-strong);
+  }
+
+  .res__fig {
+    margin-bottom: var(--space-8);
+    padding: var(--space-6);
+    background: var(--dh-cream-50);
+    border: 1px solid var(--dh-line-soft);
+    border-radius: var(--radius-4);
+  }
+
+  .res__figrow {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-5);
+    margin: 0;
+    padding-bottom: var(--space-4);
+  }
+
+  .res__figrow--rec {
+    padding: var(--space-4) 0 0;
+    border-top: 1px solid var(--dh-line-soft);
+  }
+
+  .res__lbl {
+    font-weight: 800;
+    font-size: var(--text-micro);
+    line-height: 1;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--dh-ink-5);
+  }
+
+  .res__figrow--rec .res__lbl {
+    color: var(--dh-red-verdict);
+  }
+
+  .res__off {
+    font-weight: 600;
+    font-size: var(--text-3xl);
+    line-height: 1;
+    color: var(--dh-ink-5);
+    text-decoration: line-through;
+    text-decoration-thickness: 1.5px;
+  }
+
+  .res__rec {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--display-4);
+    line-height: 0.95;
+    color: var(--dh-red-verdict);
+    text-wrap: balance;
+  }
+
+  .res__story {
+    margin: 0;
+    font-size: var(--text-md);
+    line-height: var(--leading-normal);
+    color: var(--text-body);
+    text-wrap: pretty;
+  }
+
+  .res__changed {
+    margin-top: var(--space-5);
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--dh-line-soft);
+  }
+
+  .res__changed .res__lbl {
+    display: block;
+    margin: 0 0 var(--space-3);
+  }
+
+  .res__vid {
+    position: relative;
+    display: block;
+    aspect-ratio: 16 / 11;
+    overflow: hidden;
+    border-radius: var(--radius-4);
+    background: var(--dh-forest-100);
+  }
+
+  .res__vid :global(.res__vid-img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 20%;
+    display: block;
+  }
+
+  .res__vid :global(.res__play) {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .res__quote {
+    margin: var(--space-5) 0 0;
+  }
+
+  .res__quote p {
+    margin: 0;
+    font-weight: 600;
+    font-size: var(--text-lg);
+    line-height: var(--leading-snug);
+    color: var(--text-strong);
+  }
+
+  .res__who {
+    display: block;
+    margin-top: var(--space-2);
+    font-style: normal;
+    font-weight: 800;
+    font-size: var(--text-micro);
+    line-height: 1;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--dh-ink-5);
+  }
+
+  .stories__foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-7);
+    margin-top: var(--space-7);
+  }
+
+  .stories__disc {
+    margin: 0;
+    max-width: 62ch;
+    font-size: var(--text-sm);
+    line-height: var(--leading-normal);
+    color: var(--text-on-dark-muted);
+  }
+
+  .stories__nav {
+    display: flex;
+    gap: var(--space-3);
+    flex: none;
+  }
+
+  .stories__arrow {
+    width: 52px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-3);
+    border: 1px solid var(--dh-line-on-photo);
+    background: transparent;
+    color: var(--text-on-dark);
+    font-size: var(--text-2xl);
+    line-height: 1;
+    cursor: pointer;
+    transition: background var(--transition), border-color var(--transition),
+      color var(--transition);
+  }
+
+  .stories__arrow:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--dh-white);
+  }
+
+  @media (max-width: 1080px) {
+    .res {
+      grid-template-columns: 1fr;
+      gap: var(--space-8);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .res {
+      padding: var(--space-8) var(--space-6);
+    }
+
+    .stories__foot {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--space-5);
+    }
+  }
+</style>
+
+<script>
+  import "../../../scripts/rail";
+</script>

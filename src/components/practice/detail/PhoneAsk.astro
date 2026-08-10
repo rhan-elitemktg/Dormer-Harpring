@@ -1,0 +1,103 @@
+---
+// A line of copy beside the firm's number. The comp draws it three ways —
+// `.ca-secfoot` under a light section, `.ca-tacfoot` under the dark adjuster
+// band, `.ca-nonum__ask` inside the dark "no number" panel — and they differ
+// only in the rule colour, the copy's face and the numeral's size.
+//
+// The number itself is never typed here: it comes from `firmDetails`, which is
+// the single source for it site-wide.
+import type { FirmDetails } from "../../../data/site";
+
+interface Props {
+  text: string;
+  firm: FirmDetails;
+  /**
+   * `light`  hairline rule on cream — the default
+   * `dark`   gold-tinted rule inside a forest panel
+   * `quote`  the same, with the copy set as a Newsreader pull quote and a
+   *          larger numeral. The adjuster band only.
+   */
+  tone?: "light" | "dark" | "quote";
+  class?: string;
+}
+
+const { text, firm, tone = "light", class: className } = Astro.props;
+---
+
+<div class:list={["ask", `ask--${tone}`, className]}>
+  <p class="ask__text">{text}</p>
+  <a class="ask__tel" href={`tel:${firm.phoneE164}`}>{firm.phone}</a>
+</div>
+
+<style>
+  .ask {
+    display: flex;
+    align-items: center;
+    gap: var(--space-5);
+    flex-wrap: wrap;
+    margin-top: var(--space-8);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--border-hairline);
+  }
+
+  .ask--dark,
+  .ask--quote {
+    border-top-color: var(--dh-line-gold);
+  }
+
+  .ask--quote {
+    justify-content: space-between;
+    gap: var(--space-9);
+    margin-top: var(--space-10);
+    padding-top: var(--space-8);
+  }
+
+  .ask__text {
+    margin: 0;
+    font-size: var(--text-md);
+    line-height: var(--leading-snug);
+    color: var(--text-body);
+  }
+
+  .ask--dark .ask__text {
+    color: var(--text-on-dark-muted);
+  }
+
+  .ask--quote .ask__text {
+    max-width: 56ch;
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: var(--text-3xl);
+    line-height: var(--leading-tight);
+    color: var(--text-on-dark);
+  }
+
+  .ask__tel {
+    font-family: var(--font-ui);
+    font-weight: 600;
+    font-size: var(--text-3xl);
+    line-height: 1;
+    letter-spacing: var(--tracking-tight);
+    color: var(--accent);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .ask__tel:hover {
+    color: var(--accent-gold);
+  }
+
+  .ask--dark .ask__tel,
+  .ask--quote .ask__tel {
+    color: var(--dh-gold-bright);
+  }
+
+  .ask--dark .ask__tel:hover,
+  .ask--quote .ask__tel:hover {
+    color: var(--text-on-dark);
+  }
+
+  .ask--quote .ask__tel {
+    font-size: var(--display-5);
+  }
+</style>

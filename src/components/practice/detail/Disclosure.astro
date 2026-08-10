@@ -1,0 +1,70 @@
+---
+// The comp's `.ca-more` — a bordered <details> holding the long-form half of a
+// section. Four sections use it, and the point of all four is the same: the
+// page answers in one line for the person who is in pain and reading on a
+// phone, and keeps the detail one tap away for the person who wants it.
+//
+// A real <details>, so the content is in the DOM and findable by ctrl-F whether
+// or not it is open — which also means the FAQ schema, the comp diff and a
+// search crawler all see it.
+
+interface Props {
+  label: string;
+  open?: boolean;
+  class?: string;
+}
+
+const { label, open = false, class: className } = Astro.props;
+---
+
+<details class:list={["more", className]} open={open}>
+  <summary class="more__summary">{label}</summary>
+  <div class="more__body"><slot /></div>
+</details>
+
+<style>
+  .more {
+    background: var(--dh-white);
+    border: 1px solid var(--border-hairline);
+    border-radius: var(--radius-4);
+  }
+
+  .more__summary {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-6) var(--space-7);
+    list-style: none;
+    cursor: pointer;
+    font-weight: 800;
+    font-size: var(--text-sm);
+    line-height: 1;
+    letter-spacing: var(--tracking-btn);
+    text-transform: uppercase;
+    color: var(--text-body);
+    transition: color var(--transition);
+  }
+
+  .more__summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .more__summary::after {
+    content: "+";
+    margin-left: auto;
+    font-size: var(--text-2xl);
+    color: var(--accent);
+  }
+
+  .more[open] .more__summary::after {
+    content: "\2212";
+  }
+
+  .more__summary:hover {
+    color: var(--accent);
+  }
+
+  .more__body {
+    padding: 0 var(--space-7) var(--space-7);
+  }
+</style>

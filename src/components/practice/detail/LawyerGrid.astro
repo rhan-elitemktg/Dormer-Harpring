@@ -1,0 +1,198 @@
+---
+// "Meet our car accident lawyers" — seven portraits in a row, the two founding
+// partners first.
+//
+// Takes the roster from `team.ts` rather than carrying its own copy of seven
+// names and seven photographs. The page resolves the keys and passes members
+// down, so a portrait replaced in `team.ts` changes here too.
+//
+// NOT `AttorneyCard`: that card carries a role, a bio link and an award strip
+// and is built for a three-up band. This is a seven-up contact sheet — photo
+// and name only, which is exactly what the comp draws.
+import Picture from "../../media/Picture.astro";
+import { initialsOf, type TeamMember } from "../../../data/team";
+import type { LawyersSection } from "../../../data/carAccidents";
+
+interface Props {
+  section: LawyersSection;
+  members: TeamMember[];
+  id: string;
+}
+
+const { section, members, id } = Astro.props;
+---
+
+<section class="section lawyers" id={id}>
+  <div class="container">
+    <header class="lawyers__head">
+      <h2 class="lawyers__title">{section.title}</h2>
+      <p class="lawyers__lede">{section.lede}</p>
+    </header>
+
+    <ul class="lawyers__grid">
+      {
+        members.map((member) => {
+          const inner = (
+            <>
+              <span class="lawyers__ph">
+                {member.photo ? (
+                  <Picture
+                    src={member.photo}
+                    alt={member.name}
+                    widths={[200, 400]}
+                    sizes="(max-width: 700px) 45vw, 180px"
+                    class="lawyers__img"
+                  />
+                ) : (
+                  <span class="lawyers__mono" aria-hidden="true">
+                    {initialsOf(member.name)}
+                  </span>
+                )}
+              </span>
+              <b class="lawyers__name">{member.name}</b>
+            </>
+          );
+
+          return (
+            <li>
+              {member.href ? (
+                <a class="lawyers__c" href={member.href}>
+                  {inner}
+                </a>
+              ) : (
+                <div class="lawyers__c">{inner}</div>
+              )}
+            </li>
+          );
+        })
+      }
+    </ul>
+
+    <p class="lawyers__more">
+      <a class="lawyers__more-link arrow-link" href={section.moreHref}>
+        {section.moreLabel}
+        <span class="arrow" aria-hidden="true">&rarr;</span>
+      </a>
+    </p>
+  </div>
+</section>
+
+<style>
+  .lawyers {
+    background: var(--dh-white);
+  }
+
+  .lawyers__head {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-14);
+    align-items: start;
+    margin-bottom: var(--space-14);
+  }
+
+  .lawyers__title {
+    margin: 0;
+    font-size: var(--display-3);
+    text-wrap: balance;
+  }
+
+  .lawyers__lede {
+    margin: 0;
+    font-size: var(--text-xl);
+    line-height: var(--leading-normal);
+    color: var(--text-muted);
+    text-wrap: pretty;
+  }
+
+  .lawyers__grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: var(--space-5);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .lawyers__c {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    text-decoration: none;
+  }
+
+  .lawyers__ph {
+    display: block;
+    position: relative;
+    aspect-ratio: 3 / 4;
+    border-radius: var(--radius-4);
+    overflow: hidden;
+    background: var(--surface-alt);
+  }
+
+  .lawyers__ph :global(.lawyers__img) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+  }
+
+  .lawyers__mono {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-size: var(--display-5);
+    color: var(--dh-ink-5);
+  }
+
+  .lawyers__name {
+    font-family: var(--font-ui);
+    font-weight: 700;
+    font-size: var(--text-lg);
+    line-height: 1.35;
+    letter-spacing: var(--tracking-tight);
+    color: var(--text-strong);
+    text-align: center;
+  }
+
+  a.lawyers__c:hover .lawyers__name {
+    color: var(--accent);
+  }
+
+  .lawyers__more {
+    margin: var(--space-11) 0 0;
+    text-align: center;
+  }
+
+  .lawyers__more-link {
+    font-weight: 800;
+    font-size: var(--text-micro);
+    line-height: 1;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  @media (max-width: 1180px) {
+    .lawyers__head {
+      grid-template-columns: 1fr;
+      gap: var(--space-6);
+    }
+
+    .lawyers__grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: var(--space-6);
+    }
+  }
+
+  @media (max-width: 700px) {
+    .lawyers__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>

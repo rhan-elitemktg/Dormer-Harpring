@@ -1,0 +1,107 @@
+---
+// "What happens after you call" — four steps in one white card on forest.
+import type { ProcessSection } from "../../../data/carAccidents";
+
+interface Props {
+  process: ProcessSection;
+  id: string;
+}
+
+const { process, id } = Astro.props;
+---
+
+<section class="section process" id={id}>
+  <div class="container">
+    <h2 class="process__title">{process.title}</h2>
+    <ol class="procard">
+      {
+        process.steps.map((step) => (
+          <li class="pro">
+            <b class="pro__n" aria-hidden="true">
+              {step.n}
+            </b>
+            <h3 class="pro__title">{step.title}</h3>
+            <p class="pro__body">{step.body}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<style>
+  .process {
+    background: var(--dh-forest-300);
+    color: var(--text-on-dark);
+  }
+
+  .process__title {
+    margin: 0 0 var(--space-11);
+    font-size: var(--display-3);
+    color: var(--text-on-dark);
+  }
+
+  .procard {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    background: var(--dh-white);
+    border-radius: var(--radius-4);
+    overflow: hidden;
+  }
+
+  .pro {
+    padding: var(--space-9) var(--space-8);
+    border-left: 1px solid var(--dh-line-soft);
+  }
+
+  .pro:first-child {
+    border-left: 0;
+  }
+
+  .pro__n {
+    display: block;
+    margin-bottom: var(--space-4);
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--display-5);
+    line-height: 1;
+    color: var(--accent-gold);
+  }
+
+  /* A light card inside a dark section: the heading declares its own colour or
+     it inherits parchment-on-white from the section rule. */
+  .pro__title {
+    margin: 0 0 var(--space-3);
+    font-family: var(--font-ui);
+    font-weight: 700;
+    font-size: var(--display-7);
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-tight);
+    color: var(--text-strong);
+  }
+
+  .pro__body {
+    margin: 0;
+    font-size: var(--text-md);
+    line-height: var(--leading-normal);
+    color: var(--text-muted);
+  }
+
+  @media (max-width: 980px) {
+    .procard {
+      grid-template-columns: 1fr;
+    }
+
+    .pro {
+      border-left: 0;
+      border-top: 1px solid var(--dh-line-soft);
+    }
+
+    .pro:first-child {
+      border-top: 0;
+    }
+  }
+</style>
