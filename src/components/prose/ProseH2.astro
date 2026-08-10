@@ -1,5 +1,18 @@
 ---
 // Portable Text `h2` block.
+//
+// Carries an `id` slugified from its own text, so anything can deep-link to it.
+// The blog post's contents box is the reason it exists — it links `#<id>` per
+// heading — and `headingId` is shared with that box rather than each side
+// slugifying its own copy. This applies site-wide, to every prose body; a
+// heading anchor on About or Practice Areas is harmless and useful.
+import type { BlockProps } from "astro-portabletext/types";
+import { blockText, headingId } from "../../lib/headings";
+
+const { node } = Astro.props as BlockProps;
+// Empty rather than absent when a heading is punctuation only: an `id=""`
+// would be a link target that scrolls nowhere.
+const id = headingId(blockText(node)) || undefined;
 ---
 
-<h2 class="prose__h2"><slot /></h2>
+<h2 class="prose__h2" id={id}><slot /></h2>

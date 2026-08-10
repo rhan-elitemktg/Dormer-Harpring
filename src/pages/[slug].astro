@@ -1,0 +1,97 @@
+---
+// One page per blog post.
+//
+// THIS FILE IS AT THE SITE ROOT, and that is not a shortcut. `blogPath()` is
+// `/${slug}` — the legacy WordPress site is flat at the root and ~300 live URLs
+// depend on staying there, so a post cannot live under `/blog/`. Astro gives
+// static routes priority over dynamic ones, so `/about`, `/news` and the rest
+// still win, and only the paths `getStaticPaths` returns are ever built.
+//
+// READ THIS BEFORE BUILDING THE PRACTICE-AREA DETAIL TEMPLATE. `practiceAreaPath()`
+// is ALSO `/${slug}`, and Astro allows exactly one `[slug].astro` per directory
+// — so the Car Accidents page cannot add a second one here. It has to union its
+// paths into the `getStaticPaths` below and branch on which collection the
+// record came from, the same way `meet-our-attorneys/[slug].astro` branches on
+// `member.kind`. Adding `src/pages/practice/[slug].astro` instead would change
+// the URL, which is the one thing the flat shape exists to prevent.
+//
+// ONE ARTICLE IS BUILT. See `getBlogPostArticles()` in data/blog.ts for why the
+// other four real posts wait for the Sanity import rather than being
+// transcribed by hand.
+import type { GetStaticPaths } from "astro";
+import Layout from "../layouts/Layout.astro";
+import PostArticle from "../components/blog/PostArticle.astro";
+import RelatedPosts from "../components/blog/RelatedPosts.astro";
+import ContactDetails from "../components/contact/ContactDetails.astro";
+import {
+  getBlogCategories,
+  getBlogPostArticles,
+  getBlogPostPage,
+  getBlogPosts,
+  getFeaturedPost,
+  getRelatedPosts,
+} from "../data/blog";
+import { getContactBand, getContactDetails } from "../data/contact";
+
+export const getStaticPaths = (async () => {
+  const [articles, featured, posts] = await Promise.all([
+    getBlogPostArticles(),
+    getFeaturedPost(),
+    getBlogPosts(),
+  ]);
+  const feed = [featured, ...posts];
+
+  // Walk the ARTICLES, not the feed — the same contract
+  // `meet-our-attorneys/[slug].astro` holds. A post with no body has no page,
+  // and its card on the index keeps pointing at the legacy URL it already
+  // points at, rather than at a route that was never built.
+  return Promise.all(
+    articles.map(async (article) => {
+      const post = feed.find((entry) => entry._key === article._key);
+      if (!post) {
+        throw new Error(`blog: article "${article.slug}" has no post in the feed`);
+      }
+
+      return {
+        params: { slug: article.slug },
+        props: {
+          article,
+          post,
+          // Resolved here rather than in the component so the page stays one
+          // await of everything it renders. 5 for the sidebar, 3 for the band.
+          sidebarRelated: await getRelatedPosts(article._key, 5),
+          bandRelated: await getRelatedPosts(article._key, 3),
+        },
+      };
+    })
+  );
+}) satisfies GetStaticPaths;
+
+const { article, post, sidebarRelated, bandRelated } = Astro.props;
+
+const [page, categories, band, details] = await Promise.all([
+  getBlogPostPage(),
+  getBlogCategories(),
+  getContactBand(),
+  getContactDetails(),
+]);
+---
+
+<Layout title={post.title} description={post.excerpt}>
+  <PostArticle
+    post={post}
+    article={article}
+    page={page}
+    categories={categories}
+    related={sidebarRelated}
+  />
+
+  <RelatedPosts
+    title={page.relatedTitle}
+    posts={bandRelated}
+    readMoreLabel={page.readMoreLabel}
+  />
+
+  {/* The same contact block /news and every interior page already close on. */}
+  <ContactDetails details={details} form={band.form} />
+</Layout>

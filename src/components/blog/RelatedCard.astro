@@ -1,0 +1,210 @@
+---
+// One card in the "Related blog posts" band.
+//
+// A separate component from PostCard rather than a variant of it: that card is
+// a bare column on cream carrying a byline and a three-line clamp, this is a
+// bordered panel on forest with neither. They share a subject, not a shape.
+//
+// What they DO share is the construction — one anchor stretched over the whole
+// card. The comp wraps the entire card in a single `<a>` including the
+// photograph, which gives the link an accessible name of "image, <title>,
+// <title>" once the img alt, the heading and the read-more span are all inside
+// it. So the title carries the anchor and covers the card through `::after`,
+// exactly as PostCard does.
+import Picture from "../media/Picture.astro";
+import type { BlogPost } from "../../data/blog";
+import { formatPostDate } from "../../lib/dates";
+
+interface Props {
+  post: BlogPost;
+  readMoreLabel: string;
+}
+
+const { post, readMoreLabel } = Astro.props;
+---
+
+<li class="rcard">
+  {/* Empty alt for the same reason as PostCard's: this is card art drawn from
+      the practice-area photography and picked loosely, so there is nothing in
+      it to describe that the title does not already say. */}
+  <Picture
+    src={post.image}
+    alt=""
+    widths={[400, 600, 800]}
+    sizes="(max-width: 980px) 100vw, 33vw"
+    class="rcard__img"
+  />
+
+  <div class="rcard__body">
+    <p class="rcard__meta">
+      <span class="rcard__cat">{post.category.title}</span>
+      <span class="rcard__dot" aria-hidden="true"></span>
+      <time class="rcard__date" datetime={post.publishedAt}>
+        {formatPostDate(post.publishedAt)}
+      </time>
+    </p>
+
+    <h3 class="rcard__title">
+      <a class="rcard__link" href={post.href!}>{post.title}</a>
+    </h3>
+
+    <p class="rcard__excerpt">{post.excerpt}</p>
+
+    <span class="rcard__more arrow-link">
+      {readMoreLabel} <span class="arrow" aria-hidden="true">&rarr;</span>
+    </span>
+  </div>
+</li>
+
+<style>
+  .rcard {
+    position: relative; /* the stretched link's containing block */
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border-hairline);
+    border-radius: var(--radius-card);
+    background: var(--surface-card);
+    overflow: hidden;
+    /* ONE DURATION ACROSS THE WHOLE HOVER. The lift, the shadow and the title's
+       colour are read as a single gesture, so they have to land together —
+       `--transition` on the shadow put it at nearly twice the lift's length and
+       the card arrived before its own shadow did. `--dur-fast` is the family
+       the comp uses here (.18s transform, .2s shadow). */
+    transition:
+      transform var(--dur-fast) var(--ease),
+      box-shadow var(--dur-fast) var(--ease);
+  }
+
+  .rcard:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lift);
+  }
+
+  /* `:global()` bounded by an element in this template — the class is handed to
+     Picture and lands on ITS <img>, so it carries Picture's cid, not this
+     file's. See Picture.astro's own note. */
+  .rcard :global(.rcard__img) {
+    width: 100%;
+    height: 210px;
+    object-fit: cover;
+  }
+
+  .rcard__body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: var(--space-6);
+  }
+
+  .rcard__meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+    margin-bottom: var(--space-4);
+  }
+
+  .rcard__cat {
+    font-weight: 800;
+    font-size: var(--text-micro);
+    line-height: 1;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--dh-gold-deep);
+  }
+
+  .rcard__dot {
+    width: 4px;
+    height: 4px;
+    border-radius: var(--radius-full);
+    background: var(--dh-ink-5);
+  }
+
+  .rcard__date {
+    font-size: var(--text-sm);
+    line-height: 1;
+    color: var(--text-meta);
+  }
+
+  /* THE `color` IS LOAD-BEARING — this heading is one of the few on the site
+     that must state its own. The card is a CREAM panel inside a forest
+     section, and global.css paints every heading in such a section with
+     `.section--forest :is(h1, h2, h3, h4) { color: var(--text-on-dark) }`.
+     That rule is aimed at headings sitting ON the dark background; here it
+     lands on one sitting on near-white, and left undeclared it was the only
+     rule setting a colour at all, so the title rendered parchment on cream.
+     Every other light card inside a forest band — the testimonial quote, the
+     two forms — already declares one for the same reason. */
+  .rcard__title {
+    margin-bottom: var(--space-3);
+    font-size: var(--display-7);
+    line-height: var(--leading-tight);
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--text-strong);
+    transition: color var(--dur-fast) var(--ease);
+  }
+
+  .rcard:hover .rcard__title {
+    color: var(--accent);
+  }
+
+  /* THE TRANSITION HERE IS THE ONE THAT MATTERS, not the h3's above. The text
+     you see is this anchor's, and `color: inherit` means it re-interpolates the
+     value the heading hands it — on ITS own timing, which without this line is
+     the global `a { transition: color var(--transition) }` at nearly twice the
+     card's. That is what made the title lag the lift: the heading was already
+     red while the words were still on their way. */
+  .rcard__link {
+    color: inherit;
+    transition: color var(--dur-fast) var(--ease);
+  }
+
+  .rcard__link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+  }
+
+  /* The ring belongs on the card, not on the two words of the title — the click
+     target is the card. Same treatment as PostCard. */
+  .rcard__link:focus-visible {
+    outline: none;
+  }
+
+  .rcard:has(.rcard__link:focus-visible) {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 4px;
+  }
+
+  .rcard__excerpt {
+    font-size: var(--text-base);
+    line-height: var(--leading-normal);
+    color: var(--text-muted);
+  }
+
+  /* PINNED TO THE FOOT OF THE CARD. `margin-top: auto` eats the free space the
+     body has left, so the three read-mores line up across the row however many
+     lines each title and excerpt happen to run to — which is the whole reason
+     the band's cards stretch rather than sizing to content. The `padding-top`
+     is the minimum gap, since `auto` collapses to nothing on the tallest card
+     in the row. `flex-start` keeps the hover target the width of the words. */
+  .rcard__more {
+    align-self: flex-start;
+    margin-top: auto;
+    padding-top: var(--space-5);
+    font-weight: 800;
+    font-size: var(--text-sm);
+    line-height: 1;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  /* The arrow's nudge rides on `:is(a, button):hover`, and the anchor here is
+     the title — the arrow is a sibling outside it. Driving the shift from the
+     card is why that global rule parks the offset in a custom property. */
+  .rcard:hover .arrow {
+    --arrow-shift: 3px;
+  }
+</style>

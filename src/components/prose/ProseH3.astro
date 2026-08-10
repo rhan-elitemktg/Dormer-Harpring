@@ -1,5 +1,14 @@
 ---
 // Portable Text `h3` block.
+//
+// Anchored the same way as ProseH2 — see the note there. `extractHeadings`
+// defaults to H2 only, so a contents list does not offer these; the id is here
+// so a hand-written or editor-pasted link to a subsection still resolves.
+import type { BlockProps } from "astro-portabletext/types";
+import { blockText, headingId } from "../../lib/headings";
+
+const { node } = Astro.props as BlockProps;
+const id = headingId(blockText(node)) || undefined;
 ---
 
-<h3 class="prose__h3"><slot /></h3>
+<h3 class="prose__h3" id={id}><slot /></h3>

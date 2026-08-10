@@ -1,0 +1,155 @@
+---
+// The article's sidebar: consultation form, categories, related articles.
+//
+// ORDER IS THE COMP'S REVERSED, by request. The comp leads with an author card
+// and puts the form third; here the form is first, because it is the only thing
+// in the column a reader can act on and the column is long.
+//
+// NOT STICKY, by request — against the comp's `position: sticky; top: 32px`.
+// With the form card leading, this column is taller than most viewports, and a
+// sticky element taller than its viewport pins its top edge and never scrolls
+// the rest into view: the related-articles card at the foot would be
+// unreachable on every laptop. It scrolls with the article instead.
+//
+// THE AUTHOR CARD IS GONE, also by request. It carried a click-away popover
+// with the reviewer's bio — the only new interaction on the page — and repeated
+// the byline that already sits under the title. Deliberate; do not restore it
+// from the comp.
+import ContactForm from "../contact/ContactForm.astro";
+import type { BlogCategory, BlogPost, BlogPostPageCopy } from "../../data/blog";
+import { blogFilterUrl } from "../../lib/routePaths";
+
+interface Props {
+  page: BlogPostPageCopy;
+  categories: BlogCategory[];
+  related: BlogPost[];
+}
+
+const { page, categories, related } = Astro.props;
+---
+
+<aside class="pside">
+  <ContactForm form={page.form} variant="sidebar" />
+
+  <section class="pside__card" aria-labelledby="pside-cats">
+    <div class="pside__head">
+      <h2 class="pside__title" id="pside-cats">{page.categoriesLabel}</h2>
+    </div>
+    <ul class="pside__list">
+      {
+        /* Links, not the index's buttons: these cross a page boundary, so they
+           have to be real hrefs — right-clickable, openable in a tab. They land
+           on /news with the tab pressed; see `blogFilterUrl`. The legacy
+           WordPress `/category/<slug>` archives are deliberately not linked,
+           the same decision the index's tab row records. */
+      }
+      {
+        categories.map((category) => (
+          <li class="pside__item">
+            <a class="pside__cat" href={blogFilterUrl(category.slug)}>
+              {category.title}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  {
+    /* Every entry is a post with a page. `getRelatedPosts` filters out the
+       eight the designer invented, which is all five the comp lists here — a
+       related-articles card made of unlinked titles is worse than no card, so
+       when the list comes back empty the card does not render at all. */
+    related.length > 0 && (
+      <section class="pside__card" aria-labelledby="pside-related">
+        <div class="pside__head">
+          <h2 class="pside__title" id="pside-related">
+            {page.relatedSidebarLabel}
+          </h2>
+        </div>
+        <ul class="pside__list">
+          {related.map((post) => (
+            <li class="pside__item">
+              <a class="pside__article" href={post.href!}>
+                {post.title}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+</aside>
+
+<style>
+  .pside {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    min-width: 0;
+  }
+
+  .pside__card {
+    border: 1px solid var(--border-hairline);
+    border-radius: var(--radius-media);
+    background: var(--dh-white);
+    overflow: hidden;
+  }
+
+  .pside__head {
+    padding: var(--space-4) var(--space-7);
+    border-top: 3px solid var(--accent-gold);
+    border-bottom: 1px solid var(--dh-line-soft);
+  }
+
+  .pside__title {
+    font-size: var(--text-2xl);
+    line-height: var(--leading-display-2);
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  .pside__list {
+    padding: 0 var(--space-7);
+    list-style: none;
+  }
+
+  .pside__item + .pside__item {
+    border-top: 1px solid var(--dh-line-soft);
+  }
+
+  .pside__cat,
+  .pside__article {
+    display: block;
+    padding-block: var(--space-4);
+    font-weight: 600;
+    font-size: var(--text-md);
+    color: var(--text-strong);
+  }
+
+  .pside__cat:hover,
+  .pside__article:hover {
+    color: var(--accent);
+  }
+
+  /* A category is a label, so it sits on one line beside the comp's gold rule;
+     an article title is a sentence and wraps, so it gets neither. */
+  .pside__cat {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    line-height: var(--leading-tight);
+  }
+
+  .pside__cat::before {
+    content: "";
+    flex: none;
+    width: 16px;
+    height: 2px;
+    background: var(--accent-gold);
+  }
+
+  .pside__article {
+    line-height: var(--leading-snug);
+  }
+</style>

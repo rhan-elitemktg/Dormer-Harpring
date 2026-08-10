@@ -1,0 +1,60 @@
+---
+// The dark three-card band at the foot of an article.
+//
+// Fed by `getRelatedPosts`, which returns only posts that have a page — so the
+// band renders three real links or, when the blog has nothing else to offer,
+// nothing at all. The comp names its three explicitly and the selection
+// reproduces that set; it orders them by date, where the comp's sequence
+// (June 17, June 5, June 11) follows no rule the markup states.
+import RelatedCard from "./RelatedCard.astro";
+import type { BlogPost } from "../../data/blog";
+
+interface Props {
+  title: string;
+  posts: BlogPost[];
+  readMoreLabel: string;
+}
+
+const { title, posts, readMoreLabel } = Astro.props;
+---
+
+{
+  posts.length > 0 && (
+    <section class="related section section--forest">
+      <div class="container">
+        <h2 class="related__title">{title}</h2>
+        <ul class="related__grid">
+          {posts.map((post) => (
+            <RelatedCard post={post} readMoreLabel={readMoreLabel} />
+          ))}
+        </ul>
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .related__title {
+    margin-bottom: var(--space-13);
+    font-size: var(--display-2);
+    text-align: center;
+  }
+
+  /* The global reset zeroes list `margin` only, so the marker and the UA's
+     padding-inline-start are cleared here — the two lines every grid on this
+     site carries. */
+  .related__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-7);
+    align-items: stretch;
+    list-style: none;
+    padding: 0;
+  }
+
+  @media (max-width: 980px) {
+    .related__grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

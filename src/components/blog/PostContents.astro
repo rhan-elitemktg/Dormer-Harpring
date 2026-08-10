@@ -1,0 +1,114 @@
+---
+// The box above the article body: one link per section heading.
+//
+// The comp draws four "Key takeaways" statements here instead. Replaced by
+// request with a contents list that jumps — and the takeaways were not lost,
+// they are the article's own first section, which is where the live post keeps
+// them. That is also why the heading says "In this article" rather than "Key
+// takeaways": the body has an H2 by that name a few lines below, and two of
+// them on one page reads as a bug.
+//
+// DERIVED FROM THE BODY, not authored beside it. `extractHeadings` and
+// `ProseH2` share one slugifier, so an editor rewording a heading in Sanity
+// moves the entry and its target together and cannot leave a link pointing at
+// an id that no longer exists.
+//
+// The scroll itself is CSS — `scroll-behavior: smooth` on `html` in global.css,
+// which the reduced-motion block at the foot of that file turns back off. No
+// script: a plain anchor already does the work, still works with JS disabled,
+// and leaves the heading in the address bar to be shared.
+import { extractHeadings } from "../../lib/headings";
+
+interface Props {
+  label: string;
+  /** The post body. Unknown because that is what Prose takes — this reads it,
+   *  it does not render it. */
+  body: unknown;
+}
+
+const { label, body } = Astro.props;
+const headings = extractHeadings(body);
+---
+
+{
+  /* A body with one section or none has nothing to navigate, and a contents
+     box listing a single entry is furniture. */
+  headings.length > 1 && (
+    <nav class="toc" aria-labelledby="toc-label">
+      <h2 class="toc__label" id="toc-label">
+        {label}
+      </h2>
+      <ul class="toc__list">
+        {headings.map((heading) => (
+          <li class="toc__item">
+            <a class="toc__link" href={`#${heading.id}`}>
+              {heading.text}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  )
+}
+
+<style>
+  .toc {
+    margin-block: var(--space-8) var(--space-10);
+    padding: var(--space-8) var(--space-9);
+    border: 1px solid var(--border-hairline);
+    border-radius: var(--radius-media);
+    background: var(--surface-input);
+  }
+
+  /* The base heading rule sets Anton uppercase; the comp's `bp-kt h3` is Anton
+     in mixed case, like every other heading inside this article. */
+  .toc__label {
+    margin-bottom: var(--space-5);
+    font-size: var(--text-3xl);
+    line-height: var(--leading-display-2);
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  .toc__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    list-style: none;
+    padding: 0;
+  }
+
+  /* The comp's gold bullet, moved onto the item so the dot stays put while a
+     two-line entry wraps under itself rather than under the dot. */
+  .toc__item {
+    display: flex;
+    gap: var(--space-4);
+  }
+
+  .toc__item::before {
+    content: "";
+    flex: none;
+    width: 8px;
+    height: 8px;
+    margin-top: 0.55em;
+    border-radius: var(--radius-full);
+    background: var(--accent-gold);
+  }
+
+  .toc__link {
+    font-size: var(--text-md);
+    line-height: var(--leading-normal);
+    color: var(--text-body);
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-underline-offset: 0.18em;
+    transition:
+      color var(--transition),
+      text-decoration-color var(--transition);
+  }
+
+  .toc__link:hover {
+    color: var(--accent);
+    text-decoration-color: currentColor;
+  }
+</style>

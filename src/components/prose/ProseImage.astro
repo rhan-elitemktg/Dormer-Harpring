@@ -1,0 +1,33 @@
+---
+// Portable Text `image` object — a photograph in the flow of a body.
+//
+// FULL WIDTH OF THE PROSE COLUMN, by request. The Blog Post comp floats this
+// left at 460px with the paragraphs wrapping around it; that was not adopted.
+// A float inside a 760px measure leaves a ~270px gutter the text has to set
+// in, which reads as two narrow columns rather than one article — and it
+// collapses to a plain stacked image below 980px anyway, so the float only
+// ever describes the desktop frame. Deliberate, not missed.
+//
+// Rendered through Picture like every other image on the site — the wrapper is
+// what makes these Sanity assets a one-file change later.
+import type { Props as ComponentProps } from "astro-portabletext/types";
+import Picture from "../media/Picture.astro";
+import type { PortableTextImage } from "../../data/portableText";
+
+const { node } = Astro.props as ComponentProps<PortableTextImage>;
+---
+
+<figure class="prose__figure">
+  {
+    /* `sizes` is the prose measure, not the container: this image never gets
+       wider than the article column, so asking for a 1244px candidate would
+       ship a file no viewport can use. */
+  }
+  <Picture
+    src={node.src}
+    alt={node.alt}
+    widths={[400, 760, 1140]}
+    sizes="(max-width: 980px) 100vw, min(100vw, 760px)"
+    class="prose__img"
+  />
+</figure>
