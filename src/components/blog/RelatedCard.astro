@@ -183,9 +183,16 @@ const { post, readMoreLabel } = Astro.props;
     color: var(--text-muted);
   }
 
+  /* PINNED TO THE FOOT OF THE CARD. `margin-top: auto` eats the free space the
+     body has left, so the three read-mores line up across the row however many
+     lines each title and excerpt happen to run to — which is the whole reason
+     the band's cards stretch rather than sizing to content. The `padding-top`
+     is the minimum gap, since `auto` collapses to nothing on the tallest card
+     in the row. `flex-start` keeps the hover target the width of the words. */
   .rcard__more {
     align-self: flex-start;
-    margin-top: var(--space-5);
+    margin-top: auto;
+    padding-top: var(--space-5);
     font-weight: 800;
     font-size: var(--text-sm);
     line-height: 1;
