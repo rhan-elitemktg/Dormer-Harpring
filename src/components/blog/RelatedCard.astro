@@ -65,9 +65,14 @@ const { post, readMoreLabel } = Astro.props;
     border-radius: var(--radius-card);
     background: var(--surface-card);
     overflow: hidden;
+    /* ONE DURATION ACROSS THE WHOLE HOVER. The lift, the shadow and the title's
+       colour are read as a single gesture, so they have to land together —
+       `--transition` on the shadow put it at nearly twice the lift's length and
+       the card arrived before its own shadow did. `--dur-fast` is the family
+       the comp uses here (.18s transform, .2s shadow). */
     transition:
       transform var(--dur-fast) var(--ease),
-      box-shadow var(--transition);
+      box-shadow var(--dur-fast) var(--ease);
   }
 
   .rcard:hover {
@@ -144,8 +149,15 @@ const { post, readMoreLabel } = Astro.props;
     color: var(--accent);
   }
 
+  /* THE TRANSITION HERE IS THE ONE THAT MATTERS, not the h3's above. The text
+     you see is this anchor's, and `color: inherit` means it re-interpolates the
+     value the heading hands it — on ITS own timing, which without this line is
+     the global `a { transition: color var(--transition) }` at nearly twice the
+     card's. That is what made the title lag the lift: the heading was already
+     red while the words were still on their way. */
   .rcard__link {
     color: inherit;
+    transition: color var(--dur-fast) var(--ease);
   }
 
   .rcard__link::after {
