@@ -4,104 +4,82 @@
 // These become `practiceAreaDetail` documents. `getPracticeAreaDetails()`
 // returns an ARRAY of one because the future GROQ query is
 // `*[_type == "practiceAreaDetail"]` and `src/pages/[slug].astro` walks it to
-// build paths — the same contract `getBlogPostArticles()` holds. One page is
-// built; the other 45 practice areas are the CMS phase's job, and the shape is
-// already right for them.
+// build paths — the same contract `getBlogPostArticles()` holds.
 //
-// EVERYTHING HERE IS THE COMP'S OWN CONTENT, read out of the `renderVals()`
-// block at the foot of `DH - Car Accidents.html` — 23 arrays behind 88
-// placeholders — plus the static copy in its markup. `AGENTS.md` records that
-// building a page from comp markup alone has already cost this project one
-// full rebuild; `scripts/diff-comp-car-accidents.py` is what stops it here.
+// BUILT FROM THE SECOND DESIGN OF THIS PAGE. The first was 31 sections, 23
+// `sc-for` loops and 105 placeholders; this one is 17 sections, 10 loops and 75.
+// Nine sections were cut outright (the glove-box card, the four long insurance
+// Q&As, the damages grid, the adjuster-tactics band, the cost and court
+// answers, the evidence band, the venue list), three were replaced by teasers
+// pointing at articles, and two are new.
 //
-// EIGHT OF THE COMP'S 23 ARRAYS ARE NOT IN THIS FILE, deliberately — they are
-// bands this site already builds, and a second copy of their strings is a
-// second copy that drifts:
-//   keyPoints                                    → `stats.ts` (identical, all four)
-//   leadAttorneys / otherAttorneys               → `team.ts`
-//   testimonials / quoteReviews / videoTestimonials → `testimonials.ts`
-//   infoCardsData / socials                      → `contact.ts` / `site.ts`
-//   serviceAreas / footerAreas / footerNav       → the global Footer
-// The page composes those from their own modules, exactly as
-// `practice-areas.astro` composes WhyUs and the attorneys band.
+// ITS `renderVals()` STILL DEFINES FIFTEEN ARRAYS THE MARKUP NO LONGER USES —
+// `keyPoints`, `crashSteps`, `leadAttorneys`, `otherAttorneys`, `processSteps`,
+// `injuries`, `damageCols`, `faultBranches`, `denverData`, `corridors`,
+// `courts`, `relatedAreas`, `relatedArticles`, `firmData`, `lawCtas`. They are
+// the previous design's content, left behind. Several of them are close enough
+// to the new copy to look authoritative and are not: `denverData` has four
+// figures where the page draws three, `corridors` carries a completely
+// different sentence per road, and `firmData`'s third label reads "Share of
+// calls we tell to skip hiring a lawyer" where the page says "Of callers we
+// tell they don't need a lawyer".
 //
-// TWO OF THE COMP'S FEATURES ARE DEAD IN THE COMP ITSELF and are not built:
-//   - `lawCtas` is declared in `renderVals()` and never returned from it, and no
-//     placeholder references it. Three mid-FAQ call-to-action strings that no
-//     markup can reach.
-//   - the transcript toggle. `state.transcriptOpen`, `transcriptIcon` and
-//     `toggleTranscript` are all returned, and `.ca-transcript` / `.ca-tr__body`
-//     are both styled — but neither class appears anywhere in the markup, so
-//     the comp renders no transcript UI. Named in HANDOFF.md as "the one new
-//     interaction"; it isn't one. Same story for `.ca-crit`, `.ca-card`,
-//     `.ca-step`, `.ca-qa`, `.ca-acc`, `.ca-insight`, `.ca-office` and
-//     `.ca-review`, all styled and all unrendered — earlier drafts left behind.
+// SO: WHAT THE MARKUP RENDERS IS THE SOURCE, and a live array is only a source
+// where a `{{ }}` placeholder actually reads it. `AGENTS.md` says to read the
+// comp's script block rather than its markup; on this page you need both, and
+// where they disagree the markup wins. `scripts/diff-comp-car-accidents.py`
+// checks it that way round.
+//
+// SIX BANDS ARE THIS SITE'S, NOT THIS PAGE'S, and their strings live in their
+// own modules: the testimonials rail (`testimonials.ts`), the awards row
+// (`awards.ts`), the FAQ accordion (`faqs.ts`), and the contact form and info
+// cards (`contact.ts` / `site.ts`), plus the header and footer.
 import type { ImageMetadata } from "astro";
 import { ROUTES, attorneyPath } from "../lib/routePaths";
 import heroPhoto from "../assets/practice/car-accident-hero.jpg";
 import crashVideoCover from "../assets/practice/crash-video-cover.jpg";
-import seanDormer from "../assets/team/sean-dormer-lg.jpg";
+import caseVideoCover from "../assets/practice/case-video-cover.jpg";
+import whyPhoto from "../assets/practice/why-attorneys.jpg";
+import consultPhoto from "../assets/blog/consult.jpg";
 import kcHarpring from "../assets/team/kc-harpring-lg.jpg";
 
 /**
  * In-page anchor ids, in one place because two things must agree about them:
  * the section nav's hrefs and the sections' own `id` attributes.
  *
- * NOT run through `lib/headings.ts`'s `headingId()`, which slugifies a heading's
- * text. These are short handles the comp chose (`#lawyers`, not
+ * NOT run through `lib/headings.ts`'s `headingId()`, which slugifies a
+ * heading's text. These are short handles the comp chose (`#lawyers`, not
  * `#meet-our-car-accident-lawyers`), so there is nothing to slugify — and
  * because both sides read this object, the drift that helper exists to prevent
  * cannot happen here either. Do not add a second slugifier for them.
+ *
+ * `know` moved in the second design: it was the long "who pays my medical
+ * bills" section and is now the four-point summary, which is what the nav's
+ * "Colorado car accident laws" link has always pointed at.
  */
 export const CA_SECTION_IDS = {
+  know: "know",
   lawyers: "lawyers",
   results: "results",
-  types: "types",
-  know: "know",
   next: "next",
+  types: "types",
+  reviews: "reviews",
   contact: "contact",
 } as const;
 
 // ---------------------------------------------------------------------------
-// Shared shapes. Several sections are the same construction with different
-// copy, and the comp's CSS says so: `.ca-sec`, `.ca-inline`, `.ca-secfoot` and
-// `.ca-decl` each appear in three or more sections.
 
-/** One `.ca-sec` — an h3 over one or more paragraphs. */
+/** A block of copy with a heading — used by four of the new sections. */
 export interface DetailBlock {
   _key: string;
   title: string;
-  /** One entry per paragraph. */
-  body: string[];
+  body: string;
 }
 
-/** The dark `.ca-inline` bar — a line of copy and one link. */
-export interface InlineCta {
-  text: string;
-  label: string;
-  href: string;
-}
-
-/** `.ca-secfoot` / `.ca-tacfoot` / `.ca-nonum__ask` — copy beside the phone. */
-export interface PhoneAsk {
-  text: string;
-}
-
-/**
- * A statute citation under a section.
- *
- * The comp links every one to `law.justia.com/codes/colorado/` — the index, not
- * the section — so the citation is the content and the URL is a placeholder the
- * designer used eight times. Kept as the comp has it rather than guessed at:
- * Justia's per-section URLs are stable but constructing eight of them from a
- * pattern is exactly the kind of unverified link this project doesn't ship.
- * TODO(launch): point each citation at its own statute, or drop the links and
- * leave the citations as text.
- */
+/** A statute citation. See `SourceNote` on why these are text and not links. */
 export interface StatuteSource {
   _key: string;
   label: string;
-  /** What the statute covers, where the comp names it. */
   note?: string;
 }
 
@@ -111,33 +89,13 @@ export interface SourceNote {
   items: StatuteSource[];
 }
 
-/** A `.ca-decl` figure — the mocked-up insurance declarations page. */
-export interface DeclarationsFigure {
-  caption: string;
-  title: string;
-  /** Upper-right of the head — "Coverages & limits", "Per C.R.S. 10-4-620". */
-  meta: string;
-  rows: { _key: string; label: string; value: string; highlight?: boolean }[];
-  note: { label: string; text: string };
-}
-
-/** A `<details>` disclosure — `.ca-more`. */
-export interface Disclosure {
-  /** A `<summary>`; where absent the comp renders a plain label and no toggle. */
-  label: string;
-}
-
-/** An inert video panel. Nothing on this page has a real id yet. */
+/** An inert video poster. Nothing on this page has a real id yet. */
 export interface VideoPanel {
   poster: ImageMetadata;
   alt: string;
-  /** The italic pull quote over the poster's foot. */
-  caption?: string;
-  /** Shown as a duration chip. */
-  length?: string;
+  title: string;
+  length: string;
 }
-
-// ---------------------------------------------------------------------------
 
 export interface DetailHeroProof {
   _key: string;
@@ -190,32 +148,10 @@ export interface TriageRow {
 export interface TriageSection {
   title: string;
   lede: string;
-  video: VideoPanel & { title: string };
+  video: VideoPanel;
   help: { text: string };
   rows: TriageRow[];
-  moreLabel: string;
-  moreRows: TriageRow[];
   sources: SourceNote;
-}
-
-export interface LawyersSection {
-  title: string;
-  lede: string;
-  /**
-   * Slugs into `team.ts`, not copies of the roster. The comp's own
-   * `leadAttorneys` carries a `focus` sentence per partner that appears nowhere
-   * in its markup — the card renders a photo and a name — and a `badges` array
-   * that is likewise never rendered. Both are dropped rather than ported into a
-   * shape nothing reads, the same call `practiceAreas.ts` made about `stat`,
-   * `statContext` and `bullets`.
-   *
-   * These are `TeamMember._key` values, which `getTeam()` also uses as the
-   * profile slug and turns into `href` for anyone who has a bio page.
-   */
-  leadKeys: string[];
-  otherKeys: string[];
-  moreLabel: string;
-  moreHref: string;
 }
 
 export interface TakeawaysSection {
@@ -225,25 +161,68 @@ export interface TakeawaysSection {
   items: DetailBlock[];
 }
 
+export interface CriteriaSection {
+  title: string;
+  lede: string;
+  video: VideoPanel;
+  items: DetailBlock[];
+  note: string;
+}
+
+export interface LawyersSection {
+  title: string;
+  lede: string;
+  /**
+   * The four attorneys the comp's `caLawyers` array names, each with a line
+   * about what they do on crash cases. `key` is a `TeamMember._key`, which
+   * `getTeam()` also uses as the profile slug and turns into an `href`.
+   *
+   * The CREDENTIAL LINE is this page's, not the roster's — it is written about
+   * car accident work specifically ("Litigates MedPay and first-party coverage
+   * disputes"), which is exactly the kind of per-practice-area copy a detail
+   * document owns and `team.ts` cannot.
+   */
+  attorneys: { _key: string; key: string; cred: string }[];
+  moreLabel: string;
+  moreHref: string;
+}
+
+export interface CredentialsSection {
+  eyebrow: string;
+  /** `awardKey` indexes `getAwards()`; the caption and link are this page's. */
+  badges: { _key: string; awardKey: string; caption: string; href: string }[];
+  disclaimer: string;
+}
+
+export interface WhyFirmSection {
+  eyebrow: string;
+  title: string;
+  stats: { _key: string; big: string; label: string }[];
+  disclaimer: string;
+  columns: { _key: string; n: string; title: string; body: string }[];
+  ctaLabel: string;
+  ctaHref: string;
+  photo: ImageMetadata;
+  photoAlt: string;
+}
+
 export interface ResultStory {
   _key: string;
   offered: string;
   recovered: string;
   title: string;
-  story: string;
-  changedLabel: string;
-  changed: string;
+  /** Present on the two figure cards; the video card carries a quote instead. */
+  story?: string;
+  changed?: string;
   /**
-   * A key into `getVideoReviews()` in `testimonials.ts`, which already holds
-   * the client's name, portrait, pull quote and real YouTube id.
-   *
-   * The comp inlines a poster path and a quote per story, and gets one of the
-   * three wrong: story two shows `assets/reviews/ben.jpg` and attributes the
-   * quote to Joel. Both are real clients with their own separate videos, so it
-   * is a mismatch rather than a naming quirk. Keying into the one testimonials
-   * collection fixes it and stops a fourth copy of the same three quotes.
+   * Set on the one card that is a client video. A key into `getVideoReviews()`
+   * in `testimonials.ts`, which already holds that client's portrait, pull
+   * quote and verified YouTube id — so the card does not carry a fourth copy of
+   * any of them.
    */
-  reviewKey: string;
+  reviewKey?: string;
+  /** Runtime shown on the video card. */
+  length?: string;
 }
 
 export interface ResultsSection {
@@ -255,186 +234,78 @@ export interface ResultsSection {
   disclaimer: string;
 }
 
-export interface ChecklistStep {
-  _key: string;
-  /** Into `components/icons/CrashStepIcon.astro`. */
-  iconKey: string;
-  n: number;
-  title: string;
-  body: string;
-}
-
-export interface ChecklistSection {
+export interface TimelineSection {
   title: string;
   lede: string;
-  stepLabel: string;
-  steps: ChecklistStep[];
-  ctaLabel: string;
-  ctaHref: string;
-}
-
-export interface GloveBoxSection {
-  eyebrow: string;
-  title: string;
-  body: string;
-  /**
-   * TODO(launch): the "Download and print" link has no target — the comp's is
-   * `href="#"` and no artwork exists. It ships pointing at the contact anchor
-   * alongside "Mail me a free card" rather than at a dead `#`, because a button
-   * that scrolls nowhere is worse than two that ask the same thing twice.
-   */
-  ctas: { _key: string; label: string; href: string; tone: "red" | "ghost" }[];
-  note: string;
-  front: {
-    faceLabel: string;
-    title: string;
-    steps: string[];
-    footLabel: string;
-  };
-  back: {
-    faceLabel: string;
-    notTitle: string;
-    notItems: string[];
-    deadlines: { _key: string; big: string; label: string }[];
-    footLabel: string;
-    qrLabel: string;
-  };
-}
-
-export interface CriteriaSection {
-  title: string;
-  lede: string;
-  video: VideoPanel;
-  items: DetailBlock[];
-  inline: InlineCta;
-  note: string;
-}
-
-export interface FaultSection {
-  title: string;
-  lede: string;
-  big: { figure: string; statement: string; body: string };
-  disclosure: Disclosure;
-  branchesLabel: string;
-  branches: { _key: string; n: string; question: string; answer: string }[];
-  scale: { caption: string; start: string; middle: string; end: string };
-  source: SourceNote;
-  blocks: DetailBlock[];
-  foot: PhoneAsk;
-  video: VideoPanel;
-}
-
-/** The `.ca-ans` two-column shape: heading and video left, blocks right. */
-export interface QaSection {
-  id?: string;
-  title: string;
-  lede: string;
-  video?: VideoPanel;
-  blocks: DetailBlock[];
-  figure?: DeclarationsFigure;
-  /** Which block the figure sits under. */
-  figureAfter?: string;
-  inline?: InlineCta;
-  source?: SourceNote;
-}
-
-export interface DamagesSection {
-  title: string;
-  lede: string;
-  /** `iconKey` into `components/icons/DamageIcon.astro`. */
-  tiles: { _key: string; iconKey: string; title: string; body: string }[];
-  disclosure: Disclosure;
-  columns: {
-    _key: string;
-    name: string;
-    itemsLabel: string;
-    items: string[];
-    proofLabel: string;
-    proof: string;
-    capLabel: string;
-    cap: string;
-    capNote: string;
-  }[];
-  source: SourceNote;
-  noNumber: { title: string; body: string; ask: PhoneAsk };
-}
-
-export interface TacticsSection {
-  eyebrow: string;
-  title: string;
-  lede: string;
-  cards: DetailBlock[];
-  foot: PhoneAsk;
-}
-
-/** The `.ca-ans--split` shape: a big one-word answer left, video right. */
-export interface BigAnswerSection {
-  title: string;
-  lede: string;
-  big: { figure: string; statement: string; body: string };
-  reassure?: { title: string; body: string[] };
-  disclosure: Disclosure;
-  blocks: DetailBlock[];
-  foot: PhoneAsk;
-  video: VideoPanel;
-}
-
-export interface ProcessSection {
-  title: string;
+  /** The second, forest-coloured paragraph under the lede. */
+  ledeStrong: string;
   steps: { _key: string; n: string; title: string; body: string }[];
-}
-
-export interface BuildSection {
-  eyebrow: string;
-  title: string;
-  items: DetailBlock[];
-  evidence: { title: string; items: string[]; note: string };
+  phases: { _key: string; title: string; when: string; body: string }[];
+  photo: ImageMetadata;
+  photoAlt: string;
+  points: string[];
 }
 
 export interface TileSection {
-  id?: string;
   title: string;
   lede: string;
-  /** `iconKey` into the shared `PracticeIcon`. */
   tiles: {
     _key: string;
     name: string;
-    iconKey: string;
     body: string;
-    linkLabel?: string;
-    href?: string | null;
+    linkLabel: string;
+    href: string | null;
   }[];
 }
 
 export interface DenverSection {
   title: string;
-  stats: { _key: string; big: string; label: string }[];
-  body: string[];
-  corridorsLabel: string;
-  corridors: { _key: string; name: string; body: string }[];
+  lede: string;
+  stats: { _key: string; big: string; label: string; body: string }[];
   source: string;
+  mapCaption: string;
+  corridors: { _key: string; name: string; body: string }[];
 }
 
-export interface FirmDataSection {
+/** The two "here is the short answer, the long one is an article" bands. */
+export interface TeaserSection {
+  title: string;
+  body: string;
+  ctaLabel: string;
+  /** `null` where the article does not exist yet. */
+  ctaHref: string | null;
+  /** The checklist teaser's four illustrative cards. */
+  steps?: { _key: string; iconKey: string; label: string }[];
+  /** The fault teaser's scale labels. */
+  scale?: { start: string; middle: string; end: string };
+  source?: SourceNote;
+}
+
+export interface MoreSection {
+  title: string;
+  features: {
+    _key: string;
+    title: string;
+    body: string;
+    length: string;
+    poster: ImageMetadata;
+    ctaLabel: string;
+    href: string | null;
+  }[];
+  cards: {
+    _key: string;
+    title: string;
+    body: string;
+    ctaLabel: string;
+    href: string | null;
+  }[];
+}
+
+export interface ClosingSection {
   title: string;
   lede: string;
-  stats: { _key: string; big: string; label: string }[];
-  methodology: string;
-  disclaimer: string;
-}
-
-export interface VenueSection {
-  title: string;
-  body: string[];
-  courts: { _key: string; n: string; name: string; body: string }[];
-}
-
-export interface RelatedSection {
-  title: string;
-  areasLabel: string;
-  areas: { _key: string; label: string; href: string | null }[];
-  articlesLabel: string;
-  articles: { _key: string; label: string; href: string | null }[];
+  officeLabel: string;
+  mapTitle: string;
 }
 
 export interface PracticeAreaDetail {
@@ -445,29 +316,19 @@ export interface PracticeAreaDetail {
   hero: DetailHero;
   nav: { items: { _key: string; label: string; href: string }[]; ctaLabel: string };
   triage: TriageSection;
-  lawyers: LawyersSection;
   takeaways: TakeawaysSection;
-  results: ResultsSection;
-  checklist: ChecklistSection;
-  gloveBox: GloveBoxSection;
   criteria: CriteriaSection;
-  fault: FaultSection;
-  medical: QaSection;
-  limits: QaSection;
-  damages: DamagesSection;
-  offer: QaSection;
-  tactics: TacticsSection;
-  cost: BigAnswerSection;
-  court: BigAnswerSection;
-  process: ProcessSection;
-  build: BuildSection;
-  keyPointsEyebrow: string;
+  lawyers: LawyersSection;
+  credentials: CredentialsSection;
+  whyFirm: WhyFirmSection;
+  results: ResultsSection;
+  timeline: TimelineSection;
   crashTypes: TileSection;
-  injuries: TileSection;
   denver: DenverSection;
-  firmData: FirmDataSection;
-  venue: VenueSection;
-  related: RelatedSection;
+  checklistTeaser: TeaserSection;
+  faultTeaser: TeaserSection;
+  more: MoreSection;
+  closing: ClosingSection;
 }
 
 const anchor = (id: string) => `#${id}`;
@@ -551,8 +412,8 @@ const carAccidents: PracticeAreaDetail = {
   triage: {
     title: "Recently injured in a Denver car accident?",
     lede:
-      "You’re probably in pain and already getting phone calls. Here are the three " +
-      "things that actually matter this week — in plain English.",
+      "You’re probably in pain and already getting phone calls. Here are the things " +
+      "that actually matter this week — in plain English.",
     video: {
       poster: crashVideoCover,
       alt: "",
@@ -564,6 +425,10 @@ const carAccidents: PracticeAreaDetail = {
         "Not sure what applies to you? Call and ask. We’ll tell you in five minutes, " +
         "free, and you don’t have to hire us.",
     },
+    // Five rows, all visible. The first design hid the last two behind a "More
+    // things to know" disclosure; this one does not, and the 182-day notice is
+    // the shortest deadline on the page, so showing it is the better call
+    // anyway.
     rows: [
       {
         _key: "medpay",
@@ -598,9 +463,6 @@ const carAccidents: PracticeAreaDetail = {
         ctaHref: anchor(CA_SECTION_IDS.know),
         stat: { big: "3 years", label: "From the crash date" },
       },
-    ],
-    moreLabel: "More things to know",
-    moreRows: [
       {
         _key: "government",
         question: "Was a bus or a city vehicle involved?",
@@ -635,23 +497,6 @@ const carAccidents: PracticeAreaDetail = {
     },
   },
 
-  lawyers: {
-    title: "Meet our car accident lawyers",
-    lede:
-      "From investigation to resolution, our auto accident attorneys handle every " +
-      "detail of your case. You focus on healing, and we’ll take it from here.",
-    leadKeys: ["sean-dormer", "k-c-harpring"],
-    otherKeys: [
-      "tim-garvey",
-      "laura-browne",
-      "jessica-mauser",
-      "amy-rogers",
-      "greg-bentley",
-    ],
-    moreLabel: "See the full team",
-    moreHref: ROUTES.attorneys,
-  },
-
   takeaways: {
     eyebrow: "The short version",
     title: "If you read nothing else on this page",
@@ -660,40 +505,226 @@ const carAccidents: PracticeAreaDetail = {
       {
         _key: "at-fault",
         title: "Colorado is an at-fault state",
-        body: [
+        body:
           "There is no no-fault system here. The driver who caused the crash is " +
-            "responsible for your injuries — but their insurer pays once, at the end, in " +
-            "a single check. Nothing arrives while you are still treating.",
-        ],
+          "responsible for your injuries — but their insurer pays once, at the end, in " +
+          "a single check. Nothing arrives while you are still treating.",
       },
       {
         _key: "own-policy",
         title: "Your own policy is what pays right now",
-        body: [
+        body:
           "Medical payments coverage — usually $5,000 — is on your policy unless you " +
-            "rejected it in writing. It pays your treatment regardless of who caused the " +
-            "crash, and it pays fast.",
-        ],
+          "rejected it in writing. It pays your treatment regardless of who caused the " +
+          "crash, and it pays fast.",
+      },
+      {
+        _key: "public-entity",
+        title: "The clock is shorter for public entities",
+        body:
+          "Only 182 days to notify a government entity if an RTD bus, a city vehicle, " +
+          "or a road defect was involved.",
       },
       {
         _key: "partly",
         title: "Partly at fault is still a case",
-        body: [
-          "Colorado reduces your recovery by your share of the blame instead of erasing " +
-            "it. You only lose the claim outright if you were 50% or more responsible, and " +
-            "that percentage is argued, not decided at the scene.",
-        ],
-      },
-      {
-        _key: "clock",
-        title: "The clock is shorter than it looks",
-        body: [
-          "Three years for most car crashes. But only 182 days to notify a government " +
-            "entity if an RTD bus, a city truck, or a road defect was involved — and " +
-            "cameras overwrite themselves in days.",
-        ],
+        body:
+          "Colorado reduces what you recover by your share of the blame instead of " +
+          "erasing it. Being told it was your fault is not the final word.",
       },
     ],
+  },
+
+  criteria: {
+    title: "Do I have a case?",
+    lede:
+      "Three things have to be true. You can usually tell in a couple of minutes — and " +
+      "if one is missing, we'll say so.",
+    video: {
+      poster: caseVideoCover,
+      alt: "",
+      title: "The three things a case needs",
+      length: "1:30",
+    },
+    items: [
+      {
+        _key: "hurt",
+        title: "You got hurt, and a doctor saw you",
+        body:
+          "If you were treated, there's a record of it. Without any record, there's very " +
+          "little to prove. Seeing a doctor now still counts.",
+      },
+      {
+        _key: "blame",
+        title: "Someone else was at least partly to blame",
+        body:
+          "It does not have to be all their fault. Partly is enough. You can still " +
+          "recover money even if some of it was on you.",
+      },
+      {
+        _key: "insurance",
+        title: "There's insurance to pay it",
+        body:
+          "Their policy, your own coverage, or the medical coverage on your policy. If " +
+          "nobody has insurance, there is usually nothing to collect — and we'd rather " +
+          "tell you that early.",
+      },
+    ],
+    note:
+      "Free, and no email required. If there isn't a case here, we'll tell you that " +
+      "instead of selling you one.",
+  },
+
+  lawyers: {
+    title: "Meet our car accident lawyers",
+    lede:
+      "The attorneys below handle our Denver car accident cases from investigation " +
+      "through trial.",
+    attorneys: [
+      {
+        _key: "kc",
+        key: "k-c-harpring",
+        cred:
+          "Tried the $10,000,000 crash verdict in Colorado state court. Named to the " +
+          "National Trial Lawyers Top 40 Under 40.",
+      },
+      {
+        _key: "sean",
+        key: "sean-dormer",
+        cred:
+          "Handles uninsured and underinsured motorist claims, including Hartkopp v. " +
+          "State Farm. Listed in Top 20 Colorado Jury Verdicts.",
+      },
+      {
+        _key: "tim",
+        key: "tim-garvey",
+        cred:
+          "Litigates auto injury cases in Denver District Court, from filing through " +
+          "trial setting.",
+      },
+      {
+        _key: "laura",
+        key: "laura-browne",
+        cred:
+          "Litigates MedPay and first-party coverage disputes arising out of Colorado " +
+          "crashes.",
+      },
+    ],
+    moreLabel: "See the full team",
+    moreHref: ROUTES.attorneys,
+  },
+
+  credentials: {
+    eyebrow: "Recognized & awarded",
+    // The badges are `awards.ts`'s six, in the comp's order. The CAPTION and
+    // the LINK are new: the second design makes each badge a link to the
+    // awarding body and labels it, which turns a decorative trust row into
+    // something a reader can actually check.
+    //
+    // `awardKey` IS MATCHED TO THE COMP'S CAPTION, NOT TO ITS FILENAME. Every
+    // comp captions badge-1 as Avvo, badge-2 as TopVerdict, badge-3 as Million
+    // Dollar and badge-4 as Multi-Million, and all four files are something
+    // else — the labels were shifted against the artwork upstream, and
+    // `getAwards()` documents the correction. This comp repeats the shift. So
+    // "Multi-Million Dollar Advocates Forum" here resolves to `mmdaf`, which is
+    // the badge that actually SAYS Multi-Million, rather than to whatever the
+    // comp's <img> src happened to be.
+    badges: [
+      {
+        _key: "multi-million",
+        awardKey: "mmdaf",
+        caption: "Multi-Million Dollar Advocates Forum",
+        href: "https://www.milliondollaradvocates.com/",
+      },
+      {
+        _key: "top-20-verdicts",
+        awardKey: "topverdict",
+        caption: "Top 20 Colorado Jury Verdicts",
+        href: "https://www.topverdict.com/",
+      },
+      {
+        _key: "top-100",
+        awardKey: "ntl-100",
+        caption: "National Trial Lawyers Top 100",
+        href: "https://www.thenationaltriallawyers.org/top-100-attorneys/",
+      },
+      {
+        _key: "top-40",
+        awardKey: "ntl-40",
+        caption: "Top 40 Under 40",
+        href: "https://www.thenationaltriallawyers.org/top-40-under-40/",
+      },
+      {
+        _key: "avvo",
+        awardKey: "avvo",
+        caption: "Avvo 10.0",
+        href: "https://www.avvo.com/",
+      },
+      {
+        _key: "million",
+        awardKey: "mdaf",
+        caption: "Million Dollar Advocates Forum",
+        href: "https://www.milliondollaradvocates.com/",
+      },
+    ],
+    disclaimer:
+      "Awarding organizations are not certifying authorities. Selection criteria vary " +
+      "by organization.",
+  },
+
+  whyFirm: {
+    eyebrow: "Why Dormer Harpring?",
+    title: "We are built to try cases, not to settle them cheaply.",
+    // TODO(launch): three claims about the firm's own closed files, and the
+    // comp's own disclaimer marks the period "[date range]". The third label is
+    // the MARKUP's wording; the dead `firmData` array in the same file says
+    // "Share of calls we tell to skip hiring a lawyer" instead.
+    stats: [
+      {
+        _key: "increase",
+        big: "3.4x",
+        label: "Average increase over the insurer's first offer",
+      },
+      { _key: "verdicts", big: "41", label: "Car accident cases taken to verdict" },
+      {
+        _key: "declined",
+        big: "1 in 5",
+        label: "Of callers we tell they don't need a lawyer",
+      },
+    ],
+    disclaimer:
+      "Based on Dormer Harpring's closed car accident matters, [date range]. Past " +
+      "results do not guarantee future outcomes. Every case is different.",
+    columns: [
+      {
+        _key: "price",
+        n: "01",
+        title: "Insurers price cases by who is across the table",
+        body:
+          "Carriers keep records of which firms file suit and which firms take a " +
+          "verdict. That history is part of how an adjuster values your claim.",
+      },
+      {
+        _key: "caseload",
+        n: "02",
+        title: "Fewer cases means more hours on yours",
+        body:
+          "We keep the caseload per attorney small on purpose. The lawyer who answers " +
+          "your call is the lawyer who works the file.",
+      },
+      {
+        _key: "trial-date",
+        n: "03",
+        title: "What changes when a case is set for trial",
+        body:
+          "Setting a trial date starts discovery, depositions and expert disclosures. " +
+          "The carrier has to price the case against a real courtroom deadline.",
+      },
+    ],
+    ctaLabel: "See the case results",
+    ctaHref: anchor(CA_SECTION_IDS.results),
+    photo: whyPhoto,
+    photoAlt: "Dormer Harpring attorneys outside the courthouse",
   },
 
   results: {
@@ -706,973 +737,119 @@ const carAccidents: PracticeAreaDetail = {
         _key: "hartkopp",
         offered: "$60,000",
         recovered: "$2.4 Million",
-        title: "Trial win — breach of insurance contract",
-        story:
-          "Hartkopp v. State Farm. Our client was hit head-on by an uninsured driver in " +
-          "Denver. His own insurer told the jury he was owed $60,000. A jury found State " +
-          "Farm owed him $2,400,000.",
-        changedLabel: "What changed",
-        changed:
-          "We tried it. The difference between the insurer’s number and the verdict was " +
-          "a jury hearing the medical evidence in full.",
+        title: "Trial win: breach of insurance contract",
         reviewKey: "evelyn",
-      },
-      {
-        _key: "pileup",
-        offered: "$50,000",
-        recovered: "$2.5 Million",
-        title: "Trial win — five-car pileup on the highway",
-        story:
-          "Our client was injured in a five-car pileup on a Denver-area highway. The " +
-          "offer on the table was $50,000.",
-        changedLabel: "What changed",
-        changed:
-          "Liability across five vehicles had to be untangled and proven. The case was " +
-          "tried rather than settled at the insurer’s number.",
-        reviewKey: "joel",
+        length: "1:22",
       },
       {
         _key: "low-speed",
         offered: "$2,543.62",
         recovered: "$750,000",
-        title: "Low-speed rear-end crash, no visible damage",
+        title: "Rear-end crash, no visible damage",
         story:
           "Our clients hurt their neck and back after another vehicle struck their " +
-          "trailer hitch. There was no visible property damage, and the opening offer was " +
-          "$2,543.62. A large regional TV-advertising firm had fired them for exactly " +
-          "that reason.",
-        changedLabel: "What changed",
-        changed:
-          "We proved the injuries with treatment records rather than photographs of " +
-          "bumpers, and litigated the case to a settlement roughly 295 times the first " +
-          "offer.",
-        reviewKey: "kelly",
+          "trailer hitch.",
+        changed: "We proved the injuries with treatment records, not photos of bumpers.",
+      },
+      {
+        _key: "pileup",
+        offered: "$50,000",
+        recovered: "$2.5 Million",
+        title: "Trial win: five-car highway pileup",
+        story: "Our client was injured in a five-car pileup on a Denver-area highway.",
+        changed: "Liability across five vehicles had to be untangled and proven.",
       },
     ],
     disclaimer: "Past results do not guarantee future outcomes. Every case is different.",
   },
 
-  checklist: {
-    title: "What to do after a car accident in Denver",
-    lede: "The first week matters more than most people realize.",
-    stepLabel: "Step",
-    steps: [
-      {
-        _key: "police",
-        iconKey: "police",
-        n: 1,
-        title: "Call the police",
-        body:
-          "A report is not required in every crash, but it is the cleanest record of " +
-          "what happened.",
-      },
-      {
-        _key: "checked",
-        iconKey: "stethoscope",
-        n: 2,
-        title: "Get checked even if you feel fine",
-        body: "Adrenaline masks injury. Gaps in treatment are the first thing an adjuster attacks.",
-      },
-      {
-        _key: "photograph",
-        iconKey: "camera",
-        n: 3,
-        title: "Photograph everything before the vehicles move",
-        body: "Position, damage, road conditions, signals, skid marks.",
-      },
-      {
-        _key: "witnesses",
-        iconKey: "witnesses",
-        n: 4,
-        title: "Get witness names and numbers",
-        body: "Not just the other driver. Witnesses disappear fast.",
-      },
-      {
-        _key: "insurer",
-        iconKey: "shield-check",
-        n: 5,
-        title: "Report it to your own insurer",
-        body:
-          "You have a contract with them. You do not have one with the other driver’s " +
-          "insurer.",
-      },
-      {
-        _key: "no-statement",
-        iconKey: "mic-off",
-        n: 6,
-        title: "Do not give a recorded statement to the other insurer",
-        body: "You are not required to. That call happens early on purpose.",
-      },
-      {
-        _key: "doctor",
-        iconKey: "calendar-check",
-        n: 7,
-        title: "See a doctor within days, not weeks",
-        body: "The gap between the crash and the first visit is used against you constantly.",
-      },
-      {
-        _key: "notes",
-        iconKey: "pencil",
-        n: 8,
-        title: "Write down what you remember",
-        body: "Details fade within a week.",
-      },
-    ],
-    ctaLabel: "Start your claim",
-    ctaHref: anchor(CA_SECTION_IDS.contact),
-  },
-
-  gloveBox: {
-    eyebrow: "Free printed card",
-    title: "Keep this in your glove box",
-    body:
-      "Exactly what to do at the scene — the six steps in order, the two deadlines " +
-      "that catch people out, and a number to call. Nobody remembers this list while " +
-      "standing on the shoulder of I-25.",
-    ctas: [
-      {
-        _key: "download",
-        label: "Download and print",
-        href: anchor(CA_SECTION_IDS.contact),
-        tone: "red",
-      },
-      {
-        _key: "mail",
-        label: "Mail me a free card",
-        href: anchor(CA_SECTION_IDS.contact),
-        tone: "ghost",
-      },
-    ],
-    note: "Free · English and Spanish",
-    front: {
-      faceLabel: "Front",
-      title: "At the scene",
-      steps: [
-        "Call the police",
-        "Photograph everything",
-        "Get witness numbers",
-        "Get checked out",
-        "Tell your own insurer",
-        "Write down what you remember",
-      ],
-      footLabel: "Call anytime",
-    },
-    back: {
-      faceLabel: "Back",
-      notTitle: "What not to do",
-      notItems: [
-        "Don't give a recorded statement to their insurer",
-        "Don't sign a release or accept a first offer",
-        "Don't wait weeks to see a doctor",
-      ],
-      deadlines: [
-        { _key: "claim", big: "3 yrs", label: "Crash claim deadline" },
-        { _key: "notice", big: "182 days", label: "Notice to a public entity" },
-      ],
-      footLabel: "Free, 24/7",
-      qrLabel: "Scan: check my deadline",
-    },
-  },
-
-  criteria: {
-    title: "Do I have a case?",
-    lede:
-      "Three things have to be true. You can usually tell in a couple of minutes — and " +
-      "if one is missing, we'll say so.",
-    video: {
-      poster: kcHarpring,
-      alt: "Video: the three things a case needs",
-      caption: "“The three things a case needs — and when we say no” — 90 sec",
-    },
-    items: [
-      {
-        _key: "hurt",
-        title: "You got hurt, and a doctor saw you",
-        body: [
-          "If you were treated, there's a record of it. Without any record, there's very " +
-            "little to prove. Seeing a doctor now still counts.",
-        ],
-      },
-      {
-        _key: "blame",
-        title: "Someone else was at least partly to blame",
-        body: [
-          "It does not have to be all their fault. Partly is enough. You can still " +
-            "recover money even if some of it was on you.",
-        ],
-      },
-      {
-        _key: "insurance",
-        title: "There's insurance to pay it",
-        body: [
-          "Their policy, your own coverage, or the medical coverage on your policy. If " +
-            "nobody has insurance, there is usually nothing to collect — and we'd rather " +
-            "tell you that early.",
-        ],
-      },
-    ],
-    inline: {
-      text: "Five questions and a straight answer.",
-      label: "Ask if I have a case — free",
-      href: anchor(CA_SECTION_IDS.contact),
-    },
-    note:
-      "Free, and no email required. If there isn't a case here, we'll tell you that " +
-      "instead of selling you one.",
-  },
-
-  fault: {
-    title: "Who was at fault?",
-    lede:
-      "If someone already told you it was your fault, that isn't the final word. Fault " +
-      "gets decided a lot later than people think.",
-    big: {
-      figure: "Still yes",
-      statement: "Being partly at fault does not end your case.",
-      body:
-        "It only reduces the amount. You lose the claim only if you were more than half " +
-        "responsible — and that number is argued over, not decided at the scene. If " +
-        "someone already told you it was your fault, that is not the final word.",
-    },
-    disclosure: { label: "How fault actually gets decided" },
-    branchesLabel: "The questions that decide it",
-    branches: [
-      {
-        _key: "cited-you",
-        n: "01",
-        question: "Were you cited?",
-        answer:
-          "Not decisive. A ticket is evidence, and it can be contested or outweighed by " +
-          "the physical evidence.",
-      },
-      {
-        _key: "cited-them",
-        n: "02",
-        question: "Was the other driver cited?",
-        answer:
-          "Helpful, not conclusive. It supports the claim but the insurer can still " +
-          "dispute liability.",
-      },
-      {
-        _key: "report",
-        n: "03",
-        question: "Do you disagree with the police report?",
-        answer:
-          "The report can be corrected and contradicted. It is a starting document, not " +
-          "a finding.",
-      },
-      {
-        _key: "both",
-        n: "04",
-        question: "Were you both partly at fault?",
-        answer:
-          "You still recover, reduced by your share — unless your share reaches 50%.",
-      },
-    ],
-    scale: {
-      caption:
-        "Being partly at fault reduces what you get. Being more than half at fault ends it.",
-      start: "None of it your fault",
-      middle: "Over half your fault — you get nothing",
-      end: "All your fault",
-    },
-    source: {
-      label: "Source:",
-      items: [{ _key: "comparative", label: "C.R.S. 13-21-111", note: "comparative fault" }],
-    },
-    blocks: [
-      {
-        _key: "ticket",
-        title: "Does a traffic ticket settle it?",
-        body: [
-          "No. A ticket is one piece of evidence a jury can look at, not the answer. " +
-            "We've won cases where the other driver never got a ticket, and seen cases " +
-            "lost where they did.",
-        ],
-      },
-      {
-        _key: "report-wrong",
-        title: "What if the police report is wrong?",
-        body: [
-          "It happens all the time, and it can be fixed. Officers mix up which car was " +
-            "which, mishear what people said, and draw the diagram from memory afterward. " +
-            "What really happened can be proven other ways.",
-        ],
-      },
-      {
-        _key: "memory",
-        title: "What if I can't remember what happened?",
-        body: [
-          "That's normal, and it doesn't hurt your case. Memory gaps are expected after " +
-            "a hard hit or a head injury. Fault gets pieced together from the cars, the " +
-            "damage, nearby cameras and witnesses — not just from what you remember.",
-        ],
-      },
-    ],
-    foot: { text: "Someone already told you it was your fault? Get a second opinion." },
-    video: {
-      poster: seanDormer,
-      alt: "Attorney video: who was at fault",
-      caption: "“They said it was my fault. Is that it?” — 90 sec",
-    },
-  },
-
-  medical: {
-    id: CA_SECTION_IDS.know,
-    title: "Who pays my medical bills while the case is open?",
-    lede: "It's the question we hear most, and the answer catches almost everyone off guard.",
-    video: {
-      poster: kcHarpring,
-      alt: "Attorney video: who pays my medical bills",
-      caption: "“Who pays my medical bills?” — 90 sec",
-    },
-    blocks: [
-      {
-        _key: "not-as-you-go",
-        title: "The other driver's insurance will not pay as you go",
-        body: [
-          "They pay once, at the end. Nothing arrives while you're still treating — no " +
-            "matter how obviously the crash was their fault or how big the bills get. Even " +
-            "if their insurer admits fault, that doesn't start any payments. It only makes " +
-            "the check at the end more likely.",
-        ],
-      },
-      {
-        _key: "medpay",
-        title: "You may already have $5,000 for medical bills",
-        body: [
-          "Most people do and don't know it. It's called medical payments coverage, or " +
-            "MedPay. Colorado insurers have to offer it, so it's on your policy unless you " +
-            "turned it down in writing. It pays your treatment no matter who caused the " +
-            "crash, and it pays fast.",
-          "To check: find your auto policy paperwork and look for a line that says " +
-            "medical payments with its own dollar limit, usually $5,000. If you can't find " +
-            "it, call your own insurance agent and ask, “do I have MedPay on this policy?”",
-        ],
-      },
-      {
-        _key: "health",
-        title: "Health insurance will pay now, but wants it back later",
-        body: [
-          "Your health plan will cover your care, then ask to be paid back out of " +
-            "whatever you recover at the end. That number is negotiable, and it's often too " +
-            "high — plans regularly include charges that had nothing to do with the crash. " +
-            "Getting it lowered puts money back in your pocket without changing the " +
-            "settlement at all.",
-        ],
-      },
-      {
-        _key: "none",
-        title: "What if you have none of these",
-        body: [
-          "You still have options. Some doctors will treat you now and wait to be paid " +
-            "when the case ends. Most hospitals have financial assistance programs, but " +
-            "they rarely mention them unless you ask. Three things worth asking: what's " +
-            "your self-pay rate, can this bill be held, and can I get that in writing.",
-        ],
-      },
-    ],
-    figureAfter: "medpay",
-    figure: {
-      caption: "What that line looks like on your insurance paperwork",
-      title: "Auto Policy — Declarations",
-      meta: "Coverages & limits",
-      rows: [
-        { _key: "bi", label: "Bodily injury liability", value: "$100,000 / $300,000" },
-        { _key: "pd", label: "Property damage liability", value: "$50,000" },
-        {
-          _key: "medpay",
-          label: "Medical payments (MedPay)",
-          value: "$5,000",
-          highlight: true,
-        },
-        {
-          _key: "um",
-          label: "Uninsured / underinsured motorist",
-          value: "$100,000 / $300,000",
-        },
-        { _key: "collision", label: "Collision", value: "$500 deductible" },
-      ],
-      note: {
-        label: "Look here",
-        text:
-          "Its own line, with its own dollar limit. If your paperwork says “rejected” " +
-          "next to it, you turned it down when you bought the policy.",
-      },
-    },
-    inline: {
-      text: "Not sure what coverage you have? Send us the paperwork.",
-      label: "We'll read it for you",
-      href: anchor(CA_SECTION_IDS.contact),
-    },
-    source: {
-      label: "Source:",
-      items: [
-        { _key: "medpay", label: "C.R.S. 10-4-635", note: "medical payments coverage" },
-      ],
-    },
-  },
-
-  limits: {
-    title: "What if their insurance isn’t enough?",
-    lede: "Colorado lets drivers carry very little. A serious injury can pass it in the first month.",
-    blocks: [
-      {
-        _key: "minimum",
-        title: "The legal minimum is smaller than most people picture",
-        body: [
-          "Colorado requires every driver to carry liability coverage, but the required " +
-            "amount is low. One ambulance ride, one emergency room visit, and one MRI can " +
-            "use up the entire bodily injury minimum before you have even seen a " +
-            "specialist. When that happens, the at-fault driver’s policy is not the end of " +
-            "the search — it is the beginning of it.",
-        ],
-      },
-      {
-        _key: "elsewhere",
-        title: "Where the rest of the money comes from",
-        body: [
-          "Your own underinsured motorist coverage is the usual answer, and it exists " +
-            "for exactly this situation. Beyond that: other policies in your household, an " +
-            "employer’s policy if the other driver was working, a commercial policy behind " +
-            "a company vehicle, or a second party who contributed to the crash. Finding " +
-            "every layer is often worth more than arguing about fault.",
-        ],
-      },
-      {
-        _key: "own-carrier",
-        title: "Making that claim turns your insurer into the other side",
-        body: [
-          "The moment you claim underinsured motorist benefits, your own carrier is the " +
-            "one writing the check — and the same adjusters, the same delays, and the same " +
-            "low first offers get pointed at you. Being their customer for fifteen years " +
-            "does not change how that file gets handled.",
-        ],
-      },
-      {
-        _key: "uninsured",
-        title: "What if they had no insurance at all",
-        body: [
-          "Then uninsured motorist coverage is the claim, and it works the same way. " +
-            "Colorado has a significant share of uninsured drivers, and hit-and-run crashes " +
-            "are treated as uninsured claims too — but most policies require you to report " +
-            "the crash promptly, so the timing matters.",
-        ],
-      },
-    ],
-    figureAfter: "minimum",
-    figure: {
-      caption: "What Colorado actually requires, and what is optional",
-      title: "Colorado minimum auto coverage",
-      meta: "Per C.R.S. 10-4-620",
-      rows: [
-        { _key: "bi-one", label: "Bodily injury — one person hurt", value: "$25,000" },
-        {
-          _key: "bi-all",
-          label: "Bodily injury — everyone hurt in one crash",
-          value: "$50,000",
-        },
-        { _key: "pd", label: "Property damage", value: "$15,000" },
-        {
-          _key: "medpay",
-          label: "Medical payments (MedPay) on your own policy",
-          value: "$5,000",
-          highlight: true,
-        },
-        { _key: "um", label: "Uninsured / underinsured motorist", value: "Optional" },
-      ],
-      note: {
-        label: "Note",
-        text:
-          "MedPay and uninsured motorist coverage are not required, but insurers must " +
-          "offer them — so you have them unless you turned them down in writing.",
-      },
-    },
-    inline: {
-      text: "Not sure how much coverage is available to you?",
-      label: "Send us the paperwork",
-      href: anchor(CA_SECTION_IDS.contact),
-    },
-    source: {
-      label: "Sources:",
-      items: [
-        { _key: "limits", label: "C.R.S. 10-4-620", note: "required limits" },
-        { _key: "um", label: "10-4-609", note: "uninsured motorist" },
-        { _key: "medpay", label: "10-4-635", note: "MedPay" },
-      ],
-    },
-  },
-
-  damages: {
-    title: "What money can I actually get?",
-    lede:
-      "Colorado splits it into three buckets, and they don't all work the same way. " +
-      "Most people only know about the first one.",
-    tiles: [
-      {
-        _key: "bills",
-        iconKey: "bills",
-        title: "Medical bills you already have",
-        body: "Everything billed so far — ambulance, ER, imaging, therapy.",
-      },
-      {
-        _key: "future-care",
-        iconKey: "future-care",
-        title: "Care you'll still need",
-        body: "Future treatment, surgery, or help at home that a doctor expects.",
-      },
-      {
-        _key: "missed-work",
-        iconKey: "clock",
-        title: "Work you missed",
-        body: "Paychecks lost while you were recovering, including used sick days.",
-      },
-      {
-        _key: "earning",
-        iconKey: "earning",
-        title: "Work you can no longer do",
-        body: "If the injury changes what you're able to earn going forward.",
-      },
-      {
-        _key: "out-of-pocket",
-        iconKey: "briefcase",
-        title: "Out-of-pocket costs",
-        body: "Prescriptions, braces, mileage, childcare.",
-      },
-      {
-        _key: "pain",
-        iconKey: "heart",
-        title: "Pain",
-        body: "What you've physically been through, and still are.",
-      },
-      {
-        _key: "anxiety",
-        iconKey: "mind",
-        title: "Anxiety, sleep, fear of driving",
-        body: "The emotional side. It counts, and it is regularly overlooked.",
-      },
-      {
-        _key: "activities",
-        iconKey: "activity",
-        title: "Things you can't do anymore",
-        body: "Hobbies, sports, picking up your kids, sleeping through the night.",
-      },
-      {
-        _key: "impairment",
-        iconKey: "impairment",
-        title: "Permanent loss of function",
-        body: "A joint, a limb, or a back that will not go back to how it was.",
-      },
-      {
-        _key: "scarring",
-        iconKey: "scarring",
-        title: "Scarring or disfigurement",
-        body: "Visible, permanent changes — a separate category of its own.",
-      },
-    ],
-    disclosure: {
-      label: "The legal categories, how each is proven, and the Colorado caps",
-    },
-    columns: [
-      {
-        _key: "economic",
-        name: "Economic",
-        itemsLabel: "What it covers",
-        items: [
-          "Medical bills already incurred",
-          "Future medical and attendant care",
-          "Wages lost during recovery",
-          "Lost future earning capacity",
-          "Out-of-pocket costs and mileage",
-        ],
-        proofLabel: "How it's proven",
-        proof:
-          "Records, billing, wage documentation, and an economist or life-care planner " +
-          "where future losses are involved.",
-        capLabel: "Colorado cap",
-        cap: "Not capped",
-        capNote: "Limited only by what can be documented and by available coverage.",
-      },
-      {
-        _key: "non-economic",
-        name: "Non-economic",
-        itemsLabel: "What it covers",
-        items: [
-          "Pain",
-          "Suffering",
-          "Inconvenience",
-          "Emotional distress",
-          "Loss of enjoyment of life",
-        ],
-        proofLabel: "How it's proven",
-        proof:
-          "Testimony from you and from people who knew you before — daily-life evidence, " +
-          "not paperwork.",
-        capLabel: "Colorado cap",
-        cap: "Capped by statute",
-        capNote:
-          "The cap has been raised recently and adjusts over time; which figure applies " +
-          "depends on when the claim arose.",
-      },
-      {
-        _key: "impairment",
-        name: "Physical impairment and disfigurement",
-        itemsLabel: "What it covers",
-        items: [
-          "Permanent loss of function",
-          "Permanent restriction on activity",
-          "Scarring",
-          "Disfigurement",
-          "Amputation or hardware left in place",
-        ],
-        proofLabel: "How it's proven",
-        proof:
-          "Medical opinion on permanency plus evidence of what the limitation costs you " +
-          "day to day.",
-        capLabel: "Colorado cap",
-        cap: "Not capped",
-        capNote: "A separate Colorado category. It must be pleaded and proven deliberately.",
-      },
-    ],
-    source: {
-      label: "Source:",
-      items: [{ _key: "caps", label: "C.R.S. 13-21-102.5", note: "damage caps" }],
-    },
-    noNumber: {
-      title: "Why we won’t put a number on it here",
-      body:
-        "Any number quoted before you finish treating is a guess, and usually a low one. " +
-        "Until your medical picture settles, nobody knows what the future care and " +
-        "lasting-injury pieces are worth — and those are the parts that move the total. A " +
-        "dollar figure on a website is advertising, not an answer.",
-      ask: { text: "Want a realistic range for your situation?" },
-    },
-  },
-
-  offer: {
-    title: "The insurance company offered me money. Should I take it?",
-    lede: "Sometimes yes, honestly. Here's how to tell which one this is.",
-    blocks: [
-      {
-        _key: "fast",
-        title: "Why the first offer comes so fast",
-        body: [
-          "Because it's cheapest before anyone knows how hurt you are. An offer in the " +
-            "first few weeks is built on the bills that exist today — not the scan you " +
-            "haven't had, the specialist you haven't seen, or the pain that hasn't gone " +
-            "away yet.",
-        ],
-      },
-      {
-        _key: "final",
-        title: "Once you sign, it's over",
-        body: [
-          "The paper they send with the check ends your claim for good. It covers " +
-            "treatment you haven't had yet and problems that show up next year. If the " +
-            "injury turns out worse than it looked, there is no going back and asking for " +
-            "more.",
-        ],
-      },
-      {
-        _key: "take-it",
-        title: "When taking it is the right call",
-        body: [
-          "More often than you'd expect. If the injury was minor, you're done treating, " +
-            "you feel like yourself again, and the offer covers your bills and your missed " +
-            "work — take it. Hiring a lawyer would just take a cut of the same money. We " +
-            "tell people this every week. It isn't a trick.",
-        ],
-      },
-      {
-        _key: "wait",
-        title: "When to wait",
-        body: [
-          "Don't sign while you're still treating, still in pain, or when the number " +
-            "only covers the bills you have so far. If a doctor has said the words " +
-            "permanent, surgery, or referral, the offer was calculated before anyone knew " +
-            "about any of that.",
-        ],
-      },
-    ],
-    inline: {
-      text: "Have an offer in hand? Read it to us over the phone.",
-      label: "We'll tell you if it's fair",
-      href: anchor(CA_SECTION_IDS.contact),
-    },
-  },
-
-  tactics: {
-    eyebrow: "What we see from carriers",
-    title: "The adjuster is not on your side",
-    lede:
-      "They are friendly, they call quickly, and they sound like they are helping. Their " +
-      "job is to close your file for as little as possible. Four things we deal with " +
-      "every week.",
-    cards: [
-      {
-        _key: "fast-offer",
-        title: "The fast, friendly offer",
-        body: [
-          "An early check is cheapest, because nobody knows yet how hurt you are. The " +
-            "hope is that you take easy money before the specialist, the imaging, and the " +
-            "words “this may be permanent.”",
-        ],
-      },
-      {
-        _key: "waiting",
-        title: "Waiting you out",
-        body: [
-          "Especially after a low offer. Bills pile up, the car is gone, work is missed " +
-            "— and financial pressure is what makes people accept less than a claim is " +
-            "worth. Delay is a strategy, not a backlog.",
-        ],
-      },
-      {
-        _key: "recorded",
-        title: "The recorded statement",
-        body: [
-          "The call is recorded for a reason. Say “I’m okay” in week one, or misspeak " +
-            "once about how it happened, and the quote comes back months later as an " +
-            "argument about fault or severity.",
-        ],
-      },
-      {
-        _key: "pre-existing",
-        title: "Blaming your back, not the crash",
-        body: [
-          "Colorado has no injury threshold, so the fight is over cause. Old imaging, a " +
-            "prior chiropractor visit, or a two-week gap in therapy all get used to argue " +
-            "you were already hurt before the collision.",
-        ],
-      },
-    ],
-    foot: {
-      text:
-        "Have an offer in hand? Read it to us over the phone and we’ll tell you whether " +
-        "it’s fair.",
-    },
-  },
-
-  cost: {
-    title: "What does it cost to hire us?",
-    lede: "Here is the whole answer in one number.",
-    big: {
-      figure: "$0",
-      statement: "You pay nothing unless we win.",
-      body:
-        "No retainer. No hourly bills. No invoice ever shows up in your mailbox. If we " +
-        "win, our fee comes out of the money we recover for you. If we lose, you owe us " +
-        "nothing at all.",
-    },
-    // The comp renders this one as a plain label over an always-open panel
-    // rather than a <summary>. Built as a disclosure like its three siblings:
-    // an unlabelled open panel and a closed one differ only by a caret, and
-    // four sections behaving three different ways is the kind of inconsistency
-    // a visitor reads as a bug.
-    disclosure: { label: "The details, if you want them" },
-    blocks: [
-      {
-        _key: "contingency",
-        title: "We get paid out of what we recover",
-        body: [
-          "Our fee is a percentage of the money we actually bring in for you. You agree " +
-            "to that percentage in writing before we start, so you know the number on day " +
-            "one. You pay nothing when you hire us and nothing while the case is going.",
-        ],
-      },
-      {
-        _key: "costs",
-        title: "Who pays for records and experts",
-        body: [
-          "We do, as the case goes along — medical records, expert witnesses, court " +
-            "filing fees, all of it. At the end those costs are listed out line by line and " +
-            "paid back from the recovery, separate from our fee. You see that list before " +
-            "any money is handed out.",
-        ],
-      },
-      {
-        _key: "lose",
-        title: "If we lose, you owe us nothing",
-        body: [
-          "No fee, and we eat the costs we already paid out. You will never get a bill " +
-            "from us for a case we didn't win. The firm takes that risk, not you.",
-        ],
-      },
-      {
-        _key: "free-call",
-        title: "The first call is free either way",
-        body: [
-          "Free whether you hire us or not. If you don't need a lawyer, we'll say so on " +
-            "that call and tell you what to do on your own instead.",
-        ],
-      },
-    ],
-    foot: { text: "Want it explained out loud before you decide anything?" },
-    video: {
-      poster: seanDormer,
-      alt: "Attorney video: what it costs",
-      caption: "“What it costs to hire us” — 60 sec",
-    },
-  },
-
-  court: {
-    title: "Do I have to go to court?",
-    lede: "Short answer first.",
-    big: {
-      figure: "No",
-      statement: "Almost certainly not.",
-      body:
-        "Most of our clients never set foot in a courtroom. The large majority of injury " +
-        "cases are settled, and settling is the normal ending — not a lesser one.",
-    },
-    reassure: {
-      title: "The part people worry about most: being asked questions",
-      body: [
-        "If it comes up, it's called a deposition. You sit in a conference room with " +
-          "your lawyer right beside you, the other side's lawyer asks questions, and " +
-          "someone types down your answers. No judge. No jury. Nobody watching.",
-        "It usually runs two to four hours, we practice with you beforehand, and all you " +
-          "have to do is tell the truth about what you remember. “I don't remember” is a " +
-          "real answer.",
-      ],
-    },
-    disclosure: { label: "More about how it works" },
-    blocks: [
-      {
-        _key: "filing",
-        title: "Filing a lawsuit isn't the same as going to trial",
-        body: [
-          "Filing is just a step. It puts the case on a schedule with deadlines the " +
-            "insurance company can't ignore, which is often what finally gets a stuck claim " +
-            "moving. Most cases that get filed still settle before any trial.",
-        ],
-      },
-      {
-        _key: "willingness",
-        title: "Why being willing to go to trial helps you either way",
-        body: [
-          "Insurance companies keep track of which firms actually try cases and which " +
-            "ones always settle. Firms that never go to trial get low offers, and their " +
-            "clients never find out why. Being someone the other side has to take seriously " +
-            "is what moves the number — even in a case that never reaches a jury.",
-        ],
-      },
-      {
-        _key: "how-long",
-        title: "How long will this take?",
-        body: [
-          "Longer than you want, and no honest lawyer will promise you a date. A simple " +
-            "claim often settles a few months after you finish treating. Filing a lawsuit " +
-            "usually adds a year or more. A case that goes all the way to trial can take " +
-            "two years in a busy Denver court. What we can promise is that you'll always " +
-            "know where it stands.",
-        ],
-      },
-    ],
-    foot: { text: "Worried about one specific part? Ask about just that." },
-    video: {
-      poster: kcHarpring,
-      alt: "Attorney video: do I have to go to court",
-      caption: "“Do I have to go to court?” — 90 sec",
-    },
-  },
-
-  process: {
-    title: "What happens after you call",
+  timeline: {
+    title: "What the next few months look like",
+    lede: "Most people have never done this before. Here is the honest version.",
+    ledeStrong:
+      "Most of our clients never set foot in a courtroom — but the case has to be built " +
+      "as if it will be tried.",
     steps: [
       {
         _key: "same-day",
         n: "1",
         title: "Same day, with a lawyer",
-        body: "Not a screener.",
+        body: "Not an intake screener.",
       },
       {
         _key: "deadlines",
         n: "2",
-        title: "We check deadlines and coverage first",
+        title: "We check deadlines and coverage",
         body: "Before anything else.",
       },
       {
         _key: "no-case",
         n: "3",
-        title: "If it isn't a case, we tell you",
+        title: "If it isn't a case, we say so",
         body: "And point you somewhere useful.",
       },
       {
         _key: "take-it",
         n: "4",
         title: "If it is, we take the insurers",
-        body: "You handle recovery.",
+        body: "You handle getting better.",
       },
     ],
-  },
-
-  build: {
-    eyebrow: "How we build it",
-    title: "What we actually do with your case",
-    items: [
+    phases: [
       {
-        _key: "causation",
-        title: "Prove the other driver caused it — not just that they were careless",
-        body: [
-          "Two different arguments, and insurers concede the first while fighting the " +
-            "second. We work the scene, the vehicles, the signal timing, and the witnesses " +
-            "so causation is documented rather than assumed.",
-        ],
+        _key: "treating",
+        title: "While you're treating",
+        when: "weeks to months",
+        body:
+          "Your job is appointments and getting better. We collect the records and bills " +
+          "as they come in, and we deal with the adjusters.",
       },
       {
-        _key: "losses",
-        title: "Tie every loss back to the collision",
-        body: [
-          "Hospital stays, therapy, missed shifts, the things you have stopped being " +
-            "able to do. Each one gets connected to the crash in the record, because " +
-            "anything left unconnected is something the carrier gets for free.",
-        ],
+        _key: "demand",
+        title: "The demand",
+        when: "after treatment",
+        body:
+          "Once your treatment settles, we put the whole picture in front of the insurer " +
+          "— the injuries, the costs, and what the crash actually changed for you.",
       },
       {
-        _key: "defendants",
-        title: "Find everyone who can be held responsible",
-        body: [
-          "Sometimes it is not only the driver. An employer, a vehicle owner, a bar, or " +
-            "a government entity may share liability — and each one brings another policy " +
-            "to the table.",
-        ],
+        _key: "file",
+        title: "If they won't pay, we file",
+        when: "months",
+        body:
+          "Filing puts the case on a court schedule the insurer cannot ignore. Discovery " +
+          "starts: written questions, records, depositions, and expert opinions on both " +
+          "sides.",
       },
       {
-        _key: "pre-existing",
-        title: "Get ahead of the pre-existing condition argument",
-        body: [
-          "It is coming in nearly every Colorado case. Prior records, a treating " +
-            "physician’s opinion, and people who knew you before the crash are what turn " +
-            "“he already had a bad back” into a losing argument.",
-        ],
+        _key: "mediation",
+        title: "Mediation",
+        when: "a day",
+        body:
+          "A neutral mediator works between both sides in one sitting. Many cases resolve " +
+          "here, and nothing is agreed to without you.",
+      },
+      {
+        _key: "trial",
+        title: "Trial",
+        when: "if it gets here",
+        body:
+          "A jury hears the evidence and decides. Most cases never reach this point — but " +
+          "every case we take is built as though it will.",
       },
     ],
-    evidence: {
-      title: "Evidence we gather for you",
-      items: [
-        "Photographs of the scene, the vehicles, and your injuries",
-        "The Colorado crash report and any citations issued",
-        "Traffic camera, business, and doorbell footage nearby",
-        "Statements from passengers and independent witnesses",
-        "Vehicle event data, before the car is repaired or scrapped",
-        "Your complete medical records, including what came before",
-      ],
-      note:
-        "Some of it disappears within weeks — surveillance footage especially, which is " +
-        "usually overwritten in 7 to 30 days. The sooner someone sends a preservation " +
-        "letter, the more of it still exists.",
-    },
+    photo: consultPhoto,
+    photoAlt: "An attorney meeting with a client at a conference table",
+    points: [
+      "You will not be chasing us. One person knows your case.",
+      "Most cases run several months to a year or more.",
+      "No offer is accepted unless you say yes.",
+    ],
   },
-
-  keyPointsEyebrow: "The firm at a glance",
 
   crashTypes: {
-    id: CA_SECTION_IDS.types,
     title: "Types of car accidents we handle",
-    lede:
-      "Find the one that sounds like yours. How the crash happened changes what your " +
-      "claim looks like.",
+    lede: "How the crash happened changes what has to be proven, and who ends up paying.",
     // The comp points all eight at `DH - Practice Areas.html` — its way of
     // saying "somewhere else", not a destination. Six of the eight match a live
     // legacy URL and take it; two do not exist anywhere on the legacy site and
@@ -1682,7 +859,6 @@ const carAccidents: PracticeAreaDetail = {
       {
         _key: "rear-end",
         name: "Rear-end",
-        iconKey: "car-accident",
         body:
           "Liability is usually conceded, so the fight moves to injury severity. Low " +
           "visible damage is the standard argument against you.",
@@ -1694,7 +870,6 @@ const carAccidents: PracticeAreaDetail = {
       {
         _key: "t-bone",
         name: "T-bone and intersection",
-        iconKey: "car-accident",
         body:
           "Right-of-way is contested and often decided by cameras, signal timing, or a " +
           "witness. Evidence disappears within days.",
@@ -1704,7 +879,6 @@ const carAccidents: PracticeAreaDetail = {
       {
         _key: "head-on",
         name: "Head-on",
-        iconKey: "car-accident",
         body:
           "Catastrophic injuries against limits that are frequently too low. Finding " +
           "additional coverage matters more than liability.",
@@ -1715,7 +889,6 @@ const carAccidents: PracticeAreaDetail = {
       {
         _key: "rollover",
         name: "Rollover",
-        iconKey: "car-accident",
         body:
           "Vehicle design and roof strength can put a manufacturer in the case alongside " +
           "the driver. Preserve the vehicle.",
@@ -1725,7 +898,6 @@ const carAccidents: PracticeAreaDetail = {
       {
         _key: "multi-vehicle",
         name: "Multi-vehicle",
-        iconKey: "truck-accident",
         body:
           "Several insurers each pointing at the others, and limits shared among " +
           "claimants. Sequence and speed matter.",
@@ -1735,7 +907,6 @@ const carAccidents: PracticeAreaDetail = {
       {
         _key: "hit-and-run",
         name: "Hit-and-run",
-        iconKey: "car-accident",
         body:
           "Your own uninsured motorist coverage becomes the claim. Prompt reporting is " +
           "usually a policy condition.",
@@ -1745,7 +916,6 @@ const carAccidents: PracticeAreaDetail = {
       {
         _key: "rideshare",
         name: "Rideshare",
-        iconKey: "car-accident",
         body:
           "Coverage depends on what the app was doing at that moment — offline, waiting, " +
           "en route, or carrying a passenger.",
@@ -1755,7 +925,6 @@ const carAccidents: PracticeAreaDetail = {
       {
         _key: "commercial",
         name: "Commercial vehicle",
-        iconKey: "truck-accident",
         body:
           "Federal rules, driver logs, and telematics apply, and a spoliation letter has " +
           "to go out before data is overwritten.",
@@ -1765,241 +934,217 @@ const carAccidents: PracticeAreaDetail = {
     ],
   },
 
-  injuries: {
-    title: "Injuries we see, and what they mean for your case",
-    lede: "This isn't medical advice — just what each injury tends to change about a claim.",
-    tiles: [
-      {
-        _key: "tbi",
-        name: "Traumatic brain injury",
-        iconKey: "brain-injury",
-        body:
-          "Frequently missed at the ER and priced as a soft-tissue claim. Neuropsych " +
-          "testing and testimony from people who knew you before are what prove it.",
-      },
-      {
-        _key: "spinal",
-        name: "Spinal cord and back",
-        iconKey: "slip-and-fall",
-        body:
-          "Degenerative findings on imaging get used to argue the crash changed nothing. " +
-          "Prior records and a treating opinion carry the point.",
-      },
-      {
-        _key: "whiplash",
-        name: "Whiplash and soft tissue",
-        iconKey: "car-accident",
-        body:
-          "The most disputed category there is. Consistent treatment and a documented " +
-          "return-to-baseline timeline are the whole case.",
-      },
-      {
-        _key: "fractures",
-        name: "Fractures",
-        iconKey: "slip-and-fall",
-        body:
-          "Objective and hard to dispute, so the fight shifts to future care, hardware " +
-          "removal, and permanent limitation.",
-      },
-      {
-        _key: "internal",
-        name: "Internal injuries",
-        iconKey: "medical-malpractice",
-        body:
-          "Large early bills and lien exposure. Coordinating health coverage and MedPay " +
-          "early protects the eventual recovery.",
-      },
-      {
-        _key: "wrongful-death",
-        name: "Wrongful death",
-        iconKey: "wrongful-death",
-        body:
-          "A separate Colorado statute with its own deadlines, its own damage rules, and " +
-          "strict limits on who may bring the claim.",
-      },
-    ],
-  },
-
   denver: {
     title: "Car accidents in Denver",
-    // TODO(launch): five figures the firm has to stand behind, and the comp
-    // dates them "[year]". Nothing here is sourced to a published CDOT or DPD
-    // table yet — they read as the designer's round numbers.
+    lede:
+      "Where and how a crash happens changes what the case looks like — which insurer is " +
+      "involved, what evidence exists, and how fast it disappears.",
+    // THREE figures, each with a sentence about what it means for a claim. The
+    // dead `denverData` array in the same comp still lists FOUR bare figures
+    // from the first design; the markup is the source here.
+    // TODO(launch): the comp dates all three "[year]" and sources them to
+    // "[CDOT / DRCOG / Denver Open Data]". Nothing is sourced to a published
+    // table yet.
     stats: [
-      { _key: "crashes", big: "22,400", label: "Crashes in Denver per year" },
-      { _key: "injury", big: "5,900", label: "Injury crashes per year" },
-      { _key: "fatal", big: "84", label: "Fatal crashes per year" },
-      { _key: "hit-and-run", big: "27%", label: "Hit-and-run share of crashes" },
+      {
+        _key: "hit-and-run",
+        big: "1 in 4",
+        label: "Crashes here is a hit-and-run [year]",
+        body: "Which means your own uninsured motorist coverage becomes the claim.",
+      },
+      {
+        _key: "injury",
+        big: "5,900",
+        label: "Injury crashes a year in Denver [year]",
+        body:
+          "Roughly sixteen a day. Most people involved have never dealt with an insurer " +
+          "before.",
+      },
+      {
+        _key: "fatal",
+        big: "84",
+        label: "Fatal crashes a year [year]",
+        body: "Wrongful death claims run on a different deadline than injury claims.",
+      },
     ],
-    body: [
-      "Crashes in Denver aren't spread evenly across the city. They pile up on a handful " +
-        "of big roads and highway stretches, and inside those, at traffic lights and " +
-        "on-ramps rather than out in the open.",
-      "Time of day works the same way — the weekday evening commute produces the most " +
-        "crashes, late weekend nights produce the worst ones. Where your crash happened " +
-        "often tells us which arguments the insurance company is about to make.",
-    ],
-    corridorsLabel: "Roads we see most",
+    source: "Source: [CDOT / DRCOG / Denver Open Data], [year].",
+    mapCaption: "Schematic, not to scale.",
+    // Five roads, numbered against the schematic map. Every sentence here is
+    // NEW — the dead `corridors` array carries a different one per road.
     corridors: [
       {
         _key: "i25",
         name: "I-25",
         body:
-          "Highest volume in the metro; on-ramp merges and stop-and-go backups through " +
-          "the central corridor.",
+          "High speeds, multi-vehicle impacts, and commercial traffic. Coverage limits get " +
+          "tested here more than anywhere else in the metro.",
       },
       {
         _key: "colfax",
         name: "Colfax Avenue",
         body:
-          "Long signalized arterial with heavy pedestrian traffic and frequent left-turn " +
-          "collisions.",
+          "Constant turning movements, pedestrians, and buses. Right-of-way is the usual " +
+          "fight, and camera footage is the usual answer.",
       },
       {
         _key: "federal",
         name: "Federal Boulevard",
         body:
-          "Repeatedly among the most dangerous corridors in the city for pedestrians and " +
-          "cyclists.",
+          "Wide lanes, frequent uninsured drivers, and a high hit-and-run rate. Your own " +
+          "policy often carries the claim.",
       },
       {
         _key: "colorado",
         name: "Colorado Boulevard",
-        body: "High-speed arterial with dense commercial driveways and abrupt lane changes.",
+        body:
+          "Heavy commuter volume through signalized intersections. Rear-end and left-turn " +
+          "collisions dominate.",
       },
       {
         _key: "speer",
         name: "Speer Boulevard",
-        body: "Curving one-way segments and short merges, with late-night severity spikes.",
-      },
-    ],
-    source:
-      "Colorado Department of Transportation and Denver Police Department, [year]. " +
-      "Updated annually.",
-  },
-
-  firmData: {
-    title: "What we see in our own cases",
-    lede: "Our own closed-case data, not industry averages.",
-    // TODO(launch): three claims about the firm's own closed files. The comp
-    // ships a "[Methodology pending]" placeholder beneath them, which is the
-    // designer saying the same thing.
-    stats: [
-      {
-        _key: "increase",
-        big: "3.4x",
-        label: "Average increase over the insurer's first offer",
-      },
-      { _key: "verdicts", big: "41", label: "Car accident cases taken to verdict" },
-      {
-        _key: "declined",
-        big: "1 in 5",
-        label: "Share of calls we tell to skip hiring a lawyer",
-      },
-    ],
-    methodology:
-      "[Methodology pending] — which cases are counted, over what period, and how each " +
-      "figure is calculated. Cases still open are excluded.",
-    disclaimer: "Past results do not guarantee future outcomes.",
-  },
-
-  venue: {
-    title: "Where your case gets filed, and why it matters",
-    body: [
-      "Venue changes what a case is worth. Denver District Court draws a different jury " +
-        "pool than Arapahoe or Jefferson, moves at a different pace, and its judges have " +
-        "their own habits on motions, expert challenges, and how much trial time a case " +
-        "actually gets. Two identical crashes filed in two counties can resolve months " +
-        "and a meaningful margin apart.",
-      "Trying cases in these specific rooms is what makes that predictable. We know " +
-        "roughly how long a docket takes to reach trial, which defense firms settle at " +
-        "the courthouse door, and how a particular panel tends to hear impairment " +
-        "evidence.",
-    ],
-    courts: [
-      {
-        _key: "denver",
-        n: "1",
-        name: "Denver District Court",
-        body: "2nd Judicial District. Urban jury pool and a crowded civil docket.",
-      },
-      {
-        _key: "arapahoe",
-        n: "2",
-        name: "Arapahoe County District Court",
-        body: "18th Judicial District, Centennial. Suburban panel, faster route to a trial date.",
-      },
-      {
-        _key: "jefferson",
-        n: "3",
-        name: "Jefferson County District Court",
-        body: "1st Judicial District, Golden. Conservative pool; damages proof has to be airtight.",
-      },
-      {
-        _key: "adams",
-        n: "4",
-        name: "Adams County District Court",
-        body: "17th Judicial District, Brighton. Heavy commercial-vehicle corridor, distinct venue rules.",
+        body:
+          "Angled intersections and merging traffic along Cherry Creek. Fault is rarely " +
+          "obvious from the police report alone.",
       },
     ],
   },
 
-  related: {
-    title: "Related",
-    areasLabel: "Other practice areas",
-    // All five have a live legacy URL, matched from `getPracticeAreaGroups()`.
-    // Same mechanism as the 87 links the Practice Areas directory already
-    // ships: live today, and live after cutover only once these pages are built
-    // or redirected. This is the first of them.
-    areas: [
-      { _key: "truck", label: "Truck accidents", href: "/denver-truck-accident-lawyer" },
+  /**
+   * The eight-step checklist that used to be a section on this page. The second
+   * design turns it into a teaser pointing at `DH - Blog - What to do after a
+   * car accident.html`, a comp that arrived with this revision and that this
+   * build does not serve.
+   *
+   * `ctaHref: null` by Rhan's decision: the label stays, the affordance goes,
+   * and nothing points at a page that does not exist. The four cards in the
+   * illustration are the comp's own — a sample of the eight, not all of them.
+   * TODO(launch): build the article, then set the href.
+   */
+  checklistTeaser: {
+    title: "8 things to do after a car accident",
+    body: "From the scene to the first adjuster call — the steps that protect your claim.",
+    ctaLabel: "See all 8 steps",
+    ctaHref: null,
+    steps: [
+      { _key: "police", iconKey: "police", label: "Call the police" },
+      { _key: "photos", iconKey: "camera", label: "Photograph the scene" },
+      { _key: "witnesses", iconKey: "witnesses", label: "Get witness names" },
+      { _key: "doctor", iconKey: "stethoscope", label: "See a doctor" },
+      { _key: "insurer", iconKey: "none", label: "Tell your insurer" },
+    ],
+  },
+
+  /**
+   * The comparative-fault section, likewise reduced to a teaser. The comp links
+   * it at `DH - Blog.html` — the blog index, which this build serves — so
+   * unlike the checklist it has a real destination.
+   */
+  faultTeaser: {
+    title: "What if part of it was my fault?",
+    body:
+      "Colorado reduces what you recover by your share of the blame instead of erasing " +
+      "it. Being told it was your fault is not the final word.",
+    ctaLabel: "How fault gets decided",
+    ctaHref: ROUTES.blog,
+    scale: {
+      start: "None of it your fault",
+      middle: "Over half — you get nothing",
+      end: "All your fault",
+    },
+    source: {
+      label: "Source:",
+      items: [{ _key: "comparative", label: "C.R.S. 13-21-111" }],
+    },
+  },
+
+  /**
+   * Eight article stubs, all of which the comp points at `DH - Blog.html`.
+   * Their subjects are the first design's cut sections — the insurance Q&As,
+   * the damages grid, the adjuster tactics, the venue list — turned into
+   * promised articles.
+   *
+   * They keep the comp's destination, the blog index, which this build serves
+   * at `/news`. That is not a dead href, and it is what the comp specifies; but
+   * "Read the answer" landing on an index with no such answer is a launch
+   * problem either way.
+   * TODO(launch): write the eight, or cut the section back to what exists.
+   */
+  more: {
+    title: "More on car accident claims",
+    features: [
       {
-        _key: "motorcycle",
-        label: "Motorcycle accidents",
-        href: "/motorcycle-accident-lawyer-denver",
+        _key: "fault",
+        title: "Who was at fault?",
+        body: "What happens if part of it was your fault, and how fault actually gets decided.",
+        length: "2:05",
+        poster: consultPhoto,
+        ctaLabel: "Read the answer",
+        href: ROUTES.blog,
       },
       {
-        _key: "pedestrian",
-        label: "Pedestrian accidents",
-        href: "/denver-pedestrian-accident-lawyer",
-      },
-      {
-        _key: "premises",
-        label: "Premises liability",
-        href: "/denver-premises-liability-lawyer",
-      },
-      {
-        _key: "wrongful-death",
-        label: "Wrongful death",
-        href: "/denver-wrongful-death-lawyer",
+        _key: "medical",
+        title: "Who pays my medical bills right now?",
+        body: "Your own policy usually pays first — most people don’t know they have it.",
+        length: "1:14",
+        poster: crashVideoCover,
+        ctaLabel: "Read the answer",
+        href: ROUTES.blog,
       },
     ],
-    articlesLabel: "Supporting articles",
-    /**
-     * Five titles with no destinations, and none of them matches a post among
-     * the 167 in the scrape — searched by topic as well as by title. The
-     * closest real articles are "Statute of Limitations for Personal Injury
-     * Claims in Colorado" and "What If the Accident Is a Partially At-Fault Car
-     * Accident?", which are different articles with different titles; pointing
-     * the comp's label at either would be inventing a link.
-     *
-     * They ship with `href: null` and render as plain text, the same treatment
-     * the Blog index gives its eight card-less entries and the directory gives
-     * Legal Malpractice.
-     * TODO(launch): commission these five, point them at the nearest real
-     * posts under their own titles, or drop the column.
-     */
-    articles: [
-      { _key: "deadlines", label: "Colorado filing deadlines", href: null },
-      { _key: "statements", label: "Recorded statements", href: null },
-      { _key: "medpay", label: "MedPay explained", href: null },
+    cards: [
+      {
+        _key: "limits",
+        title: "What if their insurance isn’t enough?",
+        body: "Colorado minimums are low. Your own coverage is often the larger source.",
+        ctaLabel: "Read the answer",
+        href: ROUTES.blog,
+      },
+      {
+        _key: "offer",
+        title: "Should I take the first offer?",
+        body: "Sometimes yes. Here’s how to tell which kind of offer you have.",
+        ctaLabel: "Read the answer",
+        href: ROUTES.blog,
+      },
+      {
+        _key: "adjusters",
+        title: "How adjusters actually work",
+        body: "What the friendly early call is really for.",
+        ctaLabel: "Read the answer",
+        href: ROUTES.blog,
+      },
+      {
+        _key: "damages",
+        title: "What money can I actually get?",
+        body: "The categories Colorado recognizes, and what each one requires.",
+        ctaLabel: "Read the answer",
+        href: ROUTES.blog,
+      },
       {
         _key: "government",
-        label: "Suing a government entity in Colorado",
-        href: null,
+        title: "Suing a government entity",
+        body: "RTD buses, city vehicles, and the 182-day deadline that catches people out.",
+        ctaLabel: "Read the answer",
+        href: ROUTES.blog,
       },
-      { _key: "comparative", label: "How comparative fault works", href: null },
+      {
+        _key: "venue",
+        title: "Where your case gets filed",
+        body: "Venue, timelines, and what the local courts are like.",
+        ctaLabel: "Read the answer",
+        href: ROUTES.blog,
+      },
     ],
+  },
+
+  closing: {
+    title: "Talk to a lawyer about your crash",
+    lede:
+      "Free, confidential, and no obligation. If there isn't a case here, we'll tell you " +
+      "that instead of selling you one.",
+    officeLabel: "Our office",
+    mapTitle: "Dormer Harpring — Denver office",
   },
 };
 

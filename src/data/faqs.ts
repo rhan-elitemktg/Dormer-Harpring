@@ -225,8 +225,8 @@ export async function getCarAccidentFaqSection(anchor: string): Promise<FaqSecti
     eyebrow: "What you should know",
     title: "Other questions people ask us",
     lede:
-      "Nothing here is urgent. Open only the ones you're wondering about — each one has " +
-      "a short video from the attorney who would handle your case.",
+      "Expand any question to read the answer and watch a short video from the attorney " +
+      "who would handle your case.",
     ask: { ...home.ask, ctaHref: anchor },
   };
 }

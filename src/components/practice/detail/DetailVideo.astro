@@ -1,105 +1,170 @@
 ---
-// The comp's `.ca-vid` / `.ca-ansmedia` — an attorney video poster with a play
-// ring and an italic pull quote across its foot.
+// The comp's `.ca-trvid` — a 16:9 video poster with its title across the foot,
+// a runtime chip top-right and the play button in the bottom-right corner.
 //
-// INERT, like every other video panel on the site bar the six real client
+// The second design moved the play button off centre and made it white. Both
+// matter: centred, it sat on the title; red, it was the fourth red thing in the
+// viewport and read as the page's primary action rather than as a video.
+//
+// INERT, like every video panel on the site bar the six real client
 // testimonials. `[data-video]` is the marker `global.css` uses to run the play
-// ring's pulse on hover, and the panels become real <button>s when the lightbox
+// ring's pulse on hover, and these become real <button>s when the lightbox
 // lands. Deliberately not an <a> to nowhere in the meantime.
 import Picture from "../../media/Picture.astro";
-import PlayButton from "../../media/PlayButton.astro";
 import type { VideoPanel } from "../../../data/carAccidents";
 
 interface Props {
   video: VideoPanel;
-  /**
-   * `portrait` is the comp's 3:4 attorney panel; `wide` the 16:9 explainer;
-   * `fill` stretches to the height of the row it sits in.
-   */
-  shape?: "portrait" | "wide" | "fill";
-  size?: number;
+  /** Nudges the crop for a poster whose subject sits lower in the frame. */
+  focus?: "default" | "case";
   class?: string;
 }
 
-const { video, shape = "portrait", size = 66, class: className } = Astro.props;
+const { video, focus = "default", class: className } = Astro.props;
 ---
 
-<div class:list={["vid", `vid--${shape}`, className]} data-video>
+<div class:list={["trvid", className]} data-video>
   <Picture
     src={video.poster}
     alt={video.alt}
-    widths={[400, 800]}
-    sizes="(max-width: 980px) 100vw, 400px"
-    class="vid__img"
+    widths={[600, 1000, 1400]}
+    sizes="(max-width: 980px) 100vw, 640px"
+    class:list={["trvid__img", focus === "case" && "trvid__img--case"]}
   />
-  <span class="vid__scrim" aria-hidden="true"></span>
-  <PlayButton tone="accent" size={size} class="vid__play" />
-  {video.caption && <span class="vid__quote">{video.caption}</span>}
+  <span class="trvid__scrim" aria-hidden="true"></span>
+  <span class="trvid__dur">{video.length}</span>
+  <span class="trvid__pbtn" aria-hidden="true">
+    <svg width="20" height="22" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M8 5.5v13l11-6.5z"></path>
+    </svg>
+  </span>
+  <span class="trvid__cap"><span class="trvid__ttl">{video.title}</span></span>
 </div>
 
 <style>
-  .vid {
-    position: relative;
+  .trvid {
     display: block;
-    overflow: hidden;
+    position: relative;
+    aspect-ratio: 16 / 9;
     border-radius: var(--radius-4);
+    overflow: hidden;
     background: var(--dh-forest-100);
   }
 
-  .vid--portrait {
-    aspect-ratio: 3 / 4;
-  }
-
-  .vid--wide {
-    aspect-ratio: 16 / 9;
-  }
-
-  .vid--fill {
-    height: 100%;
-    min-height: 260px;
-  }
-
-  .vid :global(.vid__img) {
-    display: block;
+  .trvid :global(.trvid__img) {
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
     object-position: center 20%;
+    display: block;
   }
 
-  /* The wash the quote sits on. 62% of the panel, as the comp has it — a
-     shorter one leaves the second line of a two-line quote on bare photograph. */
-  .vid__scrim {
-    position: absolute;
-    inset: auto 0 0 0;
-    height: 62%;
-    background: linear-gradient(
-      180deg,
-      rgba(16, 24, 19, 0) 0%,
-      rgba(16, 24, 19, 0.55) 55%,
-      rgba(16, 24, 19, 0.88) 100%
-    );
-    pointer-events: none;
+  .trvid :global(.trvid__img--case) {
+    object-position: center 28%;
   }
 
-  .vid :global(.vid__play) {
+  /* Two washes, not one: the linear darkens the foot so the title reads, and
+     the radial deepens the bottom-left corner specifically, where the title
+     starts. A single linear strong enough for the corner greys the whole
+     photograph. */
+  .trvid__scrim {
     position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 2;
+    inset: 0;
+    z-index: 1;
+    background:
+      linear-gradient(
+        180deg,
+        rgba(10, 14, 11, 0) 62%,
+        rgba(10, 14, 11, 0.48) 84%,
+        rgba(10, 14, 11, 0.85) 100%
+      ),
+      radial-gradient(
+        70% 45% at 6% 100%,
+        rgba(10, 14, 11, 0.58) 0%,
+        rgba(10, 14, 11, 0) 100%
+      );
+    transition: background var(--dur) var(--ease);
   }
 
-  .vid__quote {
+  .trvid:hover .trvid__scrim {
+    background:
+      linear-gradient(
+        180deg,
+        rgba(10, 14, 11, 0.06) 56%,
+        rgba(10, 14, 11, 0.56) 82%,
+        rgba(10, 14, 11, 0.9) 100%
+      ),
+      radial-gradient(
+        70% 45% at 6% 100%,
+        rgba(10, 14, 11, 0.64) 0%,
+        rgba(10, 14, 11, 0) 100%
+      );
+  }
+
+  .trvid__dur {
     position: absolute;
-    z-index: 2;
-    left: var(--space-5);
+    top: var(--space-3);
+    right: var(--space-3);
+    z-index: 3;
+    padding: 4px 8px;
+    border-radius: var(--radius-2);
+    background: rgba(10, 14, 11, 0.62);
+    font-family: var(--font-ui);
+    font-weight: 700;
+    font-size: var(--text-micro);
+    line-height: 1;
+    color: var(--dh-white);
+  }
+
+  .trvid__pbtn {
+    position: absolute;
     right: var(--space-5);
     bottom: var(--space-5);
-    font-family: var(--font-serif);
-    font-style: italic;
-    font-size: var(--text-xl);
+    z-index: 2;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-full);
+    background: var(--dh-white);
+    color: var(--dh-forest-100);
+    box-shadow: 0 8px 24px rgba(8, 14, 10, 0.35);
+    transition: transform var(--dur) var(--ease);
+  }
+
+  .trvid:hover .trvid__pbtn {
+    transform: scale(1.08);
+  }
+
+  /* Right inset clears the play button, so a long title wraps above it rather
+     than running underneath. */
+  .trvid__cap {
+    position: absolute;
+    left: var(--space-6);
+    right: 96px;
+    bottom: var(--space-5);
+    z-index: 3;
+    display: block;
+  }
+
+  .trvid__ttl {
+    display: block;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--text-3xl);
     line-height: var(--leading-tight);
     color: var(--dh-white);
+    text-wrap: pretty;
+  }
+
+  @media (max-width: 768px) {
+    .trvid__cap {
+      left: var(--space-5);
+      right: 84px;
+      bottom: var(--space-4);
+    }
   }
 </style>

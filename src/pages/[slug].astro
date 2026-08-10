@@ -38,7 +38,6 @@ import { CA_SECTION_IDS, getPracticeAreaDetails } from "../data/carAccidents";
 import { getContactBand, getContactDetails } from "../data/contact";
 import { getCarAccidentFaqSection, getCarAccidentFaqs } from "../data/faqs";
 import { getAwards } from "../data/awards";
-import { getFirmStats } from "../data/stats";
 import { getFirmDetails } from "../data/site";
 import { getTeam } from "../data/team";
 import {
@@ -126,8 +125,7 @@ const area =
           firm,
           team,
           videoReviews,
-          awards,
-          stats,
+          awardList,
           testimonials,
           reviewSummary,
           faqs,
@@ -139,7 +137,6 @@ const area =
           getTeam(),
           getVideoReviews(),
           getAwards(),
-          getFirmStats(),
           getHomeTestimonials(),
           getReviewSummary(),
           getCarAccidentFaqs(),
@@ -148,45 +145,59 @@ const area =
           getContactBand(),
         ]);
 
-        // The lawyers band names seven people by key. Resolved in the DATA's
-        // order rather than the roster's — the comp leads with the two founding
-        // partners, and `getTeam()` is ordered for the team index.
+        // The lawyers band names four people by key, and pairs each with a
+        // credential line the PAGE owns — `team.ts` has the portrait and the
+        // role, this document has what they do on crash cases. Resolved in the
+        // data's order rather than the roster's.
         const byKey = new Map(team.map((member) => [member._key, member]));
-        const keys = [
-          ...props.detail.lawyers.leadKeys,
-          ...props.detail.lawyers.otherKeys,
-        ];
-        const lawyers = keys.map((key) => {
-          const member = byKey.get(key);
+        const lawyers = props.detail.lawyers.attorneys.map((entry) => {
+          const member = byKey.get(entry.key);
           if (!member) {
             throw new Error(
-              `${props.detail.slug}: no team member with _key "${key}". ` +
+              `${props.detail.slug}: no team member with _key "${entry.key}". ` +
                 `Fix the key in data/carAccidents.ts or add them to data/team.ts.`
             );
           }
-          return member;
+          return { ...member, cred: entry.cred };
         });
 
-        // The three result stories each key into a real client video.
-        const reviews = Object.fromEntries(
-          props.detail.results.stories.map((story) => {
-            const review = videoReviews.find((r) => r._key === story.reviewKey);
-            if (!review) {
+        // Each credential badge names an award record; the caption and the link
+        // beside it are the page's.
+        const awardByKey = new Map(awardList.map((award) => [award._key, award]));
+        const awards = Object.fromEntries(
+          props.detail.credentials.badges.map((badge) => {
+            const award = awardByKey.get(badge.awardKey);
+            if (!award) {
               throw new Error(
-                `${props.detail.slug}: result "${story._key}" names review ` +
-                  `"${story.reviewKey}", which is not in getVideoReviews().`
+                `${props.detail.slug}: badge "${badge._key}" names award ` +
+                  `"${badge.awardKey}", which is not in getAwards().`
               );
             }
-            return [story.reviewKey, review];
+            return [badge.awardKey, award];
           })
+        );
+
+        // The one result story that is a video keys into a real client review.
+        const reviews = Object.fromEntries(
+          props.detail.results.stories
+            .filter((story) => story.reviewKey)
+            .map((story) => {
+              const review = videoReviews.find((r) => r._key === story.reviewKey);
+              if (!review) {
+                throw new Error(
+                  `${props.detail.slug}: result "${story._key}" names review ` +
+                    `"${story.reviewKey}", which is not in getVideoReviews().`
+                );
+              }
+              return [story.reviewKey as string, review];
+            })
         );
 
         return {
           firm,
           lawyers,
-          reviews,
           awards,
-          stats,
+          reviews,
           testimonials,
           reviewSummary,
           faqs,
@@ -200,6 +211,11 @@ const area =
 const title = props.kind === "post" ? props.post.title : props.detail.metaTitle;
 const description =
   props.kind === "post" ? props.post.excerpt : props.detail.metaDescription;
+
+// The detail page's `Attorney` structured data needs absolute urls. Same
+// fallback Layout.astro uses, for the same reason: `astro dev` can run without
+// `site` set and the template literal would otherwise interpolate "undefined".
+const siteUrl = (Astro.site?.href ?? "https://www.denvertrial.com/").replace(/\/+$/, "");
 ---
 
 <Layout title={title} description={description}>
@@ -232,15 +248,15 @@ const description =
         detail={props.detail}
         firm={area.firm}
         lawyers={area.lawyers}
-        reviews={area.reviews}
         awards={area.awards}
-        stats={area.stats}
+        reviews={area.reviews}
         testimonials={area.testimonials}
         reviewSummary={area.reviewSummary}
         faqs={area.faqs}
         faqSection={area.faqSection}
         contact={area.contact}
         contactForm={area.contactForm}
+        siteUrl={siteUrl}
       />
     )
   }

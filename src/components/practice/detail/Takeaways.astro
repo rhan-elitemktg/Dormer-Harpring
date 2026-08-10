@@ -6,12 +6,18 @@ import type { TakeawaysSection } from "../../../data/carAccidents";
 
 interface Props {
   takeaways: TakeawaysSection;
+  /**
+   * The section nav's "Colorado car accident laws" target. In the first design
+   * that pointed at a long medical-bills section; the second cuts it, and this
+   * four-point summary is what the link has always meant.
+   */
+  id: string;
 }
 
-const { takeaways } = Astro.props;
+const { takeaways, id } = Astro.props;
 ---
 
-<section class="section--sm takeaways">
+<section class="section--sm takeaways" id={id}>
   <div class="container takeaways__grid">
     <header>
       {/* The comp draws this one's rule in forest rather than gold — the band
@@ -42,7 +48,7 @@ const { takeaways } = Astro.props;
               <path d="M4 12.5l5.2 5.2L20 6.9"></path>
             </svg>
             <h3 class="takeaway__title">{item.title}</h3>
-            {item.body.map((paragraph) => <p class="takeaway__body">{paragraph}</p>)}
+            <p class="takeaway__body">{item.body}</p>
           </li>
         ))
       }

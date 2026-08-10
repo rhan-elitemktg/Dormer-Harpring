@@ -2,12 +2,14 @@
 // "Recently injured in a Denver car accident?" — the triage block.
 //
 // The most important section on the page and the reason it is second: someone
-// who has just been in a crash gets three answers before any marketing. Rows
-// four and five are behind a disclosure because they apply to fewer people, not
-// because they matter less — the 182-day notice is the shortest deadline here.
+// who has just been in a crash gets five answers before any marketing.
+//
+// ALL FIVE ROWS ARE VISIBLE. The first design put the last two behind a "More
+// things to know" disclosure; this one does not, and the 182-day notice is the
+// shortest deadline on the page — hiding it behind a caret was the weaker call.
 import DetailVideo from "./DetailVideo.astro";
 import SourceNote from "./SourceNote.astro";
-import type { TriageSection, TriageRow } from "../../../data/carAccidents";
+import type { TriageSection } from "../../../data/carAccidents";
 import type { FirmDetails } from "../../../data/site";
 
 interface Props {
@@ -16,10 +18,6 @@ interface Props {
 }
 
 const { triage, firm } = Astro.props;
-const rows: (TriageRow & { first?: boolean })[] = triage.rows.map((row, i) => ({
-  ...row,
-  first: i === 0,
-}));
 ---
 
 <section class="section section--cream triage">
@@ -28,11 +26,7 @@ const rows: (TriageRow & { first?: boolean })[] = triage.rows.map((row, i) => ({
       <h2 class="triage__title">{triage.title}</h2>
       <p class="triage__lede">{triage.lede}</p>
 
-      <div class="triage__video">
-        <DetailVideo video={triage.video} shape="wide" size={60} />
-        <p class="triage__video-title">{triage.video.title}</p>
-        {triage.video.length && <span class="triage__video-dur">{triage.video.length}</span>}
-      </div>
+      <DetailVideo video={triage.video} class="triage__video" />
 
       <div class="triage__help">
         <p>{triage.help.text}</p>
@@ -43,8 +37,8 @@ const rows: (TriageRow & { first?: boolean })[] = triage.rows.map((row, i) => ({
     <div class="triage__panel">
       <div class="triage__rows">
         {
-          rows.map((row) => (
-            <div class:list={["trow", row.first && "trow--first"]}>
+          triage.rows.map((row, i) => (
+            <div class:list={["trow", i === 0 && "trow--first"]}>
               <div>
                 {row.tag && (
                   <span class="trow__tag" data-tone={row.tone}>
@@ -67,30 +61,6 @@ const rows: (TriageRow & { first?: boolean })[] = triage.rows.map((row, i) => ({
             </div>
           ))
         }
-
-        <details class="triage__more">
-          <summary>{triage.moreLabel}</summary>
-          {
-            triage.moreRows.map((row) => (
-              <div class="trow">
-                <div>
-                  <h3 class="trow__q">{row.question}</h3>
-                  <p class="trow__body">{row.body}</p>
-                  <a class="trow__cta arrow-link" href={row.ctaHref}>
-                    {row.ctaLabel}
-                    <span class="arrow" aria-hidden="true">
-                      &rarr;
-                    </span>
-                  </a>
-                </div>
-                <p class="trow__stat">
-                  <b>{row.stat.big}</b>
-                  <span>{row.stat.label}</span>
-                </p>
-              </div>
-            ))
-          }
-        </details>
       </div>
 
       <SourceNote source={triage.sources} />
@@ -121,41 +91,8 @@ const rows: (TriageRow & { first?: boolean })[] = triage.rows.map((row, i) => ({
     text-wrap: pretty;
   }
 
-  .triage__video {
-    position: relative;
+  .triage :global(.triage__video) {
     margin-top: var(--space-10);
-  }
-
-  /* The title sits INSIDE the poster, over its wash — the poster component
-     already draws one, so this only has to be placed and coloured. */
-  .triage__video-title {
-    position: absolute;
-    z-index: 3;
-    left: var(--space-6);
-    right: var(--space-6);
-    bottom: var(--space-5);
-    margin: 0;
-    font-family: var(--font-display);
-    font-weight: 400;
-    font-size: var(--text-3xl);
-    line-height: var(--leading-tight);
-    color: var(--dh-white);
-    text-wrap: pretty;
-  }
-
-  .triage__video-dur {
-    position: absolute;
-    z-index: 3;
-    top: var(--space-3);
-    right: var(--space-3);
-    padding: 4px 8px;
-    border-radius: var(--radius-2);
-    background: rgba(10, 14, 11, 0.62);
-    font-family: var(--font-ui);
-    font-weight: 700;
-    font-size: var(--text-micro);
-    line-height: 1;
-    color: var(--dh-white);
   }
 
   .triage__help {
@@ -294,48 +231,6 @@ const rows: (TriageRow & { first?: boolean })[] = triage.rows.map((row, i) => ({
     color: var(--text-meta);
   }
 
-  .triage__more {
-    border-top: 1px solid var(--dh-line-soft);
-  }
-
-  .triage__more > summary {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-    padding: var(--space-5) var(--space-7);
-    list-style: none;
-    cursor: pointer;
-    font-weight: 800;
-    font-size: var(--text-sm);
-    line-height: 1;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--text-body);
-  }
-
-  .triage__more > summary::-webkit-details-marker {
-    display: none;
-  }
-
-  .triage__more > summary::after {
-    content: "+";
-    margin-left: auto;
-    font-size: var(--text-2xl);
-    color: var(--text-strong);
-  }
-
-  .triage__more[open] > summary::after {
-    content: "\2212";
-  }
-
-  .triage__more > summary:hover {
-    color: var(--accent);
-  }
-
-  .triage__more .trow {
-    border-top: 1px solid var(--dh-line-soft);
-  }
-
   @media (max-width: 1000px) {
     .triage__wrap {
       grid-template-columns: 1fr;
@@ -355,7 +250,7 @@ const rows: (TriageRow & { first?: boolean })[] = triage.rows.map((row, i) => ({
   }
 
   /* The rows come BEFORE the video and the help card on a phone: they are the
-     three answers, and the video is a way of hearing the same thing. The comp's
+     five answers, and the video is a way of hearing the same thing. The comp's
      own narrow block makes the same reorder. */
   @media (max-width: 768px) {
     .triage__wrap {
@@ -379,7 +274,7 @@ const rows: (TriageRow & { first?: boolean })[] = triage.rows.map((row, i) => ({
       order: 3;
     }
 
-    .triage__video {
+    .triage :global(.triage__video) {
       order: 4;
       margin-top: 0;
     }

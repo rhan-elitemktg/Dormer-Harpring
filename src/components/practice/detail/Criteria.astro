@@ -1,8 +1,12 @@
 ---
-// "Do I have a case?" — a video and three numbered conditions in one four-up
-// row, then the inline CTA and the "we'll tell you no" note.
+// "Do I have a case?" — a centred heading, one wide video, and the three
+// conditions in a rule-divided row beneath it.
+//
+// The first design put the video in the row as a fourth column and closed on a
+// red CTA bar. The second centres the opener, gives the video its own width,
+// and drops the CTA entirely — the honesty note is the closer now, which is a
+// better fit for a section whose point is "we will tell you if you have no case".
 import DetailVideo from "./DetailVideo.astro";
-import InlineCta from "./InlineCta.astro";
 import type { CriteriaSection } from "../../../data/carAccidents";
 
 interface Props {
@@ -19,24 +23,22 @@ const { criteria } = Astro.props;
       <p class="criteria__lede">{criteria.lede}</p>
     </header>
 
-    <div class="criteria__row">
-      <DetailVideo video={criteria.video} shape="fill" size={62} />
+    <DetailVideo video={criteria.video} focus="case" class="criteria__video" />
+
+    <ol class="critlist">
       {
         criteria.items.map((item, i) => (
-          <div class="crit">
+          <li class="crit">
             <span class="crit__n" aria-hidden="true">
-              {i + 1}
+              {String(i + 1).padStart(2, "0")}
             </span>
             <h3 class="crit__title">{item.title}</h3>
-            {item.body.map((paragraph) => (
-              <p class="crit__body">{paragraph}</p>
-            ))}
-          </div>
+            <p class="crit__body">{item.body}</p>
+          </li>
         ))
       }
-    </div>
+    </ol>
 
-    <InlineCta cta={criteria.inline} class="criteria__cta" />
     <p class="criteria__note">{criteria.note}</p>
   </div>
 </section>
@@ -44,7 +46,8 @@ const { criteria } = Astro.props;
 <style>
   .criteria__head {
     max-width: 760px;
-    margin: 0 0 var(--space-11);
+    margin: 0 auto var(--space-11);
+    text-align: center;
   }
 
   .criteria__title {
@@ -53,7 +56,7 @@ const { criteria } = Astro.props;
   }
 
   .criteria__lede {
-    margin: 0;
+    margin: 0 auto;
     max-width: 52ch;
     font-size: var(--text-xl);
     line-height: var(--leading-normal);
@@ -61,47 +64,50 @@ const { criteria } = Astro.props;
     text-wrap: pretty;
   }
 
-  .criteria__row {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    grid-auto-rows: 1fr;
-    gap: var(--space-6);
-    align-items: stretch;
+  .criteria :global(.criteria__video) {
+    max-width: 60%;
+    margin: 0 auto var(--space-14);
   }
 
+  .critlist {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0 var(--space-12);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* A rule between columns rather than three cards: the section already sits on
+     the deepest cream in the ladder, and boxing it would make four surfaces. */
   .crit {
-    display: flex;
-    flex-direction: column;
-    padding: var(--space-7);
-    background: var(--dh-white);
-    border: 1px solid var(--border-hairline);
-    border-radius: var(--radius-4);
+    padding-left: var(--space-12);
+    border-left: 1px solid rgba(44, 59, 49, 0.18);
+  }
+
+  .crit:first-child {
+    padding-left: 0;
+    border-left: 0;
   }
 
   .crit__n {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex: none;
-    width: 34px;
-    height: 34px;
-    border-radius: var(--radius-full);
-    border: 1px solid var(--accent-gold);
-    color: var(--dh-gold-deep);
-    font-family: var(--font-ui);
-    font-weight: 700;
-    font-size: var(--text-md);
+    display: block;
+    margin-bottom: var(--space-2);
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--display-5);
     line-height: 1;
+    color: var(--dh-forest-100);
   }
 
   .crit__title {
-    margin: var(--space-4) 0 var(--space-3);
+    margin: 0 0 var(--space-3);
     font-family: var(--font-ui);
     font-weight: 700;
     font-size: var(--display-7);
     line-height: var(--leading-tight);
     letter-spacing: var(--tracking-tight);
-    color: var(--text-strong);
+    color: var(--dh-forest-100);
   }
 
   .crit__body {
@@ -112,29 +118,32 @@ const { criteria } = Astro.props;
     text-wrap: pretty;
   }
 
-  /* The inline bar sits tighter here than its default — it follows a row of
-     cards rather than a column of prose. */
-  .criteria :global(.criteria__cta) {
-    padding: var(--space-8) var(--space-9);
-  }
-
   .criteria__note {
-    margin: var(--space-4) 0 0;
+    margin: var(--space-11) 0 0;
     font-size: var(--text-md);
     line-height: var(--leading-normal);
     color: var(--text-meta);
   }
 
-  @media (max-width: 1180px) {
-    .criteria__row {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+  @media (max-width: 980px) {
+    .criteria :global(.criteria__video) {
+      max-width: none;
     }
-  }
 
-  @media (max-width: 700px) {
-    .criteria__row {
+    .critlist {
       grid-template-columns: 1fr;
-      grid-auto-rows: auto;
+      gap: 0;
+    }
+
+    .crit {
+      padding: var(--space-6) 0;
+      border-left: 0;
+      border-top: 1px solid rgba(44, 59, 49, 0.18);
+    }
+
+    .crit:first-child {
+      padding-top: 0;
+      border-top: 0;
     }
   }
 </style>

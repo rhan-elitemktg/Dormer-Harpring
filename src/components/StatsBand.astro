@@ -1,32 +1,18 @@
 ---
 // The dark "by the numbers" band — four figures divided by hairlines.
 //
-// At src/components/ root because eight comps carry it: Testimonials, About,
-// Case Results, Attorneys, Community, Co-Counsel, Practice Areas and the
-// practice-area detail — where the same four figures appear under the heading
-// "The firm at a glance" as `.ca-keys`.
+// At src/components/ root because seven comps carry it: Testimonials, About,
+// Case Results, Attorneys, Community, Co-Counsel and Practice Areas.
 import type { FirmStat } from "../data/stats";
 
 interface Props {
   stats: FirmStat[];
-  /**
-   * `band` is the full-bleed dark band the seven page comps carry.
-   *
-   * `card` is the same figures as a contained, rounded card on whatever surface
-   * it sits on. The practice-area detail needs it because the band there falls
-   * between the white awards bar and the forest testimonials rail — full-bleed,
-   * it merges with the rail below and the boundary between two sections
-   * disappears. Same content, same markup, one less edge.
-   */
-  variant?: "band" | "card";
-  /** Read out by a screen reader in place of the missing heading. */
-  label?: string;
 }
 
-const { stats, variant = "band", label } = Astro.props;
+const { stats } = Astro.props;
 ---
 
-<section class:list={["stats", `stats--${variant}`]} aria-label={label}>
+<section class="stats">
   <dl class="stats__grid">
     {
       stats.map((stat) => (
@@ -44,22 +30,9 @@ const { stats, variant = "band", label } = Astro.props;
 </section>
 
 <style>
-  /* The band is the DEFAULT and keeps the bare `.stats` selector, rather than
-     both variants being modifiers off an empty base. `HeroStats.astro` styles a
-     `.stats` of its own, and `check:styles` treats one class name as belonging
-     to one component — leaving `.stats` unclaimed here reports every StatsBand
-     on the site as unstyled. */
   .stats {
     background: var(--dh-forest-500);
     border-block: 1px solid rgba(255, 255, 255, 0.1);
-  }
-
-  /* The card sits ON a section rather than being one, so it drops the band's
-     fill and edges and supplies its own padding, taking the dark inwards. */
-  .stats--card {
-    background: none;
-    border-block: 0;
-    padding: 0 var(--container-pad) var(--space-18);
   }
 
   .stats__grid {
@@ -67,15 +40,6 @@ const { stats, variant = "band", label } = Astro.props;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     max-width: var(--container-max);
     margin-inline: auto;
-  }
-
-  /* `--container-max` is a BORDER-box width, so the card matches `.container`'s
-     content width only once the pad is taken back off it. */
-  .stats--card .stats__grid {
-    max-width: calc(var(--container-max) - var(--container-pad) * 2);
-    background: var(--dh-forest-500);
-    border-radius: var(--radius-4);
-    overflow: hidden;
   }
 
   .stats__cell {

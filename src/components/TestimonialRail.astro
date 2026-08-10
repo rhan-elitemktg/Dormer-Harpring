@@ -14,12 +14,14 @@ import { ROUTES } from "../lib/routePaths";
 interface Props {
   testimonials: Testimonial[];
   reviews: ReviewSummary;
+  /** An anchor target, where a page's section nav links to this band. */
+  id?: string;
 }
 
-const { testimonials, reviews } = Astro.props;
+const { testimonials, reviews, id } = Astro.props;
 ---
 
-<section class="section section--forest-flat tmv">
+<section class="section section--forest-flat tmv" id={id}>
   <div class="container">
     <header class="tmv__head">
       <div>

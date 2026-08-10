@@ -1,86 +1,73 @@
 ---
-// The whole practice-area detail template — 24 sections in the comp's order.
+// The whole practice-area detail template — 17 sections in the comp's order.
 //
 // A composition component, like `PostArticle.astro`: it owns no content, takes
 // everything as props, and exists so `src/pages/[slug].astro` can stay a
 // readable branch between two page shapes rather than becoming 200 lines of
 // two unrelated templates.
 //
-// EIGHT OF THESE SECTIONS ARE BANDS THIS SITE ALREADY BUILDS — the awards bar,
-// the firm stats, the testimonials rail, the FAQ accordion and the contact
-// block all come in from their own modules and components. That is the third of
-// the comp HANDOFF.md said would already be built, and it is why this file is
-// mostly imports.
-//
-// Section order is the comp's, and it is not arbitrary. The page front-loads
-// what someone in pain needs in the first week (triage, results, the checklist)
-// and defers what a researcher wants (crash types, injuries, city data, venue)
-// to the bottom half. Reordering it makes it a different page.
-import AwardsBar from "../../AwardsBar.astro";
-import StatsBand from "../../StatsBand.astro";
+// SECTION ORDER IS THE COMP'S, and the second design reordered deliberately.
+// The page now front-loads reassurance and proof — triage, the four-point
+// summary, "do I have a case", the lawyers, the credentials, why the firm —
+// and defers the reference material (crash types, city data) to the bottom
+// half, with the two long explainers reduced to teasers pointing at articles.
+// Reordering it makes it a different page.
 import TestimonialRail from "../../TestimonialRail.astro";
 import FaqBand from "../../home/FaqBand.astro";
-import ContactDetails from "../../contact/ContactDetails.astro";
 
 import DetailHero from "./DetailHero.astro";
 import SectionNav from "./SectionNav.astro";
 import Triage from "./Triage.astro";
-import LawyerGrid from "./LawyerGrid.astro";
 import Takeaways from "./Takeaways.astro";
-import ResultStories from "./ResultStories.astro";
-import CrashChecklist from "./CrashChecklist.astro";
-import GloveBox from "./GloveBox.astro";
 import Criteria from "./Criteria.astro";
-import Fault from "./Fault.astro";
-import QaSection from "./QaSection.astro";
-import Damages from "./Damages.astro";
-import AdjusterTactics from "./AdjusterTactics.astro";
-import BigAnswer from "./BigAnswer.astro";
-import ProcessSteps from "./ProcessSteps.astro";
-import BuildCase from "./BuildCase.astro";
+import LawyerCards from "./LawyerCards.astro";
+import Credentials from "./Credentials.astro";
+import WhyFirm from "./WhyFirm.astro";
+import ResultStories from "./ResultStories.astro";
+import CaseTimeline from "./CaseTimeline.astro";
 import TileGrid from "./TileGrid.astro";
 import DenverData from "./DenverData.astro";
-import FirmData from "./FirmData.astro";
-import Venue from "./Venue.astro";
-import RelatedLinks from "./RelatedLinks.astro";
+import ChecklistTeaser from "./ChecklistTeaser.astro";
+import FaultTeaser from "./FaultTeaser.astro";
+import MoreOnClaims from "./MoreOnClaims.astro";
+import ClosingCta from "./ClosingCta.astro";
 
 import { CA_SECTION_IDS, type PracticeAreaDetail } from "../../../data/carAccidents";
 import type { TeamMember } from "../../../data/team";
 import type { VideoReview, Testimonial, ReviewSummary } from "../../../data/testimonials";
 import type { Award } from "../../../data/awards";
-import type { FirmStat } from "../../../data/stats";
 import type { Faq, FaqSection } from "../../../data/faqs";
-import type { ContactBand, ContactDetails as ContactDetailsData } from "../../../data/contact";
+import type { ContactBand, ContactDetails } from "../../../data/contact";
 import type { FirmDetails } from "../../../data/site";
 
 interface Props {
   detail: PracticeAreaDetail;
   firm: FirmDetails;
-  lawyers: TeamMember[];
+  lawyers: (TeamMember & { cred: string })[];
+  awards: Record<string, Award>;
   reviews: Record<string, VideoReview>;
-  awards: Award[];
-  stats: FirmStat[];
   testimonials: Testimonial[];
   reviewSummary: ReviewSummary;
   faqs: Faq[];
   faqSection: FaqSection;
-  contact: ContactDetailsData;
+  contact: ContactDetails;
   contactForm: ContactBand["form"];
+  siteUrl: string;
 }
 
 const {
   detail,
   firm,
   lawyers,
-  reviews,
   awards,
-  stats,
+  reviews,
   testimonials,
   reviewSummary,
   faqs,
   faqSection,
   contact,
   contactForm,
+  siteUrl,
 } = Astro.props;
 
 const contactAnchor = `#${CA_SECTION_IDS.contact}`;
@@ -90,40 +77,41 @@ const contactAnchor = `#${CA_SECTION_IDS.contact}`;
 <SectionNav nav={detail.nav} firm={firm} ctaHref={contactAnchor} />
 
 <Triage triage={detail.triage} firm={firm} />
-<LawyerGrid section={detail.lawyers} members={lawyers} id={CA_SECTION_IDS.lawyers} />
-<Takeaways takeaways={detail.takeaways} />
-<ResultStories results={detail.results} reviews={reviews} id={CA_SECTION_IDS.results} />
-<CrashChecklist checklist={detail.checklist} />
-<GloveBox gloveBox={detail.gloveBox} firm={firm} />
+<Takeaways takeaways={detail.takeaways} id={CA_SECTION_IDS.know} />
 <Criteria criteria={detail.criteria} />
-<Fault fault={detail.fault} firm={firm} />
 
-{/* The three `.ca-ans` answers and the three split ones alternate surfaces so
-    that ten consecutive text sections still read as ten sections. */}
-<QaSection qa={detail.medical} surface="cream" />
-<QaSection qa={detail.limits} surface="alt" />
-<Damages damages={detail.damages} firm={firm} />
-<QaSection qa={detail.offer} surface="sunk" />
-<AdjusterTactics tactics={detail.tactics} firm={firm} />
-<BigAnswer section={detail.cost} firm={firm} surface="cream" />
-<BigAnswer section={detail.court} firm={firm} surface="sunk" />
+<LawyerCards
+  section={detail.lawyers}
+  members={lawyers}
+  id={CA_SECTION_IDS.lawyers}
+  siteUrl={siteUrl}
+  firmName={firm.name}
+/>
+<Credentials credentials={detail.credentials} awards={awards} />
+<WhyFirm why={detail.whyFirm} />
 
-<ProcessSteps process={detail.process} id={CA_SECTION_IDS.next} />
-<BuildCase build={detail.build} />
+<ResultStories results={detail.results} reviews={reviews} id={CA_SECTION_IDS.results} />
+<CaseTimeline timeline={detail.timeline} id={CA_SECTION_IDS.next} />
 
-<AwardsBar awards={awards} />
-<StatsBand stats={stats} variant="card" label={detail.keyPointsEyebrow} />
+<TileGrid section={detail.crashTypes} id={CA_SECTION_IDS.types} />
+<DenverData denver={detail.denver} />
 
-<TestimonialRail testimonials={testimonials} reviews={reviewSummary} />
+<TestimonialRail
+  testimonials={testimonials}
+  reviews={reviewSummary}
+  id={CA_SECTION_IDS.reviews}
+/>
+
+<ChecklistTeaser teaser={detail.checklistTeaser} />
+<FaultTeaser teaser={detail.faultTeaser} />
+<MoreOnClaims more={detail.more} />
+
 <FaqBand section={faqSection} faqs={faqs} />
 
-<TileGrid section={detail.crashTypes} columns={4} surface="cream" />
-<TileGrid section={detail.injuries} columns={3} surface="alt" />
-<DenverData denver={detail.denver} />
-<FirmData firmData={detail.firmData} />
-<Venue venue={detail.venue} />
-<RelatedLinks related={detail.related} />
-
-{/* The same contact block every interior page closes on. Its own id is
-    `contact`, which is what every anchor on this page points at. */}
-<ContactDetails details={contact} form={contactForm} />
+<ClosingCta
+  closing={detail.closing}
+  details={contact}
+  form={contactForm}
+  firm={firm}
+  id={CA_SECTION_IDS.contact}
+/>

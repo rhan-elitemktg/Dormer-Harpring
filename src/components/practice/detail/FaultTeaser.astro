@@ -1,0 +1,186 @@
+---
+// "What if part of it was my fault?" — the comparative-fault scale and one
+// paragraph, where the first design had a full section with a four-branch
+// decision tree behind a disclosure.
+//
+// The bar is a FIGURE and carries no information the sentence beside it does
+// not, so it is `aria-hidden` and the three labels under it are what a screen
+// reader gets.
+import SourceNote from "./SourceNote.astro";
+import type { TeaserSection } from "../../../data/carAccidents";
+
+interface Props {
+  teaser: TeaserSection;
+}
+
+const { teaser } = Astro.props;
+const scale = teaser.scale;
+---
+
+<section class="section--sm fault">
+  <div class="container fault__grid">
+    <figure class="fault__viz">
+      <div class="fault__bar" aria-hidden="true">
+        <span></span>
+        <i></i>
+      </div>
+      {
+        scale && (
+          <figcaption class="fault__lbl">
+            <span>{scale.start}</span>
+            <span>{scale.middle}</span>
+            <span>{scale.end}</span>
+          </figcaption>
+        )
+      }
+      {teaser.source && <SourceNote source={teaser.source} class="fault__src" />}
+    </figure>
+
+    <div class="fault__copy">
+      <h2 class="fault__title">{teaser.title}</h2>
+      <p class="fault__body">{teaser.body}</p>
+      {
+        teaser.ctaHref ? (
+          <a class="fault__cta" href={teaser.ctaHref}>
+            {teaser.ctaLabel} &rarr;
+          </a>
+        ) : (
+          <span class="fault__cta fault__cta--inert">{teaser.ctaLabel}</span>
+        )
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .fault {
+    background: var(--surface-alt);
+  }
+
+  .fault__grid {
+    display: grid;
+    grid-template-columns: 56fr 44fr;
+    gap: var(--space-16);
+    align-items: center;
+  }
+
+  .fault__viz {
+    margin: 0;
+  }
+
+  .fault__bar {
+    position: relative;
+    height: 22px;
+    border-radius: 11px;
+    background: var(--dh-line-strong);
+    overflow: visible;
+  }
+
+  /* The filled half is "your share up to 50%"; the upright is the threshold
+     where recovery stops. Two elements, because they are two facts. */
+  .fault__bar span {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 50%;
+    border-radius: 11px 0 0 11px;
+    background: var(--dh-forest-100);
+  }
+
+  .fault__bar i {
+    position: absolute;
+    left: 50%;
+    top: -9px;
+    bottom: -9px;
+    width: 3px;
+    margin-left: -1.5px;
+    background: var(--dh-forest-100);
+  }
+
+  .fault__lbl {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-4);
+    margin-top: var(--space-4);
+  }
+
+  .fault__lbl span {
+    font-weight: 700;
+    font-size: var(--text-micro);
+    line-height: 1.4;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--dh-forest-100);
+  }
+
+  .fault__lbl span:nth-child(2) {
+    text-align: center;
+  }
+
+  .fault__lbl span:last-child {
+    text-align: right;
+  }
+
+  .fault :global(.fault__src) {
+    margin-top: var(--space-6);
+    color: var(--text-meta);
+  }
+
+  .fault__title {
+    margin: 0 0 var(--space-4);
+    font-size: var(--display-4);
+    line-height: 1.04;
+    text-wrap: balance;
+  }
+
+  .fault__body {
+    margin: 0 0 var(--space-6);
+    max-width: 46ch;
+    font-size: var(--text-lg);
+    line-height: var(--leading-prose);
+    color: var(--text-body);
+    text-wrap: pretty;
+  }
+
+  .fault__cta {
+    display: inline-block;
+    white-space: nowrap;
+    font-weight: 800;
+    font-size: var(--text-sm);
+    line-height: 1;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--dh-forest-100);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  a.fault__cta:hover {
+    color: var(--accent);
+  }
+
+  .fault__cta--inert {
+    color: var(--text-meta);
+    text-decoration: none;
+  }
+
+  @media (max-width: 980px) {
+    .fault__grid {
+      grid-template-columns: 1fr;
+      gap: var(--space-9);
+    }
+
+    /* The three labels stack rather than shrink — at 320px they overlap. */
+    .fault__lbl {
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+
+    .fault__lbl span,
+    .fault__lbl span:nth-child(2),
+    .fault__lbl span:last-child {
+      text-align: left;
+    }
+  }
+</style>

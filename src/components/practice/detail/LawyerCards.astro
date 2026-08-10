@@ -1,0 +1,262 @@
+---
+// "Meet our car accident lawyers" — four attorney cards, each with a line about
+// what they do on crash cases specifically.
+//
+// The first design drew a seven-portrait contact sheet, photo and name only.
+// This one names four and says why each is on the page, which is the version
+// that does any work — and it is the reason the section also emits `Attorney`
+// structured data.
+//
+// The PORTRAIT and the NAME come from `team.ts`; the CREDENTIAL LINE comes from
+// the page document, because it is written about car accident work and belongs
+// to this practice area rather than to the roster.
+import Picture from "../../media/Picture.astro";
+import JsonLd from "../../seo/JsonLd.astro";
+import { initialsOf, type TeamMember } from "../../../data/team";
+import type { LawyersSection } from "../../../data/carAccidents";
+
+interface Props {
+  section: LawyersSection;
+  /** Resolved by the page, in the data's order. */
+  members: (TeamMember & { cred: string })[];
+  id: string;
+  /** Absolute site origin, for the JSON-LD `url` fields. */
+  siteUrl: string;
+  firmName: string;
+}
+
+const { section, members, id, siteUrl, firmName } = Astro.props;
+
+// The comp ships an `Attorney` @graph beside this section. Emitted because
+// every claim in it is rendered on the page: the name, the role, the portrait
+// and a link to the bio. `sameAs` is deliberately NOT ported — the comp points
+// every attorney at the Colorado Supreme Court's attorney SEARCH form and at
+// linkedin.com, neither of which identifies the person.
+// TODO(launch): real bar-record and LinkedIn URLs per attorney would make
+// `sameAs` worth adding.
+const schema = {
+  "@context": "https://schema.org",
+  "@graph": members.map((member) => ({
+    "@type": "Attorney",
+    name: member.name,
+    jobTitle: member.role,
+    ...(member.href ? { url: `${siteUrl}${member.href}` } : {}),
+    worksFor: { "@type": "LegalService", name: firmName, url: `${siteUrl}/` },
+    knowsAbout: "car accident litigation",
+  })),
+};
+---
+
+<section class="section section--cream lawyers" id={id}>
+  <div class="container">
+    <header class="lawyers__head">
+      <h2 class="lawyers__title">{section.title}</h2>
+      <p class="lawyers__lede">{section.lede}</p>
+    </header>
+
+    <ul class="lawyers__grid">
+      {
+        members.map((member) => (
+          <li class="lw">
+            {member.href ? (
+              <a class="lw__ph" href={member.href}>
+                {member.photo ? (
+                  <Picture
+                    src={member.photo}
+                    alt={member.name}
+                    widths={[280, 560]}
+                    sizes="(max-width: 700px) 90vw, 280px"
+                    class="lw__img"
+                  />
+                ) : (
+                  <span class="lw__mono" aria-hidden="true">
+                    {initialsOf(member.name)}
+                  </span>
+                )}
+              </a>
+            ) : (
+              <span class="lw__ph">
+                {member.photo ? (
+                  <Picture
+                    src={member.photo}
+                    alt={member.name}
+                    widths={[280, 560]}
+                    sizes="(max-width: 700px) 90vw, 280px"
+                    class="lw__img"
+                  />
+                ) : (
+                  <span class="lw__mono" aria-hidden="true">
+                    {initialsOf(member.name)}
+                  </span>
+                )}
+              </span>
+            )}
+
+            {member.href ? (
+              <a class="lw__nm" href={member.href}>
+                {member.name}
+              </a>
+            ) : (
+              <span class="lw__nm">{member.name}</span>
+            )}
+
+            <span class="lw__role">{member.role}</span>
+            <p class="lw__cred">{member.cred}</p>
+          </li>
+        ))
+      }
+    </ul>
+
+    <p class="lawyers__more">
+      <a class="lawyers__more-link arrow-link" href={section.moreHref}>
+        {section.moreLabel}
+        <span class="arrow" aria-hidden="true">&rarr;</span>
+      </a>
+    </p>
+  </div>
+</section>
+
+<JsonLd schema={schema} />
+
+<style>
+  .lawyers__head {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-14);
+    align-items: start;
+    margin-bottom: var(--space-14);
+  }
+
+  .lawyers__title {
+    margin: 0;
+    font-size: var(--display-3);
+    text-wrap: balance;
+  }
+
+  .lawyers__lede {
+    margin: 0;
+    font-size: var(--text-xl);
+    line-height: var(--leading-normal);
+    color: var(--text-muted);
+    text-wrap: pretty;
+  }
+
+  .lawyers__grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-9);
+    align-items: start;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .lw {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .lw__ph {
+    display: block;
+    position: relative;
+    aspect-ratio: 4 / 5;
+    border-radius: var(--radius-4);
+    overflow: hidden;
+    background: var(--surface-alt);
+  }
+
+  .lw__ph :global(.lw__img) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+  }
+
+  .lw__mono {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-size: var(--display-5);
+    color: var(--dh-ink-5);
+  }
+
+  .lw__nm {
+    margin-top: var(--space-5);
+    font-family: var(--font-ui);
+    font-weight: 700;
+    font-size: var(--text-xl);
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-tight);
+    color: var(--dh-forest-100);
+    text-decoration: none;
+  }
+
+  a.lw__nm:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .lw__role {
+    margin-top: var(--space-2);
+    font-weight: 800;
+    font-size: var(--text-micro);
+    line-height: 1;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--text-meta);
+  }
+
+  .lw__cred {
+    margin: var(--space-3) 0 0;
+    font-size: var(--text-md);
+    line-height: var(--leading-snug);
+    color: var(--text-muted);
+    text-wrap: pretty;
+  }
+
+  .lawyers__more {
+    margin: var(--space-11) 0 0;
+    text-align: center;
+  }
+
+  /* Forest rather than the site's red: this comp moves almost every accent to
+     `--dh-forest-100`. See the note in HANDOFF.md — it is this page only. */
+  .lawyers__more-link {
+    font-weight: 800;
+    font-size: var(--text-micro);
+    line-height: 1;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--dh-forest-100);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  .lawyers__more-link:hover {
+    color: var(--accent);
+  }
+
+  @media (max-width: 1180px) {
+    .lawyers__head {
+      grid-template-columns: 1fr;
+      gap: var(--space-6);
+    }
+
+    .lawyers__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 700px) {
+    .lawyers__grid {
+      grid-template-columns: 1fr;
+      gap: var(--space-10);
+    }
+  }
+</style>

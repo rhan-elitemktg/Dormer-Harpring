@@ -40,62 +40,66 @@ the same union; it does not get its own file.
 
 ### What the Car Accidents work established
 
-**One practice-area detail page is built** — `/denver-car-accident-lawyer`, the live URL,
-from `DH - Car Accidents.html`. `getPracticeAreaDetails()` returns an array of one and the
-other 45 areas are the CMS phase's job; the shape is already right for them.
+**One practice-area detail page is built** — `/denver-car-accident-lawyer`, the live URL.
+`getPracticeAreaDetails()` returns an array of one and the other 45 areas are the CMS
+phase's job; the shape is already right for them.
 
-Things worth knowing before the next detail page:
+**IT WAS BUILT TWICE.** The first build followed a 31-section comp; the design folder was
+then re-dropped with a 17-section replacement — half the page cut, two sections new, three
+long explainers reduced to teasers pointing at articles. The four other comp-diff scripts
+still passed against the new folder, so **Car Accidents was the only page that changed**.
 
-- **Roughly a third of that comp was bands this site already builds**, exactly as scoped.
-  The awards bar, the firm stats, the testimonials rail, the FAQ accordion and the contact
-  block all come in from their own modules — `data/carAccidents.ts` carries **none** of
-  their strings, and the eight arrays it deliberately omits are listed in its header.
+The rebuild is the current one. What it left behind is worth knowing:
+
+- **A comp's script block can outlive its markup.** `renderVals()` still defines **fifteen
+  arrays no placeholder reads** — `keyPoints`, `crashSteps`, `leadAttorneys`,
+  `otherAttorneys`, `processSteps`, `injuries`, `damageCols`, `faultBranches`,
+  `denverData`, `corridors`, `courts`, `relatedAreas`, `relatedArticles`, `firmData`,
+  `lawCtas`. Several are close enough to the new copy to look authoritative and are not:
+  `denverData` lists four bare figures where the page draws three with a consequence
+  attached, `corridors` carries a different sentence per road, and `firmData`'s third label
+  disagrees with the markup's. **AGENTS.md says to read the script rather than the markup;
+  on a revised comp you need both, and where they disagree the markup wins.**
+  `diff-comp-car-accidents.py` asserts all fifteen are still unread, so a later revision
+  that wires one back up fails there instead of shipping the older copy.
+- **Check `sc-for` counts before budgeting.** 23 loops became 10, and 105 placeholders 75.
+  Counting them took a minute and reshaped the whole estimate.
 - **`lawQuestionsData` + `faqLens` IS the existing `Faq` type** with its two halves kept
-  apart. The twelve rows dropped into `faqs.ts` as `getCarAccidentFaqs()` and `FaqBand`
-  renders them unchanged, `faqSchema` included. That answers the question the last handoff
-  left open: it is that type with more rows, not a different one.
-- **The transcript toggle does not exist.** `transcriptOpen` / `toggleTranscript` are
-  returned from `renderVals()` and `.ca-transcript` is styled, but **neither class appears in
-  the comp's markup**. The last handoff called it the page's one new interaction; it is not
-  one. `lawCtas` is dead the same way — declared and never returned. So are `.ca-crit`,
-  `.ca-card`, `.ca-step`, `.ca-qa`, `.ca-acc`, `.ca-insight`, `.ca-office` and `.ca-review`,
-  all styled and all unrendered. **Check a comp's script against its markup before budgeting
-  for a feature.**
-- **The section nav uses explicit ids, not a slugifier.** `CA_SECTION_IDS` in the data module
-  is read by both the nav's hrefs and each section's `id`, so they cannot drift — and there
-  is no second slugifier to disagree with `lib/headings.ts`. The comp's ids are handles
-  (`#lawyers`, not `#meet-our-car-accident-lawyers`), so there was nothing to slugify.
-- **Two new icon components**, both the `PracticeIcon` key→shape pattern:
-  `CrashStepIcon` (8) and `DamageIcon` (10). The comp stores the first set as
-  `data:image/svg+xml` URIs **inside its data array** — SVG markup in the data layer, which
-  is the thing AGENTS.md says must never be there, and which no editor could fill in.
-- **`StatsBand` gained a `variant`.** `card` is the same four figures as a contained rounded
-  card instead of a full-bleed band; the detail page needs it because the band falls between
-  the white awards bar and the forest testimonials rail, and full-bleed the two merge.
+  apart. The twelve rows live in `faqs.ts` as `getCarAccidentFaqs()` and `FaqBand` renders
+  them unchanged, `faqSchema` included. Unchanged across both designs.
+- **The section nav uses explicit ids, not a slugifier.** `CA_SECTION_IDS` is read by both
+  the nav's hrefs and each section's `id`, so they cannot drift, and there is no second
+  slugifier to disagree with `lib/headings.ts`. `#know` moved between designs — it was a
+  long medical-bills section and is now the four-point summary — and only that object
+  changed.
+- **This page's accent is FOREST, not gold.** Eyebrow rules, badge captions, the FAQ sign,
+  the testimonial quote mark, the results eyebrow and the recovered figures are all
+  `--dh-forest-100` here. The other 16 comps still use gold and their diffs still pass, so
+  it is **this page only** — Rhan's call, flagged below for the designer.
 
-### One trap, and it is new
+### One trap, and it is not blog-specific
 
 **Two components cannot share a root class name unless BOTH style it.** `check:styles` maps
-one class name to one component: it collects the cids that any scoped rule demands for a
-class and fails an element carrying that class with none of them. Renaming `StatsBand`'s
-`.stats` to `.stats--band` therefore reported **every StatsBand on the site** as unstyled —
-because `HeroStats.astro` also styles a `.stats`, and StatsBand no longer claimed the bare
-name. The band keeps `.stats` and the card is the modifier, for that reason.
-
-The same rule caught two more: the new result-story rail and related band were `.results` and
-`.related`, which the homepage's `RecentResults` and the blog's `RelatedPosts` already put on
-elements. They are `.stories` and `.rellinks` now. **Grep for a root class name before using
-it.**
+one class name to one component: it collects the cids any scoped rule demands for a class
+and fails an element carrying that class with none of them. This caught four names across
+the two builds — `.stats` (against `HeroStats`), `.results` (against `RecentResults`),
+`.related` (against `RelatedPosts`) and `.why__*` (against `WhyUs`). **Grep for a root class
+name before using it.** The detail components are prefixed off the collisions now:
+`.stories`, `.whyfirm`, `.rellinks` were all renamed for this reason.
 
 ### Shared pieces to reach for
 
 New pages should use these rather than re-solving them. All are in use on two or more pages
 already, so a change to one is a change to all of them — check before editing.
 
-- **`components/practice/detail/` is a kit, not one page.** Its seven primitives —
-  `DetailBlocks`, `InlineCta`, `PhoneAsk`, `SourceNote`, `DetailVideo`, `BigAnswerCard`,
-  `Disclosure` — plus `QaSection` and `BigAnswer` are what the next practice-area page is
-  assembled from. `DetailPage.astro` is the composition; it owns no content.
+- **`components/practice/detail/` is a kit, not one page.** `DetailHero`, `SectionNav`,
+  `DetailVideo`, `SourceNote`, `Triage`, `Takeaways`, `Criteria`, `LawyerCards`,
+  `Credentials`, `WhyFirm`, `ResultStories`, `CaseTimeline`, `TileGrid`, `DenverData`, the
+  two teasers, `MoreOnClaims` and `ClosingCta` are what the next practice-area page is
+  assembled from. `DetailPage.astro` is the composition; it owns no content. The first
+  design's primitives (`DetailBlocks`, `InlineCta`, `PhoneAsk`, `BigAnswerCard`,
+  `Disclosure`, `QaSection`, `BigAnswer`) were **deleted with the sections that used
+  them** — `git show e42c323` has them if a later page wants that shape back.
 - **Portable Text carries images.** `ptImage(src, alt)` in `data/portableText.ts` composes
   with `pt()` by spreading; `ProseImage.astro` renders it through `Picture`. Registered under
   `type` — **singular**, which is astro-portabletext's key. `@portabletext/react` calls the
@@ -116,10 +120,13 @@ already, so a change to one is a change to all of them — check before editing.
   pages where the band follows a plain cream section.
 - **`.hero-cta` / `.hero-cta__note`** in `global.css` — the one-button-plus-gold-note row.
 - **`.btn` is full width below 640px**, as the rule rather than the exception.
-- **`.arrow` on every arrow inside something that navigates.** Four documented exclusions
-  now, each commented where it lives: `.pa__tab`'s chevron marks selection, `.attys__cta`'s
-  badge scales instead of sliding, the carousel prev/next are controls rather than CTAs, and
-  a crash-type tile with no page keeps the comp's label but drops the arrow.
+- **`.arrow` on every arrow inside something that navigates.** Four documented exclusions,
+  each commented where it lives: `.pa__tab`'s chevron marks selection, `.attys__cta`'s badge
+  scales instead of sliding, the carousel prev/next are controls rather than CTAs, and a
+  card with no page behind it keeps the comp's LABEL and drops the arrow — which is what
+  the two unlinked crash types and the checklist teaser do.
+- **`TestimonialRail` and `Takeaways` take an optional `id`**, so a page's section nav can
+  anchor to them without either component knowing what a section nav is.
 - **`MobileNav`'s `subItemsOf`** — a parent with children renders as a `<summary>`, which
   toggles rather than navigates. This adds a link to its own page when no child points there.
 
@@ -207,15 +214,21 @@ plain-text treatment; `/new-seo-setup` later expects a `legalPage` type for the 
   `href: null`. Marked `TODO(launch)`.
 - **Two crash types on the detail page have no page either** — rear-end and head-on. Same
   treatment, same marker.
+- **The detail page promises nine articles that do not exist** — the eight in "More on car
+  accident claims" and the 8-step checklist the teaser names. The eight are the first
+  design's cut sections turned into promised reading, and the comp points them at the blog
+  index; the checklist has its own comp (`DH - Blog - What to do after a car accident.html`)
+  that this build does not serve, so its teaser ships **unlinked** by Rhan's decision.
 
 **Waiting on the firm** — these are content, not code. `README.md` has the full table; the
-short version is that **27** `TODO(launch)` markers are open in `src/`, up from 18. The nine
-new ones are all Car Accidents: the four Denver crash figures (the comp dates them "[year]"),
-the three firm closed-case figures (under the comp's own "[Methodology pending]"), the
-reviewed-by date and K.C.'s five credential lines, and the eight statute citations whose
-links the comp points at an index page. The rest are unchanged — the seven attorney emails
-(six inferred from a pattern), the office address and hours, the `$70M+ / 20 Years` stat
-claims, and **who is in the About page's founders photograph**.
+short version is that **30** `TODO(launch)` markers are open in `src/`, up from 18. The new
+ones are Car Accidents': the three Denver crash figures (the comp dates them "[year]" and
+sources them to "[CDOT / DRCOG / Denver Open Data]"), the three firm closed-case figures
+(whose disclaimer names the period "[date range]"), the reviewed-by date and K.C.'s five
+credential lines, the four statute citations whose links the comp points at an index page,
+the two crash types with no page, and the nine promised articles. The rest are unchanged —
+the seven attorney emails (six inferred from a pattern), the office address and hours, the
+`$70M+ / 20 Years` stat claims, and **who is in the About page's founders photograph**.
 
 **Waiting on the designer**
 
@@ -226,8 +239,20 @@ claims, and **who is in the About page's founders photograph**.
   The most visible is still the homepage hero, signed off by Rhan and unseen by the designer.
 - **The Blog index departs from its comp in three visible ways**, the **Blog post in
   eighteen** (all listed and asserted in `diff-comp-blog-post.py`), and the **Car Accidents
-  page in ten** (asserted in `diff-comp-car-accidents.py`). All at Rhan's request or forced
-  by serving a real URL. Same standing: signed off by Rhan, not seen by the designer.
+  page in eleven** (asserted in `diff-comp-car-accidents.py`). All at Rhan's request or
+  forced by serving a real URL. Same standing: signed off by Rhan, not seen by the designer.
+- **The Car Accidents comp moves almost every accent from gold to forest** — eyebrow rules,
+  badge captions, the FAQ +/− sign, the testimonial quote mark, the results eyebrow, and the
+  recovered figures. The other 16 comps still use gold and their diffs still pass. Built as
+  drawn, on this page only, at Rhan's direction. **If it is a site-wide direction rather
+  than one page's, it touches `Eyebrow`'s tones, `FaqItem`, `TestimonialRail`, `AwardsBar`
+  and the token layer** — worth settling before more pages are built on the gold assumption.
+- **A second Car Accidents design replaced the first mid-build.** Worth confirming this one
+  is final before the remaining 45 practice-area pages are modelled on it.
+- **Two comps arrived with the redesign and are not built**: `DH - Attorney Bio v1.html`
+  (which suggests `DH - Attorney Bio.html` was itself revised — the built bio has no diff
+  script, so nothing checks it) and `DH - Blog - What to do after a car accident.html`.
+  Neither has been diffed against what is built. **Check the attorney bio before launch.**
 - The comp's blog-post sidebar lists **six categories** where the index's tab row lists five.
   One `getBlogCategories()` serves both, using the index's signed-off five.
 - `DH - Homepage approved.html` and `DH - Homepage approved v2.html` are the same byte size
