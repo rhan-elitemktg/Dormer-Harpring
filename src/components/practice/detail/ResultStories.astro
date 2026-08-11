@@ -115,7 +115,13 @@ const { results, reviews, id } = Astro.props;
 
     <div class="stories__foot">
       <p class="stories__disc">{results.disclaimer}</p>
-      <div class="stories__nav">
+      {
+        /* `rail.ts` hides this wrapper when the rail has nothing to scroll —
+           which at desktop widths is always: three cards at 31.4% plus two
+           24px gaps is 94.2% + 48px, so they fit any inner width over ~827px
+           and both arrows sat permanently disabled. */
+      }
+      <div class="stories__nav" data-rail-nav="ca-results">
         <button
           type="button"
           class="stories__arrow"
@@ -443,6 +449,12 @@ const { results, reviews, id } = Astro.props;
     flex: none;
   }
 
+  /* Beats the rule above, as `.rail-dots[hidden]` does: an author `display`
+     otherwise outranks the UA's `[hidden] { display: none }`. */
+  .stories__nav[hidden] {
+    display: none;
+  }
+
   .stories__arrow {
     width: 52px;
     height: 52px;
@@ -460,10 +472,18 @@ const { results, reviews, id } = Astro.props;
       color var(--transition);
   }
 
-  .stories__arrow:hover {
+  /* `:not(:disabled)`, because the wrapper only goes when the WHOLE rail is
+     unscrollable. Below 1080px it does scroll, and there an end-stop arrow is
+     disabled while the other still works — it should not light up on hover. */
+  .stories__arrow:hover:not(:disabled) {
     background: var(--accent);
     border-color: var(--accent);
     color: var(--dh-white);
+  }
+
+  .stories__arrow:disabled {
+    opacity: 0.35;
+    cursor: default;
   }
 
   @media (max-width: 1080px) {
