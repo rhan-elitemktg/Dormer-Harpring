@@ -165,11 +165,6 @@ present(
         "Founding Partner", "Updated July 2026", "Home", "Practice Areas", "Car Accidents",
     ],
 )
-cmp(
-    "reviewer credentials",
-    [unesc(li) for li in re.findall(r"<li>(.*?)</li>", slice_from('class="ca-cred__body"', "Full attorney bio"), re.S)],
-    [unesc(li) for li in re.findall(r"<li[^>]*>(.*?)</li>", re.search(r'class="[^"]*\bcred__list\b[^"]*"[^>]*>(.*?)</ul>', built, re.S).group(1), re.S)],
-)
 
 print("\nSECTION NAV")
 cmp(
@@ -438,6 +433,16 @@ else:
 
 # ------------------------------------------------------- deliberate differences
 EXPECTED = [
+    (
+        "the reviewed-by line is a link, not a disclosure",
+        'class="cred"' in built
+        and "cred__updated" in built
+        and "Licensed in Colorado since 2006" not in built_text,
+        "by request. The comp draws a <details> holding five credential lines; every one "
+        "of them is already on the bio this now links to, so carrying them here as well "
+        "would put the same claims in two places to verify — and gave the page an "
+        "interaction whose only job was to hide them",
+    ),
     (
         "the result video card links to the real testimonial",
         "youtube.com/watch?v=kFdrOgblr6A" in built and "caResLb" not in built,

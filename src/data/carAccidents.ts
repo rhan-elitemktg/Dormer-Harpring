@@ -116,19 +116,23 @@ export interface DetailHero {
   photo: ImageMetadata;
   photoAlt: string;
   /**
-   * The "Reviewed by" disclosure. E-E-A-T signalling, and the reason the page
-   * names a specific attorney rather than the firm.
+   * The "Reviewed by" line. E-E-A-T signalling, and the reason the page names a
+   * specific attorney rather than the firm.
+   *
+   * THE COMP'S FIVE CREDENTIAL LINES ARE NOT PORTED. It draws a <details>
+   * holding "Licensed in Colorado since 2006", the $10M verdict and three
+   * awards; by request this is one line and a link to the reviewer's bio
+   * instead, and every one of those five facts is already on that bio. Carrying
+   * them here as well would put the same claims in two places to verify.
+   *
    * TODO(launch): "Updated July 2026" is the comp's date and has to move when
-   * the copy is reviewed. The five credential lines are K.C.'s, and the $10M
-   * verdict and 2006 admission both want confirming — see `team.ts`.
+   * the copy is actually reviewed.
    */
   reviewer: {
     name: string;
     role: string;
     photo: ImageMetadata;
     updated: string;
-    credentials: string[];
-    bioLabel: string;
     bioHref: string;
   };
 }
@@ -377,14 +381,6 @@ const carAccidents: PracticeAreaDetail = {
       role: "Founding Partner",
       photo: kcHarpring,
       updated: "Updated July 2026",
-      credentials: [
-        "Founding Partner, Dormer Harpring",
-        "Licensed in Colorado since 2006",
-        "Dozens of jury trials to verdict, including a $10M crash verdict",
-        "Colorado Trial Lawyers Association; American Association for Justice",
-        "National Trial Lawyers Top 40 Under 40; Best Lawyers “Ones to Watch”",
-      ],
-      bioLabel: "Full attorney bio",
       // `k-c-harpring`, not `kc-harpring` — the slug the live site indexes.
       bioHref: attorneyPath("k-c-harpring"),
     },
