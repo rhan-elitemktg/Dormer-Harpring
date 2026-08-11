@@ -715,6 +715,21 @@ select {
   gap: var(--space-2);
 }
 
+/* An `.arrow-link` whose label is underlined declares it HERE, not on the
+   anchor. `.arrow-link` is a flex container, which blockifies its children —
+   and a text decoration propagates into in-flow block-level descendants, where
+   the descendant cannot then turn it off. So `text-decoration: underline` on
+   the anchor draws a second stub of line beneath the glyph as well. (Outside a
+   flex container `.arrow`'s own `display: inline-block` would exclude it: a
+   decoration is not drawn through an atomic inline. Inside one it is not
+   atomic.) The anchor still has to say `text-decoration: none` — the UA
+   stylesheet underlines it otherwise. */
+.arrow-link__label {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
 /* The hover nudge rides on a custom property so the optical -1px survives it.
    Setting `transform: translateX(...)` on hover instead would replace the whole
    declaration and drop the arrow back down mid-animation. */

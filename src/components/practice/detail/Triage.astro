@@ -48,7 +48,7 @@ const { triage, firm } = Astro.props;
                 <h3 class="trow__q">{row.question}</h3>
                 <p class="trow__body">{row.body}</p>
                 <a class="trow__cta arrow-link" href={row.ctaHref}>
-                  {row.ctaLabel}
+                  <span class="arrow-link__label">{row.ctaLabel}</span>
                   <span class="arrow" aria-hidden="true">
                     &rarr;
                   </span>
@@ -198,8 +198,10 @@ const { triage, firm } = Astro.props;
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--text-strong);
-    text-decoration: underline;
-    text-underline-offset: 4px;
+    /* The underline belongs to `.arrow-link__label`, not here — see global.css.
+       This only cancels the UA default, which would run under the arrow too. */
+    text-decoration: none;
+    transition: color var(--dur) var(--ease);
   }
 
   .trow__cta:hover {

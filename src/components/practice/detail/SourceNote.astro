@@ -1,12 +1,14 @@
 ---
 // The comp's `.ca-tr-src` — the statute citations under a section.
 //
-// The comp links all eight of these to `law.justia.com/codes/colorado/`, the
-// index rather than the section, so the citation is the content and the URL is
-// a placeholder used eight times. Rendered as TEXT here rather than as eight
-// links that all land in the same wrong place: a citation that reads as a link
-// and doesn't take you to the statute is worse than one that doesn't pretend.
-// See the `StatuteSource` note in `data/carAccidents.ts`.
+// Linked out as the comp draws them, in a new tab. The comp points all five at
+// `law.justia.com/codes/colorado/` — the index rather than the section — so
+// they currently land in the same place; the `STATUTE_INDEX` TODO(launch) in
+// `data/carAccidents.ts` is where that gets resolved.
+//
+// `href` is optional, and a citation without one renders as plain text. That is
+// the honest fallback for a statute this build has no URL for: a citation that
+// reads as a link and goes nowhere is worse than one that doesn't pretend.
 import type { SourceNote } from "../../../data/carAccidents";
 
 interface Props {
@@ -24,7 +26,15 @@ const { source, tone = "light", class: className } = Astro.props;
     source.items.map((item, i) => (
       <>
         {i > 0 && ", "}
-        <cite class="src__cite">{item.label}</cite>
+        <cite class="src__cite">
+          {item.href ? (
+            <a class="src__link" href={item.href} target="_blank" rel="noopener">
+              {item.label}
+            </a>
+          ) : (
+            item.label
+          )}
+        </cite>
         {item.note && ` (${item.note})`}
       </>
     ))
@@ -45,5 +55,19 @@ const { source, tone = "light", class: className } = Astro.props;
 
   .src__cite {
     font-style: normal;
+  }
+
+  /* `inherit`, so the one rule serves both tones — the dark variant only has to
+     change `.src`. The transition is declared here rather than inherited: a
+     colour taken from an ancestor re-interpolates on the ANCESTOR's clock. */
+  .src__link {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    transition: color var(--dur) var(--ease);
+  }
+
+  .src__link:hover {
+    color: var(--accent);
   }
 </style>

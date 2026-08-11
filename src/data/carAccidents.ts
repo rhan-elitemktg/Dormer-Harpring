@@ -77,11 +77,13 @@ export interface DetailBlock {
   body: string;
 }
 
-/** A statute citation. See `SourceNote` on why these are text and not links. */
+/** A statute citation, linked out to the code it cites. */
 export interface StatuteSource {
   _key: string;
   label: string;
   note?: string;
+  /** Optional: `SourceNote` renders a citation with no href as plain text. */
+  href?: string;
 }
 
 export interface SourceNote {
@@ -338,6 +340,16 @@ export interface PracticeAreaDetail {
 
 const anchor = (id: string) => `#${id}`;
 
+/**
+ * Where every statute citation on this page points.
+ *
+ * TODO(launch): the comp sends all five to the Justia index for the Colorado
+ * code rather than to the section each one names, so they all land in the same
+ * place. The firm should confirm the deep links — and whether Justia is the
+ * source it wants cited at all, against Casetext or the state's own site.
+ */
+const STATUTE_INDEX = "https://law.justia.com/codes/colorado/";
+
 const carAccidents: PracticeAreaDetail = {
   _key: "car-accidents",
   // The live URL. `practiceAreaPath()` is `/${slug}` — see `routePaths.ts` on
@@ -499,10 +511,10 @@ const carAccidents: PracticeAreaDetail = {
     sources: {
       label: "Sources:",
       items: [
-        { _key: "medpay", label: "C.R.S. 10-4-635" },
-        { _key: "sol", label: "13-80-101" },
-        { _key: "cgia", label: "24-10-109" },
-        { _key: "comparative", label: "13-21-111" },
+        { _key: "medpay", label: "C.R.S. 10-4-635", href: STATUTE_INDEX },
+        { _key: "sol", label: "13-80-101", href: STATUTE_INDEX },
+        { _key: "cgia", label: "24-10-109", href: STATUTE_INDEX },
+        { _key: "comparative", label: "13-21-111", href: STATUTE_INDEX },
       ],
     },
   },
@@ -1064,7 +1076,7 @@ const carAccidents: PracticeAreaDetail = {
     },
     source: {
       label: "Source:",
-      items: [{ _key: "comparative", label: "C.R.S. 13-21-111" }],
+      items: [{ _key: "comparative", label: "C.R.S. 13-21-111", href: STATUTE_INDEX }],
     },
   },
 

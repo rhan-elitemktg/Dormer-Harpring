@@ -10,6 +10,7 @@
 // testimonials. `[data-video]` is the marker `global.css` uses to run the play
 // ring's pulse on hover, and these become real <button>s when the lightbox
 // lands. Deliberately not an <a> to nowhere in the meantime.
+import PlayButton from "../../media/PlayButton.astro";
 import Picture from "../../media/Picture.astro";
 import type { VideoPanel } from "../../../data/carAccidents";
 
@@ -33,11 +34,7 @@ const { video, focus = "default", class: className } = Astro.props;
   />
   <span class="trvid__scrim" aria-hidden="true"></span>
   <span class="trvid__dur">{video.length}</span>
-  <span class="trvid__pbtn" aria-hidden="true">
-    <svg width="20" height="22" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M8 5.5v13l11-6.5z"></path>
-    </svg>
-  </span>
+  <PlayButton tone="light" size={60} class="trvid__pbtn" />
   <span class="trvid__cap"><span class="trvid__ttl">{video.title}</span></span>
 </div>
 
@@ -118,24 +115,25 @@ const { video, focus = "default", class: className } = Astro.props;
     color: var(--dh-white);
   }
 
-  .trvid__pbtn {
+  /* PlayButton rather than a bespoke circle, so the ring pulses on hover like
+     every other video poster on the site and the keyframes stay in one place.
+     `--glyph` is the hook the component exposes: the comp draws this triangle
+     in forest, where PlayButton's default is the darker `--dh-forest-400`.
+     The comp's own drop shadow is dropped rather than restated — `playPulseLight`
+     carries one in every keyframe, and an animation's value outranks a normal
+     declaration even while it sits paused at frame zero. */
+  .trvid :global(.trvid__pbtn) {
     position: absolute;
     right: var(--space-5);
     bottom: var(--space-5);
     z-index: 2;
-    width: 60px;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: var(--radius-full);
+    --glyph: var(--dh-forest-100);
     background: var(--dh-white);
-    color: var(--dh-forest-100);
-    box-shadow: 0 8px 24px rgba(8, 14, 10, 0.35);
     transition: transform var(--dur) var(--ease);
   }
 
-  .trvid:hover .trvid__pbtn {
+  /* Pulse timing is global (see `.play` in global.css); this is only the lift. */
+  .trvid:hover :global(.trvid__pbtn) {
     transform: scale(1.08);
   }
 

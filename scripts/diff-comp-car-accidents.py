@@ -227,7 +227,9 @@ cmp(
 cmp(
     "row CTAs",
     noarrow([unesc(a) for a in re.findall(r'class="ca-tr-row__cta"[^>]*>(.*?)</a>', comp_triage, re.S)]),
-    noarrow(grab("trow__cta", "a")),
+    # The label sits in its own span so the underline stops before the arrow —
+    # `.arrow-link` is a flex container, and a decoration on it reaches the glyph.
+    noarrow(inner("trow__cta", "span")),
 )
 present(
     "triage copy",
@@ -239,6 +241,24 @@ present(
         "C.R.S. 10-4-635", "24-10-109",
     ],
 )
+
+# The statute citations link out as the comp draws them, in a new tab — four
+# here and a fifth under the fault teaser. Every one goes to the Justia INDEX
+# rather than to the section it names, which is how the comp has it: a
+# TODO(launch) on `STATUTE_INDEX`, not a departure from the design.
+STATUTE_HREF = "https://law.justia.com/codes/colorado/"
+src_links = re.findall(r"<a[^>]*\bsrc__link\b[^>]*>", built)
+if len(src_links) == 5 and all(
+    f'href="{STATUTE_HREF}"' in a and 'target="_blank"' in a and 'rel="noopener"' in a
+    for a in src_links
+):
+    print(f"  ✓ statute citations link out in a new tab ({len(src_links)})")
+else:
+    ok = False
+    print("  ✗ the statute citations do not link as the comp draws them")
+    print(f"      found {len(src_links)}, expected 5")
+    for a in src_links:
+        print(f"      {a}")
 
 
 # ------------------------------------------------------------------- takeaways
@@ -516,13 +536,6 @@ EXPECTED = [
         "destination. Rear-end and head-on have no page anywhere on the legacy site, so "
         "they keep the label and lose the arrow — `.arrow` belongs only on something "
         "that navigates",
-    ),
-    (
-        "the statute citations are text, not links",
-        "law.justia.com" not in built and "C.R.S. 13-21-111" in built_text,
-        "the comp links all of them to the Justia index rather than to the section — a "
-        "citation that reads as a link and does not reach the statute is worse than one "
-        "that does not pretend to",
     ),
     (
         "the badge captions are matched to the artwork, not to the comp's filenames",
