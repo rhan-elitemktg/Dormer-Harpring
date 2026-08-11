@@ -411,7 +411,10 @@ print("\nCRASH TYPES")
 blob = array("crashTypes", "const injuries")
 cmp("names", strings(blob, "name"), grab("tile__name", "h3"))
 cmp("bodies", strings(blob, "body"), grab("tile__body", "p"))
-cmp("link labels", strings(blob, "link"), noarrow(grab("tile__link", "span")))
+# The label sits in its own span so the underline stops before the arrow, so
+# this reads the first span INSIDE each link rather than the link's own text.
+# No `noarrow()`: that span never contains the glyph by construction.
+cmp("link labels", strings(blob, "link"), inner("tile__link", "span"))
 present("heading + lede", ["Types of car accidents we handle", "How the crash happened changes what has to be proven, and who ends up paying."])
 
 
@@ -561,8 +564,12 @@ EXPECTED = [
     ),
     (
         "six of the eight crash types link, two do not",
-        built.count('class="tile tile--link') == 6
-        and built.count('class="tile__link tile__link--inert') == 2,
+        # Matched by class PRESENCE, not by an exact class-attribute prefix —
+        # `.tile__link` gained `arrow-link` and a substring match on the old
+        # ordering would have gone quietly false rather than failing loudly.
+        len(re.findall(r'class="[^"]*\btile--link\b', built)) == 6
+        and len(re.findall(r'class="[^"]*\btile__link--inert\b', built)) == 2
+        and built.count("arrow-link__label") >= 8,
         "the comp points all eight at `DH - Practice Areas.html`, which is not a "
         "destination. Rear-end and head-on have no page anywhere on the legacy site, so "
         "they keep the label and lose the arrow — `.arrow` belongs only on something "
