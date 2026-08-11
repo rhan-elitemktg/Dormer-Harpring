@@ -9,9 +9,15 @@
 // `data/carAccidents.ts`.
 //
 // The map is a SCHEMATIC — five strokes and five numbered nodes over a city
-// outline, not a real map of Denver. It is `role="img"` with a label that says
-// so, and the caption under it repeats it, because a diagram that looks like a
-// map and is not is worse than no map.
+// outline, not a real map of Denver. The "Schematic, not to scale" caption that
+// said so is gone at Rhan's request, so the `role="img"` label is now the only
+// place the page admits it. KEEP THAT LABEL SAYING "schematic": it is what a
+// screen reader gets instead of the drawing, and a sighted reader has nothing
+// else to go on either.
+//
+// The source line under the figures went with it. The three figures it credited
+// are still unverified — see the TODO(launch) on `denver.stats`, which is now
+// the only record of that anywhere.
 import type { DenverSection } from "../../../data/carAccidents";
 
 interface Props {
@@ -39,8 +45,6 @@ const { denver } = Astro.props;
         ))
       }
     </dl>
-
-    <p class="stat3__src">{denver.source}</p>
 
     <div class="corrmap">
       <figure class="corrmap__fig">
@@ -71,7 +75,6 @@ const { denver } = Astro.props;
             <circle cx="232" cy="264" r="14"></circle><text x="232" y="269">5</text>
           </g>
         </svg>
-        <figcaption>{denver.mapCaption}</figcaption>
       </figure>
 
       <ol class="corrlist">
@@ -153,12 +156,6 @@ const { denver } = Astro.props;
     text-wrap: pretty;
   }
 
-  .stat3__src {
-    margin: var(--space-4) 0 0;
-    font-size: var(--text-sm);
-    line-height: var(--leading-normal);
-    color: var(--text-meta);
-  }
 
   .corrmap {
     display: grid;
@@ -190,15 +187,6 @@ const { denver } = Astro.props;
     text-anchor: middle;
   }
 
-  .corrmap__fig figcaption {
-    margin-top: var(--space-4);
-    font-weight: 700;
-    font-size: var(--text-micro);
-    line-height: 1;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--text-meta);
-  }
 
   /* Numbered by a counter rather than by markup, so the list and the map's
      pins cannot drift apart when a corridor is added or reordered. */

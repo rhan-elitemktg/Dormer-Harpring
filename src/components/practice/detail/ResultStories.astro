@@ -1,11 +1,14 @@
 ---
-// "What we were offered, and what we recovered." — three car accident results
-// on a rail, one of which is a client video.
+// "What we were offered, and what we recovered." — four car accident results on
+// a rail, one of which is a client video.
 //
-// TWO CARD SHAPES. The figure cards are white, with the offered/recovered pair
-// in a boxed figure over a short story. The video card is the same size filled
-// edge to edge with the client's portrait, the figures reversed out of a scrim,
-// and the pull quote across its foot.
+// ONE CARD SHAPE. Every card draws the same boxed offered/recovered figure, the
+// same title, body and footnote, at the same sizes and in the same order. The
+// video card differs in exactly two things: a photograph behind it, and a play
+// button. The comp drew it as a bespoke overlay instead — figures reversed out
+// of a scrim, a runtime chip, a 64px button, the quote pinned to the foot — and
+// that is gone at Rhan's request. Its figure box goes translucent so the
+// photograph reads through, and its ink goes forest to survive that.
 //
 // THE VIDEO CARD LINKS TO THE REAL VIDEO. The comp opens a lightbox that shows
 // the poster IMAGE and the quote again — there is no player in it, so it is a
@@ -14,6 +17,7 @@
 // exactly as `/testimonials` and the homepage rail already do. That also keeps
 // the page's only lightbox from being a lightbox that shows a photograph.
 import Picture from "../../media/Picture.astro";
+import PlayButton from "../../media/PlayButton.astro";
 import Eyebrow from "../../Eyebrow.astro";
 import { videoWatchUrl } from "../../../lib/video";
 import type { VideoReview } from "../../../data/testimonials";
@@ -64,29 +68,22 @@ const { results, reviews, id } = Astro.props;
                     class="res__img"
                   />
                   <span class="res__scrim" aria-hidden="true" />
-                  <span class="res__dur">{story.length}</span>
-                  <span class="res__pbtn" aria-hidden="true">
-                    <svg width="23" height="25" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M8 5.5v13l11-6.5z" />
-                    </svg>
-                  </span>
 
-                  <span class="resv__top">
-                    <span class="resv__row">
-                      <b>{results.offeredLabel}</b>
-                      <s>{story.offered}</s>
+                  <p class="res__fig">
+                    <span class="res__figrow">
+                      <span class="res__lbl">{results.offeredLabel}</span>
+                      <span class="res__off">{story.offered}</span>
                     </span>
-                    <span class="resv__row">
-                      <b>{results.recoveredLabel}</b>
-                      <em>{story.recovered}</em>
+                    <span class="res__figrow res__figrow--rec">
+                      <span class="res__lbl">{results.recoveredLabel}</span>
+                      <span class="res__rec">{story.recovered}</span>
                     </span>
-                  </span>
+                  </p>
+                  <h3 class="res__title">{story.title}</h3>
+                  <p class="res__story">{review.quote}</p>
+                  <p class="res__chg">{review.name}</p>
 
-                  <span class="resv__bot">
-                    <b>{story.title}</b>
-                    <i>{review.quote}</i>
-                    <span>{review.name}</span>
-                  </span>
+                  <PlayButton tone="light" size={44} class="res__play" />
                 </a>
               );
             }
@@ -116,10 +113,11 @@ const { results, reviews, id } = Astro.props;
     <div class="stories__foot">
       <p class="stories__disc">{results.disclaimer}</p>
       {
-        /* `rail.ts` hides this wrapper when the rail has nothing to scroll —
-           which at desktop widths is always: three cards at 31.4% plus two
-           24px gaps is 94.2% + 48px, so they fit any inner width over ~827px
-           and both arrows sat permanently disabled. */
+        /* `rail.ts` hides this wrapper when the rail has nothing to scroll.
+           That used to be every desktop width — three cards at a rounded 31.4%
+           fit any inner width over ~827px, so both arrows sat permanently
+           disabled. The fourth result is what gives them work: the slides now
+           fill the track exactly, so a fourth overflows it outright. */
       }
       <div class="stories__nav" data-rail-nav="ca-results">
         <button
@@ -176,16 +174,21 @@ const { results, reviews, id } = Astro.props;
     align-items: stretch;
   }
 
+  /* Three across, as a calc off the gap rather than the comp's rounded 31.4%.
+     That figure left the third card 24px short of the container's right edge,
+     which put it out of line with the arrows below — they sit on the container,
+     so the slides have to as well. Same reason `.lw` on the lawyers rail is a
+     calc: the count is open, and the basis has to keep drawing three however
+     many follow. */
   .res {
     display: flex;
     flex-direction: column;
-    flex: 0 0 31.4%;
+    flex: 0 0 calc((100% - 2 * var(--space-6)) / 3);
     min-width: 0;
     scroll-snap-align: start;
     padding: var(--space-7) var(--space-7) var(--space-8);
     background: var(--dh-white);
     border-radius: var(--radius-4);
-    box-shadow: 0 14px 38px rgba(10, 16, 12, 0.1);
     text-decoration: none;
   }
 
@@ -234,7 +237,7 @@ const { results, reviews, id } = Astro.props;
   .res__rec {
     font-family: var(--font-display);
     font-weight: 400;
-    font-size: var(--display-4);
+    font-size: var(--display-6);
     line-height: 0.95;
     color: var(--dh-forest-100);
     text-wrap: balance;
@@ -263,19 +266,23 @@ const { results, reviews, id } = Astro.props;
     color: var(--text-muted);
   }
 
-  /* ---- the video card ---- */
+  /* ---- the video card ----
+     Structurally the SAME card as the other three, by request: identical
+     figure box, title, body and footnote, in the same order at the same sizes.
+     Only two things differ — the photograph behind it and the play button. The
+     bespoke overlay this used to draw (reversed-out figures, a runtime chip, a
+     64px button, a quote block pinned to the foot) is gone entirely. */
 
   .res--vid {
     position: relative;
     overflow: hidden;
-    padding: 0;
     background: var(--dh-forest-100);
-    box-shadow: 0 14px 38px rgba(10, 16, 12, 0.18);
   }
 
   .res--vid :global(.res__img) {
     position: absolute;
     inset: 0;
+    z-index: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -283,146 +290,104 @@ const { results, reviews, id } = Astro.props;
     display: block;
   }
 
-  /* Dark at BOTH ends and lighter through the middle: the figures sit at the
-     top and the quote at the foot, and the client's face is between them. */
+  /* Bottom only. The top wash is gone by request, and nothing up there needs
+     it any more: the figure box is opaque, so it carries its own contrast. The
+     ramp starts where the title does and only has to make three short lines
+     legible. */
   .res__scrim {
     position: absolute;
     inset: 0;
     z-index: 1;
     background: linear-gradient(
       180deg,
-      rgba(8, 12, 10, 0.94) 0%,
-      rgba(8, 12, 10, 0.9) 22%,
-      rgba(8, 12, 10, 0.5) 36%,
-      rgba(8, 12, 10, 0.34) 56%,
-      rgba(8, 12, 10, 0.88) 100%
+      rgba(8, 12, 10, 0) 30%,
+      rgba(8, 12, 10, 0.42) 52%,
+      rgba(8, 12, 10, 0.85) 78%,
+      rgba(8, 12, 10, 0.94) 100%
     );
   }
 
-  .res__dur {
-    position: absolute;
-    top: var(--space-3);
-    right: var(--space-3);
-    z-index: 3;
-    padding: 4px 8px;
-    border-radius: var(--radius-2);
-    background: rgba(10, 14, 11, 0.62);
-    font-family: var(--font-ui);
-    font-weight: 700;
-    font-size: var(--text-micro);
-    line-height: 1;
-    color: var(--dh-white);
+  /* The card's own children are in flow; only the photograph and the scrim are
+     not. This lifts them clear of both. */
+  .res--vid .res__fig,
+  .res--vid .res__title,
+  .res--vid .res__story,
+  .res--vid .res__chg {
+    position: relative;
+    z-index: 2;
   }
 
-  .res__pbtn {
-    position: absolute;
-    right: var(--space-6);
-    bottom: var(--space-6);
-    z-index: 4;
-    width: 64px;
-    height: 64px;
+  /* Translucent, so the photograph reads through the box. A BACKGROUND alpha
+     rather than `opacity`: `opacity` would fade the figures inside it as well,
+     and the recovered figure is the one thing on this card that has to stay
+     legible over a photograph. */
+  .res--vid .res__fig {
+    background: rgba(251, 248, 241, 0.6);
+  }
+
+  /* The INK goes forest, where the figure cards use `--dh-ink-5` — that grey is
+     tuned for an opaque cream panel and washes out at 0.6 over a photograph.
+     The RULES deliberately do not follow it: forest read too heavy against the
+     artwork, so the box border and the divider keep the faint `--dh-line-soft`
+     the other cards use. Rhan's call, and the reason there is no border
+     override here — restating the base value would only look like one. */
+  .res--vid .res__lbl,
+  .res--vid .res__off {
+    color: var(--dh-forest-100);
+  }
+
+  /* The three text rules are the light-on-photo counterparts of the same rules
+     above — same sizes and spacing, inverted colour. */
+  .res--vid .res__title {
+    color: var(--text-on-dark);
+  }
+
+  .res--vid .res__story {
+    color: rgba(246, 242, 232, 0.88);
+  }
+
+  /* The client's name, which is what this slot holds on the video card where
+     the others hold a "what changed" line — so it gets a name's treatment: a
+     little more weight, and a short rule leading it. Flex rather than an inline
+     pseudo-element, so the rule sits on the name's optical centre instead of
+     its baseline.
+     THE ITALIC IS INTENTIONAL. It comes from `.res__chg`, whose base rule this
+     card shares so the two layouts match exactly; bold italic on a name is
+     unusual and reads as an oversight. Raised and signed off by Rhan — leave
+     it. */
+  .res--vid .res__chg {
     display: flex;
     align-items: center;
-    justify-content: center;
-    border-radius: var(--radius-full);
-    background: var(--dh-white);
-    color: var(--dh-forest-100);
-    box-shadow: 0 8px 24px rgba(8, 14, 10, 0.35);
-    transition: transform var(--dur) var(--ease);
-  }
-
-  .res--vid:hover .res__pbtn {
-    transform: scale(1.08);
-  }
-
-  .resv__top {
-    position: absolute;
-    left: var(--space-7);
-    right: var(--space-7);
-    top: var(--space-6);
-    z-index: 3;
-    display: block;
-  }
-
-  .resv__row {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: var(--space-4);
-  }
-
-  /* Clears the runtime chip, which sits in the same corner. */
-  .resv__row:first-child {
-    padding-right: 62px;
-  }
-
-  .resv__row + .resv__row {
-    margin-top: var(--space-2);
-  }
-
-  .resv__row b {
-    font-weight: 800;
-    font-size: var(--text-micro);
-    line-height: 1;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: rgba(246, 242, 232, 0.6);
-  }
-
-  .resv__row s {
+    gap: var(--space-3);
     font-weight: 600;
-    font-size: var(--text-lg);
-    line-height: 1;
-    color: rgba(246, 242, 232, 0.6);
-    text-decoration: line-through;
-    text-decoration-thickness: 1.5px;
+    color: rgba(246, 242, 232, 0.66);
+    /* Clears the play button, so a long client name wraps above it rather than
+       running underneath. The one concession to the overlay. */
+    padding-right: 60px;
   }
 
-  .resv__row em {
-    font-family: var(--font-display);
-    font-style: normal;
-    font-weight: 400;
-    font-size: var(--display-5);
-    line-height: 0.95;
-    color: var(--text-on-dark);
+  /* Leading the name, like `.eyebrow`'s own rule and shorter than it — this is
+     a byline, not a section opener. `currentColor`, so it tracks the name if
+     that colour is ever retuned; one fewer alpha to keep in sync. */
+  .res--vid .res__chg::before {
+    content: "";
+    flex: none;
+    width: 20px;
+    height: 1px;
+    background: currentColor;
   }
 
-  .resv__bot {
+  /* PlayButton rather than a bespoke circle, so the ring pulses on hover — and
+     the card is an <a>, which is exactly what the global `.play` rule gates the
+     pulse on, so hovering anywhere on the card runs it. 44px, down from the 64
+     the overlay used. */
+  .res--vid :global(.res__play) {
     position: absolute;
-    left: var(--space-7);
-    right: 104px;
-    bottom: var(--space-6);
+    right: var(--space-7);
+    bottom: var(--space-8);
     z-index: 3;
-    display: block;
-  }
-
-  .resv__bot b {
-    display: block;
-    font-family: var(--font-display);
-    font-weight: 400;
-    font-size: var(--text-xl);
-    line-height: var(--leading-tight);
-    color: var(--text-on-dark);
-  }
-
-  .resv__bot i {
-    display: block;
-    margin-top: var(--space-2);
-    font-style: italic;
-    font-size: var(--text-md);
-    line-height: 1.35;
-    color: rgba(246, 242, 232, 0.8);
-  }
-
-  .resv__bot > span {
-    display: block;
-    margin-top: var(--space-2);
-    font-weight: 800;
-    font-size: var(--text-micro);
-    line-height: 1;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: rgba(246, 242, 232, 0.6);
+    --glyph: var(--dh-forest-100);
+    background: var(--dh-white);
   }
 
   /* ---- foot ---- */
@@ -486,12 +451,18 @@ const { results, reviews, id } = Astro.props;
     cursor: default;
   }
 
+  /* Two across, and a calc for the same reason: 48% left the second card short
+     of the edge the arrows sit on. */
   @media (max-width: 1080px) {
     .res {
-      flex-basis: 48%;
+      flex-basis: calc((100% - var(--space-6)) / 2);
     }
   }
 
+  /* One card with the next one peeking — the peek is the affordance at this
+     width, so the slide is deliberately NOT flush here. The foot has gone to a
+     column by now and the arrows are left-aligned, so there is no right edge to
+     line up with anyway. */
   @media (max-width: 760px) {
     .res {
       flex-basis: 86%;

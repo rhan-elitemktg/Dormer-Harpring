@@ -365,15 +365,23 @@ present(
 
 
 # --------------------------------------------------------------------- results
-print("\nRESULTS (one video card, two figure cards)")
+print("\nRESULTS (one video card, now three figure cards)")
 blob = array("resultStories", "const crashSteps")
-# The video card reverses its figures out of the poster (`<s>` struck, `<em>`
-# recovered); the two figure cards use the boxed `.res__fig`. Both, in order.
-cmp("offered", strings(blob, "offered"), inner("resv__row", "s") + grab("res__off", "span"))
-cmp("recovered", strings(blob, "recovered"), inner("resv__row", "em") + grab("res__rec", "span"))
-cmp("titles", strings(blob, "title"), [unesc(b) for b in re.findall(r'class="[^"]*\bresv__bot\b[^"]*"[^>]*><b[^>]*>(.*?)</b>', built, re.S)] + grab("res__title", "h3"))
-cmp("stories", strings(blob, "story"), grab("res__story", "p"))
-cmp("what changed", strings(blob, "changed"), grab("res__chg", "p"))
+
+# The video card no longer reverses its figures out of the poster — it draws
+# the same `.res__fig` box, title, body and footnote as every other card, so
+# all four are one ordered list. The comp's three come first; the fourth is
+# ours, and is asserted under DELIBERATE DIFFERENCES.
+n = len(strings(blob, "offered"))
+cmp("offered (the comp's three)", strings(blob, "offered"), grab("res__off", "span")[:n])
+cmp("recovered", strings(blob, "recovered"), grab("res__rec", "span")[:n])
+cmp("titles", strings(blob, "title"), grab("res__title", "h3")[:n])
+
+# `story` and `changed` belong to the FIGURE cards only — the comp's video card
+# carries a pull quote where they carry prose, and still does. So these start
+# at index 1, and the quote is checked on its own below.
+cmp("stories", strings(blob, "story"), grab("res__story", "p")[1:n])
+cmp("what changed", strings(blob, "changed"), grab("res__chg", "p")[1:n])
 present(
     "band copy",
     [
@@ -395,7 +403,7 @@ cmp(
     [unesc(li) for li in re.findall(r"<li>(.*?)</li>", slice_from('class="ca-tline__pts"', "</ul>"), re.S)],
     [unesc(li) for li in re.findall(r"<li[^>]*>(.*?)</li>", re.search(r'class="[^"]*\btline__pts\b[^"]*"[^>]*>(.*?)</ul>', built, re.S).group(1), re.S)],
 )
-present("heading + ledes", ["What the next few months look like", "Here is the honest version.", "Most of our clients never set foot in a courtroom"])
+present("heading + lede", ["What the next few months look like", "Most of our clients never set foot in a courtroom"])
 
 
 # ----------------------------------------------------------------- crash types
@@ -403,7 +411,10 @@ print("\nCRASH TYPES")
 blob = array("crashTypes", "const injuries")
 cmp("names", strings(blob, "name"), grab("tile__name", "h3"))
 cmp("bodies", strings(blob, "body"), grab("tile__body", "p"))
-cmp("link labels", strings(blob, "link"), noarrow(grab("tile__link", "span")))
+# The label sits in its own span so the underline stops before the arrow, so
+# this reads the first span INSIDE each link rather than the link's own text.
+# No `noarrow()`: that span never contains the glyph by construction.
+cmp("link labels", strings(blob, "link"), inner("tile__link", "span"))
 present("heading + lede", ["Types of car accidents we handle", "How the crash happened changes what has to be proven, and who ends up paying."])
 
 
@@ -424,7 +435,9 @@ cmp(
     [unesc(p) for p in re.findall(r"<li><b>.*?</b><p>(.*?)</p>", comp_dv, re.S)],
     [unesc(x) for x in re.findall(r"<p[^>]*>(.*?)</p>", corrlist, re.S)],
 )
-present("source + map caption", ["Source: [CDOT / DRCOG / Denver Open Data], [year].", "Schematic, not to scale."])
+# The comp's source line and map caption are both dropped — see DELIBERATE
+# DIFFERENCES. Asserted as ABSENT so a later edit cannot quietly reinstate the
+# bracketed placeholders.
 
 
 # --------------------------------------------------------------------- teasers
@@ -545,16 +558,26 @@ EXPECTED = [
         "the @denvertrial channel, so the card links out as /testimonials already does",
     ),
     (
-        "the checklist teaser has no link",
-        "teaser__cta--inert" in built and "See all 8 steps" in built_text,
+        "the checklist teaser links to a placeholder",
+        # Class PRESENCE plus the href, not an exact attribute string — the
+        # class list gained `arrow-link` and a prefix match would have gone
+        # quietly false instead of failing.
+        re.search(r'class="[^"]*\bteaser__cta\b[^"]*"[^>]*href="#"', built) is not None
+        and "See all 8 steps" in built_text,
         "the comp points it at `DH - Blog - What to do after a car accident.html`, a "
         "post comp that arrived with this revision and that this build does not serve. "
-        "Rhan's call: keep the label, drop the affordance, ship no dead href",
+        "It shipped unlinked for that reason; Rhan's call is now to draw the affordance "
+        "against `#` and fill in the real URL when the article exists. TODO(launch) — "
+        "`#` must not reach production",
     ),
     (
         "six of the eight crash types link, two do not",
-        built.count('class="tile tile--link') == 6
-        and built.count('class="tile__link tile__link--inert') == 2,
+        # Matched by class PRESENCE, not by an exact class-attribute prefix —
+        # `.tile__link` gained `arrow-link` and a substring match on the old
+        # ordering would have gone quietly false rather than failing loudly.
+        len(re.findall(r'class="[^"]*\btile--link\b', built)) == 6
+        and len(re.findall(r'class="[^"]*\btile__link--inert\b', built)) == 2
+        and built.count("arrow-link__label") >= 8,
         "the comp points all eight at `DH - Practice Areas.html`, which is not a "
         "destination. Rear-end and head-on have no page anywhere on the legacy site, so "
         "they keep the label and lose the arrow — `.arrow` belongs only on something "
@@ -568,6 +591,49 @@ EXPECTED = [
         "second row and re-balances the section every time the roster changes. Rhan's "
         "call: one rail, so the count is open. Greg Bentley is the fifth, and his "
         "credential line is drawn from his own bio",
+    ),
+    (
+        "the video card quotes the client in full, not the comp's shortened version",
+        "They made me feel like part of the family" in built_text
+        and "They made me feel like family." not in built_text,
+        "the comp trims it to “They made me feel like family.” Long-standing, and "
+        "only surfaced when this section's quote was first asserted: testimonials.ts "
+        "holds the verified wording from the client's own video, and a real person's "
+        "testimonial is not ours to tighten",
+    ),
+    (
+        "the video result is the same card as the other three, plus a fourth result",
+        "resv__bot" not in built
+        and "res__dur" not in built
+        and built.count('class="res') >= 4
+        and "Semi-truck that could not stop" in built_text,
+        "the comp draws the video result as a bespoke overlay — figures reversed out of "
+        "the poster, a runtime chip, a 64px button, the quote pinned to the foot. Rhan's "
+        "call: one card design, differing only in the photograph behind it and a 44px "
+        "play button that pulses on card hover. The fourth result is `trucking-crash` "
+        "from caseResults.ts, added so the rail overflows and its arrows have work to do",
+    ),
+    (
+        "the case timeline drops the comp's first lede, and its side does not stick",
+        "Here is the honest version" not in built_text
+        and "Most of our clients never set foot in a courtroom" in built_text
+        and "tline__side" in built,
+        "Rhan's call on both. The comp opens the band with a scene-setter over the "
+        "claim, and pins the photograph and its tick list while the phases scroll past",
+    ),
+    (
+        "the Denver band drops the comp's source line and map caption",
+        # Not a bare `[year]` check: that placeholder ALSO ends all three stat
+        # labels, which is a separate open question, so it would fail here for
+        # the wrong reason. These two strings are the removed lines themselves.
+        "CDOT" not in built_text
+        and "Schematic, not to scale" not in built_text
+        # The schematic must still ANNOUNCE itself somewhere, and this is now
+        # the only place it does.
+        and 'aria-label="Schematic diagram of Denver' in built,
+        "Rhan's call. Both were the comp's own bracketed placeholders. The three "
+        "figures they credited are still unsourced, and the TODO(launch) on "
+        "`denver.stats` is now the only record of that — nothing on the page says so",
     ),
     (
         "the badges are artwork, neither linked nor captioned",

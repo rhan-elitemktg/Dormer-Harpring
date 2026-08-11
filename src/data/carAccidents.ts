@@ -39,7 +39,8 @@ import { ROUTES, attorneyPath } from "../lib/routePaths";
 import heroPhoto from "../assets/practice/car-accident-hero.jpg";
 import crashVideoCover from "../assets/practice/crash-video-cover.jpg";
 import caseVideoCover from "../assets/practice/case-video-cover.jpg";
-import whyPhoto from "../assets/practice/why-attorneys.jpg";
+import whyPhoto from "../assets/practice/why-attorneys-desktop.jpg";
+import whyPhotoMobile from "../assets/practice/why-attorneys-mobile.jpg";
 import consultPhoto from "../assets/blog/consult.jpg";
 import kcHarpring from "../assets/team/kc-harpring-lg.jpg";
 
@@ -223,7 +224,15 @@ export interface WhyFirmSection {
   columns: { _key: string; n: string; title: string; body: string }[];
   ctaLabel: string;
   ctaHref: string;
+  /**
+   * TWO CROPS OF THE SAME PHOTOGRAPH, not two resolutions — the section is a
+   * side-by-side above 1080px and a stacked band below it, and those are
+   * near-square and 16:9 boxes respectively. One source cannot serve both
+   * without `cover` throwing away a third of it. `WhyFirm` picks between them
+   * with `media`, so this is art direction and both are required.
+   */
   photo: ImageMetadata;
+  photoMobile: ImageMetadata;
   photoAlt: string;
 }
 
@@ -242,8 +251,6 @@ export interface ResultStory {
    * any of them.
    */
   reviewKey?: string;
-  /** Runtime shown on the video card. */
-  length?: string;
 }
 
 export interface ResultsSection {
@@ -257,9 +264,14 @@ export interface ResultsSection {
 
 export interface TimelineSection {
   title: string;
+  /**
+   * One paragraph. The comp drew two — a scene-setter ("Most people have never
+   * done this before…") over this one — and the first is gone at Rhan's
+   * request. This field was `ledeStrong`, which only meant anything in contrast
+   * to the paragraph above it, and named a colour besides; the data layer does
+   * not carry presentation.
+   */
   lede: string;
-  /** The second, forest-coloured paragraph under the lede. */
-  ledeStrong: string;
   steps: { _key: string; n: string; title: string; body: string }[];
   phases: { _key: string; title: string; when: string; body: string }[];
   photo: ImageMetadata;
@@ -283,8 +295,6 @@ export interface DenverSection {
   title: string;
   lede: string;
   stats: { _key: string; big: string; label: string; body: string }[];
-  source: string;
-  mapCaption: string;
   corridors: { _key: string; name: string; body: string }[];
 }
 
@@ -742,7 +752,8 @@ const carAccidents: PracticeAreaDetail = {
     ctaLabel: "See the case results",
     ctaHref: anchor(CA_SECTION_IDS.results),
     photo: whyPhoto,
-    photoAlt: "Dormer Harpring attorneys outside the courthouse",
+    photoMobile: whyPhotoMobile,
+    photoAlt: "Three Dormer Harpring attorneys standing in a courthouse colonnade",
   },
 
   results: {
@@ -757,7 +768,6 @@ const carAccidents: PracticeAreaDetail = {
         recovered: "$2.4 Million",
         title: "Trial win: breach of insurance contract",
         reviewKey: "evelyn",
-        length: "1:22",
       },
       {
         _key: "low-speed",
@@ -777,14 +787,34 @@ const carAccidents: PracticeAreaDetail = {
         story: "Our client was injured in a five-car pileup on a Denver-area highway.",
         changed: "Liability across five vehicles had to be untangled and proven.",
       },
+      // A FOURTH, WHERE THE COMP DRAWS THREE. Added at Rhan's request so the
+      // rail actually overflows and its arrows have something to do — three
+      // cards fit the container exactly and never scrolled.
+      //
+      // NOT INVENTED. This is `trucking-crash` from `caseResults.ts`, already
+      // published on /results, restated in this rail's voice: the figures are
+      // written long the way the other three are ("$200K" -> "$200,000") and
+      // the one sentence is split into what happened and what was at issue.
+      // Nothing is claimed here that the case results page does not already
+      // claim — which matters, because Colorado's Rule 7.1 governs how these
+      // are described.
+      {
+        _key: "semi-brakes",
+        offered: "$200,000",
+        recovered: "$1.15 Million",
+        title: "Semi-truck that could not stop",
+        story:
+          "Our client, a former marine, was hit and injured by a semi-truck near " +
+          "Colorado Springs whose brakes were poorly maintained.",
+        changed: "He had pre-existing injuries, which is the argument insurers reach for.",
+      },
     ],
     disclaimer: "Past results do not guarantee future outcomes. Every case is different.",
   },
 
   timeline: {
     title: "What the next few months look like",
-    lede: "Most people have never done this before. Here is the honest version.",
-    ledeStrong:
+    lede:
       "Most of our clients never set foot in a courtroom — but the case has to be built " +
       "as if it will be tried.",
     steps: [
@@ -960,9 +990,13 @@ const carAccidents: PracticeAreaDetail = {
     // THREE figures, each with a sentence about what it means for a claim. The
     // dead `denverData` array in the same comp still lists FOUR bare figures
     // from the first design; the markup is the source here.
-    // TODO(launch): the comp dates all three "[year]" and sources them to
-    // "[CDOT / DRCOG / Denver Open Data]". Nothing is sourced to a published
-    // table yet.
+    // TODO(launch): NONE OF THESE THREE FIGURES IS SOURCED. The comp dated
+    // them "[year]" and credited "[CDOT / DRCOG / Denver Open Data]", and that
+    // line was drawn under the band until Rhan removed it — so this comment is
+    // now the ONLY record that they are placeholders. Nothing on the rendered
+    // page says so any more. Either verify all three against a published table
+    // before launch or drop the band; a city statistic with no provenance is
+    // the kind of claim Rule 7.1 covers.
     stats: [
       {
         _key: "hit-and-run",
@@ -985,8 +1019,6 @@ const carAccidents: PracticeAreaDetail = {
         body: "Wrongful death claims run on a different deadline than injury claims.",
       },
     ],
-    source: "Source: [CDOT / DRCOG / Denver Open Data], [year].",
-    mapCaption: "Schematic, not to scale.",
     // Five roads, numbered against the schematic map. Every sentence here is
     // NEW — the dead `corridors` array carries a different one per road.
     corridors: [
@@ -1043,7 +1075,14 @@ const carAccidents: PracticeAreaDetail = {
     title: "8 things to do after a car accident",
     body: "From the scene to the first adjuster call — the steps that protect your claim.",
     ctaLabel: "See all 8 steps",
-    ctaHref: null,
+    // TODO(launch): A PLACEHOLDER, AND `#` MUST NOT SHIP. The comp points this
+    // at `DH - Blog - What to do after a car accident.html`, a post comp that
+    // arrived with this revision and that this build does not serve. It shipped
+    // unlinked for that reason; Rhan's call is now to draw the affordance and
+    // fill the destination in when the article exists. Until then the link
+    // scrolls to the top of the page, which is the whole reason this is a
+    // TODO rather than a decision.
+    ctaHref: "#",
     steps: [
       { _key: "police", iconKey: "police", label: "Call the police" },
       { _key: "photos", iconKey: "camera", label: "Photograph the scene" },

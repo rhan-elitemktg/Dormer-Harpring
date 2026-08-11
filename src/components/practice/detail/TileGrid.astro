@@ -33,8 +33,10 @@ const { section, id } = Astro.props;
             <>
               <h3 class="tile__name">{tile.name}</h3>
               <p class="tile__body">{tile.body}</p>
-              <span class:list={["tile__link", !tile.href && "tile__link--inert"]}>
-                {tile.linkLabel}
+              <span
+                class:list={["tile__link", "arrow-link", !tile.href && "tile__link--inert"]}
+              >
+                <span class="arrow-link__label">{tile.linkLabel}</span>
                 {tile.href && (
                   <i class="arrow" aria-hidden="true">
                     &rarr;
@@ -107,13 +109,16 @@ const { section, id } = Astro.props;
   }
 
   .tile--link {
-    transition: transform var(--transition), box-shadow var(--transition),
-      background var(--transition);
+    transition: transform var(--transition), box-shadow var(--transition);
   }
 
+  /* The card STAYS WHITE on hover. It used to go `--dh-cream-50` (#fbf8f1),
+     which is 1.009:1 against this section's own `--dh-cream-100` (#fbf7ed) —
+     so the one card the reader was pointing at was the one that dissolved into
+     the band. The lift and the deeper shadow carry the state on their own, and
+     `background` is off the transition list now that nothing animates it. */
   .tile--link:hover {
     transform: translateY(-4px);
-    background: var(--dh-cream-50);
     box-shadow: 0 24px 50px -22px rgba(45, 34, 22, 0.35);
   }
 
@@ -132,23 +137,23 @@ const { section, id } = Astro.props;
     text-wrap: pretty;
   }
 
+  /* The flex box comes from the shared `.arrow-link` now, and the underline
+     from its `.arrow-link__label`. Declared here it also struck the glyph:
+     `.arrow-link` is a flex container, so the decoration propagates into the
+     blockified children and the child cannot turn it off. The rule that tried
+     to — `.tile__link .arrow { text-decoration: none }` — never did anything. */
   .tile__link {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
     font-weight: 800;
     font-size: var(--text-micro);
     line-height: 1;
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--dh-forest-100);
-    text-decoration: underline;
-    text-underline-offset: 4px;
   }
 
+  /* The glyph is an <i> here, where every other arrow on the page is a <span>. */
   .tile__link .arrow {
     font-style: normal;
-    text-decoration: none;
   }
 
   .tile--link:hover .tile__link {
@@ -156,9 +161,13 @@ const { section, id } = Astro.props;
   }
 
   /* No page behind it: no underline, no arrow, no link colour. The label is
-     the comp's content; the affordance would be a promise. */
+     the comp's content; the affordance would be a promise. The underline has
+     to be cancelled on the LABEL, since that is what carries it. */
   .tile__link--inert {
     color: var(--text-meta);
+  }
+
+  .tile__link--inert .arrow-link__label {
     text-decoration: none;
   }
 
