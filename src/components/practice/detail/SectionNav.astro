@@ -8,7 +8,9 @@
 // run through `lib/headings.ts` — they are handles, not slugified headings, so
 // there is nothing for a slugifier to do and no second one to drift from.
 //
-// `scroll-behavior: smooth` is already global; nothing here needs script.
+// `scroll-behavior: smooth` is already global, so the jumps need no script.
+// The one thing that does is marking where the reader currently IS — see
+// `scripts/sectionNav.ts`, wired by the `data-section-nav` attribute below.
 import type { PracticeAreaDetail } from "../../../data/carAccidents";
 import type { FirmDetails } from "../../../data/site";
 
@@ -21,9 +23,18 @@ interface Props {
 const { nav, firm, ctaHref } = Astro.props;
 ---
 
-<nav class="subnav" aria-label="On this page">
+<nav class="subnav" aria-label="On this page" data-section-nav>
   <div class="subnav__in">
-    {nav.items.map((item) => <a class="subnav__link" href={item.href}>{item.label}</a>)}
+    {
+      /* `data-section-link` opts these five into the scroll highlight. The CTA
+         below points at `#contact` too and deliberately does not carry it — a
+         red button gaining a nav item's underline reads as broken. */
+      nav.items.map((item) => (
+        <a class="subnav__link" href={item.href} data-section-link>
+          {item.label}
+        </a>
+      ))
+    }
     <a class="subnav__tel" href={`tel:${firm.phoneE164}`}>{firm.phone}</a>
     <a class="subnav__cta" href={ctaHref}>{nav.ctaLabel}</a>
   </div>
@@ -57,6 +68,11 @@ const { nav, firm, ctaHref } = Astro.props;
     display: none;
   }
 
+  /* The underline is declared here and TRANSPARENT, rather than on the current
+     link, for two reasons: `text-decoration` cannot be animated, so putting it
+     on the current state would snap the rule on while the colour eased; and a
+     link that gains an underline only when current would change height as the
+     highlight moved along the row. `text-decoration-color` does animate. */
   .subnav__link {
     font-weight: 700;
     font-size: var(--text-sm);
@@ -64,12 +80,22 @@ const { nav, firm, ctaHref } = Astro.props;
     letter-spacing: var(--tracking-btn);
     text-transform: uppercase;
     color: var(--text-body);
-    text-decoration: none;
     white-space: nowrap;
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 7px;
+    transition: color var(--transition), text-decoration-color var(--transition);
   }
 
   .subnav__link:hover {
     color: var(--accent);
+  }
+
+  /* Where the reader has scrolled to. Set by `scripts/sectionNav.ts`. */
+  .subnav__link[aria-current="location"] {
+    color: var(--accent);
+    text-decoration-color: currentColor;
   }
 
   .subnav__tel {
@@ -121,3 +147,7 @@ const { nav, firm, ctaHref } = Astro.props;
     }
   }
 </style>
+
+<script>
+  import "../../../scripts/sectionNav";
+</script>
