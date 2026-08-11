@@ -63,8 +63,8 @@ export const CA_SECTION_IDS = {
   lawyers: "lawyers",
   results: "results",
   reviews: "reviews",
-  next: "next",
   types: "types",
+  next: "next",
   contact: "contact",
 } as const;
 
@@ -413,8 +413,8 @@ const carAccidents: PracticeAreaDetail = {
       { _key: "case", label: "Do I have a case?", href: anchor(CA_SECTION_IDS.case) },
       { _key: "lawyers", label: "Our lawyers", href: anchor(CA_SECTION_IDS.lawyers) },
       { _key: "results", label: "Results", href: anchor(CA_SECTION_IDS.results) },
-      { _key: "next", label: "Next steps", href: anchor(CA_SECTION_IDS.next) },
       { _key: "types", label: "Crash types", href: anchor(CA_SECTION_IDS.types) },
+      { _key: "next", label: "Next steps", href: anchor(CA_SECTION_IDS.next) },
     ],
     ctaLabel: "Speak with a lawyer",
   },

@@ -102,10 +102,14 @@ const contactAnchor = `#${CA_SECTION_IDS.contact}`;
   id={CA_SECTION_IDS.reviews}
 />
 
-<CaseTimeline timeline={detail.timeline} id={CA_SECTION_IDS.next} />
-
+{/* Crash types and the Denver data are the page's reference pair, so they run
+    together — and "what the next few months look like" lands after them, as the
+    last substantive section before the reading tail and the closest process
+    content can get to the contact block. */}
 <TileGrid section={detail.crashTypes} id={CA_SECTION_IDS.types} />
 <DenverData denver={detail.denver} />
+
+<CaseTimeline timeline={detail.timeline} id={CA_SECTION_IDS.next} />
 
 {/* The two teasers stay in the further-reading tail rather than moving up
     beside the triage block. They are POINTERS to articles, not the content —

@@ -7,6 +7,11 @@
 // the timeline beneath them is what the page never said before — how long this
 // actually takes.
 //
+// `--alt`, not the comp's cream: in its new slot this follows DenverData's sunk
+// band and precedes the checklist teaser's cream one, and on cream it would be
+// the second of two identical backgrounds in a row — something neither linter
+// can see, because the comp hardcodes a hex per section and never compares two.
+//
 // The chevrons are a decorative shape over an ordered list. `clip-path` cuts
 // them and negative margins overlap the points; below 980px they flip to
 // pointing DOWN, because a horizontal arrow row stacked vertically reads as
@@ -22,7 +27,7 @@ interface Props {
 const { timeline, id } = Astro.props;
 ---
 
-<section class="section section--cream tline" id={id}>
+<section class="section section--alt tline" id={id}>
   <div class="container">
     <header class="tline__head">
       <h2 class="tline__title">{timeline.title}</h2>
@@ -232,7 +237,10 @@ const { timeline, id } = Astro.props;
     height: 12px;
     border-radius: var(--radius-full);
     background: var(--dh-forest-100);
-    box-shadow: 0 0 0 4px var(--surface-page);
+    /* The halo punches the spine out from behind the node, so it has to BE the
+       section's background — `--surface-alt` here, and it moves whenever the
+       section's surface does. */
+    box-shadow: 0 0 0 4px var(--surface-alt);
   }
 
   .phases__end {

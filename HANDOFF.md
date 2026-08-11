@@ -248,11 +248,14 @@ the seven attorney emails (six inferred from a pattern), the office address and 
   eighteen** (all listed and asserted in `diff-comp-blog-post.py`), and the **Car Accidents
   page in eleven** (asserted in `diff-comp-car-accidents.py`). All at Rhan's request or
   forced by serving a real URL. Same standing: signed off by Rhan, not seen by the designer.
-- **The testimonials rail was moved up to sit directly after the results**, where the comp
-  puts the case timeline, the crash types and the Denver data between them. They are one
-  argument told two ways — the figures, then the people behind them. It also broke the
-  comp's `cream → cream → cream` run across those three sections; `TileGrid` took `--alt`
-  to break the second pair. Nothing else moved: the rest of the comp's order is sound.
+- **Two sections moved.** The testimonials rail sits directly after the results — they are
+  one argument told two ways, the figures then the people behind them, and the comp puts
+  three sections between them. And the case timeline moved below the crash types and the
+  Denver data, so the reference pair runs together and "what the next few months look like"
+  is the last substantive section before the reading tail. Between them these also cleared
+  the comp's `cream → cream → cream` run; `CaseTimeline` took `--alt` in its new slot, and
+  its spine-node halo moved with it, because that halo has to BE the section's background.
+  Nothing else moved: the rest of the comp's order is sound.
 - **The section nav is six links, not the comp's five**, rebuilt in document order with
   shortened labels ("Crash types", "Colorado law") and a new "Do I have a case?" entry
   whose section the comp never anchored. The phone number now drops out of the bar at
