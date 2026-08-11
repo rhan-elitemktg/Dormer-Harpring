@@ -10,6 +10,7 @@
 //   <div data-rail="awards">…</div>
 //   <button data-rail-prev="attorneys">
 //   <div data-rail-dots="awards"></div>
+//   <div data-rail-nav="attorneys">…the two arrows…</div>
 // so the controls can live anywhere on the page relative to the rail.
 //
 // A rail declares whichever control it wants and this drives what it finds —
@@ -33,6 +34,13 @@ function initRail(rail: HTMLElement) {
     next: document.querySelector(`[data-rail-next="${name}"]`),
   };
   const dots = document.querySelector<HTMLElement>(`[data-rail-dots="${name}"]`);
+
+  // Optional, and opt-in: the wrapper around the arrows, hidden outright on a
+  // rail whose content fits. Two arrows that can never fire are the same dead
+  // control the dots already avoid — but a rail that has always overflowed has
+  // no reason to carry the attribute, so nothing here changes for one that
+  // does not declare it. See `sync()`.
+  const nav = document.querySelector<HTMLElement>(`[data-rail-nav="${name}"]`);
   if (!prev && !next && !dots) return;
 
   const track = rail.firstElementChild;
@@ -84,6 +92,12 @@ function initRail(rail: HTMLElement) {
     if (prev) prev.disabled = rail.scrollLeft <= 1;
     // A rail whose content fits needs no controls at all.
     if (next) next.disabled = max <= 1 || rail.scrollLeft >= max - 1;
+
+    // …and where the markup gives them a wrapper, it goes rather than sitting
+    // there greyed out. Measured every sync, not decided once: whether the
+    // content fits is a function of the viewport, so a rail can cross this line
+    // on resize in either direction.
+    if (nav) nav.hidden = max <= 1;
 
     if (!dots) return;
     const pages = pageCount();

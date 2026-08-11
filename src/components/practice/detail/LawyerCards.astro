@@ -1,11 +1,17 @@
 ---
-// "Meet our car accident lawyers" — four attorney cards, each with a line about
-// what they do on crash cases specifically.
+// "Meet our car accident lawyers" — attorney cards, each with a line about what
+// they do on crash cases specifically.
 //
 // The first design drew a seven-portrait contact sheet, photo and name only.
-// This one names four and says why each is on the page, which is the version
-// that does any work — and it is the reason the section also emits `Attorney`
-// structured data.
+// This one names each attorney and says why they are on the page, which is the
+// version that does any work — and it is the reason the section also emits
+// `Attorney` structured data.
+//
+// A FULL-WIDTH RAIL, NOT THE COMP'S GRID. The comp draws four across, which
+// puts a fifth attorney alone on a second row and re-balances the section every
+// time the roster changes. On a rail the count is open: the track gets longer
+// and nothing else moves. Same `scripts/rail.ts` as the homepage band and the
+// results rail below, wired by name.
 //
 // The PORTRAIT and the NAME come from `team.ts`; the CREDENTIAL LINE comes from
 // the page document, because it is written about car accident work and belongs
@@ -54,8 +60,40 @@ const schema = {
       <p class="lawyers__lede">{section.lede}</p>
     </header>
 
-    <ul class="lawyers__grid">
-      {
+    {
+      /* Above the rail and hard right, so the controls read as belonging to the
+         row they drive. They are NOT `.arrow` links: a carousel control is a
+         control, not something that navigates. `rail.ts` hides this whole
+         wrapper when the cards fit and there is nothing to scroll. */
+    }
+    <div class="lawyers__nav" data-rail-nav="ca-lawyers">
+      <button
+        type="button"
+        class="lawyers__arrow"
+        data-rail-prev="ca-lawyers"
+        aria-label="Previous attorneys"
+      >
+        <span aria-hidden="true">&larr;</span>
+      </button>
+      <button
+        type="button"
+        class="lawyers__arrow"
+        data-rail-next="ca-lawyers"
+        aria-label="Next attorneys"
+      >
+        <span aria-hidden="true">&rarr;</span>
+      </button>
+    </div>
+
+    <div
+      class="lawyers__rail noscroll"
+      data-rail="ca-lawyers"
+      tabindex="0"
+      role="group"
+      aria-label="Our car accident lawyers, scrollable"
+    >
+      <ul class="lawyers__track">
+        {
         members.map((member) => (
           <li class="lw">
             {member.href ? (
@@ -104,12 +142,13 @@ const schema = {
             <p class="lw__cred">{member.cred}</p>
           </li>
         ))
-      }
-    </ul>
+        }
+      </ul>
+    </div>
 
     <p class="lawyers__more">
       <a class="lawyers__more-link arrow-link" href={section.moreHref}>
-        {section.moreLabel}
+        <span class="arrow-link__label">{section.moreLabel}</span>
         <span class="arrow" aria-hidden="true">&rarr;</span>
       </a>
     </p>
@@ -124,7 +163,11 @@ const schema = {
     grid-template-columns: 1fr 1fr;
     gap: var(--space-14);
     align-items: start;
-    margin-bottom: var(--space-14);
+    /* Was `--space-14`, when the rail followed the head directly. The arrows
+       now sit in that gap, so it is split between the two — and when they are
+       hidden this is the whole distance to the rail, which is why it keeps most
+       of the original measure rather than a token's worth. */
+    margin-bottom: var(--space-10);
   }
 
   .lawyers__title {
@@ -141,20 +184,33 @@ const schema = {
     text-wrap: pretty;
   }
 
-  .lawyers__grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+  .lawyers__rail {
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    /* The scrollbar is hidden (`.noscroll`), so this is not clearing a track —
+       it keeps a focused card's ring from being clipped by the scroll box. */
+    padding-bottom: var(--space-2);
+  }
+
+  .lawyers__track {
+    display: flex;
     gap: var(--space-9);
-    align-items: start;
+    align-items: stretch;
     margin: 0;
     padding: 0;
     list-style: none;
   }
 
+  /* Four across at full width. A calc off the gap rather than a rounded
+     percentage, because the whole point of the rail is that the COUNT is open:
+     the basis has to keep drawing four no matter how many cards follow. */
   .lw {
     display: flex;
     flex-direction: column;
-    height: 100%;
+    flex: 0 0 calc((100% - 3 * var(--space-9)) / 4);
+    min-width: 0;
+    scroll-snap-align: start;
   }
 
   .lw__ph {
@@ -226,7 +282,9 @@ const schema = {
   }
 
   /* Forest rather than the site's red: this comp moves almost every accent to
-     `--dh-forest-100`. See the note in HANDOFF.md — it is this page only. */
+     `--dh-forest-100`. See the note in HANDOFF.md — it is this page only.
+     The underline is on `.arrow-link__label`; see global.css on why it cannot
+     sit here without also striking the glyph. */
   .lawyers__more-link {
     font-weight: 800;
     font-size: var(--text-micro);
@@ -234,12 +292,57 @@ const schema = {
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--dh-forest-100);
-    text-decoration: underline;
-    text-underline-offset: 4px;
+    text-decoration: none;
+    transition: color var(--dur) var(--ease);
   }
 
   .lawyers__more-link:hover {
     color: var(--accent);
+  }
+
+  .lawyers__nav {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-3);
+    margin-bottom: var(--space-7);
+  }
+
+  /* Beats the rule above, the same way `.rail-dots[hidden]` does: `rail.ts`
+     sets `hidden` when the four cards fit exactly and there is nothing to
+     scroll, and an author `display: flex` otherwise outranks the UA's
+     `[hidden] { display: none }`. */
+  .lawyers__nav[hidden] {
+    display: none;
+  }
+
+  /* The same control `ResultStories` draws, so the page's two rails are
+     operated the same way. */
+  .lawyers__arrow {
+    width: 52px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-3);
+    border: 1px solid rgba(44, 59, 49, 0.3);
+    background: transparent;
+    color: var(--dh-forest-100);
+    font-size: var(--text-2xl);
+    line-height: 1;
+    cursor: pointer;
+    transition: background var(--transition), border-color var(--transition),
+      color var(--transition);
+  }
+
+  .lawyers__arrow:hover:not(:disabled) {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--dh-white);
+  }
+
+  .lawyers__arrow:disabled {
+    opacity: 0.35;
+    cursor: default;
   }
 
   @media (max-width: 1180px) {
@@ -248,15 +351,20 @@ const schema = {
       gap: var(--space-6);
     }
 
-    .lawyers__grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+    .lw {
+      flex-basis: calc((100% - var(--space-9)) / 2);
     }
   }
 
+  /* One card, with the next one showing — the peek is what says the row
+     scrolls, now that there is no second grid row to imply more below. */
   @media (max-width: 700px) {
-    .lawyers__grid {
-      grid-template-columns: 1fr;
-      gap: var(--space-10);
+    .lw {
+      flex-basis: 86%;
     }
   }
 </style>
+
+<script>
+  import "../../../scripts/rail";
+</script>

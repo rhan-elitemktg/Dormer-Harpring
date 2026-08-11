@@ -285,11 +285,16 @@ present(
 
 
 # --------------------------------------------------------------------- lawyers
-print("\nOUR LAWYERS (four, with credentials)")
+print("\nOUR LAWYERS (the comp's four, plus a fifth)")
 blob = array("caLawyers", "const otherAttorneys")
-cmp("names", strings(blob, "name"), grab("lw__nm", "a"))
-cmp("roles", strings(blob, "role"), grab("lw__role", "span"))
-cmp("credential lines", strings(blob, "cred"), grab("lw__cred", "p"))
+
+# The comp's four have to come first and in its order; the band is a rail so
+# that the roster can be longer than the comp's, which is a departure recorded
+# below. Sliced rather than compared whole — anything past the fourth is ours.
+n = len(strings(blob, "name"))
+cmp("names (the comp's four, in order)", strings(blob, "name"), grab("lw__nm", "a")[:n])
+cmp("roles", strings(blob, "role"), grab("lw__role", "span")[:n])
+cmp("credential lines", strings(blob, "cred"), grab("lw__cred", "p")[:n])
 present(
     "heading, lede, link",
     [
@@ -536,6 +541,15 @@ EXPECTED = [
         "destination. Rear-end and head-on have no page anywhere on the legacy site, so "
         "they keep the label and lose the arrow — `.arrow` belongs only on something "
         "that navigates",
+    ),
+    (
+        "the lawyers band is a full-width rail, and names a fifth attorney",
+        'data-rail="ca-lawyers"' in built
+        and grab("lw__nm", "a")[4:] == ["Greg Bentley"],
+        "the comp draws a four-across grid, which strands a fifth attorney alone on a "
+        "second row and re-balances the section every time the roster changes. Rhan's "
+        "call: one rail, so the count is open. Greg Bentley is the fifth, and his "
+        "credential line is drawn from his own bio",
     ),
     (
         "the badge captions are matched to the artwork, not to the comp's filenames",

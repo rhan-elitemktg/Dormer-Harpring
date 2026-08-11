@@ -180,9 +180,14 @@ export interface LawyersSection {
   title: string;
   lede: string;
   /**
-   * The four attorneys the comp's `caLawyers` array names, each with a line
-   * about what they do on crash cases. `key` is a `TeamMember._key`, which
-   * `getTeam()` also uses as the profile slug and turns into an `href`.
+   * The attorneys on the band, each with a line about what they do on crash
+   * cases — the comp's four `caLawyers` plus Greg Bentley. `key` is a
+   * `TeamMember._key`, which `getTeam()` also uses as the profile slug and
+   * turns into an `href`.
+   *
+   * LENGTH IS OPEN. `LawyerCards` renders these on a rail, so adding or
+   * removing one extends or shortens the track; it does not reflow the
+   * section the way the comp's four-across grid did.
    *
    * The CREDENTIAL LINE is this page's, not the roster's — it is written about
    * car accident work specifically ("Litigates MedPay and first-party coverage
@@ -593,7 +598,7 @@ const carAccidents: PracticeAreaDetail = {
       },
     ],
     note:
-      "Free, and no email required. If there isn't a case here, we'll tell you that " +
+      "If there isn't a case here, we'll tell you that " +
       "instead of selling you one.",
   },
 
@@ -630,6 +635,19 @@ const carAccidents: PracticeAreaDetail = {
         cred:
           "Litigates MedPay and first-party coverage disputes arising out of Colorado " +
           "crashes.",
+      },
+      // The fifth, and not one of the comp's four. Added at Rhan's request —
+      // the band is a rail rather than a four-across grid precisely so the
+      // roster can grow without the section reflowing.
+      //
+      // The line is drawn from his own bio in `team.ts`, so both claims are
+      // already published elsewhere on this site and neither is a TODO(launch).
+      {
+        _key: "greg",
+        key: "greg-bentley",
+        cred:
+          "Handles commercial trucking and catastrophic-injury crashes. Obtained an " +
+          "$8,260,000 verdict for a client with traumatic brain and spinal injuries.",
       },
     ],
     moreLabel: "See the full team",
