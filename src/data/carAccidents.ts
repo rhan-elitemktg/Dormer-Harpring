@@ -251,8 +251,6 @@ export interface ResultStory {
    * any of them.
    */
   reviewKey?: string;
-  /** Runtime shown on the video card. */
-  length?: string;
 }
 
 export interface ResultsSection {
@@ -767,7 +765,6 @@ const carAccidents: PracticeAreaDetail = {
         recovered: "$2.4 Million",
         title: "Trial win: breach of insurance contract",
         reviewKey: "evelyn",
-        length: "1:22",
       },
       {
         _key: "low-speed",
@@ -786,6 +783,27 @@ const carAccidents: PracticeAreaDetail = {
         title: "Trial win: five-car highway pileup",
         story: "Our client was injured in a five-car pileup on a Denver-area highway.",
         changed: "Liability across five vehicles had to be untangled and proven.",
+      },
+      // A FOURTH, WHERE THE COMP DRAWS THREE. Added at Rhan's request so the
+      // rail actually overflows and its arrows have something to do — three
+      // cards fit the container exactly and never scrolled.
+      //
+      // NOT INVENTED. This is `trucking-crash` from `caseResults.ts`, already
+      // published on /results, restated in this rail's voice: the figures are
+      // written long the way the other three are ("$200K" -> "$200,000") and
+      // the one sentence is split into what happened and what was at issue.
+      // Nothing is claimed here that the case results page does not already
+      // claim — which matters, because Colorado's Rule 7.1 governs how these
+      // are described.
+      {
+        _key: "semi-brakes",
+        offered: "$200,000",
+        recovered: "$1.15 Million",
+        title: "Semi-truck that could not stop",
+        story:
+          "Our client, a former marine, was hit and injured by a semi-truck near " +
+          "Colorado Springs whose brakes were poorly maintained.",
+        changed: "He had pre-existing injuries, which is the argument insurers reach for.",
       },
     ],
     disclaimer: "Past results do not guarantee future outcomes. Every case is different.",

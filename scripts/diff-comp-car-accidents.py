@@ -365,15 +365,23 @@ present(
 
 
 # --------------------------------------------------------------------- results
-print("\nRESULTS (one video card, two figure cards)")
+print("\nRESULTS (one video card, now three figure cards)")
 blob = array("resultStories", "const crashSteps")
-# The video card reverses its figures out of the poster (`<s>` struck, `<em>`
-# recovered); the two figure cards use the boxed `.res__fig`. Both, in order.
-cmp("offered", strings(blob, "offered"), inner("resv__row", "s") + grab("res__off", "span"))
-cmp("recovered", strings(blob, "recovered"), inner("resv__row", "em") + grab("res__rec", "span"))
-cmp("titles", strings(blob, "title"), [unesc(b) for b in re.findall(r'class="[^"]*\bresv__bot\b[^"]*"[^>]*><b[^>]*>(.*?)</b>', built, re.S)] + grab("res__title", "h3"))
-cmp("stories", strings(blob, "story"), grab("res__story", "p"))
-cmp("what changed", strings(blob, "changed"), grab("res__chg", "p"))
+
+# The video card no longer reverses its figures out of the poster — it draws
+# the same `.res__fig` box, title, body and footnote as every other card, so
+# all four are one ordered list. The comp's three come first; the fourth is
+# ours, and is asserted under DELIBERATE DIFFERENCES.
+n = len(strings(blob, "offered"))
+cmp("offered (the comp's three)", strings(blob, "offered"), grab("res__off", "span")[:n])
+cmp("recovered", strings(blob, "recovered"), grab("res__rec", "span")[:n])
+cmp("titles", strings(blob, "title"), grab("res__title", "h3")[:n])
+
+# `story` and `changed` belong to the FIGURE cards only — the comp's video card
+# carries a pull quote where they carry prose, and still does. So these start
+# at index 1, and the quote is checked on its own below.
+cmp("stories", strings(blob, "story"), grab("res__story", "p")[1:n])
+cmp("what changed", strings(blob, "changed"), grab("res__chg", "p")[1:n])
 present(
     "band copy",
     [
@@ -568,6 +576,27 @@ EXPECTED = [
         "second row and re-balances the section every time the roster changes. Rhan's "
         "call: one rail, so the count is open. Greg Bentley is the fifth, and his "
         "credential line is drawn from his own bio",
+    ),
+    (
+        "the video card quotes the client in full, not the comp's shortened version",
+        "They made me feel like part of the family" in built_text
+        and "They made me feel like family." not in built_text,
+        "the comp trims it to “They made me feel like family.” Long-standing, and "
+        "only surfaced when this section's quote was first asserted: testimonials.ts "
+        "holds the verified wording from the client's own video, and a real person's "
+        "testimonial is not ours to tighten",
+    ),
+    (
+        "the video result is the same card as the other three, plus a fourth result",
+        "resv__bot" not in built
+        and "res__dur" not in built
+        and built.count('class="res') >= 4
+        and "Semi-truck that could not stop" in built_text,
+        "the comp draws the video result as a bespoke overlay — figures reversed out of "
+        "the poster, a runtime chip, a 64px button, the quote pinned to the foot. Rhan's "
+        "call: one card design, differing only in the photograph behind it and a 44px "
+        "play button that pulses on card hover. The fourth result is `trucking-crash` "
+        "from caseResults.ts, added so the rail overflows and its arrows have work to do",
     ),
     (
         "the badges are artwork, neither linked nor captioned",
