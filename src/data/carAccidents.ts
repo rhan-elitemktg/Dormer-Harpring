@@ -39,7 +39,8 @@ import { ROUTES, attorneyPath } from "../lib/routePaths";
 import heroPhoto from "../assets/practice/car-accident-hero.jpg";
 import crashVideoCover from "../assets/practice/crash-video-cover.jpg";
 import caseVideoCover from "../assets/practice/case-video-cover.jpg";
-import whyPhoto from "../assets/practice/why-attorneys.jpg";
+import whyPhoto from "../assets/practice/why-attorneys-desktop.jpg";
+import whyPhotoMobile from "../assets/practice/why-attorneys-mobile.jpg";
 import consultPhoto from "../assets/blog/consult.jpg";
 import kcHarpring from "../assets/team/kc-harpring-lg.jpg";
 
@@ -223,7 +224,15 @@ export interface WhyFirmSection {
   columns: { _key: string; n: string; title: string; body: string }[];
   ctaLabel: string;
   ctaHref: string;
+  /**
+   * TWO CROPS OF THE SAME PHOTOGRAPH, not two resolutions — the section is a
+   * side-by-side above 1080px and a stacked band below it, and those are
+   * near-square and 16:9 boxes respectively. One source cannot serve both
+   * without `cover` throwing away a third of it. `WhyFirm` picks between them
+   * with `media`, so this is art direction and both are required.
+   */
   photo: ImageMetadata;
+  photoMobile: ImageMetadata;
   photoAlt: string;
 }
 
@@ -742,7 +751,8 @@ const carAccidents: PracticeAreaDetail = {
     ctaLabel: "See the case results",
     ctaHref: anchor(CA_SECTION_IDS.results),
     photo: whyPhoto,
-    photoAlt: "Dormer Harpring attorneys outside the courthouse",
+    photoMobile: whyPhotoMobile,
+    photoAlt: "Three Dormer Harpring attorneys standing in a courthouse colonnade",
   },
 
   results: {

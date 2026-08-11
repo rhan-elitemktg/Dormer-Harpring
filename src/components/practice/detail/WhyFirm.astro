@@ -6,7 +6,8 @@
 // the three closed-case figures now sit here, under the claim they support,
 // with the methodology disclaimer directly beneath them rather than a section
 // away.
-import Picture from "../../media/Picture.astro";
+import { getImage } from "astro:assets";
+import Eyebrow from "../../Eyebrow.astro";
 import type { WhyFirmSection } from "../../../data/carAccidents";
 
 interface Props {
@@ -14,12 +15,35 @@ interface Props {
 }
 
 const { why } = Astro.props;
+
+// Art direction, so this is a hand-built <picture> rather than <Picture>: the
+// two sources are DIFFERENT CROPS of one photograph, not two resolutions of
+// one, and only `media` can choose between them. Same reason and same shape as
+// PageHeader.astro and Hero.astro.
+//
+// The breakpoint is 1080px because that is where the section restacks — the
+// crop has to change on the same line the box shape does, or one of the two
+// gets `cover`-cropped into the other's hole.
+//
+// Widths are per-source, because the two boxes are nothing like each other:
+// the desktop figure is capped at 563px by `--container-max` however wide the
+// viewport gets, while the stacked one runs the full container width, up to
+// 1016px at the breakpoint. Sizing them off one list over-serves one and
+// starves the other.
+const [wide, narrow] = await Promise.all([
+  getImage({ src: why.photo, widths: [600, 900, 1200], format: "webp" }),
+  getImage({ src: why.photoMobile, widths: [700, 1100, 1600, 2100], format: "webp" }),
+]);
+
+// The narrow crop is the <img> and the desktop one is the <source>, not the
+// other way round: `media` on a <source> is evaluated before the fallback, so
+// the default belongs to the harder case.
 ---
 
 <section class="whyfirm">
   <div class="whyfirm__in">
     <div class="whyfirm__copy">
-      <p class="whyfirm__eyebrow">{why.eyebrow}</p>
+      <Eyebrow class="whyfirm__eyebrow">{why.eyebrow}</Eyebrow>
       <h2 class="whyfirm__title">{why.title}</h2>
 
       <dl class="wfstats">
@@ -58,13 +82,29 @@ const { why } = Astro.props;
     </div>
 
     <div class="whyfirm__fig">
-      <Picture
-        src={why.photo}
-        alt={why.photoAlt}
-        widths={[600, 1000, 1600]}
-        sizes="(max-width: 1080px) 100vw, 48vw"
-        class="whyfirm__img"
-      />
+      <picture>
+        {
+          /* `48vw` alone over-declares badly: `--container-max` caps the
+             figure at 563px however wide the viewport gets, so above 1436px a
+             bare 48vw asks for nearly double what is drawn. */
+        }
+        <source
+          media="(min-width: 1081px)"
+          srcset={wide.srcSet.attribute}
+          sizes="(max-width: 1436px) 48vw, 563px"
+        />
+        <img
+          src={narrow.src}
+          srcset={narrow.srcSet.attribute}
+          sizes="100vw"
+          alt={why.photoAlt}
+          width={narrow.attributes.width}
+          height={narrow.attributes.height}
+          loading="lazy"
+          decoding="async"
+          class="whyfirm__img lazy-fade"
+        />
+      </picture>
     </div>
   </div>
 </section>
@@ -86,15 +126,26 @@ const { why } = Astro.props;
     padding: var(--space-section) var(--container-pad);
   }
 
-  .whyfirm__eyebrow {
+  /* The shared `Eyebrow`, so the leading rule and the label stay one mark —
+     the component's own note is that the rule is not decoration and the label
+     is never rendered without it. Everything but the colour and the margin now
+     comes from `.eyebrow` in global.css.
+
+     Bound by `.whyfirm`, an element in THIS template: the class is passed to a
+     child, so it carries the child's `data-astro-cid` and a bare
+     `.whyfirm__eyebrow` rule here could never match it.
+
+     The colour is overridden rather than taken from `tone="on-dark"`, which is
+     gold — this page moves its accents to forest throughout (see HANDOFF), and
+     forest on a forest band would be an invisible rule. So both the label and
+     its rule keep the muted parchment this band already used. */
+  .whyfirm :global(.whyfirm__eyebrow) {
     margin: 0 0 var(--space-4);
-    font-family: var(--font-ui);
-    font-weight: 700;
-    font-size: var(--text-label);
-    line-height: 1;
-    letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: rgba(246, 242, 232, 0.72);
+  }
+
+  .whyfirm :global(.whyfirm__eyebrow)::before {
+    background: rgba(246, 242, 232, 0.72);
   }
 
   .whyfirm__title {
@@ -209,15 +260,20 @@ const { why } = Astro.props;
     background: var(--dh-forest-100);
   }
 
-  .whyfirm__fig :global(.whyfirm__img) {
+  /* No `:global()` any more: the <img> is in THIS template now rather than
+     inside `Picture`, so it carries this component's cid. */
+  .whyfirm__fig .whyfirm__img {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
-    /* 70% across: the attorneys stand right of centre in the frame, and a
-       centred crop puts the colonnade where their faces should be. */
-    object-position: 70% 26%;
+    /* Centred, where the previous photograph needed `70% 26%` to keep the
+       colonnade off the attorneys' faces. Both crops are now composed for
+       their own box and their ratios sit within a few percent of it, so
+       `cover` trims single-digit percentages and there is nothing to correct
+       for. Re-tune this if either photograph is replaced by an off-centre one. */
+    object-position: center;
     display: block;
   }
 
@@ -227,9 +283,12 @@ const { why } = Astro.props;
       gap: var(--space-10);
     }
 
+    /* 16/9, matching the crop supplied for this breakpoint (1218 x 686 =
+       1.776). It was 16/10, which would have cropped ~11% off the frame for no
+       reason now that the source is drawn to fit. */
     .whyfirm__fig {
       min-height: 0;
-      aspect-ratio: 16 / 10;
+      aspect-ratio: 16 / 9;
     }
   }
 
