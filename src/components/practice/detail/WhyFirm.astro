@@ -51,7 +51,7 @@ const { why } = Astro.props;
 
       <p class="whyfirm__link">
         <a class="arrow-link" href={why.ctaHref}>
-          {why.ctaLabel}
+          <span class="arrow-link__label">{why.ctaLabel}</span>
           <span class="arrow" aria-hidden="true">&rarr;</span>
         </a>
       </p>
@@ -188,6 +188,9 @@ const { why } = Astro.props;
     margin: var(--space-10) 0 0;
   }
 
+  /* The underline is on `.arrow-link__label`, not here: `.arrow-link` is a flex
+     container, and a decoration declared on it reaches the glyph too. See
+     global.css. */
   .whyfirm__link a {
     font-weight: 800;
     font-size: var(--text-sm);
@@ -195,8 +198,7 @@ const { why } = Astro.props;
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--text-on-dark);
-    text-decoration: underline;
-    text-underline-offset: 4px;
+    text-decoration: none;
   }
 
   .whyfirm__fig {
