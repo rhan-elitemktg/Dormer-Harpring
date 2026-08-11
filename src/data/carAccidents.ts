@@ -264,9 +264,14 @@ export interface ResultsSection {
 
 export interface TimelineSection {
   title: string;
+  /**
+   * One paragraph. The comp drew two — a scene-setter ("Most people have never
+   * done this before…") over this one — and the first is gone at Rhan's
+   * request. This field was `ledeStrong`, which only meant anything in contrast
+   * to the paragraph above it, and named a colour besides; the data layer does
+   * not carry presentation.
+   */
   lede: string;
-  /** The second, forest-coloured paragraph under the lede. */
-  ledeStrong: string;
   steps: { _key: string; n: string; title: string; body: string }[];
   phases: { _key: string; title: string; when: string; body: string }[];
   photo: ImageMetadata;
@@ -809,8 +814,7 @@ const carAccidents: PracticeAreaDetail = {
 
   timeline: {
     title: "What the next few months look like",
-    lede: "Most people have never done this before. Here is the honest version.",
-    ledeStrong:
+    lede:
       "Most of our clients never set foot in a courtroom — but the case has to be built " +
       "as if it will be tried.",
     steps: [

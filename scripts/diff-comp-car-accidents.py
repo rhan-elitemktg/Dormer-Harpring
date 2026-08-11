@@ -403,7 +403,7 @@ cmp(
     [unesc(li) for li in re.findall(r"<li>(.*?)</li>", slice_from('class="ca-tline__pts"', "</ul>"), re.S)],
     [unesc(li) for li in re.findall(r"<li[^>]*>(.*?)</li>", re.search(r'class="[^"]*\btline__pts\b[^"]*"[^>]*>(.*?)</ul>', built, re.S).group(1), re.S)],
 )
-present("heading + ledes", ["What the next few months look like", "Here is the honest version.", "Most of our clients never set foot in a courtroom"])
+present("heading + lede", ["What the next few months look like", "Most of our clients never set foot in a courtroom"])
 
 
 # ----------------------------------------------------------------- crash types
@@ -606,6 +606,14 @@ EXPECTED = [
         "call: one card design, differing only in the photograph behind it and a 44px "
         "play button that pulses on card hover. The fourth result is `trucking-crash` "
         "from caseResults.ts, added so the rail overflows and its arrows have work to do",
+    ),
+    (
+        "the case timeline drops the comp's first lede, and its side does not stick",
+        "Here is the honest version" not in built_text
+        and "Most of our clients never set foot in a courtroom" in built_text
+        and "tline__side" in built,
+        "Rhan's call on both. The comp opens the band with a scene-setter over the "
+        "claim, and pins the photograph and its tick list while the phases scroll past",
     ),
     (
         "the Denver band drops the comp's source line and map caption",

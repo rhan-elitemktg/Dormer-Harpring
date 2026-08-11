@@ -32,7 +32,6 @@ const { timeline, id } = Astro.props;
     <header class="tline__head">
       <h2 class="tline__title">{timeline.title}</h2>
       <p class="tline__lede">{timeline.lede}</p>
-      <p class="tline__lede tline__lede--strong">{timeline.ledeStrong}</p>
     </header>
 
     <ol class="chev">
@@ -94,17 +93,15 @@ const { timeline, id } = Astro.props;
     text-wrap: balance;
   }
 
+  /* One paragraph now, so the `--strong` modifier is folded back in — it only
+     existed to override the margin and colour of the scene-setter above it,
+     and there is nothing left for it to contrast with. */
   .tline__lede {
-    margin: 0 0 var(--space-4);
+    margin: 0;
     font-size: var(--text-xl);
     line-height: var(--leading-normal);
-    color: var(--text-body);
-    text-wrap: pretty;
-  }
-
-  .tline__lede--strong {
-    margin-bottom: 0;
     color: var(--dh-forest-100);
+    text-wrap: pretty;
   }
 
   /* ---- the intake chevrons ---- */
@@ -305,12 +302,8 @@ const { timeline, id } = Astro.props;
 
   /* ---- the side ---- */
 
-  .tline__side {
-    position: sticky;
-    /* Clears the 66px sticky section nav, not the comp's 32. */
-    top: 96px;
-  }
-
+  /* NOT STICKY, BY REQUEST. It used to stick at `top: 96px`, clearing the 66px
+     section nav. Rhan's call — don't restore it from the comp. */
   .tline__fig {
     position: relative;
     aspect-ratio: 4 / 3;
@@ -396,10 +389,6 @@ const { timeline, id } = Astro.props;
     .tline__grid {
       grid-template-columns: 1fr;
       gap: var(--space-10);
-    }
-
-    .tline__side {
-      position: static;
     }
   }
 </style>
