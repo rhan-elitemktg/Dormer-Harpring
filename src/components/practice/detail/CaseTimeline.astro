@@ -1,0 +1,405 @@
+---
+// "What the next few months look like" — the four-step intake chevron over a
+// five-phase case timeline.
+//
+// New in the second design, and it absorbs the first's separate "What happens
+// after you call" band: the four steps are that band's, redrawn as arrows, and
+// the timeline beneath them is what the page never said before — how long this
+// actually takes.
+//
+// `--alt`, not the comp's cream: in its new slot this follows DenverData's sunk
+// band and precedes the checklist teaser's cream one, and on cream it would be
+// the second of two identical backgrounds in a row — something neither linter
+// can see, because the comp hardcodes a hex per section and never compares two.
+//
+// The chevrons are a decorative shape over an ordered list. `clip-path` cuts
+// them and negative margins overlap the points; below 980px they flip to
+// pointing DOWN, because a horizontal arrow row stacked vertically reads as
+// four unrelated boxes.
+import Picture from "../../media/Picture.astro";
+import type { TimelineSection } from "../../../data/carAccidents";
+
+interface Props {
+  timeline: TimelineSection;
+  id: string;
+}
+
+const { timeline, id } = Astro.props;
+---
+
+<section class="section section--alt tline" id={id}>
+  <div class="container">
+    <header class="tline__head">
+      <h2 class="tline__title">{timeline.title}</h2>
+      <p class="tline__lede">{timeline.lede}</p>
+      <p class="tline__lede tline__lede--strong">{timeline.ledeStrong}</p>
+    </header>
+
+    <ol class="chev">
+      {
+        timeline.steps.map((step, i) => (
+          <li class:list={["chev__p", i === timeline.steps.length - 1 && "chev__p--end"]}>
+            <b class="chev__n" aria-hidden="true">
+              {step.n}
+            </b>
+            <h3 class="chev__title">{step.title}</h3>
+            <p class="chev__body">{step.body}</p>
+          </li>
+        ))
+      }
+    </ol>
+
+    <div class="tline__grid">
+      <ol class="phases">
+        {
+          timeline.phases.map((phase, i) => (
+            <li class:list={[i === timeline.phases.length - 1 && "phases__end"]}>
+              <p class="phases__hd">
+                <b>{phase.title}</b>
+                <em>{phase.when}</em>
+              </p>
+              <p class="phases__body">{phase.body}</p>
+            </li>
+          ))
+        }
+      </ol>
+
+      <div class="tline__side">
+        <div class="tline__fig">
+          <Picture
+            src={timeline.photo}
+            alt={timeline.photoAlt}
+            widths={[600, 1000]}
+            sizes="(max-width: 980px) 100vw, 45vw"
+            class="tline__img"
+          />
+        </div>
+        <ul class="tline__pts">
+          {timeline.points.map((point) => <li>{point}</li>)}
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .tline__head {
+    max-width: 700px;
+    margin: 0 0 var(--space-13);
+  }
+
+  .tline__title {
+    margin: 0 0 var(--space-4);
+    font-size: var(--display-3);
+    text-wrap: balance;
+  }
+
+  .tline__lede {
+    margin: 0 0 var(--space-4);
+    font-size: var(--text-xl);
+    line-height: var(--leading-normal);
+    color: var(--text-body);
+    text-wrap: pretty;
+  }
+
+  .tline__lede--strong {
+    margin-bottom: 0;
+    color: var(--dh-forest-100);
+  }
+
+  /* ---- the intake chevrons ---- */
+
+  .chev {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin: 0 0 var(--space-16);
+    padding: 0;
+    list-style: none;
+    border-radius: var(--radius-4);
+    overflow: hidden;
+    box-shadow: 0 14px 38px rgba(45, 34, 22, 0.07);
+  }
+
+  .chev__p {
+    --n: 26px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: var(--dh-white);
+    padding: var(--space-7) var(--space-8) var(--space-7) calc(34px + var(--n));
+    margin-left: calc(var(--n) * -1);
+    clip-path: polygon(
+      0 0,
+      calc(100% - var(--n)) 0,
+      100% 50%,
+      calc(100% - var(--n)) 100%,
+      0 100%,
+      var(--n) 50%
+    );
+  }
+
+  .chev__p:first-child {
+    margin-left: 0;
+    padding-left: 34px;
+    clip-path: polygon(0 0, calc(100% - var(--n)) 0, 100% 50%, calc(100% - var(--n)) 100%, 0 100%);
+  }
+
+  .chev__p--end {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, var(--n) 50%);
+    background: var(--grad-forest);
+  }
+
+  .chev__n {
+    display: block;
+    margin-bottom: var(--space-3);
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--display-6);
+    line-height: 1;
+    color: var(--dh-forest-100);
+  }
+
+  .chev__title {
+    margin: 0 0 var(--space-2);
+    font-family: var(--font-ui);
+    font-weight: 700;
+    font-size: var(--text-lg);
+    line-height: 1.28;
+    letter-spacing: var(--tracking-tight);
+    color: var(--dh-forest-100);
+  }
+
+  .chev__body {
+    margin: 0;
+    font-size: var(--text-md);
+    line-height: var(--leading-snug);
+    color: var(--text-body);
+    text-wrap: pretty;
+  }
+
+  /* The last chevron is a dark card, so its three children each restate their
+     colour — `.section--forest`'s heading rule does not reach in here. */
+  .chev__p--end .chev__n {
+    color: rgba(246, 242, 232, 0.72);
+  }
+
+  .chev__p--end .chev__title {
+    color: var(--text-on-dark);
+  }
+
+  .chev__p--end .chev__body {
+    color: var(--text-on-dark-2);
+  }
+
+  /* ---- the phase timeline ---- */
+
+  .tline__grid {
+    display: grid;
+    grid-template-columns: 55fr 45fr;
+    gap: var(--space-18);
+    align-items: start;
+  }
+
+  .phases {
+    position: relative;
+    margin: 0;
+    padding: 0 0 0 var(--space-10);
+    list-style: none;
+  }
+
+  /* Stops short of the last item, which is a dark card and supplies its own
+     edge — running the spine into it draws a line across the fill. */
+  .phases::before {
+    content: "";
+    position: absolute;
+    left: 5px;
+    top: 8px;
+    bottom: 96px;
+    width: 2px;
+    background: rgba(44, 59, 49, 0.22);
+  }
+
+  .phases > li {
+    position: relative;
+    padding-bottom: var(--space-9);
+  }
+
+  .phases > li:last-child {
+    padding-bottom: 0;
+  }
+
+  .phases > li::before {
+    content: "";
+    position: absolute;
+    left: calc(var(--space-10) * -1);
+    top: 6px;
+    width: 12px;
+    height: 12px;
+    border-radius: var(--radius-full);
+    background: var(--dh-forest-100);
+    /* The halo punches the spine out from behind the node, so it has to BE the
+       section's background — `--surface-alt` here, and it moves whenever the
+       section's surface does. */
+    box-shadow: 0 0 0 4px var(--surface-alt);
+  }
+
+  .phases__end {
+    margin-left: calc(var(--space-10) * -1);
+    padding: var(--space-7) var(--space-8) var(--space-8) !important;
+    border-radius: var(--radius-4);
+    background: var(--grad-forest);
+  }
+
+  .phases__end::before {
+    display: none;
+  }
+
+  .phases__hd {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+    margin: 0 0 var(--space-2);
+  }
+
+  .phases__hd b {
+    font-weight: 800;
+    font-size: var(--text-sm);
+    line-height: 1.2;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--dh-forest-100);
+  }
+
+  .phases__hd em {
+    font-style: normal;
+    font-weight: 600;
+    font-size: var(--text-micro);
+    line-height: 1.2;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-meta);
+  }
+
+  .phases__body {
+    margin: 0;
+    max-width: 52ch;
+    font-size: var(--text-md);
+    line-height: var(--leading-normal);
+    color: var(--text-body);
+    text-wrap: pretty;
+  }
+
+  .phases__end .phases__hd b {
+    color: var(--text-on-dark);
+  }
+
+  .phases__end .phases__hd em {
+    color: rgba(246, 242, 232, 0.6);
+  }
+
+  .phases__end .phases__body {
+    max-width: none;
+    color: var(--text-on-dark-2);
+  }
+
+  /* ---- the side ---- */
+
+  .tline__side {
+    position: sticky;
+    /* Clears the 66px sticky section nav, not the comp's 32. */
+    top: 96px;
+  }
+
+  .tline__fig {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    border-radius: var(--radius-4);
+    overflow: hidden;
+    background: var(--dh-forest-100);
+  }
+
+  .tline__fig :global(.tline__img) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 40%;
+    display: block;
+  }
+
+  .tline__pts {
+    display: grid;
+    gap: var(--space-4);
+    margin: var(--space-7) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .tline__pts li {
+    position: relative;
+    padding-left: var(--space-7);
+    font-size: var(--text-md);
+    line-height: var(--leading-normal);
+    color: var(--text-body);
+    text-wrap: pretty;
+  }
+
+  /* A drawn tick rather than a glyph, so it takes the section's colour and
+     scales with nothing. */
+  .tline__pts li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 6px;
+    width: 15px;
+    height: 9px;
+    border-left: 2px solid var(--dh-forest-100);
+    border-bottom: 2px solid var(--dh-forest-100);
+    transform: rotate(-45deg);
+  }
+
+  @media (max-width: 980px) {
+    /* The arrows turn to point DOWN. A row of right-pointing chevrons stacked
+       into a column reads as four unrelated boxes. */
+    .chev {
+      grid-template-columns: 1fr;
+    }
+
+    .chev__p {
+      --n: 22px;
+      margin-left: 0;
+      margin-top: calc(var(--n) * -1);
+      padding: var(--space-9) var(--space-8) calc(var(--space-8) + var(--n));
+      clip-path: polygon(
+        0 0,
+        50% var(--n),
+        100% 0,
+        100% calc(100% - var(--n)),
+        50% 100%,
+        0 calc(100% - var(--n))
+      );
+    }
+
+    .chev__p:first-child {
+      margin-top: 0;
+      padding-top: var(--space-8);
+      clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--n)), 50% 100%, 0 calc(100% - var(--n)));
+    }
+
+    .chev__p--end {
+      padding-bottom: var(--space-8);
+      clip-path: polygon(0 0, 50% var(--n), 100% 0, 100% 100%, 0 100%);
+    }
+
+    .tline__grid {
+      grid-template-columns: 1fr;
+      gap: var(--space-10);
+    }
+
+    .tline__side {
+      position: static;
+    }
+  }
+</style>

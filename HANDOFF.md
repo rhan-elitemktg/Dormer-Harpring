@@ -6,217 +6,184 @@ Architecture, conventions and the design source of truth live in `AGENTS.md` (sy
 `CLAUDE.md`, loaded automatically). Pre-launch decisions live in `README.md`. Don't restate
 either here, and don't record anything `git log` already knows.
 
-_Last updated: 2026-08-10._
+_Last updated: 2026-08-11._
 
 ## State
 
-Build is green: **39 pages**, `npm run check` passing, all four comp-diff scripts exiting 0.
-The Blog post template is built and **reviewed by Rhan** — three rounds of notes on the
-related-posts cards are in. Nothing is in flight; run `git status` for where you are. This
-file deliberately does **not** name the working branch — that line went stale three times in
-the session that wrote it.
+Build is green: **40 pages**, `npm run check` passing, all **five** comp-diff scripts exiting
+0. **Every page template in the comps is now built.** Nothing is in flight; run `git status`
+for where you are. This file deliberately does **not** name the working branch — that line
+went stale three times in the session that wrote it.
 
 Live at `https://dormer-harpring.vercel.app` — `/` and `/admin` both 200.
 
-Phases 0 → 3k are done: design tokens and shell, header/drawer/footer, the homepage section
-by section, then Thank You, Contact, Testimonials, Case Results, Co-Counsel, Community
-Involvement, the Attorneys index, the Attorney bio, Practice Areas, About, the Blog index and
-the Blog post.
-
 **Built:** `index`, `about`, `contact`, `thank-you`, `testimonials`, `results`, `co-counsel`,
-`community-involvement`, `practice-areas`, `news` (the blog index), `[slug]` (blog posts),
-`meet-our-attorneys/` + `meet-our-attorneys/[slug]`, and `tokens.astro` (an internal
-design-token reference, not public-facing).
+`community-involvement`, `practice-areas`, `news` (the blog index),
+`meet-our-attorneys/` + `meet-our-attorneys/[slug]`, `tokens.astro` (an internal design-token
+reference, not public-facing), and the root `[slug]` — which serves **two** collections.
 
 `meet-our-attorneys/[slug]` serves 25 profiles from two layouts, picked on `member.kind`:
 `AttorneyBio.astro` for the 7 attorneys, `StaffBio.astro` for the 18 staff. The 3 dogs on
 the roster have no profile, so no page.
 
-`scripts/diff-comp-blog-post.py` is the fourth comp-diff script. Each **asserts its page's
-deliberate differences** as well as diffing the text, so a later session that reverts one is
-told rather than left to guess — this one's are eighteen, the most of any page, because the
-comp writes its own body for an article that already exists. Worth copying again for Car
-Accidents. None are wired into `npm run check`, which has to stay runnable without the
-design folder; run them by hand.
+### The root `[slug].astro` serves blog posts AND practice-area details
 
-### Read this before building the Car Accidents template
+Both `blogPath()` and `practiceAreaPath()` are `/${slug}` — the legacy WordPress site is flat
+and ~300 live URLs depend on it — and Astro allows exactly one `[slug].astro` per directory.
+So `getStaticPaths` **unions the two collections** and every record carries a `kind` the
+template branches on, the way `meet-our-attorneys/[slug].astro` branches on `member.kind`.
+Each branch awaits only what its own shape renders.
 
-**`src/pages/[slug].astro` is at the site root and it is the blog's.** `blogPath()` is
-`/${slug}` because the legacy WordPress site is flat and ~300 live URLs depend on staying
-there — and `practiceAreaPath()` is `/${slug}` too. Astro allows exactly one `[slug].astro`
-per directory, so **Car Accidents cannot add a second one.** It has to union its paths into
-that file's `getStaticPaths` and branch on which collection the record came from, the way
-`meet-our-attorneys/[slug].astro` branches on `member.kind`. Moving practice areas under
-`/practice/` instead would change the URL, which is the one thing the flat shape exists to
-prevent. The note is in the file's header comment too.
+A slug claimed by both would silently build one page and drop the other, so `getStaticPaths`
+checks and **throws** instead. Any third collection at the root joins the same union.
 
-### What the Blog post work established
+## What the Car Accidents work established
 
-**One post is built, and that is the scope decision, not an unfinished job.** The template
-serves the trampoline-waiver article — the comp's own subject, the index's featured post, and
-a live legacy article whose real body is in the scrape. The other four real posts wait for
-the CMS phase, which imports all 167 from that same scrape by script; four hand-transcribed
-bodies would be replaced a phase later and cannot be diffed against the source the way a
-script can. Their index links are unchanged: legacy URLs, live today, unserved after cutover.
+**One practice-area detail page is built** — `/denver-car-accident-lawyer`, the live URL.
+`getPracticeAreaDetails()` returns an array of one; the other 45 areas are the CMS phase's
+job and the shape is already right for them. The kit is 19 components under
+`src/components/practice/detail/`, composed by `DetailPage.astro`, which owns no content.
 
-Three things that constrain what comes next:
+**IT WAS BUILT TWICE.** The first build followed a 31-section comp; the design folder was
+then re-dropped with a 17-section replacement — half the page cut, two sections new, three
+long explainers reduced to teasers. The other four comp diffs still passed against the new
+folder, so **Car Accidents was the only page that changed**.
 
-- **The four in-body CTA blocks are deferred, not dropped.** The comp draws a dark callout, a
-  phone band, an attorney card and a pull quote inside the article. All four become Portable
-  Text **object types** an editor places anywhere in any post — `callout`, `phoneBand`,
-  `attorneyCard`, `pullQuote` — rather than fixed sections of the template. The intended home
-  is commented in `components/prose/components.ts`, beside the `type` map. Do not rebuild
-  them as page sections from the comp.
-- **`.prose__h2` and `.prose__h3` were corrected, not restyled.** They were `--display-3` and
-  `--display-5`, both uppercase Anton — a guess made before any body copy existed, and
-  nothing had ever rendered them (no `## ` or `### ` appeared in any data module). They are
-  now the Blog Post comp's `bp-h2` and `bp-h3`: mixed case, and h3 in Hanken 700 rather than
-  Anton, so it subordinates by face as well as size.
-- **The article body is the live post verbatim**, including its Title Case bullet labels,
-  with two departures README.md records: a sentence the live copy leaves truncated, and its
-  closing phone number.
+Five things that cost time and would cost it again:
 
-### Two traps the review turned up, both worth knowing on any new card
+- **A comp's script block can outlive its markup.** `renderVals()` still defines **fifteen
+  arrays no placeholder reads** — `keyPoints`, `crashSteps`, `leadAttorneys`,
+  `otherAttorneys`, `processSteps`, `injuries`, `damageCols`, `faultBranches`, `denverData`,
+  `corridors`, `courts`, `relatedAreas`, `relatedArticles`, `firmData`, `lawCtas`. Several
+  are close enough to the live copy to look authoritative and are not: `denverData` lists
+  four bare figures where the page draws three with a consequence attached, `corridors`
+  carries a different sentence per road, and `firmData`'s third label disagrees with the
+  markup's. **AGENTS.md says to read the script rather than the markup; on a REVISED comp
+  you need both, and where they disagree the markup wins.** `diff-comp-car-accidents.py`
+  asserts all fifteen stay unread, so a later revision that wires one back up fails there
+  instead of shipping the older copy.
+- **Count the `sc-for` loops before budgeting.** 23 became 10 and 105 placeholders became
+  75. A minute's counting reshaped the whole estimate.
+- **The nav's order must be the page's order, and it is asserted structurally.**
+  `diff-comp-car-accidents.py` resolves every `data-section-link` to its target's position
+  in the built page and requires those positions to ascend. The comp's own bar disagreed
+  with the comp's own page — "Colorado car accident laws" fourth of five with its section
+  FIRST of the five — and nothing caught it until the scroll highlight, which walks the page
+  in one direction, started marking the wrong link. A label comparison cannot see that.
+  **Move a section and that check fails until `nav.items` follows.**
+- **Two components cannot share a root class name unless BOTH style it.** `check:styles`
+  maps one class to one component: it collects the cids any scoped rule demands for a class
+  and fails an element carrying that class with none of them. Four names were caught this
+  way — `.stats` (vs `HeroStats`), `.results` (vs `RecentResults`), `.related` (vs
+  `RelatedPosts`), `.why__*` (vs `WhyUs`). **Grep a root class name before using it.** The
+  detail kit is prefixed off all four: `.stories`, `.whyfirm`, `.rellinks`.
+- **This page's accent is FOREST, not gold**, throughout — eyebrow rules, badge captions,
+  the FAQ sign, the testimonial quote mark, the results eyebrow, the recovered figures. The
+  other 16 comps still use gold. This page only, at Rhan's direction; see Open below.
 
-Neither is blog-specific and both cost a round of notes here.
+## Shared pieces to reach for
 
-- **A light card inside `.section--forest` must declare its own heading colour.** global.css
-  paints every heading in such a section with `.section--forest :is(h1, h2, h3, h4) { color:
-  var(--text-on-dark) }` — aimed at headings sitting ON the dark background. A heading on a
-  cream panel inside that band, with no colour of its own, inherits parchment-on-cream and
-  renders at 1.08:1. The testimonial quote card and both forms all declare one already;
-  `RelatedCard` did not, and it was invisible. It is not a specificity fight —
-  `:is(h1, h2, h3, h4)` contributes only a type selector, so any scoped class rule outranks
-  it. The rule just has to say something.
-- **`color: inherit` on a link re-interpolates on the ANCHOR's timing.** A card whose title
-  is an `<h3>` with a stretched `<a>` inside it paints the text from the anchor, and the
-  anchor picks up global.css's `a { transition: color var(--transition) }` — so the h3's own
-  duration is not what anyone sees. On `RelatedCard` that put the colour at nearly twice the
-  card's lift and the gesture arrived in pieces. Every animated property on one hover should
-  name the same duration, the anchor's included. `PostCard` has the same shape and is left
-  alone deliberately: with no transform on that card, the anchor's 0.3s already agrees with
-  its thumbnail's scale.
+New pages should use these rather than re-solving them. All are in use on two or more pages,
+so a change to one is a change to all — check before editing.
 
-### Shared pieces to reach for
-
-New pages should use these rather than re-solving them. All are in use on two or more pages
-already, so a change to one is a change to all of them — check before editing.
-
-- **Portable Text now carries images.** `ptImage(src, alt)` in `data/portableText.ts`
-  composes with `pt()` by spreading; `ProseImage.astro` renders it through `Picture` at the
-  full width of the prose measure. Registered under `type` — **singular**, which is
-  astro-portabletext's key. `@portabletext/react` calls the same map `types`, and the plural
-  renders nothing at all without erroring.
-- **`lib/headings.ts`** — `headingId()` and `extractHeadings()`. `ProseH2`/`ProseH3` emit an
-  id from the first, any contents list reads the second, so an anchor and its target cannot
-  drift. Site-wide: every prose heading is a jump target now.
+- **`components/practice/detail/` is a kit, not one page.** `DetailHero`, `SectionNav`,
+  `DetailVideo`, `SourceNote`, `Triage`, `Takeaways`, `Criteria`, `LawyerCards`,
+  `Credentials`, `WhyFirm`, `ResultStories`, `CaseTimeline`, `TileGrid`, `DenverData`, the
+  two teasers, `MoreOnClaims` and `ClosingCta`. The first design's primitives
+  (`DetailBlocks`, `InlineCta`, `PhoneAsk`, `BigAnswerCard`, `Disclosure`, `QaSection`,
+  `BigAnswer`) were **deleted with the sections that used them** — `git show e42c323` has
+  them if a later practice area wants that shape back.
+- **`scripts/sectionNav.ts`** — the scroll highlight, wired by `data-section-nav` on the bar
+  and `data-section-link` on each participating link. Participation is opt-in because the
+  bar also carries a CTA pointing at `#contact`. It sorts targets into document order
+  itself; keep that even though the bar now matches, because it is what stops the next
+  reshuffle re-introducing the bug.
+- **Portable Text carries images.** `ptImage(src, alt)` in `data/portableText.ts` composes
+  with `pt()` by spreading; `ProseImage.astro` renders it through `Picture`. Registered
+  under `type` — **singular**, astro-portabletext's key. `@portabletext/react` calls the
+  same map `types`, and the plural renders nothing at all without erroring.
+- **`lib/headings.ts`** — `headingId()` and `extractHeadings()`, for PROSE headings. Section
+  handles are explicit ids in `CA_SECTION_IDS`, read by both the nav and the sections, so
+  there is no second slugifier to disagree with this one.
 - **`lib/readTime.ts`** — "7 min read", counted from a body rather than typed beside it.
-  `InsightPost` in `news.ts` keeps its hand-written one; those four records have no body.
 - **`ContactForm`'s `variant` prop** — `panel` (default) is the white card; `sidebar` is the
-  blog post's dark one. Same fields, same endpoint, same honeypot and phone mask either way.
-  Its disclaimer id is now per-variant, because that page renders the component twice.
+  blog post's dark one. Same fields, endpoint, honeypot and phone mask either way.
 - **`blogFilterUrl(slug)`** in `routePaths.ts` — `/news?category=<slug>`. `blogFeed.ts`
-  presses the matching tab on load, so a category can be linked across a page boundary
-  without building the legacy `/category/*` archives. Unknown slugs fall through to the whole
-  feed.
-- **`lib/dates.ts`'s `formatPostDate`** — ISO in, "June 23, 2026" out, pinned to UTC so the
-  build machine's timezone cannot shift a published date by a day.
+  presses the matching tab on load. Unknown slugs fall through to the whole feed.
+- **`lib/dates.ts`'s `formatPostDate`** — ISO in, "June 23, 2026" out, pinned to UTC.
 - **`ReviewRating.astro`** — the white "300+ Client Reviews · 5.0 on Google" card.
-- **`AttorneyCard`'s `layout` prop** — `"rail"` fixes the card at 272px for the homepage,
-  `"grid"` lets the track set it for About.
-- **`AwardsBar`'s `tone` prop** — `lifted` (default) is the comps' near-white; `sunk` is for
-  pages where the band follows a plain cream section and would otherwise be invisible.
-- **`.hero-cta` / `.hero-cta__note`** in `global.css` — the one-button-plus-gold-note row
-  under four photo heroes.
+- **`AttorneyCard`'s `layout` prop**; **`AwardsBar`'s `tone` prop**; **`StatsBand`**;
+  **`TestimonialRail`** and **`Takeaways`** both take an optional `id`, so a page's section
+  nav can anchor them without either knowing what a section nav is.
 - **`.btn` is full width below 640px**, as the rule rather than the exception.
-- **`.arrow` on every arrow inside something that navigates.** Three documented exclusions,
+- **`.arrow` on every arrow inside something that navigates.** Four documented exclusions,
   each commented where it lives: `.pa__tab`'s chevron marks selection, `.attys__cta`'s badge
-  scales instead of sliding, and the carousel prev/next are controls rather than CTAs.
+  scales instead of sliding, the carousel prev/next are controls rather than CTAs, and a
+  card with no page behind it keeps its LABEL and drops the arrow — which is what the two
+  unlinked crash types and the checklist teaser do.
 - **`MobileNav`'s `subItemsOf`** — a parent with children renders as a `<summary>`, which
   toggles rather than navigates. This adds a link to its own page when no child points there.
 
-### The mobile heroes
+## Traps worth knowing before touching a section
 
-`Hero.astro` and `PageHeader.astro`'s `tone="photo"` share one construction below their
-breakpoints, and it is worth reading the comments before touching either. The photograph is
-a **band across the top**, sized off the viewport WIDTH; the copy starts 72% down it and
-overlaps the lower half under a bottom-to-top wash.
+- **A light card inside `.section--forest` must declare its own heading colour.** global.css
+  paints every heading in such a section with `.section--forest :is(h1,h2,h3,h4)` — aimed at
+  headings ON the dark background. A heading on a light panel inside that band renders at
+  1.08:1. Not a specificity fight; the rule just has to say something.
+- **Animate one hover on one clock.** `text-decoration` cannot be animated, so declaring it
+  on `:hover` snaps it on while colour eases. Declare the underline transparent up front and
+  transition `text-decoration-color` — `DetailHero`'s reviewer line and `SectionNav`'s
+  current link both do. Likewise `color: inherit` on a link re-interpolates on the ANCHOR's
+  timing, not its own.
+- **Surfaces are positional, not per-component, and nothing checks them.** Neither linter
+  can see two adjacent sections sharing a background; the comps hardcode a hex per section
+  and never compare two. Reordering the detail page produced a `cream → cream → cream` run
+  that had to be fixed by hand. **After any reorder, list every section's surface in
+  document order and confirm no two adjacent match.**
+- **A value painted to match a section's background has to move when that surface does.**
+  `CaseTimeline`'s spine-node halo is a `box-shadow` that punches the spine out from behind
+  each node; left at `--surface-page` on an `--alt` band it draws a cream ring.
 
-Three things that look arbitrary and are not:
+## The mobile heroes
+
+`Hero.astro`, `PageHeader.astro`'s `tone="photo"` and `DetailHero.astro` share one
+construction below their breakpoints. The photograph is a **band across the top**, sized off
+the viewport WIDTH; the copy sits beneath or over its lower half. Three things that look
+arbitrary and are not:
 
 - The band is sized off **width**, not content. `cover` on a full-height portrait box takes
-  its whole crop out of the SIDES — measured at 42–49% of the frame across phone widths,
-  which is the outer two of the four attorneys. Off width it is 6%.
-- The **0.72 and the wash stops are proportions of the band**, because the band is itself a
-  proportion of the viewport. What has to hold is the copy's relationship to the faces, which
-  sit at 12–32% of the frame in every crop — not a pixel count.
-- The mobile background is **flat `--dh-forest-500`, not `--grad-forest`**. The wash has to
-  end in exactly the colour behind the band's foot, and the radial is a different green at
-  every y.
+  its crop out of the SIDES — 42–49% of the frame across phone widths. Off width it is 6%.
+- The proportions are of the band, because the band is a proportion of the viewport. What
+  has to hold is the copy's relationship to the faces.
+- The mobile background is **flat `--dh-forest-500`, not `--grad-forest`**. A wash has to end
+  in exactly the colour behind the band's foot, and the radial is a different green at every y.
+
+`DetailHero` is the one hero whose narrow layout a comp actually specifies — its own
+`@media (max-width:1180px)` block floats the panel out from over the photograph. It also
+uses a **container query** on the panel, not a media query, so the hero's three proof labels
+can hold one line: their fit is decided by the panel, which is 40% of the viewport above
+1180px and full width below it, so in viewport terms the fit/no-fit bands are disjoint.
 
 ## Next
 
-**Car Accidents** — the practice-area **detail** template, and the last one. `DH - Car
-Accidents.html`, 1,783 lines: **31 content sections, 88 placeholders, 23 `sc-for` loops**,
-against the Blog post's 3 sections. It is bigger than the homepage. The live page is
-`/denver-car-accident-lawyer`, and the scrape has it.
-
-### What the Car Accidents template needs
-
-**Read the root-`[slug].astro` note above before writing a line of it** — that is the one
-decision that cannot be deferred, and it shapes where the file goes.
-
-The comp's `data-dc-script` block holds **23 arrays**. Grouped by what they cost:
-
-| Weight | Arrays |
-|---|---|
-| Large, page-specific | `lawQuestionsData` (12 Q&As, 5.1k chars — the page's spine), `crashSteps` (8), `crashTypes` (8), `injuries` (6), `resultStories` (3 long-form), `damageCols` (3 × 5 items) |
-| Medium, page-specific | `corridors` (5), `courts` (4), `faultBranches` (4), `processSteps` (4), `keyPoints` (4), `denverData` (4), `firmData` (3) |
-| **Already in `src/data/`** | `leadAttorneys` / `otherAttorneys` (→ `team.ts`), `testimonials` + `quoteReviews` + `videoTestimonials` (→ `testimonials.ts`), `infoCardsData` + `socials` + `serviceAreas` + `footerAreas` + `footerNav` (→ `contact.ts` / `site.ts` / `navigation.ts`) |
-
-So roughly **a third of the comp is bands this site already builds** — the testimonials rail,
-the awards bar, the results cards, the contact block, the footer's service areas. Budget the
-work against the other two thirds.
-
-Four things to decide before building rather than during:
-
-- **`relatedAreas` and `relatedArticles` are five strings each, with no destinations.** Both
-  are the same problem the Blog post's sidebar had: the five articles ("Colorado filing
-  deadlines", "Recorded statements", "MedPay explained", …) match no post in the 167, and the
-  five practice areas point at pages this build does not serve. Decide the treatment once —
-  `href: null` like the Practice Areas directory, or drop.
-- **The section nav.** The comp draws an in-page jump list across 31 sections.
-  `lib/headings.ts` already does exactly this for the blog post's contents box, and
-  `scroll-behavior: smooth` is already global — but these are *sections*, not prose headings,
-  so the ids come from the section components rather than from Portable Text. Extend the
-  helper rather than writing a second slugifier.
-- **The FAQ.** `lawQuestionsData` is 12 entries with a `faqLens` array of reading times
-  beside it. `faqs.ts` and the existing FAQ component already exist and already carry
-  `faqSchema` in `lib/schema.ts`. Check whether this is that type with more rows or a
-  genuinely different one before adding a second.
-- **A transcript toggle** (`transcriptOpen` / `toggleTranscript`) is the one new interaction,
-  on the video block.
-
-Copy `scripts/diff-comp-blog-post.py` for this page. With 88 placeholders it is the page
-where building from the markup alone would look finished and be wrong — which `AGENTS.md`
-records as having already cost this project one full rebuild.
-
-No comp exists for **privacy / disclaimer** or **404**. Both need a design decision or a
-plain-text treatment; `/new-seo-setup` later expects a `legalPage` type for the former.
-
-After the templates:
+**No page template is left.** What remains is content and infrastructure, in this order:
 
 1. **CMS phase** — write the Sanity schema types, then convert each `src/data/*.ts` getter
    body to a `sanityClient.fetch()`. The shapes are already right, so this is mechanical.
-   It also owns the **blog import**: 167 posts and 23 categories out of the scrape, plus the
-   four Portable Text object types the post template deferred.
+   It owns three collections: the **blog import** (167 posts and 23 categories out of the
+   scrape, plus the four Portable Text object types the post template deferred — `callout`,
+   `phoneBand`, `attorneyCard`, `pullQuote`, whose intended home is commented in
+   `components/prose/components.ts`), the **practice-area details** (45 more of the shape
+   `carAccidents.ts` establishes), and everything else.
 2. `/new-seo-setup` — per-page meta, a Global SEO Settings singleton with a crawl switch,
    JSON-LD, `sitemap.xml`, `robots.txt`, editor-managed redirects. **`BlogPosting` JSON-LD
    belongs to this phase**, not to the post template — `Layout.astro` has no extra-schema
-   prop yet, and designing one early would be this layer's decision made blind. Posts already
-   carry a machine-readable `publishedAt` for it.
-3. `/studio-polish ux` — desk grouping into Pages/Collections/Site Settings, unique icons,
-   length caps, preview fixes. Audits the filled-out schema, so it also waits.
+   prop yet. The detail page already emits `FAQPage` and `Attorney` locally.
+3. `/studio-polish ux` — desk grouping, unique icons, length caps, preview fixes. Audits the
+   filled-out schema, so it waits.
+
+No comp exists for **privacy / disclaimer** or **404**. Both need a design decision or a
+plain-text treatment; `/new-seo-setup` later expects a `legalPage` type for the former.
 
 ## Open
 
@@ -225,84 +192,83 @@ After the templates:
 - The attorney-bio awards carousel doesn't scroll on mobile. Its six badges lay out to
   ~1006px inside a 327px rail, but the rail reports no scrollable overflow. Pre-existing —
   replicating the pre-change CSS reproduces it exactly — and the identical carousel in
-  `AwardsBar.astro` works. Only 2 of 6 badges have ever been reachable there. Its dots
-  correctly stay hidden as a result; fixing the scroll makes them appear with no script
-  change. Four causes already ruled out: `display: contents` on `.bio__main`, adding
-  `display: flex` to the items, the `min-width` difference between the two rails, and making
-  `.bio__awards` a centred flex column.
+  `AwardsBar.astro` works. Only 2 of 6 badges have ever been reachable. Its dots correctly
+  stay hidden as a result; fixing the scroll makes them appear with no script change. Four
+  causes ruled out: `display: contents` on `.bio__main`, adding `display: flex` to the
+  items, the `min-width` difference between the two rails, and making `.bio__awards` a
+  centred flex column.
 
 **Decide before launch**
 
-- `/practice-areas`'s directory ships **87 links to legacy WordPress URLs that this build
-  does not serve** — the whole point of the section, and the same thing the nav and footer
-  already do with 21 of them, but at four times the scale. They resolve today because the
-  WordPress site is still live at those paths, and they keep resolving after cutover only if
-  the practice-area detail pages are built or redirected first. The Car Accidents template is
-  the first of those pages.
-- **Four more of the same**, down from five: the Blog index's other real posts, plus the two
-  legacy articles the built post's body links out to. Same mechanism as the 87, and the same
-  fix — the blog import, not more templates.
-- Eight of the Blog index's twelve cards **have no post behind them at all** and render
-  without a link. README.md's table has the full account. Either real articles replace them
-  or they come out; a blog index two-thirds of whose cards go nowhere cannot ship.
-- Three entries the Practice Areas comp lists have **no page anywhere** — Legal Malpractice,
-  Life Insurance Bad Faith, Pet Insurance Bad Faith. The legacy hub's own links to them are
-  broken (written relative, so they resolve under `/practice-areas/`). They render as plain
-  text via `href: null` rather than as dead links. Marked `TODO(launch)`.
+- `/practice-areas`'s directory ships **86 links to legacy WordPress URLs this build does
+  not serve**. They resolve today because the WordPress site is still live at those paths,
+  and keep resolving after cutover only if the remaining detail pages are built or
+  redirected first.
+- **Four more of the same** on the Blog index, plus the two legacy articles the built post
+  links out to. Same fix — the blog import, not more templates.
+- Eight of the Blog index's twelve cards **have no post behind them at all**.
+- Three Practice Areas entries have **no page anywhere** — Legal Malpractice, Life Insurance
+  Bad Faith, Pet Insurance Bad Faith. Plain text via `href: null`.
+- **Two crash types on the detail page** — rear-end and head-on. Same treatment.
+- **The detail page promises nine articles that do not exist**: the eight in "More on car
+  accident claims" (the first design's cut sections turned into promised reading, all
+  pointed at `/news` as the comp has them) and the 8-step checklist, whose own comp
+  (`DH - Blog - What to do after a car accident.html`) this build does not serve — so that
+  teaser ships **unlinked**, by Rhan's decision.
 
-**Waiting on the firm** — these are content, not code. `README.md` has the full table; the
-short version is that 18 `TODO(launch)` markers are open in `src/`, covering the seven
+**Waiting on the firm** — content, not code. `README.md` has the full table. **30**
+`TODO(launch)` markers are open in `src/`, up from 18 before this page. The new ones are all
+Car Accidents': the three Denver crash figures (dated "[year]", sourced to "[CDOT / DRCOG /
+Denver Open Data]"), the three firm closed-case figures (period given as "[date range]"),
+the reviewed-by date, the four statute citations whose links the comp points at an index
+page, the two crash types with no page, and the nine promised articles. Unchanged: the seven
 attorney emails (six inferred from a pattern), the office address and hours, the `$70M+ /
-20 Years` stat claims — which the blog post's fact-check band now repeats — K.C.'s facts
-band, the two departures from the live article's copy, and **who is in the About page's
-founders photograph**. The man on the left is unmistakably K.C.; the man on the right wears
-glasses and is clean-shaven where Sean's headshot has neither, so the alt text names him by
-inference. The comp's own alt text there was "Michael Dormer and Zachary Harpring" — two
-people who do not exist — so it is not a source for this.
+20 Years` stat claims, and **who is in the About page's founders photograph**.
 
 **Waiting on the designer**
 
-- **No comp specifies a mobile layout for anything** — every comp is a desktop frame, and the
-  drawer, the mobile heroes and the stacked CTA rows are all ours. The most visible of those
-  is the homepage hero: on a phone the photograph is now a band across the TOP with the copy
-  over its lower half. Rhan asked for that and signed it off, but the designer has not seen
-  it and the homepage is nominally an approved page.
-- **The Blog index's layout departs from its comp in three visible ways**, all at Rhan's
-  request: the category row sits under the featured panel rather than above it, the featured
-  post stays visible through every filter, and the tab row is a scrolling rail rather than a
-  fixed six-column grid. The last is forced by content — the comp draws six categories and
-  the live blog has twenty-three.
-- **The Blog post departs from its comp in eighteen ways**, all listed and asserted in
-  `scripts/diff-comp-blog-post.py`. Four are Rhan's requests (contents list, sidebar order,
-  no author card, full-width image); the rest follow from serving the live article at its own
-  URL. Same standing as the two above: signed off by Rhan, not seen by the designer.
-- The comp's blog-post sidebar lists **six categories** where the index's tab row lists five,
-  with two swapped and "Colorado Law" added. One `getBlogCategories()` now serves both, using
-  the index's signed-off five, so they cannot drift. If the sixth is wanted it is one entry.
+- **A second Car Accidents design replaced the first mid-build.** Confirm this one is final
+  before the remaining 45 practice-area pages are modelled on it.
+- **Two comps arrived with that redesign and are not built**: `DH - Attorney Bio v1.html` —
+  which implies `DH - Attorney Bio.html` was itself revised, and **the built bio has no diff
+  script, so nothing is checking it** — and `DH - Blog - What to do after a car accident.html`.
+  Neither has been compared against what ships. **Check the attorney bio before launch.**
+- **The Car Accidents comp moves almost every accent from gold to forest.** Built as drawn,
+  this page only. **If it is a site-wide direction rather than one page's, it touches
+  `Eyebrow`'s tones, `FaqItem`, `TestimonialRail`, `AwardsBar` and the token layer** — worth
+  settling before more pages are built on the gold assumption.
+- **The Car Accidents page departs from its comp in fourteen ways**, all listed and asserted
+  in `diff-comp-car-accidents.py`. Three are structural and worth naming: two sections moved
+  (the testimonials rail up to join the results, the case timeline down below the reference
+  pair), the section nav is six links rebuilt in document order rather than the comp's five
+  in its own, and the reviewed-by disclosure is a link to the reviewer's bio. The Blog index
+  departs in three ways and the Blog post in eighteen. All at Rhan's request or forced by
+  serving a real URL: signed off by Rhan, **not seen by the designer**.
+- **No comp specifies a mobile layout for anything** except that one Car Accidents hero
+  block. The drawer, the other mobile heroes, the stacked CTA rows and every collapse are
+  ours. The most visible is still the homepage hero, signed off by Rhan and unseen.
+- The comp's blog-post sidebar lists **six categories** where the index's tab row lists five.
+  One `getBlogCategories()` serves both, using the index's signed-off five.
 - `DH - Homepage approved.html` and `DH - Homepage approved v2.html` are the same byte size
   with different checksums. Nobody has said which is final.
 - Whether the copy in the comps is final or placeholder.
-- **The homepage's practice-area icons no longer match the homepage comp**, deliberately.
-  `PracticeIcon` carries the `pa-icons-line` set so brain injury looks the same on every
-  page. Confirm that's the intended drawing before launch; reverting is one file.
+- **The homepage's practice-area icons no longer match the homepage comp**, deliberately —
+  `PracticeIcon` carries one set so brain injury looks the same on every page. Reverting is
+  one file.
 - The Practice Areas directory has **eight groups and omits Greeley, Fort Collins and Grand
-  Junction**, which have eight live landing pages between them and appear on the legacy hub.
-  The page matches the comp, so those eight are unreachable from it. Add three groups, or
-  leave them to the nav?
-- That section's heading is "Every case we handle, by **location**", but the comp's last two
-  groups — "Premises Liability" and "Other Legal Services" — are topical. Built as the comp
-  has it. Either the heading or those two groups wants changing.
-- The About comp and the homepage comp carry the **same six core values with two of them
-  written differently**. It is one singleton serving both pages, so it keeps the homepage's
-  wording (that comp is the approved one). Same shape of thing in the reviews panel: About
-  trims two of the three review headlines by a clause. Both are asserted in
-  `diff-comp-about.py`.
+  Junction**, which have eight live landing pages between them.
+- That section's heading is "Every case we handle, by **location**", but its last two groups
+  — "Premises Liability" and "Other Legal Services" — are topical.
+- The About and homepage comps carry the **same six core values with two written
+  differently**. One singleton serves both, keeping the homepage's wording. Same shape of
+  thing in the reviews panel. Both asserted in `diff-comp-about.py`.
 
 **Blockers for launch, not for building**
 
-- `/api/consult` does not exist. **Three** forms now post to it and 404 on submit — the
-  contact band, the co-counsel referral, and the blog post's sidebar. The sidebar reuses
-  `ContactForm`, so all three send one payload shape.
+- `/api/consult` does not exist. Two form components — `ContactForm` and `CoCounselForm` —
+  are rendered in **five** places (`ContactBand`, `ContactDetails`, the blog post's
+  `PostSidebar`, the detail page's `ClosingCta`, and `/co-counsel`) and all of them 404 on
+  submit. One endpoint, not two: a hidden `kind` field tells the payloads apart.
 - The production URL is not yet a Sanity CORS origin, so the deployed `/admin` loads but
   fails sign-in. `http://localhost:4321` is registered.
 - `site:` in `astro.config.mjs` — www vs apex, unsettled.

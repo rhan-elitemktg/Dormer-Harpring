@@ -1,0 +1,131 @@
+---
+// The whole practice-area detail template — 17 sections in the comp's order.
+//
+// A composition component, like `PostArticle.astro`: it owns no content, takes
+// everything as props, and exists so `src/pages/[slug].astro` can stay a
+// readable branch between two page shapes rather than becoming 200 lines of
+// two unrelated templates.
+//
+// SECTION ORDER IS THE COMP'S, and the second design reordered deliberately.
+// The page now front-loads reassurance and proof — triage, the four-point
+// summary, "do I have a case", the lawyers, the credentials, why the firm —
+// and defers the reference material (crash types, city data) to the bottom
+// half, with the two long explainers reduced to teasers pointing at articles.
+// Reordering it makes it a different page.
+import TestimonialRail from "../../TestimonialRail.astro";
+import FaqBand from "../../home/FaqBand.astro";
+
+import DetailHero from "./DetailHero.astro";
+import SectionNav from "./SectionNav.astro";
+import Triage from "./Triage.astro";
+import Takeaways from "./Takeaways.astro";
+import Criteria from "./Criteria.astro";
+import LawyerCards from "./LawyerCards.astro";
+import Credentials from "./Credentials.astro";
+import WhyFirm from "./WhyFirm.astro";
+import ResultStories from "./ResultStories.astro";
+import CaseTimeline from "./CaseTimeline.astro";
+import TileGrid from "./TileGrid.astro";
+import DenverData from "./DenverData.astro";
+import ChecklistTeaser from "./ChecklistTeaser.astro";
+import FaultTeaser from "./FaultTeaser.astro";
+import MoreOnClaims from "./MoreOnClaims.astro";
+import ClosingCta from "./ClosingCta.astro";
+
+import { CA_SECTION_IDS, type PracticeAreaDetail } from "../../../data/carAccidents";
+import type { TeamMember } from "../../../data/team";
+import type { VideoReview, Testimonial, ReviewSummary } from "../../../data/testimonials";
+import type { Award } from "../../../data/awards";
+import type { Faq, FaqSection } from "../../../data/faqs";
+import type { ContactBand, ContactDetails } from "../../../data/contact";
+import type { FirmDetails } from "../../../data/site";
+
+interface Props {
+  detail: PracticeAreaDetail;
+  firm: FirmDetails;
+  lawyers: (TeamMember & { cred: string })[];
+  awards: Record<string, Award>;
+  reviews: Record<string, VideoReview>;
+  testimonials: Testimonial[];
+  reviewSummary: ReviewSummary;
+  faqs: Faq[];
+  faqSection: FaqSection;
+  contact: ContactDetails;
+  contactForm: ContactBand["form"];
+  siteUrl: string;
+}
+
+const {
+  detail,
+  firm,
+  lawyers,
+  awards,
+  reviews,
+  testimonials,
+  reviewSummary,
+  faqs,
+  faqSection,
+  contact,
+  contactForm,
+  siteUrl,
+} = Astro.props;
+
+const contactAnchor = `#${CA_SECTION_IDS.contact}`;
+---
+
+<DetailHero hero={detail.hero} firm={firm} ctaHref={contactAnchor} />
+<SectionNav nav={detail.nav} firm={firm} ctaHref={contactAnchor} />
+
+<Triage triage={detail.triage} firm={firm} />
+<Takeaways takeaways={detail.takeaways} id={CA_SECTION_IDS.know} />
+<Criteria criteria={detail.criteria} id={CA_SECTION_IDS.case} />
+
+<LawyerCards
+  section={detail.lawyers}
+  members={lawyers}
+  id={CA_SECTION_IDS.lawyers}
+  siteUrl={siteUrl}
+  firmName={firm.name}
+/>
+<Credentials credentials={detail.credentials} awards={awards} />
+<WhyFirm why={detail.whyFirm} />
+
+{/* Results and the testimonials rail are ONE argument told two ways — the
+    figures, then the people behind them — so they run together. The comp puts
+    three sections between them, which also left `cream → cream → cream` across
+    Results, CaseTimeline and TileGrid; the forest rail breaks the first pair
+    and TileGrid's surface breaks the second. */}
+<ResultStories results={detail.results} reviews={reviews} id={CA_SECTION_IDS.results} />
+<TestimonialRail
+  testimonials={testimonials}
+  reviews={reviewSummary}
+  id={CA_SECTION_IDS.reviews}
+/>
+
+{/* Crash types and the Denver data are the page's reference pair, so they run
+    together — and "what the next few months look like" lands after them, as the
+    last substantive section before the reading tail and the closest process
+    content can get to the contact block. */}
+<TileGrid section={detail.crashTypes} id={CA_SECTION_IDS.types} />
+<DenverData denver={detail.denver} />
+
+<CaseTimeline timeline={detail.timeline} id={CA_SECTION_IDS.next} />
+
+{/* The two teasers stay in the further-reading tail rather than moving up
+    beside the triage block. They are POINTERS to articles, not the content —
+    the urgent answers are Triage's five rows and Takeaways' four points — and
+    the checklist article does not exist yet, so promoting it would put a large
+    dead-end block a third of the way up the page. */}
+<ChecklistTeaser teaser={detail.checklistTeaser} />
+<FaultTeaser teaser={detail.faultTeaser} />
+<MoreOnClaims more={detail.more} />
+
+<FaqBand section={faqSection} faqs={faqs} />
+
+<ClosingCta
+  closing={detail.closing}
+  details={contact}
+  form={contactForm}
+  firm={firm}
+  id={CA_SECTION_IDS.contact}
+/>

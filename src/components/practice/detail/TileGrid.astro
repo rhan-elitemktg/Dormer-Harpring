@@ -1,0 +1,176 @@
+---
+// "Types of car accidents we handle" — eight tiles, four up.
+//
+// NO ICONS. The first design put a gold-plated practice icon beside each name;
+// the second drops them, and the tiles are stronger for it — the same car
+// glyph appeared on six of the eight, which told a reader nothing.
+//
+// Six of the eight have a live legacy URL. The two that do not render as plain
+// tiles rather than dead links, and keep the comp's label but lose the arrow:
+// `.arrow` travels on hover and belongs only on something that navigates. Same
+// convention as `getPracticeAreaGroups()` and `navigation.ts`.
+import type { TileSection } from "../../../data/carAccidents";
+
+interface Props {
+  section: TileSection;
+  id: string;
+}
+
+const { section, id } = Astro.props;
+---
+
+<section class="section section--cream tiles" id={id}>
+  <div class="container">
+    <header class="tiles__head">
+      <h2 class="tiles__title">{section.title}</h2>
+      <p class="tiles__lede">{section.lede}</p>
+    </header>
+
+    <ul class="tiles__grid">
+      {
+        section.tiles.map((tile) => {
+          const inner = (
+            <>
+              <h3 class="tile__name">{tile.name}</h3>
+              <p class="tile__body">{tile.body}</p>
+              <span class:list={["tile__link", !tile.href && "tile__link--inert"]}>
+                {tile.linkLabel}
+                {tile.href && (
+                  <i class="arrow" aria-hidden="true">
+                    &rarr;
+                  </i>
+                )}
+              </span>
+            </>
+          );
+
+          return (
+            <li>
+              {tile.href ? (
+                <a class="tile tile--link" href={tile.href}>
+                  {inner}
+                </a>
+              ) : (
+                <div class="tile">{inner}</div>
+              )}
+            </li>
+          );
+        })
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .tiles__head {
+    max-width: 760px;
+    margin: 0 0 var(--space-11);
+  }
+
+  .tiles__title {
+    margin: 0 0 var(--space-4);
+    font-size: var(--display-3);
+  }
+
+  .tiles__lede {
+    margin: 0;
+    max-width: 52ch;
+    font-size: var(--text-xl);
+    line-height: var(--leading-normal);
+    color: var(--text-body);
+    text-wrap: pretty;
+  }
+
+  .tiles__grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-6);
+    align-items: stretch;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .tiles__grid > li {
+    display: flex;
+  }
+
+  .tile {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: var(--space-8) var(--space-7) var(--space-7);
+    background: var(--dh-white);
+    border-radius: var(--radius-4);
+    text-decoration: none;
+    box-shadow: 0 14px 38px rgba(45, 34, 22, 0.06);
+  }
+
+  .tile--link {
+    transition: transform var(--transition), box-shadow var(--transition),
+      background var(--transition);
+  }
+
+  .tile--link:hover {
+    transform: translateY(-4px);
+    background: var(--dh-cream-50);
+    box-shadow: 0 24px 50px -22px rgba(45, 34, 22, 0.35);
+  }
+
+  .tile__name {
+    margin: 0 0 var(--space-4);
+    font-size: var(--display-7);
+    line-height: 1.15;
+  }
+
+  .tile__body {
+    margin: 0 0 var(--space-5);
+    flex: 1;
+    font-size: var(--text-md);
+    line-height: var(--leading-normal);
+    color: var(--text-muted);
+    text-wrap: pretty;
+  }
+
+  .tile__link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-weight: 800;
+    font-size: var(--text-micro);
+    line-height: 1;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--dh-forest-100);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  .tile__link .arrow {
+    font-style: normal;
+    text-decoration: none;
+  }
+
+  .tile--link:hover .tile__link {
+    color: var(--accent);
+  }
+
+  /* No page behind it: no underline, no arrow, no link colour. The label is
+     the comp's content; the affordance would be a promise. */
+  .tile__link--inert {
+    color: var(--text-meta);
+    text-decoration: none;
+  }
+
+  @media (max-width: 1180px) {
+    .tiles__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 700px) {
+    .tiles__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

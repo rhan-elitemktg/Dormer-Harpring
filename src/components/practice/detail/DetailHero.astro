@@ -1,0 +1,513 @@
+---
+// The practice-area detail hero: a full-bleed photograph with a white panel
+// floated over its right-hand third, carrying the breadcrumb, h1, lede, a
+// three-figure proof row, the CTA pair and the "Reviewed by" line.
+//
+// MOBILE IS OURS, like every other hero on this site — no comp specifies one.
+// It follows the construction `Hero.astro` and `PageHeader.astro`'s
+// `tone="photo"` already share, for the reason recorded there: `cover` on a
+// full-height portrait box takes its crop out of the SIDES. Below 1180px the
+// photograph becomes a band across the top sized off the viewport WIDTH and the
+// panel goes static beneath it, which is exactly what the comp's own
+// `@media (max-width:1180px)` block does — the one place a comp specifies any
+// narrow-viewport behaviour at all.
+import Picture from "../../media/Picture.astro";
+import Stars from "../../Stars.astro";
+import GoogleIcon from "../../icons/GoogleIcon.astro";
+import type { DetailHero } from "../../../data/carAccidents";
+import type { FirmDetails } from "../../../data/site";
+
+interface Props {
+  hero: DetailHero;
+  firm: FirmDetails;
+  ctaHref: string;
+}
+
+const { hero, firm, ctaHref } = Astro.props;
+---
+
+<section class="dhero">
+  <div class="dhero__bg">
+    <Picture
+      src={hero.photo}
+      alt={hero.photoAlt}
+      widths={[800, 1200, 1600, 2000]}
+      sizes="100vw"
+      eager
+      class="dhero__img"
+    />
+  </div>
+
+  <div class="dhero__panel">
+    <nav class="dhero__crumb" aria-label="Breadcrumb">
+      <ol class="dhero__trail">
+        {
+          hero.trail.map((crumb) => (
+            <li>
+              {crumb.href ? (
+                <a href={crumb.href}>{crumb.label}</a>
+              ) : (
+                /* The crumb with no destination IS the current page — that is
+                   what `href: null` means in this trail — so it says so, and
+                   the styling hangs off the attribute rather than a class of
+                   its own. The two cannot drift that way. */
+                <span aria-current="page">{crumb.label}</span>
+              )}
+            </li>
+          ))
+        }
+      </ol>
+    </nav>
+
+    <h1 class="dhero__title">{hero.title}</h1>
+    <p class="dhero__lede">{hero.lede}</p>
+
+    <ul class="dhero__proof">
+      {
+        hero.proof.map((item) => {
+          const figure = item.google ? (
+            <b class="dhero__fig dhero__fig--g">
+              <GoogleIcon size={24} />
+              {item.big}
+              <Stars class="dhero__stars" />
+            </b>
+          ) : (
+            <b class="dhero__fig">{item.big}</b>
+          );
+
+          return (
+            <li>
+              {item.href ? (
+                <a href={item.href} target="_blank" rel="noopener">
+                  {figure}
+                  <span class="dhero__proof-label">{item.label}</span>
+                </a>
+              ) : (
+                <>
+                  {figure}
+                  <span class="dhero__proof-label">{item.label}</span>
+                </>
+              )}
+            </li>
+          );
+        })
+      }
+    </ul>
+
+    <div class="dhero__cta">
+      <a class="btn btn--red dhero__btn" href={ctaHref}>{hero.ctaLabel}</a>
+      <a class="dhero__tel" href={`tel:${firm.phoneE164}`}>
+        <span>{hero.telLabel}</span>
+        <b>{firm.phone}</b>
+      </a>
+    </div>
+
+    {/* E-E-A-T: who reviewed this page and when.
+        A LINK TO THE REVIEWER'S BIO, not a disclosure. The comp draws a
+        <details> holding five credential lines; by request it is one line and a
+        destination instead. The credentials are on the bio page this now points
+        at, which is where they belong — restating them in a hero panel put the
+        same five facts in two places and gave the page an interaction whose
+        only job was to hide them. */}
+    <div class="cred">
+      <a class="cred__link" href={hero.reviewer.bioHref}>
+        <Picture
+          src={hero.reviewer.photo}
+          alt={hero.reviewer.name}
+          widths={[80, 160]}
+          sizes="60px"
+          class="cred__photo"
+        />
+        <span class="cred__by">
+          <span class="cred__line">
+            Reviewed by <b>{hero.reviewer.name}</b>, {hero.reviewer.role}
+          </span>
+          <span class="cred__updated">{hero.reviewer.updated}</span>
+        </span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .dhero {
+    position: relative;
+    /* Fixed now the reviewer line is a link. It was animated between two
+       heights because the comp's <details> grew the panel when it opened. */
+    min-height: 660px;
+    overflow: hidden;
+    background: var(--surface-dark-card);
+  }
+
+  .dhero__bg {
+    position: absolute;
+    inset: 0;
+  }
+
+  .dhero__bg :global(.dhero__img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* 45%, not centre: the frame's horizon and the wreckage sit low, and a
+       centred crop fills the panel's left edge with sky. */
+    object-position: center 45%;
+    display: block;
+  }
+
+  .dhero__panel {
+    position: absolute;
+    z-index: 2;
+    inset: var(--space-10) var(--space-10) var(--space-10) auto;
+    width: 40%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: var(--space-11);
+    background: var(--dh-white);
+    /* So the proof labels can ask how wide THIS box is. Their fit is decided by
+       the panel, not the viewport — see `.dhero__proof-label`. */
+    container-type: inline-size;
+    border-radius: var(--radius-4);
+    box-shadow: 0 24px 60px rgba(8, 14, 10, 0.35);
+  }
+
+  .dhero__crumb {
+    margin-bottom: var(--space-5);
+  }
+
+  .dhero__trail {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-weight: 600;
+    font-size: var(--text-sm);
+    line-height: 1;
+    letter-spacing: 0.06em;
+    color: var(--text-meta);
+  }
+
+  .dhero__trail li + li::before {
+    content: "\203A";
+    margin-right: var(--space-2);
+  }
+
+  .dhero__trail a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .dhero__trail a:hover {
+    color: var(--accent);
+  }
+
+  /* The current page, in the accent and a weight heavier than the trail it
+     closes. By request. Note it is NOT a link and takes the same colour the
+     links either side of it take on hover — so the row's only red is the crumb
+     you cannot click. Ink was tried first and read as too quiet. */
+  .dhero__trail [aria-current="page"] {
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .dhero__title {
+    margin: 0 0 var(--space-7);
+    font-size: var(--display-3);
+    text-wrap: balance;
+  }
+
+  .dhero__lede {
+    margin: 0 0 var(--space-9);
+    font-size: var(--text-xl);
+    line-height: var(--leading-normal);
+    color: var(--text-body);
+    text-wrap: pretty;
+  }
+
+  /* `padding`, not `padding-block`: a <ul> carries the UA's
+     `padding-inline-start: 40px`, which `padding-block` leaves in place — so
+     the whole row sat indented from the h1 and the lede above it. */
+  .dhero__proof {
+    display: grid;
+    /* minmax(0, …), not plain 1fr: a `nowrap` label's min-content width would
+       otherwise let its column grow past its third and push the row out of the
+       panel. */
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin: 0 0 var(--space-10);
+    padding: var(--space-7) 0;
+    list-style: none;
+    border-block: 1px solid var(--border-hairline);
+  }
+
+  /* Tight, because the three labels have to fit their column on one line and
+     the panel is only 40% of the viewport. See `.dhero__proof-label`. */
+  .dhero__proof li {
+    padding-inline: var(--space-4);
+  }
+
+  .dhero__proof li:first-child {
+    padding-left: 0;
+  }
+
+  .dhero__proof li:last-child {
+    padding-right: 0;
+  }
+
+  .dhero__proof li + li {
+    border-left: 1px solid var(--border-hairline);
+  }
+
+  /* The hit area bleeds back over the cell's padding so the target is the whole
+     cell — but only vertically and to the left, or it would cross the divider
+     into its neighbour. */
+  .dhero__proof a {
+    display: block;
+    margin: calc(var(--space-3) * -1) calc(var(--space-2) * -1);
+    padding: var(--space-3) var(--space-2);
+    border-radius: var(--radius-3);
+    text-decoration: none;
+    transition: background var(--transition);
+  }
+
+  .dhero__proof a:hover {
+    background: var(--surface-page);
+  }
+
+  .dhero__fig {
+    display: block;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--display-5);
+    line-height: 1;
+    color: var(--dh-forest-100);
+    white-space: nowrap;
+  }
+
+  .dhero__fig--g {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .dhero__proof a:hover .dhero__fig {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .dhero__proof :global(.dhero__stars) {
+    font-size: var(--text-sm);
+  }
+
+  /* ONE LINE PER LABEL, by request. "RECOVERED FOR CLIENTS" is the longest at
+     21 characters — about 152px at 11px — and it gets a third of the panel
+     minus the column padding, so it needs the panel to be ~610px wide.
+     Tracking comes down from the 0.1em these eyebrow labels usually carry to
+     buy some of that.
+
+     A CONTAINER query, not a media query, because the fit is decided by the
+     PANEL and the panel is 40% of the viewport above 1180px and full width
+     below it — so in viewport terms the label fits under 1180, wraps from 1181
+     to ~1560, and fits again above that. Two disjoint bands and a magic number
+     apiece. Asking the box how wide it is says the same thing once. */
+  .dhero__proof-label {
+    display: block;
+    margin-top: var(--space-2);
+    font-weight: 700;
+    font-size: var(--text-micro);
+    line-height: 1.3;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-meta);
+    white-space: nowrap;
+  }
+
+  .dhero__cta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-5);
+    flex-wrap: wrap;
+  }
+
+  .dhero__btn {
+    width: 300px;
+  }
+
+  .dhero__tel {
+    display: inline-flex;
+    flex-direction: column;
+    flex: 0 0 auto;
+    width: max-content;
+    font-size: var(--text-sm);
+    line-height: var(--leading-snug);
+    color: var(--text-meta);
+    text-decoration: none;
+  }
+
+  .dhero__tel b {
+    display: block;
+    font-family: var(--font-ui);
+    font-weight: 700;
+    font-size: var(--text-lg);
+    letter-spacing: var(--tracking-tight);
+    color: var(--text-strong);
+  }
+
+  /* ---- The reviewed-by line ---- */
+
+  /* The rule and the hover target are two elements on purpose. The tint has to
+     bleed outside the row's content box to read as a row rather than as a
+     highlighted label — and negative margins on the element that also draws the
+     divider would drag the divider out with them. */
+  .cred {
+    margin-top: var(--space-9);
+    padding-top: var(--space-7);
+    border-top: 1px solid var(--border-hairline);
+  }
+
+  .cred__link {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    margin: calc(var(--space-2) * -1) calc(var(--space-3) * -1);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-3);
+    text-decoration: none;
+    transition: background var(--transition);
+  }
+
+  .cred__link:hover {
+    background: var(--surface-page);
+  }
+
+  .cred :global(.cred__photo) {
+    width: 60px;
+    height: 60px;
+    flex: none;
+    border-radius: var(--radius-full);
+    object-fit: cover;
+    /* 18% down: these are head-and-shoulders portraits, and a centred circular
+       crop cuts the chin. */
+    object-position: center 18%;
+  }
+
+  /* Two lines, by request: who reviewed it, then when. A grid rather than two
+     block spans so the pair is centred against the portrait as one unit. */
+  .cred__by {
+    display: grid;
+    gap: var(--space-1);
+    flex: 1;
+    min-width: 0;
+  }
+
+  .cred__line {
+    font-size: var(--text-sm);
+    line-height: var(--leading-snug);
+    color: var(--text-meta);
+    text-wrap: pretty;
+  }
+
+  /* The underline is present from the start and TRANSPARENT, then coloured in
+     on hover. `text-decoration` itself cannot be animated, so declaring it on
+     :hover snapped the rule on instantly while the row's tint faded in behind
+     it over --dur — the gesture arriving in two pieces, which is the same fault
+     the related-posts card was fixed for. `text-decoration-color` does
+     animate, so both halves now run on one clock; and because the underline
+     always occupies its space, nothing reflows either. */
+  .cred__line b {
+    font-weight: 700;
+    color: var(--text-strong);
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-underline-offset: 3px;
+    transition: text-decoration-color var(--transition);
+  }
+
+  .cred__link:hover .cred__line b {
+    text-decoration-color: currentColor;
+  }
+
+  .cred__updated {
+    font-weight: 700;
+    font-size: var(--text-micro);
+    line-height: 1;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--dh-ink-5);
+  }
+
+  /* ---- Below the comp's own 1180px break ---- */
+
+  @media (max-width: 1180px) {
+    .dhero {
+      min-height: 0;
+    }
+
+    .dhero__bg {
+      position: relative;
+      /* Sized off WIDTH, not content — see the header comment. */
+      height: min(56vw, 420px);
+    }
+
+    .dhero__panel {
+      position: static;
+      width: auto;
+      padding: var(--space-10) var(--container-pad) var(--space-12);
+      border-radius: 0;
+      box-shadow: none;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .dhero__cta {
+      flex-direction: column;
+      align-items: stretch;
+      gap: var(--space-3);
+    }
+
+    /* The number comes FIRST and takes the solid fill on a phone: someone
+       reading this page on a kerb is likelier to call than to fill in a form.
+       The comp's own narrow-viewport block makes the same swap. */
+    .dhero__tel {
+      order: 1;
+      width: auto;
+      align-items: center;
+      justify-content: center;
+      height: 60px;
+      gap: 3px;
+      border-radius: var(--radius-3);
+      background: var(--accent);
+      color: rgba(255, 255, 255, 0.82);
+      font-size: var(--text-micro);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .dhero__tel b {
+      font-size: var(--text-2xl);
+      color: var(--dh-white);
+      text-transform: none;
+    }
+
+    .dhero__btn {
+      order: 2;
+      width: auto;
+      background: transparent;
+      border: 1.5px solid var(--accent);
+      color: var(--accent);
+    }
+  }
+
+  @container (max-width: 620px) {
+    .dhero__proof-label {
+      white-space: normal;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .dhero__proof li {
+      padding-inline: var(--space-3);
+    }
+  }
+</style>

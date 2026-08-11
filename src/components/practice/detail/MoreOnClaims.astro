@@ -1,0 +1,326 @@
+---
+// "More on car accident claims" — two feature cards over six text cards, where
+// the first design had two columns of bare links.
+//
+// EVERY ONE OF THE EIGHT IS AN ARTICLE THE FIRM HAS NOT WRITTEN. Their subjects
+// are the first design's cut sections — the insurance Q&As, the damages grid,
+// the adjuster tactics, the venue list — turned into promised reading. The comp
+// points all eight at the blog index, which this build serves, so they keep
+// that destination rather than becoming eight dead hrefs.
+// TODO(launch): "Read the answer" landing on an index with no such answer is a
+// launch problem. Write the eight, or cut the section back to what exists.
+import Picture from "../../media/Picture.astro";
+import type { MoreSection } from "../../../data/carAccidents";
+
+interface Props {
+  more: MoreSection;
+}
+
+const { more } = Astro.props;
+---
+
+<section class="section more">
+  <div class="container">
+    <h2 class="more__title">{more.title}</h2>
+
+    <ul class="feats">
+      {
+        more.features.map((feature) => (
+          <li>
+            <a class="feat" href={feature.href ?? undefined}>
+              <span class="feat__fig">
+                <Picture
+                  src={feature.poster}
+                  alt=""
+                  widths={[500, 900]}
+                  sizes="(max-width: 980px) 100vw, 45vw"
+                  class="feat__img"
+                />
+                <span class="feat__dur">{feature.length}</span>
+                <span class="feat__play" aria-hidden="true">
+                  <svg width="16" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M8 5.5v13l11-6.5z" />
+                  </svg>
+                </span>
+              </span>
+              <b class="feat__title">{feature.title}</b>
+              <p class="feat__body">{feature.body}</p>
+              <span class="feat__link">
+                {feature.ctaLabel}
+                <i class="arrow" aria-hidden="true">
+                  &rarr;
+                </i>
+              </span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+
+    <ul class="morecards">
+      {
+        more.cards.map((card) => (
+          <li>
+            <a class="mcard" href={card.href ?? undefined}>
+              <b class="mcard__title">{card.title}</b>
+              <p class="mcard__body">{card.body}</p>
+              <span class="mcard__link">
+                {card.ctaLabel}
+                <i class="arrow" aria-hidden="true">
+                  &rarr;
+                </i>
+              </span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .more {
+    background: var(--dh-forest-300);
+    color: var(--text-on-dark);
+  }
+
+  .more__title {
+    margin: 0 0 var(--space-11);
+    font-size: var(--display-3);
+    color: var(--text-on-dark);
+  }
+
+  .feats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-9);
+    margin: 0 0 var(--space-14);
+    padding: 0 0 var(--space-13);
+    border-bottom: 1px solid rgba(246, 242, 232, 0.16);
+    list-style: none;
+  }
+
+  .feat {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    text-decoration: none;
+  }
+
+  .feat__fig {
+    position: relative;
+    display: block;
+    aspect-ratio: 16 / 9;
+    margin-bottom: var(--space-6);
+    border-radius: var(--radius-4);
+    overflow: hidden;
+    background: var(--dh-forest-100);
+  }
+
+  .feat__fig :global(.feat__img) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 32%;
+    display: block;
+  }
+
+  .feat__fig::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(10, 14, 11, 0) 55%, rgba(10, 14, 11, 0.5) 100%);
+  }
+
+  .feat__play {
+    position: absolute;
+    right: var(--space-4);
+    bottom: var(--space-4);
+    z-index: 2;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-full);
+    background: var(--dh-white);
+    color: var(--dh-forest-100);
+    box-shadow: 0 8px 22px rgba(8, 14, 10, 0.35);
+    transition: transform var(--dur) var(--ease);
+  }
+
+  .feat:hover .feat__play {
+    transform: scale(1.08);
+  }
+
+  .feat__dur {
+    position: absolute;
+    top: var(--space-3);
+    right: var(--space-3);
+    z-index: 2;
+    padding: 4px 8px;
+    border-radius: var(--radius-2);
+    background: rgba(10, 14, 11, 0.62);
+    font-family: var(--font-ui);
+    font-weight: 700;
+    font-size: var(--text-micro);
+    line-height: 1;
+    color: var(--dh-white);
+  }
+
+  .feat__title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--display-6);
+    line-height: 1.16;
+    color: var(--text-on-dark);
+    transition: transform var(--transition);
+    transform-origin: left center;
+  }
+
+  .feat:hover .feat__title {
+    transform: translateX(3px);
+  }
+
+  .feat__body {
+    margin: var(--space-3) 0 var(--space-5);
+    flex: 1;
+    font-size: var(--text-md);
+    line-height: var(--leading-normal);
+    color: rgba(246, 242, 232, 0.75);
+    text-wrap: pretty;
+  }
+
+  .feat__link,
+  .mcard__link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-weight: 800;
+    font-size: var(--text-micro);
+    line-height: 1;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-on-dark);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  /* The arrow sits inside an underlined label, so it opts out of the underline
+     and keeps the shared `.arrow` nudge. */
+  .feat__link .arrow,
+  .mcard__link .arrow {
+    font-style: normal;
+    text-decoration: none;
+  }
+
+  /* ---- the six ---- */
+
+  .morecards {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .mcard {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: var(--space-7);
+    border-left: 1px solid rgba(246, 242, 232, 0.16);
+    text-decoration: none;
+    transition: background var(--transition);
+  }
+
+  .morecards > li:nth-child(3n + 1) .mcard {
+    border-left: 0;
+    padding-left: 0;
+  }
+
+  .morecards > li:nth-child(-n + 3) .mcard {
+    padding-top: 0;
+  }
+
+  .morecards > li:nth-child(n + 4) .mcard {
+    border-top: 1px solid rgba(246, 242, 232, 0.16);
+  }
+
+  .mcard:hover {
+    background: rgba(246, 242, 232, 0.05);
+  }
+
+  .mcard__title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--text-xl);
+    line-height: var(--leading-tight);
+    color: var(--text-on-dark);
+    transition: transform var(--transition);
+    transform-origin: left center;
+  }
+
+  .mcard:hover .mcard__title {
+    transform: translateX(3px);
+  }
+
+  .mcard__body {
+    margin: var(--space-3) 0 var(--space-5);
+    flex: 1;
+    font-size: var(--text-md);
+    line-height: var(--leading-snug);
+    color: rgba(246, 242, 232, 0.75);
+    text-wrap: pretty;
+  }
+
+  @media (max-width: 980px) {
+    .feats {
+      grid-template-columns: 1fr;
+    }
+
+    .morecards {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .morecards > li:nth-child(3n + 1) .mcard {
+      border-left: 1px solid rgba(246, 242, 232, 0.16);
+      padding-left: var(--space-7);
+    }
+
+    .morecards > li:nth-child(odd) .mcard {
+      border-left: 0;
+      padding-left: 0;
+    }
+
+    .morecards > li:nth-child(-n + 3) .mcard {
+      padding-top: var(--space-7);
+      border-top: 1px solid rgba(246, 242, 232, 0.16);
+    }
+
+    .morecards > li:nth-child(-n + 2) .mcard {
+      padding-top: 0;
+      border-top: 0;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .morecards {
+      grid-template-columns: 1fr;
+    }
+
+    .morecards > li .mcard {
+      border-left: 0;
+      padding-left: 0;
+      padding-top: var(--space-6);
+      border-top: 1px solid rgba(246, 242, 232, 0.16);
+    }
+
+    .morecards > li:first-child .mcard {
+      padding-top: 0;
+      border-top: 0;
+    }
+  }
+</style>

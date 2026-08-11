@@ -1,0 +1,288 @@
+---
+// "Recently injured in a Denver car accident?" — the triage block.
+//
+// The most important section on the page and the reason it is second: someone
+// who has just been in a crash gets five answers before any marketing.
+//
+// ALL FIVE ROWS ARE VISIBLE. The first design put the last two behind a "More
+// things to know" disclosure; this one does not, and the 182-day notice is the
+// shortest deadline on the page — hiding it behind a caret was the weaker call.
+import DetailVideo from "./DetailVideo.astro";
+import SourceNote from "./SourceNote.astro";
+import type { TriageSection } from "../../../data/carAccidents";
+import type { FirmDetails } from "../../../data/site";
+
+interface Props {
+  triage: TriageSection;
+  firm: FirmDetails;
+}
+
+const { triage, firm } = Astro.props;
+---
+
+<section class="section section--cream triage">
+  <div class="container triage__wrap">
+    <div class="triage__intro">
+      <h2 class="triage__title">{triage.title}</h2>
+      <p class="triage__lede">{triage.lede}</p>
+
+      <DetailVideo video={triage.video} class="triage__video" />
+
+      <div class="triage__help">
+        <p>{triage.help.text}</p>
+        <a href={`tel:${firm.phoneE164}`}>{firm.phone}</a>
+      </div>
+    </div>
+
+    <div class="triage__panel">
+      <div class="triage__rows">
+        {
+          triage.rows.map((row, i) => (
+            <div class:list={["trow", i === 0 && "trow--first"]}>
+              <div>
+                {row.tag && (
+                  <span class="trow__tag" data-tone={row.tone}>
+                    {row.tag}
+                  </span>
+                )}
+                <h3 class="trow__q">{row.question}</h3>
+                <p class="trow__body">{row.body}</p>
+                <a class="trow__cta arrow-link" href={row.ctaHref}>
+                  <span class="arrow-link__label">{row.ctaLabel}</span>
+                  <span class="arrow" aria-hidden="true">
+                    &rarr;
+                  </span>
+                </a>
+              </div>
+              <p class="trow__stat">
+                <b>{row.stat.big}</b>
+                <span>{row.stat.label}</span>
+              </p>
+            </div>
+          ))
+        }
+      </div>
+
+      <SourceNote source={triage.sources} />
+    </div>
+  </div>
+</section>
+
+<style>
+  .triage__wrap {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: var(--space-14);
+    align-items: start;
+  }
+
+  .triage__title {
+    margin: 0 0 var(--space-4);
+    font-size: var(--display-3);
+    text-wrap: balance;
+  }
+
+  .triage__lede {
+    margin: 0;
+    max-width: 46ch;
+    font-size: var(--text-xl);
+    line-height: var(--leading-normal);
+    color: var(--text-muted);
+    text-wrap: pretty;
+  }
+
+  .triage :global(.triage__video) {
+    margin-top: var(--space-10);
+  }
+
+  .triage__help {
+    margin-top: var(--space-7);
+    padding: var(--space-6);
+    background: var(--dh-white);
+    border: 1px solid var(--border-hairline);
+    border-radius: var(--radius-4);
+  }
+
+  .triage__help p {
+    margin: 0 0 var(--space-3);
+    font-size: var(--text-md);
+    line-height: var(--leading-normal);
+    color: var(--text-body);
+  }
+
+  .triage__help a {
+    display: inline-flex;
+    align-items: center;
+    font-family: var(--font-ui);
+    font-weight: 600;
+    font-size: var(--text-3xl);
+    letter-spacing: var(--tracking-tight);
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .triage__rows {
+    background: var(--dh-white);
+    border: 1px solid var(--border-hairline);
+    border-radius: var(--radius-4);
+    overflow: hidden;
+  }
+
+  .trow {
+    display: grid;
+    grid-template-columns: 1fr 224px;
+    align-items: center;
+    gap: var(--space-7);
+    padding: var(--space-6) var(--space-7);
+    border-top: 1px solid var(--dh-line-soft);
+  }
+
+  .trow:first-child {
+    border-top: 0;
+  }
+
+  .trow--first {
+    background: var(--dh-cream-50);
+  }
+
+  .trow__tag {
+    display: inline-flex;
+    align-items: center;
+    height: 24px;
+    margin-bottom: var(--space-3);
+    padding-inline: 11px;
+    border-radius: var(--radius-1);
+    background: var(--dh-forest-100);
+    color: var(--dh-white);
+    font-weight: 800;
+    font-size: var(--text-micro);
+    line-height: 1;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  /* A closed set of three, so the colour is an attribute selector rather than
+     an inline style — the rule AGENTS.md sets for data-driven values. */
+  .trow__tag[data-tone="money"] {
+    background: var(--accent);
+  }
+
+  .trow__tag[data-tone="deadline"] {
+    background: var(--dh-red-verdict);
+  }
+
+  .trow__tag[data-tone="warn"] {
+    background: var(--dh-ink-2);
+  }
+
+  .trow__q {
+    margin: 0 0 var(--space-2);
+    font-size: var(--display-6);
+    line-height: 1.12;
+  }
+
+  .trow__body {
+    margin: 0;
+    max-width: 56ch;
+    font-size: var(--text-md);
+    line-height: var(--leading-snug);
+    color: var(--text-muted);
+  }
+
+  .trow__cta {
+    margin-top: var(--space-6);
+    font-weight: 800;
+    font-size: var(--text-sm);
+    line-height: 1;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-strong);
+    /* The underline belongs to `.arrow-link__label`, not here — see global.css.
+       This only cancels the UA default, which would run under the arrow too. */
+    text-decoration: none;
+    transition: color var(--dur) var(--ease);
+  }
+
+  .trow__cta:hover {
+    color: var(--accent);
+  }
+
+  .trow__stat {
+    margin: 0;
+    text-align: right;
+  }
+
+  .trow__stat b {
+    display: block;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--display-5);
+    line-height: 1;
+    color: var(--dh-forest-100);
+  }
+
+  .trow__stat span {
+    display: block;
+    margin-top: var(--space-2);
+    font-weight: 700;
+    font-size: var(--text-micro);
+    line-height: 1.3;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-meta);
+  }
+
+  @media (max-width: 1000px) {
+    .triage__wrap {
+      grid-template-columns: 1fr;
+      gap: var(--space-10);
+    }
+  }
+
+  @media (max-width: 900px) {
+    .trow {
+      grid-template-columns: 1fr;
+      gap: var(--space-3);
+    }
+
+    .trow__stat {
+      text-align: left;
+    }
+  }
+
+  /* The rows come BEFORE the video and the help card on a phone: they are the
+     five answers, and the video is a way of hearing the same thing. The comp's
+     own narrow block makes the same reorder. */
+  @media (max-width: 768px) {
+    .triage__wrap {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .triage__intro {
+      display: contents;
+    }
+
+    .triage__title {
+      order: 1;
+    }
+
+    .triage__lede {
+      order: 2;
+    }
+
+    .triage__panel {
+      order: 3;
+    }
+
+    .triage :global(.triage__video) {
+      order: 4;
+      margin-top: 0;
+    }
+
+    .triage__help {
+      order: 5;
+    }
+  }
+</style>

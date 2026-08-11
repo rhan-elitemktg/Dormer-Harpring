@@ -1,0 +1,166 @@
+---
+// "Talk to a lawyer about your crash" — the closing block.
+//
+// NOT the shared `ContactDetails`. That component is one ARRANGEMENT of the
+// contact pieces — a photograph over the info cards, beside the form, with an
+// hours band under both — and this comp draws a different one: its own heading
+// and lede, a 2×2 grid of info cards over the office address and map, and the
+// form beside them. The reusable pieces are `ContactForm` and `InfoCard`, which
+// are what this uses; the arrangement is the page's.
+//
+// It also owns `id="contact"`, which every anchor on this page points at, so
+// the shared block cannot be rendered here as well — two elements with the same
+// id is invalid, and the first one wins.
+import InfoCard from "../../contact/InfoCard.astro";
+import ContactForm from "../../contact/ContactForm.astro";
+import type { ContactBand, ContactDetails } from "../../../data/contact";
+import type { FirmDetails } from "../../../data/site";
+import type { ClosingSection } from "../../../data/carAccidents";
+import { formatAddress } from "../../../data/site";
+
+interface Props {
+  closing: ClosingSection;
+  details: ContactDetails;
+  form: ContactBand["form"];
+  firm: FirmDetails;
+  id: string;
+}
+
+const { closing, details, form, firm, id } = Astro.props;
+
+// `?cid=` rather than an address query — see `firmDetails.mapPlaceCid` on why
+// the short link cannot be framed and an address drops an anonymous pin.
+const mapSrc = `https://www.google.com/maps?cid=${firm.mapPlaceCid}&output=embed`;
+---
+
+<section class="section closing" id={id}>
+  <div class="container">
+    <header class="closing__head">
+      <h2 class="closing__title">{closing.title}</h2>
+      <p class="closing__lede">{closing.lede}</p>
+    </header>
+
+    <div class="closing__grid">
+      <div>
+        <ul class="closing__cards">
+          {details.cards.map((card) => <InfoCard card={card} />)}
+        </ul>
+
+        <p class="closing__office">{closing.officeLabel}</p>
+        <p class="closing__address">{formatAddress(firm.address)}</p>
+
+        {
+          /* Lazy, so the ~1 MB of Maps payload is off the critical path.
+             TODO(launch): this embed sets Google cookies on load — it belongs
+             behind whatever the third-party tag review decides (see README). */
+        }
+        <iframe
+          class="closing__map"
+          title={closing.mapTitle}
+          src={mapSrc}
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"></iframe>
+      </div>
+
+      <div class="closing__formcard">
+        <ContactForm form={form} />
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .closing {
+    background: var(--surface-page);
+    border-top: 1px solid var(--dh-line-soft);
+  }
+
+  .closing__head {
+    max-width: 760px;
+    margin: 0 0 var(--space-12);
+  }
+
+  .closing__title {
+    margin: 0 0 var(--space-4);
+    font-size: var(--display-3);
+  }
+
+  .closing__lede {
+    margin: 0;
+    max-width: 54ch;
+    font-size: var(--text-xl);
+    line-height: var(--leading-normal);
+    color: var(--text-body);
+    text-wrap: pretty;
+  }
+
+  .closing__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-14);
+    align-items: start;
+  }
+
+  .closing__cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-5);
+    margin: 0 0 var(--space-9);
+    padding: 0;
+    list-style: none;
+  }
+
+  .closing__office {
+    margin: 0 0 var(--space-3);
+    font-weight: 800;
+    font-size: var(--text-micro);
+    line-height: 1;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--dh-forest-100);
+  }
+
+  .closing__address {
+    margin: 0 0 var(--space-4);
+    font-family: var(--font-ui);
+    font-weight: 600;
+    font-size: var(--text-lg);
+    line-height: var(--leading-normal);
+    letter-spacing: var(--tracking-tight);
+    color: var(--text-strong);
+  }
+
+  .closing__map {
+    display: block;
+    width: 100%;
+    min-height: 210px;
+    border: 1px solid var(--border-hairline);
+    border-radius: var(--radius-4);
+    background: var(--surface-sunk);
+  }
+
+  .closing__formcard {
+    padding: var(--space-10);
+    background: var(--dh-white);
+    border: 1px solid var(--border-hairline);
+    border-radius: var(--radius-4);
+    box-shadow: 0 24px 60px rgba(60, 52, 32, 0.08);
+  }
+
+  @media (max-width: 1080px) {
+    .closing__grid {
+      grid-template-columns: 1fr;
+      gap: var(--space-10);
+    }
+  }
+
+  @media (max-width: 560px) {
+    .closing__cards {
+      grid-template-columns: 1fr;
+    }
+
+    .closing__formcard {
+      padding: var(--space-7);
+    }
+  }
+</style>

@@ -1,0 +1,510 @@
+---
+// "What we were offered, and what we recovered." — three car accident results
+// on a rail, one of which is a client video.
+//
+// TWO CARD SHAPES. The figure cards are white, with the offered/recovered pair
+// in a boxed figure over a short story. The video card is the same size filled
+// edge to edge with the client's portrait, the figures reversed out of a scrim,
+// and the pull quote across its foot.
+//
+// THE VIDEO CARD LINKS TO THE REAL VIDEO. The comp opens a lightbox that shows
+// the poster IMAGE and the quote again — there is no player in it, so it is a
+// prototype gesture rather than a feature. This client's testimonial is one of
+// the six real ones on the `@denvertrial` channel, so the card links out to it
+// exactly as `/testimonials` and the homepage rail already do. That also keeps
+// the page's only lightbox from being a lightbox that shows a photograph.
+import Picture from "../../media/Picture.astro";
+import Eyebrow from "../../Eyebrow.astro";
+import { videoWatchUrl } from "../../../lib/video";
+import type { VideoReview } from "../../../data/testimonials";
+import type { ResultsSection } from "../../../data/carAccidents";
+
+interface Props {
+  results: ResultsSection;
+  /** Resolved by the page from the one story that carries a `reviewKey`. */
+  reviews: Record<string, VideoReview>;
+  id: string;
+}
+
+const { results, reviews, id } = Astro.props;
+---
+
+<section class="section section--cream stories" id={id}>
+  <div class="container">
+    <header class="stories__head">
+      <Eyebrow class="stories__eyebrow">{results.eyebrow}</Eyebrow>
+      <h2 class="stories__title">{results.title}</h2>
+    </header>
+
+    <div
+      class="stories__rail noscroll"
+      data-rail="ca-results"
+      tabindex="0"
+      role="group"
+      aria-label="Car accident case results, scrollable"
+    >
+      <div class="stories__track">
+        {
+          results.stories.map((story) => {
+            const review = story.reviewKey ? reviews[story.reviewKey] : undefined;
+
+            if (review) {
+              return (
+                <a
+                  class="res res--vid"
+                  href={videoWatchUrl(review.video)}
+                  target="_blank"
+                  rel="noopener"
+                >
+                  <Picture
+                    src={review.poster}
+                    alt={`${review.name} — client testimonial video`}
+                    widths={[400, 800]}
+                    sizes="(max-width: 980px) 86vw, 420px"
+                    class="res__img"
+                  />
+                  <span class="res__scrim" aria-hidden="true" />
+                  <span class="res__dur">{story.length}</span>
+                  <span class="res__pbtn" aria-hidden="true">
+                    <svg width="23" height="25" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M8 5.5v13l11-6.5z" />
+                    </svg>
+                  </span>
+
+                  <span class="resv__top">
+                    <span class="resv__row">
+                      <b>{results.offeredLabel}</b>
+                      <s>{story.offered}</s>
+                    </span>
+                    <span class="resv__row">
+                      <b>{results.recoveredLabel}</b>
+                      <em>{story.recovered}</em>
+                    </span>
+                  </span>
+
+                  <span class="resv__bot">
+                    <b>{story.title}</b>
+                    <i>{review.quote}</i>
+                    <span>{review.name}</span>
+                  </span>
+                </a>
+              );
+            }
+
+            return (
+              <article class="res">
+                <p class="res__fig">
+                  <span class="res__figrow">
+                    <span class="res__lbl">{results.offeredLabel}</span>
+                    <span class="res__off">{story.offered}</span>
+                  </span>
+                  <span class="res__figrow res__figrow--rec">
+                    <span class="res__lbl">{results.recoveredLabel}</span>
+                    <span class="res__rec">{story.recovered}</span>
+                  </span>
+                </p>
+                <h3 class="res__title">{story.title}</h3>
+                <p class="res__story">{story.story}</p>
+                <p class="res__chg">{story.changed}</p>
+              </article>
+            );
+          })
+        }
+      </div>
+    </div>
+
+    <div class="stories__foot">
+      <p class="stories__disc">{results.disclaimer}</p>
+      {
+        /* `rail.ts` hides this wrapper when the rail has nothing to scroll —
+           which at desktop widths is always: three cards at 31.4% plus two
+           24px gaps is 94.2% + 48px, so they fit any inner width over ~827px
+           and both arrows sat permanently disabled. */
+      }
+      <div class="stories__nav" data-rail-nav="ca-results">
+        <button
+          type="button"
+          class="stories__arrow"
+          data-rail-prev="ca-results"
+          aria-label="Previous result"
+        >
+          <span aria-hidden="true">&larr;</span>
+        </button>
+        <button
+          type="button"
+          class="stories__arrow"
+          data-rail-next="ca-results"
+          aria-label="Next result"
+        >
+          <span aria-hidden="true">&rarr;</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .stories__head {
+    margin-bottom: var(--space-14);
+  }
+
+  .stories :global(.stories__eyebrow) {
+    margin-bottom: var(--space-4);
+    color: var(--dh-forest-100);
+  }
+
+  .stories :global(.stories__eyebrow)::before {
+    background: var(--dh-forest-100);
+  }
+
+  .stories__title {
+    margin: 0;
+    font-size: var(--display-3);
+    text-wrap: balance;
+  }
+
+  .stories__rail {
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    padding-bottom: 4px;
+  }
+
+  .stories__track {
+    display: flex;
+    gap: var(--space-6);
+    align-items: stretch;
+  }
+
+  .res {
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 31.4%;
+    min-width: 0;
+    scroll-snap-align: start;
+    padding: var(--space-7) var(--space-7) var(--space-8);
+    background: var(--dh-white);
+    border-radius: var(--radius-4);
+    box-shadow: 0 14px 38px rgba(10, 16, 12, 0.1);
+    text-decoration: none;
+  }
+
+  .res__fig {
+    display: block;
+    margin: 0;
+    padding: var(--space-4) var(--space-5);
+    background: var(--dh-cream-50);
+    border: 1px solid var(--dh-line-soft);
+    border-radius: var(--radius-4);
+  }
+
+  .res__figrow {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding-bottom: 9px;
+  }
+
+  .res__figrow--rec {
+    padding: 9px 0 0;
+    border-top: 1px solid var(--dh-line-soft);
+  }
+
+  .res__lbl {
+    font-weight: 800;
+    font-size: var(--text-micro);
+    line-height: 1;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--dh-ink-5);
+  }
+
+  .res__off {
+    font-weight: 500;
+    font-size: var(--text-lg);
+    line-height: 1;
+    color: var(--dh-ink-5);
+    text-decoration: line-through;
+    text-decoration-thickness: 1.5px;
+  }
+
+  /* Forest, not the verdict red the other results pages use — this comp's
+     accent shift. See HANDOFF.md; it is this page only. */
+  .res__rec {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--display-4);
+    line-height: 0.95;
+    color: var(--dh-forest-100);
+    text-wrap: balance;
+  }
+
+  .res__title {
+    margin: var(--space-5) 0 var(--space-3);
+    font-size: var(--display-7);
+    line-height: 1.15;
+    color: var(--dh-forest-100);
+  }
+
+  .res__story {
+    margin: 0;
+    font-size: var(--text-md);
+    line-height: var(--leading-normal);
+    color: var(--text-body);
+    text-wrap: pretty;
+  }
+
+  .res__chg {
+    margin: var(--space-3) 0 0;
+    font-size: var(--text-md);
+    line-height: var(--leading-normal);
+    font-style: italic;
+    color: var(--text-muted);
+  }
+
+  /* ---- the video card ---- */
+
+  .res--vid {
+    position: relative;
+    overflow: hidden;
+    padding: 0;
+    background: var(--dh-forest-100);
+    box-shadow: 0 14px 38px rgba(10, 16, 12, 0.18);
+  }
+
+  .res--vid :global(.res__img) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 12%;
+    display: block;
+  }
+
+  /* Dark at BOTH ends and lighter through the middle: the figures sit at the
+     top and the quote at the foot, and the client's face is between them. */
+  .res__scrim {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(
+      180deg,
+      rgba(8, 12, 10, 0.94) 0%,
+      rgba(8, 12, 10, 0.9) 22%,
+      rgba(8, 12, 10, 0.5) 36%,
+      rgba(8, 12, 10, 0.34) 56%,
+      rgba(8, 12, 10, 0.88) 100%
+    );
+  }
+
+  .res__dur {
+    position: absolute;
+    top: var(--space-3);
+    right: var(--space-3);
+    z-index: 3;
+    padding: 4px 8px;
+    border-radius: var(--radius-2);
+    background: rgba(10, 14, 11, 0.62);
+    font-family: var(--font-ui);
+    font-weight: 700;
+    font-size: var(--text-micro);
+    line-height: 1;
+    color: var(--dh-white);
+  }
+
+  .res__pbtn {
+    position: absolute;
+    right: var(--space-6);
+    bottom: var(--space-6);
+    z-index: 4;
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-full);
+    background: var(--dh-white);
+    color: var(--dh-forest-100);
+    box-shadow: 0 8px 24px rgba(8, 14, 10, 0.35);
+    transition: transform var(--dur) var(--ease);
+  }
+
+  .res--vid:hover .res__pbtn {
+    transform: scale(1.08);
+  }
+
+  .resv__top {
+    position: absolute;
+    left: var(--space-7);
+    right: var(--space-7);
+    top: var(--space-6);
+    z-index: 3;
+    display: block;
+  }
+
+  .resv__row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-4);
+  }
+
+  /* Clears the runtime chip, which sits in the same corner. */
+  .resv__row:first-child {
+    padding-right: 62px;
+  }
+
+  .resv__row + .resv__row {
+    margin-top: var(--space-2);
+  }
+
+  .resv__row b {
+    font-weight: 800;
+    font-size: var(--text-micro);
+    line-height: 1;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(246, 242, 232, 0.6);
+  }
+
+  .resv__row s {
+    font-weight: 600;
+    font-size: var(--text-lg);
+    line-height: 1;
+    color: rgba(246, 242, 232, 0.6);
+    text-decoration: line-through;
+    text-decoration-thickness: 1.5px;
+  }
+
+  .resv__row em {
+    font-family: var(--font-display);
+    font-style: normal;
+    font-weight: 400;
+    font-size: var(--display-5);
+    line-height: 0.95;
+    color: var(--text-on-dark);
+  }
+
+  .resv__bot {
+    position: absolute;
+    left: var(--space-7);
+    right: 104px;
+    bottom: var(--space-6);
+    z-index: 3;
+    display: block;
+  }
+
+  .resv__bot b {
+    display: block;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--text-xl);
+    line-height: var(--leading-tight);
+    color: var(--text-on-dark);
+  }
+
+  .resv__bot i {
+    display: block;
+    margin-top: var(--space-2);
+    font-style: italic;
+    font-size: var(--text-md);
+    line-height: 1.35;
+    color: rgba(246, 242, 232, 0.8);
+  }
+
+  .resv__bot > span {
+    display: block;
+    margin-top: var(--space-2);
+    font-weight: 800;
+    font-size: var(--text-micro);
+    line-height: 1;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(246, 242, 232, 0.6);
+  }
+
+  /* ---- foot ---- */
+
+  .stories__foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-7);
+    margin-top: var(--space-7);
+  }
+
+  .stories__disc {
+    margin: 0;
+    max-width: 62ch;
+    font-size: var(--text-sm);
+    line-height: var(--leading-normal);
+    color: var(--text-meta);
+  }
+
+  .stories__nav {
+    display: flex;
+    gap: var(--space-3);
+    flex: none;
+  }
+
+  /* Beats the rule above, as `.rail-dots[hidden]` does: an author `display`
+     otherwise outranks the UA's `[hidden] { display: none }`. */
+  .stories__nav[hidden] {
+    display: none;
+  }
+
+  .stories__arrow {
+    width: 52px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-3);
+    border: 1px solid rgba(44, 59, 49, 0.3);
+    background: transparent;
+    color: var(--dh-forest-100);
+    font-size: var(--text-2xl);
+    line-height: 1;
+    cursor: pointer;
+    transition: background var(--transition), border-color var(--transition),
+      color var(--transition);
+  }
+
+  /* `:not(:disabled)`, because the wrapper only goes when the WHOLE rail is
+     unscrollable. Below 1080px it does scroll, and there an end-stop arrow is
+     disabled while the other still works — it should not light up on hover. */
+  .stories__arrow:hover:not(:disabled) {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--dh-white);
+  }
+
+  .stories__arrow:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+
+  @media (max-width: 1080px) {
+    .res {
+      flex-basis: 48%;
+    }
+  }
+
+  @media (max-width: 760px) {
+    .res {
+      flex-basis: 86%;
+    }
+
+    .stories__foot {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--space-5);
+    }
+  }
+</style>
+
+<script>
+  import "../../../scripts/rail";
+</script>

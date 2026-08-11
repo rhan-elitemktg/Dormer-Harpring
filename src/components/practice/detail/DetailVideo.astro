@@ -1,0 +1,168 @@
+---
+// The comp's `.ca-trvid` — a 16:9 video poster with its title across the foot,
+// a runtime chip top-right and the play button in the bottom-right corner.
+//
+// The second design moved the play button off centre and made it white. Both
+// matter: centred, it sat on the title; red, it was the fourth red thing in the
+// viewport and read as the page's primary action rather than as a video.
+//
+// INERT, like every video panel on the site bar the six real client
+// testimonials. `[data-video]` is the marker `global.css` uses to run the play
+// ring's pulse on hover, and these become real <button>s when the lightbox
+// lands. Deliberately not an <a> to nowhere in the meantime.
+import PlayButton from "../../media/PlayButton.astro";
+import Picture from "../../media/Picture.astro";
+import type { VideoPanel } from "../../../data/carAccidents";
+
+interface Props {
+  video: VideoPanel;
+  /** Nudges the crop for a poster whose subject sits lower in the frame. */
+  focus?: "default" | "case";
+  class?: string;
+}
+
+const { video, focus = "default", class: className } = Astro.props;
+---
+
+<div class:list={["trvid", className]} data-video>
+  <Picture
+    src={video.poster}
+    alt={video.alt}
+    widths={[600, 1000, 1400]}
+    sizes="(max-width: 980px) 100vw, 640px"
+    class:list={["trvid__img", focus === "case" && "trvid__img--case"]}
+  />
+  <span class="trvid__scrim" aria-hidden="true"></span>
+  <span class="trvid__dur">{video.length}</span>
+  <PlayButton tone="light" size={60} class="trvid__pbtn" />
+  <span class="trvid__cap"><span class="trvid__ttl">{video.title}</span></span>
+</div>
+
+<style>
+  .trvid {
+    display: block;
+    position: relative;
+    aspect-ratio: 16 / 9;
+    border-radius: var(--radius-4);
+    overflow: hidden;
+    background: var(--dh-forest-100);
+  }
+
+  .trvid :global(.trvid__img) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 20%;
+    display: block;
+  }
+
+  .trvid :global(.trvid__img--case) {
+    object-position: center 28%;
+  }
+
+  /* Two washes, not one: the linear darkens the foot so the title reads, and
+     the radial deepens the bottom-left corner specifically, where the title
+     starts. A single linear strong enough for the corner greys the whole
+     photograph. */
+  .trvid__scrim {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background:
+      linear-gradient(
+        180deg,
+        rgba(10, 14, 11, 0) 62%,
+        rgba(10, 14, 11, 0.48) 84%,
+        rgba(10, 14, 11, 0.85) 100%
+      ),
+      radial-gradient(
+        70% 45% at 6% 100%,
+        rgba(10, 14, 11, 0.58) 0%,
+        rgba(10, 14, 11, 0) 100%
+      );
+    transition: background var(--dur) var(--ease);
+  }
+
+  .trvid:hover .trvid__scrim {
+    background:
+      linear-gradient(
+        180deg,
+        rgba(10, 14, 11, 0.06) 56%,
+        rgba(10, 14, 11, 0.56) 82%,
+        rgba(10, 14, 11, 0.9) 100%
+      ),
+      radial-gradient(
+        70% 45% at 6% 100%,
+        rgba(10, 14, 11, 0.64) 0%,
+        rgba(10, 14, 11, 0) 100%
+      );
+  }
+
+  .trvid__dur {
+    position: absolute;
+    top: var(--space-3);
+    right: var(--space-3);
+    z-index: 3;
+    padding: 4px 8px;
+    border-radius: var(--radius-2);
+    background: rgba(10, 14, 11, 0.62);
+    font-family: var(--font-ui);
+    font-weight: 700;
+    font-size: var(--text-micro);
+    line-height: 1;
+    color: var(--dh-white);
+  }
+
+  /* PlayButton rather than a bespoke circle, so the ring pulses on hover like
+     every other video poster on the site and the keyframes stay in one place.
+     `--glyph` is the hook the component exposes: the comp draws this triangle
+     in forest, where PlayButton's default is the darker `--dh-forest-400`.
+     The comp's own drop shadow is dropped rather than restated — `playPulseLight`
+     carries one in every keyframe, and an animation's value outranks a normal
+     declaration even while it sits paused at frame zero. */
+  .trvid :global(.trvid__pbtn) {
+    position: absolute;
+    right: var(--space-5);
+    bottom: var(--space-5);
+    z-index: 2;
+    --glyph: var(--dh-forest-100);
+    background: var(--dh-white);
+    transition: transform var(--dur) var(--ease);
+  }
+
+  /* Pulse timing is global (see `.play` in global.css); this is only the lift. */
+  .trvid:hover :global(.trvid__pbtn) {
+    transform: scale(1.08);
+  }
+
+  /* Right inset clears the play button, so a long title wraps above it rather
+     than running underneath. */
+  .trvid__cap {
+    position: absolute;
+    left: var(--space-6);
+    right: 96px;
+    bottom: var(--space-5);
+    z-index: 3;
+    display: block;
+  }
+
+  .trvid__ttl {
+    display: block;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--text-3xl);
+    line-height: var(--leading-tight);
+    color: var(--dh-white);
+    text-wrap: pretty;
+  }
+
+  @media (max-width: 768px) {
+    .trvid__cap {
+      left: var(--space-5);
+      right: 84px;
+      bottom: var(--space-4);
+    }
+  }
+</style>

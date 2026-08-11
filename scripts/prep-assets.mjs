@@ -68,6 +68,23 @@ const MAP = {
   // Opaque source name; this is the Why-us team photograph.
   "uploads/pasted-1785214904589-0.png": "home/why-team.jpg",
 
+  // The practice-area DETAIL page. Two photographs, both of which look like
+  // duplicates of something already extracted and are not:
+  //  - the hero is `assets/practice-areas/car-accident.jpg` (1600×914, a crash
+  //    scene), where home/practice-car-accident.jpg is `pa-car-accident.png`
+  //    (1376×768) — a different frame entirely, and the homepage panel's.
+  //  - the triage poster is `assets/video/hero-video-cover.png` (1057×716),
+  //    not `watch-firm-video.png` — that one is the firm video on the homepage.
+  // Under practice/ rather than home/: the folder is the subject, and neither
+  // of these is a homepage image.
+  "assets/practice-areas/car-accident.jpg": "practice/car-accident-hero.jpg",
+  "assets/video/hero-video-cover.png": "practice/crash-video-cover.jpg",
+  "assets/video/case-video-cover.png": "practice/case-video-cover.jpg",
+  // The "why this firm" band's photograph — the attorneys outside a courthouse
+  // colonnade. 2752×1536 and 5.1 MB at source, the largest single image in the
+  // package.
+  "assets/photos/why-attorneys-colonnade.png": "practice/why-attorneys.jpg",
+
   // The four attorneys against the Denver skyline — a tighter crop of the same
   // frame as the hero. Ten of the fourteen comps use it, so it lives outside
   // home/ rather than being owned by whichever page happened to need it first.
