@@ -558,11 +558,17 @@ EXPECTED = [
         "the @denvertrial channel, so the card links out as /testimonials already does",
     ),
     (
-        "the checklist teaser has no link",
-        "teaser__cta--inert" in built and "See all 8 steps" in built_text,
+        "the checklist teaser links to a placeholder",
+        # Class PRESENCE plus the href, not an exact attribute string — the
+        # class list gained `arrow-link` and a prefix match would have gone
+        # quietly false instead of failing.
+        re.search(r'class="[^"]*\bteaser__cta\b[^"]*"[^>]*href="#"', built) is not None
+        and "See all 8 steps" in built_text,
         "the comp points it at `DH - Blog - What to do after a car accident.html`, a "
         "post comp that arrived with this revision and that this build does not serve. "
-        "Rhan's call: keep the label, drop the affordance, ship no dead href",
+        "It shipped unlinked for that reason; Rhan's call is now to draw the affordance "
+        "against `#` and fill in the real URL when the article exists. TODO(launch) — "
+        "`#` must not reach production",
     ),
     (
         "six of the eight crash types link, two do not",

@@ -9,9 +9,10 @@
 //
 // TODO(launch): the comp links this at `DH - Blog - What to do after a car
 // accident.html`, a post comp that arrived with this revision and that this
-// build does not serve. By Rhan's decision the label stays and the link does
-// not — nothing points at a page that doesn't exist. Build the article, then
-// set `ctaHref`.
+// build does not serve. It shipped unlinked for that reason; Rhan's call is now
+// to draw the affordance against a `#` placeholder and fill in the real URL
+// once the article exists. `#` MUST NOT REACH PRODUCTION — see `ctaHref` in
+// `data/carAccidents.ts`. The inert branch below is kept for the CMS phase.
 import type { TeaserSection } from "../../../data/carAccidents";
 
 interface Props {
@@ -25,7 +26,12 @@ const ICONS: Record<string, string[]> = {
   police: ["M12 3l7 3v6c0 4-3 6.5-7 9-4-2.5-7-5-7-9V6z"],
   camera: ["M3 8h4l2-3h6l2 3h4v11H3z"],
   witnesses: ["M2 20c0-3.3 2.7-6 6-6s6 2.7 6 6M16 5.5a3 3 0 010 6M18 20c0-2.5-1-4.6-2.6-5.6"],
-  stethoscope: ["M6 3v6a6 6 0 0012 0V3M18 15a3 3 0 006 0"],
+  // The binaural U, then a short tube to the chest piece (a <circle> below,
+  // as the camera and witnesses icons do). The bell used to be a second
+  // subpath, `M18 15a3 3 0 006 0` — an arc running from x=18 to x=24, the
+  // viewBox's own edge, so half of it was outside the canvas and the rest was
+  // sliced by the stroke. It read as a stray hook rather than a stethoscope.
+  stethoscope: ["M6 3v6a6 6 0 0012 0V3", "M12 15v2"],
 };
 ---
 
@@ -36,8 +42,11 @@ const ICONS: Record<string, string[]> = {
       <p class="teaser__body">{teaser.body}</p>
       {
         teaser.ctaHref ? (
-          <a class="teaser__cta" href={teaser.ctaHref}>
-            {teaser.ctaLabel} &rarr;
+          <a class="teaser__cta arrow-link" href={teaser.ctaHref}>
+            <span class="arrow-link__label">{teaser.ctaLabel}</span>
+            <span class="arrow" aria-hidden="true">
+              &rarr;
+            </span>
           </a>
         ) : (
           <span class="teaser__cta teaser__cta--inert">{teaser.ctaLabel}</span>
@@ -72,6 +81,7 @@ const ICONS: Record<string, string[]> = {
                     ))}
                     {step.iconKey === "camera" && <circle cx="12" cy="12.5" r="3.5" />}
                     {step.iconKey === "witnesses" && <circle cx="8" cy="7.5" r="3.5" />}
+                    {step.iconKey === "stethoscope" && <circle cx="12" cy="19.5" r="2.5" />}
                   </svg>
                 )}
                 {step.label}
@@ -114,8 +124,12 @@ const ICONS: Record<string, string[]> = {
     text-wrap: pretty;
   }
 
+  /* Typography only. The LAYOUT comes from `.arrow-link` on the linked branch,
+     and `display` deliberately is not set here: this class carries a cid, so it
+     would outrank `.arrow-link`'s `inline-flex` and drop the glyph back onto
+     the text baseline. The underline is on `.arrow-link__label` — see
+     global.css on why it cannot sit on the anchor without striking the arrow. */
   .teaser__cta {
-    display: inline-block;
     white-space: nowrap;
     font-weight: 800;
     font-size: var(--text-sm);
@@ -123,19 +137,19 @@ const ICONS: Record<string, string[]> = {
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--dh-forest-100);
-    text-decoration: underline;
-    text-underline-offset: 4px;
+    text-decoration: none;
   }
 
   a.teaser__cta:hover {
     color: var(--accent);
   }
 
-  /* No page behind it yet, so no link colour and no underline — the label is
-     the comp's content, the affordance is not. */
+  /* Unreachable while `ctaHref` holds its placeholder, and kept anyway: the
+     field is nullable, and an editor clearing it in the CMS phase must not
+     leave a link pointing nowhere. Nothing to un-underline — that rule is on
+     the label, which this branch does not render. */
   .teaser__cta--inert {
     color: var(--text-meta);
-    text-decoration: none;
   }
 
   /* ---- the illustration ---- */
@@ -143,6 +157,23 @@ const ICONS: Record<string, string[]> = {
   .teaser__viz {
     position: relative;
     height: 236px;
+
+    /* The clip box reaches further LEFT than the artwork does. The first card
+       sits flush to this element's left edge and its shadow blurs ~11px past
+       it, which `overflow: hidden` was slicing into a hard vertical line.
+       Padding widens what gets clipped; the equal negative margin puts the
+       illustration back where it was, so nothing moves.
+
+       The clip itself has to stay. The ghost card is `nowrap` and overruns its
+       column, and `mask-repeat` defaults to `repeat` — past the box edge the
+       gradient tiles back to opaque and the card reappears at full strength.
+
+       Always <= `--container-pad` (48/32/24px), so the negative margin stays
+       inside the container's gutter and never pushes the page sideways. */
+    --viz-bleed: 24px;
+    padding-left: var(--viz-bleed);
+    margin-left: calc(var(--viz-bleed) * -1);
+
     overflow: hidden;
     /* Fades at the right rather than clipping: the row is a sample of eight,
        and a hard edge implies it is all of them. */
@@ -152,7 +183,9 @@ const ICONS: Record<string, string[]> = {
 
   .teaser__line {
     position: absolute;
-    left: 0;
+    /* Not `0`: an absolutely positioned child resolves against the PADDING box,
+       so `0` would start the rule out in the bleed added above. */
+    left: var(--viz-bleed);
     right: 0;
     top: 50%;
     height: 2px;

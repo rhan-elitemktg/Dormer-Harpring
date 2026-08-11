@@ -1075,7 +1075,14 @@ const carAccidents: PracticeAreaDetail = {
     title: "8 things to do after a car accident",
     body: "From the scene to the first adjuster call — the steps that protect your claim.",
     ctaLabel: "See all 8 steps",
-    ctaHref: null,
+    // TODO(launch): A PLACEHOLDER, AND `#` MUST NOT SHIP. The comp points this
+    // at `DH - Blog - What to do after a car accident.html`, a post comp that
+    // arrived with this revision and that this build does not serve. It shipped
+    // unlinked for that reason; Rhan's call is now to draw the affordance and
+    // fill the destination in when the article exists. Until then the link
+    // scrolls to the top of the page, which is the whole reason this is a
+    // TODO rather than a decision.
+    ctaHref: "#",
     steps: [
       { _key: "police", iconKey: "police", label: "Call the police" },
       { _key: "photos", iconKey: "camera", label: "Photograph the scene" },
