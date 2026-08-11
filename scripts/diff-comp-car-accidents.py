@@ -309,11 +309,29 @@ present(
 # ----------------------------------------------------------------- credentials
 print("\nCREDENTIALS")
 comp_badges = slice_from('class="ca-badges"', 'class="ca-awards__disc"')
-cmp(
-    "badge captions",
-    [unesc(s) for s in re.findall(r"</img>|<span>(.*?)</span>", comp_badges, re.S) if s],
-    grab("badge__cap", "span"),
-)
+
+# The captions no longer render, so the comp's six are checked against the ALT
+# text that replaced them — resolved through `getAwards()`, which is why three
+# read longer than the comp's label ("Avvo Rating 10.0 Superb" for "Avvo 10.0").
+# What this pins is the ORDER, the one thing the page still owns here.
+BADGE_ALTS = [
+    "Multi-Million Dollar Advocates Forum",
+    "TopVerdict Top 20 Jury Verdicts Colorado 2023",
+    "The National Trial Lawyers Top 100",
+    "The National Trial Lawyers Top 40 Under 40",
+    "Avvo Rating 10.0 Superb",
+    "Million Dollar Advocates Forum",
+]
+comp_caps = [unesc(s) for s in re.findall(r"</img>|<span>(.*?)</span>", comp_badges, re.S) if s]
+built_alts = re.findall(r'<img[^>]*\bbadge__img\b[^>]*\balt="([^"]*)"', built) or [
+    unesc(m) for m in re.findall(r'alt="([^"]*)"[^>]*\bbadge__img\b', built)
+]
+cmp("badge order (comp captions)", BADGE_ALTS, built_alts)
+if len(comp_caps) == len(BADGE_ALTS):
+    print(f"  ✓ the comp captions the same six, in the same order ({len(comp_caps)})")
+else:
+    ok = False
+    print(f"  ✗ the comp draws {len(comp_caps)} badges, the page {len(BADGE_ALTS)}")
 present(
     "eyebrow + disclaimer",
     [
@@ -552,11 +570,23 @@ EXPECTED = [
         "credential line is drawn from his own bio",
     ),
     (
-        "the badge captions are matched to the artwork, not to the comp's filenames",
-        "Multi-Million Dollar Advocates Forum" in built_text and "Avvo 10.0" in built_text,
+        "the badges are artwork, neither linked nor captioned",
+        "badge__cap" not in built
+        and 'class="badge"' in built
+        and "milliondollaradvocates.com" not in built,
+        "the comp draws each badge as a link to the awarding body with a caption under "
+        "it. Rhan's call: drop both. Nothing is lost — getAwards()'s alt text already "
+        "said what the caption said, and said it more precisely for three of the six",
+    ),
+    (
+        "the badges are matched to the artwork, not to the comp's filenames",
+        # `built`, not `built_text` — `unesc()` strips tags, so an alt attribute
+        # is invisible to it. These read as captions until they became alt text.
+        'alt="Multi-Million Dollar Advocates Forum"' in built
+        and 'alt="Avvo Rating 10.0 Superb"' in built,
         "every comp captions badge-1 as Avvo, badge-2 as TopVerdict, badge-3 as Million "
         "Dollar and badge-4 as Multi-Million, and all four files are something else. "
-        "getAwards() documents the correction; this page resolves each caption to the "
+        "getAwards() documents the correction; this page resolves each slot to the "
         "badge that actually says it",
     ),
     (

@@ -201,8 +201,17 @@ export interface LawyersSection {
 
 export interface CredentialsSection {
   eyebrow: string;
-  /** `awardKey` indexes `getAwards()`; the caption and link are this page's. */
-  badges: { _key: string; awardKey: string; caption: string; href: string }[];
+  /**
+   * `awardKey` indexes `getAwards()`, which owns the artwork AND its alt text.
+   *
+   * The comp gives each badge a visible caption and a link to the awarding
+   * body; both are gone at Rhan's request, so nothing is left for this page to
+   * own but the ORDER. The captions are not lost — `getAwards()`'s alt text
+   * already says the same thing, and says it more precisely for three of the
+   * six ("Avvo Rating 10.0 Superb" against the comp's "Avvo 10.0"). The
+   * awarding-body URLs are in git, at 5862578.
+   */
+  badges: { _key: string; awardKey: string }[];
   disclaimer: string;
 }
 
@@ -656,10 +665,9 @@ const carAccidents: PracticeAreaDetail = {
 
   credentials: {
     eyebrow: "Recognized & awarded",
-    // The badges are `awards.ts`'s six, in the comp's order. The CAPTION and
-    // the LINK are new: the second design makes each badge a link to the
-    // awarding body and labels it, which turns a decorative trust row into
-    // something a reader can actually check.
+    // The badges are `awards.ts`'s six, in the comp's order — and the order is
+    // now the only thing this page contributes, the caption and the link having
+    // been dropped. See `CredentialsSection`.
     //
     // `awardKey` IS MATCHED TO THE COMP'S CAPTION, NOT TO ITS FILENAME. Every
     // comp captions badge-1 as Avvo, badge-2 as TopVerdict, badge-3 as Million
@@ -670,42 +678,12 @@ const carAccidents: PracticeAreaDetail = {
     // the badge that actually SAYS Multi-Million, rather than to whatever the
     // comp's <img> src happened to be.
     badges: [
-      {
-        _key: "multi-million",
-        awardKey: "mmdaf",
-        caption: "Multi-Million Dollar Advocates Forum",
-        href: "https://www.milliondollaradvocates.com/",
-      },
-      {
-        _key: "top-20-verdicts",
-        awardKey: "topverdict",
-        caption: "Top 20 Colorado Jury Verdicts",
-        href: "https://www.topverdict.com/",
-      },
-      {
-        _key: "top-100",
-        awardKey: "ntl-100",
-        caption: "National Trial Lawyers Top 100",
-        href: "https://www.thenationaltriallawyers.org/top-100-attorneys/",
-      },
-      {
-        _key: "top-40",
-        awardKey: "ntl-40",
-        caption: "Top 40 Under 40",
-        href: "https://www.thenationaltriallawyers.org/top-40-under-40/",
-      },
-      {
-        _key: "avvo",
-        awardKey: "avvo",
-        caption: "Avvo 10.0",
-        href: "https://www.avvo.com/",
-      },
-      {
-        _key: "million",
-        awardKey: "mdaf",
-        caption: "Million Dollar Advocates Forum",
-        href: "https://www.milliondollaradvocates.com/",
-      },
+      { _key: "multi-million", awardKey: "mmdaf" },
+      { _key: "top-20-verdicts", awardKey: "topverdict" },
+      { _key: "top-100", awardKey: "ntl-100" },
+      { _key: "top-40", awardKey: "ntl-40" },
+      { _key: "avvo", awardKey: "avvo" },
+      { _key: "million", awardKey: "mdaf" },
     ],
     disclaimer:
       "Awarding organizations are not certifying authorities. Selection criteria vary " +
