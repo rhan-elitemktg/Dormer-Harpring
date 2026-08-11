@@ -1,7 +1,7 @@
 ---
 // The practice-area detail hero: a full-bleed photograph with a white panel
 // floated over its right-hand third, carrying the breadcrumb, h1, lede, a
-// three-figure proof row, the CTA pair and the "Reviewed by" disclosure.
+// three-figure proof row, the CTA pair and the "Reviewed by" line.
 //
 // MOBILE IS OURS, like every other hero on this site — no comp specifies one.
 // It follows the construction `Hero.astro` and `PageHeader.astro`'s
@@ -44,7 +44,15 @@ const { hero, firm, ctaHref } = Astro.props;
         {
           hero.trail.map((crumb) => (
             <li>
-              {crumb.href ? <a href={crumb.href}>{crumb.label}</a> : crumb.label}
+              {crumb.href ? (
+                <a href={crumb.href}>{crumb.label}</a>
+              ) : (
+                /* The crumb with no destination IS the current page — that is
+                   what `href: null` means in this trail — so it says so, and
+                   the styling hangs off the attribute rather than a class of
+                   its own. The two cannot drift that way. */
+                <span aria-current="page">{crumb.label}</span>
+              )}
             </li>
           ))
         }
@@ -101,21 +109,23 @@ const { hero, firm, ctaHref } = Astro.props;
         at, which is where they belong — restating them in a hero panel put the
         same five facts in two places and gave the page an interaction whose
         only job was to hide them. */}
-    <a class="cred" href={hero.reviewer.bioHref}>
-      <Picture
-        src={hero.reviewer.photo}
-        alt={hero.reviewer.name}
-        widths={[80, 160]}
-        sizes="60px"
-        class="cred__photo"
-      />
-      <span class="cred__by">
-        <span class="cred__line">
-          Reviewed by <b>{hero.reviewer.name}</b>, {hero.reviewer.role}
+    <div class="cred">
+      <a class="cred__link" href={hero.reviewer.bioHref}>
+        <Picture
+          src={hero.reviewer.photo}
+          alt={hero.reviewer.name}
+          widths={[80, 160]}
+          sizes="60px"
+          class="cred__photo"
+        />
+        <span class="cred__by">
+          <span class="cred__line">
+            Reviewed by <b>{hero.reviewer.name}</b>, {hero.reviewer.role}
+          </span>
+          <span class="cred__updated">{hero.reviewer.updated}</span>
         </span>
-        <span class="cred__updated">{hero.reviewer.updated}</span>
-      </span>
-    </a>
+      </a>
+    </div>
   </div>
 </section>
 
@@ -191,6 +201,14 @@ const { hero, firm, ctaHref } = Astro.props;
 
   .dhero__trail a:hover {
     color: var(--accent);
+  }
+
+  /* The current page, a step darker and a weight heavier than the trail it
+     closes. Deliberately not the accent: it is not a link, and red here would
+     read as the one thing in the row you are meant to click. */
+  .dhero__trail [aria-current="page"] {
+    font-weight: 700;
+    color: var(--text-strong);
   }
 
   .dhero__title {
@@ -337,14 +355,29 @@ const { hero, firm, ctaHref } = Astro.props;
 
   /* ---- The reviewed-by line ---- */
 
+  /* The rule and the hover target are two elements on purpose. The tint has to
+     bleed outside the row's content box to read as a row rather than as a
+     highlighted label — and negative margins on the element that also draws the
+     divider would drag the divider out with them. */
   .cred {
-    display: flex;
-    align-items: center;
-    gap: var(--space-4);
     margin-top: var(--space-9);
     padding-top: var(--space-7);
     border-top: 1px solid var(--border-hairline);
+  }
+
+  .cred__link {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    margin: calc(var(--space-2) * -1) calc(var(--space-3) * -1);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-3);
     text-decoration: none;
+    transition: background var(--transition);
+  }
+
+  .cred__link:hover {
+    background: var(--surface-page);
   }
 
   .cred :global(.cred__photo) {
@@ -379,7 +412,7 @@ const { hero, firm, ctaHref } = Astro.props;
     color: var(--text-strong);
   }
 
-  .cred:hover .cred__line b {
+  .cred__link:hover .cred__line b {
     text-decoration: underline;
     text-underline-offset: 3px;
   }
