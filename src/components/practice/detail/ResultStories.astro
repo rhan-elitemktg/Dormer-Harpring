@@ -317,28 +317,23 @@ const { results, reviews, id } = Astro.props;
     z-index: 2;
   }
 
-  /* Translucent, so the photograph reads through the box.
-     A BACKGROUND alpha rather than `opacity`: `opacity` would fade the figures
-     inside it as well, and the recovered figure is the one thing on this card
-     that has to stay legible over a photograph. The border softens to match —
-     left at full strength it draws a hard cream rectangle on the image. */
+  /* Translucent, so the photograph reads through the box. A BACKGROUND alpha
+     rather than `opacity`: `opacity` would fade the figures inside it as well,
+     and the recovered figure is the one thing on this card that has to stay
+     legible over a photograph. */
   .res--vid .res__fig {
     background: rgba(251, 248, 241, 0.6);
-    border-color: var(--dh-line-soft);
   }
 
-  /* Everything inside the box goes forest, where the figure cards use the faint
-     `--dh-ink-5` and `--dh-line-soft`. Those are tuned for an opaque cream
-     panel; over a photograph at 0.6 they wash out. Forest is the darkest ink on
-     this page and the colour the recovered figure already used, so the box
-     resolves to one ink rather than three weights of it. */
+  /* The INK goes forest, where the figure cards use `--dh-ink-5` — that grey is
+     tuned for an opaque cream panel and washes out at 0.6 over a photograph.
+     The RULES deliberately do not follow it: forest read too heavy against the
+     artwork, so the box border and the divider keep the faint `--dh-line-soft`
+     the other cards use. Rhan's call, and the reason there is no border
+     override here — restating the base value would only look like one. */
   .res--vid .res__lbl,
   .res--vid .res__off {
     color: var(--dh-forest-100);
-  }
-
-  .res--vid .res__figrow--rec {
-    border-top-color: var(--dh-line-soft);
   }
 
   /* The three text rules are the light-on-photo counterparts of the same rules
@@ -353,9 +348,13 @@ const { results, reviews, id } = Astro.props;
 
   /* The client's name, which is what this slot holds on the video card where
      the others hold a "what changed" line — so it gets a name's treatment: a
-     little more weight, and a short rule trailing it. Flex rather than an
-     inline ::after, so the rule sits on the name's optical centre instead of
-     its baseline. */
+     little more weight, and a short rule leading it. Flex rather than an inline
+     pseudo-element, so the rule sits on the name's optical centre instead of
+     its baseline.
+     THE ITALIC IS INTENTIONAL. It comes from `.res__chg`, whose base rule this
+     card shares so the two layouts match exactly; bold italic on a name is
+     unusual and reads as an oversight. Raised and signed off by Rhan — leave
+     it. */
   .res--vid .res__chg {
     display: flex;
     align-items: center;
