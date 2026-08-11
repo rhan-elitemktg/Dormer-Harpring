@@ -290,8 +290,6 @@ export interface DenverSection {
   title: string;
   lede: string;
   stats: { _key: string; big: string; label: string; body: string }[];
-  source: string;
-  mapCaption: string;
   corridors: { _key: string; name: string; body: string }[];
 }
 
@@ -988,9 +986,13 @@ const carAccidents: PracticeAreaDetail = {
     // THREE figures, each with a sentence about what it means for a claim. The
     // dead `denverData` array in the same comp still lists FOUR bare figures
     // from the first design; the markup is the source here.
-    // TODO(launch): the comp dates all three "[year]" and sources them to
-    // "[CDOT / DRCOG / Denver Open Data]". Nothing is sourced to a published
-    // table yet.
+    // TODO(launch): NONE OF THESE THREE FIGURES IS SOURCED. The comp dated
+    // them "[year]" and credited "[CDOT / DRCOG / Denver Open Data]", and that
+    // line was drawn under the band until Rhan removed it — so this comment is
+    // now the ONLY record that they are placeholders. Nothing on the rendered
+    // page says so any more. Either verify all three against a published table
+    // before launch or drop the band; a city statistic with no provenance is
+    // the kind of claim Rule 7.1 covers.
     stats: [
       {
         _key: "hit-and-run",
@@ -1013,8 +1015,6 @@ const carAccidents: PracticeAreaDetail = {
         body: "Wrongful death claims run on a different deadline than injury claims.",
       },
     ],
-    source: "Source: [CDOT / DRCOG / Denver Open Data], [year].",
-    mapCaption: "Schematic, not to scale.",
     // Five roads, numbered against the schematic map. Every sentence here is
     // NEW — the dead `corridors` array carries a different one per road.
     corridors: [

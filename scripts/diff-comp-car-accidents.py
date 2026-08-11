@@ -435,7 +435,9 @@ cmp(
     [unesc(p) for p in re.findall(r"<li><b>.*?</b><p>(.*?)</p>", comp_dv, re.S)],
     [unesc(x) for x in re.findall(r"<p[^>]*>(.*?)</p>", corrlist, re.S)],
 )
-present("source + map caption", ["Source: [CDOT / DRCOG / Denver Open Data], [year].", "Schematic, not to scale."])
+# The comp's source line and map caption are both dropped — see DELIBERATE
+# DIFFERENCES. Asserted as ABSENT so a later edit cannot quietly reinstate the
+# bracketed placeholders.
 
 
 # --------------------------------------------------------------------- teasers
@@ -604,6 +606,20 @@ EXPECTED = [
         "call: one card design, differing only in the photograph behind it and a 44px "
         "play button that pulses on card hover. The fourth result is `trucking-crash` "
         "from caseResults.ts, added so the rail overflows and its arrows have work to do",
+    ),
+    (
+        "the Denver band drops the comp's source line and map caption",
+        # Not a bare `[year]` check: that placeholder ALSO ends all three stat
+        # labels, which is a separate open question, so it would fail here for
+        # the wrong reason. These two strings are the removed lines themselves.
+        "CDOT" not in built_text
+        and "Schematic, not to scale" not in built_text
+        # The schematic must still ANNOUNCE itself somewhere, and this is now
+        # the only place it does.
+        and 'aria-label="Schematic diagram of Denver' in built,
+        "Rhan's call. Both were the comp's own bracketed placeholders. The three "
+        "figures they credited are still unsourced, and the TODO(launch) on "
+        "`denver.stats` is now the only record of that — nothing on the page says so",
     ),
     (
         "the badges are artwork, neither linked nor captioned",
