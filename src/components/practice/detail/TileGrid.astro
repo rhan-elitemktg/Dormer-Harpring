@@ -5,6 +5,11 @@
 // the second drops them, and the tiles are stronger for it — the same car
 // glyph appeared on six of the eight, which told a reader nothing.
 //
+// `--alt`, not the comp's cream: this sits between CaseTimeline and DenverData,
+// and on cream it made the third of three identical backgrounds in a row —
+// something neither linter can see and the comp does not notice because it
+// hardcodes a hex per section.
+//
 // Six of the eight have a live legacy URL. The two that do not render as plain
 // tiles rather than dead links, and keep the comp's label but lose the arrow:
 // `.arrow` travels on hover and belongs only on something that navigates. Same
@@ -19,7 +24,7 @@ interface Props {
 const { section, id } = Astro.props;
 ---
 
-<section class="section section--cream tiles" id={id}>
+<section class="section section--alt tiles" id={id}>
   <div class="container">
     <header class="tiles__head">
       <h2 class="tiles__title">{section.title}</h2>

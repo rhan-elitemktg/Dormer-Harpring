@@ -167,11 +167,47 @@ present(
 )
 
 print("\nSECTION NAV")
-cmp(
-    "jump links",
-    [unesc(a) for a in re.findall(r'<a href="#\w+">(.*?)</a>', slice_from('class="ca-sub__in"', "ca-sub__tel"), re.S)],
-    grab("subnav__link", "a"),
-)
+# THE BAR'S ORDER IS THE PAGE'S ORDER, checked structurally rather than by
+# label. Each link is resolved to the character offset of the section it points
+# at, and those offsets must ascend.
+#
+# This is the check that matters. The comp's bar lists five links in an order
+# unrelated to its own page — "Colorado car accident laws" fourth of five with
+# its section first of the five in the document — and nothing caught it until
+# the scroll highlight, which walks the page in one direction, started marking
+# the wrong link. A label comparison cannot see that at all; this fails the
+# moment the page and the bar disagree, whatever either one is called.
+# Attribute ORDER is not guaranteed — Astro emits `href` before the marker —
+# so match the whole tag and pull the href out of it, rather than writing one
+# pattern per possible layout and a fallback for the other.
+nav_hrefs = [
+    m.group(1)
+    for tag in re.findall(r"<a\b[^>]*>", built)
+    if "data-section-link" in tag
+    for m in [re.search(r'href="#([^"]+)"', tag)]
+    if m
+]
+
+positions = []
+for target in nav_hrefs:
+    at = built.find(f'id="{target}"')
+    positions.append((target, at))
+
+missing = [t for t, at in positions if at < 0]
+if missing:
+    ok = False
+    print(f"  ✗ nav targets that exist on the page")
+    for t in missing:
+        print(f"      #{t} is linked but no element carries that id")
+elif [at for _, at in positions] == sorted(at for _, at in positions):
+    print(f"  ✓ the bar's order is the page's order ({len(positions)} links)")
+else:
+    ok = False
+    print("  ✗ the bar's order is NOT the page's order")
+    print(f"      bar : {[t for t, _ in positions]}")
+    print(f"      page: {[t for t, _ in sorted(positions, key=lambda e: e[1])]}")
+
+present("labels the comp also uses", ["Our lawyers", "Results", "Next steps"])
 
 
 # ---------------------------------------------------------------------- triage
@@ -433,6 +469,21 @@ else:
 
 # ------------------------------------------------------- deliberate differences
 EXPECTED = [
+    (
+        "the testimonials rail sits with the results, not four sections later",
+        built.index('id="reviews"') < built.index('id="next"'),
+        "results and reviews are one argument told two ways — the figures, then the "
+        "people behind them — and the comp puts the case timeline, the crash types and "
+        "the Denver data between them. Moving the rail up also breaks the comp's "
+        "`cream → cream → cream` run across those three",
+    ),
+    (
+        "the section nav is rebuilt in document order, six links not five",
+        len(nav_hrefs) == 6 and "Crash types" in built_text and "Colorado law" in built_text,
+        "the comp's five are in an order unrelated to its own page. Rebuilt to follow "
+        "the document, with labels shortened to fit the bar and a sixth added for "
+        "\"Do I have a case?\", whose section the comp never anchored",
+    ),
     (
         "the reviewed-by line is a link, not a disclosure",
         'class="cred"' in built

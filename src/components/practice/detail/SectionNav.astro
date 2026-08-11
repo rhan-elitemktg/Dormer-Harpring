@@ -135,9 +135,13 @@ const { nav, firm, ctaHref } = Astro.props;
     color: var(--dh-white);
   }
 
-  /* The number drops out before the links do — it is repeated in the hero
-     directly above and again in the closing block. */
-  @media (max-width: 900px) {
+  /* The number drops out before the links do, and it drops out EARLY: six
+     labels plus the number plus the CTA fill the bar at around 1190px, so
+     between here and 1180px the number is what would push the links into a
+     horizontal scroll. It is repeated in the hero directly above and again in
+     the closing block, so it is the cheapest thing in the row to lose. 1180 is
+     the breakpoint the hero already turns on. */
+  @media (max-width: 1180px) {
     .subnav__tel {
       display: none;
     }

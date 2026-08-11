@@ -78,7 +78,7 @@ const contactAnchor = `#${CA_SECTION_IDS.contact}`;
 
 <Triage triage={detail.triage} firm={firm} />
 <Takeaways takeaways={detail.takeaways} id={CA_SECTION_IDS.know} />
-<Criteria criteria={detail.criteria} />
+<Criteria criteria={detail.criteria} id={CA_SECTION_IDS.case} />
 
 <LawyerCards
   section={detail.lawyers}
@@ -90,18 +90,28 @@ const contactAnchor = `#${CA_SECTION_IDS.contact}`;
 <Credentials credentials={detail.credentials} awards={awards} />
 <WhyFirm why={detail.whyFirm} />
 
+{/* Results and the testimonials rail are ONE argument told two ways — the
+    figures, then the people behind them — so they run together. The comp puts
+    three sections between them, which also left `cream → cream → cream` across
+    Results, CaseTimeline and TileGrid; the forest rail breaks the first pair
+    and TileGrid's surface breaks the second. */}
 <ResultStories results={detail.results} reviews={reviews} id={CA_SECTION_IDS.results} />
-<CaseTimeline timeline={detail.timeline} id={CA_SECTION_IDS.next} />
-
-<TileGrid section={detail.crashTypes} id={CA_SECTION_IDS.types} />
-<DenverData denver={detail.denver} />
-
 <TestimonialRail
   testimonials={testimonials}
   reviews={reviewSummary}
   id={CA_SECTION_IDS.reviews}
 />
 
+<CaseTimeline timeline={detail.timeline} id={CA_SECTION_IDS.next} />
+
+<TileGrid section={detail.crashTypes} id={CA_SECTION_IDS.types} />
+<DenverData denver={detail.denver} />
+
+{/* The two teasers stay in the further-reading tail rather than moving up
+    beside the triage block. They are POINTERS to articles, not the content —
+    the urgent answers are Triage's five rows and Takeaways' four points — and
+    the checklist article does not exist yet, so promoting it would put a large
+    dead-end block a third of the way up the page. */}
 <ChecklistTeaser teaser={detail.checklistTeaser} />
 <FaultTeaser teaser={detail.faultTeaser} />
 <MoreOnClaims more={detail.more} />

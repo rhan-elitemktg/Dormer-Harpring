@@ -11,12 +11,14 @@ import type { CriteriaSection } from "../../../data/carAccidents";
 
 interface Props {
   criteria: CriteriaSection;
+  /** The section nav's "Do I have a case?" target. */
+  id: string;
 }
 
-const { criteria } = Astro.props;
+const { criteria, id } = Astro.props;
 ---
 
-<section class="section section--sunk criteria">
+<section class="section section--sunk criteria" id={id}>
   <div class="container">
     <header class="criteria__head">
       <h2 class="criteria__title">{criteria.title}</h2>

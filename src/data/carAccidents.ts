@@ -59,11 +59,12 @@ import kcHarpring from "../assets/team/kc-harpring-lg.jpg";
  */
 export const CA_SECTION_IDS = {
   know: "know",
+  case: "case",
   lawyers: "lawyers",
   results: "results",
+  reviews: "reviews",
   next: "next",
   types: "types",
-  reviews: "reviews",
   contact: "contact",
 } as const;
 
@@ -386,21 +387,34 @@ const carAccidents: PracticeAreaDetail = {
     },
   },
 
+  /**
+   * IN DOCUMENT ORDER, and that is the whole point of this object.
+   *
+   * The comp's bar lists five links in an order unrelated to the page: "Colorado
+   * car accident laws" is fourth of five and its section is the FIRST of the
+   * five in the document, "Types of crashes" is third and eleventh. A bar that
+   * disagrees with the page is a bar that misdescribes it — and it also broke
+   * the scroll highlight, which marks "the last section whose top you have
+   * passed" and can only walk in one direction.
+   *
+   * `diff-comp-car-accidents.py` asserts the order structurally, by resolving
+   * each href to its position in the built page. Reorder the page and that
+   * check fails until this list follows.
+   *
+   * SIX, NOT MORE: the bar's width is spent on the phone number and the CTA
+   * before any link gets a look in. Labels are shortened for the same reason.
+   * `#reviews` is deliberately absent — it sits directly under Results, so
+   * jumping to Results lands beside it — but keeps its id, which the comp's own
+   * footer links.
+   */
   nav: {
     items: [
+      { _key: "know", label: "Colorado law", href: anchor(CA_SECTION_IDS.know) },
+      { _key: "case", label: "Do I have a case?", href: anchor(CA_SECTION_IDS.case) },
       { _key: "lawyers", label: "Our lawyers", href: anchor(CA_SECTION_IDS.lawyers) },
       { _key: "results", label: "Results", href: anchor(CA_SECTION_IDS.results) },
-      {
-        _key: "types",
-        label: "Types of crashes we handle",
-        href: anchor(CA_SECTION_IDS.types),
-      },
-      {
-        _key: "know",
-        label: "Colorado car accident laws",
-        href: anchor(CA_SECTION_IDS.know),
-      },
       { _key: "next", label: "Next steps", href: anchor(CA_SECTION_IDS.next) },
+      { _key: "types", label: "Crash types", href: anchor(CA_SECTION_IDS.types) },
     ],
     ctaLabel: "Speak with a lawyer",
   },

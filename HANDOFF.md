@@ -72,6 +72,13 @@ The rebuild is the current one. What it left behind is worth knowing:
   slugifier to disagree with `lib/headings.ts`. `#know` moved between designs — it was a
   long medical-bills section and is now the four-point summary — and only that object
   changed.
+- **THE BAR'S ORDER IS THE PAGE'S ORDER, and the diff script asserts it structurally** by
+  resolving each link to its target's position in the built page. The comp's own bar lists
+  five links in an order unrelated to its page — "Colorado car accident laws" fourth of five
+  with its section FIRST of the five in the document — which nothing caught until the scroll
+  highlight, which walks the page in one direction, started marking the wrong link. A label
+  comparison cannot see that; the positional check fails the moment the two disagree. If a
+  section moves, that check fails until `nav.items` follows.
 - **This page's accent is FOREST, not gold.** Eyebrow rules, badge captions, the FAQ sign,
   the testimonial quote mark, the results eyebrow and the recovered figures are all
   `--dh-forest-100` here. The other 16 comps still use gold and their diffs still pass, so
@@ -241,6 +248,16 @@ the seven attorney emails (six inferred from a pattern), the office address and 
   eighteen** (all listed and asserted in `diff-comp-blog-post.py`), and the **Car Accidents
   page in eleven** (asserted in `diff-comp-car-accidents.py`). All at Rhan's request or
   forced by serving a real URL. Same standing: signed off by Rhan, not seen by the designer.
+- **The testimonials rail was moved up to sit directly after the results**, where the comp
+  puts the case timeline, the crash types and the Denver data between them. They are one
+  argument told two ways — the figures, then the people behind them. It also broke the
+  comp's `cream → cream → cream` run across those three sections; `TileGrid` took `--alt`
+  to break the second pair. Nothing else moved: the rest of the comp's order is sound.
+- **The section nav is six links, not the comp's five**, rebuilt in document order with
+  shortened labels ("Crash types", "Colorado law") and a new "Do I have a case?" entry
+  whose section the comp never anchored. The phone number now drops out of the bar at
+  1180px rather than 900px — six labels plus the number plus the CTA fill the row, and the
+  number is repeated in the hero directly above and in the closing block.
 - **The Car Accidents comp moves almost every accent from gold to forest** — eyebrow rules,
   badge captions, the FAQ +/− sign, the testimonial quote mark, the results eyebrow, and the
   recovered figures. The other 16 comps still use gold and their diffs still pass. Built as
