@@ -203,12 +203,13 @@ const { hero, firm, ctaHref } = Astro.props;
     color: var(--accent);
   }
 
-  /* The current page, a step darker and a weight heavier than the trail it
-     closes. Deliberately not the accent: it is not a link, and red here would
-     read as the one thing in the row you are meant to click. */
+  /* The current page, in the accent and a weight heavier than the trail it
+     closes. By request. Note it is NOT a link and takes the same colour the
+     links either side of it take on hover — so the row's only red is the crumb
+     you cannot click. Ink was tried first and read as too quiet. */
   .dhero__trail [aria-current="page"] {
     font-weight: 700;
-    color: var(--text-strong);
+    color: var(--accent);
   }
 
   .dhero__title {
@@ -407,14 +408,24 @@ const { hero, firm, ctaHref } = Astro.props;
     text-wrap: pretty;
   }
 
+  /* The underline is present from the start and TRANSPARENT, then coloured in
+     on hover. `text-decoration` itself cannot be animated, so declaring it on
+     :hover snapped the rule on instantly while the row's tint faded in behind
+     it over --dur — the gesture arriving in two pieces, which is the same fault
+     the related-posts card was fixed for. `text-decoration-color` does
+     animate, so both halves now run on one clock; and because the underline
+     always occupies its space, nothing reflows either. */
   .cred__line b {
     font-weight: 700;
     color: var(--text-strong);
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-underline-offset: 3px;
+    transition: text-decoration-color var(--transition);
   }
 
   .cred__link:hover .cred__line b {
-    text-decoration: underline;
-    text-underline-offset: 3px;
+    text-decoration-color: currentColor;
   }
 
   .cred__updated {
