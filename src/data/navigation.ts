@@ -5,7 +5,7 @@
 // refactor — nav was the one thing the previous build never finished migrating,
 // precisely because it was a static import.
 
-import { ROUTES } from "../lib/routePaths";
+import { ROUTES, locationPath, practiceAreaPath } from "../lib/routePaths";
 
 export interface NavItem {
   label: string;
@@ -70,12 +70,12 @@ export async function getNavItems(): Promise<NavItem[]> {
       label: "Practice Areas",
       href: ROUTES.practiceAreas,
       children: [
-        { label: "Car Accidents", href: "/denver-car-accident-lawyer" },
-        { label: "Truck Accidents", href: "/denver-truck-accident-lawyer" },
-        { label: "Motorcycle Accidents", href: "/motorcycle-accident-lawyer-denver" },
-        { label: "Wrongful Death", href: "/denver-wrongful-death-lawyer" },
-        { label: "Premises Liability", href: "/denver-premises-liability-lawyer" },
-        { label: "Brain Injuries", href: "/denver-brain-injury-lawyer" },
+        { label: "Car Accidents", href: practiceAreaPath("denver-car-accident-lawyer") },
+        { label: "Truck Accidents", href: practiceAreaPath("denver-truck-accident-lawyer") },
+        { label: "Motorcycle Accidents", href: practiceAreaPath("motorcycle-accident-lawyer-denver") },
+        { label: "Wrongful Death", href: practiceAreaPath("denver-wrongful-death-lawyer") },
+        { label: "Premises Liability", href: practiceAreaPath("denver-premises-liability-lawyer") },
+        { label: "Brain Injuries", href: practiceAreaPath("denver-brain-injury-lawyer") },
         { label: "View all practice areas", href: ROUTES.practiceAreas },
       ],
     },
@@ -89,14 +89,14 @@ export async function getNavItems(): Promise<NavItem[]> {
       href: null,
       children: [
         { label: "Denver", href: ROUTES.home },
-        { label: "Aurora", href: "/aurora-personal-injury-attorney" },
-        { label: "Boulder", href: "/boulder-personal-injury-attorney" },
-        { label: "Lakewood", href: "/lakewood-personal-injury-attorney" },
-        { label: "Thornton", href: "/thornton-personal-injury-attorney" },
-        { label: "Highlands Ranch", href: "/highlands-ranch-personal-injury-attorney" },
-        { label: "Greeley", href: "/greeley-personal-injury-lawyer" },
-        { label: "Fort Collins", href: "/fort-collins-personal-injury-lawyer" },
-        { label: "Grand Junction", href: "/grand-junction-personal-injury-lawyer" },
+        { label: "Aurora", href: locationPath("aurora-personal-injury-attorney") },
+        { label: "Boulder", href: locationPath("boulder-personal-injury-attorney") },
+        { label: "Lakewood", href: locationPath("lakewood-personal-injury-attorney") },
+        { label: "Thornton", href: locationPath("thornton-personal-injury-attorney") },
+        { label: "Highlands Ranch", href: locationPath("highlands-ranch-personal-injury-attorney") },
+        { label: "Greeley", href: locationPath("greeley-personal-injury-lawyer") },
+        { label: "Fort Collins", href: locationPath("fort-collins-personal-injury-lawyer") },
+        { label: "Grand Junction", href: locationPath("grand-junction-personal-injury-lawyer") },
       ],
     },
     { label: "Contact", href: ROUTES.contact },
@@ -106,14 +106,14 @@ export async function getNavItems(): Promise<NavItem[]> {
 /** Practice-area links in the footer column. */
 export async function getFooterPracticeAreas(): Promise<NavItem[]> {
   return [
-    { label: "Car Accidents", href: "/denver-car-accident-lawyer" },
-    { label: "Truck Accidents", href: "/denver-truck-accident-lawyer" },
-    { label: "Motorcycle Accidents", href: "/motorcycle-accident-lawyer-denver" },
-    { label: "Wrongful Death", href: "/denver-wrongful-death-lawyer" },
-    { label: "Slip & Fall", href: "/denver-slip-and-fall-lawyer" },
-    { label: "Pedestrian Accidents", href: "/denver-pedestrian-accident-lawyer" },
-    { label: "Brain Injuries", href: "/denver-brain-injury-lawyer" },
-    { label: "Dog Bites", href: "/denver-dog-bite-lawyer" },
+    { label: "Car Accidents", href: practiceAreaPath("denver-car-accident-lawyer") },
+    { label: "Truck Accidents", href: practiceAreaPath("denver-truck-accident-lawyer") },
+    { label: "Motorcycle Accidents", href: practiceAreaPath("motorcycle-accident-lawyer-denver") },
+    { label: "Wrongful Death", href: practiceAreaPath("denver-wrongful-death-lawyer") },
+    { label: "Slip & Fall", href: practiceAreaPath("denver-slip-and-fall-lawyer") },
+    { label: "Pedestrian Accidents", href: practiceAreaPath("denver-pedestrian-accident-lawyer") },
+    { label: "Brain Injuries", href: practiceAreaPath("denver-brain-injury-lawyer") },
+    { label: "Dog Bites", href: practiceAreaPath("denver-dog-bite-lawyer") },
   ];
 }
 

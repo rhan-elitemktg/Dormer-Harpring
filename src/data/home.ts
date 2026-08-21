@@ -15,6 +15,7 @@
 //    are re-derived in CSS instead, because no editor will ever type one.
 
 import { pt, type PortableTextBlock } from "./portableText";
+import { practiceAreaPath } from "../lib/routePaths";
 
 export interface HomeHero {
   eyebrow: string;
@@ -38,7 +39,7 @@ export async function getHomeHero(): Promise<HomeHero> {
     lede:
       "When you're hurt, everything changes. We take on fewer cases — so yours " +
       "gets our full attention, and our full fight.",
-    primaryCta: { label: "Talk to a lawyer", href: "/contact" },
+    primaryCta: { label: "Talk to a lawyer", href: practiceAreaPath("contact") },
     videoCta: { label: "Watch our video" },
   };
 }

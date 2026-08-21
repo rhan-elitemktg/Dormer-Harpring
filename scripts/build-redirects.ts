@@ -23,9 +23,18 @@ const redirects = await getRedirects();
 const config = {
   // A note for whoever opens this file first.
   $schema: "https://openapi.vercel.sh/vercel.json",
+
+  /* ONE URL PER PAGE, ENFORCED BY THE SERVER. Without this Vercel serves the
+     same page at `/about` and `/about/`, both 200, no redirect — two URLs for
+     one page, with only a canonical tag hinting which counts. `true` makes the
+     bare form 308 to the trailing-slash one, so only one ever answers.
+     Must stay in step with `trailingSlash: "always"` in astro.config.mjs and
+     with ROUTES in lib/routePaths.ts. */
+  trailingSlash: true,
   redirects: redirects.map((r) => ({
-    // Vercel normalizes a trailing slash before matching, so `/category/x`
-    // catches the legacy `/category/x/` that WordPress actually serves.
+    // Carries its trailing slash: with `trailingSlash: true` above, Vercel
+    // normalizes an incoming request to that shape BEFORE matching here, so a
+    // bare source would never fire.
     source: r.from,
     destination: r.to,
     permanent: r.permanent,

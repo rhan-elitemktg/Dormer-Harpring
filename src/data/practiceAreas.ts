@@ -12,7 +12,7 @@
 // for the same reason.
 import type { ImageMetadata } from "astro";
 import { pt, type PortableTextBlock } from "./portableText";
-import { ROUTES } from "../lib/routePaths";
+import { ROUTES, locationPath, practiceAreaPath } from "../lib/routePaths";
 import carAccident from "../assets/home/practice-car-accident.jpg";
 import truck from "../assets/home/practice-truck.jpg";
 import motorcycle from "../assets/home/practice-motorcycle.jpg";
@@ -79,7 +79,7 @@ export async function getHomePracticeAreas(): Promise<PracticeAreaSummary[]> {
       blurb:
         "How we handle car accident cases in Denver — the common issues, who is " +
         "liable, and how we build the claim.",
-      href: "/denver-car-accident-lawyer",
+      href: practiceAreaPath("denver-car-accident-lawyer"),
       image: carAccident,
     },
     {
@@ -89,7 +89,7 @@ export async function getHomePracticeAreas(): Promise<PracticeAreaSummary[]> {
       blurb:
         "Commercial truck cases — federal regulations, multiple defendants, and the " +
         "evidence that decides the outcome.",
-      href: "/denver-truck-accident-lawyer",
+      href: practiceAreaPath("denver-truck-accident-lawyer"),
       image: truck,
     },
     {
@@ -99,7 +99,7 @@ export async function getHomePracticeAreas(): Promise<PracticeAreaSummary[]> {
       blurb:
         "Motorcycle cases — the bias riders face on the road, and how we counter it " +
         "with facts.",
-      href: "/motorcycle-accident-lawyer-denver",
+      href: practiceAreaPath("motorcycle-accident-lawyer-denver"),
       image: motorcycle,
     },
     {
@@ -109,7 +109,7 @@ export async function getHomePracticeAreas(): Promise<PracticeAreaSummary[]> {
       blurb:
         "Bicycle crash cases — driver liability, right-of-way, and the severe " +
         "injuries cyclists suffer in Denver traffic.",
-      href: "/denver-bicycle-accident-lawyer",
+      href: practiceAreaPath("denver-bicycle-accident-lawyer"),
       image: bicycle,
     },
     {
@@ -119,7 +119,7 @@ export async function getHomePracticeAreas(): Promise<PracticeAreaSummary[]> {
       blurb:
         "Premises liability — proving negligence and unsafe conditions on someone " +
         "else's property.",
-      href: "/denver-slip-and-fall-lawyer",
+      href: practiceAreaPath("denver-slip-and-fall-lawyer"),
       image: slipAndFall,
     },
     {
@@ -129,7 +129,7 @@ export async function getHomePracticeAreas(): Promise<PracticeAreaSummary[]> {
       blurb:
         "Pedestrian cases — crosswalk and right-of-way law, and the serious injuries " +
         "these crashes cause.",
-      href: "/denver-pedestrian-accident-lawyer",
+      href: practiceAreaPath("denver-pedestrian-accident-lawyer"),
       image: pedestrian,
     },
   ];
@@ -160,7 +160,7 @@ export async function getFeaturedPracticeAreas(): Promise<PracticeAreaSummary[]>
         "Denver crashes are rarely as simple as the insurer claims. We build " +
         "liability from the scene up and value the injury for the whole future, " +
         "not just the ER bill.",
-      href: "/denver-car-accident-lawyer",
+      href: practiceAreaPath("denver-car-accident-lawyer"),
       image: carAccident,
     },
     {
@@ -171,7 +171,7 @@ export async function getFeaturedPracticeAreas(): Promise<PracticeAreaSummary[]>
         "Commercial cases turn on federal regulations, logs, and multiple " +
         "defendants. We move fast to preserve the evidence carriers are allowed " +
         "to destroy.",
-      href: "/denver-truck-accident-lawyer",
+      href: practiceAreaPath("denver-truck-accident-lawyer"),
       image: truck,
     },
     {
@@ -182,7 +182,7 @@ export async function getFeaturedPracticeAreas(): Promise<PracticeAreaSummary[]>
         "Riders face bias before the first question is asked. We counter it with " +
         "reconstruction, physical evidence, and testimony that puts fault where " +
         "it belongs.",
-      href: "/motorcycle-accident-lawyer-denver",
+      href: practiceAreaPath("motorcycle-accident-lawyer-denver"),
       image: motorcycle,
     },
     {
@@ -192,7 +192,7 @@ export async function getFeaturedPracticeAreas(): Promise<PracticeAreaSummary[]>
       blurb:
         "Right-of-way law protects cyclists, but drivers and their insurers argue " +
         "otherwise. We prove what happened and what the injuries will really cost.",
-      href: "/denver-bicycle-accident-lawyer",
+      href: practiceAreaPath("denver-bicycle-accident-lawyer"),
       image: bicycle,
     },
     {
@@ -205,7 +205,7 @@ export async function getFeaturedPracticeAreas(): Promise<PracticeAreaSummary[]>
         "Slip and fall, negligent security, unsafe maintenance. Colorado premises " +
         "law is technical — and we have taken these cases to verdict against " +
         "national chains.",
-      href: "/denver-premises-liability-lawyer",
+      href: practiceAreaPath("denver-premises-liability-lawyer"),
       image: premisesLiability,
     },
     {
@@ -216,7 +216,7 @@ export async function getFeaturedPracticeAreas(): Promise<PracticeAreaSummary[]>
         "Concussions and TBI rarely show on a scan, which is exactly what insurers " +
         "exploit. We document the long-term cost with the medicine and the people " +
         "who know you.",
-      href: "/denver-brain-injury-lawyer",
+      href: practiceAreaPath("denver-brain-injury-lawyer"),
       image: brainInjury,
     },
     {
@@ -226,7 +226,7 @@ export async function getFeaturedPracticeAreas(): Promise<PracticeAreaSummary[]>
       blurb:
         "When a family loses someone to negligence, accountability matters as much " +
         "as compensation. We handle these cases with the care they demand.",
-      href: "/denver-wrongful-death-lawyer",
+      href: practiceAreaPath("denver-wrongful-death-lawyer"),
       image: wrongfulDeath,
     },
     {
@@ -236,7 +236,7 @@ export async function getFeaturedPracticeAreas(): Promise<PracticeAreaSummary[]>
       blurb:
         "Colorado has a strict liability statute for serious dog bite injuries. We " +
         "handle the claim — usually against a homeowner policy — so you can heal.",
-      href: "/denver-dog-bite-lawyer",
+      href: practiceAreaPath("denver-dog-bite-lawyer"),
       image: dogBite,
     },
     {
@@ -247,7 +247,7 @@ export async function getFeaturedPracticeAreas(): Promise<PracticeAreaSummary[]>
         "Burns mean surgeries, scarring, and a permanently altered life. These " +
         "claims are valued for the whole future, and we build them that way from " +
         "day one.",
-      href: "/denver-burn-injury-attorney",
+      href: practiceAreaPath("denver-burn-injury-attorney"),
       image: burns,
     },
   ];
@@ -282,7 +282,7 @@ export async function getCatastrophicAreas(): Promise<CatastrophicArea[]> {
       insight:
         "Mild concussions to life-altering TBI — we prove the long-term cost insurers " +
         "try to minimize.",
-      href: "/denver-brain-injury-lawyer",
+      href: practiceAreaPath("denver-brain-injury-lawyer"),
     },
     {
       _key: "spinal",
@@ -291,7 +291,7 @@ export async function getCatastrophicAreas(): Promise<CatastrophicArea[]> {
       insight:
         "Paralysis and permanent mobility loss demand lifetime-care planning. We build " +
         "the full-value claim.",
-      href: "/denver-spinal-cord-injury-lawyer",
+      href: practiceAreaPath("denver-spinal-cord-injury-lawyer"),
     },
     {
       _key: "burns",
@@ -300,14 +300,14 @@ export async function getCatastrophicAreas(): Promise<CatastrophicArea[]> {
       insight:
         "Disfigurement and multiple surgeries — valued for the whole future, not just " +
         "the ER bill.",
-      href: "/denver-burn-injury-attorney",
+      href: practiceAreaPath("denver-burn-injury-attorney"),
     },
     {
       _key: "wrongful-death",
       name: "Wrongful Death",
       iconKey: "wrongful-death",
       insight: "Holding the responsible party accountable when a family loses someone.",
-      href: "/denver-wrongful-death-lawyer",
+      href: practiceAreaPath("denver-wrongful-death-lawyer"),
     },
   ];
 }
@@ -410,134 +410,134 @@ export async function getPracticeAreaGroups(): Promise<AreaGroup[]> {
         // Denver PI overview page. `navigation.ts` drops the equivalent nav
         // item for that reason; here the comp shows it, so it stays.
         { _key: "pi", label: "Personal Injury", href: ROUTES.home },
-        { _key: "amputation", label: "Amputation Injuries", href: "/denver-amputation-injury-lawyer" },
-        { _key: "bike", label: "Bike Accidents", href: "/denver-bicycle-accident-lawyer" },
-        { _key: "birth", label: "Birth Injuries", href: "/denver-birth-injury-lawyer" },
-        { _key: "brain", label: "Brain Injuries", href: "/denver-brain-injury-lawyer" },
-        { _key: "burn", label: "Burn Injuries", href: "/denver-burn-injury-attorney" },
-        { _key: "bus", label: "Bus Accidents", href: "/denver-bus-accident-lawyer" },
-        { _key: "car", label: "Car Accidents", href: "/denver-car-accident-lawyer" },
-        { _key: "child", label: "Child Injuries", href: "/denver-child-injury-lawyer" },
-        { _key: "construction", label: "Construction Accidents", href: "/denver-construction-accident-attorney" },
-        { _key: "distracted", label: "Distracted Driver Accidents", href: "/denver-distracted-driver-accident-lawyer" },
-        { _key: "scooter", label: "E-Scooter Accidents", href: "/denver-scooter-accident-lawyer" },
-        { _key: "dog", label: "Dog Bites", href: "/denver-dog-bite-lawyer" },
-        { _key: "dram-shop", label: "Dram Shop Liability", href: "/denver-dram-shop-lawyer" },
-        { _key: "drowsy", label: "Drowsy Driving Accidents", href: "/denver-drowsy-driving-accident-lawyer" },
-        { _key: "funeral", label: "Funeral Home Negligence", href: "/colorado-funeral-home-negligence-lawyer" },
-        { _key: "motorcycle", label: "Motorcycle Accidents", href: "/motorcycle-accident-lawyer-denver" },
-        { _key: "malpractice", label: "Medical Malpractice", href: "/denver-medical-malpractice-lawyer" },
-        { _key: "ice-snow", label: "Negligent Ice / Snow Removal", href: "/denver-negligent-ice-snow-removal-attorneys" },
-        { _key: "nursing-home", label: "Nursing Home Abuse", href: "/nursing-home-abuse-lawyer" },
-        { _key: "pedestrian", label: "Pedestrian Accidents", href: "/denver-pedestrian-accident-lawyer" },
-        { _key: "premises", label: "Premises Liability", href: "/denver-premises-liability-lawyer" },
-        { _key: "product", label: "Product Liability", href: "/denver-product-liability-lawyer" },
-        { _key: "rideshare", label: "Rideshare Accidents", href: "/denver-uber-accident-lawyer" },
-        { _key: "rtd", label: "RTD Denver Accidents", href: "/rtd-denver-accidents" },
-        { _key: "sexual-assault", label: "Sexual Assault", href: "/denver-sexual-assault-lawyer" },
-        { _key: "side-impact", label: "Side-Impact Accidents", href: "/denver-side-impact-accident-lawyer" },
-        { _key: "ski", label: "Ski Accidents", href: "/denver-ski-accident-lawyer" },
-        { _key: "slip", label: "Slip and Fall Accidents", href: "/denver-slip-and-fall-lawyer" },
-        { _key: "spinal", label: "Spinal Cord Injury", href: "/denver-spinal-cord-injury-lawyer" },
-        { _key: "trampoline", label: "Trampoline Park Injuries", href: "/denver-trampoline-park-injury-lawyer" },
-        { _key: "truck", label: "Truck Accidents", href: "/denver-truck-accident-lawyer" },
-        { _key: "uninsured", label: "Uninsured & Underinsured Motorists", href: "/denver-uninsured-and-underinsured-motorcyclist-accident-lawyer" },
-        { _key: "whiplash", label: "Whiplash Injuries", href: "/denver-whiplash-injury-attorney" },
-        { _key: "wrongful-death", label: "Wrongful Death", href: "/denver-wrongful-death-lawyer" },
-        { _key: "wildfire", label: "Wildfire Litigation", href: "/colorado-wildfire-attorney" },
+        { _key: "amputation", label: "Amputation Injuries", href: practiceAreaPath("denver-amputation-injury-lawyer") },
+        { _key: "bike", label: "Bike Accidents", href: practiceAreaPath("denver-bicycle-accident-lawyer") },
+        { _key: "birth", label: "Birth Injuries", href: practiceAreaPath("denver-birth-injury-lawyer") },
+        { _key: "brain", label: "Brain Injuries", href: practiceAreaPath("denver-brain-injury-lawyer") },
+        { _key: "burn", label: "Burn Injuries", href: practiceAreaPath("denver-burn-injury-attorney") },
+        { _key: "bus", label: "Bus Accidents", href: practiceAreaPath("denver-bus-accident-lawyer") },
+        { _key: "car", label: "Car Accidents", href: practiceAreaPath("denver-car-accident-lawyer") },
+        { _key: "child", label: "Child Injuries", href: practiceAreaPath("denver-child-injury-lawyer") },
+        { _key: "construction", label: "Construction Accidents", href: practiceAreaPath("denver-construction-accident-attorney") },
+        { _key: "distracted", label: "Distracted Driver Accidents", href: practiceAreaPath("denver-distracted-driver-accident-lawyer") },
+        { _key: "scooter", label: "E-Scooter Accidents", href: practiceAreaPath("denver-scooter-accident-lawyer") },
+        { _key: "dog", label: "Dog Bites", href: practiceAreaPath("denver-dog-bite-lawyer") },
+        { _key: "dram-shop", label: "Dram Shop Liability", href: practiceAreaPath("denver-dram-shop-lawyer") },
+        { _key: "drowsy", label: "Drowsy Driving Accidents", href: practiceAreaPath("denver-drowsy-driving-accident-lawyer") },
+        { _key: "funeral", label: "Funeral Home Negligence", href: practiceAreaPath("colorado-funeral-home-negligence-lawyer") },
+        { _key: "motorcycle", label: "Motorcycle Accidents", href: practiceAreaPath("motorcycle-accident-lawyer-denver") },
+        { _key: "malpractice", label: "Medical Malpractice", href: practiceAreaPath("denver-medical-malpractice-lawyer") },
+        { _key: "ice-snow", label: "Negligent Ice / Snow Removal", href: practiceAreaPath("denver-negligent-ice-snow-removal-attorneys") },
+        { _key: "nursing-home", label: "Nursing Home Abuse", href: practiceAreaPath("nursing-home-abuse-lawyer") },
+        { _key: "pedestrian", label: "Pedestrian Accidents", href: practiceAreaPath("denver-pedestrian-accident-lawyer") },
+        { _key: "premises", label: "Premises Liability", href: practiceAreaPath("denver-premises-liability-lawyer") },
+        { _key: "product", label: "Product Liability", href: practiceAreaPath("denver-product-liability-lawyer") },
+        { _key: "rideshare", label: "Rideshare Accidents", href: practiceAreaPath("denver-uber-accident-lawyer") },
+        { _key: "rtd", label: "RTD Denver Accidents", href: practiceAreaPath("rtd-denver-accidents") },
+        { _key: "sexual-assault", label: "Sexual Assault", href: practiceAreaPath("denver-sexual-assault-lawyer") },
+        { _key: "side-impact", label: "Side-Impact Accidents", href: practiceAreaPath("denver-side-impact-accident-lawyer") },
+        { _key: "ski", label: "Ski Accidents", href: practiceAreaPath("denver-ski-accident-lawyer") },
+        { _key: "slip", label: "Slip and Fall Accidents", href: practiceAreaPath("denver-slip-and-fall-lawyer") },
+        { _key: "spinal", label: "Spinal Cord Injury", href: practiceAreaPath("denver-spinal-cord-injury-lawyer") },
+        { _key: "trampoline", label: "Trampoline Park Injuries", href: practiceAreaPath("denver-trampoline-park-injury-lawyer") },
+        { _key: "truck", label: "Truck Accidents", href: practiceAreaPath("denver-truck-accident-lawyer") },
+        { _key: "uninsured", label: "Uninsured & Underinsured Motorists", href: practiceAreaPath("denver-uninsured-and-underinsured-motorcyclist-accident-lawyer") },
+        { _key: "whiplash", label: "Whiplash Injuries", href: practiceAreaPath("denver-whiplash-injury-attorney") },
+        { _key: "wrongful-death", label: "Wrongful Death", href: practiceAreaPath("denver-wrongful-death-lawyer") },
+        { _key: "wildfire", label: "Wildfire Litigation", href: practiceAreaPath("colorado-wildfire-attorney") },
       ],
     },
     {
       _key: "aurora",
       title: "Aurora Personal Injury",
       items: [
-        { _key: "pi", label: "Personal Injury Overview", href: "/aurora-personal-injury-attorney" },
-        { _key: "brain", label: "Brain Injuries", href: "/aurora-brain-injury-lawyer" },
-        { _key: "car", label: "Car Accidents", href: "/aurora-car-accident-lawyer" },
-        { _key: "premises", label: "Premises Liability", href: "/aurora-premises-liability-attorney" },
-        { _key: "product", label: "Product Liability", href: "/aurora-product-liability-attorney" },
-        { _key: "truck", label: "Truck Accidents", href: "/aurora-truck-accident-attorney" },
+        { _key: "pi", label: "Personal Injury Overview", href: locationPath("aurora-personal-injury-attorney") },
+        { _key: "brain", label: "Brain Injuries", href: locationPath("aurora-brain-injury-lawyer") },
+        { _key: "car", label: "Car Accidents", href: locationPath("aurora-car-accident-lawyer") },
+        { _key: "premises", label: "Premises Liability", href: locationPath("aurora-premises-liability-attorney") },
+        { _key: "product", label: "Product Liability", href: locationPath("aurora-product-liability-attorney") },
+        { _key: "truck", label: "Truck Accidents", href: locationPath("aurora-truck-accident-attorney") },
       ],
     },
     {
       _key: "boulder",
       title: "Boulder Personal Injury",
       items: [
-        { _key: "pi", label: "Personal Injury", href: "/boulder-personal-injury-attorney" },
-        { _key: "brain", label: "Brain Injuries", href: "/boulder-brain-injury-lawyer" },
-        { _key: "car", label: "Car Accidents", href: "/boulder-car-accident-lawyer" },
-        { _key: "hit-and-run", label: "Hit and Run Accidents", href: "/boulder-hit-and-run-accident-attorney" },
-        { _key: "off-road", label: "Off-Road Vehicle Accidents", href: "/boulder-off-road-recreational-vehicle-accident-attorney" },
-        { _key: "premises", label: "Premises Liability", href: "/boulder-premises-liability-attorney" },
-        { _key: "product", label: "Product Liability", href: "/boulder-product-liability-attorney" },
-        { _key: "truck", label: "Truck Accidents", href: "/boulder-truck-accident-attorney" },
+        { _key: "pi", label: "Personal Injury", href: locationPath("boulder-personal-injury-attorney") },
+        { _key: "brain", label: "Brain Injuries", href: locationPath("boulder-brain-injury-lawyer") },
+        { _key: "car", label: "Car Accidents", href: locationPath("boulder-car-accident-lawyer") },
+        { _key: "hit-and-run", label: "Hit and Run Accidents", href: locationPath("boulder-hit-and-run-accident-attorney") },
+        { _key: "off-road", label: "Off-Road Vehicle Accidents", href: locationPath("boulder-off-road-recreational-vehicle-accident-attorney") },
+        { _key: "premises", label: "Premises Liability", href: locationPath("boulder-premises-liability-attorney") },
+        { _key: "product", label: "Product Liability", href: locationPath("boulder-product-liability-attorney") },
+        { _key: "truck", label: "Truck Accidents", href: locationPath("boulder-truck-accident-attorney") },
       ],
     },
     {
       _key: "highlands-ranch",
       title: "Highlands Ranch Personal Injury",
       items: [
-        { _key: "pi", label: "Personal Injury Overview", href: "/highlands-ranch-personal-injury-attorney" },
-        { _key: "brain", label: "Brain Injuries", href: "/highlands-ranch-brain-injury-lawyer" },
-        { _key: "car", label: "Car Accidents", href: "/highlands-ranch-car-accident-lawyer" },
-        { _key: "elder-abuse", label: "Financial Elder Abuse", href: "/highlands-ranch-financial-elder-abuse-lawyer" },
-        { _key: "premises", label: "Premises Liability", href: "/highlands-ranch-premises-liability-attorney" },
-        { _key: "product", label: "Product Liability", href: "/highlands-ranch-product-liability-attorney" },
-        { _key: "truck", label: "Truck Accidents", href: "/highlands-ranch-truck-accident-attorney" },
+        { _key: "pi", label: "Personal Injury Overview", href: locationPath("highlands-ranch-personal-injury-attorney") },
+        { _key: "brain", label: "Brain Injuries", href: locationPath("highlands-ranch-brain-injury-lawyer") },
+        { _key: "car", label: "Car Accidents", href: locationPath("highlands-ranch-car-accident-lawyer") },
+        { _key: "elder-abuse", label: "Financial Elder Abuse", href: locationPath("highlands-ranch-financial-elder-abuse-lawyer") },
+        { _key: "premises", label: "Premises Liability", href: locationPath("highlands-ranch-premises-liability-attorney") },
+        { _key: "product", label: "Product Liability", href: locationPath("highlands-ranch-product-liability-attorney") },
+        { _key: "truck", label: "Truck Accidents", href: locationPath("highlands-ranch-truck-accident-attorney") },
       ],
     },
     {
       _key: "lakewood",
       title: "Lakewood Personal Injury",
       items: [
-        { _key: "pi", label: "Personal Injury Overview", href: "/lakewood-personal-injury-attorney" },
-        { _key: "brain", label: "Brain Injuries", href: "/lakewood-brain-injury-lawyer" },
-        { _key: "car", label: "Car Accidents", href: "/lakewood-car-accident-lawyer" },
-        { _key: "premises", label: "Premises Liability", href: "/lakewood-premises-liability-attorney" },
-        { _key: "product", label: "Product Liability", href: "/lakewood-product-liability-attorney" },
-        { _key: "truck", label: "Truck Accidents", href: "/lakewood-truck-accident-attorney" },
+        { _key: "pi", label: "Personal Injury Overview", href: locationPath("lakewood-personal-injury-attorney") },
+        { _key: "brain", label: "Brain Injuries", href: locationPath("lakewood-brain-injury-lawyer") },
+        { _key: "car", label: "Car Accidents", href: locationPath("lakewood-car-accident-lawyer") },
+        { _key: "premises", label: "Premises Liability", href: locationPath("lakewood-premises-liability-attorney") },
+        { _key: "product", label: "Product Liability", href: locationPath("lakewood-product-liability-attorney") },
+        { _key: "truck", label: "Truck Accidents", href: locationPath("lakewood-truck-accident-attorney") },
       ],
     },
     {
       _key: "thornton",
       title: "Thornton Personal Injury",
       items: [
-        { _key: "pi", label: "Personal Injury Overview", href: "/thornton-personal-injury-attorney" },
-        { _key: "brain", label: "Brain Injury", href: "/thornton-brain-injury-lawyer" },
-        { _key: "bicycle", label: "Bicycle Accidents", href: "/thornton-bicycle-accident-lawyer" },
-        { _key: "car", label: "Car Accidents", href: "/thornton-car-accident-attorney" },
-        { _key: "dog", label: "Dog Bite", href: "/thornton-dog-bite-attorney" },
-        { _key: "motorcycle", label: "Motorcycle Accidents", href: "/thornton-motorcycle-accident-lawyer" },
-        { _key: "pedestrian", label: "Pedestrian Accidents", href: "/thornton-pedestrian-accident-attorney" },
-        { _key: "premises", label: "Premises Liability", href: "/thornton-premises-liability-lawyer" },
-        { _key: "product", label: "Product Liability", href: "/thornton-product-liability-attorney" },
-        { _key: "slip", label: "Slip and Fall Accidents", href: "/thornton-slip-and-fall-accident-lawyer" },
-        { _key: "spinal", label: "Spinal Cord Injury", href: "/thornton-spinal-cord-injury-lawyer" },
-        { _key: "truck", label: "Truck Accidents", href: "/thornton-truck-accident-attorney" },
-        { _key: "workplace", label: "Workplace Injuries", href: "/thornton-workplace-injury-attorney" },
-        { _key: "wrongful-death", label: "Wrongful Death", href: "/thornton-wrongful-death-lawyer" },
+        { _key: "pi", label: "Personal Injury Overview", href: locationPath("thornton-personal-injury-attorney") },
+        { _key: "brain", label: "Brain Injury", href: locationPath("thornton-brain-injury-lawyer") },
+        { _key: "bicycle", label: "Bicycle Accidents", href: locationPath("thornton-bicycle-accident-lawyer") },
+        { _key: "car", label: "Car Accidents", href: locationPath("thornton-car-accident-attorney") },
+        { _key: "dog", label: "Dog Bite", href: locationPath("thornton-dog-bite-attorney") },
+        { _key: "motorcycle", label: "Motorcycle Accidents", href: locationPath("thornton-motorcycle-accident-lawyer") },
+        { _key: "pedestrian", label: "Pedestrian Accidents", href: locationPath("thornton-pedestrian-accident-attorney") },
+        { _key: "premises", label: "Premises Liability", href: locationPath("thornton-premises-liability-lawyer") },
+        { _key: "product", label: "Product Liability", href: locationPath("thornton-product-liability-attorney") },
+        { _key: "slip", label: "Slip and Fall Accidents", href: locationPath("thornton-slip-and-fall-accident-lawyer") },
+        { _key: "spinal", label: "Spinal Cord Injury", href: locationPath("thornton-spinal-cord-injury-lawyer") },
+        { _key: "truck", label: "Truck Accidents", href: locationPath("thornton-truck-accident-attorney") },
+        { _key: "workplace", label: "Workplace Injuries", href: locationPath("thornton-workplace-injury-attorney") },
+        { _key: "wrongful-death", label: "Wrongful Death", href: locationPath("thornton-wrongful-death-lawyer") },
       ],
     },
     {
       _key: "premises-liability",
       title: "Premises Liability",
       items: [
-        { _key: "overview", label: "Premises Liability Overview", href: "/denver-premises-liability-lawyer" },
-        { _key: "building", label: "Negligent Building Maintenance", href: "/denver-negligent-building-maintenance-attorneys" },
-        { _key: "ice-snow", label: "Negligent Ice / Snow Removal", href: "/denver-negligent-ice-snow-removal-attorneys" },
-        { _key: "security", label: "Negligent Security", href: "/denver-negligent-security-lawyers" },
-        { _key: "factors", label: "Premises Liability Factors", href: "/colorado-premises-liability-law" },
-        { _key: "laws", label: "Colorado Slip and Fall Laws", href: "/what-are-colorados-slip-and-fall-laws" },
-        { _key: "case-types", label: "Slip and Fall Case Types", href: "/types-of-slip-and-fall-accidents" },
-        { _key: "hiring", label: "Hiring a Slip and Fall Lawyer", href: "/should-you-hire-a-lawyer-for-a-slip-and-fall-injury-case" },
-        { _key: "after-a-fall", label: "10 Things to Do After a Fall", href: "/10-things-to-do-after-a-slip-and-fall-accident" },
+        { _key: "overview", label: "Premises Liability Overview", href: practiceAreaPath("denver-premises-liability-lawyer") },
+        { _key: "building", label: "Negligent Building Maintenance", href: practiceAreaPath("denver-negligent-building-maintenance-attorneys") },
+        { _key: "ice-snow", label: "Negligent Ice / Snow Removal", href: practiceAreaPath("denver-negligent-ice-snow-removal-attorneys") },
+        { _key: "security", label: "Negligent Security", href: practiceAreaPath("denver-negligent-security-lawyers") },
+        { _key: "factors", label: "Premises Liability Factors", href: practiceAreaPath("colorado-premises-liability-law") },
+        { _key: "laws", label: "Colorado Slip and Fall Laws", href: practiceAreaPath("what-are-colorados-slip-and-fall-laws") },
+        { _key: "case-types", label: "Slip and Fall Case Types", href: practiceAreaPath("types-of-slip-and-fall-accidents") },
+        { _key: "hiring", label: "Hiring a Slip and Fall Lawyer", href: practiceAreaPath("should-you-hire-a-lawyer-for-a-slip-and-fall-injury-case") },
+        { _key: "after-a-fall", label: "10 Things to Do After a Fall", href: practiceAreaPath("10-things-to-do-after-a-slip-and-fall-accident") },
       ],
     },
     {
       _key: "other",
       title: "Other Legal Services",
       items: [
-        { _key: "bad-faith", label: "Insurance Bad Faith", href: "/denver-insurance-bad-faith-lawyer" },
+        { _key: "bad-faith", label: "Insurance Bad Faith", href: practiceAreaPath("denver-insurance-bad-faith-lawyer") },
         { _key: "legal-malpractice", label: "Legal Malpractice", href: null },
         { _key: "life-bad-faith", label: "Life Insurance Bad Faith", href: null },
         { _key: "pet-bad-faith", label: "Pet Insurance Bad Faith", href: null },

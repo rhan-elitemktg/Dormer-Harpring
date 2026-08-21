@@ -145,8 +145,8 @@ export async function getCoCounselPage(): Promise<CoCounselPage> {
         },
         // TODO(launch): the last two have no page on the live site. They link to
         // the hub until one exists — a dead link is worse than a general one.
-        { _key: "bad-faith", label: "Insurance Bad Faith", href: "/practice-areas" },
-        { _key: "product", label: "Product Liability", href: "/practice-areas" },
+        { _key: "bad-faith", label: "Insurance Bad Faith", href: practiceAreaPath("practice-areas") },
+        { _key: "product", label: "Product Liability", href: practiceAreaPath("practice-areas") },
       ],
     },
 

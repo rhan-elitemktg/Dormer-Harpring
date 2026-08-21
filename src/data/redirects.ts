@@ -3,7 +3,7 @@
  *
  * Rhan's direction is that these eventually live in Sanity, so the shape here
  * is already the one a `redirect` document will project: a flat list of
- * `{ from, to, permanent }`, paths normalized, no platform syntax. When the CMS
+ * `{ from, to, permanent }`, no platform syntax. When the CMS
  * phase lands, `getRedirects()`'s body becomes a `sanityClient.fetch(...)` and
  * `scripts/build-redirects.ts` — the only consumer — does not change.
  *
@@ -27,7 +27,13 @@ import { ROUTES, blogCategoryPath, blogFilterUrl, isReservedPath, normalizePath 
 
 export interface Redirect {
   _key: string;
-  /** Canonical path form — leading slash, no trailing slash, lowercase. */
+  /**
+   * The path AS LINKED AND INDEXED — with its trailing slash, matching ROUTES.
+   * NOT `normalizePath`'s comparison form: Vercel normalizes an incoming
+   * request to the trailing-slash shape before matching `redirects`, so a
+   * source without one would never fire. The comparison form is still used for
+   * the checks below, where the slash must not matter.
+   */
   from: string;
   /** A path on this site, or an absolute URL. */
   to: string;
@@ -80,7 +86,7 @@ const CATEGORY_ARCHIVES: ReadonlyArray<readonly [from: string, to: string]> = [
 export async function getRedirects(): Promise<Redirect[]> {
   const list: Redirect[] = CATEGORY_ARCHIVES.map(([from, to]) => ({
     _key: `cat-${normalizePath(from).split("/").pop()}`,
-    from: normalizePath(from),
+    from,
     to,
     permanent: true,
   }));
@@ -88,6 +94,8 @@ export async function getRedirects(): Promise<Redirect[]> {
   // Loud rather than silent, the way getStaticPaths checks its slug union.
   // A redirect that never fires is invisible in every build log; these two
   // mistakes are the ones that produce it.
+  // Compared in `normalizePath`'s form so `/category/x` and `/category/x/`
+  // cannot both slip through as if they were different rules.
   const seen = new Set<string>();
   for (const r of list) {
     if (isReservedPath(r.from)) {
@@ -96,10 +104,10 @@ export async function getRedirects(): Promise<Redirect[]> {
           `the redirect would never fire.`
       );
     }
-    if (seen.has(r.from)) {
+    if (seen.has(normalizePath(r.from))) {
       throw new Error(`redirects: "${r.from}" is listed twice; the second would never fire.`);
     }
-    seen.add(r.from);
+    seen.add(normalizePath(r.from));
   }
 
   return list;

@@ -204,8 +204,13 @@ EXPECTED = [
     ),
     (
         "the four real posts link to their legacy slugs",
+        # WITH the trailing slash: the site links every internal path that way
+        # (ROUTES / `trailingSlash: "always"` / vercel.json's `trailingSlash`),
+        # matching the form all ~300 legacy URLs are indexed under. Asserted
+        # literally rather than slash-agnostically so that reverting the
+        # convention fails here instead of passing quietly.
         all(
-            f'href="/{slug}"' in grid_html
+            f'href="/{slug}/"' in grid_html
             for slug in (
                 "common-daycare-injuries",
                 "are-helmets-safe-to-use-after-theyve-been-dropped",
@@ -213,7 +218,7 @@ EXPECTED = [
                 "what-are-common-types-of-product-defects",
             )
         )
-        and 'href="/can-you-sue-a-trampoline-park-if-you-signed-a-waiver"' in built,
+        and 'href="/can-you-sue-a-trampoline-park-if-you-signed-a-waiver/"' in built,
         "the comp points all thirteen at '#'; five are real live posts and the scrape has their URLs",
     ),
     (
