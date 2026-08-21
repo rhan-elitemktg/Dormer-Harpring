@@ -39,25 +39,42 @@ const { image, alt = "", widths, sizes, class: className } = Astro.props;
     <Picture src={image} alt={alt} widths={widths} sizes={sizes} class={className} />
   ) : (
     <span class:list={["thumb-mark", className]}>
-      {/* Decorative: the card's own heading names the post, and the firm is
-          named in every byline beneath it. A logo announced here would be read
-          out before the title on every one of 107 cards. */}
-      <Picture src={logo} alt="" widths={[200, 400]} sizes="180px" class="thumb-mark__logo" />
+      {/* TWO ELEMENTS, NOT ONE, and the inner one does the centring.
+          The outer span wears the CALLER's image class, and callers style that
+          class for an <img>: PostCard's `.pcard__thumb :global(.pcard__img)`
+          sets `display: block`, which is a two-class selector and beats
+          anything single-class this component writes for the same element. A
+          `display: grid` here lost that fight silently and the logo sat at the
+          top of the box.
+          So the outer span keeps whatever box the caller gives it — 240px on a
+          post card, 210px on a related card — and the inner one, which no
+          caller knows about, fills it and centres. Nothing to out-specify. */}
+      <span class="thumb-mark__inner">
+        {/* Decorative: the card's own heading names the post, and the firm is
+            named in every byline beneath it. A logo announced here would be
+            read out before the title on every one of 107 cards. */}
+        <Picture src={logo} alt="" widths={[200, 400]} sizes="180px" class="thumb-mark__logo" />
+      </span>
     </span>
   )
 }
 
 <style>
-  /* `display: grid` + `place-items` rather than flex, so the logo is centred on
-     both axes with one declaration and the box still fills whatever aspect
-     ratio the card gives it. */
+  /* Deliberately sets NO display: the caller's image class lands here too and
+     styles it as an image. Only the colour is ours. */
   .thumb-mark {
+    background: var(--dh-forest-500);
+  }
+
+  /* `display: grid` + `place-items` rather than flex, so the logo is centred on
+     both axes with one declaration. `height: 100%` resolves because every
+     caller gives the outer span a definite height. */
+  .thumb-mark__inner {
     display: grid;
     place-items: center;
     width: 100%;
     height: 100%;
     padding: var(--space-6);
-    background: var(--dh-forest-500);
   }
 
   /* `:global()` BOUNDED BY `.thumb-mark`, which is an element in THIS template.
@@ -68,7 +85,7 @@ const { image, alt = "", widths, sizes, class: className } = Astro.props;
 
      Sized as a proportion of the card, capped: the same mark should not read as
      enormous on a wide card and tiny in a related rail. */
-  .thumb-mark :global(.thumb-mark__logo) {
+  .thumb-mark__inner :global(.thumb-mark__logo) {
     width: 55%;
     max-width: 180px;
     height: auto;
