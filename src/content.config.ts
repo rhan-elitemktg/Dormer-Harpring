@@ -31,7 +31,7 @@ import { glob } from "astro/loaders";
 const portableTextBlock = z.object({
   _type: z.literal("block"),
   _key: z.string(),
-  style: z.enum(["normal", "blockquote", "h2", "h3"]),
+  style: z.enum(["normal", "blockquote", "h2", "h3", "h4"]),
   markDefs: z.array(z.record(z.string(), z.unknown())).default([]),
   children: z.array(
     z.object({
@@ -41,7 +41,7 @@ const portableTextBlock = z.object({
       marks: z.array(z.string()).default([]),
     })
   ),
-  listItem: z.literal("bullet").optional(),
+  listItem: z.enum(["bullet", "number"]).optional(),
   // Always 1 — nothing nests. The field has to be present or the renderer
   // treats the item as loose. See the note in portableText.ts.
   level: z.number().int().positive().optional(),

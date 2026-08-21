@@ -1,0 +1,11 @@
+---
+// Portable Text `em` mark.
+//
+// MAPPED SO IT CANNOT VANISH SILENTLY. astro-portabletext falls an unmapped
+// mark through to its children — the words survive, the emphasis does not, and
+// nothing warns. 97 of the 167 imported posts carry emphasis, so leaving this
+// unmapped would have quietly flattened italics across more than half the blog
+// with a green build. Same reasoning as ProseStrong.
+---
+
+<em class="prose__em"><slot /></em>
