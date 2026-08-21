@@ -81,18 +81,15 @@ export interface BlogPost {
    * it machine-readable. Formatted for display by `formatPostDate`.
    */
   publishedAt: string;
-  /** The category shown on the card — the first of `categorySlugs`. */
-  category: BlogCategory;
   /**
-   * EVERY category slug the post carries, primary first.
+   * THE post's category — one, not a list.
    *
-   * The card displays one category but belongs to all of them: 29 of the 167
-   * imported posts carry two to four. The tab filter matches against this list,
-   * not against `category.slug` — matching the primary alone made
-   * `auto-insurance-accident-claims` a dead tab, because all 13 of its posts
-   * carry it second.
+   * WordPress lets a post carry several and 28 of the imported 167 do, but by
+   * Rhan's direction a post belongs to exactly one here: the first its source
+   * record lists. The content files keep every slug, because the getter is
+   * where a projection narrows — see `getImportedPosts`.
    */
-  categorySlugs: string[];
+  category: BlogCategory;
   /**
    * Card art. The comp draws these from the practice-area photography and picks
    * them loosely — the uninsured-motorist card gets the dog-bite photograph —
@@ -167,17 +164,23 @@ export async function getBlogCategories(): Promise<BlogCategory[]> {
     getCollection("blog"),
   ]);
 
-  // EVERY category a post carries, which is exactly what the tab filters on —
-  // the card emits all of them and blogFeed.ts token-matches. The two have to
-  // count the same thing or the row is ordered by a number no tab can produce.
+  // PRIMARY ONLY, matching what a card carries and therefore what a tab can
+  // find. Counting a post under its secondaries would order the row by a
+  // number no tab can produce.
   const counts = new Map<string, number>();
   for (const post of posts) {
-    for (const slug of post.data.categories) {
-      counts.set(slug, (counts.get(slug) ?? 0) + 1);
-    }
+    const primary = post.data.categories[0];
+    if (primary) counts.set(primary, (counts.get(primary) ?? 0) + 1);
   }
 
   return categories
+    // A TAB THAT FINDS NOTHING IS WORSE THAN NO TAB. With one category per
+    // post, any category no post LEADS with can never be reached — today that
+    // is "Auto Insurance & Accident Claims", which 13 posts carry second and
+    // none carry first. It is dropped from the row rather than shipped as an
+    // empty state. Give one of those 13 that category first and it returns on
+    // its own; nothing here needs editing.
+    .filter((entry) => (counts.get(entry.data.slug) ?? 0) > 0)
     .map((entry) => ({ _key: entry.data.slug, title: entry.data.title, slug: entry.data.slug }))
     .sort(
       (a, b) =>
@@ -266,7 +269,6 @@ export async function getFeaturedPost(): Promise<FeaturedPost> {
       "at all.",
     publishedAt: "2026-06-23",
     category: CATEGORIES.premises,
-    categorySlugs: [CATEGORIES.premises.slug],
     image: consult,
     imageAlt: "Attorney meeting with a client",
     author: FIRM,
@@ -697,7 +699,6 @@ export async function getImportedPosts(): Promise<BlogPost[]> {
         excerpt: entry.data.excerpt,
         publishedAt: entry.data.publishedAt,
         category,
-        categorySlugs: entry.data.categories,
         image: entry.data.image ?? IMPORTED_FALLBACK_IMAGE[primary] ?? consult,
         author: FIRM,
         reviewer: kc,

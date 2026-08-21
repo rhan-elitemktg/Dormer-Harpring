@@ -49,20 +49,19 @@ function initBlogFeed(grid: HTMLElement) {
   // should not carry that depth into a category with four posts in it.
   let shown = initial;
 
-  // A TOKEN LIST, not one value: `data-category` carries every category the
-  // post belongs to, so an exact string compare only ever matched the first and
-  // left any category used exclusively as a secondary with a tab that found
-  // nothing. Split rather than `includes()` on the raw string, which would
-  // match "auto-accident" inside "auto-accident-claims".
   const matches = (element: HTMLElement) =>
-    filter === "all" || (element.dataset.category ?? "").split(" ").includes(filter);
+    filter === "all" || element.dataset.category === filter;
 
   const render = () => {
     const matched = items.filter(matches);
 
-    // A filtered view shows everything it matched — at most a handful — so the
-    // pager only governs the unfiltered feed.
-    const limit = filter === "all" ? shown : matched.length;
+    // THE PAGER GOVERNS EVERY VIEW, filtered or not. It used to reveal a
+    // filtered category in full on the assumption that a category held "at most
+    // a handful" — true of the twelve placeholder cards, wrong of the imported
+    // archive, where Auto Accident alone has 57. The button then stayed on
+    // screen with nothing left to reveal. `shown` resets to `initial` on every
+    // filter change, so each category starts at six of its own.
+    const limit = shown;
     let seen = 0;
     for (const item of items) {
       item.hidden = !matches(item) || seen++ >= limit;

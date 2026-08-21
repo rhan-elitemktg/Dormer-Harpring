@@ -28,10 +28,9 @@ const { post, readMoreLabel } = Astro.props;
 ---
 
 {/* `data-category` is what the tab filter matches on — see scripts/blogFeed.ts.
-    SPACE-SEPARATED, because a post belongs to every category it carries even
-    though the card shows only the first. Matched as a token list, the way a
-    class attribute is. */}
-<li class="pcard" data-category={post.categorySlugs.join(" ")}>
+    ONE value: a post belongs to exactly one category here, even where its
+    source record lists several. */}
+<li class="pcard" data-category={post.category.slug}>
   <div class="pcard__thumb">
     {
       /* Empty alt: this is card art, not content. The comp sets the post title

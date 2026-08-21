@@ -248,11 +248,13 @@ EXPECTED = [
         "object types in the Sanity phase, not fixed sections of this template",
     ),
     (
-        "the sidebar lists every category, not the comp's six",
-        len(built_cats) == 23,
+        "the sidebar lists every reachable category, not the comp's six",
+        len(built_cats) == 22,
         "one getBlogCategories() serves this card and the index's tab row, so they cannot drift. "
-        "It returns all 23 the imported archive has, ordered by post count — the comp drew six "
-        "because six was all the placeholder feed needed",
+        "22, not the archive's 23: a post belongs to exactly one category, so "
+        "'Auto Insurance & Accident Claims' is unreachable — 13 posts carry it second and none "
+        "carry it first — and a category nothing can reach is dropped rather than shipped empty. "
+        "The comp drew six because six was all the placeholder feed needed",
     ),
     (
         "related articles are real posts",
