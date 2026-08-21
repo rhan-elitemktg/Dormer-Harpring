@@ -31,14 +31,24 @@ const config = {
      Must stay in step with `trailingSlash: "always"` in astro.config.mjs and
      with ROUTES in lib/routePaths.ts. */
   trailingSlash: true,
-  redirects: redirects.map((r) => ({
-    // Carries its trailing slash: with `trailingSlash: true` above, Vercel
-    // normalizes an incoming request to that shape BEFORE matching here, so a
-    // bare source would never fire.
-    source: r.from,
-    destination: r.to,
-    permanent: r.permanent,
-  })),
+  /* BOTH SLASH FORMS FOR EVERY RULE. `trailingSlash: true` above already
+     normalizes a bare request to the slashed shape, so `/category/x` would
+     reach `/category/x/` and then match — but as TWO redirects, one to add the
+     slash and one to reach the destination. These carry every indexed category
+     URL on the legacy site, which is the traffic least worth spending an extra
+     hop on, and the cost of avoiding it is a longer generated file nobody
+     hand-edits. Listing the bare form FIRST so it matches before the
+     normalizer gets to it. */
+  redirects: redirects.flatMap((r) => {
+    const bare = r.from.replace(/\/+$/, "");
+    const entry = (source: string) => ({
+      source,
+      destination: r.to,
+      permanent: r.permanent,
+    });
+    // `/` has no bare form, and emitting one would claim every path on the site.
+    return bare ? [entry(bare), entry(r.from)] : [entry(r.from)];
+  }),
 };
 
 await writeFile("vercel.json", JSON.stringify(config, null, 2) + "\n");

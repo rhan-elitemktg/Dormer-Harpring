@@ -33,7 +33,6 @@ import {
   getBlogPosts,
   getFeaturedPost,
   getImportedArticles,
-  getImportedPosts,
   getRelatedPosts,
 } from "../data/blog";
 import { CA_SECTION_IDS, getPracticeAreaDetails } from "../data/carAccidents";
@@ -49,22 +48,20 @@ import {
 } from "../data/testimonials";
 
 export const getStaticPaths = (async () => {
-  const [handAuthored, imported, featured, posts, importedFeed, details] =
-    await Promise.all([
-      getBlogPostArticles(),
-      getImportedArticles(),
-      getFeaturedPost(),
-      getBlogPosts(),
-      getImportedPosts(),
-      getPracticeAreaDetails(),
-    ]);
+  const [handAuthored, imported, featured, posts, details] = await Promise.all([
+    getBlogPostArticles(),
+    getImportedArticles(),
+    getFeaturedPost(),
+    getBlogPosts(),
+    getPracticeAreaDetails(),
+  ]);
 
-  // The imported posts join BOTH unions: an article to render, and a feed
-  // entry for the join below to find. They are not in `getBlogPosts()` yet —
-  // that is the index's card list, and adding them there decides the tab-row
-  // question by accident. See the note in data/blog.ts.
+  // ONE FEED AGAIN. `getBlogPosts()` IS the imported archive now, so the third
+  // list this used to union in would have duplicated every card. Articles still
+  // come from two places — the hand-authored one and the import — because a
+  // post's BODY can be curated even when its card is not.
   const articles = [...handAuthored, ...imported];
-  const feed = [featured, ...posts, ...importedFeed];
+  const feed = [featured, ...posts];
 
   // Walk the ARTICLES, not the feed — the same contract
   // `meet-our-attorneys/[slug].astro` holds. A post with no body has no page,

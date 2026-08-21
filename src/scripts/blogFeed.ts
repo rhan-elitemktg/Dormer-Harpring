@@ -137,8 +137,53 @@ function initBlogFeed(grid: HTMLElement) {
     ? tabs?.querySelector(`[data-filter="${CSS.escape(requested)}"]`)
     : null;
 
-  if (requested && known) applyFilter(requested);
-  else render();
+  if (requested && known) {
+    applyFilter(requested);
+    arriveAt(requested);
+  } else {
+    render();
+  }
+}
+
+/**
+ * Bring a filtered arrival to the feed.
+ *
+ * A reader following a category link from a post — or a legacy
+ * `/category/<slug>/` URL, which redirects here — lands at the top of the blog
+ * index looking at the hero and the featured panel, with the filtered grid
+ * below the fold. Nothing on screen shows that a filter was applied, so the
+ * page reads as "the category link is broken".
+ *
+ * SCROLLS TO THE TAB ROW, NOT THE GRID ITSELF. The grid alone would put the
+ * tabs off-screen, leaving no way to see which category is active or switch to
+ * another without scrolling back. The row sits directly above the grid, so this
+ * still lands on the posts — with the control that produced them in view.
+ *
+ * NOT ON A PLAIN /news/ VISIT: only when a category was actually requested and
+ * matched a tab.
+ */
+function arriveAt(slug: string) {
+  const tabs = document.querySelector<HTMLElement>("[data-blog-tabs]");
+  const target = tabs?.closest("section") ?? tabs;
+  if (!target) return;
+
+  // A back-navigation restores the reader's old position, and scrolling then
+  // would yank them away from where they were. Only act on an arrival that is
+  // still at the top of the page.
+  if (window.scrollY > 8) return;
+
+  // An involuntary animated scroll is a genuine problem for people who get
+  // motion sickness from it. They still need to arrive at the feed, so the
+  // journey is dropped rather than the destination.
+  const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  target.scrollIntoView({ behavior: still ? "auto" : "smooth", block: "start" });
+
+  // With 23 categories the row scrolls, so the pressed tab is very often out of
+  // sight — and an active tab nobody can see is the same failure this function
+  // exists to fix, one axis over. `inline: "center"` rather than "nearest" so
+  // the neighbours show too, which is what makes it read as a row.
+  const active = tabs?.querySelector<HTMLElement>(`[data-filter="${CSS.escape(slug)}"]`);
+  active?.scrollIntoView({ behavior: still ? "auto" : "smooth", block: "nearest", inline: "center" });
 }
 
 for (const grid of document.querySelectorAll<HTMLElement>("[data-blog-grid]")) {

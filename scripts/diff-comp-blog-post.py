@@ -125,10 +125,16 @@ built_cats = [
 
 print("\nSIDEBAR CATEGORIES")
 print(f"  · comp lists {len(comp_cats)}, built lists {len(built_cats)} — see DELIBERATE DIFFERENCES")
+# The card lists every category the blog has, so this is no longer a fixed
+# five. What must still hold is that none of the comp's went missing — except
+# "Colorado Law", which the designer invented: it is not among the live site's
+# 23 and never has been, so there is nothing to import under that name. That is
+# the sixth entry this comp carries and the index comp does not.
+COMP_ONLY_CATEGORIES = {"Colorado Law"}
 cmp(
-    "the five the index also ships, in the index's order",
-    ["Auto Accident", "Personal Injury", "Product Liability", "Premises Liability", "Trials"],
-    built_cats,
+    "the comp's categories all still present",
+    [],
+    [c for c in comp_cats if c not in built_cats and c not in COMP_ONLY_CATEGORIES],
 )
 
 
@@ -153,10 +159,13 @@ built_rel_titles = [
 
 print(f"\nRELATED BAND ({len(cards)} built, {len(comp_rel_titles)} in comp)")
 present("heading", ["Related blog posts", "Read more"])
-# Same three posts, ordered by date rather than the comp's sequence — so the
-# SETS are compared, and the ordering is asserted below.
-cmp("categories (as a set)", sorted(comp_rel_cats), sorted(built_rel_cats))
-cmp("dates (as a set)", sorted(comp_rel_dates), sorted(built_rel_dates))
+# NOT the comp's three. `getRelatedPosts` picks from the imported archive, so
+# these are real posts with real pages, chosen by category — the comp's three
+# are among the titles the designer invented. The count and the completeness of
+# each card are what the band still owes.
+cmp("three cards", [3], [len(cards)])
+for name, values in (("category", built_rel_cats), ("date", built_rel_dates), ("title", built_rel_titles)):
+    cmp(f"every related card has a {name}", [], [i for i, v in enumerate(values) if not v.strip()])
 
 
 # ---------------------------------------------------------------- fact check
@@ -239,29 +248,34 @@ EXPECTED = [
         "object types in the Sanity phase, not fixed sections of this template",
     ),
     (
-        "sidebar categories are the index's five, not the comp's six",
-        "Colorado Law" not in built_text and len(built_cats) == 5,
-        "one getBlogCategories() serves both pages so they cannot drift, and the index's order is "
-        "the signed-off one; the comp swaps two and adds a sixth",
+        "the sidebar lists every category, not the comp's six",
+        len(built_cats) == 23,
+        "one getBlogCategories() serves this card and the index's tab row, so they cannot drift. "
+        "It returns all 23 the imported archive has, ordered by post count — the comp drew six "
+        "because six was all the placeholder feed needed",
     ),
     (
         "related articles are real posts",
-        side_html.count('class="pside__article') == 4
+        side_html.count('class="pside__article') == 5
         and "What is my personal injury claim worth?" not in built_text,
-        "all five the comp lists are among the eight invented posts the index leaves unlinked — a "
-        "related-articles card of dead entries is worse than a shorter one",
+        "all five the comp lists are titles the designer invented. The card now fills from the "
+        "imported archive instead, so it ships the full five it was drawn with AND every one "
+        "leads to a page — it used to fall back to four for want of real posts",
     ),
     (
-        "the related band is ordered by date",
-        built_rel_dates == ["June 17, 2026", "June 11, 2026", "June 5, 2026"],
-        "the comp's sequence is June 17, June 5, June 11, which follows no rule its markup states",
+        "the related band leads with the same category",
+        built_rel_cats[0] == built_rel_cats[1] == "Premises Liability",
+        "getRelatedPosts puts same-category posts first and the rest after, each half already "
+        "newest-first. With a real archive behind it that grouping is visible; against the "
+        "placeholder feed it looked like plain date order. The comp's own sequence follows no "
+        "rule its markup states",
     ),
     (
         "related titles come from the feed, not the comp",
-        "Are helmets safe to use after they have been dropped?" in built_text
-        and "Are helmets safe after they have been dropped?" not in built_text,
-        "getBlogPosts() is the single source for a post's title and excerpt; the comp trims both "
-        "differently here than the index comp does",
+        all(t not in built_text for t in comp_rel_titles),
+        "getBlogPosts() is the single source for a post's title and excerpt. It is the imported "
+        "archive now, so none of the comp's three appear here at all — they name posts that do "
+        "not exist",
     ),
     (
         "read time is computed, not typed",
