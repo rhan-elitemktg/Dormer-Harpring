@@ -1,0 +1,430 @@
+{
+  "slug": "how-to-drive-around-trucks-safely-in-colorado",
+  "title": "How to Drive Around Trucks Safely in Colorado",
+  "excerpt": "Commercial trucks pose unique safety risks to other drivers. First, these trucks are large and heavy. This makes a collision between a regular passenger vehicle and a commercial truck dangerous and potentially deadly. At the same time, given their length, it is difficult for commercial truck drivers to see the vehicles around them. Their blind […]",
+  "publishedAt": "2020-03-30T11:00:11",
+  "modifiedAt": "2026-02-26T14:10:27",
+  "categories": [
+    "truck-accidents"
+  ],
+  "body": [
+    {
+      "_type": "image",
+      "_key": "icao",
+      "src": "./images/2020-03-18-wheeler-semi-truck-on-highway-with-sun-lens-flare.jpg",
+      "alt": "Photo of How to Drive Around Trucks"
+    },
+    {
+      "_type": "block",
+      "_key": "bcau",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "lcar",
+          "_type": "link",
+          "href": "https://www.fmcsa.dot.gov/ourroads/tips-driving-safely-around-large-trucks-or-buses"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scaq",
+          "text": "Commercial trucks pose unique safety risks to other drivers. First, these trucks are large and heavy. This makes a collision between a regular passenger vehicle and a commercial truck dangerous and potentially deadly. At the same time, given their length, it is difficult for commercial truck drivers to see the vehicles around them. Their blind spots are much bigger than the average passenger vehicles. This limited visibility increases the chances of a commercial truck crash. For these reasons, passenger vehicle drivers should take ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "scas",
+          "text": "extra precautions",
+          "marks": [
+            "lcar"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "scat",
+          "text": " about how to drive around trucks on the road.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcaw",
+      "style": "h3",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scav",
+          "text": "3 Helpful Tips on How to Drive Around Trucks",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcay",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scax",
+          "text": "Below, our Lakewood truck accident attorneys discuss how to drive around trucks with these factors in mind.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcb0",
+      "style": "h4",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scaz",
+          "text": "When Driving Behind a Truck",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcb2",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scb1",
+          "text": "When driving behind a truck you should maintain a safe following distance. Driving too closely, or less than 30 feet away, can put you in the truck driver’s blind spot. It will also shorten the amount of time you have to stop. If the truck comes to a sudden stop, but you have been following too closely, a resultant crash could be deadly.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcb4",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scb3",
+          "text": "If you are behind a semi at a red light, leave extra space between your vehicle and the truck. Once the light turns green, commercial trucks are likely to roll slightly backwards before moving forward.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcb6",
+      "style": "h4",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scb5",
+          "text": "When Driving Near a Truck",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcbb",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "lcb8",
+          "_type": "link",
+          "href": "https://www.fmcsa.dot.gov/ourroads/large-blind-spots"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scb7",
+          "text": "Knowing how to drive around trucks requires knowing ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "scb9",
+          "text": "their blind spots",
+          "marks": [
+            "lcb8"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "scba",
+          "text": ". If you are driving in the following blind spots, the truck driver will not be able to see you:",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcbd",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scbc",
+          "text": "Less than 30 feet directly behind the truck",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bcbf",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scbe",
+          "text": "Less than 20 feet directly in front of the truck",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bcbh",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scbg",
+          "text": "On the truck’s left side, directly beside the front half of the truck",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bcbj",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scbi",
+          "text": "On the truck’s right side, directly beside the front half of the truck",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bcbl",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scbk",
+          "text": "On the truck’s right side, with one lane between yourself and the truck",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bcbn",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scbm",
+          "text": "When it comes to a truck’s blind spots, a good rule is to check whether you can see the driver in his or her side mirrors. If you cannot see them, they cannot see you. Try to stay out of a truck’s blind spots as much as possible. If you must drive in a truck’s blind spots in order to pass the truck, do not linger there for an extended period.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcbp",
+      "style": "h4",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scbo",
+          "text": "When Passing a Truck",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcbr",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scbq",
+          "text": "When passing a commercial truck, first you need to make sure it is safe. This will require checking for a few indicators that it is safe to pass. Make sure the truck is not turning or backing up. If it is, passing the truck will put you into the truck’s blind spots.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcbt",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scbs",
+          "text": "Next, try to pass the truck by using the left lane to maximize your visibility. Given his or her position within the cab, the truck driver’s blind spots are much larger on the right side.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcbv",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scbu",
+          "text": "Keep a consistent speed while passing, so the truck driver can better anticipate your vehicle. Then, before merging back into the truck’s lane, double check your rearview mirror. Only merge when you can clearly see the truck behind you.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcbx",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scbw",
+          "text": "Also, dim your lights when passing a commercial truck. The bright lights of your high beams can hit the truck driver’s mirrors and reflect that light into the driver’s eyes. You do not want to blind a truck driver, even temporarily.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcbz",
+      "style": "h3",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scby",
+          "text": "Injured in a Truck Accident? Contact an Experienced Denver Truck Accident Attorney",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcca",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "lcc1",
+          "_type": "link",
+          "href": "/practice-areas/"
+        },
+        {
+          "_key": "lcc4",
+          "_type": "link",
+          "href": "/denver-truck-accident-lawyer/"
+        },
+        {
+          "_key": "lcc7",
+          "_type": "link",
+          "href": "/contact/"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scc0",
+          "text": "Dormer Harpring is proud to serve clients across the entire state of Colorado. We have extensive experience with a ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "scc2",
+          "text": "wide range of personal injury cases",
+          "marks": [
+            "lcc1"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "scc3",
+          "text": ". We strive to secure the best possible outcome for people injured due to the negligent actions of others. If you suffered injuries in a ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "scc5",
+          "text": "truck accident",
+          "marks": [
+            "lcc4"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "scc6",
+          "text": ", contact our office to discuss your legal options. You can schedule a free consultation with us at (303) 747-4404 or through ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "scc8",
+          "text": "our online form",
+          "marks": [
+            "lcc7"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "scc9",
+          "text": ".",
+          "marks": []
+        }
+      ]
+    }
+  ],
+  "factCheck": [],
+  "author": {
+    "name": "Dormer Harpring",
+    "href": "/about"
+  },
+  "reviewer": {
+    "name": "K.C. Harpring",
+    "href": "/meet-our-attorneys/k-c-harpring"
+  },
+  "legacyId": 1621
+}

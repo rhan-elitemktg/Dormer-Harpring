@@ -35,12 +35,21 @@ const clean = (value?: string | null) => {
 };
 
 /**
- * A page's absolute URL with any trailing slash dropped — the site's canonical
- * form. Shared with the sitemap so the two can never disagree.
+ * A page's absolute URL in the site's canonical form — WITH a trailing slash,
+ * matching ROUTES, `trailingSlash: "always"` and the generated vercel.json.
+ * Shared with the sitemap so the two can never disagree.
+ *
+ * The canonical tag has to name the URL the server actually serves. It used to
+ * strip the slash while the server served both forms with a 200, which left
+ * every page reachable at two URLs and only a hint saying which counted.
+ *
+ * Query and hash are carried through untouched — appending the slash to a href
+ * that ends in `?category=x` would produce a different URL, not a tidier one.
  */
 export const canonicalize = (url: URL | string) => {
   const href = typeof url === "string" ? url : url.href;
-  return href.replace(/\/+$/, "");
+  const [, path, suffix] = /^([^?#]*)([\s\S]*)$/.exec(href)!;
+  return `${path.replace(/\/+$/, "")}/${suffix}`;
 };
 
 /**

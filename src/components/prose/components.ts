@@ -9,11 +9,14 @@
  */
 import ProseParagraph from "./ProseParagraph.astro";
 import ProseStrong from "./ProseStrong.astro";
+import ProseEm from "./ProseEm.astro";
 import ProseLink from "./ProseLink.astro";
 import ProseH2 from "./ProseH2.astro";
 import ProseH3 from "./ProseH3.astro";
+import ProseH4 from "./ProseH4.astro";
 import ProseQuote from "./ProseQuote.astro";
 import ProseList from "./ProseList.astro";
+import ProseNumberList from "./ProseNumberList.astro";
 import ProseListItem from "./ProseListItem.astro";
 import ProseImage from "./ProseImage.astro";
 
@@ -44,16 +47,24 @@ export const proseComponents = {
     normal: ProseParagraph,
     h2: ProseH2,
     h3: ProseH3,
+    // h4 is the legacy import's, not the comp's — see ProseH4.astro.
+    h4: ProseH4,
     blockquote: ProseQuote,
   },
   list: {
     bullet: ProseList,
+    number: ProseNumberList,
   },
   listItem: {
     bullet: ProseListItem,
+    // Same <li>; the ordered/unordered difference is the WRAPPER's.
+    number: ProseListItem,
   },
   mark: {
     strong: ProseStrong,
+    // Unmapped marks fall through to their children silently — the words stay
+    // and the emphasis disappears with no warning. See ProseEm.astro.
+    em: ProseEm,
     link: ProseLink,
   },
 };

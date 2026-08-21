@@ -1,0 +1,339 @@
+{
+  "slug": "guide-to-sharing-the-road-with-motorcyclists",
+  "title": "Guide to Sharing the Road With Motorcyclists",
+  "excerpt": "Motorcyclists are more at risk of suffering serious and fatal injuries in accidents than motor vehicle drivers. For this reason, although every road user has a duty to prevent accidents, motor vehicle drivers have a greater responsibility regarding the safety of motorcyclists. May is Motorcycle Safety Awareness Month. Learning how to safely share the road […]",
+  "publishedAt": "2024-04-29T08:14:01",
+  "modifiedAt": "2025-06-20T14:23:41",
+  "categories": [
+    "motorcycle-accidents"
+  ],
+  "body": [
+    {
+      "_type": "block",
+      "_key": "bata",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sat9",
+          "text": "Motorcyclists are more at risk of suffering serious and fatal injuries in accidents than motor vehicle drivers. For this reason, although every road user has a duty to prevent accidents, motor vehicle drivers have a greater responsibility regarding the safety of motorcyclists.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "batf",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "latc",
+          "_type": "link",
+          "href": "https://www.trafficsafetymarketing.gov/safety-topics/motorcycle-safety#:~:text=May%20is%20Motorcycle%20Safety%20Awareness%20Month%20and%20you'll%20see,increase%20your%20motorcycle%20safety%20messaging."
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "satb",
+          "text": "May is ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "satd",
+          "text": "Motorcycle Safety Awareness Month",
+          "marks": [
+            "latc"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "sate",
+          "text": ". Learning how to safely share the road with motorcyclists in your community could save a life.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bath",
+      "style": "h2",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "satg",
+          "text": "Eliminate Distractions",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "batm",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "latj",
+          "_type": "link",
+          "href": "https://www.nhtsa.gov/campaign/distracted-driving"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sati",
+          "text": "Distracted driving is one of the highest crash risks involved in all types of motor vehicle accidents. The ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "satk",
+          "text": "National Highway Traffic Safety Administration",
+          "marks": [
+            "latj"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "satl",
+          "text": " reported that 3,308 lives were lost in 2022 due to distracted drivers. Over 32,000 deaths related to distracted driving occurred in the last 10 years.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "batq",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "satn",
+          "text": "Avoid distractions of any kind while operating your vehicle in Colorado, but cell phones are especially dangerous. Driving while distracted can make it easier to miss a nearby or oncoming motorcyclist and cause an accident.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bats",
+      "style": "h2",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "satr",
+          "text": "Check Twice",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "batu",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "satt",
+          "text": "You have probably heard the phrase “check twice for motorcyclists,” but you may not recognize the importance of adopting this habit. Motorcycles are much smaller than the standard passenger vehicle. This makes them easier to miss, especially in blind spots.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "batw",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "satv",
+          "text": "Before making any maneuvers, such as changing lanes or making a left-hand turn at an intersection, check twice for motorcycles you may have missed the first time. Exercise extra caution at night and when checking your blind spots.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "baty",
+      "style": "h2",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "satx",
+          "text": "Increase Following Distance",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bau0",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "satz",
+          "text": "Give motorcyclists a wider berth than you would for other motor vehicles. Their vulnerability in accidents makes it important to give motorcyclists room to safely maneuver. A motorcyclist may not be able to brake suddenly, for example, because he or she does not want to be tossed over the handlebars. Increasing your following and passing distances can give a motorcycle rider the extra space he or she needs to make safer decisions.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bau2",
+      "style": "h2",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sau1",
+          "text": "Be Patient",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bau4",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sau3",
+          "text": "Never tailgate, or follow too closely behind, a motorcyclist. This can easily lead to a deadly rear-end collision. Although some states now permit motorcyclists to lane split, or ride on the line between two lanes of same-direction traffic to help avoid rear-end collisions, Colorado is not one of them.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bau6",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sau5",
+          "text": "Keep ample distance between the front of your vehicle and the rear of a motorcycle in front of you to protect the motorcyclist. Be patient; do not speed, weave in and out of multiple lanes, make unsafe lane changes, or otherwise drive recklessly near a motorcyclist. Keep your vehicle’s movements smooth, safe and predictable.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bau8",
+      "style": "h2",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sau7",
+          "text": "Be Aware of Dangerous Environmental Conditions",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "baua",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sau9",
+          "text": "Motorcyclists are more exposed to risks presented by environmental hazards, such as bad weather and unsafe road conditions. Their smaller, lighter vehicles could lose control on a slippery road or if the tire strikes a pothole, for example.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bauc",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "saub",
+          "text": "If you are driving near a motorcyclist, be aware of the environment and road conditions. If they appear dangerous for a motorcycle, provide greater space in case the rider falls off the bike or has to lay the motorcycle down.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bauk",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "laue",
+          "_type": "link",
+          "href": "/contact/"
+        },
+        {
+          "_key": "lauh",
+          "_type": "link",
+          "href": "/motorcycle-accident-lawyer-denver/"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "saud",
+          "text": "If you get involved in an accident with a motorcycle despite your best efforts to share the road safely, ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "sauf",
+          "text": "contact Dormer Harpring",
+          "marks": [
+            "laue"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "saug",
+          "text": " to schedule a free consultation about your legal options. Our ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "saui",
+          "text": "Denver motorcycle accident attorney",
+          "marks": [
+            "lauh"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "sauj",
+          "text": " is experienced in holding negligent drivers accountable for causing an accident.",
+          "marks": []
+        }
+      ]
+    }
+  ],
+  "factCheck": [],
+  "author": {
+    "name": "Dormer Harpring",
+    "href": "/about"
+  },
+  "reviewer": {
+    "name": "K.C. Harpring",
+    "href": "/meet-our-attorneys/k-c-harpring"
+  },
+  "legacyId": 9023
+}

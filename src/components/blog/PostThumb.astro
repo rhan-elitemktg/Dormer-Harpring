@@ -1,0 +1,102 @@
+---
+// A post card's artwork — the real featured image, or the branded placeholder.
+//
+// ONE COMPONENT FOR BOTH CARD TYPES. PostCard and RelatedCard each drew their
+// own `<Picture>`, which was fine while every post was guaranteed art. Only 60
+// of the 167 imported posts have a featured image, so the "or else" branch is
+// now the common case — and two copies of it would drift the moment one card's
+// placeholder was tweaked.
+//
+// THE PLACEHOLDER IS MARKUP, NOT A GENERATED IMAGE FILE. A flat colour and a
+// centred logo has nothing to rasterise: shipping it as a real file would mean
+// one blurry bitmap scaled across every card size, plus a fake photograph in
+// `src/assets` that the next person has to work out the provenance of. As
+// markup the logo stays crisp at every width and the colour is the token, so it
+// follows the palette if the palette moves.
+//
+// It replaces a per-category fallback that gave every post in a category the
+// SAME photograph — the duplication that prompted this. A placeholder that
+// looks deliberate beats one that looks like a mistake.
+import type { ImageMetadata } from "astro";
+import Picture from "../media/Picture.astro";
+import logo from "../../assets/logo-white.webp";
+
+interface Props {
+  /** `null` for a post with no featured image — 107 of the imported 167. */
+  image: ImageMetadata | null;
+  /** Card art is decorative, so this is empty unless the caller describes it. */
+  alt?: string;
+  widths: number[];
+  sizes: string;
+  class?: string;
+}
+
+const { image, alt = "", widths, sizes, class: className } = Astro.props;
+---
+
+{
+  image ? (
+    <Picture src={image} alt={alt} widths={widths} sizes={sizes} class={className} />
+  ) : (
+    <span class:list={["thumb-mark", className]}>
+      {/* TWO ELEMENTS, NOT ONE, and the inner one does the centring.
+          The outer span wears the CALLER's image class, and callers style that
+          class for an <img>: PostCard's `.pcard__thumb :global(.pcard__img)`
+          sets `display: block`, which is a two-class selector and beats
+          anything single-class this component writes for the same element. A
+          `display: grid` here lost that fight silently and the logo sat at the
+          top of the box.
+          So the outer span keeps whatever box the caller gives it — 240px on a
+          post card, 210px on a related card — and the inner one, which no
+          caller knows about, fills it and centres. Nothing to out-specify. */}
+      <span class="thumb-mark__inner">
+        {/* Decorative: the card's own heading names the post, and the firm is
+            named in every byline beneath it. A logo announced here would be
+            read out before the title on every one of 107 cards. */}
+        <Picture src={logo} alt="" widths={[200, 400]} sizes="180px" class="thumb-mark__logo" />
+      </span>
+    </span>
+  )
+}
+
+<style>
+  /* NO DISPLAY AND NO SIZE HERE, on purpose. This element wears the CALLER's
+     image class as well, and `.thumb-mark[data-astro-cid-…]` is specificity
+     (0,2,0) — an attribute selector counts the same as a class — which exactly
+     ties `.pcard__thumb .pcard__img`. On a tie the later rule wins, and
+     PostCard's is emitted after this file's, so anything declared here for a
+     property PostCard also sets is lost. It only provides the colour and a
+     positioning context. */
+  .thumb-mark {
+    position: relative;
+    background: var(--dh-forest-500);
+  }
+
+  /* ABSOLUTE, PINNED TO ALL FOUR EDGES. No caller styles this element, so
+     nothing can outrank it — and `inset: 0` means the box fills its parent
+     whatever the parent's display is and wherever its height comes from, so
+     the centring does not depend on a percentage height resolving. Flex rather
+     than grid because a single centred child is what flex is for. */
+  .thumb-mark__inner {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-6);
+  }
+
+  /* `:global()` BOUNDED BY `.thumb-mark`, which is an element in THIS template.
+     The class itself is handed to Picture, so it lands on Picture's markup
+     carrying Picture's cid — a bare `.thumb-mark__logo` rule here compiles and
+     matches nothing, which is precisely what `check:styles` exists to catch,
+     and did.
+
+     Sized as a proportion of the card, capped: the same mark should not read as
+     enormous on a wide card and tiny in a related rail. */
+  .thumb-mark__inner :global(.thumb-mark__logo) {
+    width: 55%;
+    max-width: 180px;
+    height: auto;
+  }
+</style>

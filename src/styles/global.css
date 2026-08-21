@@ -840,12 +840,18 @@ select {
   margin-block: 0 var(--space-5);
 }
 
-.prose__list {
+/* The ordered list is the unordered one plus its marker — the legacy import is
+   the only source of either, and it uses both. Sharing the rule rather than
+   duplicating it keeps the two from drifting apart, which they would: nothing
+   in either linter compares two selectors' declarations. */
+.prose__list,
+.prose__olist {
   margin-block: 0 var(--space-5);
   padding-left: var(--space-6);
 }
 
-.prose__list li {
+.prose__list li,
+.prose__olist li {
   margin-bottom: var(--space-2);
 }
 
@@ -863,6 +869,14 @@ select {
 .prose__strong {
   font-weight: 700;
   color: var(--dh-ink-warm);
+}
+
+/* Italic only — no colour shift. `.prose__strong` warms its ink because the
+   comps set bold that way; nothing in any comp sets emphasis at all, so this
+   stays the browser default rather than inventing a treatment. It exists to be
+   MAPPED, not to be styled — see ProseEm.astro. */
+.prose__em {
+  font-style: italic;
 }
 
 .prose__quote {

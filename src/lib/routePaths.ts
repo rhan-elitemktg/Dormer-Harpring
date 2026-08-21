@@ -17,32 +17,46 @@
  *  `/meet-our-attorneys/<slug>` shape for the same reason — the live site has
  *  25 of them indexed, and `/attorneys/<slug>` would have cost 26 redirects to
  *  buy a slightly shorter URL. */
-export const practiceAreaPath = (slug: string) => `/${slug}`;
-export const locationPath = (slug: string) => `/${slug}`;
-export const blogPath = (slug: string) => `/${slug}`;
-export const communityPath = (slug: string) => `/${slug}`;
-export const resourcePath = (slug: string) => `/${slug}`;
-export const blogCategoryPath = (slug: string) => `/category/${slug}`;
+export const practiceAreaPath = (slug: string) => `/${slug}/`;
+export const locationPath = (slug: string) => `/${slug}/`;
+export const blogPath = (slug: string) => `/${slug}/`;
+export const communityPath = (slug: string) => `/${slug}/`;
+export const resourcePath = (slug: string) => `/${slug}/`;
+export const blogCategoryPath = (slug: string) => `/category/${slug}/`;
 
-/** Fixed routes. Referenced by the nav, the footer, and the sitemap. */
+/**
+ * Fixed routes. Referenced by the nav, the footer, and the sitemap.
+ *
+ * EVERY PATH CARRIES A TRAILING SLASH, matching `trailingSlash: "always"` in
+ * astro.config.mjs and `"trailingSlash": true` in the generated vercel.json.
+ * The three have to agree: Astro decides what it builds, Vercel decides what it
+ * serves and redirects, and these decide what the site links to. If they
+ * disagree, every internal link takes a needless redirect hop.
+ *
+ * WHY THE SLASH AND NOT THE BARE PATH. All ~300 indexed legacy URLs carry one —
+ * WordPress 301s the bare form to it — so matching means those URLs keep
+ * working exactly as Google already has them. Dropping it would quietly move
+ * every URL on the site, which is the one thing the flat root shape exists to
+ * prevent.
+ */
 export const ROUTES = {
   home: "/",
-  about: "/about",
-  attorneys: "/meet-our-attorneys",
-  practiceAreas: "/practice-areas",
-  results: "/results",
-  testimonials: "/testimonials",
-  coCounsel: "/co-counsel",
-  community: "/community-involvement",
-  blog: "/news",
-  contact: "/contact",
-  thankYou: "/thank-you",
-  privacy: "/privacy-policy",
-  editorialGuidelines: "/editorial-guidelines",
+  about: "/about/",
+  attorneys: "/meet-our-attorneys/",
+  practiceAreas: "/practice-areas/",
+  results: "/results/",
+  testimonials: "/testimonials/",
+  coCounsel: "/co-counsel/",
+  community: "/community-involvement/",
+  blog: "/news/",
+  contact: "/contact/",
+  thankYou: "/thank-you/",
+  privacy: "/privacy-policy/",
+  editorialGuidelines: "/editorial-guidelines/",
 } as const;
 
 /** Declared after ROUTES so the shared prefix is read from one place. */
-export const attorneyPath = (slug: string) => `${ROUTES.attorneys}/${slug}`;
+export const attorneyPath = (slug: string) => `${ROUTES.attorneys}${slug}/`;
 
 /**
  * The blog index with one category already selected.
@@ -76,12 +90,20 @@ export const RESERVED_PATHS: readonly string[] = [
   ROUTES.privacy,
   ROUTES.editorialGuidelines,
   "/admin",
-];
+  // Stored in `normalizePath`'s COMPARISON form, because `isReservedPath`
+  // normalizes its input before looking in here. Mapped rather than typed that
+  // way so ROUTES stays the one place a path is written.
+].map((path) => normalizePath(path));
 
 /**
- * Leading slash, no trailing slash, lowercase — the site's canonical path form.
- * Used before any comparison against RESERVED_PATHS or a document slug, so that
- * `/About/` and `about` both resolve to `/about`.
+ * The COMPARISON form: leading slash, NO trailing slash, lowercase.
+ *
+ * NOT the form the site links in — that carries a trailing slash, see ROUTES.
+ * This exists so two paths can be compared without the slash mattering, which
+ * is what every caller actually wants: `/About/`, `/about` and `about` all
+ * reduce to `/about`. Keeping it slash-free means the comparison survives
+ * whichever convention the site links in, and it is why flipping the site to
+ * trailing slashes did not have to touch a single comparison.
  */
 export function normalizePath(input: string): string {
   const trimmed = input.trim().toLowerCase();

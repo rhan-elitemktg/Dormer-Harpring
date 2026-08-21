@@ -55,9 +55,13 @@ function initBlogFeed(grid: HTMLElement) {
   const render = () => {
     const matched = items.filter(matches);
 
-    // A filtered view shows everything it matched — at most a handful — so the
-    // pager only governs the unfiltered feed.
-    const limit = filter === "all" ? shown : matched.length;
+    // THE PAGER GOVERNS EVERY VIEW, filtered or not. It used to reveal a
+    // filtered category in full on the assumption that a category held "at most
+    // a handful" — true of the twelve placeholder cards, wrong of the imported
+    // archive, where Auto Accident alone has 57. The button then stayed on
+    // screen with nothing left to reveal. `shown` resets to `initial` on every
+    // filter change, so each category starts at six of its own.
+    const limit = shown;
     let seen = 0;
     for (const item of items) {
       item.hidden = !matches(item) || seen++ >= limit;
@@ -137,8 +141,67 @@ function initBlogFeed(grid: HTMLElement) {
     ? tabs?.querySelector(`[data-filter="${CSS.escape(requested)}"]`)
     : null;
 
-  if (requested && known) applyFilter(requested);
-  else render();
+  if (requested && known) {
+    applyFilter(requested);
+    arriveAt(requested);
+  } else {
+    render();
+  }
+}
+
+/**
+ * Bring a filtered arrival to the feed.
+ *
+ * A reader following a category link from a post — or a legacy
+ * `/category/<slug>/` URL, which redirects here — lands at the top of the blog
+ * index looking at the hero and the featured panel, with the filtered grid
+ * below the fold. Nothing on screen shows that a filter was applied, so the
+ * page reads as "the category link is broken".
+ *
+ * SCROLLS TO THE TAB ROW, NOT THE GRID ITSELF. The grid alone would put the
+ * tabs off-screen, leaving no way to see which category is active or switch to
+ * another without scrolling back. The row sits directly above the grid, so this
+ * still lands on the posts — with the control that produced them in view.
+ *
+ * NOT ON A PLAIN /news/ VISIT: only when a category was actually requested and
+ * matched a tab.
+ */
+function arriveAt(slug: string) {
+  const tabs = document.querySelector<HTMLElement>("[data-blog-tabs]");
+  const target = tabs?.closest("section") ?? tabs;
+  if (!target) return;
+
+  // A back-navigation restores the reader's old position, and scrolling then
+  // would yank them away from where they were. Only act on an arrival that is
+  // still at the top of the page.
+  if (window.scrollY > 8) return;
+
+  // An involuntary animated scroll is a genuine problem for people who get
+  // motion sickness from it. They still need to arrive at the feed, so the
+  // journey is dropped rather than the destination.
+  const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const behavior: ScrollBehavior = still ? "auto" : "smooth";
+
+  // NOT `scrollIntoView`. It scrolls EVERY scrollable ancestor, and the second
+  // call below — centring the pressed tab inside the row — would therefore move
+  // the document too, computing its target from a position the first
+  // animation had not reached yet. Two smooth scrolls racing each other landed
+  // the page at its maximum offset, with the tab row sitting at the BOTTOM of
+  // the viewport instead of the top.
+  //
+  // An explicit offset cannot race: it is the section's top in document
+  // coordinates, resolved once.
+  window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY, behavior });
+
+  // With 23 categories the row scrolls, so the pressed tab is often out of
+  // sight — an active tab nobody can see is the same failure this function
+  // exists to fix, one axis over. Driving the ROW's own scrollLeft keeps this
+  // strictly horizontal; the document cannot move as a side effect.
+  const active = tabs?.querySelector<HTMLElement>(`[data-filter="${CSS.escape(slug)}"]`);
+  if (active && tabs) {
+    const centred = active.offsetLeft - (tabs.clientWidth - active.offsetWidth) / 2;
+    tabs.scrollTo({ left: Math.max(0, centred), behavior });
+  }
 }
 
 for (const grid of document.querySelectorAll<HTMLElement>("[data-blog-grid]")) {

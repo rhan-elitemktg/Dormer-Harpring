@@ -32,6 +32,7 @@ import {
   getBlogPostPage,
   getBlogPosts,
   getFeaturedPost,
+  getImportedArticles,
   getRelatedPosts,
 } from "../data/blog";
 import { CA_SECTION_IDS, getPracticeAreaDetails } from "../data/carAccidents";
@@ -47,12 +48,19 @@ import {
 } from "../data/testimonials";
 
 export const getStaticPaths = (async () => {
-  const [articles, featured, posts, details] = await Promise.all([
+  const [handAuthored, imported, featured, posts, details] = await Promise.all([
     getBlogPostArticles(),
+    getImportedArticles(),
     getFeaturedPost(),
     getBlogPosts(),
     getPracticeAreaDetails(),
   ]);
+
+  // ONE FEED AGAIN. `getBlogPosts()` IS the imported archive now, so the third
+  // list this used to union in would have duplicated every card. Articles still
+  // come from two places — the hand-authored one and the import — because a
+  // post's BODY can be curated even when its card is not.
+  const articles = [...handAuthored, ...imported];
   const feed = [featured, ...posts];
 
   // Walk the ARTICLES, not the feed — the same contract
@@ -86,15 +94,21 @@ export const getStaticPaths = (async () => {
     props: { kind: "practice-area" as const, detail },
   }));
 
-  const seen = new Set<string>();
+  // NAMES BOTH CLAIMANTS. The message used to say "a blog post and a practice
+  // area" whatever the actual pair was, which sent the first post-vs-post
+  // collision — a hand-authored article and its own imported copy — looking in
+  // the wrong place entirely.
+  const seen = new Map<string, string>();
   for (const entry of [...postPaths, ...detailPaths]) {
-    if (seen.has(entry.params.slug)) {
+    const kind = entry.props.kind === "post" ? "a blog post" : "a practice area";
+    const prior = seen.get(entry.params.slug);
+    if (prior) {
       throw new Error(
-        `/${entry.params.slug} is claimed by both a blog post and a practice ` +
-          `area. Astro would build one and silently drop the other.`
+        `/${entry.params.slug} is claimed by ${prior} AND ${kind}. Astro would ` +
+          `build one and silently drop the other.`
       );
     }
-    seen.add(entry.params.slug);
+    seen.set(entry.params.slug, kind);
   }
 
   return [...postPaths, ...detailPaths];

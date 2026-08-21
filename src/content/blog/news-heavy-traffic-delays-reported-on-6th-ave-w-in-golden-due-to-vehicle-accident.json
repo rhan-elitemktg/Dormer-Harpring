@@ -1,0 +1,167 @@
+{
+  "slug": "news-heavy-traffic-delays-reported-on-6th-ave-w-in-golden-due-to-vehicle-accident",
+  "title": "News: Heavy traffic delays reported on 6th Ave. W. in Golden due to vehicle accident",
+  "excerpt": "GOLDEN, CO – Significant traffic delays were reported on westbound 6th Avenue just before Indiana Street on Wednesday morning due to a vehicle accident. Jayson Luber, Denver 7 Traffic’s leading traffic expert, first announced the crash at 8:18 a.m., saying traffic was reduced to one lane. At the time of the reporting, traffic delays could […]",
+  "publishedAt": "2026-02-04T17:29:08",
+  "modifiedAt": "2026-02-04T17:29:08",
+  "categories": [
+    "auto-accident"
+  ],
+  "body": [
+    {
+      "_type": "block",
+      "_key": "b3nw",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s3nv",
+          "text": "GOLDEN, CO – Significant traffic delays were reported on westbound 6th Avenue just before Indiana Street on Wednesday morning due to a vehicle accident.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b3o1",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "l3ny",
+          "_type": "link",
+          "href": "https://x.com/Denver7Traffic/status/2019067998120681550"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s3nx",
+          "text": "Jayson Luber, ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "s3nz",
+          "text": "Denver 7 Traffic",
+          "marks": [
+            "l3ny"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "s3o0",
+          "text": "’s leading traffic expert, first announced the crash at 8:18 a.m., saying traffic was reduced to one lane. At the time of the reporting, traffic delays could also be seen towards Simms/Union.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b3o3",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s3o2",
+          "text": "Officials have not specified how the collision unfolded or confirmed the number of people and vehicles involved.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b3o5",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s3o4",
+          "text": "No injuries or citations were reported.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b3of",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "l3o7",
+          "_type": "link",
+          "href": "/denver-car-accident-lawyer/"
+        },
+        {
+          "_key": "l3oc",
+          "_type": "link",
+          "href": "/contact/"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s3o6",
+          "text": "Since 2016, Dormer Harping, LLC’s team of ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "s3o8",
+          "text": "Denver accident lawyers",
+          "marks": [
+            "l3o7",
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "s3o9",
+          "text": " has achieved millions in settlements and verdicts. Whether you were injured in a car accident, truck crash, or other related incident caused by the negligence of another, we are ready to help you hold the at-fault party accountable and support you in your path toward justice and recovery. Set up a free, no obligation consultation by calling our office at",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "s3oa",
+          "text": " (720) 571-8186",
+          "marks": [
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "s3ob",
+          "text": " or reaching out ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "s3od",
+          "text": "online",
+          "marks": [
+            "l3oc",
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "s3oe",
+          "text": ".",
+          "marks": []
+        }
+      ]
+    }
+  ],
+  "factCheck": [],
+  "author": {
+    "name": "Dormer Harpring",
+    "href": "/about"
+  },
+  "reviewer": {
+    "name": "K.C. Harpring",
+    "href": "/meet-our-attorneys/k-c-harpring"
+  },
+  "legacyId": 19163
+}

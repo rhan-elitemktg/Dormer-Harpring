@@ -1,0 +1,112 @@
+{
+  "slug": "connecting-with-the-community-at-the-denver-highlands-oktoberfest",
+  "title": "Connecting with the Community at the Denver Highlands Oktoberfest",
+  "excerpt": "On Saturday, September 13, our team had the pleasure of tabling at the Denver Highlands Oktoberfest. While it’s not the kind of place you’d usually expect to find a law firm, we’re so glad we had the opportunity to participate! This event was filled with incredible music, food and German fashion. There were even fun […]",
+  "publishedAt": "2025-09-15T11:53:54",
+  "modifiedAt": "2026-01-26T12:41:09",
+  "categories": [
+    "news"
+  ],
+  "body": [
+    {
+      "_type": "block",
+      "_key": "b6rj",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s6ri",
+          "text": "On Saturday, September 13, our team had the pleasure of tabling at the Denver Highlands Oktoberfest. While it’s not the kind of place you’d usually expect to find a law firm, we’re so glad we had the opportunity to participate!",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b6rl",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s6rk",
+          "text": "This event was filled with incredible music, food and German fashion. There were even fun competitions that took place such as a keg rolling race and even a dachshund race! However, the best part was the ability to connect with our community. We got to meet tons of friendly people, chat about what we do, and hand out some fun swag.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "image",
+      "_key": "i6rm",
+      "src": "./images/2025-09-Captura-de-pantalla-2025-09-15-a-las-11.50.04-a.m.png",
+      "alt": "Denver Highlands Oktoberfest"
+    },
+    {
+      "_type": "block",
+      "_key": "b6ro",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s6rn",
+          "text": "We believe that being a part of the community goes beyond office walls and courtrooms. Events like this give us the chance to introduce ourselves in a relaxed, fun setting and show that we’re more than just legal professionals.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b6rq",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s6rp",
+          "text": "A huge thank you to everyone who came by our booth. We had a blast, and we’re already looking forward to the next opportunity to participate in another tabling event.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b6ru",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "l6rs",
+          "_type": "link",
+          "href": "/community-involvement/"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s6rr",
+          "text": "We’re proud to be part of a community that supports one another. Learn more about how Dormer Harpring stays involved in local events and outreach ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "s6rt",
+          "text": "here.",
+          "marks": [
+            "l6rs"
+          ]
+        }
+      ]
+    }
+  ],
+  "factCheck": [],
+  "author": {
+    "name": "Dormer Harpring",
+    "href": "/about"
+  },
+  "reviewer": {
+    "name": "K.C. Harpring",
+    "href": "/meet-our-attorneys/k-c-harpring"
+  },
+  "legacyId": 16540
+}

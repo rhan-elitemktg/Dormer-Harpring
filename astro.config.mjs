@@ -17,6 +17,16 @@ export default defineConfig({
   // TODO(launch): confirm www vs apex before the first production deploy.
   site: "https://www.denvertrial.com",
 
+  // ONE URL PER PAGE. Without this Astro builds `/about/index.html` and Vercel
+  // happily serves it at BOTH `/about` and `/about/` with a 200 — the same page
+  // at two URLs, with only a canonical tag hinting which one counts. "always"
+  // makes the built links, the canonical tag and the server agree.
+  //
+  // The trailing slash rather than the bare path because every indexed legacy
+  // URL carries one: WordPress 301s the bare form to it, so this is the shape
+  // Google already has for ~300 pages. See ROUTES in lib/routePaths.ts.
+  trailingSlash: "always",
+
   // Self-hosted Google Fonts via Astro's Fonts API — downloaded and served
   // from our own origin at build time, so there is no render-blocking request
   // to fonts.googleapis.com (which is what the comps do).

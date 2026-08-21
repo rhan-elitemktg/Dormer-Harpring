@@ -105,7 +105,13 @@ built_tabs = [
 ]
 
 print("\nCATEGORY TABS")
-cmp("labels / order", comp_tabs, built_tabs)
+print(f"  · comp draws {len(comp_tabs)}, built ships {len(built_tabs)} — see DELIBERATE DIFFERENCES")
+# NOT a 1:1 comparison any more: the row carries every category the blog has.
+# What still has to hold is that none of the comp's SIX went missing — a
+# category the designer drew disappearing is a real regression, and it would be
+# invisible in a bare count.
+missing_tabs = [t for t in comp_tabs if t not in built_tabs]
+cmp("the comp's tabs all still present", [], missing_tabs)
 
 
 # ---------------------------------------------------------------- featured post
@@ -143,10 +149,22 @@ built_excerpts = [
 ]
 
 print(f"\nPOST CARDS ({len(cards)} built, {len(comp_titles)} in comp)")
-cmp("categories / order", comp_cats, built_cats)
-cmp("dates / order", comp_dates, built_dates)
-cmp("titles / order", comp_titles, built_titles)
-cmp("excerpts / order", comp_excerpts, built_excerpts)
+# The comp's twelve were placeholder copy — four real posts and eight titles the
+# designer invented. The grid is the imported archive now, so comparing the two
+# lists card-for-card compares a real feed against a mock-up. What replaces it is
+# the check that actually protects the card COMPONENT: every card, all 166 of
+# them, renders every field. A card losing its excerpt or its date would have
+# shown up in the old comparison too, and still shows up here.
+for name, values in (
+    ("category", built_cats),
+    ("date", built_dates),
+    ("title", built_titles),
+    ("excerpt", built_excerpts),
+):
+    blank = [i for i, v in enumerate(values) if not v.strip()]
+    cmp(f"every card has a {name}", [], blank)
+    if len(values) != len(cards):
+        cmp(f"a {name} per card", [len(cards)], [len(values)])
 
 
 # ---------------------------------------------------------------- core values
@@ -204,8 +222,13 @@ EXPECTED = [
     ),
     (
         "the four real posts link to their legacy slugs",
+        # WITH the trailing slash: the site links every internal path that way
+        # (ROUTES / `trailingSlash: "always"` / vercel.json's `trailingSlash`),
+        # matching the form all ~300 legacy URLs are indexed under. Asserted
+        # literally rather than slash-agnostically so that reverting the
+        # convention fails here instead of passing quietly.
         all(
-            f'href="/{slug}"' in grid_html
+            f'href="/{slug}/"' in grid_html
             for slug in (
                 "common-daycare-injuries",
                 "are-helmets-safe-to-use-after-theyve-been-dropped",
@@ -213,13 +236,18 @@ EXPECTED = [
                 "what-are-common-types-of-product-defects",
             )
         )
-        and 'href="/can-you-sue-a-trampoline-park-if-you-signed-a-waiver"' in built,
+        and 'href="/can-you-sue-a-trampoline-park-if-you-signed-a-waiver/"' in built,
         "the comp points all thirteen at '#'; five are real live posts and the scrape has their URLs",
     ),
     (
-        "the eight invented posts carry no link",
-        grid_html.count('class="pcard__link"') == 4,
-        "no post with those titles or dates exists in the 167 legacy posts, so there is nothing to link to",
+        # WAS "the eight invented posts carry no link", when the grid was the
+        # comp's twelve and only four were real. They are not unlinked now —
+        # they are GONE, replaced by the imported archive, so the invariant
+        # flipped from "exactly four link" to "every card links".
+        "every card links; nothing renders unlinked",
+        grid_html.count('class="pcard__link"') == len(cards) and len(cards) > 12,
+        "the comp's eight invented titles exist nowhere in the 167 legacy posts; rather than "
+        "ship them unlinked the grid now carries the real archive, so every card leads somewhere",
     ),
     (
         "reviewer is the roster's 'K.C. Harpring'",
@@ -237,7 +265,10 @@ EXPECTED = [
         # reviewer); a card with a post adds exactly one more, the title. The
         # comp would give the four linked cards five apiece.
         "one link per card, not four",
-        sorted(c.count("<a ") for c in cards) == [2] * 8 + [3] * 4,
+        # Every card is linked now, so every card is the same shape: two byline
+        # anchors plus the title. The old expectation — [2]*8 + [3]*4 — was
+        # describing the placeholder feed's eight unlinked cards, not a rule.
+        sorted(c.count("<a ") for c in cards) == [3] * len(cards),
         "the comp wires thumbnail, title and Read more as three anchors to one destination",
     ),
     (

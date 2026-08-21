@@ -25,6 +25,7 @@
 // the Practice Areas directory gives the three entries with no page. See the
 // TODO(launch) on `getBlogPosts()`.
 import type { ImageMetadata } from "astro";
+import { getCollection } from "astro:content";
 import { getTeam } from "./team";
 import { getFirmDetails } from "./site";
 import {
@@ -80,13 +81,27 @@ export interface BlogPost {
    * it machine-readable. Formatted for display by `formatPostDate`.
    */
   publishedAt: string;
+  /**
+   * THE post's category — one, not a list.
+   *
+   * WordPress lets a post carry several and 28 of the imported 167 do, but by
+   * Rhan's direction a post belongs to exactly one here: the first its source
+   * record lists. The content files keep every slug, because the getter is
+   * where a projection narrows — see `getImportedPosts`.
+   */
   category: BlogCategory;
   /**
-   * Card art. The comp draws these from the practice-area photography and picks
-   * them loosely — the uninsured-motorist card gets the dog-bite photograph —
-   * so they are decorative, and the cards render them with an empty `alt`.
+   * Card art — the post's own featured image, or `null`.
+   *
+   * NULL FOR 107 OF THE 167 IMPORTED POSTS, which have no featured image on the
+   * legacy site at all. `PostThumb.astro` draws the branded placeholder for
+   * those. It used to fall back to a practice-area photograph chosen by
+   * category, which gave every post in a category the same picture — the cards
+   * looked duplicated because they were.
+   *
+   * Decorative either way, so the cards render it with an empty `alt`.
    */
-  image: ImageMetadata;
+  image: ImageMetadata | null;
   author: PostByline;
   reviewer: PostByline;
   /** `null` for a post with no page. The card then renders without a link. */
@@ -94,6 +109,9 @@ export interface BlogPost {
 }
 
 export interface FeaturedPost extends BlogPost {
+  /** NARROWED from BlogPost's nullable: the featured panel is a photograph with
+   *  copy over it, so there is no version of it without art. */
+  image: ImageMetadata;
   /** The featured block shows a real photograph, so this one is described. */
   imageAlt: string;
 }
@@ -132,22 +150,52 @@ export async function getBlogPage(): Promise<BlogPageCopy> {
 }
 
 /**
- * The tab row, in the comp's order. Six entries, of which the first is the
- * unfiltered state — it carries no slug because there is no `/category/all`.
+ * The tab row: EVERY category the blog has, ordered by how many posts each
+ * holds.
  *
- * These are the SITE's categories, not a summary of the twelve posts below:
- * Premises Liability is here because the blog has that archive, and matches
- * only the featured post in the current feed. That is an artifact of a
- * placeholder feed, not of the tab row — the real archive has posts in all six.
+ * ALL 23, NOT THE COMP'S SIX. `CategoryTabs.astro` was already built to
+ * overflow into a horizontal scroll for exactly this — the comp draws six, the
+ * live blog has twenty-three, and an editor will add more. Rhan's direction is
+ * that the row scrolls rather than being capped or grouped.
+ *
+ * ORDERED BY POST COUNT, DESCENDING. In a row that scrolls, order decides what
+ * a reader meets before they interact: Auto Accident (54) and Personal Injury
+ * (49) sit where the eye lands, and the single-post categories are the ones you
+ * scroll for. Alphabetical would lead with Awards and Bike Accidents and bury
+ * the two covering two thirds of the archive.
+ *
+ * `all` is not here — it is the sentinel the component renders itself, and
+ * there is no `/category/all` behind it.
  */
 export async function getBlogCategories(): Promise<BlogCategory[]> {
-  return [
-    { _key: "auto-accident", title: "Auto Accident", slug: "auto-accident" },
-    { _key: "personal-injury", title: "Personal Injury", slug: "personal-injury" },
-    { _key: "product-liability", title: "Product Liability", slug: "product-liability" },
-    { _key: "premises-liability", title: "Premises Liability", slug: "premises-liability" },
-    { _key: "trials", title: "Trials", slug: "trials" },
-  ];
+  const [categories, posts] = await Promise.all([
+    getCollection("blogCategories"),
+    getCollection("blog"),
+  ]);
+
+  // PRIMARY ONLY, matching what a card carries and therefore what a tab can
+  // find. Counting a post under its secondaries would order the row by a
+  // number no tab can produce.
+  const counts = new Map<string, number>();
+  for (const post of posts) {
+    const primary = post.data.categories[0];
+    if (primary) counts.set(primary, (counts.get(primary) ?? 0) + 1);
+  }
+
+  return categories
+    // A TAB THAT FINDS NOTHING IS WORSE THAN NO TAB. With one category per
+    // post, any category no post LEADS with can never be reached — today that
+    // is "Auto Insurance & Accident Claims", which 13 posts carry second and
+    // none carry first. It is dropped from the row rather than shipped as an
+    // empty state. Give one of those 13 that category first and it returns on
+    // its own; nothing here needs editing.
+    .filter((entry) => (counts.get(entry.data.slug) ?? 0) > 0)
+    .map((entry) => ({ _key: entry.data.slug, title: entry.data.title, slug: entry.data.slug }))
+    .sort(
+      (a, b) =>
+        (counts.get(b.slug) ?? 0) - (counts.get(a.slug) ?? 0) ||
+        a.title.localeCompare(b.title)
+    );
 }
 
 const CATEGORIES: Record<string, BlogCategory> = {
@@ -197,6 +245,28 @@ async function byline(memberKey: string): Promise<PostByline> {
  *  site's byline convention, which the comp reproduces on all thirteen cards. */
 const FIRM: PostByline = { name: "Dormer Harpring", href: ROUTES.attorneys };
 
+/**
+ * The reviewed-by band at the foot of an article.
+ *
+ * ONE SOURCE FOR ONE SENTENCE. It is per-post data — in Sanity it becomes a
+ * field an editor can rewrite for a post reviewed by someone else — but every
+ * post that exists today is reviewed by the same person, and two hand-copied
+ * versions of this would drift the moment one is edited.
+ *
+ * TODO(launch): "more than 20 years" is one of the unverified stat claims in
+ * README's table. It was already on the one built article; deriving the
+ * imported posts from the same sentence puts it on every post the import
+ * brings, so it needs confirming before launch rather than after.
+ */
+function reviewedBy(reviewer: PostByline): PortableTextBlock[] {
+  return pt(
+    "This article was written and reviewed by the team at Dormer Harpring " +
+      `and approved by founding partner [${reviewer.name}](${reviewer.href}), who has ` +
+      "tried personal injury cases to verdict in Colorado courts for more " +
+      "than 20 years."
+  );
+}
+
 export async function getFeaturedPost(): Promise<FeaturedPost> {
   return {
     _key: "trampoline-waiver",
@@ -217,190 +287,26 @@ export async function getFeaturedPost(): Promise<FeaturedPost> {
 }
 
 /**
- * The twelve cards below the featured block, newest first.
+ * The feed below the featured panel, newest first.
  *
- * TODO(launch): THE LAST EIGHT HAVE NO PAGE AND NO SOURCE. Posts 1–4 are real —
- * they are the live blog's June 17 → June 1 entries and keep their legacy
- * slugs, so those four links resolve today and keep resolving after cutover.
- * Posts 5–12 are copy the designer wrote for the comp: their titles appear
- * nowhere in the 167 legacy posts, and their dates (May 22 → Feb 11, 2026)
- * belong to different real posts. Four of them are the same placeholder
- * articles the homepage's insights tab carries. They ship with `href: null`,
- * so their cards render without a link rather than as dead ones. Replace them
- * with real posts, or drop them, before launch.
+ * THIS IS THE IMPORTED ARCHIVE NOW. It used to be twelve cards transcribed from
+ * the comp, of which only four were real posts — the other eight were titles
+ * the designer invented, shipped with `href: null` so their cards rendered
+ * unlinked rather than dead. All twelve are gone: the import brings the actual
+ * 166 (167 less the featured post, which is hand-authored and shown above), so
+ * every card leads somewhere and the tab row filters a real archive instead of
+ * a placeholder.
+ *
+ * That settles three of README's launch items at once — the eight cards with no
+ * post behind them, the four pointing at legacy URLs this build did not serve,
+ * and the index's dependence on the old site staying up.
+ *
+ * The featured post is NOT here: `getImportedPosts()` drops any slug a
+ * hand-authored article claims, and the trampoline post is the one that does,
+ * so it cannot appear twice.
  */
 export async function getBlogPosts(): Promise<BlogPost[]> {
-  const kc = await byline("k-c-harpring");
-  const sean = await byline("sean-dormer");
-
-  return [
-    {
-      _key: "daycare-injuries",
-      title: "Common daycare injuries",
-      excerpt:
-        "Daycare injuries range from scrapes to broken bones and head trauma. " +
-        "Playground equipment, poor supervision, and unsecured furniture drive " +
-        "most of the serious ones — and Denver families often have legal options.",
-      publishedAt: "2026-06-17",
-      category: CATEGORIES.daycare,
-      image: personalInjury,
-      author: FIRM,
-      reviewer: kc,
-      href: blogPath("common-daycare-injuries"),
-    },
-    {
-      _key: "dropped-helmets",
-      title: "Are helmets safe to use after they have been dropped?",
-      excerpt:
-        "A helmet’s foam liner compresses permanently once it absorbs impact, " +
-        "and the outer shell rarely shows it. Any crash is reason enough to " +
-        "replace it, no matter how minor it felt.",
-      publishedAt: "2026-06-11",
-      category: CATEGORIES.bike,
-      image: bicycle,
-      author: FIRM,
-      reviewer: kc,
-      href: blogPath("are-helmets-safe-to-use-after-theyve-been-dropped"),
-    },
-    {
-      _key: "pressure-cookers",
-      title: "Are pressure cookers dangerous?",
-      excerpt:
-        "When a safety mechanism fails, built-up steam has nowhere to go. " +
-        "Burns, lacerations, and permanent scarring follow — and Colorado gives " +
-        "you two years to bring a claim.",
-      publishedAt: "2026-06-05",
-      category: CATEGORIES.product,
-      image: burns,
-      author: FIRM,
-      reviewer: kc,
-      href: blogPath("dangers-of-pressure-cookers"),
-    },
-    {
-      _key: "product-defects",
-      title: "What are common types of product defects?",
-      excerpt:
-        "Design, manufacturing, and marketing defects are the three categories " +
-        "courts recognize. Liability can reach designers, assemblers, " +
-        "wholesalers, and retailers alike — and preserving the product matters.",
-      publishedAt: "2026-06-01",
-      category: CATEGORIES.product,
-      image: slipAndFall,
-      author: FIRM,
-      reviewer: kc,
-      href: blogPath("what-are-common-types-of-product-defects"),
-    },
-    {
-      _key: "adjusters",
-      title: "Talking to adjusters: what not to say",
-      excerpt:
-        "The first call from an insurer is evidence gathering, not a courtesy. " +
-        "Here is what a recorded statement is really for, the questions built " +
-        "to shrink your claim, and what to say instead.",
-      publishedAt: "2026-05-22",
-      category: CATEGORIES.autoInsurance,
-      image: carAccident,
-      author: FIRM,
-      reviewer: sean,
-      href: null,
-    },
-    {
-      _key: "claim-worth",
-      title: "What is my personal injury claim worth?",
-      excerpt:
-        "Medical bills are only the starting point. Lost wages, future care, " +
-        "and pain and suffering all carry value — and the first offer is almost " +
-        "never that number.",
-      publishedAt: "2026-05-08",
-      category: CATEGORIES.personalInjury,
-      image: truck,
-      author: FIRM,
-      reviewer: kc,
-      href: null,
-    },
-    {
-      _key: "first-48",
-      title: "What to do in the first 48 hours after a crash",
-      excerpt:
-        "The evidence that decides your case disappears fast. A short, " +
-        "practical checklist for the two days that matter most — even if you " +
-        "feel fine.",
-      publishedAt: "2026-04-24",
-      category: CATEGORIES.autoAccident,
-      image: motorcycle,
-      author: FIRM,
-      reviewer: sean,
-      href: null,
-    },
-    {
-      _key: "will-it-go-to-trial",
-      title: "Will my case actually go to trial?",
-      excerpt:
-        "Most cases settle. But a firm that is genuinely willing to try one is " +
-        "exactly what makes an insurer pay full value — here is how that " +
-        "leverage works.",
-      publishedAt: "2026-04-09",
-      category: CATEGORIES.trials,
-      image: boardroom,
-      author: FIRM,
-      reviewer: kc,
-      href: null,
-    },
-    {
-      _key: "how-long-to-file",
-      title: "How long do I have to file a claim in Colorado?",
-      excerpt:
-        "Two years for most injuries, three for motor vehicle crashes — with " +
-        "exceptions that shorten the window sharply when a government entity is " +
-        "involved.",
-      publishedAt: "2026-03-26",
-      category: CATEGORIES.laws,
-      image: wrongfulDeath,
-      author: FIRM,
-      reviewer: sean,
-      href: null,
-    },
-    {
-      _key: "invisible-brain-injury",
-      title: "Proving a brain injury insurers say is not there",
-      excerpt:
-        "Concussions rarely show on a scan. Here is the medical and " +
-        "testimonial evidence that makes an invisible injury undeniable to a " +
-        "jury.",
-      publishedAt: "2026-03-12",
-      category: CATEGORIES.personalInjury,
-      image: brainInjury,
-      author: FIRM,
-      reviewer: kc,
-      href: null,
-    },
-    {
-      _key: "um-uim",
-      title: "Uninsured and underinsured motorist coverage, explained",
-      excerpt:
-        "The driver who hit you may carry the state minimum. Your own policy " +
-        "may cover the gap — and most people never realize they can use it.",
-      publishedAt: "2026-02-26",
-      category: CATEGORIES.autoInsurance,
-      image: dogBite,
-      author: FIRM,
-      reviewer: sean,
-      href: null,
-    },
-    {
-      _key: "who-pays-medical-bills",
-      title: "Who pays my medical bills while the case is pending?",
-      excerpt:
-        "Health insurance, MedPay, and treatment on a lien. The options that " +
-        "let you get care now instead of waiting on a settlement.",
-      publishedAt: "2026-02-11",
-      category: CATEGORIES.personalInjury,
-      image: consult,
-      author: FIRM,
-      reviewer: kc,
-      href: null,
-    },
-  ];
+  return getImportedPosts();
 }
 
 // ---------------------------------------------------------------------------
@@ -674,12 +580,7 @@ export async function getBlogPostArticles(): Promise<BlogPostArticle[]> {
       readTime: readTime(body),
       // TODO(launch): "more than 20 years" is the same unverified claim as the
       // homepage's `20 Years` stat. The comp asserts it; nobody has confirmed it.
-      factCheck: pt(
-        "This article was written and reviewed by the team at Dormer Harpring " +
-          `and approved by founding partner [${kc.name}](${kc.href}), who has ` +
-          "tried personal injury cases to verdict in Colorado courts for more " +
-          "than 20 years."
-      ),
+      factCheck: reviewedBy(kc),
     },
   ];
 }
@@ -697,6 +598,123 @@ export async function getBlogPostArticles(): Promise<BlogPostArticle[]> {
  * four that exist), the band at the foot takes 3. They overlap, and will stop
  * overlapping as soon as the blog has more than five real posts in it.
  */
+/* ---------------------------------------------------------------------------
+ * THE IMPORTED LEGACY BLOG.
+ *
+ * Everything above this line is hand-authored copy from the comps. Everything
+ * below reads the `blog` content collection, which `scripts/import-blog-posts.mjs`
+ * fills from the live WordPress site.
+ *
+ * THE TWO ARE DELIBERATELY NOT MERGED INTO THE INDEX YET. `getBlogPosts()` is
+ * still the comp's twelve cards, because the index's tab row ships five
+ * categories and the import brings twenty-three — how that row handles
+ * twenty-three is an open design question, and answering it by quietly
+ * lengthening the feed would decide it by accident. So imported posts get a
+ * PAGE (the route unions them in) without yet getting a CARD. When the tab row
+ * is settled, `getBlogPosts()` returns these too and this comment goes.
+ * ------------------------------------------------------------------------- */
+
+
+/** The taxonomy, straight from the `blogCategories` collection rather than the
+ *  hand-written CATEGORIES map above — the imported posts carry the live
+ *  site's 23 slugs, and only the collection knows all of them. */
+async function importedCategories(): Promise<Map<string, BlogCategory>> {
+  const entries = await getCollection("blogCategories");
+  return new Map(
+    entries.map((entry) => [
+      entry.data.slug,
+      { _key: entry.data.slug, title: entry.data.title, slug: entry.data.slug },
+    ])
+  );
+}
+
+/**
+ * Imported posts in the FEED shape, newest first.
+ *
+ * `_key` is the slug: the route joins an article to its feed entry on `_key`,
+ * and for an imported post the slug is the only identifier that exists on both
+ * sides. The hand-authored posts use short keys like `trampoline-waiver`, so
+ * the two namespaces cannot collide unless a legacy slug is exactly that.
+ */
+/**
+ * Slugs a hand-authored article already claims.
+ *
+ * HAND-AUTHORED WINS. The import brings all 167 legacy posts including any that
+ * were already transcribed by hand, and the hand-authored version is not merely
+ * a duplicate — it is the legacy article WITH corrections: the live copy's
+ * truncated sentence completed, the firm's real phone number in place of the
+ * article's third one. Both are asserted in diff-comp-blog-post.py. Letting the
+ * import win would silently revert them.
+ *
+ * The route's own collision check would throw on this rather than pick one,
+ * which is how it surfaced. Filtering here keeps that check meaning what it
+ * says: a genuine conflict, not an expected overlap.
+ */
+async function handAuthoredSlugs(): Promise<Set<string>> {
+  return new Set((await getBlogPostArticles()).map((article) => article.slug));
+}
+
+export async function getImportedPosts(): Promise<BlogPost[]> {
+  const [entries, categories, kc, claimed] = await Promise.all([
+    getCollection("blog"),
+    importedCategories(),
+    byline("k-c-harpring"),
+    handAuthoredSlugs(),
+  ]);
+
+  return entries
+    .filter((entry) => !claimed.has(entry.data.slug))
+    .map((entry) => {
+      const primary = entry.data.categories[0];
+      const category = categories.get(primary);
+      if (!category) {
+        throw new Error(
+          `blog: imported post "${entry.data.slug}" has category "${primary}", ` +
+            `which is not in the blogCategories collection.`
+        );
+      }
+      return {
+        _key: entry.data.slug,
+        title: entry.data.title,
+        excerpt: entry.data.excerpt,
+        publishedAt: entry.data.publishedAt,
+        category,
+        // No fallback: a post without a featured image gets the placeholder,
+        // drawn by PostThumb.astro. Substituting a stock photograph here is
+        // what made every card in a category look identical.
+        image: entry.data.image ?? null,
+        author: FIRM,
+        reviewer: kc,
+        href: blogPath(entry.data.slug),
+      } satisfies BlogPost;
+    })
+    .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
+}
+
+/** Imported posts in the ARTICLE shape — the body the page renders. */
+export async function getImportedArticles(): Promise<BlogPostArticle[]> {
+  const [entries, kc, claimed] = await Promise.all([
+    getCollection("blog"),
+    byline("k-c-harpring"),
+    handAuthoredSlugs(),
+  ]);
+
+  return entries
+    .filter((entry) => !claimed.has(entry.data.slug))
+    .map((entry) => ({
+    _key: entry.data.slug,
+    slug: entry.data.slug,
+    body: entry.data.body,
+    // DERIVED, never stored — same rule the hand-authored article follows.
+    readTime: readTime(entry.data.body),
+    /* WordPress has no field for this, so the import leaves it empty and the
+       band is derived from the reviewer here. A post whose file DOES carry one
+       keeps it — that is the path an editor's override takes once these move
+       into Sanity, and it is why this coalesces rather than always deriving. */
+    factCheck: entry.data.factCheck.length > 0 ? entry.data.factCheck : reviewedBy(kc),
+  }));
+}
+
 export async function getRelatedPosts(key: string, limit: number): Promise<BlogPost[]> {
   const [featured, posts] = await Promise.all([getFeaturedPost(), getBlogPosts()]);
   const feed: BlogPost[] = [featured, ...posts];

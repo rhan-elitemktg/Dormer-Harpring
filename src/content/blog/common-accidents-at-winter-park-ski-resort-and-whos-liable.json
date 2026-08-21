@@ -1,0 +1,938 @@
+{
+  "slug": "common-accidents-at-winter-park-ski-resort-and-whos-liable",
+  "title": "Common Accidents at Winter Park Ski Resort and Who’s Liable?",
+  "excerpt": "A day at Winter Park Ski Resort often promises fresh powder, breathtaking mountain views, and adrenaline-filled descents. Yet, accidents happen even on the most carefully groomed slopes. Collisions, falls, and equipment failures can turn a weekend getaway into weeks of medical treatment and unexpected costs. When injuries occur, questions of fault and financial responsibility quickly […]",
+  "publishedAt": "2025-12-29T08:11:02",
+  "modifiedAt": "2025-12-24T12:18:28",
+  "categories": [
+    "ski-accident"
+  ],
+  "body": [
+    {
+      "_type": "block",
+      "_key": "b4cx",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4cu",
+          "text": "A day at ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "s4cv",
+          "text": "Winter Park Ski Resort",
+          "marks": [
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "s4cw",
+          "text": " often promises fresh powder, breathtaking mountain views, and adrenaline-filled descents. Yet, accidents happen even on the most carefully groomed slopes. Collisions, falls, and equipment failures can turn a weekend getaway into weeks of medical treatment and unexpected costs. When injuries occur, questions of fault and financial responsibility quickly follow.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "image",
+      "_key": "i4cy",
+      "src": "./images/2025-12-shutterstock_2697939507-1-225x300.jpg",
+      "alt": "Ski resort"
+    },
+    {
+      "_type": "block",
+      "_key": "b4d3",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "l4d0",
+          "_type": "link",
+          "href": "/"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4cz",
+          "text": "At ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "s4d1",
+          "text": "Dormer Harpring",
+          "marks": [
+            "l4d0",
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "s4d2",
+          "text": ", we aim to fight for justice, challenge negligent operators, and pursue compensation under Colorado’s ski safety laws when serious injuries change lives.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b4d5",
+      "style": "h2",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4d4",
+          "text": "Understanding Ski Resort Liability",
+          "marks": [
+            "strong"
+          ]
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b4db",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "l4d7",
+          "_type": "link",
+          "href": "https://leg.colorado.gov/sites/default/files/images/olls/crs2024-title-33.pdf"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4d6",
+          "text": "Colorado law limits what injured skiers may recover from a resort. Section ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "s4d8",
+          "text": "33-44-113",
+          "marks": [
+            "l4d7",
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "s4d9",
+          "text": " of the Colorado Ski Safety Act",
+          "marks": [
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "s4da",
+          "text": " provides: “The total amount of damages which may be recovered from a ski area operator…shall not exceed one million dollars, present value, including any derivative claim by any other claimant, which shall not exceed two hundred fifty thousand dollars…including any claim attributable to noneconomic loss or injury…which shall not exceed two hundred fifty thousand dollars.”",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b4dd",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4dc",
+          "text": "In practice, this statute caps recovery at one million dollars. Derivative claims and non-economic damages, such as pain and suffering, are each capped at $250,000. Courts may grant additional recovery only for proven excess future medical costs or lost earnings.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b4df",
+      "style": "h2",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4de",
+          "text": "Duty of Care by Ski Resorts",
+          "marks": [
+            "strong"
+          ]
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b4dh",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4dg",
+          "text": "Every ski resort in Colorado, including Winter Park, owes its guests a duty of care. This responsibility includes:",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b4dj",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4di",
+          "text": "Posting warning signs at trail entrances and near hazards.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "b4dl",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4dk",
+          "text": "Closing unsafe runs and enforcing closures.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "b4dn",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4dm",
+          "text": "Maintaining ski lifts and gondolas to ensure passenger safety.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "b4dp",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4do",
+          "text": "Training staff and patrollers to respond to emergencies.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "b4dr",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4dq",
+          "text": "When a resort fails in these obligations, and an injury results, legal responsibility can follow.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b4dt",
+      "style": "h2",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4ds",
+          "text": "Some common accidents and factors",
+          "marks": [
+            "strong"
+          ]
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b4dv",
+      "style": "h3",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4du",
+          "text": "Collisions with other skiers",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b4e0",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "l4dx",
+          "_type": "link",
+          "href": "https://www.nsaa.org/NSAA/Safety/Collision_Safety/NSAA/Safety/Collision_Safety.aspx?hkey=e79bb01d-ee13-4c82-80c1-fde1a608de10"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4dw",
+          "text": "Crashes between skiers and snowboarders are among the most common accidents at Colorado resorts. They often occur when someone skis too fast, loses control, or disregards right-of-way rules. The ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "s4dy",
+          "text": "National Ski Areas Association",
+          "marks": [
+            "l4dx",
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "s4dz",
+          "text": " highlights collision safety as a shared responsibility, urging all skiers to stay aware of others and ride responsibly.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b4e2",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4e1",
+          "text": "When this rule is ignored, accidents can cause concussions, broken bones, and spinal injuries. Disputes often arise because both parties may blame the other. Evidence such as witness accounts, trail camera footage, or ski patrol reports can prove who violated slope safety rules.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b4e4",
+      "style": "h3",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4e3",
+          "text": "Falls",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b4e6",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4e5",
+          "text": "Falling is an unavoidable part of skiing, but not all falls are harmless. Slips can occur when icy patches form, the terrain is uneven, or a skier attempts to run beyond their skill level. While some falls result only in sore muscles, others can lead to torn ligaments, fractured wrists, or traumatic brain injuries.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b4e8",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4e7",
+          "text": "Responsibility for these accidents depends heavily on context. A skier who overestimates their ability may have no legal recourse. Still, a fall caused by poorly maintained trails or failure to rope off dangerous areas could raise questions of resort negligence. Even routine conditions, such as shaded slopes that refreeze into slick surfaces, require proper warnings and maintenance to protect guests.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b4ea",
+      "style": "h3",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4e9",
+          "text": "Equipment malfunctions",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b4ec",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4eb",
+          "text": "Though less common than collisions or falls, equipment failures can be hazardous. Issues range from defective bindings that fail to release to boot or helmet defects to lift malfunctions. One recent example at Winter Park involved a gondola temporarily shut down after a cracked component was discovered.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b4ee",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4ed",
+          "text": "When gear fails, the legal question shifts to whether the manufacturer produced a defective product or the resort could not properly inspect and maintain the rental equipment. These claims often involve product liability principles and can require expert testimony about the design or maintenance of the equipment involved.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b4eg",
+      "style": "h3",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4ef",
+          "text": "Collisions with trees or other objects",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b4ei",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4eh",
+          "text": "Natural and man-made obstacles add another layer of risk. Skiers can strike trees, fences, lift towers, or even unmarked equipment left on the slopes. Loss of control is usually the main factor, but resort conditions also play a role. According to Colorado safety statistics, nearly half of ski fatalities in some recent seasons were tied to tree impacts.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b4ek",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4ej",
+          "text": "Resorts are expected to minimize hazards, such as padding lift towers or clearly marking snowmaking equipment. However, the skier still has the responsibility to stay in control. When resort negligence and skier error contribute, liability may be shared.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b4em",
+      "style": "h3",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4el",
+          "text": "Accidents in closed areas",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b4eo",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4en",
+          "text": "Few scenarios create greater danger than entering closed terrain. These areas may hide unstable snow, avalanche risks, tree wells, or deep powder that traps skiers. Despite prominent signage, some visitors still venture into restricted runs in search of fresh tracks.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b4eq",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4ep",
+          "text": "Winter Park Resort enforces a zero-tolerance policy on this issue. Violating closures can result in immediate pass revocation and hold the skier personally responsible for any injuries sustained.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b4es",
+      "style": "h2",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4er",
+          "text": "Location and Conditions of the Resort",
+          "marks": [
+            "strong"
+          ]
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b4eu",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4et",
+          "text": "The mountain environment itself adds complexity to ski accident claims. Winter Park combines gentle beginner slopes with steep bowls and tree-lined runs, creating very different risk levels within a single resort. Altitude, unpredictable weather, and shifting snowpack all shape safety on the hill. For example:",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b4ew",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4ev",
+          "text": "A sudden storm can slash visibility within minutes, obscuring hazards.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "b4ey",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4ex",
+          "text": "Afternoon sun can melt and refreeze snow, leaving treacherous ice on shaded trails.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "b4f0",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4ez",
+          "text": "Holiday crowds pack runs with skiers of mixed abilities, increasing the likelihood of collisions.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "b4f2",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4f1",
+          "text": "These conditions are more than background details—they often influence how liability is assessed when serious injuries occur.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b4f4",
+      "style": "h2",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4f3",
+          "text": "Determining liability",
+          "marks": [
+            "strong"
+          ]
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b4f6",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4f5",
+          "text": "Assigning fault in a ski accident requires analyzing multiple factors, including the skier’s actions, the resort’s role, and potential equipment issues.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b4f9",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4f7",
+          "text": "Skier’s liability",
+          "marks": [
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "s4f8",
+          "text": ": Skiers must remain in control, obey posted signs, and respect closures. Ignoring these duties often leads to personal responsibility, particularly in skier-to-skier collisions.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "b4fc",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4fa",
+          "text": "Resort’s liability",
+          "marks": [
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "s4fb",
+          "text": ": Resorts may be liable for negligence, such as failing to maintain lifts, leaving dangerous trails open, or not posting adequate warnings. Colorado law, however, caps damages against operators, limiting recovery even if fault is proven.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "b4ff",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4fd",
+          "text": "Manufacturer or equipment provider liability",
+          "marks": [
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "s4fe",
+          "text": ": Defective bindings, helmets, or rental gear can cause serious harm. In such cases, responsibility may rest with the manufacturer or the resort that failed to maintain equipment.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "b4fi",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4fg",
+          "text": "Liability waivers",
+          "marks": [
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "s4fh",
+          "text": ": Waivers provide resorts with significant protection, but they cannot block claims for gross negligence, willful misconduct, or defective products.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "b4fn",
+      "style": "h2",
+      "markDefs": [
+        {
+          "_key": "l4fk",
+          "_type": "link",
+          "href": "/denver-ski-accident-lawyer/"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4fj",
+          "text": "Call a ",
+          "marks": [
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "s4fl",
+          "text": "Ski Crash Injury Lawyer",
+          "marks": [
+            "strong",
+            "l4fk"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "s4fm",
+          "text": " That Understands the Rules",
+          "marks": [
+            "strong"
+          ]
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b4fy",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "l4ft",
+          "_type": "link",
+          "href": "/contact/"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4fo",
+          "text": "At ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "s4fp",
+          "text": "Dormer Harpring",
+          "marks": [
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "s4fq",
+          "text": ", we’ve helped Coloradans and visitors navigate the complex legal landscape after ski resort accidents. Liability at ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "s4fr",
+          "text": "Winter Park Ski Resort",
+          "marks": [
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "s4fs",
+          "text": " depends on the facts of each case, from the actions of individual skiers to the safety practices of the resort itself. Don’t wait to understand your rights if you’ve been injured on the slopes. ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "s4fu",
+          "text": "Call us today",
+          "marks": [
+            "l4ft"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "s4fv",
+          "text": " at ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "s4fw",
+          "text": "(303) 747-4404",
+          "marks": [
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "s4fx",
+          "text": " to speak with our team and learn how we can help you pursue your recovery.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b4g0",
+      "style": "h2",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4fz",
+          "text": "Check Out More Helpful Articles",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b4g3",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "l4g1",
+          "_type": "link",
+          "href": "/who-pays-for-damages-if-a-minor-causes-a-skiing-accident/"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4g2",
+          "text": "Who Pays For Damages If A Minor Causes A Skiing Accident?",
+          "marks": [
+            "l4g1"
+          ]
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "b4g6",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "l4g4",
+          "_type": "link",
+          "href": "/understanding-ski-collisions/"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4g5",
+          "text": "Understanding Ski Collisions",
+          "marks": [
+            "l4g4"
+          ]
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "b4g9",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "l4g7",
+          "_type": "link",
+          "href": "/determining-who-is-at-fault-in-a-ski-accident/"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4g8",
+          "text": "Determining Who Is At Fault In a Ski Accident",
+          "marks": [
+            "l4g7"
+          ]
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    }
+  ],
+  "factCheck": [],
+  "author": {
+    "name": "Dormer Harpring",
+    "href": "/about"
+  },
+  "reviewer": {
+    "name": "K.C. Harpring",
+    "href": "/meet-our-attorneys/k-c-harpring"
+  },
+  "legacyId": 18621
+}

@@ -47,12 +47,14 @@ export type PortableTextNode = PortableTextBlock | PortableTextImage;
 export interface PortableTextBlock {
   _type: "block";
   _key: string;
-  style: "normal" | "blockquote" | "h2" | "h3";
+  /** `h4` and the numbered list arrive with the legacy blog import; the `pt()`
+   *  shim below emits neither, since no hand-authored copy has needed them. */
+  style: "normal" | "blockquote" | "h2" | "h3" | "h4";
   markDefs: PortableTextLink[];
   children: PortableTextSpan[];
   /** Present only on list items. Consecutive ones are grouped into one <ul> by
    *  the renderer, which is why a list is a run of blocks and not a block. */
-  listItem?: "bullet";
+  listItem?: "bullet" | "number";
   /** Portable Text nests lists by level. Nothing here nests, so it is always 1,
    *  but the field has to be there or the renderer treats the item as loose. */
   level?: number;

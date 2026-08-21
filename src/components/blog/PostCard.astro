@@ -14,7 +14,7 @@
 // A post with no page renders with no link at all — see `href: null` in
 // `data/blog.ts`. Eight of the twelve are in that state until the firm
 // supplies real articles.
-import Picture from "../media/Picture.astro";
+import PostThumb from "./PostThumb.astro";
 import type { BlogPost } from "../../data/blog";
 import { formatPostDate } from "../../lib/dates";
 
@@ -27,7 +27,9 @@ interface Props {
 const { post, readMoreLabel } = Astro.props;
 ---
 
-{/* `data-category` is what the tab filter matches on — see scripts/blogFeed.ts. */}
+{/* `data-category` is what the tab filter matches on — see scripts/blogFeed.ts.
+    ONE value: a post belongs to exactly one category here, even where its
+    source record lists several. */}
 <li class="pcard" data-category={post.category.slug}>
   <div class="pcard__thumb">
     {
@@ -37,9 +39,8 @@ const { post, readMoreLabel } = Astro.props;
          practice-area set and chosen loosely — the uninsured-motorist card gets
          the dog-bite photograph — so they illustrate nothing to describe. */
     }
-    <Picture
-      src={post.image}
-      alt=""
+    <PostThumb
+      image={post.image}
       widths={[400, 600, 800]}
       sizes="(max-width: 760px) 100vw, (max-width: 1180px) 50vw, 33vw"
       class="pcard__img"
@@ -79,6 +80,20 @@ const { post, readMoreLabel } = Astro.props;
     position: relative; /* the stretched link's containing block */
     display: flex;
     flex-direction: column;
+  }
+
+  /* `display: flex` ABOVE BEATS THE `hidden` ATTRIBUTE, so this rule is what
+     makes filtering and paging work at all. `hidden` only carries
+     `display: none` from the UA stylesheet, and any author `display` on the
+     same element wins — the attribute is set, the card stays on screen.
+
+     blogFeed.ts hides by writing `hidden`, so without this the category tabs
+     did nothing and "Load more" had nothing left to reveal, with no error
+     anywhere. It went unnoticed while the feed was twelve placeholder cards;
+     at 166 it is the whole page. Any element blogFeed.ts writes `hidden` on
+     needs this if it sets its own display. */
+  .pcard[hidden] {
+    display: none;
   }
 
   /* Cards fade up when a category is picked, so the grid reads as having

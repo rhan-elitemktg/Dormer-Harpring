@@ -1,0 +1,10 @@
+---
+// Portable Text numbered list.
+//
+// NOT INTERCHANGEABLE WITH `ProseList`. 16 of the imported posts use an ordered
+// list, and in several the number IS the content — "5 Steps to Take After a
+// Truck Accident" is a sequence, not a set. Rendering those as bullets would
+// read as a loss of meaning rather than a loss of styling.
+---
+
+<ol class="prose__olist"><slot /></ol>

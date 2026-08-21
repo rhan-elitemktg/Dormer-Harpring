@@ -35,7 +35,7 @@
 // (`awards.ts`), the FAQ accordion (`faqs.ts`), and the contact form and info
 // cards (`contact.ts` / `site.ts`), plus the header and footer.
 import type { ImageMetadata } from "astro";
-import { ROUTES, attorneyPath } from "../lib/routePaths";
+import { ROUTES, attorneyPath, practiceAreaPath } from "../lib/routePaths";
 import heroPhoto from "../assets/practice/car-accident-hero.jpg";
 import crashVideoCover from "../assets/practice/crash-video-cover.jpg";
 import caseVideoCover from "../assets/practice/case-video-cover.jpg";
@@ -922,7 +922,7 @@ const carAccidents: PracticeAreaDetail = {
           "Right-of-way is contested and often decided by cameras, signal timing, or a " +
           "witness. Evidence disappears within days.",
         linkLabel: "Intersection crashes",
-        href: "/denver-side-impact-accident-lawyer",
+        href: practiceAreaPath("denver-side-impact-accident-lawyer"),
       },
       {
         _key: "head-on",
@@ -941,7 +941,7 @@ const carAccidents: PracticeAreaDetail = {
           "Vehicle design and roof strength can put a manufacturer in the case alongside " +
           "the driver. Preserve the vehicle.",
         linkLabel: "Rollover crashes",
-        href: "/denver-product-liability-lawyer",
+        href: practiceAreaPath("denver-product-liability-lawyer"),
       },
       {
         _key: "multi-vehicle",
@@ -950,7 +950,7 @@ const carAccidents: PracticeAreaDetail = {
           "Several insurers each pointing at the others, and limits shared among " +
           "claimants. Sequence and speed matter.",
         linkLabel: "Multi-vehicle pileups",
-        href: "/denver-distracted-driver-accident-lawyer",
+        href: practiceAreaPath("denver-distracted-driver-accident-lawyer"),
       },
       {
         _key: "hit-and-run",
@@ -959,7 +959,7 @@ const carAccidents: PracticeAreaDetail = {
           "Your own uninsured motorist coverage becomes the claim. Prompt reporting is " +
           "usually a policy condition.",
         linkLabel: "Hit-and-run",
-        href: "/denver-uninsured-and-underinsured-motorcyclist-accident-lawyer",
+        href: practiceAreaPath("denver-uninsured-and-underinsured-motorcyclist-accident-lawyer"),
       },
       {
         _key: "rideshare",
@@ -968,7 +968,7 @@ const carAccidents: PracticeAreaDetail = {
           "Coverage depends on what the app was doing at that moment — offline, waiting, " +
           "en route, or carrying a passenger.",
         linkLabel: "Uber and Lyft crashes",
-        href: "/denver-uber-accident-lawyer",
+        href: practiceAreaPath("denver-uber-accident-lawyer"),
       },
       {
         _key: "commercial",
@@ -977,7 +977,7 @@ const carAccidents: PracticeAreaDetail = {
           "Federal rules, driver logs, and telematics apply, and a spoliation letter has " +
           "to go out before data is overwritten.",
         linkLabel: "Commercial vehicles",
-        href: "/denver-truck-accident-lawyer",
+        href: practiceAreaPath("denver-truck-accident-lawyer"),
       },
     ],
   },

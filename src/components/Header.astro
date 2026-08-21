@@ -7,7 +7,7 @@ import Picture from "./media/Picture.astro";
 import MobileNav from "./MobileNav.astro";
 import { getNavItems } from "../data/navigation";
 import { getFirmDetails } from "../data/site";
-import { ROUTES } from "../lib/routePaths";
+import { ROUTES, normalizePath } from "../lib/routePaths";
 import logoWhite from "../assets/logo-white.webp";
 
 interface Props {
@@ -24,9 +24,13 @@ const [nav, firm] = await Promise.all([getNavItems(), getFirmDetails()]);
 // conflate them only by accident, since an empty array is truthy.
 const hasMenu = (item: (typeof nav)[number]) => item.children !== undefined;
 
-// Mark the current page so the nav can show it as active. Trailing slash is
-// stripped to match `ROUTES`, which never carries one.
-const current = Astro.url.pathname.replace(/\/+$/, "") || "/";
+// Mark the current page so the nav can show it as active. BOTH SIDES go
+// through `normalizePath`, so the match cannot break on a trailing slash —
+// ROUTES carries one and `Astro.url.pathname` may or may not, depending on how
+// the page was reached. Comparing a stripped pathname against a raw ROUTES
+// value silently dropped aria-current from every item when the site moved to
+// trailing slashes.
+const current = normalizePath(Astro.url.pathname);
 ---
 
 <header class:list={["header", `header--${variant}`]}>
@@ -44,7 +48,7 @@ const current = Astro.url.pathname.replace(/\/+$/, "") || "/";
                 <a
                   href={item.href}
                   class="header__link"
-                  aria-current={current === item.href ? "page" : undefined}
+                  aria-current={current === normalizePath(item.href) ? "page" : undefined}
                 >
                   {item.label}
                   {hasMenu(item) && <span class="header__caret" aria-hidden="true">▾</span>}

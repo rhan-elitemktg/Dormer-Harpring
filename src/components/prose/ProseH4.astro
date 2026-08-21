@@ -1,0 +1,19 @@
+---
+// Portable Text `h4` block.
+//
+// ADDED FOR THE LEGACY IMPORT. `.prose__h4` was styled in global.css from the
+// start — the h3 rule's comment already refers to it — but nothing could ever
+// produce one: the `pt()` shim has no `#### ` marker and the renderer map had
+// no entry. 98 of the 167 imported posts use h4, 204 times, so the style was
+// waiting for exactly this.
+//
+// Anchored like ProseH2 and ProseH3. `extractHeadings` still defaults to H2
+// only, so a contents list does not offer these.
+import type { BlockProps } from "astro-portabletext/types";
+import { blockText, headingId } from "../../lib/headings";
+
+const { node } = Astro.props as BlockProps;
+const id = headingId(blockText(node)) || undefined;
+---
+
+<h4 class="prose__h4" id={id}><slot /></h4>

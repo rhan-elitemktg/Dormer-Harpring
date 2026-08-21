@@ -1,0 +1,86 @@
+{
+  "slug": "trucking-settlement-1150000",
+  "title": "Trucking Settlement : $1,150,000",
+  "excerpt": "Our client was an EMT (and honorably discharged veteran) on his way to work when he was t-boned by a runaway truck that blew through a red light at a busy intersection. Although our client’s injuries were severe, the insurance company for the truck driver decided to play hardball because our client had a history […]",
+  "publishedAt": "2023-09-22T12:29:24",
+  "modifiedAt": "2025-10-31T15:25:18",
+  "categories": [
+    "auto-accident",
+    "personal-injury",
+    "truck-accidents"
+  ],
+  "body": [
+    {
+      "_type": "image",
+      "_key": "ib83",
+      "src": "./images/2023-09-Screenshot-2023-09-22-at-1.26.28-PM-300x206.png",
+      "alt": "truck accident"
+    },
+    {
+      "_type": "block",
+      "_key": "bb85",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sb84",
+          "text": "truck accident",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bb87",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sb86",
+          "text": "Our client was an EMT (and honorably discharged veteran) on his way to work when he was t-boned by a runaway truck that blew through a red light at a busy intersection. Although our client’s injuries were severe, the insurance company for the truck driver decided to play hardball because our client had a history of pre-existing combat injuries they thought they could use against him to avoid accepting responsibility.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bb89",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sb88",
+          "text": "Our client’s original attorneys hired Dormer Harpring as co-counsel to help prepare the case for trial. And, after Dormer Harpring attorneys Tim Garvey and Sean Dormer convinced the court to allow our client to seek a claim for punitive damages against the trucking company and its driver, they eventually relented and paid what was owed: $1,150,000.00.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bb8b",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sb8a",
+          "text": "If you or a loved one have suffered life changing injuries in a truck wreck—or any other crash—do what other attorneys throughout the state do for their own clients: hire Dormer Harpring to fight for you.",
+          "marks": []
+        }
+      ]
+    }
+  ],
+  "factCheck": [],
+  "author": {
+    "name": "Dormer Harpring",
+    "href": "/about"
+  },
+  "reviewer": {
+    "name": "K.C. Harpring",
+    "href": "/meet-our-attorneys/k-c-harpring"
+  },
+  "legacyId": 5522
+}

@@ -1,0 +1,866 @@
+{
+  "slug": "what-are-compensatory-damages",
+  "title": "What Are Compensatory Damages?",
+  "excerpt": "If you’ve experienced a personal injury in Colorado due to someone else’s negligence, you might be wondering what compensatory damages are and how these apply to your case. Compensatory damages represent financial compensation awarded to individuals harmed by another party’s negligence or wrongful actions. This monetary award aims to restore the injured individual, as much […]",
+  "publishedAt": "2025-04-30T09:00:35",
+  "modifiedAt": "2026-01-29T12:03:24",
+  "categories": [
+    "personal-injury"
+  ],
+  "image": "./images/2025-04-shutterstock_2372635043.jpg",
+  "body": [
+    {
+      "_type": "block",
+      "_key": "b9ct",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "l9ci",
+          "_type": "link",
+          "href": "/"
+        },
+        {
+          "_key": "l9cl",
+          "_type": "link",
+          "href": "https://colorado.public.law/statutes/crs_13-21-102.5"
+        },
+        {
+          "_key": "l9cq",
+          "_type": "link",
+          "href": "/"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s9ch",
+          "text": "If you’ve experienced a personal injury in Colorado due to someone else’s negligence, you might be wondering ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "s9cj",
+          "text": "what compensatory damages",
+          "marks": [
+            "l9ci",
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "s9ck",
+          "text": " are and how these apply to your case. ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "s9cm",
+          "text": "Compensatory damages",
+          "marks": [
+            "l9cl"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "s9cn",
+          "text": " represent financial compensation awarded to individuals harmed by another party’s negligence or wrongful actions. This monetary award aims to restore the injured individual, as much as possible, to the position they were in before the injury occurred. At ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "s9co",
+          "text": "Dormer Harpring",
+          "marks": [
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "s9cp",
+          "text": ", our ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "s9cr",
+          "text": "Personal Injury Attorneys",
+          "marks": [
+            "l9cq"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "s9cs",
+          "text": " assist clients throughout Colorado in managing and pursuing compensatory damages to protect their rights and secure fair settlements.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b9cv",
+      "style": "h2",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s9cu",
+          "text": "Compensatory Damages: Definition, Types, and Examples",
+          "marks": [
+            "strong"
+          ]
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b9cx",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s9cw",
+          "text": "In the legal sense, compensatory damages are the financial relief awarded to sufferers of losses or injuries directly resulting from another person’s negligence. Usually, two types of losses exist: general compensatory damages (non-economic damages) and actual compensatory damages, sometimes known as economic damages. Though they deal with different kinds of losses, both groups seek to offset the ones suffered.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b9cz",
+      "style": "h2",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s9cy",
+          "text": "Examples of Actual Compensatory Damages",
+          "marks": [
+            "strong"
+          ]
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b9d1",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s9d0",
+          "text": "Actual compensatory damages address tangible financial losses directly associated with the injury. These might include:",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b9d4",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s9d2",
+          "text": "Medical expenses:",
+          "marks": [
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "s9d3",
+          "text": " Payments for hospital stays, doctor visits, physical therapy, surgeries, medications, and any future medical care.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "b9d7",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s9d5",
+          "text": "Lost wages:",
+          "marks": [
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "s9d6",
+          "text": " Earnings lost due to time away from work during recovery or reduced earning capacity resulting from injuries.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "b9da",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s9d8",
+          "text": "Property damage:",
+          "marks": [
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "s9d9",
+          "text": " Costs associated with repairing or replacing personal property damaged in the incident.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "b9dd",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s9db",
+          "text": "Out-of-pocket expenses:",
+          "marks": [
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "s9dc",
+          "text": " Additional expenses such as transportation costs to medical appointments or hiring home care services.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "b9df",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s9de",
+          "text": "Each case in Colorado is unique, and the exact amount of actual compensatory damages may vary depending on individual circumstances.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b9dh",
+      "style": "h2",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s9dg",
+          "text": "Examples of General Compensatory Damages",
+          "marks": [
+            "strong"
+          ]
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b9dj",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s9di",
+          "text": "General compensatory damages address intangible harms that do not have a direct monetary cost but significantly impact a person’s life quality. Typical examples include:",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b9dm",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s9dk",
+          "text": "Pain and suffering:",
+          "marks": [
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "s9dl",
+          "text": " Physical discomfort and emotional pain are directly associated with the injury.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "b9dp",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s9dn",
+          "text": "Mental anguish:",
+          "marks": [
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "s9do",
+          "text": " Psychological trauma resulting from an accident or injury.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "b9ds",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s9dq",
+          "text": "Loss of enjoyment of life:",
+          "marks": [
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "s9dr",
+          "text": " A diminished ability to participate in activities or hobbies previously enjoyed.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "b9dv",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s9dt",
+          "text": "Loss of consortium:",
+          "marks": [
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "s9du",
+          "text": " The adverse impact on relationships, including the loss of companionship or intimacy with a spouse or partner.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "b9dx",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s9dw",
+          "text": "Colorado law acknowledges these emotional and psychological impacts, but they might be more challenging to quantify precisely, relying heavily on the circumstances and evidence presented.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b9dz",
+      "style": "h2",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s9dy",
+          "text": "What Is the Difference Between Compensatory Damages and Punitive Damages?",
+          "marks": [
+            "strong"
+          ]
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b9e1",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s9e0",
+          "text": "Acknowledging personal injury cases requires one to separate compensatory damages from punitive damages. Compensatory damages seek to pay victims, therefore enabling their emotional and financial recovery from injuries resulting from another’s negligence. These damages guarantee enough compensation to cover both financial and non-financial effects, therefore concentrating solely on the victim’s losses.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b9e3",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s9e2",
+          "text": "Still, punitive damages have a different and unique use. Unlike compensatory damages, punitive damages are intended clearly as a punishment for the defendant’s damaging behavior, therefore discouraging future misbehavior. Colorado courts typically impose punitive damages in circumstances when the offenses were especially purposeful, malicious, or reckless. Crucially, Colorado’s punitive damages have legal restrictions; usually limited to a particular multiple of the granted compensatory damages, unless very unusual circumstances are proven.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b9e5",
+      "style": "h2",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s9e4",
+          "text": "What Is the Difference Between Compensatory Damages and Treble Damages?",
+          "marks": [
+            "strong"
+          ]
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b9e7",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s9e6",
+          "text": "In both their intention and their application, treble damages are not like compensatory damages. While treble damages act as a punitive penalty to punish especially severe or deliberate misbehavior, compensatory damages seek to “make whole” an aggrieved person.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b9e9",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s9e8",
+          "text": "These types of damages in Colorado could cause the awarded compensatory sum to be doubled by three, therefore greatly raising the defendant’s financial liability. Usually involving fraud, deliberate dishonesty, or consumer protection legislation crimes, such increased penalties apply. While compensatory damages remain essentially connected to actual documented losses and damages sustained by the victim, treble damages highlight the seriousness of wrongdoing by multiplying the penalty.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b9eb",
+      "style": "h2",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s9ea",
+          "text": "What Is a Compensatory Activity?",
+          "marks": [
+            "strong"
+          ]
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b9ed",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s9ec",
+          "text": "In the context of personal injury law, a compensation activity is any action taken to counteract or lessen the effects of losses experienced from an accident or injury. These pursuits seek to lessen the emotional or financial burden the impairment causes. If your injury keeps you from pursuing vocational rehabilitation, career retraining, or alternative work prospects, for example, you could consider compensation activities to be those that replace your regular employment.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b9ef",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s9ee",
+          "text": "To speed recovery and lessen the long-lasting effects of injuries, compensatory activities could also include physical rehabilitation, therapeutic exercises, or attendance in therapy sessions. Recording these events is vital since they show the injured person’s attempt to minimize their damages, which Colorado courts usually see favorably when assessing claims.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b9eh",
+      "style": "h2",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s9eg",
+          "text": "What Are General Compensatory Damages?",
+          "marks": [
+            "strong"
+          ]
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b9el",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s9ei",
+          "text": "General compensatory damages are awarded to cover intangible, non-economic losses that cannot easily be quantified with specific financial records. ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "s9ej",
+          "text": "These may include emotional distress, pain and suffering, diminished quality of life, and mental anguish.",
+          "marks": [
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "s9ek",
+          "text": " These damages address deeply personal impacts that an injury might have on one’s emotional well-being, personal relationships, and overall enjoyment of life.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b9en",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s9em",
+          "text": "Colorado’s general compensatory damages determination calls for careful review of the individual’s situation, the degree of the damage, medical expert opinion, and recorded psychological and emotional impact. To show a complete knowledge of how the damage has severely affected the victim’s everyday life and future well-being, lawyers frequently collaborate closely with mental health professionals, expert witnesses, and personal experiences.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b9eq",
+      "style": "h2",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s9ep",
+          "text": "Do Compensatory Damages Include Emotional Distress?",
+          "marks": [
+            "strong"
+          ]
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b9ex",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "l9eu",
+          "_type": "link",
+          "href": "https://legalclarity.org/can-you-sue-for-trauma-legal-options-for-emotional-distress-claims/"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s9er",
+          "text": "Yes, ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "s9es",
+          "text": "compensatory damages often include emotional distress",
+          "marks": [
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "s9et",
+          "text": ". ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "s9ev",
+          "text": "Emotional distress",
+          "marks": [
+            "l9eu"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "s9ew",
+          "text": " damages compensate for psychological impacts, including anxiety, depression, insomnia, fear, and trauma resulting directly from injuries sustained. Colorado law recognizes emotional distress as legitimate harm deserving compensation, though precise amounts awarded might vary considerably based on individual cases.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b9ez",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s9ey",
+          "text": "Colorado law explicitly acknowledges emotional distress as a significant and compensable harm. To pursue emotional distress effectively, individuals generally need clear documentation or testimony regarding how their lives have been affected emotionally and psychologically by the incident. This documentation might include professional mental health evaluations, counseling records, medical expert testimony, or personal narratives illustrating how the emotional impact has disrupted daily activities, relationships, and emotional stability.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b9f1",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s9f0",
+          "text": "It’s also essential to note that Colorado courts carefully evaluate claims for emotional distress, considering various factors such as the severity of the initial injury, the specific circumstances of the incident, and the consistency and credibility of presented evidence. Successful claims typically demonstrate a clear causal link between the injury and the emotional harm claimed. Legal representation becomes crucial in such cases, as experienced attorneys can guide victims in gathering compelling evidence, articulating the emotional impact clearly, and presenting a strong case that fully conveys the extent and severity of emotional distress.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b9f3",
+      "style": "h2",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s9f2",
+          "text": "Contact Us for Compensatory Damage",
+          "marks": [
+            "strong"
+          ]
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b9fc",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "l9f5",
+          "_type": "link",
+          "href": "/"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s9f4",
+          "text": "If you or someone you love has suffered a ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "s9f6",
+          "text": "personal injury in Colorado",
+          "marks": [
+            "l9f5"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "s9f7",
+          "text": ", you might be entitled to compensatory damages. At",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "s9f8",
+          "text": " Dormer Harpring",
+          "marks": [
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "s9f9",
+          "text": ", our experienced team is committed to providing personalized, compassionate legal assistance tailored to your unique situation. ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "s9fa",
+          "text": "Contact us",
+          "marks": [
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "s9fb",
+          "text": " today to schedule a consultation and learn how we may help you manage your claim effectively.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b9fe",
+      "style": "h2",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s9fd",
+          "text": "Check Out More Helpful Articles",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b9fh",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "l9ff",
+          "_type": "link",
+          "href": "/contributory-negligence-vs-comparative-negligence/"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s9fg",
+          "text": "How Contributory Negligence vs Comparative Negligence Differ",
+          "marks": [
+            "l9ff"
+          ]
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "b9fk",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "l9fi",
+          "_type": "link",
+          "href": "/do-i-have-to-pay-medical-bills-out-of-my-settlement/"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s9fj",
+          "text": "Who Pays My Medical Bills If I Have A Personal Injury Case?",
+          "marks": [
+            "l9fi"
+          ]
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "b9fn",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "l9fl",
+          "_type": "link",
+          "href": "/should-i-get-a-lawyer-for-a-car-accident-that-wasnt-my-fault/"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s9fm",
+          "text": "I Was In A Car Accident That Wasn’t My Fault: What Should You Do Next?",
+          "marks": [
+            "l9fl"
+          ]
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    }
+  ],
+  "factCheck": [],
+  "author": {
+    "name": "Dormer Harpring",
+    "href": "/about"
+  },
+  "reviewer": {
+    "name": "K.C. Harpring",
+    "href": "/meet-our-attorneys/k-c-harpring"
+  },
+  "legacyId": 13581
+}
