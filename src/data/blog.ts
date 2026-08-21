@@ -81,7 +81,18 @@ export interface BlogPost {
    * it machine-readable. Formatted for display by `formatPostDate`.
    */
   publishedAt: string;
+  /** The category shown on the card — the first of `categorySlugs`. */
   category: BlogCategory;
+  /**
+   * EVERY category slug the post carries, primary first.
+   *
+   * The card displays one category but belongs to all of them: 29 of the 167
+   * imported posts carry two to four. The tab filter matches against this list,
+   * not against `category.slug` — matching the primary alone made
+   * `auto-insurance-accident-claims` a dead tab, because all 13 of its posts
+   * carry it second.
+   */
+  categorySlugs: string[];
   /**
    * Card art. The comp draws these from the practice-area photography and picks
    * them loosely — the uninsured-motorist card gets the dog-bite photograph —
@@ -156,8 +167,9 @@ export async function getBlogCategories(): Promise<BlogCategory[]> {
     getCollection("blog"),
   ]);
 
-  // A post counts toward EVERY category it carries, not just its primary: the
-  // tab filters the feed, and the feed shows a post under any of them.
+  // EVERY category a post carries, which is exactly what the tab filters on —
+  // the card emits all of them and blogFeed.ts token-matches. The two have to
+  // count the same thing or the row is ordered by a number no tab can produce.
   const counts = new Map<string, number>();
   for (const post of posts) {
     for (const slug of post.data.categories) {
@@ -254,6 +266,7 @@ export async function getFeaturedPost(): Promise<FeaturedPost> {
       "at all.",
     publishedAt: "2026-06-23",
     category: CATEGORIES.premises,
+    categorySlugs: [CATEGORIES.premises.slug],
     image: consult,
     imageAlt: "Attorney meeting with a client",
     author: FIRM,
@@ -684,6 +697,7 @@ export async function getImportedPosts(): Promise<BlogPost[]> {
         excerpt: entry.data.excerpt,
         publishedAt: entry.data.publishedAt,
         category,
+        categorySlugs: entry.data.categories,
         image: entry.data.image ?? IMPORTED_FALLBACK_IMAGE[primary] ?? consult,
         author: FIRM,
         reviewer: kc,

@@ -27,8 +27,11 @@ interface Props {
 const { post, readMoreLabel } = Astro.props;
 ---
 
-{/* `data-category` is what the tab filter matches on — see scripts/blogFeed.ts. */}
-<li class="pcard" data-category={post.category.slug}>
+{/* `data-category` is what the tab filter matches on — see scripts/blogFeed.ts.
+    SPACE-SEPARATED, because a post belongs to every category it carries even
+    though the card shows only the first. Matched as a token list, the way a
+    class attribute is. */}
+<li class="pcard" data-category={post.categorySlugs.join(" ")}>
   <div class="pcard__thumb">
     {
       /* Empty alt: this is card art, not content. The comp sets the post title
@@ -79,6 +82,20 @@ const { post, readMoreLabel } = Astro.props;
     position: relative; /* the stretched link's containing block */
     display: flex;
     flex-direction: column;
+  }
+
+  /* `display: flex` ABOVE BEATS THE `hidden` ATTRIBUTE, so this rule is what
+     makes filtering and paging work at all. `hidden` only carries
+     `display: none` from the UA stylesheet, and any author `display` on the
+     same element wins — the attribute is set, the card stays on screen.
+
+     blogFeed.ts hides by writing `hidden`, so without this the category tabs
+     did nothing and "Load more" had nothing left to reveal, with no error
+     anywhere. It went unnoticed while the feed was twelve placeholder cards;
+     at 166 it is the whole page. Any element blogFeed.ts writes `hidden` on
+     needs this if it sets its own display. */
+  .pcard[hidden] {
+    display: none;
   }
 
   /* Cards fade up when a category is picked, so the grid reads as having

@@ -49,8 +49,13 @@ function initBlogFeed(grid: HTMLElement) {
   // should not carry that depth into a category with four posts in it.
   let shown = initial;
 
+  // A TOKEN LIST, not one value: `data-category` carries every category the
+  // post belongs to, so an exact string compare only ever matched the first and
+  // left any category used exclusively as a secondary with a tab that found
+  // nothing. Split rather than `includes()` on the raw string, which would
+  // match "auto-accident" inside "auto-accident-claims".
   const matches = (element: HTMLElement) =>
-    filter === "all" || element.dataset.category === filter;
+    filter === "all" || (element.dataset.category ?? "").split(" ").includes(filter);
 
   const render = () => {
     const matched = items.filter(matches);
@@ -176,14 +181,28 @@ function arriveAt(slug: string) {
   // motion sickness from it. They still need to arrive at the feed, so the
   // journey is dropped rather than the destination.
   const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  target.scrollIntoView({ behavior: still ? "auto" : "smooth", block: "start" });
+  const behavior: ScrollBehavior = still ? "auto" : "smooth";
 
-  // With 23 categories the row scrolls, so the pressed tab is very often out of
-  // sight — and an active tab nobody can see is the same failure this function
-  // exists to fix, one axis over. `inline: "center"` rather than "nearest" so
-  // the neighbours show too, which is what makes it read as a row.
+  // NOT `scrollIntoView`. It scrolls EVERY scrollable ancestor, and the second
+  // call below — centring the pressed tab inside the row — would therefore move
+  // the document too, computing its target from a position the first
+  // animation had not reached yet. Two smooth scrolls racing each other landed
+  // the page at its maximum offset, with the tab row sitting at the BOTTOM of
+  // the viewport instead of the top.
+  //
+  // An explicit offset cannot race: it is the section's top in document
+  // coordinates, resolved once.
+  window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY, behavior });
+
+  // With 23 categories the row scrolls, so the pressed tab is often out of
+  // sight — an active tab nobody can see is the same failure this function
+  // exists to fix, one axis over. Driving the ROW's own scrollLeft keeps this
+  // strictly horizontal; the document cannot move as a side effect.
   const active = tabs?.querySelector<HTMLElement>(`[data-filter="${CSS.escape(slug)}"]`);
-  active?.scrollIntoView({ behavior: still ? "auto" : "smooth", block: "nearest", inline: "center" });
+  if (active && tabs) {
+    const centred = active.offsetLeft - (tabs.clientWidth - active.offsetWidth) / 2;
+    tabs.scrollTo({ left: Math.max(0, centred), behavior });
+  }
 }
 
 for (const grid of document.querySelectorAll<HTMLElement>("[data-blog-grid]")) {

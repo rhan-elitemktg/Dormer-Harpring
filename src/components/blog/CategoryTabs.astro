@@ -91,12 +91,13 @@ const { label, allLabel, categories } = Astro.props;
     overflow-x: auto;
     scroll-snap-type: x proximity;
     scrollbar-width: none;
-    /* Bleeds to the viewport edge so the rail can be scrolled from anywhere;
-       the negative margin cancels the page gutter, which is why it reads the
-       same token rather than restating the breakpoints. */
-    margin-inline: calc(var(--container-pad) * -1);
-    padding-inline: var(--container-pad);
-    scroll-padding-inline: var(--container-pad);
+    /* FLUSH WITH EVERY OTHER SECTION, by request. This used to bleed out to the
+       viewport edge with `margin-inline: calc(var(--container-pad) * -1)` so
+       the rail could be dragged from anywhere — but that put the row a full
+       gutter wider than the cards it filters directly beneath it, and a row
+       that overhangs its own grid reads as a layout bug rather than an
+       affordance. It scrolls the same either way; only the edge moves. */
+    scroll-padding-inline: 0;
     /* `overflow-x` makes the block axis scrollable too, which would otherwise
        clip a focus ring drawn outside the tab. */
     padding-block: 3px;
