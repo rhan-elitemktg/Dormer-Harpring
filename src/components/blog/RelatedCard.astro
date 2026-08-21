@@ -11,7 +11,7 @@
 // <title>" once the img alt, the heading and the read-more span are all inside
 // it. So the title carries the anchor and covers the card through `::after`,
 // exactly as PostCard does.
-import Picture from "../media/Picture.astro";
+import PostThumb from "./PostThumb.astro";
 import type { BlogPost } from "../../data/blog";
 import { formatPostDate } from "../../lib/dates";
 
@@ -27,9 +27,8 @@ const { post, readMoreLabel } = Astro.props;
   {/* Empty alt for the same reason as PostCard's: this is card art drawn from
       the practice-area photography and picked loosely, so there is nothing in
       it to describe that the title does not already say. */}
-  <Picture
-    src={post.image}
-    alt=""
+  <PostThumb
+    image={post.image}
     widths={[400, 600, 800]}
     sizes="(max-width: 980px) 100vw, 33vw"
     class="rcard__img"

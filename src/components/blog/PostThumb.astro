@@ -1,0 +1,76 @@
+---
+// A post card's artwork — the real featured image, or the branded placeholder.
+//
+// ONE COMPONENT FOR BOTH CARD TYPES. PostCard and RelatedCard each drew their
+// own `<Picture>`, which was fine while every post was guaranteed art. Only 60
+// of the 167 imported posts have a featured image, so the "or else" branch is
+// now the common case — and two copies of it would drift the moment one card's
+// placeholder was tweaked.
+//
+// THE PLACEHOLDER IS MARKUP, NOT A GENERATED IMAGE FILE. A flat colour and a
+// centred logo has nothing to rasterise: shipping it as a real file would mean
+// one blurry bitmap scaled across every card size, plus a fake photograph in
+// `src/assets` that the next person has to work out the provenance of. As
+// markup the logo stays crisp at every width and the colour is the token, so it
+// follows the palette if the palette moves.
+//
+// It replaces a per-category fallback that gave every post in a category the
+// SAME photograph — the duplication that prompted this. A placeholder that
+// looks deliberate beats one that looks like a mistake.
+import type { ImageMetadata } from "astro";
+import Picture from "../media/Picture.astro";
+import logo from "../../assets/logo-white.webp";
+
+interface Props {
+  /** `null` for a post with no featured image — 107 of the imported 167. */
+  image: ImageMetadata | null;
+  /** Card art is decorative, so this is empty unless the caller describes it. */
+  alt?: string;
+  widths: number[];
+  sizes: string;
+  class?: string;
+}
+
+const { image, alt = "", widths, sizes, class: className } = Astro.props;
+---
+
+{
+  image ? (
+    <Picture src={image} alt={alt} widths={widths} sizes={sizes} class={className} />
+  ) : (
+    <span class:list={["thumb-mark", className]}>
+      {/* Decorative: the card's own heading names the post, and the firm is
+          named in every byline beneath it. A logo announced here would be read
+          out before the title on every one of 107 cards. */}
+      <Picture src={logo} alt="" widths={[200, 400]} sizes="180px" class="thumb-mark__logo" />
+    </span>
+  )
+}
+
+<style>
+  /* `display: grid` + `place-items` rather than flex, so the logo is centred on
+     both axes with one declaration and the box still fills whatever aspect
+     ratio the card gives it. */
+  .thumb-mark {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    padding: var(--space-6);
+    background: var(--dh-forest-500);
+  }
+
+  /* `:global()` BOUNDED BY `.thumb-mark`, which is an element in THIS template.
+     The class itself is handed to Picture, so it lands on Picture's markup
+     carrying Picture's cid — a bare `.thumb-mark__logo` rule here compiles and
+     matches nothing, which is precisely what `check:styles` exists to catch,
+     and did.
+
+     Sized as a proportion of the card, capped: the same mark should not read as
+     enormous on a wide card and tiny in a related rail. */
+  .thumb-mark :global(.thumb-mark__logo) {
+    width: 55%;
+    max-width: 180px;
+    height: auto;
+  }
+</style>

@@ -14,7 +14,7 @@
 // A post with no page renders with no link at all — see `href: null` in
 // `data/blog.ts`. Eight of the twelve are in that state until the firm
 // supplies real articles.
-import Picture from "../media/Picture.astro";
+import PostThumb from "./PostThumb.astro";
 import type { BlogPost } from "../../data/blog";
 import { formatPostDate } from "../../lib/dates";
 
@@ -39,9 +39,8 @@ const { post, readMoreLabel } = Astro.props;
          practice-area set and chosen loosely — the uninsured-motorist card gets
          the dog-bite photograph — so they illustrate nothing to describe. */
     }
-    <Picture
-      src={post.image}
-      alt=""
+    <PostThumb
+      image={post.image}
       widths={[400, 600, 800]}
       sizes="(max-width: 760px) 100vw, (max-width: 1180px) 50vw, 33vw"
       class="pcard__img"

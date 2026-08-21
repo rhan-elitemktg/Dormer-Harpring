@@ -91,11 +91,17 @@ export interface BlogPost {
    */
   category: BlogCategory;
   /**
-   * Card art. The comp draws these from the practice-area photography and picks
-   * them loosely — the uninsured-motorist card gets the dog-bite photograph —
-   * so they are decorative, and the cards render them with an empty `alt`.
+   * Card art — the post's own featured image, or `null`.
+   *
+   * NULL FOR 107 OF THE 167 IMPORTED POSTS, which have no featured image on the
+   * legacy site at all. `PostThumb.astro` draws the branded placeholder for
+   * those. It used to fall back to a practice-area photograph chosen by
+   * category, which gave every post in a category the same picture — the cards
+   * looked duplicated because they were.
+   *
+   * Decorative either way, so the cards render it with an empty `alt`.
    */
-  image: ImageMetadata;
+  image: ImageMetadata | null;
   author: PostByline;
   reviewer: PostByline;
   /** `null` for a post with no page. The card then renders without a link. */
@@ -103,6 +109,9 @@ export interface BlogPost {
 }
 
 export interface FeaturedPost extends BlogPost {
+  /** NARROWED from BlogPost's nullable: the featured panel is a photograph with
+   *  copy over it, so there is no version of it without art. */
+  image: ImageMetadata;
   /** The featured block shows a real photograph, so this one is described. */
   imageAlt: string;
 }
@@ -605,35 +614,6 @@ export async function getBlogPostArticles(): Promise<BlogPostArticle[]> {
  * is settled, `getBlogPosts()` returns these too and this comment goes.
  * ------------------------------------------------------------------------- */
 
-/** Card art for an imported post, keyed by its primary category. 107 of the
- *  167 legacy posts have no featured image at all, and the design already
- *  treats this art as decorative — the cards render it with an empty `alt` —
- *  so a category-appropriate photograph beats inventing one per post. */
-const IMPORTED_FALLBACK_IMAGE: Record<string, ImageMetadata> = {
-  "auto-accident": carAccident,
-  "auto-insurance-accident-claims": carAccident,
-  "bike-accidents": bicycle,
-  "burn-injury": burns,
-  "dating-apps": personalInjury,
-  "daycare-injury": personalInjury,
-  "dog-bites": dogBite,
-  "laws": boardroom,
-  "medical-malpractice": personalInjury,
-  "motorcycle-accidents": motorcycle,
-  "news": boardroom,
-  "awards": boardroom,
-  "pedestrian-accident": bicycle,
-  "personal-injury": personalInjury,
-  "premises-liability": slipAndFall,
-  "product-liability": burns,
-  "ski-accident": brainInjury,
-  "slip-and-fall": slipAndFall,
-  "trampoline-park-injuries": brainInjury,
-  "trials": boardroom,
-  "verdicts": boardroom,
-  "truck-accidents": truck,
-  "wrongful-death": wrongfulDeath,
-};
 
 /** The taxonomy, straight from the `blogCategories` collection rather than the
  *  hand-written CATEGORIES map above — the imported posts carry the live
@@ -699,7 +679,10 @@ export async function getImportedPosts(): Promise<BlogPost[]> {
         excerpt: entry.data.excerpt,
         publishedAt: entry.data.publishedAt,
         category,
-        image: entry.data.image ?? IMPORTED_FALLBACK_IMAGE[primary] ?? consult,
+        // No fallback: a post without a featured image gets the placeholder,
+        // drawn by PostThumb.astro. Substituting a stock photograph here is
+        // what made every card in a category look identical.
+        image: entry.data.image ?? null,
         author: FIRM,
         reviewer: kc,
         href: blogPath(entry.data.slug),

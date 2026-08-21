@@ -369,6 +369,25 @@ async function fetchAll() {
   return posts;
 }
 
+/**
+ * `featured_media` is an attachment ID, not a URL, so the media records have to
+ * be fetched separately. 60 of the 167 posts have one; the other 107 get the
+ * branded placeholder — see PostThumb.astro.
+ */
+async function featuredUrlById(ids) {
+  const out = new Map();
+  const unique = [...new Set(ids.filter(Boolean))];
+  for (let i = 0; i < unique.length; i += 100) {
+    const batch = unique.slice(i, i + 100);
+    const r = await fetch(
+      `${API}/media?include=${batch.join(",")}&per_page=100&_fields=id,source_url`
+    );
+    if (!r.ok) throw new Error(`media: HTTP ${r.status}`);
+    for (const m of await r.json()) out.set(m.id, m.source_url);
+  }
+  return out;
+}
+
 async function categorySlugById() {
   const r = await fetch(`${API}/categories?per_page=100&_fields=id,slug`);
   return new Map((await r.json()).map((c) => [c.id, c.slug]));
@@ -382,6 +401,7 @@ const known = new Set(
 
 async function main() {
   const [posts, catById] = await Promise.all([fetchAll(), categorySlugById()]);
+  const featuredById = await featuredUrlById(posts.map((p) => p.featured_media));
   const { readdir } = await import("node:fs/promises");
   const validCats = new Set(
     (await readdir("src/content/blog-categories")).filter((f) => f.endsWith(".json")).map((f) => f.slice(0, -5))
@@ -402,6 +422,22 @@ async function main() {
     const body = convertBody(p.content.rendered, slug);
     if (!body.length) throw new Error(`${slug}: converted to an empty body.`);
 
+    // The featured image, where there is one. Same queue as body images, so it
+    // comes from the scrape when the scrape has it and only otherwise costs a
+    // request.
+    let image;
+    const featuredUrl = featuredById.get(p.featured_media);
+    if (featuredUrl) {
+      const path = featuredUrl.replace(/^https?:\/\/(www\.)?denvertrial\.com/i, "").split("?")[0];
+      if (path.startsWith("/wp-content/")) {
+        const local = path.split("/").filter(Boolean).slice(-3).join("-").replace(/[^a-zA-Z0-9._-]/g, "-");
+        imagesToCopy.set(local, path);
+        image = `./images/${local}`;
+      } else {
+        warn(slug, `featured image is not on the firm's domain: ${featuredUrl.slice(0, 60)}`);
+      }
+    }
+
     docs.push({
       slug,
       title: decode(p.title.rendered).trim(),
@@ -409,6 +445,7 @@ async function main() {
       publishedAt: p.date,
       modifiedAt: p.modified,
       categories: cats,
+      ...(image ? { image } : {}),
       body,
       factCheck: [],
       author: { name: "Dormer Harpring", href: "/about" },

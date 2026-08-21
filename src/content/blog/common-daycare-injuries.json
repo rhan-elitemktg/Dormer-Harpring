@@ -8,6 +8,7 @@
     "daycare-injury",
     "personal-injury"
   ],
+  "image": "./images/2026-06-daycare-injuries-1-1.jpg",
   "body": [
     {
       "_type": "block",

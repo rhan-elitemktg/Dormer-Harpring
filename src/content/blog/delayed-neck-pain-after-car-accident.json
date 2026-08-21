@@ -8,6 +8,7 @@
     "auto-accident",
     "personal-injury"
   ],
+  "image": "./images/2025-03-shutterstock_171526988.jpg",
   "body": [
     {
       "_type": "block",
