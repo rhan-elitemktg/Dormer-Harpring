@@ -83,15 +83,21 @@ const { post, article, page, categories, related } = Astro.props;
     background: var(--surface-page);
   }
 
+  /* TWO TRACKS, NOT THREE EQUAL ONES SPANNED 2/1. Same idea, but the ratio is
+     sayable: three `1fr` tracks fixed the sidebar at a third of the grid, and
+     widening it meant re-picking a span. 1.8:1 puts it at ~419px inside the
+     1244px container, against 367px before, and stays proportional as the
+     container shrinks — which a fixed `420px` track would not, leaving the
+     article and the sidebar nearly equal by 1000px. */
   .post__grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr);
     gap: var(--space-18);
     align-items: start;
   }
 
   .post__main {
-    grid-column: 1 / span 2;
+    grid-column: 1;
     grid-row: 1;
     min-width: 0;
   }
@@ -103,7 +109,7 @@ const { post, article, page, categories, related } = Astro.props;
   }
 
   .post :global(.pside) {
-    grid-column: 3;
+    grid-column: 2;
     grid-row: 1;
   }
 

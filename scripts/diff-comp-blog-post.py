@@ -108,7 +108,9 @@ present(
     [
         "Get a free case review",
         "Tell us what happened. An attorney reviews every request personally.",
-        "Request my case review",
+        # The comp's "Request my case review" is now "Review my case" — see
+        # DELIBERATE DIFFERENCES.
+        "Review my case",
         "Free &amp; confidential",
     ],
 )
@@ -298,6 +300,12 @@ EXPECTED = [
         and "756-3812" not in built_text,
         "the live article closes on a third number; site.ts is the only place a phone number may "
         "live, so it is read from there rather than transcribed",
+    ),
+    (
+        "the sidebar form's button reads 'Review my case'",
+        "Review my case" in built_text and "Request my case review" not in built_text,
+        "shortened from the comp's 'Request my case review' at Rhan's request; the page-foot "
+        "form keeps contact.ts's longer 'Request my free case review'",
     ),
     (
         "no fake form success panel",
