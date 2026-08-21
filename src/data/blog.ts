@@ -736,7 +736,10 @@ export async function getBlogPostPage(): Promise<BlogPostPageCopy> {
     form: {
       title: "Get a free case review",
       lede: "Tell us what happened. An attorney reviews every request personally.",
-      submitLabel: "Request my case review",
+      // Shortened from the comp's "Request my case review" at Rhan's request.
+      // Sentence case like its two siblings in contact.ts / coCounsel.ts; `.btn`
+      // uppercases it, so the case here is the data's convention, not the design.
+      submitLabel: "Review my case",
       // The comp draws this as a small gold note under the button rather than
       // the sentence the page-foot form carries. Same field, same slot; the
       // sidebar variant styles it as the label it is.
