@@ -464,12 +464,12 @@ comp_more = slice_from('class="ca-feats"', 'data-screen-label="FAQ"')
 cmp(
     "two feature cards",
     [unesc(b) for b in re.findall(r'</span>\s*<b>(.*?)</b>', comp_more, re.S)][:2],
-    grab("feat__title", "b"),
+    grab("morefeat__title", "h3"),
 )
 cmp(
     "six more cards",
     [unesc(b) for b in re.findall(r'<a class="ca-more__c"[^>]*><b>(.*?)</b>', comp_more, re.S)],
-    grab("mcard__title", "b"),
+    grab("mcard__title", "h3"),
 )
 present("heading", ["More on car accident claims"])
 
