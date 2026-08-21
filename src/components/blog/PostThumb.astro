@@ -60,20 +60,29 @@ const { image, alt = "", widths, sizes, class: className } = Astro.props;
 }
 
 <style>
-  /* Deliberately sets NO display: the caller's image class lands here too and
-     styles it as an image. Only the colour is ours. */
+  /* NO DISPLAY AND NO SIZE HERE, on purpose. This element wears the CALLER's
+     image class as well, and `.thumb-mark[data-astro-cid-…]` is specificity
+     (0,2,0) — an attribute selector counts the same as a class — which exactly
+     ties `.pcard__thumb .pcard__img`. On a tie the later rule wins, and
+     PostCard's is emitted after this file's, so anything declared here for a
+     property PostCard also sets is lost. It only provides the colour and a
+     positioning context. */
   .thumb-mark {
+    position: relative;
     background: var(--dh-forest-500);
   }
 
-  /* `display: grid` + `place-items` rather than flex, so the logo is centred on
-     both axes with one declaration. `height: 100%` resolves because every
-     caller gives the outer span a definite height. */
+  /* ABSOLUTE, PINNED TO ALL FOUR EDGES. No caller styles this element, so
+     nothing can outrank it — and `inset: 0` means the box fills its parent
+     whatever the parent's display is and wherever its height comes from, so
+     the centring does not depend on a percentage height resolving. Flex rather
+     than grid because a single centred child is what flex is for. */
   .thumb-mark__inner {
-    display: grid;
-    place-items: center;
-    width: 100%;
-    height: 100%;
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     padding: var(--space-6);
   }
 
