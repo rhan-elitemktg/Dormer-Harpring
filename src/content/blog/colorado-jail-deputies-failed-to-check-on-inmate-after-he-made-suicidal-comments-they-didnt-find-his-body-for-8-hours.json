@@ -1,0 +1,44 @@
+{
+  "slug": "colorado-jail-deputies-failed-to-check-on-inmate-after-he-made-suicidal-comments-they-didnt-find-his-body-for-8-hours",
+  "title": "Colorado jail deputies failed to check on inmate after he made suicidal comments. They didn’t find his body for 8 hours",
+  "excerpt": "Read Article Here",
+  "publishedAt": "2021-03-29T16:04:35",
+  "modifiedAt": "2026-01-26T12:54:29",
+  "categories": [
+    "news"
+  ],
+  "body": [
+    {
+      "_type": "block",
+      "_key": "bc3d",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "lc3b",
+          "_type": "link",
+          "href": "https://www.denverpost.com/2021/03/04/colorado-jail-suicide-jackson-maes/"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sc3c",
+          "text": "Read Article Here",
+          "marks": [
+            "lc3b"
+          ]
+        }
+      ]
+    }
+  ],
+  "factCheck": [],
+  "author": {
+    "name": "Dormer Harpring",
+    "href": "/about"
+  },
+  "reviewer": {
+    "name": "K.C. Harpring",
+    "href": "/meet-our-attorneys/k-c-harpring"
+  },
+  "legacyId": 4160
+}

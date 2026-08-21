@@ -1,0 +1,104 @@
+{
+  "slug": "client-advisory-board-dinner-a-night-of-connection-laughter-and-great-food",
+  "title": "Client Advisory Board Dinner: A Night of Connection, Laughter, and Great Food",
+  "excerpt": "After a long hiatus, we were thrilled to bring back our Client Advisory Board dinner on Wednesday, July 30, and it was well worth the wait. Hosted at Maggiano’s, the evening was filled with laughter, meaningful conversation, and company that reminds us why we do what we do. We were truly honored to spend the […]",
+  "publishedAt": "2025-08-11T11:05:31",
+  "modifiedAt": "2026-01-26T12:42:06",
+  "categories": [
+    "news"
+  ],
+  "body": [
+    {
+      "_type": "image",
+      "_key": "i7s5",
+      "src": "./images/2025-08-IMG_4206-scaled.jpg",
+      "alt": "Client Advisory Board Dinner"
+    },
+    {
+      "_type": "block",
+      "_key": "b7s7",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s7s6",
+          "text": "After a long hiatus, we were thrilled to bring back our Client Advisory Board dinner on Wednesday, July 30, and it was well worth the wait. Hosted at Maggiano’s, the evening was filled with laughter, meaningful conversation, and company that reminds us why we do what we do. We were truly honored to spend the evening with our clients, outside the stress of their cases.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b7s9",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s7s8",
+          "text": "The night began with a warm, welcoming atmosphere as guests arrived and settled in. Conversations flowed naturally as we kicked off the evening with a delicious first course: crispy mozzarella, tomato bruschetta, wagyu beef meatballs, Maggiano’s signature salad, and a classic Caesar. It was delicious and the perfect way to set the tone for the rest of the night.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b7sb",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s7sa",
+          "text": "Next came the hearty second course, served family-style and full of flavor—four cheese ravioli, rich fettuccine bolognese, chicken parmesan, and tender beef medallions. As the food made its way around the table, so did the laughter and lively conversation. The energy in the room was truly something special.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b7sd",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s7sc",
+          "text": "Before diving into dessert—an irresistible duo of apple crostada and tiramisu—we added one more surprise to the evening: a comedy set by the talented Christie Buchele. Her sharp wit and energy had the whole room in laughter, and it was the perfect way to wrap up a memorable night.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b7sf",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s7se",
+          "text": "To everyone who joined us—thank you. Your presence made the evening so special, and we’re already looking forward to the next one!",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "image",
+      "_key": "i7sg",
+      "src": "./images/2025-08-IMG_4204-scaled.jpg",
+      "alt": "Client Advisory Board Dinner"
+    }
+  ],
+  "factCheck": [],
+  "author": {
+    "name": "Dormer Harpring",
+    "href": "/about"
+  },
+  "reviewer": {
+    "name": "K.C. Harpring",
+    "href": "/meet-our-attorneys/k-c-harpring"
+  },
+  "legacyId": 15737
+}

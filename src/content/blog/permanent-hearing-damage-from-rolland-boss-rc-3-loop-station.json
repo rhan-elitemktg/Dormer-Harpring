@@ -1,0 +1,478 @@
+{
+  "slug": "permanent-hearing-damage-from-rolland-boss-rc-3-loop-station",
+  "title": "Lawsuit: Permanent Hearing Damage from Rolland Boss RC-3 Loop Station",
+  "excerpt": "By Sean Dormer Denver, Colorado – Dormer Harpring, LLC, has filed a lawsuit against the Rolland Corporation and its US subsidiary over an alleged defect in its Boss RC-3 Loop Station. Our position in the lawsuit is summarized as follows, and please see below for a related practice pointer: Hearing Damage Caused by Rolland Boss […]",
+  "publishedAt": "2023-04-14T13:18:28",
+  "modifiedAt": "2026-01-26T12:49:13",
+  "categories": [
+    "trials"
+  ],
+  "body": [
+    {
+      "_type": "block",
+      "_key": "bbg6",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbg5",
+          "text": "By Sean Dormer",
+          "marks": [
+            "em"
+          ]
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bbgb",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "lbg8",
+          "_type": "link",
+          "href": "/"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbg7",
+          "text": "Denver, Colorado – ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "sbg9",
+          "text": "Dormer Harpring, LLC",
+          "marks": [
+            "lbg8"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "sbga",
+          "text": ", has filed a lawsuit against the Rolland Corporation and its US subsidiary over an alleged defect in its Boss RC-3 Loop Station. Our position in the lawsuit is summarized as follows, and please see below for a related practice pointer:",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bbgd",
+      "style": "h2",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbgc",
+          "text": "Hearing Damage Caused by Rolland Boss RC-3 Loop Station",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bbgf",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbge",
+          "text": "Rolland is a Japanese corporation that does business in the US through its subsidiary, Roland Corporation U.S.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bbgh",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbgg",
+          "text": "The RC-3 Loop Station is a looping pedal created by Roland Corporation and marketed to guitarists and other musicians of all skill levels, from amateurs to professionals. The RC-3 allows musicians to create phrases of recorded sound that can be looped back and built on. It includes 99 onboard memory presets. And it ships with pre-recorded phrases loaded onto the last few memory presets.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bbgj",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbgi",
+          "text": "For no reason we are aware of, the RC-3 was shipped with pre-recorded phrases that are far louder than phrases recorded by the user. It was shipped with no warning to the musician of this volume increase. Used normally, a musician would record their own phrases, then set the volume at an appropriate level to replay them. But if the musician switched to a pre-recorded phrase without first turning the volume down, the RC-3 could put out dangerously high volume levels that could cause permanent hearing damage.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bbgl",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbgk",
+          "text": "Rolland knew about this defect – we know this because the company published a troubleshooting page about it. But for musicians who had not yet experienced this dangerous defect and had not yet thought to visit Rolland’s troubleshooting guides, Rolland left them in the dark.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bbgn",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbgm",
+          "text": "We believe this defect in the RC-3 is a serious issue that deserves attention. Hearing damage can be devastating to professional and amateur musicians alike. But it also would have been cheap and simple to fix. From the day Rolland learned about this defect in the RC-3, Rolland should have corrected the volume level of its pre-loaded phrases and taken steps to warn the users of products that had already shipped. Rolland took the lazy route instead. And our team is committed to holding Rolland accountable for its choice.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bbgp",
+      "style": "h2",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbgo",
+          "text": "How Dormer Harpring is Approaching the Case Against Rolland",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bbgs",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbgq",
+          "text": "Related practice pointer: ",
+          "marks": [
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "sbgr",
+          "text": "It’s always a good idea to balance the speed and expense of Hague service (service abroad) against the speed and expense of serving a company through its U.S. subsidiary and then fighting about whether service was proper. In this case, we tried to fight for U.S. service first because (a) we believed we had the right to, and (b) a bit of briefing might have resulted in avoiding translating the documents into Japanese and serving them under the Hague Convention. Although we believed we were right, we didn’t win this time. Here’s the section of our brief on the applicable law:",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bbh2",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbgt",
+          "text": "In moving this Court to increase Plaintiff’s costs and delay justice, Roland Corp. cites several cases that say the opposite of what it says they say. Most troubling is Roland Corp.’s citation to ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "sbgu",
+          "text": "Volkswagenwerk Aktiengesellschaft v. Schlunk",
+          "marks": [
+            "em"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "sbgv",
+          "text": " for the proposition that the Hague Service Convention “pre-empts any ‘inconsistent methods of service prescribed by state law in all cases to which it applies.’” Doc. 15 at 5 (citing 486 U.S. 694, 699 (1988)). What’s troubling is that Roland Corp. withholds from this Court ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "sbgw",
+          "text": "Volkswagenwerk",
+          "marks": [
+            "em"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "sbgx",
+          "text": "’s holding: “Where service on a domestic agent is valid and complete under both state law and the Due Process Clause, our inquiry ends and the [Hague Service] Convention has no further implications.” ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "sbgy",
+          "text": "Volkswagenwerk Aktiengesellschaft",
+          "marks": [
+            "em"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "sbgz",
+          "text": ", 486 U.S. at 707; ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "sbh0",
+          "text": "see also id.",
+          "marks": [
+            "em"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "sbh1",
+          "text": " at 708 (“The Court holds, and I agree, that a litigant may, consistent with the Convention, serve process on a foreign corporation by serving its wholly owned domestic subsidiary, because such process is not ‘service abroad’ within the meaning of Article 1 [of the Convention].”) (J. Brennan concurring).",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bbh7",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbh3",
+          "text": "Likewise, Roland Corp. fails to inform this Court that “California law allows service on a foreign corporation by serving its domestic subsidiary.” ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "sbh4",
+          "text": "Yamaha Motor Co., Ltd. v. Superior Court (Jack R. Connors)",
+          "marks": [
+            "em"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "sbh5",
+          "text": ", 174 Cal.App.4th 264, 271 (Cal. Ct. App. 2009). Plaintiff has requested, and Defendant has failed to provide, any evidence that could distinguish the relationship between Roland US and Roland Corp. from the relationship between Yamaha-America and Yamaha Japan at-issue in ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "sbh6",
+          "text": "Yamaha Motor Co.",
+          "marks": [
+            "em"
+          ]
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bbh9",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbh8",
+          "text": "And, while Roland Corp.’s Motion cites Rule 4(f)—which concerns service on individuals—it fails to cite Rules 4(h)(1)(A) and (B), which concern service on corporations. Further, Rule 4(h) clearly permits service of corporations in the manner done here (i.e., by “delivering a copy of the summons and of the complaint to an officer, a managing or general agent, or any other agent authorized by appointment or by law to receive service of process … .”). Fed. R. Civ. P. 4(h)(1)(B).",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bbhb",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbha",
+          "text": "Here, there is no dispute that Plaintiff served Roland Corp.’s wholly owned domestic subsidiary, Roland US, in California on October 14, 2022. There is no dispute that Plaintiff properly served Roland US with the summons and Complaint—for both Roland Corp. and Roland US—under Fed. R. Civ. P. 4(h) and California law. And, Roland Corp. raises no Due Process concerns. Nor could it. Accordingly, the Motion cannot be granted.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bbhd",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbhc",
+          "text": "But here’s the operative part of the order:",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bbhh",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbhe",
+          "text": "Plaintiff argues that he served Defendant by serving Defendant’s domestic subsidiary in California. Indeed, California law permits such service. ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "sbhf",
+          "text": "See Yamaha Motor Co. v. Superior Ct.",
+          "marks": [
+            "em"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "sbhg",
+          "text": ", 174 Cal. App. 4th 264, 271–75 (2009) (holding that under California law service upon domestic subsidiary was sufficient to serve foreign corporation).",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bbhj",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbhi",
+          "text": "Fatal to this argument, however, is the undeniable fact that Colorado is the forum state.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bbht",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbhk",
+          "text": "It’s pretty clear where the court got it wrong: F.R.C.P. 4(e)(1) allows for service that complies with the laws of the forum state (“the state where the district court is located”) but it also allows for service that complies with “state law for serving a summons … in the state … where service is made.” But is it worth fighting about more, versus just jumping into Hague service? At this point, we decided the answer was no. But it’s at least something we can add to our briefs in the future.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bbhv",
+      "style": "h2",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbhu",
+          "text": "Work With Us For Legal Help",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bbi0",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "lbhx",
+          "_type": "link",
+          "href": "/contact/"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbhw",
+          "text": "If you’re a lawyer investigating or litigating a similar case and want to compare notes or talk about co-counseling, please ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "sbhy",
+          "text": "contact us",
+          "marks": [
+            "lbhx"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "sbhz",
+          "text": ". We believe that working together and sharing information is the best way to achieve justice for our clients.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bbi5",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "lbi2",
+          "_type": "link",
+          "href": "/denver-product-liability-lawyer/"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbi1",
+          "text": "If you have suffered a similar injury and want to talk, please contact our ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "sbi3",
+          "text": "Denver product liability lawyers",
+          "marks": [
+            "lbi2"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "sbi4",
+          "text": ".",
+          "marks": []
+        }
+      ]
+    }
+  ],
+  "factCheck": [],
+  "author": {
+    "name": "Dormer Harpring",
+    "href": "/about"
+  },
+  "reviewer": {
+    "name": "K.C. Harpring",
+    "href": "/meet-our-attorneys/k-c-harpring"
+  },
+  "legacyId": 5189
+}

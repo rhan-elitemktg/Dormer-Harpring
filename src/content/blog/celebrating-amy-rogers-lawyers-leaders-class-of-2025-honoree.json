@@ -1,0 +1,197 @@
+{
+  "slug": "celebrating-amy-rogers-lawyers-leaders-class-of-2025-honoree",
+  "title": "Celebrating Amy Rogers: Lawyers & Leaders Class of 2025 Honoree",
+  "excerpt": "A big congratulations to our very own Amy Rogers for being named within the WVU College of Law Lawyers & Leaders Class of 2025! This prestigious award, a collaboration between the West Virginia University College of Law and West Virginia Executive Magazine, recognizes the accomplishments of lawyers who have made a positive impact on the […]",
+  "publishedAt": "2025-08-25T15:35:26",
+  "modifiedAt": "2026-01-26T12:15:47",
+  "categories": [
+    "awards"
+  ],
+  "body": [
+    {
+      "_type": "block",
+      "_key": "b7eo",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "l7ej",
+          "_type": "link",
+          "href": "/meet-our-attorneys/amy-rogers/"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s7ei",
+          "text": "A big congratulations to our very own ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "s7ek",
+          "text": "Amy Rogers",
+          "marks": [
+            "l7ej",
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "s7el",
+          "text": " for being named within the ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "s7em",
+          "text": "WVU College of Law Lawyers & Leaders Class of 2025",
+          "marks": [
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "s7en",
+          "text": "!",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "image",
+      "_key": "i7ep",
+      "src": "./images/2025-08-ANR.png",
+      "alt": "Celebrating Amy Rogers: Lawyers & Leaders Class of 2025 Honoree"
+    },
+    {
+      "_type": "block",
+      "_key": "b7ev",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s7eq",
+          "text": "This prestigious award, a collaboration between the ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "s7er",
+          "text": "West Virginia University College of Law",
+          "marks": [
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "s7es",
+          "text": " and ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "s7et",
+          "text": "West Virginia Executive Magazine",
+          "marks": [
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "s7eu",
+          "text": ", recognizes the accomplishments of lawyers who have made a positive impact on the state and the nation.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b7ex",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s7ew",
+          "text": "Acknowledged by her fellow peers, Amy was nominated and honored the award for her dedication to serving others within her community. Her hard work and care for others truly has made a huge impact.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b7ez",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s7ey",
+          "text": "In her own words, Amy recently shared a powerful blog post reflecting on her upbringing, legal background, and the experiences that have shaped her path. It’s an inspiring read that showcases her authenticity, passion, and resilience. We highly encourage you to check out.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b7f1",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s7f0",
+          "text": "We couldn’t be prouder to have Amy on our team and are excited to see the continued impact she will make in the legal field.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b7f3",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s7f2",
+          "text": "To read Amy’s full write up, click the link below:",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b7f6",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "l7f4",
+          "_type": "link",
+          "href": "https://lnkd.in/gDi5wwhs"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s7f5",
+          "text": "https://lnkd.in/gDi5wwhs",
+          "marks": [
+            "l7f4"
+          ]
+        }
+      ]
+    }
+  ],
+  "factCheck": [],
+  "author": {
+    "name": "Dormer Harpring",
+    "href": "/about"
+  },
+  "reviewer": {
+    "name": "K.C. Harpring",
+    "href": "/meet-our-attorneys/k-c-harpring"
+  },
+  "legacyId": 16004
+}

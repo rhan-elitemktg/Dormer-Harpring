@@ -1,0 +1,256 @@
+{
+  "slug": "promises-sean-dormer",
+  "title": "My Promises – Sean Dormer",
+  "excerpt": "“The Trial Lawyer’s College is dedicated to training and educating lawyers and judges who are committed to the jury system and to representing and obtaining justice for individuals; the poor, the injured, the forgotten, the voiceless, the defenseless and the damned, and to protecting the rights of such people from corporate and government oppression. In […]",
+  "publishedAt": "2017-10-05T15:33:12",
+  "modifiedAt": "2017-10-05T15:33:12",
+  "categories": [
+    "trials"
+  ],
+  "body": [
+    {
+      "_type": "block",
+      "_key": "bcjp",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scjm",
+          "text": "“The Trial Lawyer’s College is dedicated to training and educating lawyers and judges who are committed to the jury system and to representing and obtaining justice for individuals; the poor, the injured, the forgotten, the voiceless, the defenseless and the damned, and to protecting the rights of such people from corporate and government oppression. In all of its activities, the Trial Lawyer’s College will foster and nourish an open atmosphere of caring for people regardless of their race, age, creed, religion, national origin, physical abilities, gender or sexual orientation.”",
+          "marks": [
+            "em"
+          ]
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcju",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "lcjr",
+          "_type": "link",
+          "href": "https://www.triallawyerscollege.org/"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scjq",
+          "text": "– The ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "scjs",
+          "text": "Trial Lawyer’s College",
+          "marks": [
+            "lcjr"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "scjt",
+          "text": " Mission Statement",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bck0",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "lcjx",
+          "_type": "link",
+          "href": "https://www.triallawyerscollege.org/"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scjw",
+          "text": "When I got in my car and headed towards Wyoming at the beginning of September, I didn’t know much about ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "scjy",
+          "text": "The Trial Lawyer’s College",
+          "marks": [
+            "lcjx"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "scjz",
+          "text": " (we call it “TLC”). I knew the mission statement. I knew that some of the best trial lawyers in America call themselves Warriors. But I didn’t know what to expect for myself.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bck2",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sck1",
+          "text": "As it turned out, I didn’t know what to expect at TLC because the process is difficult to explain. We started by spending a week getting to know what we call “our real selves.” For the two-and-a-half weeks after that, we sprinkled more intense self-reflection throughout our courses on trial skills. The entire month was devoted to unleashing our creativity – something law school stifles. We took only three days and two evenings off. We spent time among some of the most incredible trial lawyers, communicators, and psychodramatists around.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bck4",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sck3",
+          "text": "For me, TLC felt more like the beginning of a lifelong journey than a self-contained class. And as with any journey, I find comfort in starting off with a guide. Here’s my guide – please hold me to it:",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bck8",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sck5",
+          "text": "I promise to ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "sck6",
+          "text": "really",
+          "marks": [
+            "em"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "sck7",
+          "text": " listen to the person or people I’m spending time with.",
+          "marks": []
+        }
+      ],
+      "listItem": "number",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bckc",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sck9",
+          "text": "I promise to do the work it takes to ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "scka",
+          "text": "really",
+          "marks": [
+            "em"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "sckb",
+          "text": " get to know my clients’ stories before trial.",
+          "marks": []
+        }
+      ],
+      "listItem": "number",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bcke",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sckd",
+          "text": "I promise to show people what I mean whenever possible, not just tell them.",
+          "marks": []
+        }
+      ],
+      "listItem": "number",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bckg",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sckf",
+          "text": "I promise to remember that there is no courage without fear. I will not let the fear of embarrassment, rejection, or failure stand in the way of showing my love for others or fighting for what I believe to be right.",
+          "marks": []
+        }
+      ],
+      "listItem": "number",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bcki",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sckh",
+          "text": "I promise to respond to gifts given to me by paying them forward or giving them back.",
+          "marks": []
+        }
+      ],
+      "listItem": "number",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bckk",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sckj",
+          "text": "-Sean",
+          "marks": []
+        }
+      ]
+    }
+  ],
+  "factCheck": [],
+  "author": {
+    "name": "Dormer Harpring",
+    "href": "/about"
+  },
+  "reviewer": {
+    "name": "K.C. Harpring",
+    "href": "/meet-our-attorneys/k-c-harpring"
+  },
+  "legacyId": 764
+}

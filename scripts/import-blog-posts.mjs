@@ -76,6 +76,20 @@ const decode = (s) =>
    .replace(/&nbsp;/g, " ").replace(/&hellip;/g, "…")
    .replace(/&#(\d+);/g, (_, d) => String.fromCodePoint(+d));
 
+/* `querySelectorAll` reaches THROUGH a chrome wrapper. The walk checks each
+ * element as it descends and never enters one, but lifting media out of a
+ * paragraph queries the whole subtree — so a phone icon inside a
+ * `coman-btn-block`, or an avatar inside `client-reviews`, comes back as if it
+ * were content. Every such query has to re-check ancestors itself. */
+const inChrome = (el) => {
+  let n = el;
+  while (n) {
+    if (n.rawTagName && isChrome(n)) return true;
+    n = n.parentNode;
+  }
+  return false;
+};
+
 const isChrome = (el) => {
   if (CHROME_TAGS.includes(el.rawTagName?.toLowerCase())) return true;
   const cls = el.getAttribute?.("class") || "";
@@ -251,15 +265,25 @@ function walk(node, slug, out) {
       const b = textBlock(el, "h4", slug);
       if (b) out.push(b);
     } else if (tag === "p") {
-      const img = el.querySelector("img");
-      // A paragraph that is only an image — WordPress's usual wrapper.
-      if (img && !decode(el.text).trim()) {
-        const n = imageNode(img, slug);
-        if (n) out.push(n);
-      } else {
-        const b = textBlock(el, "normal", slug);
-        if (b) out.push(b);
+      /* A PARAGRAPH CAN CARRY MEDIA AND TEXT AT ONCE, and an earlier version of
+         this only handled a <p> that was NOTHING BUT an image — anything else
+         went to the inline walker, which keeps words and drops tags, so an
+         image or an iframe sharing a paragraph with a sentence vanished with no
+         warning. That is how the three Google My Maps escaped their flag and
+         ten images went missing. Media is lifted out FIRST, then whatever text
+         is left becomes the block. */
+      for (const media of el.querySelectorAll("img, iframe")) {
+        if (inChrome(media)) { media.remove(); continue; }
+        if (media.rawTagName.toLowerCase() === "img") {
+          const n = imageNode(media, slug);
+          if (n) out.push(n);
+        } else {
+          noteDroppedMap(media, slug);
+        }
+        media.remove();
       }
+      const b = textBlock(el, "normal", slug);
+      if (b) out.push(b);
     } else if (tag === "ul") {
       out.push(...listBlocks(el, "bullet", slug));
     } else if (tag === "ol") {
@@ -273,17 +297,17 @@ function walk(node, slug, out) {
       const n = imageNode(el, slug);
       if (n) out.push(n);
     } else if (tag === "figure") {
-      const img = el.querySelector("img");
-      if (img) { const n = imageNode(img, slug); if (n) out.push(n); }
+      for (const media of el.querySelectorAll("img, iframe")) {
+        if (inChrome(media)) continue;
+        if (media.rawTagName.toLowerCase() === "img") {
+          const n = imageNode(media, slug);
+          if (n) out.push(n);
+        } else noteDroppedMap(media, slug);
+      }
     } else if (tag === "table") {
       out.push(...tableBlocks(el, slug));
     } else if (tag === "iframe") {
-      // Three Google My Maps of crash sites. Dropped at Rhan's direction, with
-      // the map id recorded — the map lives in the firm's Google account and
-      // outlives the post, so this is enough to restore it later.
-      const src = decode(el.getAttribute("src") || "");
-      const mid = /[?&]mid=([^&"]+)/.exec(src)?.[1];
-      warn(slug, `TODO(launch): Google My Map dropped — mid=${mid ?? "unknown"}`);
+      noteDroppedMap(el, slug);
     } else if (tag === "hr" || tag === "br") {
       // No Portable Text equivalent, and nothing depends on it.
     } else {
@@ -293,10 +317,40 @@ function walk(node, slug, out) {
   }
 }
 
+/* Three Google My Maps of crash sites. Dropped at Rhan's direction, with the
+ * map id recorded — the map lives in the firm's Google account and outlives the
+ * post, so the id is enough to restore it later. */
+function noteDroppedMap(el, slug) {
+  const src = decode(el.getAttribute("src") || "");
+  const mid = /[?&]mid=([^&"]+)/.exec(src)?.[1];
+  warn(slug, `TODO(launch): Google My Map dropped — mid=${mid ?? "unknown"}`);
+}
+
+/* THE AUDIT. Every count below is a thing the source had; if the conversion
+ * did not account for it, the difference is content that disappeared without
+ * anyone being told. Written after an <img> inside a text paragraph did exactly
+ * that, ten times, while the run reported one warning and looked clean. */
+function countSourceImages(root) {
+  return root.querySelectorAll("img").filter((el) => !inChrome(el)).length;
+}
+
+/* COUNTED BEFORE THE WALK, NOT AFTER. The walk calls `.remove()` to lift media
+ * out of a paragraph, so counting the tree afterwards finds nothing and the
+ * audit reports a negative — which is exactly what it did the first time. */
+function audit(imgs, blocks, slug) {
+  const emitted = blocks.filter((b) => b._type === "image").length;
+  const skipped = warnings.filter((w) => w.startsWith(`${slug}: image is not on`)).length;
+  if (imgs !== emitted + skipped) {
+    warn(slug, `AUDIT: ${imgs} images in the source, ${emitted} emitted, ${skipped} skipped — ${imgs - emitted - skipped} unaccounted for`);
+  }
+}
+
 export function convertBody(htmlString, slug) {
   const root = parse(htmlString, { blockTextElements: { script: false, style: false } });
+  const sourceImages = countSourceImages(root);
   const out = [];
   walk(root, slug, out);
+  audit(sourceImages, out, slug);
   return out;
 }
 

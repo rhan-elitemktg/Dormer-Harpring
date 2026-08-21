@@ -782,14 +782,34 @@ async function importedCategories(): Promise<Map<string, BlogCategory>> {
  * sides. The hand-authored posts use short keys like `trampoline-waiver`, so
  * the two namespaces cannot collide unless a legacy slug is exactly that.
  */
+/**
+ * Slugs a hand-authored article already claims.
+ *
+ * HAND-AUTHORED WINS. The import brings all 167 legacy posts including any that
+ * were already transcribed by hand, and the hand-authored version is not merely
+ * a duplicate — it is the legacy article WITH corrections: the live copy's
+ * truncated sentence completed, the firm's real phone number in place of the
+ * article's third one. Both are asserted in diff-comp-blog-post.py. Letting the
+ * import win would silently revert them.
+ *
+ * The route's own collision check would throw on this rather than pick one,
+ * which is how it surfaced. Filtering here keeps that check meaning what it
+ * says: a genuine conflict, not an expected overlap.
+ */
+async function handAuthoredSlugs(): Promise<Set<string>> {
+  return new Set((await getBlogPostArticles()).map((article) => article.slug));
+}
+
 export async function getImportedPosts(): Promise<BlogPost[]> {
-  const [entries, categories, kc] = await Promise.all([
+  const [entries, categories, kc, claimed] = await Promise.all([
     getCollection("blog"),
     importedCategories(),
     byline("k-c-harpring"),
+    handAuthoredSlugs(),
   ]);
 
   return entries
+    .filter((entry) => !claimed.has(entry.data.slug))
     .map((entry) => {
       const primary = entry.data.categories[0];
       const category = categories.get(primary);
@@ -816,12 +836,15 @@ export async function getImportedPosts(): Promise<BlogPost[]> {
 
 /** Imported posts in the ARTICLE shape — the body the page renders. */
 export async function getImportedArticles(): Promise<BlogPostArticle[]> {
-  const [entries, kc] = await Promise.all([
+  const [entries, kc, claimed] = await Promise.all([
     getCollection("blog"),
     byline("k-c-harpring"),
+    handAuthoredSlugs(),
   ]);
 
-  return entries.map((entry) => ({
+  return entries
+    .filter((entry) => !claimed.has(entry.data.slug))
+    .map((entry) => ({
     _key: entry.data.slug,
     slug: entry.data.slug,
     body: entry.data.body,
