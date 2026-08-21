@@ -1,0 +1,130 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "redirects": [
+    {
+      "source": "/category/auto-accident",
+      "destination": "/news?category=auto-accident",
+      "permanent": true
+    },
+    {
+      "source": "/category/personal-injury",
+      "destination": "/news?category=personal-injury",
+      "permanent": true
+    },
+    {
+      "source": "/category/auto-insurance-accident-claims",
+      "destination": "/news?category=auto-insurance-accident-claims",
+      "permanent": true
+    },
+    {
+      "source": "/category/motorcycle-accidents",
+      "destination": "/news?category=motorcycle-accidents",
+      "permanent": true
+    },
+    {
+      "source": "/category/truck-accidents",
+      "destination": "/news?category=truck-accidents",
+      "permanent": true
+    },
+    {
+      "source": "/category/verdicts",
+      "destination": "/news?category=verdicts",
+      "permanent": true
+    },
+    {
+      "source": "/category/product-liability",
+      "destination": "/news?category=product-liability",
+      "permanent": true
+    },
+    {
+      "source": "/category/trials",
+      "destination": "/news?category=trials",
+      "permanent": true
+    },
+    {
+      "source": "/category/dating-apps",
+      "destination": "/news?category=dating-apps",
+      "permanent": true
+    },
+    {
+      "source": "/category/ski-accident",
+      "destination": "/news?category=ski-accident",
+      "permanent": true
+    },
+    {
+      "source": "/category/wrongful-death",
+      "destination": "/news?category=wrongful-death",
+      "permanent": true
+    },
+    {
+      "source": "/category/awards",
+      "destination": "/news?category=awards",
+      "permanent": true
+    },
+    {
+      "source": "/category/news",
+      "destination": "/news?category=news",
+      "permanent": true
+    },
+    {
+      "source": "/category/premises-liability",
+      "destination": "/news?category=premises-liability",
+      "permanent": true
+    },
+    {
+      "source": "/category/dog-bites",
+      "destination": "/news?category=dog-bites",
+      "permanent": true
+    },
+    {
+      "source": "/category/laws",
+      "destination": "/news?category=laws",
+      "permanent": true
+    },
+    {
+      "source": "/category/medical-malpractice",
+      "destination": "/news?category=medical-malpractice",
+      "permanent": true
+    },
+    {
+      "source": "/category/slip-and-fall",
+      "destination": "/news?category=slip-and-fall",
+      "permanent": true
+    },
+    {
+      "source": "/category/bike-accidents",
+      "destination": "/news?category=bike-accidents",
+      "permanent": true
+    },
+    {
+      "source": "/category/burn-injury",
+      "destination": "/news?category=burn-injury",
+      "permanent": true
+    },
+    {
+      "source": "/category/daycare-injury",
+      "destination": "/news?category=daycare-injury",
+      "permanent": true
+    },
+    {
+      "source": "/category/pedestrian-accident",
+      "destination": "/news?category=pedestrian-accident",
+      "permanent": true
+    },
+    {
+      "source": "/category/trampoline-park-injuries",
+      "destination": "/news?category=trampoline-park-injuries",
+      "permanent": true
+    },
+    {
+      "source": "/category/articles",
+      "destination": "/news",
+      "permanent": true
+    },
+    {
+      "source": "/category/darcare-injuries",
+      "destination": "/news?category=daycare-injury",
+      "permanent": true
+    }
+  ]
+}

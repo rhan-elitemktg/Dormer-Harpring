@@ -7,13 +7,14 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "npm run build:redirects && astro build",
     "preview": "astro preview",
     "astro": "astro",
     "check:styles": "python3 scripts/check-scoped-styles.py $(find dist -name '*.html' -not -path 'dist/admin/*')",
     "prep:assets": "node scripts/prep-assets.mjs",
     "check:tokens": "python3 scripts/check-tokens.py",
-    "check": "npm run check:styles && npm run check:tokens"
+    "check": "npm run check:styles && npm run check:tokens",
+    "build:redirects": "tsx scripts/build-redirects.ts"
   },
   "dependencies": {
     "@astrojs/react": "^6.0.2",
