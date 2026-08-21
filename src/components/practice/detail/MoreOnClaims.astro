@@ -23,30 +23,30 @@ const { more } = Astro.props;
   <div class="container">
     <h2 class="more__title">{more.title}</h2>
 
-    <ul class="feats">
+    <ul class="morefeats">
       {
         more.features.map((feature) => (
           <li>
-            <a class="feat" href={feature.href ?? undefined}>
-              <span class="feat__fig">
+            <a class="morefeat" href={feature.href ?? undefined}>
+              <span class="morefeat__fig">
                 <Picture
                   src={feature.poster}
                   alt=""
                   widths={[500, 900]}
                   sizes="(max-width: 980px) 100vw, 45vw"
-                  class="feat__img"
+                  class="morefeat__img"
                 />
-                <span class="feat__dur">{feature.length}</span>
-                <span class="feat__play" aria-hidden="true">
+                <span class="morefeat__dur">{feature.length}</span>
+                <span class="morefeat__play" aria-hidden="true">
                   <svg width="16" height="18" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M8 5.5v13l11-6.5z" />
                   </svg>
                 </span>
               </span>
-              <b class="feat__title">{feature.title}</b>
-              <p class="feat__body">{feature.body}</p>
-              <span class="feat__link">
-                {feature.ctaLabel}
+              <h3 class="morefeat__title">{feature.title}</h3>
+              <p class="morefeat__body">{feature.body}</p>
+              <span class="morefeat__link arrow-link">
+                <span class="arrow-link__label">{feature.ctaLabel}</span>
                 <i class="arrow" aria-hidden="true">
                   &rarr;
                 </i>
@@ -62,10 +62,10 @@ const { more } = Astro.props;
         more.cards.map((card) => (
           <li>
             <a class="mcard" href={card.href ?? undefined}>
-              <b class="mcard__title">{card.title}</b>
+              <h3 class="mcard__title">{card.title}</h3>
               <p class="mcard__body">{card.body}</p>
-              <span class="mcard__link">
-                {card.ctaLabel}
+              <span class="mcard__link arrow-link">
+                <span class="arrow-link__label">{card.ctaLabel}</span>
                 <i class="arrow" aria-hidden="true">
                   &rarr;
                 </i>
@@ -90,7 +90,7 @@ const { more } = Astro.props;
     color: var(--text-on-dark);
   }
 
-  .feats {
+  .morefeats {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--space-9);
@@ -100,14 +100,14 @@ const { more } = Astro.props;
     list-style: none;
   }
 
-  .feat {
+  .morefeat {
     display: flex;
     flex-direction: column;
     height: 100%;
     text-decoration: none;
   }
 
-  .feat__fig {
+  .morefeat__fig {
     position: relative;
     display: block;
     aspect-ratio: 16 / 9;
@@ -117,7 +117,7 @@ const { more } = Astro.props;
     background: var(--dh-forest-100);
   }
 
-  .feat__fig :global(.feat__img) {
+  .morefeat__fig :global(.morefeat__img) {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -127,14 +127,14 @@ const { more } = Astro.props;
     display: block;
   }
 
-  .feat__fig::after {
+  .morefeat__fig::after {
     content: "";
     position: absolute;
     inset: 0;
     background: linear-gradient(180deg, rgba(10, 14, 11, 0) 55%, rgba(10, 14, 11, 0.5) 100%);
   }
 
-  .feat__play {
+  .morefeat__play {
     position: absolute;
     right: var(--space-4);
     bottom: var(--space-4);
@@ -151,11 +151,11 @@ const { more } = Astro.props;
     transition: transform var(--dur) var(--ease);
   }
 
-  .feat:hover .feat__play {
+  .morefeat:hover .morefeat__play {
     transform: scale(1.08);
   }
 
-  .feat__dur {
+  .morefeat__dur {
     position: absolute;
     top: var(--space-3);
     right: var(--space-3);
@@ -170,7 +170,11 @@ const { more } = Astro.props;
     color: var(--dh-white);
   }
 
-  .feat__title {
+  /* `margin: 0` because these are <h3>s now, not <b>s — the eight card titles
+     are the only structure in a section that exists to be scanned, and `<b>`
+     contributes nothing to the outline. */
+  .morefeat__title {
+    margin: 0;
     font-family: var(--font-display);
     font-weight: 400;
     font-size: var(--display-6);
@@ -180,11 +184,11 @@ const { more } = Astro.props;
     transform-origin: left center;
   }
 
-  .feat:hover .feat__title {
+  .morefeat:hover .morefeat__title {
     transform: translateX(3px);
   }
 
-  .feat__body {
+  .morefeat__body {
     margin: var(--space-3) 0 var(--space-5);
     flex: 1;
     font-size: var(--text-md);
@@ -193,27 +197,27 @@ const { more } = Astro.props;
     text-wrap: pretty;
   }
 
-  .feat__link,
+  /* The flex box is `.arrow-link`'s and the underline is on its
+     `.arrow-link__label`. Declared here it also struck the glyph: this is a
+     flex container, so the decoration propagates into the blockified children
+     and a child cannot turn it off. The rule that used to try —
+     `.morefeat__link .arrow { text-decoration: none }` — never did anything,
+     and its comment said it did. */
+  .morefeat__link,
   .mcard__link {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
     font-weight: 800;
     font-size: var(--text-micro);
     line-height: 1;
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--text-on-dark);
-    text-decoration: underline;
-    text-underline-offset: 4px;
+    text-decoration: none;
   }
 
-  /* The arrow sits inside an underlined label, so it opts out of the underline
-     and keeps the shared `.arrow` nudge. */
-  .feat__link .arrow,
+  /* The glyph is an <i> here, where most arrows on the page are a <span>. */
+  .morefeat__link .arrow,
   .mcard__link .arrow {
     font-style: normal;
-    text-decoration: none;
   }
 
   /* ---- the six ---- */
@@ -236,9 +240,17 @@ const { more } = Astro.props;
     transition: background var(--transition);
   }
 
+  /* The first column's TEXT sits on the container's left edge, which used to
+     mean `padding-left: 0` — and `.mcard:hover` then painted its wash hard
+     against that text while every other card's was inset by `--space-7`. Along
+     a row the highlight changed shape. The padding is restored and pulled back
+     out by the same amount, so the text does not move and the wash matches.
+     `--space-7` (28px) stays inside `--container-pad` at both widths this rule
+     applies to (48px, and 32px below 1280px). */
   .morecards > li:nth-child(3n + 1) .mcard {
     border-left: 0;
-    padding-left: 0;
+    padding-left: var(--space-7);
+    margin-left: calc(var(--space-7) * -1);
   }
 
   .morecards > li:nth-child(-n + 3) .mcard {
@@ -254,6 +266,7 @@ const { more } = Astro.props;
   }
 
   .mcard__title {
+    margin: 0;
     font-family: var(--font-display);
     font-weight: 400;
     font-size: var(--text-xl);
@@ -277,7 +290,7 @@ const { more } = Astro.props;
   }
 
   @media (max-width: 980px) {
-    .feats {
+    .morefeats {
       grid-template-columns: 1fr;
     }
 
@@ -285,14 +298,19 @@ const { more } = Astro.props;
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
+    /* Two columns, so the first column is now the ODD cards and card 4 stops
+       being one. The bleed follows the first column rather than the rule that
+       set it at three-up. */
     .morecards > li:nth-child(3n + 1) .mcard {
       border-left: 1px solid rgba(246, 242, 232, 0.16);
       padding-left: var(--space-7);
+      margin-left: 0;
     }
 
     .morecards > li:nth-child(odd) .mcard {
       border-left: 0;
-      padding-left: 0;
+      padding-left: var(--space-7);
+      margin-left: calc(var(--space-7) * -1);
     }
 
     .morecards > li:nth-child(-n + 3) .mcard {
@@ -311,9 +329,13 @@ const { more } = Astro.props;
       grid-template-columns: 1fr;
     }
 
+    /* One column, and NO bleed: `--container-pad` is 24px here, less than the
+       28px it would pull, so the card would hang past the gutter. There is also
+       no second column left to be out of step with. */
     .morecards > li .mcard {
       border-left: 0;
       padding-left: 0;
+      margin-left: 0;
       padding-top: var(--space-6);
       border-top: 1px solid rgba(246, 242, 232, 0.16);
     }
