@@ -32,7 +32,12 @@ const portableTextBlock = z.object({
   _type: z.literal("block"),
   _key: z.string(),
   style: z.enum(["normal", "blockquote", "h2", "h3", "h4"]),
-  markDefs: z.array(z.record(z.string(), z.unknown())).default([]),
+  /** `link` is the ONLY markDef the renderer maps (see prose/components.ts),
+   *  so this matches PortableTextLink exactly rather than staying open. Loose
+   *  typing here bought nothing and cost a cast at every read site. */
+  markDefs: z
+    .array(z.object({ _type: z.literal("link"), _key: z.string(), href: z.string() }))
+    .default([]),
   children: z.array(
     z.object({
       _type: z.literal("span"),
@@ -100,8 +105,31 @@ const blog = defineCollection({
        */
       categories: z.array(z.string()).default([]),
 
-      /** Portable Text. The article body, chrome already stripped. */
-      body: z.array(portableTextBlock),
+      /**
+       * Portable Text. The article body, chrome already stripped.
+       *
+       * A UNION, because 116 of the 167 posts carry photographs mid-article.
+       * `z.union` discriminates on `_type` well enough here — the two members
+       * share no shape — and an entry matching neither fails the build rather
+       * than being dropped, which is the behaviour that matters: a silently
+       * skipped block is a paragraph that vanishes from a live page.
+       */
+      body: z.array(
+        z.union([
+          portableTextBlock,
+          /* Portable Text's `image` object, as `ptImage()` builds it and
+             `ProseImage.astro` renders it. `src` is a PATH relative to the
+             entry file; Astro's `image()` resolves it to the ImageMetadata
+             ProseImage expects. Declared inline because `image()` exists only
+             inside this callback. */
+          z.object({
+            _type: z.literal("image"),
+            _key: z.string(),
+            src: image(),
+            alt: z.string(),
+          }),
+        ])
+      ),
       /** The reviewed-by band at the foot. Per-post: it names a specific
        *  person and makes a specific claim about them. */
       factCheck: z.array(portableTextBlock).default([]),

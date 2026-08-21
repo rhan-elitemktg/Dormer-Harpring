@@ -64,13 +64,26 @@ const { post, article, page, categories, related } = Astro.props;
            single-column order reads article → fact-check → sidebar rather than
            burying the fact-check under the form. */
       }
-      <div class="post__fact">
-        <p class="post__factlabel">
-          <span class="post__factmark" aria-hidden="true">&#10003;</span>
-          {page.factCheckLabel}
-        </p>
-        <Prose value={article.factCheck} class="post__factbody" />
-      </div>
+      {
+        /* A GUARD, NOT A CONDITION ANYTHING MEETS TODAY. Every post now
+           carries this band: the hand-authored one writes its own, and
+           `getImportedArticles()` derives one from the reviewer because
+           WordPress has no field for it. The check stays because an empty
+           `factCheck` renders as a checkmark, a heading and nothing else —
+           which reads as a broken component rather than an absent one — and
+           the field is editable per post once these live in Sanity. */
+        article.factCheck.length > 0 && (
+          <div class="post__fact">
+            <p class="post__factlabel">
+              <span class="post__factmark" aria-hidden="true">
+                &#10003;
+              </span>
+              {page.factCheckLabel}
+            </p>
+            <Prose value={article.factCheck} class="post__factbody" />
+          </div>
+        )
+      }
 
       <PostSidebar page={page} categories={categories} related={related} />
     </div>

@@ -25,6 +25,7 @@
 // the Practice Areas directory gives the three entries with no page. See the
 // TODO(launch) on `getBlogPosts()`.
 import type { ImageMetadata } from "astro";
+import { getCollection } from "astro:content";
 import { getTeam } from "./team";
 import { getFirmDetails } from "./site";
 import {
@@ -196,6 +197,28 @@ async function byline(memberKey: string): Promise<PostByline> {
 /** Every post is written by the firm and reviewed by an attorney — the live
  *  site's byline convention, which the comp reproduces on all thirteen cards. */
 const FIRM: PostByline = { name: "Dormer Harpring", href: ROUTES.attorneys };
+
+/**
+ * The reviewed-by band at the foot of an article.
+ *
+ * ONE SOURCE FOR ONE SENTENCE. It is per-post data — in Sanity it becomes a
+ * field an editor can rewrite for a post reviewed by someone else — but every
+ * post that exists today is reviewed by the same person, and two hand-copied
+ * versions of this would drift the moment one is edited.
+ *
+ * TODO(launch): "more than 20 years" is one of the unverified stat claims in
+ * README's table. It was already on the one built article; deriving the
+ * imported posts from the same sentence puts it on every post the import
+ * brings, so it needs confirming before launch rather than after.
+ */
+function reviewedBy(reviewer: PostByline): PortableTextBlock[] {
+  return pt(
+    "This article was written and reviewed by the team at Dormer Harpring " +
+      `and approved by founding partner [${reviewer.name}](${reviewer.href}), who has ` +
+      "tried personal injury cases to verdict in Colorado courts for more " +
+      "than 20 years."
+  );
+}
 
 export async function getFeaturedPost(): Promise<FeaturedPost> {
   return {
@@ -674,12 +697,7 @@ export async function getBlogPostArticles(): Promise<BlogPostArticle[]> {
       readTime: readTime(body),
       // TODO(launch): "more than 20 years" is the same unverified claim as the
       // homepage's `20 Years` stat. The comp asserts it; nobody has confirmed it.
-      factCheck: pt(
-        "This article was written and reviewed by the team at Dormer Harpring " +
-          `and approved by founding partner [${kc.name}](${kc.href}), who has ` +
-          "tried personal injury cases to verdict in Colorado courts for more " +
-          "than 20 years."
-      ),
+      factCheck: reviewedBy(kc),
     },
   ];
 }
@@ -697,6 +715,126 @@ export async function getBlogPostArticles(): Promise<BlogPostArticle[]> {
  * four that exist), the band at the foot takes 3. They overlap, and will stop
  * overlapping as soon as the blog has more than five real posts in it.
  */
+/* ---------------------------------------------------------------------------
+ * THE IMPORTED LEGACY BLOG.
+ *
+ * Everything above this line is hand-authored copy from the comps. Everything
+ * below reads the `blog` content collection, which `scripts/import-blog-posts.mjs`
+ * fills from the live WordPress site.
+ *
+ * THE TWO ARE DELIBERATELY NOT MERGED INTO THE INDEX YET. `getBlogPosts()` is
+ * still the comp's twelve cards, because the index's tab row ships five
+ * categories and the import brings twenty-three — how that row handles
+ * twenty-three is an open design question, and answering it by quietly
+ * lengthening the feed would decide it by accident. So imported posts get a
+ * PAGE (the route unions them in) without yet getting a CARD. When the tab row
+ * is settled, `getBlogPosts()` returns these too and this comment goes.
+ * ------------------------------------------------------------------------- */
+
+/** Card art for an imported post, keyed by its primary category. 107 of the
+ *  167 legacy posts have no featured image at all, and the design already
+ *  treats this art as decorative — the cards render it with an empty `alt` —
+ *  so a category-appropriate photograph beats inventing one per post. */
+const IMPORTED_FALLBACK_IMAGE: Record<string, ImageMetadata> = {
+  "auto-accident": carAccident,
+  "auto-insurance-accident-claims": carAccident,
+  "bike-accidents": bicycle,
+  "burn-injury": burns,
+  "dating-apps": personalInjury,
+  "daycare-injury": personalInjury,
+  "dog-bites": dogBite,
+  "laws": boardroom,
+  "medical-malpractice": personalInjury,
+  "motorcycle-accidents": motorcycle,
+  "news": boardroom,
+  "awards": boardroom,
+  "pedestrian-accident": bicycle,
+  "personal-injury": personalInjury,
+  "premises-liability": slipAndFall,
+  "product-liability": burns,
+  "ski-accident": brainInjury,
+  "slip-and-fall": slipAndFall,
+  "trampoline-park-injuries": brainInjury,
+  "trials": boardroom,
+  "verdicts": boardroom,
+  "truck-accidents": truck,
+  "wrongful-death": wrongfulDeath,
+};
+
+/** The taxonomy, straight from the `blogCategories` collection rather than the
+ *  hand-written CATEGORIES map above — the imported posts carry the live
+ *  site's 23 slugs, and only the collection knows all of them. */
+async function importedCategories(): Promise<Map<string, BlogCategory>> {
+  const entries = await getCollection("blogCategories");
+  return new Map(
+    entries.map((entry) => [
+      entry.data.slug,
+      { _key: entry.data.slug, title: entry.data.title, slug: entry.data.slug },
+    ])
+  );
+}
+
+/**
+ * Imported posts in the FEED shape, newest first.
+ *
+ * `_key` is the slug: the route joins an article to its feed entry on `_key`,
+ * and for an imported post the slug is the only identifier that exists on both
+ * sides. The hand-authored posts use short keys like `trampoline-waiver`, so
+ * the two namespaces cannot collide unless a legacy slug is exactly that.
+ */
+export async function getImportedPosts(): Promise<BlogPost[]> {
+  const [entries, categories, kc] = await Promise.all([
+    getCollection("blog"),
+    importedCategories(),
+    byline("k-c-harpring"),
+  ]);
+
+  return entries
+    .map((entry) => {
+      const primary = entry.data.categories[0];
+      const category = categories.get(primary);
+      if (!category) {
+        throw new Error(
+          `blog: imported post "${entry.data.slug}" has category "${primary}", ` +
+            `which is not in the blogCategories collection.`
+        );
+      }
+      return {
+        _key: entry.data.slug,
+        title: entry.data.title,
+        excerpt: entry.data.excerpt,
+        publishedAt: entry.data.publishedAt,
+        category,
+        image: entry.data.image ?? IMPORTED_FALLBACK_IMAGE[primary] ?? consult,
+        author: FIRM,
+        reviewer: kc,
+        href: blogPath(entry.data.slug),
+      } satisfies BlogPost;
+    })
+    .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
+}
+
+/** Imported posts in the ARTICLE shape — the body the page renders. */
+export async function getImportedArticles(): Promise<BlogPostArticle[]> {
+  const [entries, kc] = await Promise.all([
+    getCollection("blog"),
+    byline("k-c-harpring"),
+  ]);
+
+  return entries.map((entry) => ({
+    _key: entry.data.slug,
+    slug: entry.data.slug,
+    body: entry.data.body,
+    // DERIVED, never stored — same rule the hand-authored article follows.
+    readTime: readTime(entry.data.body),
+    /* WordPress has no field for this, so the import leaves it empty and the
+       band is derived from the reviewer here. A post whose file DOES carry one
+       keeps it — that is the path an editor's override takes once these move
+       into Sanity, and it is why this coalesces rather than always deriving. */
+    factCheck: entry.data.factCheck.length > 0 ? entry.data.factCheck : reviewedBy(kc),
+  }));
+}
+
 export async function getRelatedPosts(key: string, limit: number): Promise<BlogPost[]> {
   const [featured, posts] = await Promise.all([getFeaturedPost(), getBlogPosts()]);
   const feed: BlogPost[] = [featured, ...posts];
