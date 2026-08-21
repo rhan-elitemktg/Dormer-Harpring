@@ -1,16 +1,43 @@
 ---
-// Portable Text `link` mark. External links get rel="noopener"; the check is on
-// the href rather than a flag, so an editor pasting a full URL gets it right.
-import type { PortableTextMarkComponentProps } from "astro-portabletext/types";
+// Portable Text `link` mark.
+//
+// THE MARKDEF IS ON `node`, NOT ON A `value` PROP. This read `Astro.props.value`
+// and fell back to "#" when it was undefined — and it was ALWAYS undefined, so
+// every link in every prose body on this site rendered as a dead `href="#"`.
+// astro-portabletext gives a mark component `node.markDef` and `node.markKey`
+// (see its own Mark.astro, which reads `node.markDef.href`); `value` is
+// @portabletext/react's name for it, the same plural-vs-singular trap that
+// `type` vs `types` sets in components.ts.
+//
+// NO HREF MEANS PLAIN TEXT, NOT A LINK TO NOWHERE. That is the choice
+// TeamCard.astro already records: an <a href="#"> is a control that looks
+// actionable, takes focus and does nothing, which is worse for someone on a
+// screen reader than plain prose. It also means a missing href now shows up as
+// unlinked text a reviewer can see, rather than as a link that silently goes
+// nowhere.
+//
+// External links get rel="noopener"; the check is on the href rather than a
+// flag, so an editor pasting a full URL gets it right.
+import type { Mark, Props as $ } from "astro-portabletext/types";
 
-type Props = PortableTextMarkComponentProps<{ _type: "link"; href?: string }>;
-const { value } = Astro.props;
-const href = value?.href ?? "#";
-const external = /^https?:\/\//i.test(href);
+type Props = $<Mark<{ href?: string }>>;
+
+const { node } = Astro.props as Props;
+const href = node.markDef?.href?.trim();
+const external = !!href && /^https?:\/\//i.test(href);
 ---
 
-<a
-  class="prose__link"
-  href={href}
-  target={external ? "_blank" : undefined}
-  rel={external ? "noopener" : undefined}><slot /></a>
+{
+  href ? (
+    <a
+      class="prose__link"
+      href={href}
+      target={external ? "_blank" : undefined}
+      rel={external ? "noopener" : undefined}
+    >
+      <slot />
+    </a>
+  ) : (
+    <slot />
+  )
+}
