@@ -251,6 +251,96 @@
       "source": "/category/darcare-injuries/",
       "destination": "/news/?category=daycare-injury",
       "permanent": true
+    },
+    {
+      "source": "/news/who-is-liable-in-a-denver-truck-accident",
+      "destination": "/who-is-liable-in-a-denver-truck-accident/",
+      "permanent": true
+    },
+    {
+      "source": "/news/who-is-liable-in-a-denver-truck-accident/",
+      "destination": "/who-is-liable-in-a-denver-truck-accident/",
+      "permanent": true
+    },
+    {
+      "source": "/news/what-are-common-types-of-product-defects",
+      "destination": "/what-are-common-types-of-product-defects/",
+      "permanent": true
+    },
+    {
+      "source": "/news/what-are-common-types-of-product-defects/",
+      "destination": "/what-are-common-types-of-product-defects/",
+      "permanent": true
+    },
+    {
+      "source": "/news/understanding-plaintiff-status-under-colorados-premises-liability-act",
+      "destination": "/understanding-plaintiff-status-under-colorados-premises-liability-act/",
+      "permanent": true
+    },
+    {
+      "source": "/news/understanding-plaintiff-status-under-colorados-premises-liability-act/",
+      "destination": "/understanding-plaintiff-status-under-colorados-premises-liability-act/",
+      "permanent": true
+    },
+    {
+      "source": "/practice-areas/legal-malpractice-attorney",
+      "destination": "/legal-malpractice-attorney/",
+      "permanent": true
+    },
+    {
+      "source": "/practice-areas/legal-malpractice-attorney/",
+      "destination": "/legal-malpractice-attorney/",
+      "permanent": true
+    },
+    {
+      "source": "/practice-areas/denver-life-insurance-bad-faith-lawyer",
+      "destination": "/denver-life-insurance-bad-faith-lawyer/",
+      "permanent": true
+    },
+    {
+      "source": "/practice-areas/denver-life-insurance-bad-faith-lawyer/",
+      "destination": "/denver-life-insurance-bad-faith-lawyer/",
+      "permanent": true
+    },
+    {
+      "source": "/practice-areas/denver-pet-insurance-bad-faith-lawyer",
+      "destination": "/denver-pet-insurance-bad-faith-lawyer/",
+      "permanent": true
+    },
+    {
+      "source": "/practice-areas/denver-pet-insurance-bad-faith-lawyer/",
+      "destination": "/denver-pet-insurance-bad-faith-lawyer/",
+      "permanent": true
+    },
+    {
+      "source": "/practice-areas/personal-injury-attorney/defective-product-liability/colorado-defective-helmet",
+      "destination": "/colorado-defective-helmet/",
+      "permanent": true
+    },
+    {
+      "source": "/practice-areas/personal-injury-attorney/defective-product-liability/colorado-defective-helmet/",
+      "destination": "/colorado-defective-helmet/",
+      "permanent": true
+    },
+    {
+      "source": "/why-hire-personal-injury-attorney/client-review-testimonial",
+      "destination": "/testimonials/",
+      "permanent": true
+    },
+    {
+      "source": "/why-hire-personal-injury-attorney/client-review-testimonial/",
+      "destination": "/testimonials/",
+      "permanent": true
+    },
+    {
+      "source": "/why-hire-personal-injury-attorney",
+      "destination": "/about/",
+      "permanent": true
+    },
+    {
+      "source": "/why-hire-personal-injury-attorney/",
+      "destination": "/about/",
+      "permanent": true
     }
   ]
 }

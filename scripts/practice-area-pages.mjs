@@ -180,6 +180,13 @@ export const PRACTICE_AREA_PAGES = {
  * This map is the other half of the guarantee: a page in neither map fails the
  * import. Deleting a line here does not skip a page, it breaks the build — which
  * is the intended asymmetry.
+ *
+ * FOURTEEN OF THESE ARE ARTICLES AND ARE IMPORTED — into the blog, by the other
+ * importer, because that is what they are. They are excluded HERE, not dropped;
+ * `PAGE_ARTICLES` in blog-category-overrides.mjs is where they land and why.
+ * The distinction is the firm's own: its directory lists five near-identical
+ * slip-and-fall pages as practice areas (kept here, marked `resource`) and
+ * lists none of these fourteen.
  */
 export const EXCLUDED_SLUGS = {
   "2023-big-little-gala-hosted-by-big-brothers-big-sisters-of-colorado": "community involvement write-up",
@@ -197,18 +204,18 @@ export const EXCLUDED_SLUGS = {
   "brittany-freeman": "community involvement write-up",
   "brittany-lesmeister": "community involvement write-up",
   "car-accident": "duplicates denver-car-accident-lawyer",
-  "car-seat-safety": "resource article, not a practice area — TODO(launch): blog bodies link to it",
+  "car-seat-safety": "article, not a practice area — imported into the BLOG, see PAGE_ARTICLES",
   "cba-well-being-symposium-spring-summit": "community involvement write-up",
   "cindy-waller": "community involvement write-up",
-  "client-review-testimonial": "community involvement write-up",
+  "client-review-testimonial": "the legacy Client Testimonials page — /testimonials/ replaces it; redirected",
   "clothes-to-kids-denver": "community involvement write-up",
   "co-counsel": "site page",
-  "colorado-motorcycle-laws-important-information-for-riders": "resource article, not a practice area — TODO(launch): blog bodies link to it",
-  "common-causes-of-car-accidents-in-colorado": "resource article, not a practice area — TODO(launch): blog bodies link to it",
-  "common-causes-of-truck-accidents-in-colorado": "resource article, not a practice area — TODO(launch): blog bodies link to it",
-  "common-types-of-car-accidents": "resource article, not a practice area — TODO(launch): blog bodies link to it",
-  "common-types-of-motorcycle-accident-injuries": "resource article, not a practice area — TODO(launch): blog bodies link to it",
-  "common-types-of-truck-accidents": "resource article, not a practice area — TODO(launch): blog bodies link to it",
+  "colorado-motorcycle-laws-important-information-for-riders": "article, not a practice area — imported into the BLOG, see PAGE_ARTICLES",
+  "common-causes-of-car-accidents-in-colorado": "article, not a practice area — imported into the BLOG, see PAGE_ARTICLES",
+  "common-causes-of-truck-accidents-in-colorado": "article, not a practice area — imported into the BLOG, see PAGE_ARTICLES",
+  "common-types-of-car-accidents": "article, not a practice area — imported into the BLOG, see PAGE_ARTICLES",
+  "common-types-of-motorcycle-accident-injuries": "article, not a practice area — imported into the BLOG, see PAGE_ARTICLES",
+  "common-types-of-truck-accidents": "article, not a practice area — imported into the BLOG, see PAGE_ARTICLES",
   "community-involvement": "site page",
   "contact": "site page",
   "craig-hospital": "community involvement",
@@ -222,13 +229,13 @@ export const EXCLUDED_SLUGS = {
   "dumb-friends-league": "community involvement write-up",
   "editorial-guidelines": "site page",
   "ella-nelson": "community involvement write-up",
-  "fmcsa-trucking-rules-regulations": "resource article, not a practice area — TODO(launch): blog bodies link to it",
+  "fmcsa-trucking-rules-regulations": "article, not a practice area — imported into the BLOG, see PAGE_ARTICLES",
   "giving-back-at-craig-hospital": "community involvement write-up",
   "giving-back-with-the-park-people": "community involvement write-up",
   "greg-bentley": "community involvement write-up",
   "highlights-from-the-2025-dmar-inaugural": "community involvement write-up",
-  "how-a-colorado-car-accident-lawyer-can-help": "resource article, not a practice area — TODO(launch): blog bodies link to it",
-  "how-can-a-truck-accident-lawyer-help-me": "resource article, not a practice area — TODO(launch): blog bodies link to it",
+  "how-a-colorado-car-accident-lawyer-can-help": "article, not a practice area — imported into the BLOG, see PAGE_ARTICLES",
+  "how-can-a-truck-accident-lawyer-help-me": "article, not a practice area — imported into the BLOG, see PAGE_ARTICLES",
   "jassy-rendezvous-fundraising-gala": "community involvement write-up",
   "jessica-ayala": "community involvement write-up",
   "jessica-mauser": "community involvement write-up",
@@ -244,7 +251,7 @@ export const EXCLUDED_SLUGS = {
   "marilyn-morales": "community involvement write-up",
   "meet-our-attorneys": "site page",
   "michael-greer": "community involvement write-up",
-  "most-common-injuries-caused-by-car-accidents": "resource article, not a practice area — TODO(launch): blog bodies link to it",
+  "most-common-injuries-caused-by-car-accidents": "article, not a practice area — imported into the BLOG, see PAGE_ARTICLES",
   "new-homepage": "community involvement write-up",
   "new-homepage-v2": "community involvement write-up",
   "news": "site page — the blog index",
@@ -265,9 +272,9 @@ export const EXCLUDED_SLUGS = {
   "volunteer-day-project-cure": "community involvement write-up",
   "volunteering-at-metro-carings-fresh-foods-market": "community involvement write-up",
   "we-dont-waste": "community involvement write-up",
-  "what-to-do-after-a-car-accident-in-colorado": "resource article, not a practice area — TODO(launch): blog bodies link to it",
-  "what-to-do-after-a-motorcycle-accident": "resource article, not a practice area — TODO(launch): blog bodies link to it",
-  "what-to-do-after-a-truck-accident-in-colorado": "resource article, not a practice area — TODO(launch): blog bodies link to it",
+  "what-to-do-after-a-car-accident-in-colorado": "article, not a practice area — imported into the BLOG, see PAGE_ARTICLES",
+  "what-to-do-after-a-motorcycle-accident": "article, not a practice area — imported into the BLOG, see PAGE_ARTICLES",
+  "what-to-do-after-a-truck-accident-in-colorado": "article, not a practice area — imported into the BLOG, see PAGE_ARTICLES",
 };
 
 export const CITY_KEYS = new Set(CITIES.map((c) => c.key));
