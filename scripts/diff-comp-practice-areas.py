@@ -46,7 +46,10 @@ built_descs = [unesc(b) for a, b in cards]
 built_groups = []
 for gm in re.finditer(r'<h3 class="dir__group-title[^"]*"[^>]*>(.*?)</h3>(.*?)</ul>', built, re.S):
     title = unesc(gm.group(1))
-    items = [unesc(x) for x in re.findall(r'class="dir__link[^"]*"[^>]*>(.*?)</(?:a|span)>', gm.group(2), re.S)]
+    # `arealist__link`, not `dir__link`: the link rows moved into the shared
+    # AreaLinkList component when the practice-area page's city band became the
+    # third caller. The group heading is still this page's own.
+    items = [unesc(x) for x in re.findall(r'class="arealist__link[^"]*"[^>]*>(.*?)</(?:a|span)>', gm.group(2), re.S)]
     built_groups.append((title, items))
 
 ok = True

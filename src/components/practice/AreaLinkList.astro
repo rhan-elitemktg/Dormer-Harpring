@@ -1,0 +1,144 @@
+---
+// A column-flowing list of chevroned practice-area links.
+//
+// EXTRACTED WHEN THE THIRD CALLER ARRIVED. `AreaDirectory` carried this markup
+// and these styles, with a comment reading "keep the two in step if either
+// changes" about `cocounsel/PracticeAreaLinks.astro`; `practice/CityAreas`
+// made it three, which is where copying stops being cheaper than sharing.
+//
+// IT OWNS ALL OF ITS OWN STYLES, and that is the point rather than tidiness.
+// The classes are declared in the same template that emits them, so the scoped
+// rules match — where a parent styling `.arealist__link` through a class it
+// passed down would compile and match nothing, which is the case
+// `check:styles` exists to catch. Callers style their own group wrappers and
+// headings; they never reach in here.
+//
+// `cocounsel/PracticeAreaLinks.astro` is KNOWINGLY still separate. It draws a
+// different glyph (an arrow, not a chevron) at a different size on a different
+// column ramp, and folding it in would change that page's markup and class
+// names with no diff script watching. Worth doing; not worth doing blind.
+import type { AreaLink } from "../../data/practiceAreas";
+
+interface Props {
+  items: AreaLink[];
+  /** Columns at the widest breakpoint. The ramp below is relative to it. */
+  columns?: number;
+}
+
+const { items, columns = 4 } = Astro.props;
+---
+
+<ul class="arealist" style={`--arealist-cols:${columns}`}>
+  {
+    items.map((item) => {
+      const Tag = item.href ? "a" : "span";
+      return (
+        <li>
+          {/* An entry with no page renders as a <span>: the firm lists the
+              area, but there is nowhere to send anyone yet. Same convention as
+              a null `NavItem.href`. */}
+          <Tag
+            class:list={["arealist__link", !item.href && "arealist__link--plain"]}
+            href={item.href ?? undefined}
+          >
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.4"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+              class="arealist__chevron"
+            >
+              <path d="M9 6l6 6-6 6" />
+            </svg>
+            {item.label}
+          </Tag>
+        </li>
+      );
+    })
+  }
+</ul>
+
+<style>
+  .arealist {
+    display: grid;
+    grid-template-columns: repeat(var(--arealist-cols, 4), minmax(0, 1fr));
+    gap: 0 var(--space-6);
+    list-style: none;
+    padding: 0;
+  }
+
+  /* Equal heights across a row. The grid already stretches each <li> to the
+     tallest cell in its row, but the link inside was sized by its own text — so
+     where one label wrapped to two lines ("Uninsured & Underinsured Motorists"),
+     its neighbours' underlines sat ~23px higher than its own and the row read
+     as broken. Making the <li> a flex container stretches the link to fill it,
+     which puts every rule on the row at one baseline. */
+  .arealist > li {
+    display: flex;
+  }
+
+  .arealist > li > * {
+    flex: 1;
+  }
+
+  .arealist__link {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding-block: var(--space-3);
+    border-bottom: 1px solid var(--dh-line-soft);
+    font-weight: 500;
+    font-size: var(--text-lg);
+    line-height: 1.35;
+    color: var(--dh-ink-link);
+    transition: color var(--transition);
+  }
+
+  .arealist__link:hover {
+    color: var(--accent);
+  }
+
+  /* No hover shift and no pointer — it is not a link. */
+  .arealist__link--plain,
+  .arealist__link--plain:hover {
+    color: var(--text-muted);
+  }
+
+  /* Gold at rest, then inheriting the link's red — the glyph and the label move
+     together rather than as two separate colour changes. */
+  .arealist__chevron {
+    flex: none;
+    color: var(--accent-gold);
+    transition: color var(--transition);
+  }
+
+  .arealist__link:hover .arealist__chevron {
+    color: currentColor;
+  }
+
+  /* The ramp steps down from whatever the caller asked for, never up. `min()`
+     rather than a per-caller media query so a 2-column caller does not become
+     3 at 860px. */
+  @media (max-width: 1180px) {
+    .arealist {
+      grid-template-columns: repeat(min(var(--arealist-cols, 4), 3), minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 860px) {
+    .arealist {
+      grid-template-columns: repeat(min(var(--arealist-cols, 4), 2), minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 640px) {
+    .arealist {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

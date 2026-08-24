@@ -2,11 +2,17 @@
 // "Every case we handle, by location." — the full practice-area directory,
 // grouped by city and set in four columns of chevroned links.
 //
-// The nine groups are wildly uneven (Denver has 46 entries, Grand Junction 2),
-// which is why each group is its own four-column grid rather than one grid the
-// groups flow through: a shared grid would let Grand Junction's two links sit
+// The eight groups are wildly uneven (Denver has 36 entries, "Other Legal
+// Services" 4), which is why each group is its own grid rather than one grid
+// the groups flow through: a shared grid would let a short group's links sit
 // beside Denver's tail and read as part of it.
+//
+// The link rows themselves are `AreaLinkList`, shared with `CityAreas` — the
+// band at the foot of every practice-area page. `cocounsel/PracticeAreaLinks`
+// is a third copy of the same affordance and is knowingly still separate; see
+// the note in AreaLinkList.
 import Eyebrow from "../Eyebrow.astro";
+import AreaLinkList from "./AreaLinkList.astro";
 import type { AreaGroup, PracticeAreasPage } from "../../data/practiceAreas";
 
 interface Props {
@@ -28,38 +34,7 @@ const { section, groups } = Astro.props;
       groups.map((group) => (
         <div class="dir__group">
           <h3 class="dir__group-title">{group.title}</h3>
-          <ul class="dir__cols">
-            {group.items.map((item) => {
-              const Tag = item.href ? "a" : "span";
-              return (
-                <li>
-                  {/* An entry with no page renders as a <span>: the firm lists
-                      the area, but there is nowhere to send anyone yet. Same
-                      convention as a null `NavItem.href`. */}
-                  <Tag
-                    class:list={["dir__link", !item.href && "dir__link--plain"]}
-                    href={item.href ?? undefined}
-                  >
-                    <svg
-                      width="13"
-                      height="13"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2.4"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      aria-hidden="true"
-                      class="dir__chevron"
-                    >
-                      <path d="M9 6l6 6-6 6" />
-                    </svg>
-                    {item.label}
-                  </Tag>
-                </li>
-              );
-            })}
-          </ul>
+          <AreaLinkList items={group.items} />
         </div>
       ))
     }
@@ -114,83 +89,8 @@ const { section, groups } = Astro.props;
     margin-bottom: var(--space-6);
   }
 
-  .dir__cols {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 0 var(--space-6);
-    list-style: none;
-    padding: 0;
-  }
-
-  /* Equal heights across a row. The grid already stretches each <li> to the
-     tallest cell in its row, but the link inside was sized by its own text — so
-     where one label wrapped to two lines ("Uninsured & Underinsured Motorists"),
-     its neighbours' underlines sat ~23px higher than its own and the row read
-     as broken. Making the <li> a flex container stretches the link to fill it,
-     which puts every rule on the row at one baseline. */
-  .dir__cols > li {
-    display: flex;
-  }
-
-  .dir__cols > li > * {
-    flex: 1;
-  }
-
-  /* Matches the co-counsel page's area list, which is the same affordance on a
-     shorter list — keep the two in step if either changes. */
-  .dir__link {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-    padding-block: var(--space-3);
-    border-bottom: 1px solid var(--dh-line-soft);
-    font-weight: 500;
-    font-size: var(--text-lg);
-    line-height: 1.35;
-    color: var(--dh-ink-link);
-    transition: color var(--transition);
-  }
-
-  .dir__link:hover {
-    color: var(--accent);
-  }
-
-  /* No hover shift and no pointer — it is not a link. */
-  .dir__link--plain {
-    color: var(--text-muted);
-  }
-
-  .dir__link--plain:hover {
-    color: var(--text-muted);
-  }
-
-  /* Gold at rest, then inheriting the link's red — the glyph and the label move
-     together rather than as two separate colour changes. */
-  .dir__chevron {
-    flex: none;
-    color: var(--accent-gold);
-    transition: color var(--transition);
-  }
-
-  .dir__link:hover .dir__chevron {
-    color: currentColor;
-  }
-
-  @media (max-width: 1180px) {
-    .dir__cols {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-  }
-
-  @media (max-width: 860px) {
-    .dir__cols {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-  }
-
-  @media (max-width: 640px) {
-    .dir__cols {
-      grid-template-columns: minmax(0, 1fr);
-    }
-  }
+  /* The four-column grid, its equal-height fix and the whole link treatment
+     moved to AreaLinkList when CityAreas became the third caller. Nothing here
+     may style them: those classes land on that component's markup and carry
+     ITS cid, so a rule here would compile and match nothing. */
 </style>

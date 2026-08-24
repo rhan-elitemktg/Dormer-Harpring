@@ -81,75 +81,7 @@ const { page, categories, related } = Astro.props;
   }
 </aside>
 
-<style>
-  .pside {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-6);
-    min-width: 0;
-  }
-
-  .pside__card {
-    border: 1px solid var(--border-hairline);
-    border-radius: var(--radius-media);
-    background: var(--dh-white);
-    overflow: hidden;
-  }
-
-  .pside__head {
-    padding: var(--space-4) var(--space-7);
-    border-top: 3px solid var(--accent-gold);
-    border-bottom: 1px solid var(--dh-line-soft);
-  }
-
-  .pside__title {
-    font-size: var(--text-2xl);
-    line-height: var(--leading-display-2);
-    letter-spacing: 0;
-    text-transform: none;
-  }
-
-  .pside__list {
-    padding: 0 var(--space-7);
-    list-style: none;
-  }
-
-  .pside__item + .pside__item {
-    border-top: 1px solid var(--dh-line-soft);
-  }
-
-  .pside__cat,
-  .pside__article {
-    display: block;
-    padding-block: var(--space-4);
-    font-weight: 600;
-    font-size: var(--text-md);
-    color: var(--text-strong);
-  }
-
-  .pside__cat:hover,
-  .pside__article:hover {
-    color: var(--accent);
-  }
-
-  /* A category is a label, so it sits on one line beside the comp's gold rule;
-     an article title is a sentence and wraps, so it gets neither. */
-  .pside__cat {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-    line-height: var(--leading-tight);
-  }
-
-  .pside__cat::before {
-    content: "";
-    flex: none;
-    width: 16px;
-    height: 2px;
-    background: var(--accent-gold);
-  }
-
-  .pside__article {
-    line-height: var(--leading-snug);
-  }
-</style>
+<!-- No styles here. `.pside*` is GLOBAL, in styles/global.css — two
+     components render this card stack now (see `practice/area/AreaSidebar`),
+     and a scoped copy in each is how the two would drift. The column this
+     stack sits in is placed by whichever section owns the grid. -->

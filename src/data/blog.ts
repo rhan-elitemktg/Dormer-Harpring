@@ -728,6 +728,62 @@ export async function getRelatedPosts(key: string, limit: number): Promise<BlogP
     .slice(0, limit);
 }
 
+/**
+ * Practice-area slug fragment -> blog category slug, for the light practice-area
+ * template's "Related articles" card.
+ *
+ * MATCHED ON THE AREA SLUG, NOT ITS TOPIC. Topic is five buckets, so keying on
+ * it would put car-accident posts on the motorcycle page — the exact failure the
+ * live site ships, where every practice area gets the same five car-accident
+ * articles regardless of subject. The fragments are ordered longest-first below
+ * so `truck-accident` cannot be claimed by a shorter substring.
+ *
+ * TODO(launch): this mapping is inferred, not authored. The shape an editor
+ * will actually want is a per-page list of chosen posts, which is what it
+ * becomes in Sanity — a `relatedPosts` reference array on the practice-area
+ * document. Until then, subject matching beats recency.
+ */
+const AREA_TO_BLOG_CATEGORY: ReadonlyArray<readonly [string, string]> = [
+  ["motorcycle", "motorcycle-accidents"],
+  ["truck-accident", "truck-accidents"],
+  ["bicycle", "bike-accidents"],
+  ["pedestrian", "pedestrian-accident"],
+  ["slip-and-fall", "slip-and-fall"],
+  ["premises", "premises-liability"],
+  ["negligent-", "premises-liability"],
+  ["dog-bite", "dog-bites"],
+  ["product-liability", "product-liability"],
+  ["medical-malpractice", "medical-malpractice"],
+  ["wrongful-death", "wrongful-death"],
+  ["burn-injury", "burn-injury"],
+  ["ski-accident", "ski-accident"],
+  ["trampoline", "trampoline-park-injuries"],
+  ["daycare", "daycare-injury"],
+  ["insurance-bad-faith", "auto-insurance-accident-claims"],
+  // Everything else with wheels. Last, so the specific vehicles above win.
+  ["accident", "auto-accident"],
+  ["car-", "auto-accident"],
+];
+
+/**
+ * Posts for a practice-area page's sidebar.
+ *
+ * Falls back to the newest posts when the area matches no category — better a
+ * card of real recent writing than an empty one. `PostSidebar` already treats a
+ * zero-length list as "render nothing", and that guard still holds here for the
+ * theoretical case of an empty archive.
+ */
+export async function getRelatedPostsForArea(areaSlug: string, limit: number): Promise<BlogPost[]> {
+  const posts = (await getBlogPosts()).filter((post) => post.href !== null);
+  const match = AREA_TO_BLOG_CATEGORY.find(([fragment]) => areaSlug.includes(fragment));
+  if (!match) return posts.slice(0, limit);
+
+  const [, categorySlug] = match;
+  const onTopic = posts.filter((post) => post.category.slug === categorySlug);
+  // Topped up rather than truncated: a thin category still fills the card.
+  return [...onTopic, ...posts.filter((post) => post.category.slug !== categorySlug)].slice(0, limit);
+}
+
 export interface BlogPostPageCopy {
   /** Heads the box above the body. NOT "Key takeaways": the article's own
    *  first section is an H2 by that name, and two of them on one page reads as

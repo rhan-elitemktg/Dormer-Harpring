@@ -1,0 +1,148 @@
+---
+// The imported FAQ accordion, plus its FAQPage structured data.
+//
+// SITS INSIDE THE ARTICLE COLUMN, after the body, which is where the live page
+// puts it. It is part of the article rather than a band of its own — a
+// full-width FAQ section under a two-column article would read as a different
+// page's furniture.
+//
+// CSS-only `<details>`, following `home/faq/FaqItem.astro`'s recorded reason:
+// this block is the source for FAQPage structured data and Google requires the
+// answer text to be present in the page, so a JS-swapped panel would put it out
+// of the DOM. NOT `name="faq"` — that would make the group exclusive, and these
+// are reference answers a reader may want open side by side rather than a
+// homepage tour of one question at a time.
+//
+// NOT `home/faq/FaqItem.astro`, which needs a `videoLength`, renders a Picture
+// video panel and a contact CTA. None of that applies here.
+import Prose from "../../prose/Prose.astro";
+import JsonLd from "../../seo/JsonLd.astro";
+import type { PracticeAreaFaq } from "../../../data/practiceAreaPages";
+import { faqSchema } from "../../../lib/schema";
+import { toPlainText } from "../../../lib/portableText";
+
+interface Props {
+  title: string;
+  faqs: PracticeAreaFaq[];
+  id: string;
+}
+
+const { title, faqs, id } = Astro.props;
+
+/* The rendered answer is rich; the structured-data copy is the same blocks
+   flattened. Reading one source twice is what keeps them from disagreeing. */
+const schema = faqSchema(
+  faqs.map((faq) => ({ question: faq.question, answer: toPlainText(faq.answer) }))
+);
+---
+
+{
+  faqs.length > 0 && (
+    <section class="afaq" id={id} aria-labelledby={`${id}-title`}>
+      <h2 class="afaq__title" id={`${id}-title`}>
+        {title}
+      </h2>
+
+      {faqs.map((faq) => (
+        <details class="afaq__item">
+          <summary class="afaq__q">
+            <span class="afaq__q-text">{faq.question}</span>
+            <span class="afaq__sign" aria-hidden="true" />
+          </summary>
+          <div class="afaq__a">
+            <Prose value={faq.answer} class="afaq__body" />
+          </div>
+        </details>
+      ))}
+
+      <JsonLd schema={schema} />
+    </section>
+  )
+}
+
+<style>
+  .afaq {
+    margin-top: var(--space-12);
+    padding-top: var(--space-10);
+    border-top: 1px solid var(--border-hairline);
+  }
+
+  /* Matches `.prose__h2` rather than a display size — it is a section heading
+     inside the article, not a band heading over it. */
+  .afaq__title {
+    margin-bottom: var(--space-6);
+    font-size: var(--display-5);
+    line-height: var(--leading-display-2);
+    letter-spacing: var(--tracking-tight);
+    text-transform: none;
+  }
+
+  .afaq__item {
+    border-bottom: 1px solid var(--dh-line-soft);
+  }
+
+  .afaq__q {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-6);
+    padding-block: var(--space-5);
+    cursor: pointer;
+    list-style: none;
+    font-weight: 700;
+    font-size: var(--text-lg);
+    line-height: var(--leading-snug);
+    color: var(--text-strong);
+    transition: color var(--transition);
+  }
+
+  /* Safari draws its own triangle through `::-webkit-details-marker`, which
+     `list-style: none` alone does not remove. */
+  .afaq__q::-webkit-details-marker {
+    display: none;
+  }
+
+  .afaq__q:hover {
+    color: var(--accent);
+  }
+
+  /* A plus that becomes a minus. Two bars, the second rotated, so the open
+     state is one transform rather than a second glyph. */
+  .afaq__sign {
+    position: relative;
+    flex: none;
+    width: 18px;
+    height: 18px;
+  }
+
+  .afaq__sign::before,
+  .afaq__sign::after {
+    content: "";
+    position: absolute;
+    inset: 50% 0 auto 0;
+    height: 2px;
+    background: var(--accent-gold);
+    transform: translateY(-50%);
+    transition: transform var(--transition);
+  }
+
+  .afaq__sign::after {
+    transform: translateY(-50%) rotate(90deg);
+  }
+
+  .afaq__item[open] .afaq__sign::after {
+    transform: translateY(-50%) rotate(0deg);
+  }
+
+  .afaq__a {
+    padding-bottom: var(--space-6);
+  }
+
+  /* `:global()` bounded by an element in THIS template. The class is handed to
+     Prose, so it lands on Prose's wrapper carrying Prose's cid — a bare
+     `.afaq__body` rule here would compile and match nothing, which is the case
+     `check:styles` exists to catch. */
+  .afaq__a :global(.afaq__body) {
+    font-size: var(--text-md);
+  }
+</style>

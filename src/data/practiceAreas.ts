@@ -385,11 +385,13 @@ export interface AreaGroup {
  * in the site scrape, matched to each label — which is also what makes them
  * resolve after cutover (see `routePaths.ts` on preserving the flat shape).
  *
- * Three entries have no page anywhere — Legal Malpractice, Life Insurance Bad
- * Faith, Pet Insurance Bad Faith. The legacy hub links them relative without a
- * `../`, so they resolve under /practice-areas/ and 404 there too. They carry
- * `href: null` and render as text.
- * TODO(launch): if the firm still offers these three, they need pages.
+ * Every entry now resolves. Legal Malpractice, Life Insurance Bad Faith and
+ * Pet Insurance Bad Faith used to carry `href: null` and render as plain text,
+ * on the belief that no page existed — the legacy hub links them relative
+ * without a `../`, so they 404 under /practice-areas/ and looked absent. All
+ * three are in fact live, and the practice-area import now serves them.
+ * `assertDirectoryJoin()` fails the build if any entry here loses its page
+ * again, so this list cannot silently rot back.
  *
  * Two departures from the comp, both about scope rather than presentation:
  *  - Its last two groups, "Premises Liability" and "Other Legal Services", are
@@ -538,9 +540,9 @@ export async function getPracticeAreaGroups(): Promise<AreaGroup[]> {
       title: "Other Legal Services",
       items: [
         { _key: "bad-faith", label: "Insurance Bad Faith", href: practiceAreaPath("denver-insurance-bad-faith-lawyer") },
-        { _key: "legal-malpractice", label: "Legal Malpractice", href: null },
-        { _key: "life-bad-faith", label: "Life Insurance Bad Faith", href: null },
-        { _key: "pet-bad-faith", label: "Pet Insurance Bad Faith", href: null },
+        { _key: "legal-malpractice", label: "Legal Malpractice", href: practiceAreaPath("legal-malpractice-attorney") },
+        { _key: "life-bad-faith", label: "Life Insurance Bad Faith", href: practiceAreaPath("denver-life-insurance-bad-faith-lawyer") },
+        { _key: "pet-bad-faith", label: "Pet Insurance Bad Faith", href: practiceAreaPath("denver-pet-insurance-bad-faith-lawyer") },
       ],
     },
   ];

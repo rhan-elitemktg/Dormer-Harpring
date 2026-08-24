@@ -18,6 +18,7 @@ import { getFirmStats } from "../data/stats";
 import { getHomeWhyUs } from "../data/home";
 import { getAttorneysSection, getHomeAttorneys } from "../data/attorneys";
 import { getContactBand, getContactDetails } from "../data/contact";
+import { assertDirectoryJoin } from "../data/practiceAreaPages";
 
 // `getHomeWhyUs` and the attorneys band are read straight from the homepage's
 // modules rather than copied: the comp carries both sections here WORD FOR WORD,
@@ -35,6 +36,14 @@ const [page, featured, groups, stats, why, attorneysSection, attorneys, band, de
     getContactBand(),
     getContactDetails(),
   ]);
+
+/* THE DIRECTORY AND THE COLLECTION ARE TWO HAND-MAINTAINED LISTS OF ONE THING,
+   and drift between them is silent in both directions: an entry with no page is
+   a 404 this build would happily ship, and a page in no group is a page nothing
+   links to. Asserted here, at the one place that renders the directory, because
+   throwing at build time is what the rest of this codebase does with a broken
+   cross-reference — see the three resolve-and-throw joins in `[slug].astro`. */
+await assertDirectoryJoin(groups);
 ---
 
 <Layout
