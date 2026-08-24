@@ -10,14 +10,18 @@ _Last updated: 2026-08-24._
 
 ## State
 
-Build is green: **315 pages** (316 with `/admin`), `npm run check` passing, all five comp-diff
+Build is green: **329 pages** (330 with `/admin`), `npm run check` passing, all five comp-diff
 scripts exiting 0, and the new fidelity audit reporting 109 of 109 pages at ≥99% against the live
-source. Run `git status` for where you are; this file deliberately does **not** name the working
+source. **Every internal body link resolves** — 2,013 of them across 236 paths, none
+unserved. Run `git status` for where you are; this file deliberately does **not** name the working
 branch, because that line went stale three times in the session that first wrote it.
 
 **The practice-area pages are imported and there is a template for them.** 109 pages across nine
 cities, on a light template built like the blog post. That is the single biggest change since the
 last handoff and it moves the project's biggest dependency off the critical path.
+
+**The blog archive is 181 posts, not 167.** WordPress has two post types and the article-shaped
+content is spread across both — see below.
 
 Marker inventory: **57 `TODO(launch)`, 5 `TODO(video)`, 4 `TODO(sanity)`, 1 `TODO(content)`.**
 Grep all four before launch, not just the first.
@@ -39,6 +43,31 @@ comp — despite 41 live pages between them. Four of them did have directory gro
 Thornton's pages were simply unaccounted for.
 
 The four-city figure came from the comp. The comp is not an inventory.
+
+## The blog was complete; WordPress's filing was not
+
+The blog import took all **167 of 167** `/wp/v2/posts` records, and that was right. But fourteen
+more articles live under `/wp/v2/pages` with the practice areas — "What to Do After a Car Accident
+in Colorado", "Most Common Injuries Caused by Car Accidents", "Car Seat Safety", the FMCSA
+trucking rules, and ten more. **No query for "the blog" would ever have found them**, because
+WordPress does not think they are blog posts. 12,719 words, 18 in-body links pointing at them.
+
+They are now imported into the blog collection, where they belong, and the archive is 181.
+
+The line between these and the practice-area import is the FIRM'S OWN, not a guess. Its directory
+lists five near-identical slip-and-fall pages **as practice areas** — those are imported that way,
+marked `resource` — and lists none of these fourteen at all. Every link to the fourteen comes from
+a blog body.
+
+- **`PAGE_ARTICLES` in `blog-category-overrides.mjs`** holds them, one category each, every
+  assignment naming a sibling already in the archive the way the eleven post overrides do.
+  Pages carry no category at all, so this is required rather than a fallback.
+- **Posts are converted first and pages appended.** The converter's `mkKey` is one run-scoped
+  counter; interleaving them would rewrite every `_key` in all 167 existing files. The gate held —
+  `git diff --name-only src/content/blog` returned nothing after the run.
+- **Four have titles close to an existing post** (`how-can-a-truck-accident-lawyer-help-me` vs
+  `how-can-truck-accident-lawyer-help-denver`, and three others). Checked: 5–12% body similarity.
+  They are distinct articles, not duplicates.
 
 ## The light template
 
@@ -159,10 +188,16 @@ Not wired into `npm run check` — it needs the network, like the five diff scri
 
 ## What this closed
 
-- **Dead body links: 149 across 42 paths → 23 across 12** (blog bodies; 46 across 19 counting the
-  new practice-area bodies too, out of 1,947 internal links). The remainder are the ~21 resource
-  articles that were deliberately not imported, plus a handful of legacy `/practice-areas/<slug>`
-  and `/news/<slug>` path forms.
+- **Dead body links: 149 across 42 paths → ZERO.** 2,013 internal links across 236 paths, every
+  one either built or redirected. Three things got there: the practice-area import, the fourteen
+  article-pages, and nine `LEGACY_PATH_FORMS` redirects (below).
+- **Nine legacy URL shapes now redirect** rather than 404 — `/news/<slug>` from before the blog
+  moved to the root, `/practice-areas/<slug>` from the hub linking its children relatively without
+  a `../`, and `/why-hire-personal-injury-attorney` plus its testimonials child. Every destination
+  is a page this build serves; most are redirects WordPress already performs. `vercel.json` is 68
+  rules now, still generated — don't hand-edit it.
+  That hub-relative link bug is also **why three pages were recorded as having "no page
+  anywhere"**: the hub's own links 404, so live pages looked absent.
 - **The three Practice Areas entries "with no page anywhere"** — Legal Malpractice, Life Insurance
   Bad Faith, Pet Insurance Bad Faith — **all three are live pages** and are now imported and
   linked. They looked absent because the legacy hub links them relative without a `../`, so they
@@ -198,11 +233,6 @@ plain-text treatment.
 
 **Decide**
 
-- **The ~21 resource articles were deliberately not imported** — `what-to-do-after-a-motorcycle-
-  accident`, `common-types-of-car-accidents` and friends. They are articles, not practice areas,
-  and 23 blog body links point at them. Each is in `EXCLUDED_SLUGS` with that reason. They want a
-  home: blog posts, or practice-area pages marked `resource: true` the way the five slip-and-fall
-  ones already are.
 - **Three live Denver pages were excluded as duplicates** and want a ruling:
   `personal-injury-attorney` (duplicates the homepage), `car-accident` and
   `traffic-collision-lawyer` (both overlap `denver-car-accident-lawyer`, which the heavy template
