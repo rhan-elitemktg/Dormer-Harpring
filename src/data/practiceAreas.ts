@@ -375,15 +375,23 @@ export interface AreaGroup {
 }
 
 /**
- * The full directory — the comp's own `groupsData`, in its order, with its
- * group titles and its item order. Read out of the `data-dc-script` block at
- * the foot of `DH - Practice Areas.html`, which is where the comps keep the
- * content behind their `sc-for` placeholders.
+ * The full directory. Its skeleton is the comp's own `groupsData`, in its
+ * order, with its group titles and its item order — read out of the
+ * `data-dc-script` block at the foot of `DH - Practice Areas.html`, which is
+ * where the comps keep the content behind their `sc-for` placeholders.
  *
  * The comp's links are all `href="#"`, so the URLs are the one thing it does
- * NOT specify. Those come from the legacy `denvertrial.com/practice-areas` hub
- * in the site scrape, matched to each label — which is also what makes them
- * resolve after cutover (see `routePaths.ts` on preserving the flat shape).
+ * NOT specify. Those come from the live `denvertrial.com/practice-areas` hub,
+ * matched to each label — which is also what makes them resolve after cutover
+ * (see `routePaths.ts` on preserving the flat shape).
+ *
+ * THE COMP IS NOT AN INVENTORY, and this list is now synced to that live hub
+ * rather than to the comp: the hub carries 110 entries in 11 groups, the comp
+ * 90 in 8. Every entry the hub has and the comp lacks is one the firm links
+ * today and would have lost at cutover. The gap was three whole city groups
+ * and six Denver pages; all nineteen destinations were already built and
+ * served, just unlinked from here. `scripts/diff-comp-practice-areas.py`
+ * declares each addition, so the diff against the comp stays strict.
  *
  * Every entry now resolves. Legal Malpractice, Life Insurance Bad Faith and
  * Pet Insurance Bad Faith used to carry `href: null` and render as plain text,
@@ -393,14 +401,39 @@ export interface AreaGroup {
  * `assertDirectoryJoin()` fails the build if any entry here loses its page
  * again, so this list cannot silently rot back.
  *
- * Two departures from the comp, both about scope rather than presentation:
+ * Departures from the comp, all about scope or consistency, none presentation:
  *  - Its last two groups, "Premises Liability" and "Other Legal Services", are
  *    topical rather than geographic, which the section heading ("by location")
  *    does not describe. Kept anyway — matching the comp is the instruction, and
  *    the heading is the comp's own wording.
- *  - It omits Greeley, Fort Collins and Grand Junction, which have eight live
- *    landing pages between them. Left out to match the comp; flagged in
- *    HANDOFF.md as a question for the designer rather than silently added.
+ *  - Greeley, Fort Collins and Grand Junction are added from the live hub. See
+ *    the comment on the Greeley group.
+ *  - Six Denver entries are added from the live hub — five branded-truck pages
+ *    and Daycare Injury.
+ *  - Grand Junction reads car → truck → motorcycle. The hub has that one group
+ *    the other way round and its two siblings this way; normalised, by request.
+ *
+ * EVERY LABEL IS THE LIVE HUB'S, with one exception. The comp shortens twelve
+ * of them — "E-Scooter Accidents" for "Dockless Bike / E-Scooter Accidents",
+ * "10 Things to Do After a Fall" for "10 Things To Do After a Slip and Fall
+ * Accident" — and the hub's longer wording is the firm's own, so it wins. The
+ * exception is the personal-injury row, which reads "Personal Injury" in every
+ * group: the hub says "Personal Injury Overview" in four of them, "Personal
+ * Injuries" in Denver and "Personal Injury" in the rest, and the column read as
+ * a mistake. By request.
+ *
+ * A LABEL LIVES IN THREE PLACES and they must not drift: here, the manifest in
+ * `scripts/practice-area-pages.mjs`, and the page's own content JSON, which the
+ * importer writes from the manifest. Change all three or re-run the import.
+ * One slug breaks the one-to-one: `denver-premises-liability-lawyer` is
+ * "Premises Liability" in the Denver column and "Premises Liability Overview"
+ * in the topical group — both the hub's. The manifest holds the topical form,
+ * which is the one the city bands want.
+ *
+ * NOT synced from the hub: its "Privacy Policy/Disclaimer" entry. No privacy
+ * page exists in this build (`ROUTES.privacy` is reserved, not built), and an
+ * href to a page that does not exist is the one thing this codebase will not
+ * ship. Add the entry when the page lands.
  */
 export async function getPracticeAreaGroups(): Promise<AreaGroup[]> {
   return [
@@ -412,6 +445,7 @@ export async function getPracticeAreaGroups(): Promise<AreaGroup[]> {
         // Denver PI overview page. `navigation.ts` drops the equivalent nav
         // item for that reason; here the comp shows it, so it stays.
         { _key: "pi", label: "Personal Injury", href: ROUTES.home },
+        { _key: "amazon-truck", label: "Amazon Truck Accident", href: practiceAreaPath("denver-amazon-truck-accident-lawyer") },
         { _key: "amputation", label: "Amputation Injuries", href: practiceAreaPath("denver-amputation-injury-lawyer") },
         { _key: "bike", label: "Bike Accidents", href: practiceAreaPath("denver-bicycle-accident-lawyer") },
         { _key: "birth", label: "Birth Injuries", href: practiceAreaPath("denver-birth-injury-lawyer") },
@@ -421,29 +455,34 @@ export async function getPracticeAreaGroups(): Promise<AreaGroup[]> {
         { _key: "car", label: "Car Accidents", href: practiceAreaPath("denver-car-accident-lawyer") },
         { _key: "child", label: "Child Injuries", href: practiceAreaPath("denver-child-injury-lawyer") },
         { _key: "construction", label: "Construction Accidents", href: practiceAreaPath("denver-construction-accident-attorney") },
+        { _key: "daycare", label: "Daycare Injury", href: practiceAreaPath("denver-daycare-injury-lawyers") },
         { _key: "distracted", label: "Distracted Driver Accidents", href: practiceAreaPath("denver-distracted-driver-accident-lawyer") },
-        { _key: "scooter", label: "E-Scooter Accidents", href: practiceAreaPath("denver-scooter-accident-lawyer") },
+        { _key: "scooter", label: "Dockless Bike / E-Scooter Accidents", href: practiceAreaPath("denver-scooter-accident-lawyer") },
         { _key: "dog", label: "Dog Bites", href: practiceAreaPath("denver-dog-bite-lawyer") },
         { _key: "dram-shop", label: "Dram Shop Liability", href: practiceAreaPath("denver-dram-shop-lawyer") },
-        { _key: "drowsy", label: "Drowsy Driving Accidents", href: practiceAreaPath("denver-drowsy-driving-accident-lawyer") },
+        { _key: "drowsy", label: "Drowsy Driving Accident", href: practiceAreaPath("denver-drowsy-driving-accident-lawyer") },
+        { _key: "fedex-truck", label: "FedEx Truck Accident", href: practiceAreaPath("denver-fedex-truck-accident-lawyer") },
         { _key: "funeral", label: "Funeral Home Negligence", href: practiceAreaPath("colorado-funeral-home-negligence-lawyer") },
+        { _key: "garbage-truck", label: "Garbage Truck Accident", href: practiceAreaPath("denver-garbage-truck-accident-lawyer") },
         { _key: "motorcycle", label: "Motorcycle Accidents", href: practiceAreaPath("motorcycle-accident-lawyer-denver") },
         { _key: "malpractice", label: "Medical Malpractice", href: practiceAreaPath("denver-medical-malpractice-lawyer") },
-        { _key: "ice-snow", label: "Negligent Ice / Snow Removal", href: practiceAreaPath("denver-negligent-ice-snow-removal-attorneys") },
+        { _key: "ice-snow", label: "Negligent Ice/Snow Removal", href: practiceAreaPath("denver-negligent-ice-snow-removal-attorneys") },
         { _key: "nursing-home", label: "Nursing Home Abuse", href: practiceAreaPath("nursing-home-abuse-lawyer") },
         { _key: "pedestrian", label: "Pedestrian Accidents", href: practiceAreaPath("denver-pedestrian-accident-lawyer") },
         { _key: "premises", label: "Premises Liability", href: practiceAreaPath("denver-premises-liability-lawyer") },
-        { _key: "product", label: "Product Liability", href: practiceAreaPath("denver-product-liability-lawyer") },
+        { _key: "product", label: "Product Liability Overview", href: practiceAreaPath("denver-product-liability-lawyer") },
         { _key: "rideshare", label: "Rideshare Accidents", href: practiceAreaPath("denver-uber-accident-lawyer") },
         { _key: "rtd", label: "RTD Denver Accidents", href: practiceAreaPath("rtd-denver-accidents") },
         { _key: "sexual-assault", label: "Sexual Assault", href: practiceAreaPath("denver-sexual-assault-lawyer") },
-        { _key: "side-impact", label: "Side-Impact Accidents", href: practiceAreaPath("denver-side-impact-accident-lawyer") },
+        { _key: "side-impact", label: "Side-Impact Accident", href: practiceAreaPath("denver-side-impact-accident-lawyer") },
         { _key: "ski", label: "Ski Accidents", href: practiceAreaPath("denver-ski-accident-lawyer") },
         { _key: "slip", label: "Slip and Fall Accidents", href: practiceAreaPath("denver-slip-and-fall-lawyer") },
         { _key: "spinal", label: "Spinal Cord Injury", href: practiceAreaPath("denver-spinal-cord-injury-lawyer") },
+        { _key: "tow-truck", label: "Tow Truck Accident", href: practiceAreaPath("denver-tow-truck-accident-lawyer") },
         { _key: "trampoline", label: "Trampoline Park Injuries", href: practiceAreaPath("denver-trampoline-park-injury-lawyer") },
         { _key: "truck", label: "Truck Accidents", href: practiceAreaPath("denver-truck-accident-lawyer") },
-        { _key: "uninsured", label: "Uninsured & Underinsured Motorists", href: practiceAreaPath("denver-uninsured-and-underinsured-motorcyclist-accident-lawyer") },
+        { _key: "uninsured", label: "Uninsured and Underinsured Motorcyclist Accidents", href: practiceAreaPath("denver-uninsured-and-underinsured-motorcyclist-accident-lawyer") },
+        { _key: "ups-truck", label: "UPS Truck Accident", href: practiceAreaPath("denver-ups-truck-accident-lawyer") },
         { _key: "whiplash", label: "Whiplash Injuries", href: practiceAreaPath("denver-whiplash-injury-attorney") },
         { _key: "wrongful-death", label: "Wrongful Death", href: practiceAreaPath("denver-wrongful-death-lawyer") },
         { _key: "wildfire", label: "Wildfire Litigation", href: practiceAreaPath("colorado-wildfire-attorney") },
@@ -453,7 +492,7 @@ export async function getPracticeAreaGroups(): Promise<AreaGroup[]> {
       _key: "aurora",
       title: "Aurora Personal Injury",
       items: [
-        { _key: "pi", label: "Personal Injury Overview", href: locationPath("aurora-personal-injury-attorney") },
+        { _key: "pi", label: "Personal Injury", href: locationPath("aurora-personal-injury-attorney") },
         { _key: "brain", label: "Brain Injuries", href: locationPath("aurora-brain-injury-lawyer") },
         { _key: "car", label: "Car Accidents", href: locationPath("aurora-car-accident-lawyer") },
         { _key: "premises", label: "Premises Liability", href: locationPath("aurora-premises-liability-attorney") },
@@ -469,7 +508,7 @@ export async function getPracticeAreaGroups(): Promise<AreaGroup[]> {
         { _key: "brain", label: "Brain Injuries", href: locationPath("boulder-brain-injury-lawyer") },
         { _key: "car", label: "Car Accidents", href: locationPath("boulder-car-accident-lawyer") },
         { _key: "hit-and-run", label: "Hit and Run Accidents", href: locationPath("boulder-hit-and-run-accident-attorney") },
-        { _key: "off-road", label: "Off-Road Vehicle Accidents", href: locationPath("boulder-off-road-recreational-vehicle-accident-attorney") },
+        { _key: "off-road", label: "Off-Road Recreational Vehicle Accidents", href: locationPath("boulder-off-road-recreational-vehicle-accident-attorney") },
         { _key: "premises", label: "Premises Liability", href: locationPath("boulder-premises-liability-attorney") },
         { _key: "product", label: "Product Liability", href: locationPath("boulder-product-liability-attorney") },
         { _key: "truck", label: "Truck Accidents", href: locationPath("boulder-truck-accident-attorney") },
@@ -479,7 +518,7 @@ export async function getPracticeAreaGroups(): Promise<AreaGroup[]> {
       _key: "highlands-ranch",
       title: "Highlands Ranch Personal Injury",
       items: [
-        { _key: "pi", label: "Personal Injury Overview", href: locationPath("highlands-ranch-personal-injury-attorney") },
+        { _key: "pi", label: "Personal Injury", href: locationPath("highlands-ranch-personal-injury-attorney") },
         { _key: "brain", label: "Brain Injuries", href: locationPath("highlands-ranch-brain-injury-lawyer") },
         { _key: "car", label: "Car Accidents", href: locationPath("highlands-ranch-car-accident-lawyer") },
         { _key: "elder-abuse", label: "Financial Elder Abuse", href: locationPath("highlands-ranch-financial-elder-abuse-lawyer") },
@@ -492,7 +531,7 @@ export async function getPracticeAreaGroups(): Promise<AreaGroup[]> {
       _key: "lakewood",
       title: "Lakewood Personal Injury",
       items: [
-        { _key: "pi", label: "Personal Injury Overview", href: locationPath("lakewood-personal-injury-attorney") },
+        { _key: "pi", label: "Personal Injury", href: locationPath("lakewood-personal-injury-attorney") },
         { _key: "brain", label: "Brain Injuries", href: locationPath("lakewood-brain-injury-lawyer") },
         { _key: "car", label: "Car Accidents", href: locationPath("lakewood-car-accident-lawyer") },
         { _key: "premises", label: "Premises Liability", href: locationPath("lakewood-premises-liability-attorney") },
@@ -504,7 +543,7 @@ export async function getPracticeAreaGroups(): Promise<AreaGroup[]> {
       _key: "thornton",
       title: "Thornton Personal Injury",
       items: [
-        { _key: "pi", label: "Personal Injury Overview", href: locationPath("thornton-personal-injury-attorney") },
+        { _key: "pi", label: "Personal Injury", href: locationPath("thornton-personal-injury-attorney") },
         { _key: "brain", label: "Brain Injury", href: locationPath("thornton-brain-injury-lawyer") },
         { _key: "bicycle", label: "Bicycle Accidents", href: locationPath("thornton-bicycle-accident-lawyer") },
         { _key: "car", label: "Car Accidents", href: locationPath("thornton-car-accident-attorney") },
@@ -520,19 +559,60 @@ export async function getPracticeAreaGroups(): Promise<AreaGroup[]> {
         { _key: "wrongful-death", label: "Wrongful Death", href: locationPath("thornton-wrongful-death-lawyer") },
       ],
     },
+    /* Greeley, Fort Collins and Grand Junction are NOT in the comp. They are in
+       the live hub, with thirteen live pages between them, and until now this
+       build served all thirteen while linking none of them from the directory —
+       reachable only from each other's city bands. Added from the live list;
+       the comp is not an inventory. Their live group titles are the bare city
+       name, unlike every other group's "<City> Personal Injury"; the suffix is
+       ours, for consistency down the column. */
+    {
+      _key: "greeley",
+      title: "Greeley Personal Injury",
+      items: [
+        { _key: "pi", label: "Personal Injury", href: locationPath("greeley-personal-injury-lawyer") },
+        { _key: "car", label: "Car Accident", href: locationPath("greeley-car-accident-lawyer") },
+        { _key: "truck", label: "Truck Accident", href: locationPath("greeley-truck-accident-lawyer") },
+        { _key: "motorcycle", label: "Motorcycle Accident", href: locationPath("greeley-motorcycle-accident-lawyer") },
+        { _key: "wrongful-death", label: "Wrongful Death", href: locationPath("greeley-wrongful-death-lawyer") },
+      ],
+    },
+    {
+      _key: "fort-collins",
+      title: "Fort Collins Personal Injury",
+      items: [
+        { _key: "pi", label: "Personal Injury", href: locationPath("fort-collins-personal-injury-lawyer") },
+        { _key: "car", label: "Car Accident", href: locationPath("fort-collins-car-accident-lawyer") },
+        { _key: "truck", label: "Truck Accident", href: locationPath("fort-collins-truck-accident-lawyer") },
+        { _key: "motorcycle", label: "Motorcycle Accident", href: locationPath("fort-collins-motorcycle-accident-lawyer") },
+      ],
+    },
+    {
+      _key: "grand-junction",
+      title: "Grand Junction Personal Injury",
+      items: [
+        // Truck before motorcycle. The live hub puts them the other way round
+        // here and only here — its two sibling groups both read car → truck →
+        // motorcycle — so this one is normalised rather than followed.
+        { _key: "pi", label: "Personal Injury", href: locationPath("grand-junction-personal-injury-lawyer") },
+        { _key: "car", label: "Car Accident", href: locationPath("grand-junction-car-accident-lawyer") },
+        { _key: "truck", label: "Truck Accident", href: locationPath("grand-junction-truck-accident-lawyer") },
+        { _key: "motorcycle", label: "Motorcycle Accident", href: locationPath("grand-junction-motorcycle-accident-lawyer") },
+      ],
+    },
     {
       _key: "premises-liability",
       title: "Premises Liability",
       items: [
         { _key: "overview", label: "Premises Liability Overview", href: practiceAreaPath("denver-premises-liability-lawyer") },
         { _key: "building", label: "Negligent Building Maintenance", href: practiceAreaPath("denver-negligent-building-maintenance-attorneys") },
-        { _key: "ice-snow", label: "Negligent Ice / Snow Removal", href: practiceAreaPath("denver-negligent-ice-snow-removal-attorneys") },
+        { _key: "ice-snow", label: "Negligent Ice/Snow Removal", href: practiceAreaPath("denver-negligent-ice-snow-removal-attorneys") },
         { _key: "security", label: "Negligent Security", href: practiceAreaPath("denver-negligent-security-lawyers") },
         { _key: "factors", label: "Premises Liability Factors", href: practiceAreaPath("colorado-premises-liability-law") },
-        { _key: "laws", label: "Colorado Slip and Fall Laws", href: practiceAreaPath("what-are-colorados-slip-and-fall-laws") },
+        { _key: "laws", label: "Slip and Fall Accident Laws in Colorado", href: practiceAreaPath("what-are-colorados-slip-and-fall-laws") },
         { _key: "case-types", label: "Slip and Fall Case Types", href: practiceAreaPath("types-of-slip-and-fall-accidents") },
-        { _key: "hiring", label: "Hiring a Slip and Fall Lawyer", href: practiceAreaPath("should-you-hire-a-lawyer-for-a-slip-and-fall-injury-case") },
-        { _key: "after-a-fall", label: "10 Things to Do After a Fall", href: practiceAreaPath("10-things-to-do-after-a-slip-and-fall-accident") },
+        { _key: "hiring", label: "Slip and Fall Injury Cases – Hiring a Lawyer", href: practiceAreaPath("should-you-hire-a-lawyer-for-a-slip-and-fall-injury-case") },
+        { _key: "after-a-fall", label: "10 Things To Do After a Slip and Fall Accident", href: practiceAreaPath("10-things-to-do-after-a-slip-and-fall-accident") },
       ],
     },
     {

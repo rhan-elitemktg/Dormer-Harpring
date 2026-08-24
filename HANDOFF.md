@@ -11,10 +11,16 @@ _Last updated: 2026-08-24._
 ## State
 
 Build is green: **329 pages** (330 with `/admin`), `npm run check` passing, all five comp-diff
-scripts exiting 0, and the new fidelity audit reporting 109 of 109 pages at ≥99% against the live
-source. **Every internal body link resolves** — 2,013 of them across 236 paths, none
-unserved. Run `git status` for where you are; this file deliberately does **not** name the working
-branch, because that line went stale three times in the session that first wrote it.
+scripts exiting 0, and the fidelity audit reporting 109 of 109 pages at ≥99% against the live
+source. A full sweep of **every `<a>` in `dist/` — 42,599 internal links across 329 pages —
+finds four dead targets**: the three the footer links on every page (`/privacy-policy/`,
+`/editorial-guidelines/`, `/sitemap.xml`) and one relative href inside an imported blog body.
+Both are item 1 and item 2 under Next. That sweep is ad hoc and **not committed**; the earlier
+"2,013 body links, none unserved" figure came from a script nobody kept, and it counted body
+links only, which is how 984 footer 404s stayed invisible.
+
+Run `git status` for where you are; this file deliberately does **not** name the working branch,
+because that line went stale three times in the session that first wrote it.
 
 **The practice-area pages are imported and there is a template for them.** 109 pages across nine
 cities, on a light template built like the blog post. That is the single biggest change since the
@@ -69,6 +75,42 @@ a blog body.
   `how-can-truck-accident-lawyer-help-denver`, and three others). Checked: 5–12% body similarity.
   They are distinct articles, not duplicates.
 
+## The directory is synced to the live hub, not to the comp
+
+`/practice-areas`'s "Browse All" directory was the comp's 90 entries in 8 groups. The live hub
+carries **110 in 11**, and the gap was not cosmetic: three whole city groups (Greeley, Fort
+Collins, Grand Junction) and six Denver pages — the five branded-truck pages and Daycare
+Injuries. **All nineteen destinations were already built and served**, just unlinked from the one
+page whose job is to link them. The comp is not an inventory; the live hub is the firm's own list.
+
+- **`scripts/diff-comp-practice-areas.py` still compares strictly.** It was not loosened into a
+  subset check, which would have stopped catching a dropped entry. Instead the departures are
+  declared — `ADDED_GROUPS`, `ADDED_ITEMS`, `RENAMED` — applied to the comp's arrays, and the
+  result compared for exact equality. Adding an entry without declaring it still fails.
+- **EVERY LABEL IS THE HUB'S NOW, with one exception.** The comp shortens sixteen of them —
+  "E-Scooter Accidents" for "Dockless Bike / E-Scooter Accidents", "10 Things to Do After a Fall"
+  for "10 Things To Do After a Slip and Fall Accident" — and the hub's wording is the firm's own,
+  so it wins. **The exception is the personal-injury row**, which reads "Personal Injury" in every
+  group: the hub says "Personal Injury Overview" in four, "Personal Injuries" in Denver and
+  "Personal Injury" in the rest, and the column read as a mistake. By request.
+- **A LABEL LIVES IN THREE PLACES and they must not drift**: `practiceAreas.ts`, the manifest in
+  `scripts/practice-area-pages.mjs`, and the page's own content JSON, which the importer writes
+  from the manifest. Change all three or re-run the import. One slug breaks the one-to-one —
+  `denver-premises-liability-lawyer` is "Premises Liability" in the Denver column and "Premises
+  Liability Overview" in the topical group, both the hub's; the manifest holds the topical form.
+- **Grand Junction reads car → truck → motorcycle.** The hub has that one group the other way
+  round and its two siblings this way. Normalised, by request — the only ordering departure.
+- **The hub's "Privacy Policy/Disclaimer" entry was deliberately NOT added.** No privacy page
+  exists; `ROUTES.privacy` is reserved, not built.
+
+**The remaining diff against the hub is exactly six entries and nothing else**: the five
+personal-injury rows, and the privacy link. Re-checkable — extract the hub's `practice-area-item`
+blocks and compare labels and slugs group by group.
+
+Verified after: build green at 329 pages, `npm run check` clean, all five comp diffs at 0, the
+fidelity audit still 109 of 109, and every internal link on the built page resolving except the
+three site-wide ones below.
+
 ## The light template
 
 `src/components/practice/area/` — `AreaArticle`, `AreaSidebar`, `AreaFaqs` — plus
@@ -97,6 +139,20 @@ What IS shared: `Prose`, `PostContents`, `ContactForm`, and **`.pside*`, which m
 `cocounsel/PracticeAreaLinks` is knowingly still separate — different glyph, different ramp, and
 no diff script watching that page. **`diff-comp-practice-areas.py` reads `arealist__link` now**; a
 class rename in that component breaks it, which is the point.
+
+## `/practice-areas` runs cream → WHITE → forest
+
+`.dir` is `--dh-white`, not `--surface-page`. It and `.feat` above it were both cream-100, so the
+directory read as a continuation of the featured grid rather than a section of its own — the
+adjacent-identical-surfaces trap, which nothing in the build checks for. Lightening it was the
+request, and only two tokens are lighter than cream-100: `--dh-cream-50` at 1.009:1, invisible,
+and white at **1.070:1 — a bigger step than `--surface-alt` manages at 1.046:1**. `.feat`'s cards
+are already white, so the band uses a colour the page had established.
+
+**`.feat`'s bottom padding is load-bearing and was `0`.** It ended flush and borrowed the
+directory's top padding, which only worked while the two shared a surface. Both are
+`--space-section` now. Full order: photo hero → `.feat` cream → `.dir` white → StatsBand forest →
+WhyUs cream-50 → AttorneysBand sunk → ContactDetails cream. No two adjacent match.
 
 ## Surfaces: the light page's band is `--alt`, and that is load-bearing
 
@@ -211,20 +267,31 @@ entry and both files to fix.
 
 ## Next
 
-1. **The 9 remaining dead links on the homepage.** Eight are `data/news.ts`, every `href` a literal
+1. **Three dead links sit in the FOOTER, on 328 of 329 pages.** `/privacy-policy/`,
+   `/editorial-guidelines/` and `/sitemap.xml`. All three are linked from every page and none is
+   built. Both pages are in `RESERVED_PATHS` and both slugs are in `EXCLUDED_SLUGS`, so this is
+   known-and-unbuilt rather than lost — but it is 984 dead links, not three, and it dwarfs the
+   homepage's nine. The sitemap belongs to item 5; the two pages need a design decision.
+2. **One dead link in an imported blog body.** `5-steps-to-take-after-a-truck-accident` carries
+   `href="practice-areas/traffic-collision-lawyer/truck-accident"` — RELATIVE, so it resolves
+   under the post's own path and 404s. Broken on the live site too. The intended destination is
+   `/denver-truck-accident-lawyer/`; `traffic-collision-lawyer` is one of the three excluded
+   duplicates. **The importer's link walk does not reject relative hrefs** — worth a check, since
+   this one was found by a sweep rather than by anything committed.
+3. **The 9 remaining dead links on the homepage.** Eight are `data/news.ts`, every `href` a literal
    `"#"`, marked `TODO(content)` rather than `TODO(launch)` — which is how they stayed off the
    launch list. The ninth is the Car Accidents checklist teaser. `#` must not reach production.
-2. **Move both collections into Sanity.** The blog and the practice areas are now two collections
+4. **Move both collections into Sanity.** The blog and the practice areas are now two collections
    with the same contract, and the getters are already the projections. Plus the four Portable
    Text object types the post template deferred (`callout`, `phoneBand`, `attorneyCard`,
    `pullQuote`), whose intended home is commented in `prose/components.ts` — and which the
    practice-area chrome maps onto almost exactly.
-3. `/new-seo-setup` — per-page meta, a Global SEO Settings singleton, JSON-LD, `sitemap.xml`,
+5. `/new-seo-setup` — per-page meta, a Global SEO Settings singleton, JSON-LD, `sitemap.xml`,
    `robots.txt`, editor-managed redirects. **The practice-area pages already carry real
    `metaTitle` / `metaDescription` from the live site's own meta**, so that layer has something
    true to start from. `BlogPosting` JSON-LD belongs to this phase. Note that **every page links
    `/sitemap.xml` and no sitemap is built**, so that URL 404s today — now across 329 pages.
-4. `/studio-polish ux` — audits the filled-out schema, so it waits.
+6. `/studio-polish ux` — audits the filled-out schema, so it waits.
 
 No comp exists for **privacy / disclaimer** or **404**. Both need a design decision or a
 plain-text treatment.
@@ -237,9 +304,6 @@ plain-text treatment.
   `personal-injury-attorney` (duplicates the homepage), `car-accident` and
   `traffic-collision-lawyer` (both overlap `denver-car-accident-lawyer`, which the heavy template
   serves).
-- **Five cities have pages but no route into them** beyond their own city band — Lakewood and
-  Thornton have no directory group at all, and Greeley / Fort Collins / Grand Junction were
-  already flagged. 41 pages between them, reachable today only from each other.
 - **The `AREA_TO_BLOG_CATEGORY` map in `blog.ts` is inferred, not authored.** It decides which
   posts a practice area's sidebar shows. Keyed on the area slug rather than its topic, because
   topic is five buckets and would put car-accident posts on the motorcycle page — which is what

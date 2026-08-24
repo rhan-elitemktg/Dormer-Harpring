@@ -2,7 +2,7 @@
 // "Every case we handle, by location." — the full practice-area directory,
 // grouped by city and set in four columns of chevroned links.
 //
-// The eight groups are wildly uneven (Denver has 36 entries, "Other Legal
+// The eleven groups are wildly uneven (Denver has 42 entries, "Other Legal
 // Services" 4), which is why each group is its own grid rather than one grid
 // the groups flow through: a shared grid would let a short group's links sit
 // beside Denver's tail and read as part of it.
@@ -42,8 +42,22 @@ const { section, groups } = Astro.props;
 </section>
 
 <style>
+  /* WHITE, NOT CREAM, and the lightest surface on the page. `.feat` above it is
+     `--surface-page` and `ContactDetails` below the stats band is too, so this
+     band read as a continuation of the featured grid rather than a section of
+     its own — two identical adjacent surfaces, which nothing in the build
+     checks for. Lifting rather than sinking it was the request, and only two
+     tokens are lighter than cream-100: `--dh-cream-50`, which is 1.009:1
+     against it and so invisible, and white at 1.070:1 — a BIGGER step than the
+     site's own alternate band, `--surface-alt`, manages at 1.046:1. `.feat`'s
+     cards are already white, so the band picks up a colour the page has
+     established rather than introducing one.
+
+     `.feat` carries a matching `padding-block` bottom for this: it used to end
+     at zero and borrow this section's top padding, which only worked while the
+     two shared a surface. */
   .dir {
-    background: var(--surface-page);
+    background: var(--dh-cream-300);
     padding-block: var(--space-section);
   }
 

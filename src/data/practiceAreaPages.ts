@@ -132,7 +132,7 @@ export async function getCityAreaGroups(city: string, excludeSlug: string): Prom
       items: siblings
         .filter((page) => page.topic === topic._key)
         // KEYED ON THE SLUG. `AreaLink._key` is not globally unique in the
-        // directory data — `"car"` appears in eight groups — so a flattened
+        // directory data — `"car"` appears in ten groups — so a flattened
         // list keyed the other way collides.
         .map((page) => ({ _key: page.slug, label: page.label, href: page.href }) satisfies AreaLink),
     }))
@@ -242,7 +242,7 @@ export async function getCityBandTitles(): Promise<Map<string, string>> {
  *
  * Slugs are derived from the href rather than stored on `AreaLink`, because
  * `practiceAreaPath(slug)` is `/${slug}/` and adding a redundant field to all
- * 90 directory entries would be 90 chances to mistype one.
+ * 109 directory entries would be 109 chances to mistype one.
  */
 export async function assertDirectoryJoin(groups: AreaGroup[]): Promise<void> {
   const [pages, claimed] = await Promise.all([getPracticeAreaPages(), detailSlugs()]);

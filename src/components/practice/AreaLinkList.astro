@@ -74,10 +74,11 @@ const { items, columns = 4 } = Astro.props;
 
   /* Equal heights across a row. The grid already stretches each <li> to the
      tallest cell in its row, but the link inside was sized by its own text — so
-     where one label wrapped to two lines ("Uninsured & Underinsured Motorists"),
-     its neighbours' underlines sat ~23px higher than its own and the row read
-     as broken. Making the <li> a flex container stretches the link to fill it,
-     which puts every rule on the row at one baseline. */
+     where one label wrapped to two lines ("Uninsured and Underinsured
+     Motorcyclist Accidents"), its neighbours' underlines sat ~23px higher than
+     its own and the row read as broken. Making the <li> a flex container
+     stretches the link to fill it, which puts every rule on the row at one
+     baseline. */
   .arealist > li {
     display: flex;
   }
