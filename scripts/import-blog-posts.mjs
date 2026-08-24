@@ -1,6 +1,12 @@
 // Imports the legacy WordPress blog into the `blog` content collection.
 //
-//   node scripts/import-blog-posts.mjs                 all 167
+// TWO POST TYPES, ONE ARCHIVE. 167 `post` records, plus 14 `page` records that
+// are articles in everything but WordPress's filing — see PAGE_ARTICLES in
+// blog-category-overrides.mjs for why they are here and not in the
+// practice-area import. Posts are converted FIRST and the pages appended, so
+// adding them cannot shift a single existing `_key`.
+//
+//   node scripts/import-blog-posts.mjs                 all 181
 //   node scripts/import-blog-posts.mjs --only <slug>   one, for inspection
 //   node scripts/import-blog-posts.mjs --dry           convert, write nothing
 //
@@ -18,11 +24,11 @@
 // practice-area importer. It is instantiated ONCE, below, and the posts are
 // iterated in the order the API returns them — both deliberate. Its `mkKey` is
 // a single run-scoped counter, so a second converter or a different iteration
-// order rewrites every `_key` in all 167 files for no reason.
+// order rewrites every `_key` in all 181 files for no reason.
 import { writeFile, mkdir, copyFile, access } from "node:fs/promises";
 import { join } from "node:path";
 import { homedir } from "node:os";
-import { CATEGORY_OVERRIDES, DROPPED_CATEGORY_SLUGS } from "./blog-category-overrides.mjs";
+import { CATEGORY_OVERRIDES, DROPPED_CATEGORY_SLUGS, PAGE_ARTICLES } from "./blog-category-overrides.mjs";
 import { createConverter, decode } from "./lib/wp-portable-text.mjs";
 
 const API = "https://www.denvertrial.com/wp-json/wp/v2";
@@ -95,28 +101,73 @@ async function featuredUrlById(ids) {
   return out;
 }
 
+/**
+ * The 14 article-pages, fetched from the OTHER post type.
+ *
+ * All pages are pulled and filtered rather than requested by slug, so a page
+ * that has been unpublished or renamed upstream THROWS here instead of quietly
+ * shrinking the archive.
+ */
+async function fetchPageArticles() {
+  const wanted = new Set(Object.keys(PAGE_ARTICLES));
+  const pages = [];
+  for (let page = 1; ; page++) {
+    const url = `${API}/pages?per_page=100&page=${page}&_fields=id,slug,title,excerpt,content,date,modified,featured_media`;
+    const r = await fetch(url);
+    if (r.status === 400) break;
+    if (!r.ok) throw new Error(`pages page ${page}: HTTP ${r.status}`);
+    const batch = await r.json();
+    pages.push(...batch);
+    if (batch.length < 100) break;
+  }
+  const found = pages.filter((p) => wanted.has(p.slug));
+  const missing = [...wanted].filter((slug) => !found.some((p) => p.slug === slug));
+  if (missing.length) {
+    throw new Error(
+      `PAGE_ARTICLES names ${missing.length} page(s) that are not live: ${missing.join(", ")}. ` +
+        `Remove them from blog-category-overrides.mjs or restore them upstream.`
+    );
+  }
+  // Sorted by slug so the conversion order — and therefore every `_key` these
+  // fourteen get — does not depend on what order the API happens to return.
+  return found.sort((a, b) => a.slug.localeCompare(b.slug));
+}
+
 async function categorySlugById() {
   const r = await fetch(`${API}/categories?per_page=100&_fields=id,slug`);
   return new Map((await r.json()).map((c) => [c.id, c.slug]));
 }
 
 async function main() {
-  const [posts, catById] = await Promise.all([fetchAll(), categorySlugById()]);
-  const featuredById = await featuredUrlById(posts.map((p) => p.featured_media));
+  const [posts, pageArticles, catById] = await Promise.all([
+    fetchAll(),
+    fetchPageArticles(),
+    categorySlugById(),
+  ]);
+  const featuredById = await featuredUrlById(
+    [...posts, ...pageArticles].map((p) => p.featured_media)
+  );
   const { readdir } = await import("node:fs/promises");
   const validCats = new Set(
     (await readdir("src/content/blog-categories")).filter((f) => f.endsWith(".json")).map((f) => f.slice(0, -5))
   );
 
-  const chosen = only ? posts.filter((p) => p.slug === only) : posts;
+  // POSTS FIRST, PAGES APPENDED. The converter's `mkKey` is one run-scoped
+  // counter, so interleaving these would rewrite every `_key` in all 167
+  // existing files for no reason. See lib/wp-portable-text.mjs.
+  const all = [...posts, ...pageArticles];
+  const chosen = only ? all.filter((p) => p.slug === only) : all;
   if (only && !chosen.length) throw new Error(`no post with slug "${only}"`);
 
   const docs = [];
   for (const p of chosen) {
     const slug = p.slug;
+    // A page has no `categories` field at all, so both paths land on the
+    // override maps — PAGE_ARTICLES for the fourteen, CATEGORY_OVERRIDES for
+    // the eleven posts the live taxonomy leaves unusable.
     let cats = (p.categories || []).map((id) => catById.get(id)).filter(Boolean);
     cats = cats.filter((c) => !DROPPED_CATEGORY_SLUGS.has(c));
-    if (!cats.length) cats = CATEGORY_OVERRIDES[slug] ?? [];
+    if (!cats.length) cats = PAGE_ARTICLES[slug] ?? CATEGORY_OVERRIDES[slug] ?? [];
     if (!cats.length) throw new Error(`${slug}: no category, and no override. Add one to blog-category-overrides.mjs.`);
     for (const c of cats) if (!validCats.has(c)) throw new Error(`${slug}: category "${c}" is not in the collection.`);
 
@@ -174,7 +225,10 @@ async function main() {
     console.log(`images: ${copied} from the scrape, ${fetched} fetched live`);
   }
 
-  console.log(`${dry ? "converted (not written)" : "wrote"} ${docs.length} posts`);
+  console.log(
+    `${dry ? "converted (not written)" : "wrote"} ${docs.length} posts ` +
+      `(${posts.length} from /posts, ${pageArticles.length} from /pages)`
+  );
   const blocks = docs.reduce((n, d) => n + d.body.length, 0);
   console.log(`blocks: ${blocks}`);
   if (warnings.length) {

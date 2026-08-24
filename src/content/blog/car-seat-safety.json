@@ -1,0 +1,1120 @@
+{
+  "slug": "car-seat-safety",
+  "title": "Car Seat Safety",
+  "excerpt": "Keeping children secure on the road begins with understanding Car Seat Safety—a topic every Colorado parent should take seriously. A properly installed car seat reduces the risk of fatal injury in a crash by more than 70%, yet too many families unknowingly use the wrong seat, place it incorrectly, or transition too soon. At Dormer […]",
+  "publishedAt": "2025-10-30T10:09:45",
+  "modifiedAt": "2025-10-30T10:40:50",
+  "categories": [
+    "auto-accident"
+  ],
+  "body": [
+    {
+      "_type": "block",
+      "_key": "bcqp",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "lcqm",
+          "_type": "link",
+          "href": "/"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scqj",
+          "text": "Keeping children secure on the road begins with understanding ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "scqk",
+          "text": "Car Seat Safety",
+          "marks": [
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "scql",
+          "text": "—a topic every Colorado parent should take seriously. A properly installed car seat reduces the risk of fatal injury in a crash by more than 70%, yet too many families unknowingly use the wrong seat, place it incorrectly, or transition too soon. At ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "scqn",
+          "text": "Dormer Harpring",
+          "marks": [
+            "lcqm",
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "scqo",
+          "text": ", we help families understand these risks, navigate Colorado’s child safety laws, and take legal action when negligence leads to harm.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "image",
+      "_key": "icqq",
+      "src": "./images/2025-10-shutterstock_2250877965-1-300x200.jpg",
+      "alt": "Car Seat"
+    },
+    {
+      "_type": "block",
+      "_key": "bcqs",
+      "style": "h2",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scqr",
+          "text": "Car Seat Overview",
+          "marks": [
+            "strong"
+          ]
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcqw",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "lcqt",
+          "_type": "link",
+          "href": "/why-are-car-seats-so-important/"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scqu",
+          "text": "Car seats",
+          "marks": [
+            "lcqt"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "scqv",
+          "text": " are designed to protect children by distributing crash forces across the strongest parts of the body. There are three main types that children progress through as they grow: rear-facing, forward-facing, and booster seats. Each stage provides a different level of protection, and it’s critical not to rush the transition between them.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcqy",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scqx",
+          "text": "Rear-facing seats support the head, neck, and spine of infants and toddlers, reducing the risk of catastrophic injury in frontal crashes. Forward-facing seats protect older children using harness systems that limit movement during a collision. Booster seats elevate children so seat belts fit correctly—low on the hips and across the chest. According to the Colorado Department of Public Health and Environment (CDPHE), children are safest when seated in the back seat and restrained according to their size and age requirements.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcr0",
+      "style": "h2",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scqz",
+          "text": "Statistics on Car Seat Safety",
+          "marks": [
+            "strong"
+          ]
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcr7",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "lcr2",
+          "_type": "link",
+          "href": "https://www.denverhealth.org/services/trauma/injury-prevention"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scr1",
+          "text": "The numbers are sobering. The ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "scr3",
+          "text": "Denver Health",
+          "marks": [
+            "lcr2"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "scr4",
+          "text": " notes that roadway injuries remain a top cause of preventable death among children nationwide. Each year, thousands of kids suffer serious injuries that could have been avoided with proper ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "scr5",
+          "text": "car seat safety",
+          "marks": [
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "scr6",
+          "text": " practices.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcr9",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scr8",
+          "text": "The CDC reports that more than 600 children die annually in motor vehicle crashes, and nearly half of those deaths involve children who were unrestrained or improperly restrained. Colorado’s CDPHE estimates that 9 out of 10 car seats in the state are not installed correctly, significantly reducing their effectiveness. When used correctly, car seats reduce fatal injury by more than two-thirds for infants and by over half for toddlers.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcrb",
+      "style": "h2",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scra",
+          "text": "Common Mistakes When Installing Car Seats",
+          "marks": [
+            "strong"
+          ]
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcrh",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "lcrd",
+          "_type": "link",
+          "href": "https://www.denverhealth.org/blog/2020/09/a-note-to-new-and-expecting-parents-five-tips-for-car-seat-safety?utm_source=chatgpt.com"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scrc",
+          "text": "Improper installation is one of the most frequent and dangerous mistakes parents make. According to",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "scre",
+          "text": " Denver Health’s injury prevention program",
+          "marks": [
+            "lcrd"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "scrg",
+          "text": ", 9 out of 10 car seats are installed incorrectly. Misrouting the seat belt, not tightening the base, or failing to secure the harness snugly all compromise protection.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcrj",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scri",
+          "text": "Other common errors include:",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcrl",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scrk",
+          "text": "Using both the seat belt and LATCH system together when not recommended by the manufacturer.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bcrn",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scrm",
+          "text": "Placing the car seat in front of an active airbag.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bcrp",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scro",
+          "text": "Allowing harness straps to sit too loosely or at the wrong height.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bcrr",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scrq",
+          "text": "Forgetting to check for expired or recalled seats.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bcrt",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scrs",
+          "text": "Always install car seats in the back seat when possible and ensure the seat doesn’t move more than one inch side to side or front to back at the belt path.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcrv",
+      "style": "h2",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scru",
+          "text": "Choosing the Right Car Seat for Every Stage",
+          "marks": [
+            "strong"
+          ]
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcs0",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "lcrx",
+          "_type": "link",
+          "href": "https://cdphe.colorado.gov/babies/car-seat-safety?utm_source=chatgpt.com"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scrw",
+          "text": "Selecting the right car seat depends on your child’s size and age, not just convenience. The following guidelines reflect current recommendations from the ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "scry",
+          "text": "Colorado Department of Public Health and Environment (CDPHE)",
+          "marks": [
+            "lcrx"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "scrz",
+          "text": ":",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcs2",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scs1",
+          "text": "Rear-facing car seat",
+          "marks": [
+            "strong"
+          ]
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcs4",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scs3",
+          "text": "Required if the child is under 2 years old and under 40 pounds.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bcs6",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scs5",
+          "text": "Must be installed in the back seat when available.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bcs8",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scs7",
+          "text": "Children can remain rear-facing longer if the seat’s weight limits allow.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bcsa",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scs9",
+          "text": "Forward-facing car seat",
+          "marks": [
+            "strong"
+          ]
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcsc",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scsb",
+          "text": "Required if the child is under 2 years old but over 40 pounds, or between 2–4 years old and over 20 pounds.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bcse",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scsd",
+          "text": "Must be placed in the back seat if possible.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bcsg",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scsf",
+          "text": "Can continue to be used past age 4 if the seat allows.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bcsi",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scsh",
+          "text": "Booster seat",
+          "marks": [
+            "strong"
+          ]
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcsk",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scsj",
+          "text": "Required for children 4–9 years old who weigh at least 40 pounds.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bcsm",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scsl",
+          "text": "Should be positioned in the back seat.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bcso",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scsn",
+          "text": "Can continue beyond age 9 if needed for a proper belt fit.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bcsq",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scsp",
+          "text": "Seat belt",
+          "marks": [
+            "strong"
+          ]
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcss",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scsr",
+          "text": "For children 9–18 years old.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bcsu",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scst",
+          "text": "The lap belt must fit low across the hips, and the shoulder strap should lie flat across the chest—never the neck or face.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bcsw",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scsv",
+          "text": "These stages ensure the restraint system offers the best protection at each point in a child’s growth. Moving to the next stage too early increases injury risk, especially in side-impact or rollover crashes.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcsy",
+      "style": "h2",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scsx",
+          "text": "Don’t Transition to Seat Belts Too Early",
+          "marks": [
+            "strong"
+          ]
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bct0",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scsz",
+          "text": "Many parents are eager to let children “graduate” to adult seat belts, but safety experts warn against rushing this step. Colorado law sets clear benchmarks for when a child can safely move beyond booster seats. The seat belt must fit snugly across the thighs and shoulders, not the stomach or neck. If a child slouches or the belt rides up, it’s too soon.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bct2",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sct1",
+          "text": "Colorado law (C.R.S. §42-4-236) makes it the driver’s responsibility to ensure all passengers under 16 are properly restrained. When children are moved out of booster seats too early, they lose the protection these restraints provide—and in the event of an accident, it could affect both safety outcomes and potential liability.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bct4",
+      "style": "h2",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sct3",
+          "text": "Car Seat Recalls Are More Common Than You Think",
+          "marks": [
+            "strong"
+          ]
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bct6",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sct5",
+          "text": "Car seat recalls occur more frequently than most parents realize. In the past year alone, recalls affected more than 755,000 individual seats due to issues like faulty buckles, improper labeling, or defective harnesses.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bct8",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sct7",
+          "text": "The best way to stay informed is to register your car seat with the manufacturer so you’ll receive recall alerts and safety updates automatically. You can also check your model on the National Highway Traffic Safety Administration (NHTSA) recall database to confirm that your seat remains compliant. Staying proactive ensures your child’s restraint system continues to meet federal safety standards.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcta",
+      "style": "h2",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sct9",
+          "text": "Simple Steps to Prevent Car Seat Dangers",
+          "marks": [
+            "strong"
+          ]
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bctg",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "lctc",
+          "_type": "link",
+          "href": "https://www.codot.gov/safety/carseats/car-seat-fit-recommendations"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sctb",
+          "text": "Using the correct car seat could save your child’s life. Vehicle crashes remain one of the leading causes of death for children, but many tragedies can be prevented through consistent restraint use. It’s every driver’s responsibility to ensure passengers under 18 are properly secured during every trip, as reinforced by the",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "sctd",
+          "text": " Colorado Department of Transportation (CDOT)",
+          "marks": [
+            "lctc"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "sctf",
+          "text": ".",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcti",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scth",
+          "text": "Here are straightforward safety habits to follow:",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bctk",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sctj",
+          "text": "Read both the vehicle and car seat manuals before installation.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bctm",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sctl",
+          "text": "Schedule a free safety check through Car Seats Colorado or a local fire department.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bcto",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sctn",
+          "text": "Replace car seats after moderate or severe crashes—even if no damage is visible.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bctq",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sctp",
+          "text": "Avoid buying used seats unless you know their complete history.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bcts",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sctr",
+          "text": "Never use accessories or seat covers that aren’t manufacturer-approved.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bctw",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sctt",
+          "text": "Every step you take toward better ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "sctu",
+          "text": "car seat safety",
+          "marks": [
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "sctv",
+          "text": " strengthens your child’s protection on the road.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcty",
+      "style": "h2",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sctx",
+          "text": "Keep Every Ride Safe: Check Your Car Seat",
+          "marks": [
+            "strong"
+          ]
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcu0",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sctz",
+          "text": "A quick monthly inspection can make all the difference. Check for loose parts, worn straps, and correct harness height. Confirm that your car seat hasn’t expired—most have a lifespan of six to ten years.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcu4",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scu1",
+          "text": "At ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "scu2",
+          "text": "Dormer Harpring",
+          "marks": [
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "scu3",
+          "text": ", we’ve seen the consequences of improperly secured restraints. When a defective product, negligent driver, or failure to follow safety laws causes harm, families have the right to seek justice. Our attorneys help Colorado families pursue claims involving vehicle injuries, defective car seats, and unsafe driving practices. We use our understanding of Colorado law and injury prevention to advocate for children’s safety and family recovery.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcu6",
+      "style": "h2",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scu5",
+          "text": "Your Family’s Safety Matters",
+          "marks": [
+            "strong"
+          ]
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcue",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "lcua",
+          "_type": "link",
+          "href": "/contact/"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scu7",
+          "text": "Every parent deserves peace of mind knowing their child is protected on the road. Our firm helps families understand ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "scu8",
+          "text": "car seat safety",
+          "marks": [
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "scu9",
+          "text": ", navigate insurance issues, and pursue accountability after preventable injuries. If you or your child has been hurt in a crash, we can help you move forward with confidence. ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "scub",
+          "text": "Call Dormer Harpring",
+          "marks": [
+            "strong",
+            "lcua"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "scuc",
+          "text": " at (303) 747-4404",
+          "marks": [
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "scud",
+          "text": " to speak with a Colorado car accident attorney today.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcug",
+      "style": "h2",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scuf",
+          "text": "Car Accident Lawyers Near You in Denver",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcul",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "lcui",
+          "_type": "link",
+          "href": "https://maps.app.goo.gl/8oWqkqUJtBrSS49s9"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scuh",
+          "text": "Our dedicated attorneys at ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "scuj",
+          "text": "Dormer Harpring Denver Personal Injury Lawyers",
+          "marks": [
+            "lcui"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "scuk",
+          "text": " provide compassionate and aggressive representation for clients facing car accident claims in the Denver area. Our firm is conveniently located at 3457 Ringsby Ct Unit 110, Denver, CO 80216, United States. Find us with our GeoCoordinates: 39.7726247, -104.9820183.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcuo",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "lcum",
+          "_type": "link",
+          "href": "https://maps.app.goo.gl/8oWqkqUJtBrSS49s9"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scun",
+          "text": "View on Google Maps",
+          "marks": [
+            "lcum"
+          ]
+        }
+      ]
+    }
+  ],
+  "factCheck": [],
+  "author": {
+    "name": "Dormer Harpring",
+    "href": "/about"
+  },
+  "reviewer": {
+    "name": "K.C. Harpring",
+    "href": "/meet-our-attorneys/k-c-harpring"
+  },
+  "legacyId": 17237
+}
