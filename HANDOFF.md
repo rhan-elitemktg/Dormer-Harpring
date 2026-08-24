@@ -23,7 +23,7 @@ last handoff and it moves the project's biggest dependency off the critical path
 **The blog archive is 181 posts, not 167.** WordPress has two post types and the article-shaped
 content is spread across both — see below.
 
-Marker inventory: **57 `TODO(launch)`, 5 `TODO(video)`, 4 `TODO(sanity)`, 1 `TODO(content)`.**
+Marker inventory: **43 `TODO(launch)`, 5 `TODO(video)`, 4 `TODO(sanity)`, 1 `TODO(content)`.**
 Grep all four before launch, not just the first.
 
 ## The scope was twice what this file said
@@ -125,7 +125,7 @@ the same converter.
 - **`scripts/practice-area-pages.mjs`** is the manifest: every live page is in
   `PRACTICE_AREA_PAGES` or in `EXCLUDED_SLUGS` with a reason, and **a page in neither throws**.
   That is the whole anti-silent-drop guarantee. There is no programmatic discriminator and looking
-  for one is the trap — `template-landing.php` covers only 70 of the 109, `parent` is useless
+  for one is the trap — `template-landing.php` covers only 69 of the 109, `parent` is useless
   (162 of 195 sit at the root), and five pages that read as articles are **linked from the
   directory as practice areas**, so excluding them by shape would ship five 404s at cutover.
 - **`city` and `topic` are both written down, not inferred.** Slug prefixes cannot carry city:
@@ -223,7 +223,7 @@ entry and both files to fix.
    `robots.txt`, editor-managed redirects. **The practice-area pages already carry real
    `metaTitle` / `metaDescription` from the live site's own meta**, so that layer has something
    true to start from. `BlogPosting` JSON-LD belongs to this phase. Note that **every page links
-   `/sitemap.xml` and no sitemap is built**, so that URL 404s today — now across 315 pages.
+   `/sitemap.xml` and no sitemap is built**, so that URL 404s today — now across 329 pages.
 4. `/studio-polish ux` — audits the filled-out schema, so it waits.
 
 No comp exists for **privacy / disclaimer** or **404**. Both need a design decision or a
@@ -248,7 +248,7 @@ plain-text treatment.
 - **`site:` in `astro.config.mjs`** — www vs apex, still unsettled.
 - **Two crash types on the heavy detail page** — rear-end and head-on.
 - **The three Denver crash figures are unsourced**, and `[year]` renders live in all three labels.
-- **`src/content` is now 39M** (29M blog, 9.6M practice areas), mostly images. Fine for git today;
+- **`src/content` is now 39M** (30M blog, 8.7M practice areas), mostly images. Fine for git today;
   worth watching.
 
 **Waiting on the firm** — content, not code. `README.md` has the full table. Unchanged: the seven
@@ -286,9 +286,10 @@ practice-area pages carry the legacy `(303) 756-3812` inside imported body copy*
 
 **Blockers for launch, not for building**
 
-- `/api/consult` does not exist. Two form components are rendered in **five** places — now on 109
-  more pages through `AreaSidebar` — and all of them 404 on submit. One endpoint, not two: a
-  hidden `kind` field tells the payloads apart.
+- `/api/consult` does not exist. Two form components are rendered from **six** call sites and
+  reach **326 of the 329 built pages** — the light template put one on 109 more through
+  `AreaSidebar` — and every one of them 404s on submit. One endpoint, not two: a hidden `kind`
+  field tells the payloads apart.
 - The production URL is not yet a Sanity CORS origin, so the deployed `/admin` loads but fails
   sign-in. `http://localhost:4321` is registered — don't move dev off 4321.
 
