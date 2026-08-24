@@ -1,0 +1,660 @@
+{
+  "slug": "colorado-defective-helmet",
+  "title": "Defective Helmets",
+  "label": "Defective Helmets",
+  "city": "denver",
+  "topic": "other",
+  "statewide": true,
+  "resource": false,
+  "metaTitle": "Defective Helmets and Colorado Product Liability Law",
+  "metaDescription": "You should be able to expect that your helmet will keep you safe. When it doesn't, you have legal options. Call our Denver product liability lawyers.",
+  "body": [
+    {
+      "_type": "block",
+      "_key": "bbvt",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "lbvq",
+          "_type": "link",
+          "href": "/meet-our-attorneys/sean-dormer/"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbvp",
+          "text": "As a pediatrician, ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "sbvr",
+          "text": "Sean Dormer’s",
+          "marks": [
+            "lbvq"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "sbvs",
+          "text": " wife spends a lot of time telling her patients and their parents about the importance of helmets. “What is the most important part of your entire body?” she asks her patients. “Your brain! That is why you always have to wear your helmet when you ride anything with wheels.” We have to be able to trust helmet makers to know that too. And they promise they do.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bbvx",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbvu",
+          "text": "Unfortunately, helmet makers do not always live up to their promises. At Dormer Harpring, our product liability lawyers have seen defective bike helmets that were too weak. We have seen defective bike helmets that came off before impact even when worn correctly. We have seen defective football helmets make concussions ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "sbvv",
+          "text": "worse",
+          "marks": [
+            "em"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "sbvw",
+          "text": ". We’ve seen defective motorcycle helmets shatter on impact, allowing the rider’s head to hit the pavement.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bbvz",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbvy",
+          "text": "And the same things show up in the news too often. Defective football helmets are not protecting players from repeated concussions. New research shows companies how to make safer helmets, but all-too-often, companies ignore it. All of these helmet defects can turn simple or survivable accidents into catastrophic or deadly injuries.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bbw1",
+      "style": "h2",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbw0",
+          "text": "Defective Helmet Law in Colorado",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bbw3",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbw2",
+          "text": "Colorado, like most states, has an area of law called product liability. Product liability law holds companies responsible when they make or sell defective helmets. If someone sustains an injury, or his or her injury is worsened because of a defective helmet, the law generally says the manufacturer has to pay for that person’s damages.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bbw5",
+      "style": "h2",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbw4",
+          "text": "How Can You Tell If a Helmet Is Defective?",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bbwa",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "lbw7",
+          "_type": "link",
+          "href": "/news/what-are-common-types-of-product-defects/"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbw6",
+          "text": "“Defective” means anything that makes a product unreasonably dangerous. Helmets can be ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "sbw8",
+          "text": "defective for many reasons",
+          "marks": [
+            "lbw7"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "sbw9",
+          "text": ". Below, our Denver product liability lawyers list a few examples of situations that might mean a helmet is defective:",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bbwc",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbwb",
+          "text": "Cracks or shatters from small impact",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bbwe",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbwd",
+          "text": "Falls off before impact, even when worn correctly",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bbwg",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbwf",
+          "text": "Falls off after first impact, even when worn correctly, allowing a second direct hit to the head",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bbwi",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbwh",
+          "text": "Face mask breaks from small impact",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bbwk",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbwj",
+          "text": "Does not protect against repeated concussions",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bbwm",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbwl",
+          "text": "Fails to prevent a brain injury",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bbwo",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbwn",
+          "text": "Keep in mind that the details surrounding your situation always matter. Skilled corporate defense lawyers can often twist the details of your situation to win. This is one reason you should have an experienced personal injury lawyer on your side to fight for you.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bbwq",
+      "style": "h2",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbwp",
+          "text": "What Types of Injuries Can Result From a Defective Helmet?",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bbws",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbwr",
+          "text": "Injuries from a defective helmet may include:",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bbwv",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "lbwt",
+          "_type": "link",
+          "href": "/denver-brain-injury-lawyer/"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbwu",
+          "text": "Brain injury",
+          "marks": [
+            "lbwt"
+          ]
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bbwx",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbww",
+          "text": "Brain bleed",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bbwz",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbwy",
+          "text": "Permanent brain damage",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bbx1",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbx0",
+          "text": "Skull fracture",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bbx3",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbx2",
+          "text": "Facial fracture",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bbx5",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbx4",
+          "text": "Facial deformity",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bbx7",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbx6",
+          "text": "Neck injury",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bbx9",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbx8",
+          "text": "Paralysis",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bbxb",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbxa",
+          "text": "Death",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bbxd",
+      "style": "h2",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbxc",
+          "text": "What Damages Can a Victim Recover in a Defective Helmet Claim?",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bbxf",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbxe",
+          "text": "If you or a loved one suffered injury because of a defective helmet, speak with our Denver product liability lawyers. Even if a helmet is defective, it may be tough to hold the helmet maker responsible. This is because the injured person must prove that he or she was hurt at least in part because of the defect.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bbxk",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "lbxh",
+          "_type": "link",
+          "href": "/denver-product-liability-lawyer/"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbxg",
+          "text": "Our ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "sbxi",
+          "text": "Denver product liability attorneys",
+          "marks": [
+            "lbxh"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "sbxj",
+          "text": " can help you recover the damages you need and deserve. Damages in a Colorado personal injury claim get broken down into three categories:",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bbxn",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbxl",
+          "text": "Economic damages. ",
+          "marks": [
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "sbxm",
+          "text": "Economic damages are things like medical bills (reasonable value is usually the full bill, NOT the lower “amount paid”) and lost income. These damages may also include accessibility tools and modifications, like wheelchairs or medical beds.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bbxq",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbxo",
+          "text": "Non-economic damages. ",
+          "marks": [
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "sbxp",
+          "text": "These damages include mental and physical pain and suffering, emotional distress, loss of enjoyment of life and inconvenience. It can be difficult to assign an amount to non-economic damages. We describe our clients’ non-economic damages to adjusters and juries in ways designed to maximize results. In Colorado, non-economic damages are capped. The cap changes with inflation. The Colorado Secretary of State should re-certify it every so often.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bbxt",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbxr",
+          "text": "Physical Impairment and Disfigurement.",
+          "marks": [
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "sbxs",
+          "text": " In Colorado, these damages are not capped. They are usually defined in a trial by medical experts. Again, it can be hard to put a number to these damages, but our product liability lawyers can help maximize the result.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bbxv",
+      "style": "h2",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbxu",
+          "text": "Questions? Call Our Product Liability Lawyers for a Free Consultation",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bby3",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "lbxx",
+          "_type": "link",
+          "href": "tel:3037474404"
+        },
+        {
+          "_key": "lby0",
+          "_type": "link",
+          "href": "/contact/"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sbxw",
+          "text": "We have earned a reputation as “tough lawyers for tough cases.” Most of our cases involve severe and complex injuries, but we do this job because we want to help. It is free to call us and ask more about an injury you or a loved one sustained because of another’s unsafe behavior. If we decide to sign on as your attorneys, we work on a “contingent fee.” This means you only pay fees if we win. We can also advance case expenses, so you pay nothing until your case is over. Call Dormer Harpring today at ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "sbxy",
+          "text": "(303) 747-4404",
+          "marks": [
+            "lbxx"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "sbxz",
+          "text": " or fill out our simple ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "sby1",
+          "text": "online contact form",
+          "marks": [
+            "lby0"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "sby2",
+          "text": ".",
+          "marks": []
+        }
+      ]
+    }
+  ],
+  "faqs": [],
+  "publishedAt": "2018-12-22T07:45:34",
+  "modifiedAt": "2025-09-12T17:04:14",
+  "legacyId": 974
+}
