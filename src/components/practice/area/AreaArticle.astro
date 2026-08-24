@@ -1,0 +1,149 @@
+---
+// The practice-area page's body and sidebar — its first and largest section.
+//
+// A SIBLING OF `blog/PostArticle`, NOT A REUSE OF IT. Three reasons, and the
+// third is the one that settles it:
+//
+//  1. PostArticle's props are typed against BlogPost / BlogPostArticle /
+//     BlogCategory. Sharing means widening those to carry `publishedAt`,
+//     `author`, `reviewer`, `category` and `readTime` for a page that has none
+//     of them — and each of those shapes is already the GROQ projection it will
+//     be after the swap. In Sanity these are two document types.
+//  2. PostArticle renders a category eyebrow, a four-part byline and the
+//     fact-check band. Forking those by prop flags puts four conditionals in a
+//     component whose whole job is a grid.
+//  3. THE SCOPED-STYLE RULES MAKE SHARING THE GRID IMPOSSIBLE ANYWAY.
+//     PostArticle places the sidebar with `.post :global(.pside)`, bounded by
+//     an element in its OWN template as AGENTS.md requires. This file's `.parea`
+//     wrapper cannot match that rule, and adding `.parea` to PostArticle's
+//     stylesheet is precisely the ANCESTOR blind spot README.md documents that
+//     `check:styles` cannot catch.
+//
+// What IS shared: `Prose`, `PostContents`, `ContactForm`, and the `.pside*`
+// card chrome, which moved to global.css when this file arrived.
+//
+// No PageHeader, for the same reason PostArticle records: the page's own title
+// stands in for one, and a page header would put a second heading above the H1.
+import Prose from "../../prose/Prose.astro";
+import PostContents from "../../blog/PostContents.astro";
+import AreaSidebar from "./AreaSidebar.astro";
+import AreaFaqs from "./AreaFaqs.astro";
+import type { BlogPost } from "../../../data/blog";
+import type {
+  PracticeAreaArticle,
+  PracticeAreaPageCopy,
+  SidebarAreas,
+} from "../../../data/practiceAreaPages";
+
+interface Props {
+  article: PracticeAreaArticle;
+  page: PracticeAreaPageCopy;
+  areas: SidebarAreas;
+  related: BlogPost[];
+  faqId: string;
+}
+
+const { article, page, areas, related, faqId } = Astro.props;
+---
+
+<section class="parea">
+  <div class="container">
+    <div class="parea__grid">
+      <article class="parea__main">
+        <h1 class="parea__title">{article.title}</h1>
+
+        {
+          /* NO BYLINE AND NO DATE, unlike the post page. These are evergreen
+             service pages, not articles: the live site shows no date on them
+             either, and stamping one would make copy last touched in 2016 look
+             stale rather than settled. The reviewed-by line the firm wants on
+             this template belongs to the SEO phase, alongside the post page's
+             fact-check band — see HANDOFF. */
+        }
+
+        <PostContents label={page.contentsLabel} body={article.body} />
+        <Prose value={article.body} />
+
+        {
+          /* Inside the article column, after the body — where the live page
+             puts it. 28 of the 109 pages carry one; the component renders
+             nothing for the rest. */
+        }
+        <AreaFaqs title={page.faqsTitle} faqs={article.faqs} id={faqId} />
+      </article>
+
+      <AreaSidebar page={page} areas={areas} related={related} />
+    </div>
+  </div>
+</section>
+
+<style>
+  .parea {
+    padding-block: var(--space-18) var(--space-section);
+    background: var(--surface-page);
+  }
+
+  /* THE POST PAGE'S RATIO, deliberately identical. 1.8:1 puts the sidebar at
+     ~419px inside the 1244px container and the body at ~753px, which lands on
+     `--measure-prose: 760px` — and the two templates sit at the same URL depth
+     and carry the same sidebar, so a reader moving between them should not feel
+     the column widths shift. Kept proportional rather than a fixed `420px`
+     track, which stops being proportional as the container shrinks. */
+  .parea__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr);
+    gap: var(--space-18);
+    align-items: start;
+  }
+
+  .parea__main {
+    grid-column: 1;
+    grid-row: 1;
+    min-width: 0;
+  }
+
+  /* `:global()` bounded by `.parea`, an element in this template — the class
+     lands on AreaSidebar's own markup and carries ITS cid, not this file's. */
+  .parea :global(.pside) {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  /* Mixed case and the interior page size rather than a display one. These
+     titles are long — "Denver Uninsured and Underinsured Motorcyclist Accident
+     Lawyer" is the worst of the 109 — so `text-wrap: balance` keeps the last
+     line from carrying a single word. */
+  .parea__title {
+    font-size: var(--display-page-sm);
+    line-height: 1.02;
+    letter-spacing: 0.005em;
+    text-transform: none;
+    text-wrap: balance;
+  }
+
+  @media (max-width: 1180px) {
+    .parea__grid {
+      gap: var(--space-12);
+    }
+  }
+
+  @media (max-width: 980px) {
+    .parea {
+      padding-block: var(--space-12) var(--space-section);
+    }
+
+    /* One column, and BOTH explicit placements released with it. A `grid-row: 1`
+       left on the sidebar in a one-column grid puts it above the article — the
+       same trap PostArticle records for its own three placements. */
+    .parea__grid {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-12);
+    }
+
+    .parea__main,
+    .parea :global(.pside) {
+      grid-column: auto;
+      grid-row: auto;
+    }
+  }
+</style>

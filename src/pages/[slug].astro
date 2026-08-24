@@ -1,5 +1,6 @@
 ---
-// TWO PAGE SHAPES, ONE ROUTE FILE: blog posts and practice-area detail pages.
+// THREE PAGE SHAPES, ONE ROUTE FILE: blog posts, the heavy practice-area
+// detail page, and the light practice-area template.
 //
 // THIS FILE IS AT THE SITE ROOT, and that is not a shortcut. `blogPath()` is
 // `/${slug}` — the legacy WordPress site is flat at the root and ~300 live URLs
@@ -17,15 +18,27 @@
 // A slug collision between the two collections would silently build one page
 // and drop the other, so it is checked below and throws instead.
 //
-// ONE ARTICLE and ONE PRACTICE AREA are built. See `getBlogPostArticles()` in
-// data/blog.ts and `getPracticeAreaDetails()` in data/carAccidents.ts for why
-// the rest wait for the Sanity import rather than being transcribed by hand.
+// THE TWO PRACTICE-AREA SHAPES ARE NOT VARIANTS OF EACH OTHER. `area-detail`
+// is the hand-authored 17-section kit in `components/practice/detail/`,
+// reserved for special cases; `area-page` is the imported one — a title, a body
+// and a FAQ, built like the blog post. One of the first exists; 109 of the
+// second do. They share this route because they share a URL shape, nothing
+// more.
+//
+// SURFACE ORDER, which nothing in the build checks (see HANDOFF):
+//   post        cream `.post`  → forest `.related` → cream `.ct`
+//   area-page   cream `.parea` → alt `.cityareas`  → cream `.ct`
+// Both alternate. Reordering either branch means re-checking that they still
+// do — three cream sections in a row is invisible in review and obvious on the
+// page.
 import type { GetStaticPaths } from "astro";
 import Layout from "../layouts/Layout.astro";
 import PostArticle from "../components/blog/PostArticle.astro";
 import RelatedPosts from "../components/blog/RelatedPosts.astro";
 import ContactDetails from "../components/contact/ContactDetails.astro";
 import DetailPage from "../components/practice/detail/DetailPage.astro";
+import AreaArticle from "../components/practice/area/AreaArticle.astro";
+import CityAreas from "../components/practice/CityAreas.astro";
 import {
   getBlogCategories,
   getBlogPostArticles,
@@ -34,7 +47,15 @@ import {
   getFeaturedPost,
   getImportedArticles,
   getRelatedPosts,
+  getRelatedPostsForArea,
 } from "../data/blog";
+import {
+  getCityAreaGroups,
+  getCityBandTitles,
+  getPracticeAreaArticles,
+  getPracticeAreaPageCopy,
+  getPracticeAreaSidebarLinks,
+} from "../data/practiceAreaPages";
 import { CA_SECTION_IDS, getPracticeAreaDetails } from "../data/carAccidents";
 import { getContactBand, getContactDetails } from "../data/contact";
 import { getCarAccidentFaqSection, getCarAccidentFaqs } from "../data/faqs";
@@ -48,12 +69,13 @@ import {
 } from "../data/testimonials";
 
 export const getStaticPaths = (async () => {
-  const [handAuthored, imported, featured, posts, details] = await Promise.all([
+  const [handAuthored, imported, featured, posts, details, areaPages] = await Promise.all([
     getBlogPostArticles(),
     getImportedArticles(),
     getFeaturedPost(),
     getBlogPosts(),
     getPracticeAreaDetails(),
+    getPracticeAreaArticles(),
   ]);
 
   // ONE FEED AGAIN. `getBlogPosts()` IS the imported archive now, so the third
@@ -91,16 +113,43 @@ export const getStaticPaths = (async () => {
 
   const detailPaths = details.map((detail) => ({
     params: { slug: detail.slug },
-    props: { kind: "practice-area" as const, detail },
+    props: { kind: "area-detail" as const, detail },
   }));
+
+  // Everything the light template renders is resolved HERE, the same way the
+  // post branch resolves its two related lists — so the page stays one await of
+  // what it shows and no component fetches behind its back.
+  const areaPaths = await Promise.all(
+    areaPages.map(async (article) => {
+      const [cityGroups, sidebarAreas, related] = await Promise.all([
+        getCityAreaGroups(article.city, article.slug),
+        getPracticeAreaSidebarLinks(article.city, article.slug),
+        getRelatedPostsForArea(article.slug, 5),
+      ]);
+      return {
+        params: { slug: article.slug },
+        props: { kind: "area-page" as const, article, cityGroups, sidebarAreas, related },
+      };
+    })
+  );
 
   // NAMES BOTH CLAIMANTS. The message used to say "a blog post and a practice
   // area" whatever the actual pair was, which sent the first post-vs-post
   // collision — a hand-authored article and its own imported copy — looking in
   // the wrong place entirely.
+  //
+  // A LOOKUP, NOT A TERNARY. With two kinds a ternary was exact; with three it
+  // silently mislabels the newest one — which is the very failure the message
+  // was rewritten to prevent, reintroduced by the change that added a shape.
+  const KIND_LABEL: Record<"post" | "area-detail" | "area-page", string> = {
+    post: "a blog post",
+    "area-detail": "a practice-area detail page",
+    "area-page": "an imported practice-area page",
+  };
+
   const seen = new Map<string, string>();
-  for (const entry of [...postPaths, ...detailPaths]) {
-    const kind = entry.props.kind === "post" ? "a blog post" : "a practice area";
+  for (const entry of [...postPaths, ...detailPaths, ...areaPaths]) {
+    const kind = KIND_LABEL[entry.props.kind];
     const prior = seen.get(entry.params.slug);
     if (prior) {
       throw new Error(
@@ -111,7 +160,7 @@ export const getStaticPaths = (async () => {
     seen.set(entry.params.slug, kind);
   }
 
-  return [...postPaths, ...detailPaths];
+  return [...postPaths, ...detailPaths, ...areaPaths];
 }) satisfies GetStaticPaths;
 
 const props = Astro.props;
@@ -133,7 +182,7 @@ const blog =
     : null;
 
 const area =
-  props.kind === "practice-area"
+  props.kind === "area-detail"
     ? await (async () => {
         const [
           firm,
@@ -222,9 +271,36 @@ const area =
       })()
     : null;
 
-const title = props.kind === "post" ? props.post.title : props.detail.metaTitle;
+const areaPage =
+  props.kind === "area-page"
+    ? await (async () => {
+        const [page, bandTitles, contact, band] = await Promise.all([
+          getPracticeAreaPageCopy(),
+          getCityBandTitles(),
+          getContactDetails(),
+          getContactBand(),
+        ]);
+        return {
+          page,
+          bandTitle: bandTitles.get(props.article.city) ?? "More practice areas",
+          contact,
+          form: band.form,
+        };
+      })()
+    : null;
+
+const title =
+  props.kind === "post"
+    ? props.post.title
+    : props.kind === "area-detail"
+      ? props.detail.metaTitle
+      : props.article.metaTitle;
 const description =
-  props.kind === "post" ? props.post.excerpt : props.detail.metaDescription;
+  props.kind === "post"
+    ? props.post.excerpt
+    : props.kind === "area-detail"
+      ? props.detail.metaDescription
+      : props.article.metaDescription;
 
 // The detail page's `Attorney` structured data needs absolute urls. Same
 // fallback Layout.astro uses, for the same reason: `astro dev` can run without
@@ -257,7 +333,7 @@ const siteUrl = (Astro.site?.href ?? "https://www.denvertrial.com/").replace(/\/
   }
 
   {
-    props.kind === "practice-area" && area && (
+    props.kind === "area-detail" && area && (
       <DetailPage
         detail={props.detail}
         firm={area.firm}
@@ -272,6 +348,32 @@ const siteUrl = (Astro.site?.href ?? "https://www.denvertrial.com/").replace(/\/
         contactForm={area.contactForm}
         siteUrl={siteUrl}
       />
+    )
+  }
+
+  {
+    props.kind === "area-page" && areaPage && (
+      <>
+        <AreaArticle
+          article={props.article}
+          page={areaPage.page}
+          areas={props.sidebarAreas}
+          related={props.related}
+          faqId="faqs"
+        />
+
+        {/* Where the post page runs its "Related blog posts" band. A reader
+            here wants the firm's other work in this city; the recent writing is
+            in the sidebar. */}
+        <CityAreas
+          eyebrow={areaPage.page.bandEyebrow}
+          title={areaPage.bandTitle}
+          groups={props.cityGroups}
+        />
+
+        {/* The same contact block /news and every interior page already close on. */}
+        <ContactDetails details={areaPage.contact} form={areaPage.form} />
+      </>
     )
   }
 </Layout>

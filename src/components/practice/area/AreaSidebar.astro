@@ -1,0 +1,90 @@
+---
+// The practice-area page's sidebar: consultation form, practice areas, related
+// articles — in that order, by request.
+//
+// THE SAME CARD STACK AS `blog/PostSidebar`, and deliberately so: `.pside*`
+// lives in global.css and both render it. What differs is the middle card,
+// which lists this city's other practice areas where the post's lists blog
+// categories.
+//
+// FORM FIRST, for the reason PostSidebar records: it is the only thing in the
+// column a reader can act on, and the column is long.
+//
+// NOT STICKY, for the same reason as well — a sticky element taller than its
+// viewport pins its top edge and never scrolls the rest into view, which would
+// put the related-articles card out of reach on every laptop.
+import ContactForm from "../../contact/ContactForm.astro";
+import type { BlogPost } from "../../../data/blog";
+import type { PracticeAreaPageCopy, SidebarAreas } from "../../../data/practiceAreaPages";
+
+interface Props {
+  page: PracticeAreaPageCopy;
+  areas: SidebarAreas;
+  related: BlogPost[];
+}
+
+const { page, areas, related } = Astro.props;
+---
+
+<aside class="pside">
+  <ContactForm form={page.form} variant="sidebar" />
+
+  {
+    /* CAPPED, and the cap is visible. Denver has 54 siblings; the card shows
+       twelve and hands the rest to the directory. The city band at the foot of
+       the page is where the full set lives, so nothing is hidden — this is the
+       shortcut, not the index. */
+    areas.items.length > 0 && (
+      <section class="pside__card" aria-labelledby="pside-areas">
+        <div class="pside__head">
+          <h2 class="pside__title" id="pside-areas">
+            {page.areasLabel}
+          </h2>
+        </div>
+        <ul class="pside__list">
+          {areas.items.map((area) => (
+            <li class="pside__item">
+              <a class="pside__cat" href={area.href!}>
+                {area.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+        {areas.more && (
+          <a class="pside__more arrow-link" href={areas.more.href}>
+            <span class="arrow-link__label">{areas.more.label}</span>
+            <span class="arrow" aria-hidden="true">
+              &#8594;
+            </span>
+          </a>
+        )}
+      </section>
+    )
+  }
+
+  {
+    /* Subject-matched, not recency-ordered — see `getRelatedPostsForArea`. An
+       empty list renders no card at all, the same guard PostSidebar carries:
+       a related-articles heading over nothing reads as a broken component. */
+    related.length > 0 && (
+      <section class="pside__card" aria-labelledby="pside-related">
+        <div class="pside__head">
+          <h2 class="pside__title" id="pside-related">
+            {page.relatedSidebarLabel}
+          </h2>
+        </div>
+        <ul class="pside__list">
+          {related.map((post) => (
+            <li class="pside__item">
+              <a class="pside__article" href={post.href!}>
+                {post.title}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+</aside>
+
+<!-- No styles: `.pside*` and `.arrow-link` are global. See global.css. -->

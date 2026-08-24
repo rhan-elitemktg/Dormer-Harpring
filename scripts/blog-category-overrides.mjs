@@ -49,6 +49,66 @@ export const CATEGORY_OVERRIDES = {
 };
 
 /**
+ * ARTICLES THE LEGACY SITE FILED AS PAGES, NOT POSTS.
+ *
+ * These fourteen read as blog articles, are linked from blog bodies, and are
+ * written like the archive around them — but they live under `/wp/v2/pages`
+ * with the practice areas, so the post import never saw them. Nothing was
+ * dropped: WordPress has 167 posts and all 167 were imported. These are a
+ * different post type.
+ *
+ * They are NOT practice areas, which is why the practice-area import excludes
+ * them. The firm's own directory is the evidence: it lists five near-identical
+ * slip-and-fall pages AS practice areas (they are imported that way, marked
+ * `resource`), and lists none of these fourteen at all. Every link pointing at
+ * them comes from a blog body.
+ *
+ * A page has no category, so each is assigned here — SAME RULE AS ABOVE, every
+ * assignment following a sibling already in the archive rather than being
+ * invented, and the sibling named on the line. No new category was needed.
+ *
+ * Order does not matter here, but ORDER OF CONVERSION DOES: these are converted
+ * after all 167 posts, so the posts' `_key`s do not shift. See the note on
+ * `mkKey` in lib/wp-portable-text.mjs.
+ */
+export const PAGE_ARTICLES = {
+  // --- Car accidents.
+  // cf. why-are-car-seats-so-important → Auto Accident
+  "car-seat-safety": ["auto-accident"],
+  // cf. what-injuries-commonly-cause-death-in-car-accidents → Auto Accident
+  "most-common-injuries-caused-by-car-accidents": ["auto-accident"],
+  // cf. 2022-colorado-car-accident-fatality-stats → Auto Accident
+  "common-causes-of-car-accidents-in-colorado": ["auto-accident"],
+  "common-types-of-car-accidents": ["auto-accident"],
+  // cf. is-it-worth-getting-an-attorney-for-a-car-accident → Auto Accident
+  "what-to-do-after-a-car-accident-in-colorado": ["auto-accident"],
+  // cf. attorney-for-car-accident-without-injury → Auto Accident
+  "how-a-colorado-car-accident-lawyer-can-help": ["auto-accident"],
+
+  // --- Truck accidents.
+  // cf. 5-steps-to-take-after-a-truck-accident → Truck Accidents
+  "what-to-do-after-a-truck-accident-in-colorado": ["truck-accidents"],
+  // cf. how-can-truck-accident-lawyer-help-denver → Truck Accidents
+  "how-can-a-truck-accident-lawyer-help-me": ["truck-accidents"],
+  // cf. how-to-drive-around-trucks-safely-in-colorado → Truck Accidents
+  "common-causes-of-truck-accidents-in-colorado": ["truck-accidents"],
+  "common-types-of-truck-accidents": ["truck-accidents"],
+  /* Regulations rather than a crash story, and 'Laws' exists — but it holds two
+     posts, both about a specific liability rule (dog bite, comparative
+     negligence). A reader meets this while reading about trucks, so it is filed
+     where they are. cf. important-evidence-for-a-truck-accident-claim-in-colorado */
+  "fmcsa-trucking-rules-regulations": ["truck-accidents"],
+
+  // --- Motorcycles.
+  // cf. are-helmets-safe-to-use-after-theyve-been-dropped → Motorcycle Accidents
+  "what-to-do-after-a-motorcycle-accident": ["motorcycle-accidents"],
+  // cf. are-motorcycle-airbags-effective-at-preventing-injury → Motorcycle Accidents
+  "common-types-of-motorcycle-accident-injuries": ["motorcycle-accidents"],
+  // cf. colorados-motorcycle-licensing-requirements → Motorcycle Accidents
+  "colorado-motorcycle-laws-important-information-for-riders": ["motorcycle-accidents"],
+};
+
+/**
  * Posts that carry Uncategorized ALONGSIDE a real category. Only one does
  * today; the rule is applied to all posts rather than to a list, so a re-import
  * after an editor tags something Uncategorized cannot reintroduce it.

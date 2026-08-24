@@ -1,0 +1,519 @@
+{
+  "slug": "denver-drowsy-driving-accident-lawyer",
+  "title": "Denver Drowsy Driving Accident Lawyer",
+  "label": "Drowsy Driving Accidents",
+  "city": "denver",
+  "topic": "motor-vehicle",
+  "statewide": false,
+  "resource": false,
+  "metaTitle": "Denver Drowsy Driving Accident Lawyer",
+  "metaDescription": "Injured in a crash caused by drowsy driving? A Denver Drowsy Driving Accident Lawyer can help you seek compensation. Get your free consultation today!",
+  "body": [
+    {
+      "_type": "image",
+      "_key": "i4h4",
+      "src": "./images/2025-02-shutterstock_2446021673.jpg",
+      "alt": "Denver Drowsy Driving Accident Lawyer"
+    },
+    {
+      "_type": "block",
+      "_key": "b4h9",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "l4h6",
+          "_type": "link",
+          "href": "/denver-car-accident-lawyer/"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4h5",
+          "text": "Every day, careless and reckless drivers on the streets of Denver put everyone at risk. Drowsy driving is a dangerous behavior that can increase the odds of broken traffic laws, distracted driving and falling asleep behind the wheel. If you get injured in an accident caused by a drowsy driver, a ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "s4h7",
+          "text": "car accident attorney in Denver",
+          "marks": [
+            "l4h6"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "s4h8",
+          "text": " can help you pursue fair compensation and achieve justice.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b4hb",
+      "style": "h2",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4ha",
+          "text": "What Is Drowsy Driving?",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b4hd",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4hc",
+          "text": "Drowsy driving is when a person operates a motor vehicle while too tired or fatigued to do so with the required level of attention, care and control. Driving while excessively drowsy can significantly affect the ability to drive safely. Common causes of drowsy driving include a lack of sleep, long or overnight drives, tight work schedules for career drivers, sleep disorders, and medication side effects.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b4hf",
+      "style": "h2",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4he",
+          "text": "Drowsy Driving Accident Statistics",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b4hn",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "l4hh",
+          "_type": "link",
+          "href": "https://www.nhtsa.gov/risky-driving/drowsy-driving"
+        },
+        {
+          "_key": "l4hk",
+          "_type": "link",
+          "href": "https://csp.colorado.gov/press-release/take-a-break-dont-drive-drowsy"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4hg",
+          "text": "Thousands of car accidents related to drowsy driving occur in the U.S. each year. The ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "s4hi",
+          "text": "National Highway Traffic Safety Administration",
+          "marks": [
+            "l4hh"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "s4hj",
+          "text": " states that 693 people died in these collisions in 2022 (the most recent year data is available). Colorado has a high rate of drowsy driving accidents compared to other states. In 2022, ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "s4hl",
+          "text": "Colorado State Troopers",
+          "marks": [
+            "l4hk"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "s4hm",
+          "text": " reported 84 crashes due to fatigue or a driver falling asleep.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b4hp",
+      "style": "h2",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4ho",
+          "text": "Why Is Drowsy Driving So Dangerous?",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b4hu",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "l4hr",
+          "_type": "link",
+          "href": "https://www.sleepfoundation.org/drowsy-driving/drowsy-driving-vs-drunk-driving"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4hq",
+          "text": "Driving while tired can slow down a driver’s thought processing speed and affect the ability to concentrate, react in a timely manner to hazards and make sound decisions. The ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "s4hs",
+          "text": "Sleep Foundation",
+          "marks": [
+            "l4hr"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "s4ht",
+          "text": " compares it to drunk driving in how dangerous drowsy driving is, as both conditions affect reaction times, alertness and decision-making.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b4hw",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4hv",
+          "text": "A driver who is too exhausted to operate a motor vehicle safely may make many dangerous mistakes, such as:",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b4hy",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4hx",
+          "text": "Speeding or being unable to maintain a constant speed",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "b4i0",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4hz",
+          "text": "Getting too close to other vehicles",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "b4i2",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4i1",
+          "text": "Weaving between multiple lanes",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "b4i4",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4i3",
+          "text": "Drifting out of a lane or off the road",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "b4i6",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4i5",
+          "text": "Running red lights and stop signs",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "b4i8",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4i7",
+          "text": "Failing to notice traffic signs and signals",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "b4ia",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4i9",
+          "text": "Entering another lane at a high speed",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "b4ij",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "l4id",
+          "_type": "link",
+          "href": "/how-is-liability-determined-in-a-head-on-collision-in-colorado/"
+        },
+        {
+          "_key": "l4ig",
+          "_type": "link",
+          "href": "/t-bone-accidents-in-denver/"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4ib",
+          "text": "It only takes a moment of inattention for a drowsy driver to cause a serious car accident. Since reaction times are highly affected by tiredness, drowsy drivers often do not even tap the brakes prior to impact. This increases the severity of these collisions due to high speeds. Fatigue also comes with a risk of catastrophic accidents such as ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "s4ie",
+          "text": "head-on",
+          "marks": [
+            "l4id"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "s4if",
+          "text": " and ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "s4ih",
+          "text": "T-bone collisions",
+          "marks": [
+            "l4ig"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "s4ii",
+          "text": ".",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b4il",
+      "style": "h2",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4ik",
+          "text": "Who Is Responsible for a Drowsy Driving Accident in Denver?",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b4in",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4im",
+          "text": "Colorado is a fault-based car accident state, meaning the person or party at fault for causing a car accident must pay, but the injured victim has to prove fault. If there is proof that the other driver involved in your accident was drowsy or fell asleep behind the wheel, this can make the driver financially responsible for your medical costs and property damage after an accident.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b4ip",
+      "style": "h2",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4io",
+          "text": "The Importance of Hiring a Denver Drowsy Driving Accident Lawyer",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b4ir",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4iq",
+          "text": "To receive financial compensation for a drowsy driving car accident in Denver, you must prove that the other driver is at fault with compelling evidence. An experienced car accident lawyer can make your claim easier with services such as investigating the crash, gathering evidence, navigating Colorado’s car accident laws and negotiating a fair settlement with an insurance company on your behalf. Meanwhile, you can focus on healing from your injuries.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b4iw",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "l4it",
+          "_type": "link",
+          "href": "/contact/"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4is",
+          "text": "To speak directly to a Denver Drowsy Driving Accident Lawyer, ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "s4iu",
+          "text": "contact Dormer Harpring",
+          "marks": [
+            "l4it"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "s4iv",
+          "text": " for a free consultation.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "b4iy",
+      "style": "h2",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "s4ix",
+          "text": "Awards and Accolades",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "image",
+      "_key": "i4iz",
+      "src": "./images/2025-05-awards-and-accolades-icon-1.png",
+      "alt": "Top 20 Jury Verdicts Colorado"
+    },
+    {
+      "_type": "image",
+      "_key": "i4j0",
+      "src": "./images/2025-05-awards-and-accolades-icon-2.png",
+      "alt": "The National Trial lawyers, Top 40 Under 40"
+    },
+    {
+      "_type": "image",
+      "_key": "i4j1",
+      "src": "./images/2025-05-awards-and-accolades-icon-3.png",
+      "alt": "Avvo Rating 10"
+    },
+    {
+      "_type": "image",
+      "_key": "i4j2",
+      "src": "./images/2025-05-awards-and-accolades-icon-4.png",
+      "alt": "Lead Counsel Verified"
+    },
+    {
+      "_type": "image",
+      "_key": "i4j3",
+      "src": "./images/2025-05-awards-and-accolades-icon-5.png",
+      "alt": "Multi-Million Dollar Advocates Forum"
+    },
+    {
+      "_type": "image",
+      "_key": "i4j4",
+      "src": "./images/2025-05-awards-and-accolades-icon-6.png",
+      "alt": "The National Trial Lawyers Top 40 under 40"
+    }
+  ],
+  "faqs": [],
+  "publishedAt": "2025-02-12T13:27:32",
+  "modifiedAt": "2026-07-09T14:01:01",
+  "legacyId": 12626
+}

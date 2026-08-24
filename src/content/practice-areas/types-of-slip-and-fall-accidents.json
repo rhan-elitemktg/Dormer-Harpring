@@ -1,0 +1,437 @@
+{
+  "slug": "types-of-slip-and-fall-accidents",
+  "title": "Types of Slip and Fall Accidents",
+  "label": "Slip and Fall Case Types",
+  "city": "denver",
+  "topic": "premises",
+  "statewide": false,
+  "resource": true,
+  "metaTitle": "Types of Slip and Fall Accidents",
+  "metaDescription": "After being injured in any type of slip and fall accident, contact our Colorado slip & fall lawyers for help. Learn more online today.",
+  "body": [
+    {
+      "_type": "block",
+      "_key": "bcnm",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scnl",
+          "text": "Slip and fall accidents can happen nearly anywhere, and they can be caused by various factors. Understanding what type of slip and fall accident you have suffered can be the key to determining your best options for recovery.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcnr",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "lcno",
+          "_type": "link",
+          "href": "/denver-slip-and-fall-lawyer/"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scnn",
+          "text": "At Dormer Harpring, our ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "scnp",
+          "text": "Denver slip and fall accident attorneys",
+          "marks": [
+            "lcno"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "scnq",
+          "text": " are skilled at representing people who have been injured in various types of slip and fall accidents. Known for providing compassionate, personalized legal service, we are ready to work tirelessly for you, helping you get onto the path to recovery so you can get your life back to normal.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcnt",
+      "style": "h2",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scns",
+          "text": "Where Slip & Falls Happen",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcnv",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scnu",
+          "text": "One way of differentiating slip and fall accidents can be by the location of the accident. Some of the most common locations of slip and fall accidents include:",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcny",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scnw",
+          "text": "Retail settings",
+          "marks": [
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "scnx",
+          "text": " – Stores, malls, shopping centers, and restaurants can all be the scenes of slip and fall accidents when merchandise is left in walkways, flooring is not properly maintained, spills aren’t cleaned up, etc.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bco1",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scnz",
+          "text": "Large public venues",
+          "marks": [
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "sco0",
+          "text": " – Stadiums, movie theaters, and arenas can be the sites of slip and fall accidents when stairways lack lighting, ramps aren’t free of clutter, flooring is not properly maintained or kept dry, etc.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bco4",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sco2",
+          "text": "Sidewalks, parks, and playgrounds",
+          "marks": [
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "sco3",
+          "text": " – These public settings can be the scenes of slip and falls when snow or ice isn’t promptly cleared, when potholes or ditches aren’t repaired/maintained, etc.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bco7",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sco5",
+          "text": "Hospitals, nursing homes, and retirement homes",
+          "marks": [
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "sco6",
+          "text": " – Slick floors and poor lighting can be a recipe for a disastrous slip and fall in nursing homes, where residents may already have issues with balance, mobility, and/or vision.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bcoa",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "sco8",
+          "text": "Private residences",
+          "marks": [
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "sco9",
+          "text": " – A private home can also be the site of a slip and fall when, for instance, clutter is left in walkways, damaged flooring is left in disrepair, etc.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bcod",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scob",
+          "text": "Bars, Parties, and Music Venues",
+          "marks": [
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "scoc",
+          "text": " – Bars, parties, and music venues can be the scene of heavy drinking if the responsible parties are not careful. In addition to other issues, heavy drinking can lead to more spills.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bcof",
+      "style": "h2",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scoe",
+          "text": "How Slip & Falls Happen",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcoh",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scog",
+          "text": "Another common way of differentiating slip and fall accidents can be by the specific factors that caused the accident. Some of these factors tend to include:",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcok",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scoi",
+          "text": "Wet, icy, or otherwise slippery floors",
+          "marks": [
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "scoj",
+          "text": " – This can include pooling liquids left on floors, ice tracked in from the outside, icy sidewalks, and overly waxed flooring. Property owners are generally responsible for cleaning up spills and pooling liquids, and they are also usually required to remove ice and warn visitors of wet or potentially slick flooring. If inside floors are not cleaned properly, grease or soap can be left in the path of unsuspecting guests.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bcon",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scol",
+          "text": "Damaged floors",
+          "marks": [
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "scom",
+          "text": " – This can include torn carpet, loose tiles, uneven floorboards, unrepaired holes in flooring, and even ditches or potholes in driveways/parking lots. Property owners are typically responsible for maintaining their floors, driveways, and/or parking lots, repairing any damage, and/or warning people about the potential risks associated with their damaged floors (or ground surfaces).",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bcoq",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scoo",
+          "text": "Cluttered floors",
+          "marks": [
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "scop",
+          "text": " – This can involve merchandise, cords, equipment, trash, etc., being left in walkways and creating a tripping hazard. Property owners are generally required to keep walkways free from these (or any) types of hazards.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bcot",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scor",
+          "text": "Insufficient lighting",
+          "marks": [
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "scos",
+          "text": " – Poor lighting can also contribute to slip and falls, especially when the lack of lighting is in stairwells or somewhere else where people would need to see changes in the flooring in order to walk safely.",
+          "marks": []
+        }
+      ],
+      "listItem": "bullet",
+      "level": 1
+    },
+    {
+      "_type": "block",
+      "_key": "bcov",
+      "style": "h2",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scou",
+          "text": "Contact a Colorado Slip & Fall Lawyer at Dormer Harpring",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcp2",
+      "style": "normal",
+      "markDefs": [
+        {
+          "_key": "lcoz",
+          "_type": "link",
+          "href": "/contact/"
+        }
+      ],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scow",
+          "text": "After being hurt in any type of slip and fall accident, contact our Colorado slip & fall lawyers for honest answers about your recovery options. You can call us at ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "scox",
+          "text": "(303) 747-4404",
+          "marks": [
+            "strong"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "scoy",
+          "text": " or email us via the ",
+          "marks": []
+        },
+        {
+          "_type": "span",
+          "_key": "scp0",
+          "text": "contact form",
+          "marks": [
+            "lcoz"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "scp1",
+          "text": " on this page. Our commitment to representing people from all walks of life means that we never charge for a consultation and that our legal fees are contingent on the amount we recover.",
+          "marks": []
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "bcp4",
+      "style": "normal",
+      "markDefs": [],
+      "children": [
+        {
+          "_type": "span",
+          "_key": "scp3",
+          "text": "From our Denver office, our lawyers provide exceptional representation throughout Denver County, Adams County, Boulder County, Arapahoe County, Jefferson County, and the State of Colorado.",
+          "marks": []
+        }
+      ]
+    }
+  ],
+  "faqs": [],
+  "publishedAt": "2016-05-10T21:45:11",
+  "modifiedAt": "2026-02-26T13:42:47",
+  "legacyId": 133
+}
