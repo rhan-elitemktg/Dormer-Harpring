@@ -6,18 +6,32 @@ Architecture, conventions and the design source of truth live in `AGENTS.md` (sy
 `CLAUDE.md`, loaded automatically). Pre-launch decisions live in `README.md`. Don't restate
 either here, and don't record anything `git log` already knows.
 
-_Last updated: 2026-08-24._
+_Last updated: 2026-08-25._
 
 ## State
 
 Build is green: **329 pages** (330 with `/admin`), `npm run check` passing, all five comp-diff
 scripts exiting 0, and the fidelity audit reporting 104 of 104 pages at ≥99% against the live
-source. A full sweep of **every `<a>` in `dist/` — 42,599 internal links across 329 pages —
-finds four dead targets**: the three the footer links on every page (`/privacy-policy/`,
-`/editorial-guidelines/`, `/sitemap.xml`) and one relative href inside an imported blog body.
-Both are item 1 and item 2 under Next. That sweep is ad hoc and **not committed**; the earlier
-"2,013 body links, none unserved" figure came from a script nobody kept, and it counted body
-links only, which is how 984 footer 404s stayed invisible.
+source.
+
+**`npm run check` is THREE linters now, and one of them could never fail.**
+`scripts/check-links.py` is the new one — 39,484 internal links across 328 pages, every target
+resolved against what `dist/` actually serves plus `vercel.json`. The link sweep is no longer
+ad hoc: the "42,599 links, four dead targets" figure in the last version of this file came from
+a throwaway, like the "2,013 body links, none unserved" figure before it, and a number that
+cannot be re-checked cannot fail.
+
+**`check:styles` printed its findings and exited 0** — for its entire life. `npm run check` is
+`&&`-chained, so a scoped rule that could never match its target has never once failed the
+build. Proven by feeding it a deliberately broken page. Fixed. If anything in `dist/` was
+relying on that, it surfaces on the next run; nothing did today.
+
+**One dead target left, and it is the footer's three.** `/privacy-policy/`,
+`/editorial-guidelines/` and `/sitemap.xml`, on all 328 pages — **984 dead links**. They are
+DECLARED in `KNOWN_DEAD` with a reason rather than ignored, and the check fails if one of them
+quietly starts resolving without the entry being deleted. Item 1 under Next.
+
+The relative href that was item 2 is fixed, and 49 malformed `tel:` hrefs with it — see below.
 
 Run `git status` for where you are; this file deliberately does **not** name the working branch,
 because that line went stale three times in the session that first wrote it.
@@ -29,7 +43,7 @@ last handoff and it moves the project's biggest dependency off the critical path
 **The blog archive is 186 posts, not 167.** WordPress has two post types and the article-shaped
 content is spread across both — see below.
 
-Marker inventory: **33 `TODO(launch)`, 5 `TODO(video)`, 4 `TODO(sanity)`, 1 `TODO(content)`.**
+Marker inventory: **34 `TODO(launch)`, 5 `TODO(video)`, 4 `TODO(sanity)`, 1 `TODO(content)`.**
 Grep all four before launch, not just the first — and **grep with the colon**. `TODO(launch)` also
 appears in eleven comments that DISCUSS a marker rather than being one, which is how this line
 previously read 43. `grep -rn "TODO(launch):"` is the count that means anything.
@@ -489,6 +503,59 @@ is the corrected one.
 
 Not wired into `npm run check` — it needs the network, like the five diff scripts. Build first.
 
+## The link check — and the linter that could not fail
+
+`scripts/check-links.py`, wired into `npm run check` alongside the other two. It reads `dist/`,
+so build first.
+
+**Why it exists.** Nothing in the build looks at links. Astro renders whatever string a
+component hands it, so an href to a page that was never built is a green build and a production
+404. The footer's three proved it: 984 dead links, on every page, past five comp-diff scripts
+and two linters. The sweeps that did find them — this file's "42,599 links, four dead targets"
+and the earlier "2,013 body links, none unserved" — were both written ad hoc and thrown away,
+and the second counted body links only, which is exactly how the footer's stayed invisible.
+
+**Four failure classes**: `DEAD` (nothing serves it and nothing redirects it — redirect
+*destinations* are resolved too, because a redirect landing on nothing is the same bug one hop
+later), `PLACEHOLDER` (`href="#"`), `RELATIVE` (an internal href with no leading slash: a 404
+that moves, because it resolves under whatever page it lands on), and `TEL` (a `tel:`/`sms:`
+that is not E.164).
+
+**IT FAILS IN BOTH DIRECTIONS, and the second one is the point.** Known breakage is declared
+with a reason in `KNOWN_DEAD` / `KNOWN_PLACEHOLDER` / `KNOWN_RELATIVE` / `KNOWN_TEL` — the
+contract `PRACTICE_AREA_PAGES` gives the importer. Undeclared breakage fails; **a declaration
+that has stopped being true also fails**, until it is deleted. Without that half an exemption
+table only ever grows, and closing an item leaves no trace. All six paths were tested by
+breaking something and watching the check go red.
+
+`KNOWN_PLACEHOLDER` is keyed **by count**, not by page, so removing one of the homepage's eight
+without lowering the number fails.
+
+**`check:styles` had never been able to fail.** It printed its ✗ lines and returned 0, and
+`npm run check` is `&&`-chained, so a scoped rule that could never match its target went green
+every single time since the script was written. The linter guarding a silent failure mode was
+itself failing silently. It exits 1 now. **Worth checking the same thing about any script this
+project trusts** — `check:tokens` and all five comp diffs were verified to exit non-zero.
+
+### The imported bodies carried a phone number spelled nine ways
+
+68 `tel:` links in imported body copy dial `(303) 747-4404`, in **nine different spellings** —
+`tel:(303) 747-4404`, `tel: +1(303) 747-4404`, `tel:303 747 4404` among them. The ones with a
+space straight after the colon do not reliably dial at all. 49 were malformed; 19 were already
+E.164. All 68 are E.164 now, and `normalizeHref()` in the converter does it on import.
+
+**The digits were deliberately preserved.** Whether these pages should dial `(303) 747-4404` at
+all — the site's own number is `(866) 683-6894`, emitted 1,645 times by the chrome — is a
+content decision still open under README's phone row. As plain text the legacy numbers reach
+**197 of 329 pages** (187 with `747-4404`, 10 with `756-3812`). Doing that one as a scripted
+pass over `src/content/*.json` is much cheaper than hand-editing 197 documents in the Studio
+afterwards, so it is worth settling before the swap.
+
+**Applied surgically, never by re-importing.** `mkKey` is a single run-scoped counter and a
+re-run rewrites every `_key` across all 290 content files. The diff was 49 lines, all href
+values; the 35,179 `_key`s were untouched. Same gate as always —
+`git status --porcelain src/content` after any converter change.
+
 ## What this closed
 
 - **Dead body links: 149 across 42 paths → ZERO.** 2,013 internal links across 236 paths, every
@@ -518,27 +585,25 @@ entry and both files to fix.
    `/editorial-guidelines/` and `/sitemap.xml`. All three are linked from every page and none is
    built. Both pages are in `RESERVED_PATHS` and both slugs are in `EXCLUDED_SLUGS`, so this is
    known-and-unbuilt rather than lost — but it is 984 dead links, not three, and it dwarfs the
-   homepage's nine. The sitemap belongs to item 5; the two pages need a design decision.
-2. **One dead link in an imported blog body.** `5-steps-to-take-after-a-truck-accident` carries
-   `href="practice-areas/traffic-collision-lawyer/truck-accident"` — RELATIVE, so it resolves
-   under the post's own path and 404s. Broken on the live site too. The intended destination is
-   `/denver-truck-accident-lawyer/`; `traffic-collision-lawyer` is one of the three excluded
-   duplicates. **The importer's link walk does not reject relative hrefs** — worth a check, since
-   this one was found by a sweep rather than by anything committed.
-3. **The 9 remaining dead links on the homepage.** Eight are `data/news.ts`, every `href` a literal
+   homepage's nine. The sitemap belongs to item 4; the two pages need a design decision.
+2. **The 9 remaining dead links on the homepage.** Eight are `data/news.ts`, every `href` a literal
    `"#"`, marked `TODO(content)` rather than `TODO(launch)` — which is how they stayed off the
    launch list. The ninth is the Car Accidents checklist teaser. `#` must not reach production.
-4. **Move both collections into Sanity.** The blog and the practice areas are now two collections
+   All nine are declared in `KNOWN_PLACEHOLDER` **by count**, so removing one without lowering
+   the number fails the check. The four news mentions are real published articles (FOX31,
+   Denver7, OutThere Colorado, The Mountain Mail) and their URLs are findable; the four insight
+   teasers and the checklist point at articles nobody has written.
+3. **Move both collections into Sanity.** The blog and the practice areas are now two collections
    with the same contract, and the getters are already the projections. Plus the four Portable
    Text object types the post template deferred (`callout`, `phoneBand`, `attorneyCard`,
    `pullQuote`), whose intended home is commented in `prose/components.ts` — and which the
    practice-area chrome maps onto almost exactly.
-5. `/new-seo-setup` — per-page meta, a Global SEO Settings singleton, JSON-LD, `sitemap.xml`,
+4. `/new-seo-setup` — per-page meta, a Global SEO Settings singleton, JSON-LD, `sitemap.xml`,
    `robots.txt`, editor-managed redirects. **The practice-area pages already carry real
    `metaTitle` / `metaDescription` from the live site's own meta**, so that layer has something
    true to start from. `BlogPosting` JSON-LD belongs to this phase. Note that **every page links
    `/sitemap.xml` and no sitemap is built**, so that URL 404s today — now across 329 pages.
-6. `/studio-polish ux` — audits the filled-out schema, so it waits.
+5. `/studio-polish ux` — audits the filled-out schema, so it waits.
 
 No comp exists for **privacy / disclaimer** or **404**. Both need a design decision or a
 plain-text treatment.
@@ -563,9 +628,14 @@ plain-text treatment.
   worth watching.
 
 **Waiting on the firm** — content, not code. `README.md` has the full table. Unchanged: the seven
-attorney emails, the office address and hours, the `$70M+ / 20 Years` stat claims. **The
-practice-area pages carry the legacy `(303) 756-3812` inside imported body copy** in places —
-`firmDetails` is not consulted for text that came from WordPress.
+attorney emails, the office address and hours, the `$70M+ / 20 Years` stat claims.
+
+**The legacy phone numbers in imported body copy are now measured, and it is 197 of 329 pages** —
+187 carry `(303) 747-4404`, 10 carry `(303) 756-3812`, against the site's own `(866) 683-6894`.
+`firmDetails` is not consulted for text that came from WordPress, by design: it is the firm's own
+published copy. The `tel:` hrefs among them have been normalised to E.164 (see above), but the
+**digits are untouched and the decision is open**. It is worth taking before the Sanity swap —
+one scripted pass over `src/content/*.json` now, versus 197 documents by hand in the Studio.
 
 **Waiting on the designer**
 
