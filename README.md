@@ -87,6 +87,8 @@ Everything below is deliberately unfinished, not overlooked.
 | **`sitemap.xml`** | Still not built, and now not linked either. `/sitemap/` is the human page the footer points at; the XML file is a crawler artifact whose every URL is absolute off `site:` — the open www-vs-apex decision — so it belongs to `/new-seo-setup` with `robots.txt`. |
 | **Four practice areas are in no directory group** | Defective Helmets, Autonomous Vehicle Accidents, Drunk Driving Accidents and Taxi Accidents, all Denver. All four are built and reachable from sibling sidebars (7–19 inbound links each), but the live hub does not list them and the directory is synced to the hub — so `/practice-areas` does not either. `/sitemap/` lists them because it reads the collection. Add them to the directory, or confirm hub-only. |
 
+| **Favicon** | The firm's DH monogram, taken from the live site's WordPress site-icon and shipped as `favicon.ico` (16+32), `icon-192.png` and `apple-touch-icon.png`. Until now the site served **Astro's default logo**. **No SVG**: no vector source for the mark exists in the comps or `src/assets`, and hand-tracing a monogram is design work rather than a conversion. The mark's green `#314641` is **not on this site's forest ramp** (nearest is `--dh-forest-100` `#2c3b31`; the chrome is `#151e19`) — it is the legacy site's colour, carried over as-is. Worth a decision with the designer. |
+
 **Do not add `AggregateRating` structured data.** The homepage's "5.0 on Google"
 card is presentational copy only. The current site marks the firm up as a
 `Product` carrying review stars, which is a Google policy violation and one of
