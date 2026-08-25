@@ -50,10 +50,47 @@ export const decode = (s) =>
     .replace(/&#(\d+);/g, (_, d) => String.fromCodePoint(+d));
 
 /** Absolute links back to the firm's own domain become site-relative, so they
- *  keep working after cutover and stop pointing at the site being replaced. */
+ *  keep working after cutover and stop pointing at the site being replaced.
+ *
+ *  `tel:` and `sms:` are rewritten to E.164 — a plus, a country code, digits,
+ *  nothing else. WordPress body copy spells the same number nine different
+ *  ways ("tel:(303) 747-4404", "tel: +1(303) 747-4404", "tel:303 747 4404"),
+ *  and the ones with a space straight after the colon do not reliably dial at
+ *  all. `firmDetails.smsE164` in src/data/site.ts is named for this format, so
+ *  the body copy is being brought to the site's own convention rather than to
+ *  an invented one. The DIGITS are preserved — which number a page should dial
+ *  is a content decision, not this converter's. */
 export function normalizeHref(href) {
   const h = decode(href.trim());
+
+  const dial = h.match(/^(tel|sms):\s*(.+)$/i);
+  if (dial) {
+    const [, scheme, raw] = dial;
+    const digits = raw.replace(/[^\d+]/g, "").replace(/(?!^)\+/g, "");
+    // A bare 10-digit US number carries no country code; E.164 needs one.
+    const e164 = digits.startsWith("+")
+      ? digits
+      : `+${digits.length === 10 ? "1" : ""}${digits}`;
+    return `${scheme.toLowerCase()}:${e164}`;
+  }
+
   return h.replace(/^https?:\/\/(www\.)?denvertrial\.com/i, "") || "/";
+}
+
+/** True for an href that resolves under the CURRENT page's path rather than
+ *  the site root — no scheme, no leading slash, not a bare fragment.
+ *
+ *  WordPress bodies carry these because the legacy hub links its children
+ *  relatively, and they are broken on the live site too: the one that reached
+ *  this build, `practice-areas/traffic-collision-lawyer/truck-accident` on
+ *  5-steps-to-take-after-a-truck-accident, resolved under the post's own slug
+ *  and 404'd. It was found by a one-off sweep, not by anything committed,
+ *  which is what this guard and scripts/check-links.py between them fix. */
+export function isDocumentRelative(href) {
+  const h = href.trim();
+  if (!h) return false;
+  if (h.startsWith("#") || h.startsWith("/")) return false;   // "//host" is absolute too
+  return !/^[a-z][a-z0-9+.-]*:/i.test(h);
 }
 
 /**
@@ -139,6 +176,13 @@ export function createConverter({
         if (!href || href === "#") {
           // Same choice TeamCard.astro records: plain text beats a link to
           // nowhere. A dead href in a body is worse than a missing one.
+          out.push(...inlineSpans(child, marks, markDefs, slug));
+        } else if (isDocumentRelative(href)) {
+          // Same treatment, and for the same reason — this one resolves under
+          // whatever page it lands on, so it is a 404 that moves. Warned
+          // rather than silently dropped: the converter cannot know where it
+          // was meant to point, but a human reading the run can.
+          warn(slug, `TODO(launch): relative href dropped to plain text: ${href.slice(0, 80)}`);
           out.push(...inlineSpans(child, marks, markDefs, slug));
         } else if (dropLink && dropLink(normalizeHref(href), slug)) {
           // The caller has decided this destination is not worth a link. Same
