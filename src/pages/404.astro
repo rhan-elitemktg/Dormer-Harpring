@@ -18,18 +18,37 @@
 // and someone who mistyped one is still a visitor with a case.
 import Layout from "../layouts/Layout.astro";
 import PageArticle from "../components/page/PageArticle.astro";
+import AreaSidebar from "../components/practice/area/AreaSidebar.astro";
 import AwardsBar from "../components/AwardsBar.astro";
 import ContactDetails from "../components/contact/ContactDetails.astro";
 import { getNotFoundPage } from "../data/sitePages";
 import { getAwards } from "../data/awards";
 import { getContactBand, getContactDetails } from "../data/contact";
+import {
+  getPracticeAreaPageCopy,
+  getPracticeAreaSidebarLinks,
+} from "../data/practiceAreaPages";
+import { getBlogPosts } from "../data/blog";
 
-const [page, awards, details, band] = await Promise.all([
+const [page, awards, details, band, areaCopy, sidebarAreas, posts] = await Promise.all([
   getNotFoundPage(),
   getAwards(),
   getContactDetails(),
   getContactBand(),
+  getPracticeAreaPageCopy(),
+  getPracticeAreaSidebarLinks("denver", ""),
+  getBlogPosts(),
 ]);
+
+/* THE PRACTICE-AREA SIDEBAR, by request — the same three cards those pages
+   carry. Two of its inputs have no natural value on a page that is not a
+   practice area, so both are chosen rather than invented; the reasoning is
+   written out in full in privacy-policy.astro. Short form: the empty current
+   slug makes the window start at the head with nothing highlighted, which the
+   getter already handles, and the related card is relabelled because "Related
+   articles" claims a subject match these pages cannot earn. */
+const sidebarCopy = { ...areaCopy, relatedSidebarLabel: "Latest articles" };
+const latest = posts.filter((post) => post.href).slice(0, 5);
 ---
 
 <Layout
@@ -58,6 +77,8 @@ const [page, awards, details, band] = await Promise.all([
         }
       </ul>
     </nav>
+
+    <AreaSidebar slot="sidebar" page={sidebarCopy} areas={sidebarAreas} related={latest} />
   </PageArticle>
 
   <AwardsBar awards={awards} tone="sunk" />

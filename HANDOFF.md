@@ -615,11 +615,31 @@ not a reuse of either, and the reasons are AreaArticle's own one step further on
 - **It would put the fact-check band on a privacy policy** — a band that says the page was
   "written, edited, and reviewed by a team of legal writers" and names the attorney who approved
   it. True of 104 service pages and 186 articles. Not true of a 404.
-- **It would put "Denver Practice Areas" in a sidebar on a 404.** That card is a window centred
-  on the CURRENT page among its city's siblings. There is no current page and no city.
+- Reusing it would put the fact-check band — which asserts a named attorney approved the page —
+  on a privacy policy and a 404.
 
-So: one column, no sidebar, no byline, no FAQ, no fact band, and the same three surfaces —
-cream `.spage` → sunk `.awards` → cream `.ct`.
+So: no byline, no FAQ, no fact band, and the same three surfaces — cream `.spage` → sunk
+`.awards` → cream `.ct`.
+
+**THE SIDEBAR IS THERE, and getting it right took a correction.** It was built without one on
+the argument that `AreaSidebar`'s middle card is a window centred on the CURRENT page among its
+city's siblings, and these pages have no current page and no city. That was over-reading the
+brief — the ask was to mimic the practice-area template, and the sidebar is most of what that
+template looks like. Both objections turned out to be answerable rather than blocking:
+
+- **`getPracticeAreaSidebarLinks("denver", "")` already handles a missing current slug.**
+  `at < 0` starts the window at the head and nothing gets `current`, so the card renders as a
+  plain twelve-entry list with its "View All Practice Areas" link. Verified in the built markup:
+  12 rows, 0 `--current`, no self-link. Denver because it is the firm's own city and its 50
+  pages are the ones a visitor is most likely to want.
+- **`relatedSidebarLabel` is overridden to "Latest articles".** `PracticeAreaPageCopy` says
+  "Related articles", which is a claim about subject-matching that `getRelatedPostsForArea`
+  earns and a privacy policy cannot. These are the five most recent posts, so the card says so.
+
+`AreaSidebar` is rendered by each PAGE and passed through a **named slot**, not built inside
+`PageArticle` — its three cards need `PracticeAreaPageCopy`, `SidebarAreas` and a post list,
+data the component has no other use for. The grid is `AreaArticle`'s, ratio and breakpoints
+identical, including releasing every explicit placement at 980px.
 
 **`.spage__title` is a THIRD copy of `.post__title`.** Deliberate for now: the shared thing would
 be an "article head", but `.post__*` and `.parea__*` are class names the comp-diff scripts read,
@@ -675,7 +695,17 @@ lands in no group **throws at build time**.
 ### 404
 
 `src/pages/404.astro` → `dist/404.html`, which Vercel serves for any unmatched path on a static
-deployment — no adapter, no config, no route entry. **NOT in `RESERVED_PATHS`**: nothing may link
+deployment — no adapter, no config, no route entry.
+
+**IT ONLY RENDERS AT A PATH WITH A TRAILING SLASH, and that is `trailingSlash: "always"`, not a
+bug in the page.** `/dfgfgf/` renders it; bare `/dfgfgf` gets Astro's own built-in
+`404: Not Found (trailingSlash is set to "always")` instead, because Astro rejects the
+slash-less form before routing reaches any page file. Both `astro dev` and `astro preview`
+behave this way. **Production should not**: `vercel.json` carries `"trailingSlash": true`, so
+Vercel 308s the bare form to the slashed one first and then serves `404.html`. That last step is
+reasoned from Vercel's documented behaviour, NOT measured — worth one check on the first preview
+deployment. Do not "fix" it by loosening `trailingSlash`; three layers agree on it and ~300
+indexed legacy URLs depend on it. **NOT in `RESERVED_PATHS`**: nothing may link
 it and no redirect may point at it, because a redirect to a 404 page returns 200 with not-found
 content, which is the soft-404 pattern search engines penalise. The status has to come from the
 server failing to find a file. `noIndex`, verified in the built `<meta name="robots">`.

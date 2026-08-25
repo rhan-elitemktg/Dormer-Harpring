@@ -26,19 +26,24 @@
 // privacy-policy.astro.
 import Layout from "../layouts/Layout.astro";
 import PageArticle from "../components/page/PageArticle.astro";
+import AreaSidebar from "../components/practice/area/AreaSidebar.astro";
 import AwardsBar from "../components/AwardsBar.astro";
 import ContactDetails from "../components/contact/ContactDetails.astro";
 import { getSitemapPage } from "../data/sitePages";
 import { getAwards } from "../data/awards";
 import { getContactBand, getContactDetails } from "../data/contact";
 import { getPracticeAreaGroups } from "../data/practiceAreas";
-import { getPracticeAreaPages } from "../data/practiceAreaPages";
+import {
+  getPracticeAreaPages,
+  getPracticeAreaPageCopy,
+  getPracticeAreaSidebarLinks,
+} from "../data/practiceAreaPages";
 import { getPracticeAreaDetails } from "../data/carAccidents";
 import { getBlogPosts, getFeaturedPost } from "../data/blog";
 import { getTeam } from "../data/team";
 import { ROUTES } from "../lib/routePaths";
 
-const [page, awards, details, band, areaGroups, areaPages, areaDetails, posts, featured, team] =
+const [page, awards, details, band, areaGroups, areaPages, areaDetails, areaCopy, sidebarAreas, posts, featured, team] =
   await Promise.all([
     getSitemapPage(),
     getAwards(),
@@ -47,6 +52,8 @@ const [page, awards, details, band, areaGroups, areaPages, areaDetails, posts, f
     getPracticeAreaGroups(),
     getPracticeAreaPages(),
     getPracticeAreaDetails(),
+    getPracticeAreaPageCopy(),
+    getPracticeAreaSidebarLinks("denver", ""),
     getBlogPosts(),
     getFeaturedPost(),
     getTeam(),
@@ -155,6 +162,16 @@ for (const post of allPosts) {
 }
 const postGroups = [...byCategory.values()].sort((a, b) => a.title.localeCompare(b.title));
 
+/* THE PRACTICE-AREA SIDEBAR, by request — the same three cards those pages
+   carry. Two of its inputs have no natural value on a page that is not a
+   practice area, so both are chosen rather than invented; the reasoning is
+   written out in full in privacy-policy.astro. Short form: the empty current
+   slug makes the window start at the head with nothing highlighted, which the
+   getter already handles, and the related card is relabelled because "Related
+   articles" claims a subject match these pages cannot earn. */
+const sidebarCopy = { ...areaCopy, relatedSidebarLabel: "Latest articles" };
+const latest = allPosts.slice(0, 5);
+
 const total = SITE_PAGES.length + bios.length + placed + allPosts.length;
 ---
 
@@ -234,6 +251,8 @@ const total = SITE_PAGES.length + bios.length + placed + allPosts.length;
         ))
       }
     </div>
+
+    <AreaSidebar slot="sidebar" page={sidebarCopy} areas={sidebarAreas} related={latest} />
   </PageArticle>
 
   <AwardsBar awards={awards} tone="sunk" />

@@ -15,18 +15,45 @@
 // declared it in KNOWN_DEAD; that entry is gone with this file.
 import Layout from "../layouts/Layout.astro";
 import PageArticle from "../components/page/PageArticle.astro";
+import AreaSidebar from "../components/practice/area/AreaSidebar.astro";
 import AwardsBar from "../components/AwardsBar.astro";
 import ContactDetails from "../components/contact/ContactDetails.astro";
 import { getPrivacyPolicyPage } from "../data/sitePages";
 import { getAwards } from "../data/awards";
 import { getContactBand, getContactDetails } from "../data/contact";
+import {
+  getPracticeAreaPageCopy,
+  getPracticeAreaSidebarLinks,
+} from "../data/practiceAreaPages";
+import { getBlogPosts } from "../data/blog";
 
-const [page, awards, details, band] = await Promise.all([
+const [page, awards, details, band, areaCopy, sidebarAreas, posts] = await Promise.all([
   getPrivacyPolicyPage(),
   getAwards(),
   getContactDetails(),
   getContactBand(),
+  getPracticeAreaPageCopy(),
+  getPracticeAreaSidebarLinks("denver", ""),
+  getBlogPosts(),
 ]);
+
+/* THE PRACTICE-AREA SIDEBAR, by request — the same three cards those pages
+   carry. Two of its inputs have no natural value on a page that is not a
+   practice area, so both are chosen rather than invented:
+
+   - `getPracticeAreaSidebarLinks("denver", "")`. The second argument is the
+     CURRENT slug, used to centre the twelve-entry window and highlight the row
+     you are on. There is no current page here, and the getter already handles
+     that: `at < 0` starts the window at the head and nothing gets `current`,
+     so the card reads as a plain list with its "View All Practice Areas" link.
+     Denver because it is the firm's own city and its 50 pages are the ones a
+     visitor is most likely to want.
+   - `relatedSidebarLabel` is overridden. `PracticeAreaPageCopy` says "Related
+     articles", which is a claim about subject-matching that `getRelatedPostsForArea`
+     earns and a privacy policy cannot. These are the five most recent posts, so
+     the card says so. */
+const sidebarCopy = { ...areaCopy, relatedSidebarLabel: "Latest articles" };
+const latest = posts.filter((post) => post.href).slice(0, 5);
 ---
 
 <Layout
@@ -38,7 +65,14 @@ const [page, awards, details, band] = await Promise.all([
     body={page.body}
     stamp={page.updatedAt}
     metaLabel={page.updatedLabel}
-  />
+  >
+    <AreaSidebar
+      slot="sidebar"
+      page={sidebarCopy}
+      areas={sidebarAreas}
+      related={latest}
+    />
+  </PageArticle>
 
   <AwardsBar awards={awards} tone="sunk" />
   <ContactDetails details={details} form={band.form} />
