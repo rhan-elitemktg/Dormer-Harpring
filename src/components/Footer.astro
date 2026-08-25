@@ -137,11 +137,19 @@ const directionsUrl = firm.mapUrl;
       <ul class="footer__legal-links">
         <li><a href={ROUTES.privacy}>Privacy Policy</a></li>
         <li><a href="/sitemap.xml">Sitemap</a></li>
-        {/* The agency mark, last in the row so it sits bottom-right. Not a
-            link: no destination was specified, and an <a> with nowhere to go
-            is the thing TeamCard.astro already argues against. */}
+        {/* The agency mark, last in the row so it sits bottom-right. External,
+            so `rel="noopener" target="_blank"` — the same pair the socials and
+            "Get directions" above already carry. The image's alt IS the link's
+            accessible name here, because the <a> holds nothing else. */}
         <li class="footer__by">
-          <Picture src={eliteMark} alt="Built by Elite Legal Marketing" class="footer__by-mark" />
+          <a
+            class="footer__by-link"
+            href="https://www.elitelegalmarketing.com/"
+            rel="noopener"
+            target="_blank"
+          >
+            <Picture src={eliteMark} alt="Built by Elite Legal Marketing" class="footer__by-mark" />
+          </a>
         </li>
       </ul>
     </div>
@@ -340,18 +348,32 @@ const directionsUrl = firm.mapUrl;
     margin-left: var(--space-2);
   }
 
+  /* `flex`, not the inline default: an <img> in an inline box sits on the text
+     baseline and leaves a few pixels of descender space under it, which would
+     push the mark off the row's centre line. */
+  .footer__by-link {
+    display: flex;
+    align-items: center;
+  }
+
   /* Bounded by an element in THIS template — `.footer__by-mark` is a class
      handed to Picture, so it lands on Picture's <img> and carries Picture's
      cid, not this file's. A bare `.footer__by-mark {}` rule here would compile
      and match nothing; check:styles catches exactly this. */
-  .footer__by :global(.footer__by-mark) {
+  .footer__by-link :global(.footer__by-mark) {
     width: auto;
-    height: 22px;
+    height: 32px;
     /* The mark is white artwork on transparency and this bar is the chrome
        surface, so it needs no colour treatment — only the same muting the
        links beside it carry, so it reads as a credit and not as a third
-       navigation item. */
+       navigation item. It comes up to full strength on hover, which is this
+       row's existing idiom: the links beside it go to --dh-white. */
     opacity: 0.55;
+    transition: opacity var(--transition);
+  }
+
+  .footer__by-link:hover :global(.footer__by-mark) {
+    opacity: 1;
   }
 
   @media (max-width: 980px) {
