@@ -31,7 +31,14 @@ export interface FirmDetails {
   phone: string;
   /** E.164, for `tel:` hrefs and JSON-LD. */
   phoneE164: string;
-  /** The footer's "Text" number. */
+  /**
+   * The footer's "Text" number: (720) 730-7997, confirmed by the firm.
+   *
+   * NOT the comps' (720) 734-6230, which 29 comp files carry. Same shape as
+   * `phone` above — the live site publishes 730-7997 (864 uses) and has the
+   * comps' number only inside commented-out markup, and the live one is right.
+   * The comps have now been wrong about both numbers.
+   */
   sms: string;
   smsE164: string;
   email?: string;
@@ -92,8 +99,8 @@ export async function getFirmDetails(): Promise<FirmDetails> {
     legalName: "Dormer Harpring, LLC",
     phone: "(303) 756-3812",
     phoneE164: "+13037563812",
-    sms: "(720) 734-6230",
-    smsE164: "+17207346230",
+    sms: "(720) 730-7997",
+    smsE164: "+17207307997",
     address: {
       // "Ct", not "Court": the live site publishes both (866 uses to 571) and
       // every comp uses the short form, which is also what fits the contact

@@ -8,10 +8,12 @@ hands it, so an href to a page that was never built is a green build and a 404
 in production. Nothing else in `npm run check` looks at links at all.
 
 That gap is not hypothetical. Three hrefs in the footer — /privacy-policy/,
-/editorial-guidelines/ and /sitemap.xml — are on every page of the site, which
-is 984 dead links, and they went unnoticed through five comp-diff scripts and
+/editorial-guidelines/ and /sitemap.xml — were on every page of the site, which
+was 984 dead links, and they went unnoticed through five comp-diff scripts and
 two linters because the only sweep that ever found them was written ad hoc,
-read once, and thrown away. An earlier sweep reported "2,013 body links, none
+read once, and thrown away. (Editorial Guidelines has since been taken out of
+the footer, and this check failed on the now-stale declaration rather than
+letting it rot — which is the second half of the contract below, working.) An earlier sweep reported "2,013 body links, none
 unserved" and was also not kept; it counted body links only, which is exactly
 how the footer's stayed invisible. A number that cannot be re-checked cannot
 fail. This one can.
@@ -90,11 +92,6 @@ KNOWN_DEAD: dict[str, str] = {
     "/privacy-policy": (
         "In RESERVED_PATHS and in EXCLUDED_SLUGS — promised, not built. No comp "
         "exists for it. Linked from the footer, so this is ~328 dead links, not one."
-    ),
-    "/editorial-guidelines": (
-        "Same as privacy: reserved, unbuilt, no comp. The blog and practice-area "
-        "fact-check bands name it in prose and deliberately do NOT link it for "
-        "this reason — only the footer does."
     ),
     "/sitemap.xml": (
         "Belongs to the /new-seo-setup phase, which builds it. Linked from the "

@@ -1,10 +1,25 @@
 ---
 // "Areas we serve" — the eyebrow, headline and 18 city chips above the footer
 // proper. Split out because it is a distinct band with its own grid behaviour,
-// and because the chips become `serviceCity` references (with real landing
-// pages) in the CMS phase.
+// and because the chips become `serviceCity` references in the CMS phase.
+//
+// THE CHIPS ARE NOT LINKS, by request, and that is the whole point of them.
+// They used to be <a href={ROUTES.contact}> — eighteen chips all pointing at
+// the same page. Nothing was dead, but a linked city chip promises one of two
+// things and the firm has neither: a landing page for that city (only nine of
+// the eighteen have practice-area pages, and none has a page of its own) or an
+// office there (there is one office, in Denver's RiNo district, which the note
+// beside these chips already says).
+//
+// So they are <span>s. Same convention TeamCard.astro records for an attorney
+// with no bio and AreaLinkList for the current page's own row: a control that
+// looks like a link and does not behave like one is worse than plain text.
+// The hover state went with the anchor — a hover on something that cannot be
+// clicked reads as a broken control.
+//
+// If city landing pages are ever built, this goes back to being a link list
+// and `ROUTES`/`routePaths` comes back with it.
 import Eyebrow from "../Eyebrow.astro";
-import { ROUTES } from "../../lib/routePaths";
 
 interface Props {
   areas: string[];
@@ -32,7 +47,7 @@ const { areas } = Astro.props;
       {
         areas.map((area) => (
           <li>
-            <a class="areas__chip" href={ROUTES.contact}>
+            <span class="areas__chip">
               <svg
                 class="areas__pin"
                 width="13"
@@ -49,7 +64,7 @@ const { areas } = Astro.props;
                 <circle cx="12" cy="10" r="2.5" />
               </svg>
               {area}
-            </a>
+            </span>
           </li>
         ))
       }
@@ -111,12 +126,8 @@ const { areas } = Astro.props;
     font-size: var(--text-md);
     line-height: 1.2;
     color: var(--text-on-dark-2);
-    transition: background-color var(--transition), color var(--transition);
-  }
-
-  .areas__chip:hover {
-    background: rgba(199, 154, 84, 0.16);
-    color: var(--dh-white);
+    /* No transition and no :hover — nothing about this element changes on
+       pointer-over now that it is a <span>. Both went with the anchor. */
   }
 
   .areas__pin {
