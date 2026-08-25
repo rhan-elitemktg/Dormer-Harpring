@@ -170,14 +170,29 @@ for name, values in (("category", built_rel_cats), ("date", built_rel_dates), ("
 
 # ---------------------------------------------------------------- fact check
 print("\nFACT CHECK")
+# REWRITTEN COPY, by request, and the same string now runs on the 109
+# practice-area pages — `reviewedBy()` in data/blog.ts is the one source for
+# both. It says "This page", not "this article", because it serves both.
+#
+# What the old copy claimed and this does not: "who has tried personal injury
+# cases to verdict in Colorado courts for more than 20 years." That was a
+# TODO(launch) — one of README's unverified stat claims — and the new wording
+# makes no numeric claim, so the marker went with it. Asserted absent so it
+# cannot creep back in unreviewed.
 present(
     "label and body",
     [
         "Fact-checked",
-        "This article was written and reviewed by the team at Dormer Harpring and approved by "
-        "founding partner",
-        "who has tried personal injury cases to verdict in Colorado courts for more than 20 years.",
+        "This page has been written, edited, and reviewed by a team of legal writers "
+        "following our comprehensive editorial guidelines.",
+        "This page was approved by attorney,",
+        "a Denver personal injury attorney with extensive legal expertise.",
     ],
+)
+cmp(
+    "the unverified 20-years claim is gone",
+    [],
+    ["still present"] if "more than 20 years" in built_text else [],
 )
 
 

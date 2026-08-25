@@ -1,13 +1,12 @@
 {
   "slug": "10-things-to-do-after-a-slip-and-fall-accident",
   "title": "10 Things To Do After a Slip and Fall Accident",
-  "label": "10 Things to Do After a Fall",
-  "city": "denver",
-  "topic": "premises",
-  "statewide": false,
-  "resource": true,
-  "metaTitle": "10 Things To Do After a Slip and Fall Accident in Colorado",
-  "metaDescription": "After a slip and fall accident, there are steps you should take to help your claim. Call our slip and fall lawyers for a free consultation.",
+  "excerpt": "It can be tough to collect your thoughts after being injured in an accident. If you know what to do after a slip and fall accident, however, you can take the right steps in protecting yourself – and a future claim for recovery. In general, here are the important things to remember to do after […]",
+  "publishedAt": "2016-05-10T21:46:00",
+  "modifiedAt": "2025-06-26T11:14:15",
+  "categories": [
+    "slip-and-fall"
+  ],
   "body": [
     {
       "_type": "block",
@@ -373,8 +372,14 @@
       ]
     }
   ],
-  "faqs": [],
-  "publishedAt": "2016-05-10T21:46:00",
-  "modifiedAt": "2025-06-26T11:14:15",
+  "factCheck": [],
+  "author": {
+    "name": "Dormer Harpring",
+    "href": "/about"
+  },
+  "reviewer": {
+    "name": "K.C. Harpring",
+    "href": "/meet-our-attorneys/k-c-harpring"
+  },
   "legacyId": 135
 }

@@ -1,13 +1,12 @@
 {
   "slug": "should-you-hire-a-lawyer-for-a-slip-and-fall-injury-case",
   "title": "Should You Hire a Lawyer for a Slip and Fall Injury Case?",
-  "label": "Hiring a Slip and Fall Lawyer",
-  "city": "denver",
-  "topic": "premises",
-  "statewide": false,
-  "resource": true,
-  "metaTitle": "Should You Hire a Lawyer for a Slip and Fall Injury Case?",
-  "metaDescription": "Injured in a slip and fall accident in Colorado? Learn how our Denver slip and fall attorneys may be able to help you on your road to recovery.",
+  "excerpt": "After a slip and fall accident, injured people may wonder if they really need an attorney to represent them moving forward. They may not realize how complex their case is; they may be considering taking a settlement offer, or they may simply not realize how a lawyer can help them improve their chances of a […]",
+  "publishedAt": "2016-05-10T21:41:55",
+  "modifiedAt": "2026-02-26T10:59:18",
+  "categories": [
+    "slip-and-fall"
+  ],
   "body": [
     {
       "_type": "block",
@@ -321,8 +320,14 @@
       "level": 1
     }
   ],
-  "faqs": [],
-  "publishedAt": "2016-05-10T21:41:55",
-  "modifiedAt": "2026-02-26T10:59:18",
+  "factCheck": [],
+  "author": {
+    "name": "Dormer Harpring",
+    "href": "/about"
+  },
+  "reviewer": {
+    "name": "K.C. Harpring",
+    "href": "/meet-our-attorneys/k-c-harpring"
+  },
   "legacyId": 3423
 }

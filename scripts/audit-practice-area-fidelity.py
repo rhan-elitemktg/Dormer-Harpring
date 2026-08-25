@@ -25,6 +25,8 @@ Requires a `dist/` built from the current content: run `npm run build` first.
 import json
 import re
 import sys
+import time
+import urllib.error
 import urllib.request
 from difflib import SequenceMatcher
 from html.parser import HTMLParser
@@ -47,6 +49,45 @@ VOID = {"img", "br", "hr", "input", "meta", "link", "source", "area", "col", "em
 
 # The bar the blog import cleared. A page below it has lost something.
 THRESHOLD = 0.99
+
+# TWO BODY SECTIONS THE TEMPLATE DELIBERATELY DROPS — the office-address block
+# ("<City> <Area> Lawyer Near Me", which the footer already carries) and the
+# firm's own article list ("<City> <Area> Resources", which the sidebar already
+# carries). Removed by request.
+#
+# MUST STAY IDENTICAL TO `DROPPED_SECTIONS` in src/data/practiceAreaPages.ts,
+# which is where the removal actually happens; this is the source side of the
+# same fact. They are two lists rather than one because a .py script cannot
+# import a .ts module, and the getter is where the rule belongs. Drift shows up
+# here immediately: a section dropped there and not here reads as lost content,
+# and a section listed here and not dropped there reads as surplus.
+#
+# `thornton-bicycle-accident-lawyer`'s "Bicycle Accident Resources in Thornton,
+# Colorado" is deliberately absent from both — it is Bike Thornton and Bicycle
+# Colorado with their addresses, not the firm's own chrome.
+#
+# A section runs from its h2 to the next h2, or to the end of the body.
+# Dropped on EVERY page that carries it, matched in full rather than by pattern.
+# "Awards and Accolades" is the firm's six award badges — an h2 and six <img>s,
+# byte-identical on the 30 pages that have it — and `AwardsBar` now renders the
+# same six under the article, so the body copy was showing them twice.
+#
+# MUST STAY IDENTICAL TO `DROPPED_EVERYWHERE` in src/data/practiceAreaPages.ts.
+DROPPED_EVERYWHERE = ["Awards and Accolades"]
+
+DROPPED_SECTIONS = {
+    "denver-bicycle-accident-lawyer": ["Denver Car Accident Lawyer Near Me"],
+    "denver-brain-injury-lawyer": ["Brain Injury Resources", "Denver Medical Malpractice Lawyer Near Me"],
+    "denver-burn-injury-attorney": ["Denver Medical Malpractice Lawyer Near Me"],
+    "denver-drunk-driving-accident-lawyer": ["Denver Car Accident Lawyer Near Me"],
+    "denver-medical-malpractice-lawyer": ["Denver Medical Malpractice Lawyer Near Me"],
+    "denver-pedestrian-accident-lawyer": ["Denver Personal Injury Lawyer Near Me"],
+    "denver-spinal-cord-injury-lawyer": ["Denver Medical Malpractice Lawyer Near Me"],
+    "denver-truck-accident-lawyer": ["Denver Truck Accident Lawyer Near Me", "Denver Truck Accident Resources"],
+    "thornton-car-accident-attorney": ["Thornton Car Accident Resources"],
+    "thornton-personal-injury-attorney": ["Thornton Personal Injury Resources"],
+    "thornton-wrongful-death-lawyer": ["Thornton Wrongful Death Resources"],
+}
 
 
 def norm(text):
@@ -108,7 +149,7 @@ class SourceReader(HTMLParser):
     source even says.
     """
 
-    def __init__(self):
+    def __init__(self, dropped=()):
         super().__init__(convert_charrefs=True)
         self.chunks = []
         self.depth = 0          # >0 while inside chrome
@@ -116,6 +157,13 @@ class SourceReader(HTMLParser):
         self.counts = {"h2": 0, "h3": 0, "h4": 0, "img": 0, "li": 0, "a": 0}
         self.table_rows = 0     # a <tr> becomes one list item — see below
         self._heading = None    # the open heading tag, and whether it has text
+        # The declared drops for THIS page, and the state that skips them. A
+        # heading's text is only known once it closes, so the chunk list is
+        # rewound to `_mark` and everything up to the next h2 suppressed.
+        self._dropped = tuple(dropped) + tuple(DROPPED_EVERYWHERE)
+        self._seen_dropped = set()
+        self._skipping = False
+        self._mark = 0
 
     def _is_chrome(self, tag, attrs):
         if tag in CHROME_TAGS:
@@ -133,6 +181,11 @@ class SourceReader(HTMLParser):
         if chrome:
             self.depth += 1
             return
+        # A dropped section ends where the next h2 begins, whatever it says.
+        if self.depth == 0 and tag == "h2":
+            self._skipping = False
+        if self._skipping:
+            return
         if self.depth == 0 and tag == "tr":
             self.table_rows += 1
         if self.depth == 0 and tag in ("h2", "h3", "h4"):
@@ -141,17 +194,27 @@ class SourceReader(HTMLParser):
             # would report a heading lost on every one of them. Counted on close,
             # and only if text arrived.
             self._heading = [tag, False]
+            self._mark = len(self.chunks)
             return
         if self.depth == 0 and tag in self.counts:
             self.counts[tag] += 1
 
     def handle_startendtag(self, tag, attrs):
+        if self._skipping:
+            return
         if self.depth == 0 and not self._is_chrome(tag, attrs) and tag in self.counts:
             self.counts[tag] += 1
 
     def handle_endtag(self, tag):
         if self._heading and self._heading[0] == tag:
-            if self._heading[1]:
+            text = norm(" ".join(self.chunks[self._mark:]))
+            match = next((d for d in self._dropped if norm(d) == text), None)
+            if match is not None:
+                # Rewind past the heading and suppress the rest of the section.
+                del self.chunks[self._mark:]
+                self._seen_dropped.add(match)
+                self._skipping = True
+            elif self._heading[1]:
                 self.counts[tag] += 1
             self._heading = None
         for i in range(len(self.stack) - 1, -1, -1):
@@ -162,7 +225,7 @@ class SourceReader(HTMLParser):
                 return
 
     def handle_data(self, data):
-        if self.depth == 0:
+        if self.depth == 0 and not self._skipping:
             self.chunks.append(data)
             if self._heading and data.strip():
                 self._heading[1] = True
@@ -170,6 +233,20 @@ class SourceReader(HTMLParser):
     @property
     def text(self):
         return norm(" ".join(self.chunks))
+
+    @property
+    def unmatched(self):
+        """Per-page declared drops this page's source did not contain.
+
+        DROPPED_EVERYWHERE is excluded: it is offered to all 109 and matches on
+        30, which is normal rather than stale. Only a per-slug entry naming a
+        heading the source no longer has means the list has rotted.
+        """
+        return [
+            d
+            for d in self._dropped
+            if d not in self._seen_dropped and d not in DROPPED_EVERYWHERE
+        ]
 
 
 class RegionReader(HTMLParser):
@@ -217,22 +294,60 @@ class RegionReader(HTMLParser):
         return norm(" ".join(self.chunks))
 
 
+def fetch(url, attempts=4):
+    """One GET, retried on a transport error.
+
+    RETRIES BECAUSE THE RUN IS 218 REQUESTS. Every page is fetched twice — JSON
+    for the body, HTML for the FAQ block — and denvertrial.com drops or stalls
+    one often enough that a single-shot fetch loses whole runs to a
+    `TimeoutError` two thirds of the way through. That failure says nothing
+    about fidelity, and a check that cannot finish is a check nobody runs.
+
+    Backs off 2s, 4s, 8s. Only transport errors are retried; an HTTP error is
+    the server answering, and a 404 here is a real finding.
+    """
+    last = None
+    for attempt in range(attempts):
+        try:
+            with urllib.request.urlopen(url, timeout=60) as r:
+                return r.read()
+        except urllib.error.HTTPError:
+            raise
+        except (urllib.error.URLError, TimeoutError, OSError) as err:
+            last = err
+            if attempt < attempts - 1:
+                time.sleep(2 ** (attempt + 1))
+    raise SystemExit(f"giving up on {url} after {attempts} attempts: {last}")
+
+
 def fetch_json(url):
-    with urllib.request.urlopen(url, timeout=60) as r:
-        return json.load(r)
+    return json.loads(fetch(url))
 
 
 def fetch_text(url):
-    with urllib.request.urlopen(url, timeout=60) as r:
-        return r.read().decode("utf-8", "replace")
+    return fetch(url).decode("utf-8", "replace")
 
 
 def built_article(slug):
-    """The article column of the built page, minus the two things that repeat it.
+    """The article column of the built page, minus the things that repeat it.
 
     The contents box lists every H2 again, and the FAQPage JSON-LD carries every
     answer again. Both are correct on the page and both would inflate the built
     side of the comparison, hiding a real loss behind duplicated text.
+
+    THE H1 IS BACK IN THIS COLUMN. It moved to a `PageHeader` for two rounds and
+    came home when the header was dropped, so it needs no splicing — the source
+    side leads with `title` and this region carries it. The EYEBROW above it does
+    get stripped: "Practice Area" is chrome this template adds on all 109, and
+    WordPress has no such field.
+
+    The meta line is stripped for the same reason — "Written by
+    Dormer Harpring · Updated … · 12 min read" is nine words the built page adds
+    and the source has nowhere. It is the byline convention, not content.
+
+    So is the fact-check band, which sits between `</article>` and the sidebar
+    and therefore inside this slice. Same 35 words on all 109, derived from the
+    reviewer; WordPress has no field for it.
     """
     path = DIST / slug / "index.html"
     if not path.exists():
@@ -245,6 +360,9 @@ def built_article(slug):
     region = html[start:end if end != -1 else len(html)]
     region = re.sub(r'<nav class="toc".*?</nav>', " ", region, flags=re.S)
     region = re.sub(r"<script[^>]*>.*?</script>", " ", region, flags=re.S)
+    region = re.sub(r'<p class="parea__cat".*?</p>', " ", region, flags=re.S)
+    region = re.sub(r'<p class="parea__meta".*?</p>', " ", region, flags=re.S)
+    region = re.sub(r'<div class="parea__fact".*$', " ", region, flags=re.S)
     return region
 
 
@@ -271,8 +389,19 @@ def main():
             failures.append(f"{slug}: no live page with this slug")
             continue
 
-        src = SourceReader()
+        src = SourceReader(DROPPED_SECTIONS.get(slug, ()))
         src.feed(strip_editor_artifacts(records[0]["content"]["rendered"]))
+
+        # A declared drop the source no longer has means WordPress changed and
+        # this list did not. The getter throws on the same condition; this is
+        # the source side of it, and it must not pass quietly.
+        if src.unmatched:
+            failures.append(
+                f"{slug}: DROPPED_SECTIONS names "
+                + ", ".join(repr(u) for u in src.unmatched)
+                + ", which the live source no longer contains"
+            )
+            continue
 
         faq = RegionReader()
         faq.feed(fetch_text(f"{SITE}/{slug}/"))

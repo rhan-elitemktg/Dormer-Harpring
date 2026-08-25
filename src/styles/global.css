@@ -855,15 +855,29 @@ select {
   margin-bottom: var(--space-2);
 }
 
+/* THE HOVER WAS THERE AND READ AS NOTHING. It changed `color` alone, from
+   #e14a32 to #cf6624 — a red-to-orange shift of about 1.2:1 against each other
+   — with no transition, so it landed instantly and was easy to miss entirely.
+   The underline now thickens as well, which is the change the eye actually
+   catches, and both animate on one clock.
+
+   `transition` names the two properties rather than `all`: `text-decoration`
+   itself cannot be animated (see HANDOFF), but its longhands can, and listing
+   them keeps this off every other property the element might inherit. */
 .prose__link {
   color: var(--accent);
   text-decoration: underline;
   text-underline-offset: 0.18em;
   text-decoration-thickness: 1px;
+  transition:
+    color var(--transition),
+    text-decoration-color var(--transition),
+    text-decoration-thickness var(--transition);
 }
 
 .prose__link:hover {
   color: var(--dh-red-link);
+  text-decoration-thickness: 2px;
 }
 
 .prose__strong {
@@ -900,8 +914,18 @@ select {
   margin-block: var(--space-8);
 }
 
+/* `max-width`, NOT `width`, by request. It used to be `width: 100%`, which
+   stretched every body image to the 760px measure — including the 150px and
+   300px sources among them, upscaled past their own pixels and soft. Capped
+   instead: a photograph wider than the column still fills it, and a small one
+   renders at its own size.
+
+   `sizes` on ProseImage still describes the column rather than the rendered
+   width, and that is fine rather than sloppy: it is an upper bound, and the
+   srcset for a small source carries no candidate above its intrinsic width, so
+   the browser cannot over-fetch. */
 .prose__figure .prose__img {
-  width: 100%;
+  max-width: 100%;
   height: auto;
   border-radius: var(--radius-media);
 }
@@ -994,6 +1018,42 @@ select {
   width: 16px;
   height: 2px;
   background: var(--accent-gold);
+}
+
+/* THE PAGE YOU ARE ON. The practice-area sidebar keeps the current page in its
+   list rather than dropping it, so one row has to say "you are here".
+
+   TEXT ONLY, NO BACKGROUND — by request. It carried a `--dh-gold-tint` block
+   bled to the card's edges; that is gone, and with it the negative inline
+   margin that existed solely to bleed it.
+
+   GOLD, AT 3.29:1, AND THAT IS A DECISION SOMEONE MADE — not an oversight, so
+   do not "fix" it back. `--dh-gold-deep` on this card's white measures 3.29:1,
+   under AA's 4.5 for text this size: `--text-md` tops out at 16px, short of the
+   18.66px bold that would exempt it. It was measured, raised, and chosen at
+   Rhan's request over the alternative, which was `--dh-ink` at 14.08:1 with the
+   weight alone carrying the highlight.
+
+   `font-weight: 800` stays, and does more work here than it would at full
+   contrast: heavier strokes are what keep a low-contrast label legible. The
+   rule beside it takes the same gold so the two read as one mark.
+
+   WHAT WOULD FIX IT PROPERLY is a darker gold token — the ladder stops at
+   `--dh-gold-deep`, which was itself darkened to pass contrast on CREAM, not on
+   white. A `--dh-gold-deeper` at ~4.5:1 would serve this and anything else that
+   ever needs gold text on a white card. Not invented for one use.
+
+   NOT `--accent`: red is what every row in this card turns on hover, and a
+   permanently red row reads as one stuck mid-hover.
+
+   It is a <span>, so there is no hover rule and no pointer: it is not a link. */
+.pside__cat--current {
+  font-weight: 800;
+  color: var(--dh-gold-deep);
+}
+
+.pside__cat--current::before {
+  background: var(--dh-gold-deep);
 }
 
 .pside__article {

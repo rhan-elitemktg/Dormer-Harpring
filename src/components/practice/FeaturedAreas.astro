@@ -69,9 +69,13 @@ const { section, areas, moreLabel = "Learn more" } = Astro.props;
 </section>
 
 <style>
+  /* The bottom padding is NOT decorative. It was `0` while `AreaDirectory`
+     below shared this section's cream and supplied the whole gap with its own
+     top padding; that section is white now, so the boundary is visible and the
+     card grid would otherwise sit flush against it. */
   .feat {
     background: var(--surface-page);
-    padding-block: var(--space-section) 0;
+    padding-block: var(--space-section);
   }
 
   /* `:global()` bounded by this component's own `.feat`, because the class is

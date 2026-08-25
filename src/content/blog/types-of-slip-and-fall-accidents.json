@@ -1,13 +1,12 @@
 {
   "slug": "types-of-slip-and-fall-accidents",
   "title": "Types of Slip and Fall Accidents",
-  "label": "Slip and Fall Case Types",
-  "city": "denver",
-  "topic": "premises",
-  "statewide": false,
-  "resource": true,
-  "metaTitle": "Types of Slip and Fall Accidents",
-  "metaDescription": "After being injured in any type of slip and fall accident, contact our Colorado slip & fall lawyers for help. Learn more online today.",
+  "excerpt": "Slip and fall accidents can happen nearly anywhere, and they can be caused by various factors. Understanding what type of slip and fall accident you have suffered can be the key to determining your best options for recovery. At Dormer Harpring, our Denver slip and fall accident attorneys are skilled at representing people who have […]",
+  "publishedAt": "2016-05-10T21:45:11",
+  "modifiedAt": "2026-02-26T13:42:47",
+  "categories": [
+    "slip-and-fall"
+  ],
   "body": [
     {
       "_type": "block",
@@ -430,8 +429,14 @@
       ]
     }
   ],
-  "faqs": [],
-  "publishedAt": "2016-05-10T21:45:11",
-  "modifiedAt": "2026-02-26T13:42:47",
+  "factCheck": [],
+  "author": {
+    "name": "Dormer Harpring",
+    "href": "/about"
+  },
+  "reviewer": {
+    "name": "K.C. Harpring",
+    "href": "/meet-our-attorneys/k-c-harpring"
+  },
   "legacyId": 133
 }
