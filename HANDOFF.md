@@ -10,13 +10,21 @@ _Last updated: 2026-08-25._
 
 ## State
 
-Build is green: **329 pages** (330 with `/admin`), `npm run check` passing, all five comp-diff
-scripts exiting 0, and the fidelity audit reporting 104 of 104 pages at ≥99% against the live
-source.
+Build is green: **332 pages** — 330 that render a site header and footer, plus `404.html` and
+`/admin`. `npm run check` passes, all five comp-diff scripts exit 0, and the fidelity audit
+reports 104 of 104 pages at ≥99% against the live source.
+
+**Do not re-run the fidelity audit as part of a routine sweep.** It fetches all 104 practice-area
+pages from the live WordPress site and has taken anywhere from two minutes to over an hour. It
+only checks imported practice-area body copy, so a change to components, chrome or the check
+scripts cannot affect its result. Run it when `src/content/practice-areas/` or the importer
+changed, and background it when you do.
 
 **`npm run check` is THREE linters now, and one of them could never fail.**
-`scripts/check-links.py` is the new one — 39,484 internal links across 328 pages, every target
-resolved against what `dist/` actually serves plus `vercel.json`. The link sweep is no longer
+`scripts/check-links.py` is the new one — 33,754 internal links across 330 pages, every target
+resolved against what `dist/` actually serves plus `vercel.json`. (The count fell from 39,484
+when the eighteen footer city chips stopped being links — 5,904 of them — and Editorial
+Guidelines left the footer.) The link sweep is no longer
 ad hoc: the "42,599 links, four dead targets" figure in the last version of this file came from
 a throwaway, like the "2,013 body links, none unserved" figure before it, and a number that
 cannot be re-checked cannot fail.
@@ -26,10 +34,11 @@ cannot be re-checked cannot fail.
 build. Proven by feeding it a deliberately broken page. Fixed. If anything in `dist/` was
 relying on that, it surfaces on the next run; nothing did today.
 
-**One dead target left, and it is the footer's three.** `/privacy-policy/`,
-`/editorial-guidelines/` and `/sitemap.xml`, on all 328 pages — **984 dead links**. They are
-DECLARED in `KNOWN_DEAD` with a reason rather than ignored, and the check fails if one of them
-quietly starts resolving without the entry being deleted. Item 1 under Next.
+**`KNOWN_DEAD` IS EMPTY.** The footer's three — `/privacy-policy/`, `/editorial-guidelines/` and
+`/sitemap.xml`, 984 dead links across every page — are all closed. Each was closed by a change
+that made `check:links` FAIL on the now-stale declaration rather than pass quietly, which is why
+the table shrank instead of growing. **The only dead links left on the site are the nine
+`href="#"` placeholders**, declared by count in `KNOWN_PLACEHOLDER`. Item 1 under Next.
 
 The relative href that was item 2 is fixed, and 49 malformed `tel:` hrefs with it — see below.
 
@@ -43,7 +52,7 @@ last handoff and it moves the project's biggest dependency off the critical path
 **The blog archive is 186 posts, not 167.** WordPress has two post types and the article-shaped
 content is spread across both — see below.
 
-Marker inventory: **37 `TODO(launch)`, 5 `TODO(video)`, 4 `TODO(sanity)`, 1 `TODO(content)`.**
+Marker inventory: **38 `TODO(launch)`, 5 `TODO(video)`, 4 `TODO(sanity)`, 1 `TODO(content)`.**
 Grep all four before launch, not just the first — and **grep with the colon**. `TODO(launch)` also
 appears in eleven comments that DISCUSS a marker rather than being one, which is how this line
 previously read 43. `grep -rn "TODO(launch):"` is the count that means anything.
@@ -601,6 +610,63 @@ re-run rewrites every `_key` across all 313 content files. Every changed line wa
 a phone line and nothing else; the 35,179 `_key`s are untouched. Same gate as always —
 `git status --porcelain src/content` after any converter change.
 
+## The footer, the header and the favicon
+
+Six changes to the footer and one to the header, all by request.
+
+- **The text number is `(720) 730-7997`**, from `firmDetails`. The comps' `(720) 734-6230` is
+  retired. **THE COMPS ARE NOW WRONG ABOUT BOTH NUMBERS** — worth knowing before trusting them
+  on a third. Both are asserted absent in `diff-comp-about.py` and `diff-comp-blog.py`, as one
+  declared departure read out of `site.ts` rather than repeated as a literal.
+- **The 18 service-area chips are `<span>`s, not links.** They pointed at `/contact/` — eighteen
+  chips, one destination. Nothing was dead, but a linked city chip promises a landing page for
+  that city or an office in it, and the firm has neither; the note beside them already says
+  there is one office, in RiNo. Same convention `TeamCard.astro` records. The `:hover` and the
+  `transition` went with the anchor — a hover on something unclickable reads as a broken
+  control. **5,904 fewer internal links.**
+- **Editorial Guidelines is out of the legal bar.** No comp ever carried it. `ROUTES` and
+  `RESERVED_PATHS` keep the route, and the two fact-check bands still name "our comprehensive
+  editorial guidelines" in prose without linking it, so there is one place for the link to
+  return to.
+- **The general-purposes / prior-results disclaimer is out of the bar.** NOT gone from the site:
+  `/results`, `/co-counsel` and `/testimonials` each keep their own copy, which are the three
+  pages that actually publish outcomes. Recorded in a comment so it is not restored from the comp
+  as a missing feature.
+- **The Elite mark closes the row**, after Sitemap, linked to `elitelegalmarketing.com` with
+  `rel="noopener" target="_blank"`, 32px tall at 55% opacity rising to full on hover. Rendered
+  through `Picture` from `src/assets/elite-white.svg`. Two things the anchor needed that the bare
+  image did not: `display: flex` on the `<a>`, because an `<img>` in an inline box sits on the
+  text baseline and leaves descender space that drops it off the row's centre line; and a hover,
+  on the row's existing idiom.
+- **Header: "It's free. Available 24/7" is now "Free Consultation. Available 24/7."** The same
+  phrase survives untouched in `contact.ts`'s form lede on 325 pages — out of scope, not missed.
+
+**A mobile-centring pass on `.footer__bottom` was built and then reverted by request.** It is in
+the reflog at `06077cf` if it comes back. The finding in it is worth keeping either way:
+`space-between` is not a centring rule once a flex row wraps, because each wrapped line holds one
+item and space-between leaves a lone item at flex-start.
+
+### The favicon was Astro's default logo, on every page
+
+Replaced with the firm's DH monogram — white on `#314641` — from the live site's WordPress
+site-icon, `uploads/2020/10/cropped-favicon-1-1.jpg`. `favicon.ico` (16 + 32 as PNG payloads),
+`icon-192.png`, `apple-touch-icon.png` at 180.
+
+- **Built from the 512px ORIGINAL, not WordPress's 32px crop.** That crop is a JPEG already
+  downsampled once; resizing it again compounds the artifacts. The live site still serves the
+  512, and the sitesucker scrape has only the three crops.
+- **No ImageMagick and no Pillow on this machine.** `sips` did the resampling and the ICO
+  container is a 30-line writer — ICO takes PNG payloads, so the header is six bytes plus a
+  16-byte directory entry per image.
+- **NO SVG, and the `favicon.svg` link is gone** rather than left pointing at Astro's. No vector
+  source for the mark exists — the comps' SVGs are the practice-area icons and `src/assets` has
+  only the Elite mark — and hand-tracing a monogram is design work, not a conversion. If the firm
+  produces one it goes in first and browsers prefer it over the `.ico`.
+- **`TODO(launch)`: the mark's green is not this site's.** `#314641` against the nearest token
+  `--dh-forest-100` `#2c3b31`, with the chrome at `#151e19` — so the tab icon is a visibly
+  lighter, greyer green than the header it sits above. Carried over as-is because it is the
+  firm's asset. README has the row.
+
 ## The three utility pages, on the light template's shell
 
 `/privacy-policy/`, `/sitemap/` and `404` — built by request on the practice-area template's
@@ -767,6 +833,13 @@ light template's shell anyway — see below.
 
 **Decide**
 
+- **Four built practice-area pages are in no directory group** — Defective Helmets, Autonomous
+  Vehicle Accidents, Drunk Driving Accidents, Taxi Accidents, all Denver. The directory is synced
+  to the firm's live hub and the hub does not list them. Not orphans (7–19 inbound links each
+  from sibling sidebars) and `/sitemap/` lists them, but `/practice-areas` does not. Add them, or
+  confirm hub-only. `assertDirectoryJoin()` cannot decide this for you — see its note.
+- **The favicon's green is not the site's.** `#314641` against `--dh-forest-100` `#2c3b31`.
+  Designer call.
 - **Three live Denver pages were excluded as duplicates** and want a ruling:
   `personal-injury-attorney` (duplicates the homepage), `car-accident` and
   `traffic-collision-lawyer` (both overlap `denver-car-accident-lawyer`, which the heavy template
@@ -784,6 +857,13 @@ light template's shell anyway — see below.
 
 **Waiting on the firm** — content, not code. `README.md` has the full table. Unchanged: the seven
 attorney emails, the office address and hours, the `$70M+ / 20 Years` stat claims.
+
+**Settled this session, so stop asking**: both phone numbers (call `(303) 756-3812`, text
+`(720) 730-7997` — the comps were wrong about both), and the privacy policy, which is now built
+from the live page's own text. The privacy policy is **thin** and wants a legal review before
+launch, not a content answer: no CCPA/GDPR section, no cookie disclosure, no retention period,
+no route for a data request, and no mention of the third-party tags or the cookie-setting map
+embed. That is README's row, not a blocker for building.
 
 **The phone number is SETTLED and no longer waiting on anyone**: `(303) 756-3812` site-wide,
 including the imported body copy, which carried six different firm numbers. See above. What is
