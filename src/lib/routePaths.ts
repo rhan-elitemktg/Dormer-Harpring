@@ -53,6 +53,11 @@ export const ROUTES = {
   thankYou: "/thank-you/",
   privacy: "/privacy-policy/",
   editorialGuidelines: "/editorial-guidelines/",
+  /* The HUMAN sitemap, not `/sitemap.xml`. The footer used to link the XML file
+     and nothing built it — 328 dead links. The XML one is a crawler file whose
+     every URL is absolute off `site:`, still an open www-vs-apex decision, and
+     it belongs to /new-seo-setup with robots.txt. */
+  sitemap: "/sitemap/",
 } as const;
 
 /** Declared after ROUTES so the shared prefix is read from one place. */
@@ -89,6 +94,7 @@ export const RESERVED_PATHS: readonly string[] = [
   ROUTES.thankYou,
   ROUTES.privacy,
   ROUTES.editorialGuidelines,
+  ROUTES.sitemap,
   "/admin",
   // Stored in `normalizePath`'s COMPARISON form, because `isReservedPath`
   // normalizes its input before looking in here. Mapped rather than typed that

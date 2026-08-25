@@ -423,7 +423,21 @@ export async function getPracticeAreaPageCopy(): Promise<PracticeAreaPageCopy> {
  * The Practice Areas directory (`getPracticeAreaGroups()`) and this collection
  * are two hand-maintained lists of the same thing, and drift between them is
  * silent in both directions: a directory entry with no page is a 404 the build
- * happily ships, and a page in no group is a page nothing links to.
+ * happily ships, and a page in no group is a page the directory does not list.
+ *
+ * THIS CHECKS ONE OF THOSE DIRECTIONS. It walks directory entries looking for a
+ * missing page. It does NOT walk pages looking for a missing group, and this
+ * comment used to claim it did — four built pages are absent from the directory
+ * today (Defective Helmets, Autonomous Vehicle Accidents, Drunk Driving
+ * Accidents, Taxi Accidents, all Denver) and this function has never had a word
+ * to say about them.
+ *
+ * The reverse check is NOT simply missing: the directory is deliberately synced
+ * to the firm's live hub rather than to this collection, so a page the hub does
+ * not list is a content decision, not a bug — and a check that threw on it
+ * would fail the build on the firm's own choice. `src/pages/sitemap.astro`
+ * covers the gap where it actually matters, by listing the collection rather
+ * than the directory. TODO(launch): the four want a ruling.
  *
  * Throwing at build time is the established pattern here — `[slug].astro`
  * already does it for a missing team member, award and video review, each with

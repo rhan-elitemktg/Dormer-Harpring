@@ -13,7 +13,8 @@
     "check:styles": "python3 scripts/check-scoped-styles.py $(find dist -name '*.html' -not -path 'dist/admin/*')",
     "prep:assets": "node scripts/prep-assets.mjs",
     "check:tokens": "python3 scripts/check-tokens.py",
-    "check": "npm run check:styles && npm run check:tokens",
+    "check:links": "python3 scripts/check-links.py",
+    "check": "npm run check:styles && npm run check:tokens && npm run check:links",
     "build:redirects": "tsx scripts/build-redirects.ts"
   },
   "dependencies": {

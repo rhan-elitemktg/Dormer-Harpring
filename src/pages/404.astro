@@ -1,0 +1,154 @@
+---
+// The 404 page.
+//
+// Astro builds this to `dist/404.html` and Vercel serves it for any unmatched
+// path on a static deployment — no adapter, no config, no route entry. That is
+// also why `/404` is NOT in `RESERVED_PATHS`: nothing may link it and no
+// redirect may point at it. A redirect to a 404 page returns 200 with
+// not-found content, which is the soft-404 pattern search engines penalise;
+// the status has to come from the server failing to find a file.
+//
+// `noIndex` for the same reason the thank-you page carries it, plus one of its
+// own: a 404 that ranks is a 404 someone arrives at on purpose.
+//
+// SURFACE ORDER: cream `.spage` → sunk `.awards` → cream `.ct`. The same three
+// bands the other two utility pages and the light practice-area template use.
+// Deliberately the full page furniture rather than a bare apology — the ~300
+// legacy URLs most likely to land here are practice-area pages and blog posts,
+// and someone who mistyped one is still a visitor with a case.
+import Layout from "../layouts/Layout.astro";
+import PageArticle from "../components/page/PageArticle.astro";
+import AreaSidebar from "../components/practice/area/AreaSidebar.astro";
+import AwardsBar from "../components/AwardsBar.astro";
+import ContactDetails from "../components/contact/ContactDetails.astro";
+import { getNotFoundPage } from "../data/sitePages";
+import { getAwards } from "../data/awards";
+import { getContactBand, getContactDetails } from "../data/contact";
+import {
+  getPracticeAreaPageCopy,
+  getPracticeAreaSidebarLinks,
+} from "../data/practiceAreaPages";
+import { getBlogPosts } from "../data/blog";
+
+const [page, awards, details, band, areaCopy, sidebarAreas, posts] = await Promise.all([
+  getNotFoundPage(),
+  getAwards(),
+  getContactDetails(),
+  getContactBand(),
+  getPracticeAreaPageCopy(),
+  getPracticeAreaSidebarLinks("denver", ""),
+  getBlogPosts(),
+]);
+
+/* THE PRACTICE-AREA SIDEBAR, by request — the same three cards those pages
+   carry. Two of its inputs have no natural value on a page that is not a
+   practice area, so both are chosen rather than invented; the reasoning is
+   written out in full in privacy-policy.astro. Short form: the empty current
+   slug makes the window start at the head with nothing highlighted, which the
+   getter already handles, and the related card is relabelled because "Related
+   articles" claims a subject match these pages cannot earn. */
+const sidebarCopy = { ...areaCopy, relatedSidebarLabel: "Latest articles" };
+const latest = posts.filter((post) => post.href).slice(0, 5);
+---
+
+<Layout
+  title="Page not found"
+  description="That page could not be found. Here is where most people were heading."
+  seo={{ noIndex: true }}
+>
+  <PageArticle title={page.title} lede={page.lede}>
+    <nav class="nf" aria-labelledby="nf-title">
+      <h2 class="nf__title" id="nf-title">{page.linksTitle}</h2>
+      <ul class="nf__list">
+        {
+          page.links.map((link) => (
+            <li>
+              <a class="nf__link" href={link.href}>
+                <span class="nf__label">
+                  {link.label}
+                  <span class="arrow" aria-hidden="true">
+                    &rarr;
+                  </span>
+                </span>
+                <span class="nf__desc">{link.description}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <AreaSidebar slot="sidebar" page={sidebarCopy} areas={sidebarAreas} related={latest} />
+  </PageArticle>
+
+  <AwardsBar awards={awards} tone="sunk" />
+  <ContactDetails details={details} form={band.form} />
+</Layout>
+
+<style>
+  .nf {
+    margin-top: var(--space-10);
+  }
+
+  .nf__title {
+    margin-bottom: var(--space-6);
+    font-size: var(--display-6);
+    text-transform: none;
+  }
+
+  .nf__list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
+    list-style: none;
+    padding: 0;
+  }
+
+  .nf__link {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    height: 100%;
+    padding: var(--space-5) var(--space-6);
+    border: 1px solid var(--dh-line);
+    border-radius: var(--radius-card);
+    background: var(--dh-white);
+    transition:
+      border-color var(--transition),
+      background-color var(--transition);
+  }
+
+  .nf__link:hover {
+    border-color: var(--accent);
+  }
+
+  /* The arrow rides the label, not the card: `.nf__link` is a column flex
+     container, so an arrow placed directly in it would sit on its own line
+     under the description rather than after the words it belongs to. */
+  .nf__label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-family: var(--font-ui);
+    font-weight: 700;
+    font-size: var(--text-md);
+    color: var(--text-strong);
+  }
+
+  .nf__link:hover .nf__label {
+    color: var(--accent);
+  }
+
+  .nf__desc {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    line-height: var(--leading-snug);
+    color: var(--text-muted);
+  }
+
+  @media (max-width: 640px) {
+    .nf__list {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

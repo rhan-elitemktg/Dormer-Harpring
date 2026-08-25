@@ -13,7 +13,7 @@ PUBLIC_SANITY_DATASET="production"
 
 ## Checks
 
-`npm run build` catches compile errors. Two things it can't catch, both silent
+`npm run build` catches compile errors. Three things it can't catch, all silent
 by construction — run them on every commit:
 
 ```sh
@@ -27,6 +27,14 @@ npm run build && npm run check
 - **`check:tokens`** — an undefined `var()` doesn't degrade, it invalidates the
   whole declaration. `padding: var(--space-11) var(--space-13)` with no
   `--space-13` renders *no* padding, not most of it.
+- **`check:links`** — an `<a>` whose target was never built. Nothing else in the
+  build looks at links at all, which is how three footer hrefs stayed dead on
+  every page of the site — 984 links — through five comp-diff scripts and two
+  linters. It also fails on `href="#"`, on a document-relative href (it resolves
+  under whatever page it lands on, so it's a 404 that moves), and on a `tel:`
+  that isn't E.164. Known-broken links are **declared with a reason** in the
+  tables at the top of `scripts/check-links.py`, and a declaration that stops
+  being true fails too — so closing an item can't leave the table stale.
 
 `check:styles` has one known blind spot: it catches a passed-in class used as
 the **target** of a scoped rule, but not one used as its **ancestor**.
@@ -54,16 +62,16 @@ Everything below is deliberately unfinished, not overlooked.
 | **Video posters** | All six testimonials were shot vertically, so every thumbnail YouTube serves is a 9:16 title card letterboxed into 16:9 against a blurred copy of itself — mostly blur, and showing a stock river clip rather than the client. The cards use the design package's own client portraits instead. A still lifted from each video would beat both. |
 | **Nav submenus** | About and Practice Areas use the current site's IA; Locations is proposed and needs sign-off. "Locations" has no hub page, so its parent renders as plain text. The team sits inside About as "Our Team"; the comps' top-level "Attorneys" item is gone, and "Testimonials" takes the slot. |
 | **"En Español"** | Renders in the header (every comp shows it) with no target. |
-| **Phone** | `(866) 683-6894` site-wide, from `firmDetails`. The live site still publishes `(303) 756-3812` in its JSON-LD and on its contact page — decide whether that one is retired or kept as a local number, and settle the display vs CallRail tracking split, before launch. |
-| **Text number** | `(720) 734-6230`, from every comp. The live site publishes `(720) 730-7997` (864 uses) and has the comps' number only inside commented-out markup. One of the two is stale — confirm which. |
+| **Phone** | **Settled: `(303) 756-3812`**, from `firmDetails`, everywhere. This reverses the earlier `(866) 683-6894` — the comps' number, which this project had recorded as the firm's choice and which the firm has now confirmed it is not. The 866 number is **retired, not kept as a fallback**. Imported WordPress body copy carried SIX different firm numbers and was rewritten to match; the three non-firm numbers in it (Denver Police non-emergency, Bike Thornton, Bicycle Colorado) were deliberately left alone. Still open: the display vs CallRail tracking split, if dynamic insertion returns. |
+| **Text number** | **Settled: `(720) 730-7997`**, from `firmDetails`. The comps' `(720) 734-6230` (29 files) is retired — same call as the phone above, and for the same reason: the live site publishes 730-7997 864 times and carries the comps' number only inside commented-out markup. Both comp numbers are now asserted absent in `diff-comp-about.py` and `diff-comp-blog.py`. |
 | **Email** | The contact page shows `info@dormerharpring.com`, which is the comp's. **The live site publishes no contact address anywhere** — the only one in its markup is a WordPress author account leaking into blog JSON-LD. Confirm it exists, or clear `firmDetails.email` and the card disappears on its own. |
 | **Attorney emails** | Each bio's contact line shows `<first name>@dormerharpring.com` — seven addresses, of which **only Sean's comes from a source** (the comp) and the other six are inferred from that pattern. Same problem as above, multiplied: verify all seven, or clear `email` on the profile in `src/data/team.ts` and the line closes up to phone and city. |
 | **Office hours** | `Mo-Fr 09:00-17:00`, which is what the live site's JSON-LD asserts. The Contact comp shows **8:30am – 5:30pm**. `hours` and `hoursDisplay` sit together in `firmDetails` so the page and the structured data cannot drift apart; both change together. |
 | **Third-party tags** | The old site loads GA4, GTM, CallRail, Clarity, Ahrefs, Intaker and reCAPTCHA — roughly 600 KB. Recommend GTM only, with the rest configured inside it. The contact page's Google Maps embed also sets cookies on load, so it belongs in the same consent decision. |
 | **Duplicate case results** | Three of the 89 results on `/results` are the same cases the homepage leads with, in different words — the King Soopers slip-and-fall is "Denied → $2.1M" on one and "$250K offered → $2.1M" on the other. Both are the comps'. They become one document each at the Sanity phase; which wording is right is the firm's call. |
-| **Blog posts** | Settled by the import. The comp's thirteen feed cards — five real, eight the designer's invention — are gone: `getBlogPosts()` IS the imported archive, so the index serves real posts and nothing ships with `href: null`. **The archive is 181, not 167**: WordPress holds 167 `post` records and fourteen more articles filed as `page` records (`PAGE_ARTICLES` in `scripts/blog-category-overrides.mjs` says which and why). 23 categories, 22 of which get a tab. Still interim — `src/content/blog`, not Sanity, by request. |
-| **Blog post pages** | All 181 are built and served flat at the root, which is the legacy URL shape. The hand-authored trampoline-waiver article still wins over its imported copy — it is the legacy article *with* corrections — and `getImportedPosts()` drops any slug a hand-authored article claims. Nothing outstanding here. |
-| **Blog body copy** | The built article is the live one, verbatim, with **two deliberate departures**, both asserted in `scripts/diff-comp-blog-post.py`: the live copy's second paragraph stops mid-clause ("…understand what those waivers.") and is completed here, and its closing phone number — a third number, `(303) 747-4404`, matching neither the site's nor the one its own widgets use — is read from `firmDetails` instead. Confirm the wording of both with the firm. |
+| **Blog posts** | Settled by the import. The comp's thirteen feed cards — five real, eight the designer's invention — are gone: `getBlogPosts()` IS the imported archive, so the index serves real posts and nothing ships with `href: null`. **The archive is 186, not 167**: WordPress holds 167 `post` records and fourteen more articles filed as `page` records (`PAGE_ARTICLES` in `scripts/blog-category-overrides.mjs` says which and why), and five more moved over from the practice-area import. 23 categories, 22 of which get a tab. Still interim — `src/content/blog`, not Sanity, by request. |
+| **Blog post pages** | All 186 are built and served flat at the root, which is the legacy URL shape. The hand-authored trampoline-waiver article still wins over its imported copy — it is the legacy article *with* corrections — and `getImportedPosts()` drops any slug a hand-authored article claims. Nothing outstanding here. |
+| **Blog body copy** | The built article is the live one, verbatim, with **two deliberate departures**, both asserted in `scripts/diff-comp-blog-post.py`: the live copy's second paragraph stops mid-clause ("…understand what those waivers.") and is completed here, and its closing `(303) 747-4404` is read from `firmDetails` instead. Confirm the wording of the first with the firm; the phone is settled. |
 | **Fact-check band** | The blog post's footer band claims the reviewing attorney has tried cases "for more than 20 years". Same unverified claim as the homepage's `20 Years` stat. |
 | **Car accident figures** | The detail page ships **six unsourced numbers**, all the comp's. Three are city data — "1 in 4" hit-and-run, 5,900 injury crashes, 84 fatal — each dated "**[year]**" and sourced to "**[CDOT / DRCOG / Denver Open Data]**", both the comp's own placeholders. Three are the firm's own closed-case data — 3.4× over first offer, 41 cases to verdict, 1 in 5 callers told they don't need a lawyer — under a disclaimer that names the period "**[date range]**". Source the three or drop the band; fix the period or drop the three. Colorado's advertising rules care about the second set. |
 | **Statute citations** | The page cites four Colorado statutes (10-4-635, 13-80-101, 24-10-109, 13-21-111). The comp links **all of them to `law.justia.com/codes/colorado/`** — the index, not the section — so they ship as **text, not links**. Either point each at its own statute or leave them as citations. |
@@ -74,6 +82,12 @@ Everything below is deliberately unfinished, not overlooked.
 | **Attorney `sameAs`** | The comp's `Attorney` structured data points every attorney's `sameAs` at the Colorado Supreme Court's attorney **search form** and at `linkedin.com` — neither identifies the person, so neither is ported. Real bar-record and LinkedIn URLs per attorney would make `sameAs` worth adding. |
 | **Team portraits** | Solved for 25 of 27. The comps ship generic stand-ins for three attorneys and nothing for the rest; the live site's Meet Our Attorneys page carries a real, consistent set — one backdrop, one lighting setup, 460×580 apiece — and those are now in `src/assets/team/`. **Alexandra Petroff and Dinorah Gutierrez** appear in the comp but nowhere on the live site, so they have no photograph; their cards fall back to a monogram. |
 | **Eyebrow contrast** | Section eyebrows are 12px uppercase gold on cream. The comps use `#C79A54` (≈2.5:1) on News/Insights/Community and `#B0873C` (≈3.1:1) elsewhere; both fall short of WCAG AA, and neither qualifies as large text at this size. Built to match the comps — worth a decision before launch. |
+
+| **Privacy policy** | Built at `/privacy-policy/`, transcribed from the live page. **Thin by modern standards** — no CCPA/GDPR section, no cookie disclosure, no retention period, no route for a data request — and the site loads third-party tags and embeds a Google Map that sets cookies on load, none of which it mentions. Shipped as the firm's own existing text rather than rewritten, because rewriting a law firm's privacy policy is the firm's call. Review before launch. |
+| **`sitemap.xml`** | Still not built, and now not linked either. `/sitemap/` is the human page the footer points at; the XML file is a crawler artifact whose every URL is absolute off `site:` — the open www-vs-apex decision — so it belongs to `/new-seo-setup` with `robots.txt`. |
+| **Four practice areas are in no directory group** | Defective Helmets, Autonomous Vehicle Accidents, Drunk Driving Accidents and Taxi Accidents, all Denver. All four are built and reachable from sibling sidebars (7–19 inbound links each), but the live hub does not list them and the directory is synced to the hub — so `/practice-areas` does not either. `/sitemap/` lists them because it reads the collection. Add them to the directory, or confirm hub-only. |
+
+| **Favicon** | The firm's DH monogram, taken from the live site's WordPress site-icon and shipped as `favicon.ico` (16+32), `icon-192.png` and `apple-touch-icon.png`. Until now the site served **Astro's default logo**. **No SVG**: no vector source for the mark exists in the comps or `src/assets`, and hand-tracing a monogram is design work rather than a conversion. The mark's green `#314641` is **not on this site's forest ramp** (nearest is `--dh-forest-100` `#2c3b31`; the chrome is `#151e19`) — it is the legacy site's colour, carried over as-is. Worth a decision with the designer. |
 
 **Do not add `AggregateRating` structured data.** The homepage's "5.0 on Google"
 card is presentational copy only. The current site marks the firm up as a
@@ -87,7 +101,7 @@ the things this rebuild fixes.
 | `npm install` | Install dependencies |
 | `npm run dev` | Site and Studio together on `localhost:4321` |
 | `npm run build` | Build to `./dist/` |
-| `npm run check` | The two silent-failure linters above — run after a build |
+| `npm run check` | The three silent-failure linters above — run after a build |
 | `npm run preview` | Preview the build locally |
 | `npm run prep:assets` | One-off: pull and downsample comp images into `src/assets/` |
 

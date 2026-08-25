@@ -90,6 +90,28 @@ DROPPED_SECTIONS = {
 }
 
 
+# Every phone number the firm's own imported copy carried, folded to one token
+# on BOTH sides before comparison.
+#
+# DECLARED, not absorbed. The firm confirmed (303) 756-3812 as its number and
+# the body copy was normalised to it site-wide, so 200-odd pages now differ
+# from the live source by exactly one word. At ~2,000 words a page that is a
+# 0.05% delta, which this audit's 99% threshold would never have noticed — and
+# that is the problem: a real content departure of the same size would pass as
+# noise too. Folding both sides means the audit still cannot see the phone, but
+# for a reason written down rather than by luck.
+#
+# The three numbers that are NOT the firm's stay comparable: the Denver Police
+# non-emergency line and the two Thornton cycling charities were left exactly
+# as the source has them, so drift in those still fails.
+FIRM_PHONES = [
+    "(303) 756-3812", "303-756-3812", "3037563812",
+    "(303) 747-4404", "(303) 747 4404", "303 747 4404", "303-747-4404",
+    "(303) 747-4407", "(303) 474-4404", "(720) 571-8186", "(303) 647-9990",
+]
+
+
+
 def norm(text):
     """Whitespace-collapsed, lowercase, punctuation-normalised.
 
@@ -102,6 +124,9 @@ def norm(text):
                 .replace("“", '"').replace("”", '"')
                 .replace("–", "-").replace("—", "-")
                 .replace(" ", " ").replace("…", "..."))
+    # The firm's phone number, folded on both sides — see FIRM_PHONES.
+    for number in FIRM_PHONES:
+        text = text.replace(number, "<firm-phone>")
     return re.sub(r"\s+", " ", text).strip().lower()
 
 

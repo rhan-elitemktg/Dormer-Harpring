@@ -1,0 +1,168 @@
+---
+// The utility pages' article section — privacy policy, sitemap, 404.
+//
+// A THIRD SIBLING OF `blog/PostArticle` AND `practice/area/AreaArticle`, not a
+// reuse of either, and the reasons are AreaArticle's own one step further on:
+// its props are typed against `PracticeAreaArticle` / `PracticeAreaPageCopy`,
+// so reusing it means fabricating a `readTime`, a `publishedAt`, an `author`, a
+// `faqs` array and a `factCheck` for three pages that have none of them — and
+// each of those shapes is already the GROQ projection it will be after the
+// swap. It would also put the fact-check band, which asserts that a named
+// attorney approved the page, on a privacy policy and a 404.
+//
+// WHAT IT DOES SHARE IS THE LAYOUT AND THE SIDEBAR, by request: the same
+// `1.8fr / 1fr` grid, the same `.pside` card stack in column 2, the same
+// collapse at 980px. `AreaSidebar` is rendered by the PAGE and passed in
+// through a named slot rather than built here, because its three cards need
+// `PracticeAreaPageCopy`, `SidebarAreas` and a post list — data this component
+// has no other use for, and threading it through would make every caller pass
+// five props to get one column.
+//
+// THE RATIO IS AreaArticle's, deliberately: 1.8:1 puts the body at ~753px
+// inside the 1244px container, which lands on `--measure-prose` (760px). A
+// reader moving between a practice-area page and one of these should not feel
+// the column widths shift.
+//
+// EXTRACTION NOTE: `.spage__title` restates `.parea__title`, which already
+// restates `.post__title`. That is a third copy and it is deliberate for now —
+// the shared thing would be an "article head", but `.post__*` and `.parea__*`
+// are class names the comp-diff scripts read (`diff-comp-practice-areas.py`
+// reads `arealist__link`), so renaming them to extract is a change to committed
+// checks rather than a tidy-up. A FOURTH caller is the time to do it properly,
+// the way `.pside*` moved to global.css when the second sidebar arrived.
+import Prose from "../prose/Prose.astro";
+import { formatPostDate } from "../../lib/dates";
+
+interface Props {
+  title: string;
+  /** One sentence under the H1. */
+  lede?: string;
+  /** Portable Text. Renders nothing when empty — the sitemap and 404 pass none. */
+  body?: unknown;
+  /** ISO. With `metaLabel`, renders "Last updated <date>". */
+  stamp?: string;
+  metaLabel?: string;
+}
+
+const { title, lede, body, stamp, metaLabel } = Astro.props;
+---
+
+<section class="spage">
+  <div class="container">
+    <div class="spage__grid">
+      <article class="spage__main">
+        <h1 class="spage__title">{title}</h1>
+
+        {
+          /* `formatPostDate` pins the date to UTC so the build machine's timezone
+             cannot shift it by a day, exactly as the other two templates do. The
+             machine-readable form stays on the <time>. */
+          stamp && metaLabel && (
+            <p class="spage__meta">
+              {metaLabel} <time datetime={stamp}>{formatPostDate(stamp)}</time>
+            </p>
+          )
+        }
+
+        {lede && <p class="spage__lede">{lede}</p>}
+
+        <Prose value={body} />
+
+        {/* Where a page brings its own structure rather than a body: the
+            sitemap's link groups, the 404's routes out. */}
+        <slot />
+      </article>
+
+      <slot name="sidebar" />
+    </div>
+  </div>
+</section>
+
+<style>
+  /* AreaArticle's 72px top, and for its reason: this section opens the page, so
+     the padding is the gap between the site header and the article rather than
+     a boundary between two sections. */
+  .spage {
+    padding-block: var(--space-18) var(--space-section);
+    background: var(--surface-page);
+  }
+
+  /* AreaArticle's grid, deliberately identical — see the note above. */
+  .spage__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr);
+    gap: var(--space-18);
+    align-items: start;
+  }
+
+  .spage__main {
+    grid-column: 1;
+    grid-row: 1;
+    min-width: 0;
+  }
+
+  /* `:global()` bounded by `.spage__grid`, an element in THIS template — the
+     class lands on AreaSidebar's own markup and carries ITS cid, not this
+     file's. The ancestor blind spot README documents is why this cannot simply
+     borrow `.parea :global(.pside)` from AreaArticle's stylesheet. */
+  .spage__grid :global(.pside) {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  /* .parea__title's rules — see the extraction note above. */
+  .spage__title {
+    font-size: var(--display-page-sm);
+    line-height: 1.02;
+    letter-spacing: 0.005em;
+    text-transform: none;
+    text-wrap: balance;
+  }
+
+  .spage__meta {
+    margin-top: var(--space-5);
+    font-size: var(--text-sm);
+    line-height: var(--leading-normal);
+    color: var(--text-meta);
+  }
+
+  .spage__lede {
+    margin-top: var(--space-6);
+    font-size: var(--text-lg);
+    line-height: var(--leading-normal);
+    color: var(--text-muted);
+  }
+
+  /* The body needs the same gap under the head that the other two templates get
+     from PostContents. There is no contents box here — three headings do not
+     want one — so the space is declared instead. */
+  .spage__main :global(.prose) {
+    margin-top: var(--space-8);
+  }
+
+  @media (max-width: 1180px) {
+    .spage__grid {
+      gap: var(--space-12);
+    }
+  }
+
+  @media (max-width: 980px) {
+    .spage {
+      padding-block: var(--space-12) var(--space-section);
+    }
+
+    /* One column, and EVERY explicit placement released with it. A `grid-row: 1`
+       left on the sidebar in a one-column grid puts it above the article — the
+       same trap AreaArticle and PostArticle both record. */
+    .spage__grid {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-12);
+    }
+
+    .spage__main,
+    .spage__grid :global(.pside) {
+      grid-column: auto;
+      grid-row: auto;
+    }
+  }
+</style>

@@ -109,7 +109,7 @@
         {
           "_type": "span",
           "_key": "sdk6",
-          "text": "Dormer Harpring is ready, willing, and able to assist you today. You can reach us by calling (303) 747-4404 or completing the contact form on this page.",
+          "text": "Dormer Harpring is ready, willing, and able to assist you today. You can reach us by calling (303) 756-3812 or completing the contact form on this page.",
           "marks": []
         }
       ]
@@ -2092,7 +2092,7 @@
         {
           "_key": "lds0",
           "_type": "link",
-          "href": "tel:(303) 747-4404"
+          "href": "tel:+13037563812"
         }
       ],
       "children": [
@@ -2121,7 +2121,7 @@
         {
           "_type": "span",
           "_key": "sds2",
-          "text": " at (303) 747-4404, or fill out our convenient online contact form below.",
+          "text": " at (303) 756-3812, or fill out our convenient online contact form below.",
           "marks": []
         }
       ]

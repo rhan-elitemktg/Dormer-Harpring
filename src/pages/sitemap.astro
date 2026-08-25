@@ -1,0 +1,328 @@
+---
+// The HTML sitemap the footer links.
+//
+// NOT `sitemap.xml`. An XML sitemap is a crawler file, referenced from
+// robots.txt rather than from a footer, and every URL in it is absolute —
+// built from `site:` in astro.config.mjs, which is still an open www-vs-apex
+// TODO(launch). Generating one now would bake that guess into ~330 URLs. It
+// belongs to `/new-seo-setup` alongside robots.txt and the canonical layer,
+// which is where HANDOFF.md files it. The footer now points here instead of at
+// the `/sitemap.xml` that was never built.
+//
+// THE GROUPS ARE COMPOSED, NOT STORED. Every list on this page comes from the
+// getter that already owns that collection — the practice-area directory, the
+// blog feed, the team roster. A second hand-maintained list of every page on
+// the site is a list that goes stale the first time anything is added, and this
+// is the one page where being out of date is the whole failure.
+//
+// The one hand-written list is `SITE_PAGES`, because there is no getter that
+// returns "the fixed routes a visitor should see". `ROUTES` is close but is not
+// it: it also holds `thankYou` (noIndex, and arriving there directly tells a
+// stranger their case was received) and `editorialGuidelines` (reserved, never
+// built). Both are excluded below by name rather than by filter, so adding a
+// route does not silently add it here.
+//
+// SURFACE ORDER: cream `.spage` → sunk `.awards` → cream `.ct`. See
+// privacy-policy.astro.
+import Layout from "../layouts/Layout.astro";
+import PageArticle from "../components/page/PageArticle.astro";
+import AreaSidebar from "../components/practice/area/AreaSidebar.astro";
+import AwardsBar from "../components/AwardsBar.astro";
+import ContactDetails from "../components/contact/ContactDetails.astro";
+import { getSitemapPage } from "../data/sitePages";
+import { getAwards } from "../data/awards";
+import { getContactBand, getContactDetails } from "../data/contact";
+import { getPracticeAreaGroups } from "../data/practiceAreas";
+import {
+  getPracticeAreaPages,
+  getPracticeAreaPageCopy,
+  getPracticeAreaSidebarLinks,
+} from "../data/practiceAreaPages";
+import { getPracticeAreaDetails } from "../data/carAccidents";
+import { getBlogPosts, getFeaturedPost } from "../data/blog";
+import { getTeam } from "../data/team";
+import { ROUTES } from "../lib/routePaths";
+
+const [page, awards, details, band, areaGroups, areaPages, areaDetails, areaCopy, sidebarAreas, posts, featured, team] =
+  await Promise.all([
+    getSitemapPage(),
+    getAwards(),
+    getContactDetails(),
+    getContactBand(),
+    getPracticeAreaGroups(),
+    getPracticeAreaPages(),
+    getPracticeAreaDetails(),
+    getPracticeAreaPageCopy(),
+    getPracticeAreaSidebarLinks("denver", ""),
+    getBlogPosts(),
+    getFeaturedPost(),
+    getTeam(),
+  ]);
+
+/* The fixed routes, in the order the nav presents them. `thankYou` and
+   `editorialGuidelines` are deliberately absent — see the note above. */
+const SITE_PAGES: { label: string; href: string }[] = [
+  { label: "Home", href: ROUTES.home },
+  { label: "About", href: ROUTES.about },
+  { label: "Meet Our Attorneys", href: ROUTES.attorneys },
+  { label: "Practice Areas", href: ROUTES.practiceAreas },
+  { label: "Case Results", href: ROUTES.results },
+  { label: "Testimonials", href: ROUTES.testimonials },
+  { label: "Co-Counsel", href: ROUTES.coCounsel },
+  { label: "Community Involvement", href: ROUTES.community },
+  { label: "Articles & Insights", href: ROUTES.blog },
+  { label: "Contact", href: ROUTES.contact },
+  { label: "Privacy Policy", href: ROUTES.privacy },
+  { label: "Sitemap", href: ROUTES.sitemap },
+];
+
+/* THE PRACTICE AREAS COME FROM THE COLLECTION, NOT FROM THE DIRECTORY, and
+   that is the whole reason this block exists rather than reusing `areaGroups`
+   directly.
+   
+   `getPracticeAreaGroups()` is synced to the firm's LIVE HUB — it is the hub's
+   list of links, deliberately, and the hub does not list everything the firm
+   has. Four built pages are missing from it: Defective Helmets, Autonomous
+   Vehicle Accidents, Drunk Driving Accidents and Taxi Accidents, all Denver.
+   They are not orphans — sibling pages' sidebars link them 7-19 times each —
+   but they are absent from the one page whose job is to list them, and a
+   sitemap built off the same source would inherit that hole silently.
+   
+   `assertDirectoryJoin()` does NOT catch this. Its doc comment says drift is
+   "silent in both directions" and HANDOFF says it throws when "a page loses its
+   group", but it only walks directory entries looking for missing pages — never
+   pages looking for a missing group. TODO(launch): the four want a ruling —
+   added to the directory, or deliberately hub-only.
+   
+   So: the directory supplies the group TITLES and their order, which are the
+   firm's own; the collection supplies the members. Complete by construction.
+   It also drops the directory's "Personal Injury → /" row, which is the
+   homepage rather than a practice-area page and which listed `/` twice. */
+const detailBySlug = new Map(areaDetails.map((detail) => [detail.slug, detail]));
+
+const areaSections = areaGroups
+  .map((group) => {
+    const key = group.title.replace(/ Personal Injury$/, "").toLowerCase().replace(/ /g, "-");
+
+    /* THE HEAVY TEMPLATE'S PAGES ARE NOT IN THE COLLECTION. `getPracticeAreaPages()`
+       filters out any slug `getPracticeAreaDetails()` claims, so /denver-car-accident-lawyer/
+       — the one hand-authored 17-section page — is absent from it by design.
+       It IS in the directory, which is where its label and its group come from. */
+    const heavy = group.items.flatMap((item) => {
+      if (!item.href) return [];
+      const slug = item.href.replace(/^\/+|\/+$/g, "");
+      return detailBySlug.has(slug) ? [{ label: item.label, href: item.href }] : [];
+    });
+
+    const light = areaPages
+      .filter((area) => area.city === key)
+      .map((area) => ({ label: area.label, href: area.href }));
+
+    return {
+      title: group.title,
+      items: [...light, ...heavy].sort((a, b) => a.label.localeCompare(b.label)),
+    };
+  })
+  .filter((section) => section.items.length > 0);
+
+/* Every practice-area page has to land in one of those sections. A city key
+   that matched no group title, or a detail page in no group, would drop off the
+   sitemap without a word — the exact failure this block was written to fix, one
+   level up. Throwing at build time is the pattern `assertDirectoryJoin()` and
+   `[slug].astro` already use. */
+const placed = areaSections.reduce((n, section) => n + section.items.length, 0);
+const expected = areaPages.length + areaDetails.length;
+if (placed !== expected) {
+  const cities = [...new Set(areaPages.map((a) => a.city))].sort();
+  throw new Error(
+    `sitemap: ${expected - placed} practice-area page(s) landed in no group. ` +
+      `Cities in the collection: ${cities.join(", ")}. Group titles must read ` +
+      `"<City> Personal Injury" (src/data/practiceAreas.ts), and every heavy detail ` +
+      `page must have a directory entry.`
+  );
+}
+
+/* The roster's own href, which `getTeam` sets only for the people who have a
+   bio page — so this cannot link a route that was never built. Same contract
+   `meet-our-attorneys/[slug].astro` holds. */
+const bios = team.filter((member) => member.href);
+
+/* THE FEATURED POST IS NOT IN `getBlogPosts()`. `/news` renders it in its own
+   panel above the grid, so the feed getter excludes it — and a sitemap that
+   inherits that exclusion silently drops the one post the blog leads with. */
+const allPosts = [featured, ...posts].filter((post) => post.href);
+
+/* One bucket per category, in the order the posts arrive (newest first), so a
+   reader scanning for a topic finds it grouped rather than interleaved. */
+const byCategory = new Map<string, { title: string; posts: typeof allPosts }>();
+for (const post of allPosts) {
+  const bucket = byCategory.get(post.category._key);
+  if (bucket) bucket.posts.push(post);
+  else byCategory.set(post.category._key, { title: post.category.title, posts: [post] });
+}
+const postGroups = [...byCategory.values()].sort((a, b) => a.title.localeCompare(b.title));
+
+/* THE PRACTICE-AREA SIDEBAR, by request — the same three cards those pages
+   carry. Two of its inputs have no natural value on a page that is not a
+   practice area, so both are chosen rather than invented; the reasoning is
+   written out in full in privacy-policy.astro. Short form: the empty current
+   slug makes the window start at the head with nothing highlighted, which the
+   getter already handles, and the related card is relabelled because "Related
+   articles" claims a subject match these pages cannot earn. */
+const sidebarCopy = { ...areaCopy, relatedSidebarLabel: "Latest articles" };
+const latest = allPosts.slice(0, 5);
+
+const total = SITE_PAGES.length + bios.length + placed + allPosts.length;
+---
+
+<Layout
+  title={page.title}
+  description="Every page on the Dormer Harpring site, grouped and linked in one place."
+>
+  <PageArticle title={page.title} lede={page.lede}>
+    <div class="smap">
+      <p class="smap__count">{total} pages</p>
+
+      <section class="smap__group">
+        <h2 class="smap__title">Main pages</h2>
+        <ul class="smap__list">
+          {
+            SITE_PAGES.map((item) => (
+              <li>
+                <a class="smap__link" href={item.href}>
+                  {item.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+
+      <section class="smap__group">
+        <h2 class="smap__title">Attorneys &amp; staff</h2>
+        <ul class="smap__list">
+          {
+            bios.map((member) => (
+              <li>
+                <a class="smap__link" href={member.href}>
+                  {member.name}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+
+      {
+        /* Nine city groups, the directory's titles and order, the collection's
+           members — see the note above. Alphabetical within a group: the
+           directory's own ordering is the hub's, and this is a reference list
+           rather than an editorial one. */
+        areaSections.map((section) => (
+          <section class="smap__group">
+            <h2 class="smap__title">{section.title}</h2>
+            <ul class="smap__list">
+              {section.items.map((area) => (
+                <li>
+                  <a class="smap__link" href={area.href}>
+                    {area.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))
+      }
+
+      {
+        postGroups.map((group) => (
+          <section class="smap__group">
+            <h2 class="smap__title">{group.title}</h2>
+            <ul class="smap__list">
+              {group.posts.map((post) => (
+                <li>
+                  <a class="smap__link" href={post.href!}>
+                    {post.title}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))
+      }
+    </div>
+
+    <AreaSidebar slot="sidebar" page={sidebarCopy} areas={sidebarAreas} related={latest} />
+  </PageArticle>
+
+  <AwardsBar awards={awards} tone="sunk" />
+  <ContactDetails details={details} form={band.form} />
+</Layout>
+
+<style>
+  .smap {
+    margin-top: var(--space-10);
+  }
+
+  .smap__count {
+    margin-bottom: var(--space-8);
+    font-family: var(--font-ui);
+    font-weight: 600;
+    font-size: var(--text-sm);
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--text-meta);
+  }
+
+  .smap__group + .smap__group {
+    margin-top: var(--space-10);
+    padding-top: var(--space-10);
+    border-top: 1px solid var(--dh-line);
+  }
+
+  .smap__title {
+    margin-bottom: var(--space-5);
+    font-size: var(--display-6);
+    text-transform: none;
+  }
+
+  /* Two columns from the start: these lists run to 48 entries in Denver's
+     group and 30 in a busy blog category, and a single column of short link
+     text down a 760px measure is a very long page with very short lines.
+     Collapses to one below 640px, where two columns of link text would wrap
+     mid-label. */
+  .smap__list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-2) var(--space-8);
+    list-style: none;
+    padding: 0;
+  }
+
+  .smap__link {
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    line-height: var(--leading-snug);
+    color: var(--text-body);
+    /* Declared transparent up front and transitioned on colour: text-decoration
+       itself cannot be animated, but its colour and thickness can. The same
+       rule `.prose__link` follows. */
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-underline-offset: 3px;
+    transition:
+      color var(--transition),
+      text-decoration-color var(--transition);
+  }
+
+  .smap__link:hover {
+    color: var(--accent);
+    text-decoration-color: currentColor;
+  }
+
+  @media (max-width: 640px) {
+    .smap__list {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

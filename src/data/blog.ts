@@ -582,10 +582,11 @@ export async function getBlogPostArticles(): Promise<BlogPostArticle[]> {
         "recoverable.",
 
       "## Contact a Personal Injury Lawyer Today",
-      // The live article closes on (303) 747-4404, a third number after the
-      // (303) 756-3812 its own widgets use. Neither is the number this site
-      // publishes, and `site.ts` is the only place a phone number may live —
-      // so it is read from there rather than transcribed.
+      // The live article closes on (303) 747-4404, a different number from the
+      // (303) 756-3812 its own widgets use. The second one is the firm's, and
+      // is now what `site.ts` publishes — but this still reads from there
+      // rather than transcribing it, because site.ts is the only place a phone
+      // number may live and that does not change with which number wins.
       "A signed waiver does not have to be the final word after a trampoline park " +
         "injury in Denver. At **Dormer Harpring**, we can review the waiver, the " +
         "facility’s conduct, and the facts of what happened to determine what " +

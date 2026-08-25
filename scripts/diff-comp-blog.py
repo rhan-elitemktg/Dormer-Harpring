@@ -72,6 +72,23 @@ def present(label, needles):
 
 built_text = unesc(built)
 
+# site.ts is the single source for the firm's phone number, and a .py script
+# cannot import a .ts module — so it is read out by regex rather than repeated.
+SITE_PHONE = re.search(
+    r'phone:\s*"([^"]+)"',
+    open("src/data/site.ts", encoding="utf-8").read(),
+).group(1)
+
+SITE_SMS = re.search(
+    r'sms:\s*"([^"]+)"',
+    open("src/data/site.ts", encoding="utf-8").read(),
+).group(1)
+
+# BOTH numbers the comps carry, and the comps are wrong about both. Excluded
+# from the info-card value comparison and asserted as a declared departure
+# instead — see EXPECTED.
+COMP_NUMBERS = ("(866) 683-6894", "(720) 734-6230")
+
 markup = comp[: comp.index('<script type="text/x-dc"')]
 markup_nofor = re.sub(r"<sc-for.*?</sc-for>", "", markup, flags=re.S)
 
@@ -200,7 +217,7 @@ blk = comp[comp.index("const infoCardsData = [") : comp.index("const infoCards =
 
 print("\nCONTACT INFO CARDS")
 present("labels", re.findall(r"label: '([^']+)'", blk))
-present("values", re.findall(r"value: '([^']+)'", blk))
+present("values", [v for v in re.findall(r"value: '([^']+)'", blk) if not any(n in v for n in COMP_NUMBERS)])
 
 
 # ---------------------------------------------------------------- deliberate diffs
@@ -209,6 +226,21 @@ present("values", re.findall(r"value: '([^']+)'", blk))
 grid_html = built[built.index('class="posts__grid"') :]
 
 EXPECTED = [
+    (
+        # The comps' own infoCardsData values are excluded from present("values")
+        # above; both numbers are asserted here instead, against site.ts.
+        "both phone numbers are the firm's, not the comps'",
+        SITE_PHONE in built_text
+        and SITE_SMS in built_text
+        and not any(n in built_text for n in COMP_NUMBERS),
+        "the comps are wrong about BOTH numbers and this project had taken both from them. Call: "
+        "the comps say (866) 683-6894 and this codebase recorded it as the firm's choice; the firm "
+        "confirmed (303) 756-3812, the number its live site publishes in JSON-LD and on its "
+        "contact page. Text: the comps say (720) 734-6230 across 29 files; the firm confirmed "
+        "(720) 730-7997, which the live site publishes 864 times and which the comps carry only "
+        "inside commented-out markup. Both retired, neither kept as a fallback. site.ts is the "
+        "only place a phone number may live, so this reads from there",
+    ),
     (
         "the category row sits below the featured panel, not above it",
         built.index('class="cats"') > built.index('class="feat"')

@@ -66,8 +66,27 @@ const organization = legalServiceSchema(firm, siteUrl);
     {meta.ogImage && <meta property="og:image" content={meta.ogImage} />}
     <meta name="twitter:card" content="summary_large_image" />
 
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    {/* THE FIRM'S OWN MARK — the DH monogram, white on #314641, taken from the
+        live site's WordPress site-icon (uploads/2020/10/cropped-favicon-1-1.jpg).
+        Until now this shipped ASTRO'S DEFAULT LOGO on all 332 pages.
+
+        Generated from the 512px original rather than from WordPress's own 32px
+        crop: that one is a JPEG already downsampled once, so resizing it again
+        compounds the artifacts. favicon.ico carries 16 and 32 as PNG payloads.
+
+        NO SVG, deliberately. There is no vector source for this mark anywhere —
+        not in the comps (their SVGs are the practice-area icons), not in
+        src/assets — and hand-tracing a monogram is design work, not a
+        conversion. If the firm produces one, it goes here first with
+        `type="image/svg+xml"` and browsers prefer it over the .ico.
+
+        TODO(launch): the mark's #314641 is NOT on this site's forest ramp — the
+        nearest is --dh-forest-100 #2c3b31, and the chrome is #151e19. It is the
+        legacy site's green, carried over as-is because it is the firm's asset.
+        Worth a decision with the designer. */}
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
     <Font cssVariable="--font-anton" preload />
     <Font cssVariable="--font-hanken" preload />

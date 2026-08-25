@@ -8,7 +8,7 @@ is only half the picture. Read it at the start of every session, including when 
 looks small enough not to need it: the last three things that went wrong here were all
 already written down.
 
-Also read `README.md` when the task touches setup, the two `check:` scripts, or anything on
+Also read `README.md` when the task touches setup, the three `check:` scripts, or anything on
 the pre-launch decision list.
 
 ---
@@ -30,16 +30,19 @@ npm run dev                  # site + Studio, both on :4321
 npm run build && npm run check
 ```
 
-`npm run check` is not optional. It runs two linters for two failure modes the build cannot
-see, both of which fail **silently** — README.md has the full explanation:
+`npm run check` is not optional. It runs three linters for three failure modes the build
+cannot see, all of which fail **silently** — README.md has the full explanation:
 
 - `check:styles` — a scoped CSS rule that can never match, because the class it targets was
   passed to a child component and so never carries this file's `data-astro-cid`.
 - `check:tokens` — an undefined `var()`, which invalidates its whole declaration rather than
   degrading. `padding: var(--space-11) var(--space-13)` with no `--space-13` renders *no*
   padding, not most of it.
+- `check:links` — an `<a>` pointing at a page that was never built. Astro renders whatever
+  string it is handed, so this is a green build and a production 404. It caught 984 of them
+  in the footer, on every page of the site.
 
-`check:styles` reads `dist/`, so build first. Dev runs on 4321 and that exact origin is
+`check:styles` and `check:links` read `dist/`, so build first. Dev runs on 4321 and that exact origin is
 registered with Sanity CORS — don't move it.
 
 ## Architecture: the Sanity swap
@@ -165,7 +168,7 @@ src/lib/        routePaths · schema · seo · video
 src/styles/     global.css — tokens, .btn, .container, .section, .prose, .rail-dots
 src/scripts/    rail · loadMore · phoneMask (self-executing, imported by components)
 src/assets/     optimized images, by subject
-scripts/        the two check:* linters · prep-assets.mjs (one-off comp extraction)
+scripts/        the three check:* linters · prep-assets.mjs (one-off comp extraction)
                 diff-comp-practice-areas.py (built page vs comp content, run by hand)
 ```
 
