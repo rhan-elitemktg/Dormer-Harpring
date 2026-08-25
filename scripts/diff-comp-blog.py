@@ -72,6 +72,17 @@ def present(label, needles):
 
 built_text = unesc(built)
 
+# site.ts is the single source for the firm's phone number, and a .py script
+# cannot import a .ts module — so it is read out by regex rather than repeated.
+SITE_PHONE = re.search(
+    r'phone:\s*"([^"]+)"',
+    open("src/data/site.ts", encoding="utf-8").read(),
+).group(1)
+
+# The comps' phone number. Excluded from the info-card value comparison and
+# asserted as a declared departure instead — see EXPECTED.
+COMP_PHONE = "(866) 683-6894"
+
 markup = comp[: comp.index('<script type="text/x-dc"')]
 markup_nofor = re.sub(r"<sc-for.*?</sc-for>", "", markup, flags=re.S)
 
@@ -200,7 +211,7 @@ blk = comp[comp.index("const infoCardsData = [") : comp.index("const infoCards =
 
 print("\nCONTACT INFO CARDS")
 present("labels", re.findall(r"label: '([^']+)'", blk))
-present("values", re.findall(r"value: '([^']+)'", blk))
+present("values", [v for v in re.findall(r"value: '([^']+)'", blk) if COMP_PHONE not in v])
 
 
 # ---------------------------------------------------------------- deliberate diffs
@@ -209,6 +220,16 @@ present("values", re.findall(r"value: '([^']+)'", blk))
 grid_html = built[built.index('class="posts__grid"') :]
 
 EXPECTED = [
+    (
+        # The comp's own infoCardsData value is excluded from present("values")
+        # above; the number is asserted here instead, against site.ts.
+        "the phone number is the firm's, not the comp's",
+        SITE_PHONE in built_text and COMP_PHONE not in built_text,
+        "the comps carry (866) 683-6894 on every interior header and this project recorded it as "
+        "the firm's choice; it was not. The firm confirmed (303) 756-3812 — the number its live "
+        "site publishes in JSON-LD and on its contact page — and the 866 number is retired. "
+        "site.ts is the only place a phone number may live, so this reads from there",
+    ),
     (
         "the category row sits below the featured panel, not above it",
         built.index('class="cats"') > built.index('class="feat"')

@@ -7,7 +7,7 @@
   "statewide": false,
   "resource": false,
   "metaTitle": "Denver Tow Truck Accident Lawyer | Free Consultation Available",
-  "metaDescription": "Injured in a tow truck accident? A Denver tow truck accident lawyer can help. Contact us for a free consultation: 303-756-3812.",
+  "metaDescription": "Injured in a tow truck accident? A Denver tow truck accident lawyer can help. Contact us for a free consultation: (303) 756-3812.",
   "body": [
     {
       "_type": "image",
@@ -76,7 +76,7 @@
         {
           "_key": "l35a",
           "_type": "link",
-          "href": "tel:+13037474404"
+          "href": "tel:+13037563812"
         }
       ],
       "children": [
@@ -104,7 +104,7 @@
         {
           "_type": "span",
           "_key": "s35b",
-          "text": "(303) 747-4404",
+          "text": "(303) 756-3812",
           "marks": [
             "l35a",
             "strong"
@@ -1605,7 +1605,7 @@
         {
           "_key": "l3b2",
           "_type": "link",
-          "href": "tel:+13037474404"
+          "href": "tel:+13037563812"
         },
         {
           "_key": "l3b5",
@@ -1652,7 +1652,7 @@
         {
           "_type": "span",
           "_key": "s3b3",
-          "text": "(303) 747-4404",
+          "text": "(303) 756-3812",
           "marks": [
             "l3b2",
             "strong"

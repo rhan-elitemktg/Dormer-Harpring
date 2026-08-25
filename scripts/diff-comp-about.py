@@ -72,6 +72,17 @@ def present(label, needles):
 
 built_text = unesc(built)
 
+# site.ts is the single source for the firm's phone number, and a .py script
+# cannot import a .ts module — so it is read out by regex rather than repeated.
+SITE_PHONE = re.search(
+    r'phone:\s*"([^"]+)"',
+    open("src/data/site.ts", encoding="utf-8").read(),
+).group(1)
+
+# The comps' phone number. Excluded from the info-card value comparison and
+# asserted as a declared departure instead — see EXPECTED.
+COMP_PHONE = "(866) 683-6894"
+
 
 # ---------------------------------------------------------------- section prose
 # Every <h1>/<h2>/<h3> and every body <p> the comp's markup carries, in order.
@@ -168,7 +179,7 @@ comp_card_values = re.findall(r"value: '([^']+)'", blk)
 
 print("\nCONTACT INFO CARDS")
 present("labels", comp_card_labels)
-present("values", comp_card_values)
+present("values", [v for v in comp_card_values if COMP_PHONE not in v])
 
 
 # ---------------------------------------------------------------- reviews
@@ -184,6 +195,16 @@ cmp("reviewer names / order", comp_review_names, built_review_names)
 # Each of these IS a difference from the comp, made on purpose. Asserted so the
 # diff stays honest — if one is ever reverted, this script says so.
 EXPECTED = [
+    (
+        # The comp's own infoCardsData value is excluded from present("values")
+        # above; the number is asserted here instead, against site.ts.
+        "the phone number is the firm's, not the comp's",
+        SITE_PHONE in built_text and COMP_PHONE not in built_text,
+        "the comps carry (866) 683-6894 on every interior header and this project recorded it as "
+        "the firm's choice; it was not. The firm confirmed (303) 756-3812 — the number its live "
+        "site publishes in JSON-LD and on its contact page — and the 866 number is retired. "
+        "site.ts is the only place a phone number may live, so this reads from there",
+    ),
     (
         # Searched in the RAW html, not `built_text` — alt lives in an attribute,
         # and stripping tags takes the attribute with them.

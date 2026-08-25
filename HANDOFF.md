@@ -537,23 +537,68 @@ every single time since the script was written. The linter guarding a silent fai
 itself failing silently. It exits 1 now. **Worth checking the same thing about any script this
 project trusts** — `check:tokens` and all five comp diffs were verified to exit non-zero.
 
-### The imported bodies carried a phone number spelled nine ways
+### THE PHONE NUMBER IS `(303) 756-3812`, and the 866 number is retired
 
-68 `tel:` links in imported body copy dial `(303) 747-4404`, in **nine different spellings** —
-`tel:(303) 747-4404`, `tel: +1(303) 747-4404`, `tel:303 747 4404` among them. The ones with a
-space straight after the colon do not reliably dial at all. 49 were malformed; 19 were already
-E.164. All 68 are E.164 now, and `normalizeHref()` in the converter does it on import.
+**Settled by the firm, and it reverses what this codebase said.** `site.ts` recorded
+`(866) 683-6894` — the comps' number — as "the firm's choice". It was not. The correct number is
+the one the live site publishes in its JSON-LD and on its contact page, and it is now
+`firmDetails.phone` / `phoneE164`, so the header, footer, every `tel:` href, the JSON-LD and the
+Thank You lede all follow from one line.
 
-**The digits were deliberately preserved.** Whether these pages should dial `(303) 747-4404` at
-all — the site's own number is `(866) 683-6894`, emitted 1,645 times by the chrome — is a
-content decision still open under README's phone row. As plain text the legacy numbers reach
-**197 of 329 pages** (187 with `747-4404`, 10 with `756-3812`). Doing that one as a scripted
-pass over `src/content/*.json` is much cheaper than hand-editing 197 documents in the Studio
-afterwards, so it is worth settling before the swap.
+The 866 number is **retired, not kept as a fallback**: a second number in the data layer is a
+second number that can ship by accident. It appears on **0 pages** now.
+
+**The imported body copy carried SIX different firm numbers, not two.** This is the part worth
+not re-deriving — the last version of this file said "197 of 329 pages" off a two-number count,
+and that was wrong:
+
+| In imported copy | Count | |
+|---|---|---|
+| `(303) 747-4404` | 240 text + 69 `tel:` | the main one, in five spellings |
+| `303-756-3812` | 10 | already right, wrong display format |
+| `(720) 571-8186` | 4 | "call Dormer Harpring at …", four blog posts |
+| `(303) 747-4407` | 2 | last digit differs, same sentence shape |
+| `(303) 474-4404` | 2 | 747 transposed, `thornton-spinal-cord-injury-lawyer` |
+| `(303) 647-9990` | 1 | "Dormer Harpring … Call us at …" |
+
+All 330 rewritten. Every one was verified by reading its whole block, not its span — the number
+is usually its own span, because it was a link on the live site, so 90 characters of context
+shows nothing.
+
+**THREE NUMBERS IN THE SAME COPY ARE NOT THE FIRM'S AND WERE LEFT ALONE**: `(720) 913-2000` (the
+Denver Police non-emergency line, on two posts) and `(303) 538-7200` / `(303) 417-1544` (Bike
+Thornton and Bicycle Colorado, on `thornton-bicycle-accident-lawyer`). **A regex over
+phone-shaped strings is the trap here** — it also matches sixty-odd Shutterstock asset ids in
+image filenames, two X/Twitter status ids and a PACER document id. The replacement list is
+written down, the same way `DROPPED_SECTIONS` is.
+
+`(303) 555-0100` is **not** a firm number either: it is the `placeholder` and `title` hint on the
+two forms' phone inputs, an example of the format the VISITOR should type, on 326 pages. 555-01xx
+is the reserved fictional range. `site.ts` used to claim it "is not used anywhere", which was
+wrong in a way that invited someone to grep for it and delete it.
+
+**Four committed checks had to change with it**, and three of them were asserting the old number:
+
+- `diff-comp-blog-post.py` asserted `"(866) 683-6894" in built_text and "756-3812" not in
+  built_text` — it was forbidding the right answer.
+- `diff-comp-about.py` and `diff-comp-blog.py` compare the comps' info-card values against the
+  built page, and the comps carry the 866 number. The phone is now excluded from that comparison
+  and asserted as a **declared departure** instead, which was tested by reverting the number and
+  watching it fail.
+- All three now read the number out of `src/data/site.ts` by regex rather than repeating the
+  literal. A `.py` script cannot import a `.ts` module, but it can read one.
+- `audit-practice-area-fidelity.py` folds every firm number to one token on **both** sides. It
+  would otherwise have passed on luck: one word in ~2,000 is a 0.05% delta against a 99%
+  threshold, so a real content departure of that size reads as noise too.
+
+**The `tel:` hrefs were separately malformed** — 68 of them, in nine spellings, including
+`tel:(303) 747-4404` and `tel: 303 747 4404`. The ones with a space after the colon do not
+reliably dial. `normalizeHref()` in the converter emits E.164 now, so the import cannot
+reintroduce them, and `check:links` fails on any that appear.
 
 **Applied surgically, never by re-importing.** `mkKey` is a single run-scoped counter and a
-re-run rewrites every `_key` across all 290 content files. The diff was 49 lines, all href
-values; the 35,179 `_key`s were untouched. Same gate as always —
+re-run rewrites every `_key` across all 313 content files. Every changed line was confirmed to be
+a phone line and nothing else; the 35,179 `_key`s are untouched. Same gate as always —
 `git status --porcelain src/content` after any converter change.
 
 ## What this closed
@@ -630,12 +675,9 @@ plain-text treatment.
 **Waiting on the firm** — content, not code. `README.md` has the full table. Unchanged: the seven
 attorney emails, the office address and hours, the `$70M+ / 20 Years` stat claims.
 
-**The legacy phone numbers in imported body copy are now measured, and it is 197 of 329 pages** —
-187 carry `(303) 747-4404`, 10 carry `(303) 756-3812`, against the site's own `(866) 683-6894`.
-`firmDetails` is not consulted for text that came from WordPress, by design: it is the firm's own
-published copy. The `tel:` hrefs among them have been normalised to E.164 (see above), but the
-**digits are untouched and the decision is open**. It is worth taking before the Sanity swap —
-one scripted pass over `src/content/*.json` now, versus 197 documents by hand in the Studio.
+**The phone number is SETTLED and no longer waiting on anyone**: `(303) 756-3812` site-wide,
+including the imported body copy, which carried six different firm numbers. See above. What is
+still open is only the display vs CallRail tracking split, if dynamic insertion returns.
 
 **Waiting on the designer**
 

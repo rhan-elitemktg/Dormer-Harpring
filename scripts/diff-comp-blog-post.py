@@ -29,6 +29,15 @@ BUILT = (
 comp = open(COMP, encoding="utf-8", errors="replace").read()
 built = open(BUILT, encoding="utf-8", errors="replace").read()
 
+# site.ts is the single source for the firm's phone number, and a .py script
+# cannot import a .ts module — so it is read out by regex rather than repeated.
+# Repeating the literal is exactly what made the phone assertion below wrong
+# when the number changed.
+SITE_PHONE = re.search(
+    r'phone:\s*"([^"]+)"',
+    open("src/data/site.ts", encoding="utf-8").read(),
+).group(1)
+
 
 def unesc(s):
     """Strip tags and entities, normalise quotes and whitespace."""
@@ -326,11 +335,12 @@ EXPECTED = [
     ),
     (
         "the phone number is the site's, not the article's",
-        "(866) 683-6894" in built_text
-        and "747-4404" not in built_text
-        and "756-3812" not in built_text,
-        "the live article closes on a third number; site.ts is the only place a phone number may "
-        "live, so it is read from there rather than transcribed",
+        SITE_PHONE in built_text and "747-4404" not in built_text,
+        "the live article closes on (303) 747-4404, which is not the number the firm publishes; "
+        "site.ts is the only place a phone number may live, so it is read from there rather than "
+        "transcribed. Asserted against site.ts rather than a literal, because this assertion has "
+        "already been wrong once — it hardcoded (866) 683-6894 and forbade 756-3812, and when the "
+        "firm confirmed 756-3812 as correct it was forbidding the right answer",
     ),
     (
         "the sidebar form's button reads 'Review my case'",

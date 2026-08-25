@@ -7,7 +7,7 @@
   "statewide": false,
   "resource": false,
   "metaTitle": "Greeley Personal Injury Lawyer | Free Consultation Available",
-  "metaDescription": "To learn more about compensation in your claim, schedule a meeting with a Greeley personal injury lawyer. Call us at (303) 747-4404.",
+  "metaDescription": "To learn more about compensation in your claim, schedule a meeting with a Greeley personal injury lawyer. Call us at (303) 756-3812.",
   "body": [
     {
       "_type": "image",
@@ -73,7 +73,7 @@
         {
           "_type": "span",
           "_key": "s2ws",
-          "text": "(303) 747-4404",
+          "text": "(303) 756-3812",
           "marks": [
             "strong"
           ]
@@ -1767,7 +1767,7 @@
         {
           "_key": "l33b",
           "_type": "link",
-          "href": "tel:+13037474404"
+          "href": "tel:+13037563812"
         },
         {
           "_key": "l33e",
@@ -1813,7 +1813,7 @@
         {
           "_type": "span",
           "_key": "s33c",
-          "text": "(303) 747-4404",
+          "text": "(303) 756-3812",
           "marks": [
             "l33b",
             "strong"

@@ -62,14 +62,27 @@ export interface FirmDetails {
 }
 
 /**
- * Phone: (866) 683-6894 site-wide — the number the comps carry on every
- * interior header, and the firm's choice over the (303) 756-3812 the live
- * site's JSON-LD and contact page still list. The homepage comp's
- * (303) 555-0100 is a placeholder and is not used anywhere.
+ * Phone: (303) 756-3812 site-wide — the number the live site publishes in its
+ * JSON-LD and on its contact page, confirmed by the firm as the correct one.
+ *
+ * THIS REVERSES AN EARLIER DECISION, deliberately. The comps carry
+ * (866) 683-6894 on every interior header and this file recorded that as "the
+ * firm's choice"; it was not. The 866 number is retired — it is not a fallback
+ * and it is not kept anywhere, because a second number in the data layer is a
+ * second number that can ship by accident.
+ *
+ * (303) 555-0100 is NOT a third number and does not belong here: it is the
+ * `placeholder` and `title` hint on the two forms' phone inputs — an example of
+ * the format the VISITOR should type, on 326 pages. 555-01xx is the reserved
+ * fictional range, which is what makes it safe for that. This file's comment
+ * used to say it "is not used anywhere", which was wrong in a way that invited
+ * someone to grep for it and delete it.
  *
  * Changing it is this one line plus `phoneE164`: nothing else in the codebase
  * may hardcode a number, so the header, the footer, every `tel:` href, the
- * JSON-LD and the Thank You lede all follow.
+ * JSON-LD and the Thank You lede all follow. Imported WordPress body copy is
+ * the exception and had to be rewritten separately — it carried SIX different
+ * firm numbers across 200 pages; see HANDOFF.md.
  * TODO(launch): if CallRail dynamic insertion returns, this stays the static
  * fallback and the swap pool is configured in the CallRail dashboard.
  */
@@ -77,8 +90,8 @@ export async function getFirmDetails(): Promise<FirmDetails> {
   return {
     name: "Dormer Harpring",
     legalName: "Dormer Harpring, LLC",
-    phone: "(866) 683-6894",
-    phoneE164: "+18666836894",
+    phone: "(303) 756-3812",
+    phoneE164: "+13037563812",
     sms: "(720) 734-6230",
     smsE164: "+17207346230",
     address: {
