@@ -1,0 +1,45 @@
+---
+// The privacy policy, transcribed from the live page. See
+// `getPrivacyPolicyPage()` for the three deliberate departures from it — the
+// phone number, the duplicated heading, and which date is stamped.
+//
+// SURFACE ORDER, which nothing in the build checks (see HANDOFF):
+//   cream `.spage` → sunk `.awards` → cream `.ct`
+// The light practice-area template's own order, and for its reason: `.ct` is
+// cream, so something visibly not-cream has to sit between them. `lifted` is
+// `--dh-cream-50` at 1.009:1 against cream-100 — the invisible-surface trap —
+// so the awards bar takes `sunk` here exactly as it does there and on About.
+//
+// This page WAS a dead link on all 328 pages of the site until now: the footer
+// linked `ROUTES.privacy` and nothing built it. `scripts/check-links.py`
+// declared it in KNOWN_DEAD; that entry is gone with this file.
+import Layout from "../layouts/Layout.astro";
+import PageArticle from "../components/page/PageArticle.astro";
+import AwardsBar from "../components/AwardsBar.astro";
+import ContactDetails from "../components/contact/ContactDetails.astro";
+import { getPrivacyPolicyPage } from "../data/sitePages";
+import { getAwards } from "../data/awards";
+import { getContactBand, getContactDetails } from "../data/contact";
+
+const [page, awards, details, band] = await Promise.all([
+  getPrivacyPolicyPage(),
+  getAwards(),
+  getContactDetails(),
+  getContactBand(),
+]);
+---
+
+<Layout
+  title={page.title}
+  description="How Dormer Harpring collects, uses and protects the information you share through this website."
+>
+  <PageArticle
+    title={page.title}
+    body={page.body}
+    stamp={page.updatedAt}
+    metaLabel={page.updatedLabel}
+  />
+
+  <AwardsBar awards={awards} tone="sunk" />
+  <ContactDetails details={details} form={band.form} />
+</Layout>

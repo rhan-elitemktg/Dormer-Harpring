@@ -11,9 +11,12 @@ That gap is not hypothetical. Three hrefs in the footer — /privacy-policy/,
 /editorial-guidelines/ and /sitemap.xml — were on every page of the site, which
 was 984 dead links, and they went unnoticed through five comp-diff scripts and
 two linters because the only sweep that ever found them was written ad hoc,
-read once, and thrown away. (Editorial Guidelines has since been taken out of
-the footer, and this check failed on the now-stale declaration rather than
-letting it rot — which is the second half of the contract below, working.) An earlier sweep reported "2,013 body links, none
+read once, and thrown away.
+
+All three are closed now, and KNOWN_DEAD is empty. Each was closed by a change
+that made this check FAIL on the stale declaration rather than pass quietly —
+which is the second half of the contract below, and the reason the table shrank
+instead of growing. An earlier sweep reported "2,013 body links, none
 unserved" and was also not kept; it counted body links only, which is exactly
 how the footer's stayed invisible. A number that cannot be re-checked cannot
 fail. This one can.
@@ -88,16 +91,19 @@ ANCHOR = re.compile(r"<a\b[^>]*?\bhref\s*=\s*([\"'])(.*?)\1", re.I | re.S)
 # --------------------------------------------------------------------------
 
 # target path (comparison form) -> why it is still dead
-KNOWN_DEAD: dict[str, str] = {
-    "/privacy-policy": (
-        "In RESERVED_PATHS and in EXCLUDED_SLUGS — promised, not built. No comp "
-        "exists for it. Linked from the footer, so this is ~328 dead links, not one."
-    ),
-    "/sitemap.xml": (
-        "Belongs to the /new-seo-setup phase, which builds it. Linked from the "
-        "footer on every page in the meantime."
-    ),
-}
+#
+# EMPTY, and it took four rounds to get here. It held the footer's three —
+# /privacy-policy/, /editorial-guidelines/ and /sitemap.xml, 984 dead links
+# across every page of the site. Editorial Guidelines came out of the footer;
+# the privacy policy and a human /sitemap/ were built and the footer repointed
+# at the latter. Each time, this check failed on the STALE DECLARATION rather
+# than passing quietly, which is the half of the contract that made the table
+# shrink instead of grow.
+#
+# /sitemap.xml is not "still dead" — nothing links it any more. It is also not
+# built: it belongs to /new-seo-setup, because every URL in it is absolute off
+# `site:` in astro.config.mjs, which is an open www-vs-apex TODO(launch).
+KNOWN_DEAD: dict[str, str] = {}
 
 # page path -> how many href="#" that page is still allowed to carry
 KNOWN_PLACEHOLDER: dict[str, int] = {

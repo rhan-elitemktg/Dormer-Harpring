@@ -43,7 +43,7 @@ last handoff and it moves the project's biggest dependency off the critical path
 **The blog archive is 186 posts, not 167.** WordPress has two post types and the article-shaped
 content is spread across both — see below.
 
-Marker inventory: **34 `TODO(launch)`, 5 `TODO(video)`, 4 `TODO(sanity)`, 1 `TODO(content)`.**
+Marker inventory: **37 `TODO(launch)`, 5 `TODO(video)`, 4 `TODO(sanity)`, 1 `TODO(content)`.**
 Grep all four before launch, not just the first — and **grep with the colon**. `TODO(launch)` also
 appears in eleven comments that DISCUSS a marker rather than being one, which is how this line
 previously read 43. `grep -rn "TODO(launch):"` is the count that means anything.
@@ -601,6 +601,89 @@ re-run rewrites every `_key` across all 313 content files. Every changed line wa
 a phone line and nothing else; the 35,179 `_key`s are untouched. Same gate as always —
 `git status --porcelain src/content` after any converter change.
 
+## The three utility pages, on the light template's shell
+
+`/privacy-policy/`, `/sitemap/` and `404` — built by request on the practice-area template's
+look. **`KNOWN_DEAD` in `check-links.py` is now EMPTY**: the footer's 984 dead links are gone,
+and the only dead links left on the site are the nine `href="#"` placeholders.
+
+`components/page/PageArticle.astro` is a **third sibling** of `PostArticle` and `AreaArticle`,
+not a reuse of either, and the reasons are AreaArticle's own one step further on:
+
+- Reusing `AreaArticle` means fabricating a `readTime`, `publishedAt`, `author`, `faqs` and
+  `factCheck` for three pages that have none.
+- **It would put the fact-check band on a privacy policy** — a band that says the page was
+  "written, edited, and reviewed by a team of legal writers" and names the attorney who approved
+  it. True of 104 service pages and 186 articles. Not true of a 404.
+- **It would put "Denver Practice Areas" in a sidebar on a 404.** That card is a window centred
+  on the CURRENT page among its city's siblings. There is no current page and no city.
+
+So: one column, no sidebar, no byline, no FAQ, no fact band, and the same three surfaces —
+cream `.spage` → sunk `.awards` → cream `.ct`.
+
+**`.spage__title` is a THIRD copy of `.post__title`.** Deliberate for now: the shared thing would
+be an "article head", but `.post__*` and `.parea__*` are class names the comp-diff scripts read,
+so extracting means changing committed checks rather than tidying. A **fourth** caller is the
+time to do it, the way `.pside*` moved to `global.css` when the second sidebar arrived.
+
+### Privacy policy — transcribed, with three departures
+
+From the live page (WP page id 1061). The wording is the firm's throughout; the departures are
+structural or factual:
+
+1. **The phone number is read from `firmDetails`**, not transcribed — the live page closes on
+   `(303) 747-4404`, one of the six numbers the imported bodies were normalised off.
+2. **The source's own `<h2>` is dropped and its three `<h3>`s promoted.** The live body opens on
+   "Privacy Policy for Personal Injury Law Firm Dormer Harpring", which is the title said twice:
+   WordPress renders no H1 from `content.rendered`, so on the live page that h2 IS the heading.
+3. **`updatedAt` is WordPress's `modified`** (2026-01-20), not its `date` (2019-01-17) — the same
+   call the practice-area template makes.
+
+`TODO(launch)`: it is thin. No CCPA/GDPR section, no cookie disclosure, no retention period, no
+route for a data request — and the site loads third-party tags and embeds a Google Map that sets
+cookies on load, none of which it mentions. Shipped as the firm's own text because rewriting a
+law firm's privacy policy is the firm's call. README has the row.
+
+### `/sitemap/` is the HUMAN page, and `sitemap.xml` is still unwritten
+
+The footer linked `/sitemap.xml` and nothing built it. An XML sitemap is a crawler file
+referenced from `robots.txt`, not from a footer, and every URL in it is absolute off `site:` —
+the open www-vs-apex `TODO(launch)`. Writing it now bakes that guess into ~330 URLs, so it stays
+with `/new-seo-setup`. The footer points at the human page instead.
+
+**328 links, every built page except `/thank-you/` (noIndex) and `/tokens/` (the throwaway).
+Zero duplicates.** Verified by differencing the rendered hrefs against `dist/`.
+
+**IT READS THE COLLECTION, NOT THE DIRECTORY, and that is load-bearing.** Two traps it hit:
+
+- **Four built pages are in no directory group** — Defective Helmets, Autonomous Vehicle
+  Accidents, Drunk Driving Accidents, Taxi Accidents, all Denver. The directory is synced to the
+  firm's live hub and the hub does not list them. They are not orphans (7–19 inbound links each
+  from sibling sidebars) but `/practice-areas` does not list them, and a sitemap built off the
+  same source inherits the hole. **`assertDirectoryJoin()` does not catch this** — it walks
+  directory entries looking for missing pages and never pages looking for a missing group. Its
+  doc comment claimed both directions and this file claimed it threw on "a page loses its group".
+  Both corrected. `TODO(launch)`: the four want a ruling.
+- **The featured post is not in `getBlogPosts()`.** `/news` renders it in its own panel, so the
+  feed getter excludes it — and inheriting that exclusion drops the one post the blog leads with.
+
+The directory still supplies the group **titles and their order**, which are the firm's own; the
+collection supplies the members. The heavy detail page is merged in separately, because
+`getPracticeAreaPages()` filters out any slug `getPracticeAreaDetails()` claims. A page that
+lands in no group **throws at build time**.
+
+### 404
+
+`src/pages/404.astro` → `dist/404.html`, which Vercel serves for any unmatched path on a static
+deployment — no adapter, no config, no route entry. **NOT in `RESERVED_PATHS`**: nothing may link
+it and no redirect may point at it, because a redirect to a 404 page returns 200 with not-found
+content, which is the soft-404 pattern search engines penalise. The status has to come from the
+server failing to find a file. `noIndex`, verified in the built `<meta name="robots">`.
+
+It offers four routes rather than a search box: **this site has no search.** The blog index
+filters client-side over a list it already has, which would find nothing outside `/news`, and a
+box that returns nothing is worse than no box.
+
 ## What this closed
 
 - **Dead body links: 149 across 42 paths → ZERO.** 2,013 internal links across 236 paths, every
@@ -626,32 +709,29 @@ entry and both files to fix.
 
 ## Next
 
-1. **Three dead links sit in the FOOTER, on 328 of 329 pages.** `/privacy-policy/`,
-   `/editorial-guidelines/` and `/sitemap.xml`. All three are linked from every page and none is
-   built. Both pages are in `RESERVED_PATHS` and both slugs are in `EXCLUDED_SLUGS`, so this is
-   known-and-unbuilt rather than lost — but it is 984 dead links, not three, and it dwarfs the
-   homepage's nine. The sitemap belongs to item 4; the two pages need a design decision.
-2. **The 9 remaining dead links on the homepage.** Eight are `data/news.ts`, every `href` a literal
+1. **The 9 remaining dead links on the homepage** — the ONLY dead links left on the site.
+   `KNOWN_DEAD` in `check-links.py` is empty. Eight are `data/news.ts`, every `href` a literal
    `"#"`, marked `TODO(content)` rather than `TODO(launch)` — which is how they stayed off the
    launch list. The ninth is the Car Accidents checklist teaser. `#` must not reach production.
    All nine are declared in `KNOWN_PLACEHOLDER` **by count**, so removing one without lowering
    the number fails the check. The four news mentions are real published articles (FOX31,
    Denver7, OutThere Colorado, The Mountain Mail) and their URLs are findable; the four insight
    teasers and the checklist point at articles nobody has written.
-3. **Move both collections into Sanity.** The blog and the practice areas are now two collections
+2. **Move both collections into Sanity.** The blog and the practice areas are now two collections
    with the same contract, and the getters are already the projections. Plus the four Portable
    Text object types the post template deferred (`callout`, `phoneBand`, `attorneyCard`,
    `pullQuote`), whose intended home is commented in `prose/components.ts` — and which the
    practice-area chrome maps onto almost exactly.
-4. `/new-seo-setup` — per-page meta, a Global SEO Settings singleton, JSON-LD, `sitemap.xml`,
+3. `/new-seo-setup` — per-page meta, a Global SEO Settings singleton, JSON-LD, `sitemap.xml`,
    `robots.txt`, editor-managed redirects. **The practice-area pages already carry real
    `metaTitle` / `metaDescription` from the live site's own meta**, so that layer has something
-   true to start from. `BlogPosting` JSON-LD belongs to this phase. Note that **every page links
-   `/sitemap.xml` and no sitemap is built**, so that URL 404s today — now across 329 pages.
-5. `/studio-polish ux` — audits the filled-out schema, so it waits.
+   true to start from. `BlogPosting` JSON-LD belongs to this phase, and so does `sitemap.xml` — **which
+   nothing links any more**: the footer points at the human `/sitemap/` now. The XML file's every
+   URL is absolute off `site:`, so it cannot be written before the www-vs-apex call.
+4. `/studio-polish ux` — audits the filled-out schema, so it waits.
 
-No comp exists for **privacy / disclaimer** or **404**. Both need a design decision or a
-plain-text treatment.
+No comp exists for **privacy / disclaimer**, **sitemap** or **404**. All three are built on the
+light template's shell anyway — see below.
 
 ## Open
 

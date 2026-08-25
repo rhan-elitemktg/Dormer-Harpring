@@ -1,0 +1,135 @@
+---
+// The utility pages' article section — privacy policy, sitemap, 404.
+//
+// A THIRD SIBLING OF `blog/PostArticle` AND `practice/area/AreaArticle`, not a
+// reuse of either, and the reasons are AreaArticle's own reasons one step
+// further on:
+//
+//  1. AreaArticle's props are typed against `PracticeAreaArticle` /
+//     `PracticeAreaPageCopy`. Reusing it means fabricating a `readTime`, a
+//     `publishedAt`, an `author`, a `faqs` array and a `factCheck` for three
+//     pages that have none of them — and each of those shapes is already the
+//     GROQ projection it will be after the swap.
+//  2. IT WOULD PUT THE FACT-CHECK BAND ON A PRIVACY POLICY. That band says the
+//     page "has been written, edited, and reviewed by a team of legal writers"
+//     and names an attorney who approved it. That claim is true of 104 service
+//     pages and 186 articles. It is not true of a 404, and asserting attorney
+//     review of a privacy policy is the kind of thing this codebase already
+//     refuses to invent (see `parea__meta`'s missing reviewer).
+//  3. IT WOULD PUT "DENVER PRACTICE AREAS" IN A SIDEBAR ON A 404. AreaSidebar's
+//     middle card is a windowed list centred on the CURRENT page among its
+//     city's siblings. There is no current page here and no city.
+//
+// So this is one column, no sidebar, no byline, no FAQ, no fact-check band —
+// and the same cream `--surface-page` opening section the other two use, so the
+// three templates read as one site.
+//
+// EXTRACTION NOTE: `.spage__title` restates `.parea__title`, which already
+// restates `.post__title`. That is a third copy and it is deliberate for now —
+// the shared thing would be an "article head", but `.post__*` and `.parea__*`
+// are class names the comp-diff scripts read (`diff-comp-practice-areas.py`
+// reads `arealist__link`), so renaming them to extract is a change to committed
+// checks rather than a tidy-up. A FOURTH caller is the time to do it properly,
+// the way `.pside*` moved to global.css when the second sidebar arrived.
+import Prose from "../prose/Prose.astro";
+import { formatPostDate } from "../../lib/dates";
+
+interface Props {
+  title: string;
+  /** One sentence under the H1. */
+  lede?: string;
+  /** Portable Text. Renders nothing when empty — the sitemap and 404 pass []. */
+  body?: unknown;
+  /** ISO. With `metaLabel`, renders "Last updated <date>". */
+  stamp?: string;
+  metaLabel?: string;
+}
+
+const { title, lede, body, stamp, metaLabel } = Astro.props;
+---
+
+<section class="spage">
+  <div class="container">
+    <div class="spage__main">
+      <h1 class="spage__title">{title}</h1>
+
+      {
+        /* `formatPostDate` pins the date to UTC so the build machine's timezone
+           cannot shift it by a day, exactly as the other two templates do. The
+           machine-readable form stays on the <time>. */
+        stamp && metaLabel && (
+          <p class="spage__meta">
+            {metaLabel} <time datetime={stamp}>{formatPostDate(stamp)}</time>
+          </p>
+        )
+      }
+
+      {lede && <p class="spage__lede">{lede}</p>}
+
+      <Prose value={body} />
+
+      {/* Where a page brings its own structure rather than a body: the
+          sitemap's link groups, the 404's routes out. Inside the measure, so
+          it lines up with the prose above it. */}
+      <slot />
+    </div>
+  </div>
+</section>
+
+<style>
+  /* AreaArticle's 72px top, and for its reason: this section opens the page, so
+     the padding is the gap between the site header and the article rather than
+     a boundary between two sections. */
+  .spage {
+    padding-block: var(--space-18) var(--space-section);
+    background: var(--surface-page);
+  }
+
+  /* ONE COLUMN, and bounded by the prose measure rather than the container.
+     AreaArticle's 1.8fr track lands its body on --measure-prose (760px)
+     because a sidebar takes the rest; with no sidebar there is nothing to take
+     it, and a 1244px-wide line of legal copy is unreadable. Left-aligned, not
+     centred: the H1 and the prose share an edge with the header above them. */
+  .spage__main {
+    max-width: var(--measure-prose);
+    min-width: 0;
+  }
+
+  /* .parea__title's rules — see the extraction note above. */
+  .spage__title {
+    font-size: var(--display-page-sm);
+    line-height: 1.02;
+    letter-spacing: 0.005em;
+    text-transform: none;
+    text-wrap: balance;
+  }
+
+  .spage__meta {
+    margin-top: var(--space-5);
+    font-size: var(--text-sm);
+    line-height: var(--leading-normal);
+    color: var(--text-meta);
+  }
+
+  .spage__lede {
+    margin-top: var(--space-6);
+    font-size: var(--text-lg);
+    line-height: var(--leading-normal);
+    color: var(--text-muted);
+  }
+
+  /* The body needs the same gap under the head that it gets on the other two
+     templates, where PostContents provides it. There is no contents box here —
+     three headings do not want one — so the space is declared instead.
+     `:global()` bounded by an element in THIS template, per AGENTS.md: `.prose`
+     is Prose's own class and carries Prose's cid, never this file's. */
+  .spage__main :global(.prose) {
+    margin-top: var(--space-8);
+  }
+
+  @media (max-width: 980px) {
+    .spage {
+      padding-block: var(--space-12) var(--space-section);
+    }
+  }
+</style>
