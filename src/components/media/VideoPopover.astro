@@ -1,0 +1,85 @@
+---
+// The ONE place the site opens a video in a popover.
+//
+// Same reasoning as `Picture.astro` and `PlayButton.astro`: the trigger markup
+// is not interesting, but having one owner is. Every play affordance on the
+// site routes through here, so switching provider, changing the popover
+// options, or replacing Wistia's runtime with a hand-rolled lightbox is one
+// file rather than a grep for `wistia_` across components.
+//
+// THE TRIGGER IS AN <a>, NOT A <button>, and that is the load-bearing part.
+// Wistia binds the click and opens the popover; if its runtime is blocked, slow,
+// or JS is off entirely, the href still goes to the video. The homepage hero
+// carried a `<button>` that did nothing at all until now — the exact shape
+// `TeamCard.astro` and `ProseLink.astro` both argue against, a control that
+// looks like a control and goes nowhere.
+//
+// YOUTUBE GETS NO POPOVER, deliberately. Wistia's runtime only plays Wistia
+// media, and embedding YouTube's iframe API to match would mean a second video
+// runtime plus the cookie conversation `videoEmbedUrl` already documents. A
+// `youtube` record renders the same link, unwrapped, which is what the site
+// does for its testimonials today. That branch disappears when the last record
+// flips.
+import {
+  WISTIA_RUNTIME,
+  videoWatchUrl,
+  wistiaMediaScript,
+  wistiaPopoverClass,
+  type VideoRef,
+} from "../../lib/video";
+
+interface Props {
+  video: VideoRef;
+  /** Classes for the <a> itself — the caller's own button styling. */
+  class?: string;
+  /** Accessible name, when the slotted content is not descriptive on its own. */
+  label?: string;
+}
+
+const { video, class: className, label } = Astro.props;
+
+const href = videoWatchUrl(video);
+const isWistia = video.provider === "wistia";
+---
+
+{
+  isWistia ? (
+    <span class:list={["vpop", wistiaPopoverClass(video.id)]}>
+      <a class={className} href={href} aria-label={label}>
+        <slot />
+      </a>
+    </span>
+  ) : (
+    <a class={className} href={href} aria-label={label} rel="noopener" target="_blank">
+      <slot />
+    </a>
+  )
+}
+
+{
+  /* `is:inline`, so Astro leaves the URLs alone rather than trying to bundle a
+     third-party runtime it cannot see. Both are `async` and neither blocks
+     paint. Including them per embed rather than in Layout keeps 330 pages that
+     have no video from loading a video player — E-v1.js is idempotent, so a
+     page with two popovers loading it twice is fine. */
+  isWistia && (
+    <>
+      <script is:inline async src={wistiaMediaScript(video.id)} />
+      <script is:inline async src={WISTIA_RUNTIME} />
+    </>
+  )
+}
+
+<style>
+  /* The wrapper exists only to carry Wistia's config classes, so it must not
+     affect layout: `display: contents` takes it out of the box tree entirely
+     and lets the <a> inside sit in the caller's flex row exactly as the bare
+     <button> used to.
+
+     NOTE the config classes on this element are PARSED BY WISTIA, not matched
+     by CSS. Nothing here may target `.wistia_embed` or `wistia_async_*` — they
+     are data wearing a class attribute. */
+  .vpop {
+    display: contents;
+  }
+</style>
