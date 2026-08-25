@@ -13,7 +13,7 @@ PUBLIC_SANITY_DATASET="production"
 
 ## Checks
 
-`npm run build` catches compile errors. Two things it can't catch, both silent
+`npm run build` catches compile errors. Three things it can't catch, all silent
 by construction — run them on every commit:
 
 ```sh
@@ -27,6 +27,14 @@ npm run build && npm run check
 - **`check:tokens`** — an undefined `var()` doesn't degrade, it invalidates the
   whole declaration. `padding: var(--space-11) var(--space-13)` with no
   `--space-13` renders *no* padding, not most of it.
+- **`check:links`** — an `<a>` whose target was never built. Nothing else in the
+  build looks at links at all, which is how three footer hrefs stayed dead on
+  every page of the site — 984 links — through five comp-diff scripts and two
+  linters. It also fails on `href="#"`, on a document-relative href (it resolves
+  under whatever page it lands on, so it's a 404 that moves), and on a `tel:`
+  that isn't E.164. Known-broken links are **declared with a reason** in the
+  tables at the top of `scripts/check-links.py`, and a declaration that stops
+  being true fails too — so closing an item can't leave the table stale.
 
 `check:styles` has one known blind spot: it catches a passed-in class used as
 the **target** of a scoped rule, but not one used as its **ancestor**.
@@ -61,8 +69,8 @@ Everything below is deliberately unfinished, not overlooked.
 | **Office hours** | `Mo-Fr 09:00-17:00`, which is what the live site's JSON-LD asserts. The Contact comp shows **8:30am – 5:30pm**. `hours` and `hoursDisplay` sit together in `firmDetails` so the page and the structured data cannot drift apart; both change together. |
 | **Third-party tags** | The old site loads GA4, GTM, CallRail, Clarity, Ahrefs, Intaker and reCAPTCHA — roughly 600 KB. Recommend GTM only, with the rest configured inside it. The contact page's Google Maps embed also sets cookies on load, so it belongs in the same consent decision. |
 | **Duplicate case results** | Three of the 89 results on `/results` are the same cases the homepage leads with, in different words — the King Soopers slip-and-fall is "Denied → $2.1M" on one and "$250K offered → $2.1M" on the other. Both are the comps'. They become one document each at the Sanity phase; which wording is right is the firm's call. |
-| **Blog posts** | Settled by the import. The comp's thirteen feed cards — five real, eight the designer's invention — are gone: `getBlogPosts()` IS the imported archive, so the index serves real posts and nothing ships with `href: null`. **The archive is 181, not 167**: WordPress holds 167 `post` records and fourteen more articles filed as `page` records (`PAGE_ARTICLES` in `scripts/blog-category-overrides.mjs` says which and why). 23 categories, 22 of which get a tab. Still interim — `src/content/blog`, not Sanity, by request. |
-| **Blog post pages** | All 181 are built and served flat at the root, which is the legacy URL shape. The hand-authored trampoline-waiver article still wins over its imported copy — it is the legacy article *with* corrections — and `getImportedPosts()` drops any slug a hand-authored article claims. Nothing outstanding here. |
+| **Blog posts** | Settled by the import. The comp's thirteen feed cards — five real, eight the designer's invention — are gone: `getBlogPosts()` IS the imported archive, so the index serves real posts and nothing ships with `href: null`. **The archive is 186, not 167**: WordPress holds 167 `post` records and fourteen more articles filed as `page` records (`PAGE_ARTICLES` in `scripts/blog-category-overrides.mjs` says which and why), and five more moved over from the practice-area import. 23 categories, 22 of which get a tab. Still interim — `src/content/blog`, not Sanity, by request. |
+| **Blog post pages** | All 186 are built and served flat at the root, which is the legacy URL shape. The hand-authored trampoline-waiver article still wins over its imported copy — it is the legacy article *with* corrections — and `getImportedPosts()` drops any slug a hand-authored article claims. Nothing outstanding here. |
 | **Blog body copy** | The built article is the live one, verbatim, with **two deliberate departures**, both asserted in `scripts/diff-comp-blog-post.py`: the live copy's second paragraph stops mid-clause ("…understand what those waivers.") and is completed here, and its closing phone number — a third number, `(303) 747-4404`, matching neither the site's nor the one its own widgets use — is read from `firmDetails` instead. Confirm the wording of both with the firm. |
 | **Fact-check band** | The blog post's footer band claims the reviewing attorney has tried cases "for more than 20 years". Same unverified claim as the homepage's `20 Years` stat. |
 | **Car accident figures** | The detail page ships **six unsourced numbers**, all the comp's. Three are city data — "1 in 4" hit-and-run, 5,900 injury crashes, 84 fatal — each dated "**[year]**" and sourced to "**[CDOT / DRCOG / Denver Open Data]**", both the comp's own placeholders. Three are the firm's own closed-case data — 3.4× over first offer, 41 cases to verdict, 1 in 5 callers told they don't need a lawyer — under a disclaimer that names the period "**[date range]**". Source the three or drop the band; fix the period or drop the three. Colorado's advertising rules care about the second set. |
@@ -87,7 +95,7 @@ the things this rebuild fixes.
 | `npm install` | Install dependencies |
 | `npm run dev` | Site and Studio together on `localhost:4321` |
 | `npm run build` | Build to `./dist/` |
-| `npm run check` | The two silent-failure linters above — run after a build |
+| `npm run check` | The three silent-failure linters above — run after a build |
 | `npm run preview` | Preview the build locally |
 | `npm run prep:assets` | One-off: pull and downsample comp images into `src/assets/` |
 

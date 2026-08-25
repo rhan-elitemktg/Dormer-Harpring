@@ -45,5 +45,14 @@ for page in sys.argv[1:]:
 
 if not bad:
     print("  ✓ OK — every scoped rule can match the element it targets")
+    sys.exit(0)
+
 for page, cls, want, have in dict.fromkeys(bad):
     print(f"  ✗ UNSTYLED  {page}\n              .{cls} needs cid {want}, element has {have}")
+
+# The exit code is the whole point of a linter, and this one did not have it:
+# it printed its findings and returned 0, so `npm run check` — which is
+# check:styles && check:tokens — went green no matter what this found. The
+# checker that guards a silent failure mode was itself failing silently.
+print(f"\n{len(dict.fromkeys(bad))} scoped rule(s) that can never match.")
+sys.exit(1)
