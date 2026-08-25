@@ -27,10 +27,19 @@
 //
 // SURFACE ORDER, which nothing in the build checks (see HANDOFF):
 //   post        cream `.post`  → forest `.related` → cream `.ct`
-//   area-page   cream `.parea` → alt `.cityareas`  → cream `.ct`
+//   area-page   cream `.parea` → sunk `.awards`    → cream `.ct`
 // Both alternate. Reordering either branch means re-checking that they still
 // do — three cream sections in a row is invisible in review and obvious on the
-// page.
+// page. `.awards` is `tone="sunk"` for exactly that reason: `lifted` is
+// cream-50, which is 1.009:1 against `.parea`'s cream-100 and so invisible.
+// It is also what stands where the city band used to.
+//
+// NEITHER BRANCH HAS A PAGE HEADER, and the area-page branch briefly had two
+// different ones — Testimonials' photo band, then `/results/`' forest band —
+// before both were dropped by request. Both templates now open the way the post
+// comp does: the site header runs straight into the cream article, whose own
+// eyebrow and title stand in for a header. Adding one back means moving the H1
+// again, because two <h1>s cannot happen.
 import type { GetStaticPaths } from "astro";
 import Layout from "../layouts/Layout.astro";
 import PostArticle from "../components/blog/PostArticle.astro";
@@ -38,7 +47,7 @@ import RelatedPosts from "../components/blog/RelatedPosts.astro";
 import ContactDetails from "../components/contact/ContactDetails.astro";
 import DetailPage from "../components/practice/detail/DetailPage.astro";
 import AreaArticle from "../components/practice/area/AreaArticle.astro";
-import CityAreas from "../components/practice/CityAreas.astro";
+import AwardsBar from "../components/AwardsBar.astro";
 import {
   getBlogCategories,
   getBlogPostArticles,
@@ -50,8 +59,6 @@ import {
   getRelatedPostsForArea,
 } from "../data/blog";
 import {
-  getCityAreaGroups,
-  getCityBandTitles,
   getPracticeAreaArticles,
   getPracticeAreaPageCopy,
   getPracticeAreaSidebarLinks,
@@ -121,14 +128,13 @@ export const getStaticPaths = (async () => {
   // what it shows and no component fetches behind its back.
   const areaPaths = await Promise.all(
     areaPages.map(async (article) => {
-      const [cityGroups, sidebarAreas, related] = await Promise.all([
-        getCityAreaGroups(article.city, article.slug),
+      const [sidebarAreas, related] = await Promise.all([
         getPracticeAreaSidebarLinks(article.city, article.slug),
         getRelatedPostsForArea(article.slug, 5),
       ]);
       return {
         params: { slug: article.slug },
-        props: { kind: "area-page" as const, article, cityGroups, sidebarAreas, related },
+        props: { kind: "area-page" as const, article, sidebarAreas, related },
       };
     })
   );
@@ -274,18 +280,13 @@ const area =
 const areaPage =
   props.kind === "area-page"
     ? await (async () => {
-        const [page, bandTitles, contact, band] = await Promise.all([
+        const [page, awards, contact, band] = await Promise.all([
           getPracticeAreaPageCopy(),
-          getCityBandTitles(),
+          getAwards(),
           getContactDetails(),
           getContactBand(),
         ]);
-        return {
-          page,
-          bandTitle: bandTitles.get(props.article.city) ?? "More practice areas",
-          contact,
-          form: band.form,
-        };
+        return { page, awards, contact, form: band.form };
       })()
     : null;
 
@@ -362,14 +363,12 @@ const siteUrl = (Astro.site?.href ?? "https://www.denvertrial.com/").replace(/\/
           faqId="faqs"
         />
 
-        {/* Where the post page runs its "Related blog posts" band. A reader
-            here wants the firm's other work in this city; the recent writing is
-            in the sidebar. */}
-        <CityAreas
-          eyebrow={areaPage.page.bandEyebrow}
-          title={areaPage.bandTitle}
-          groups={props.cityGroups}
-        />
+        {/* Where the post page runs its "Related blog posts" band, and where
+            the city band used to be — removed by request, since the sidebar's
+            Practice Areas card answers the same question. The homepage's
+            awards bar takes the slot; `sunk`, not the default `lifted`, or it
+            would be invisible against the cream above it. */}
+        <AwardsBar awards={areaPage.awards} tone="sunk" />
 
         {/* The same contact block /news and every interior page already close on. */}
         <ContactDetails details={areaPage.contact} form={areaPage.form} />

@@ -11,7 +11,7 @@ _Last updated: 2026-08-24._
 ## State
 
 Build is green: **329 pages** (330 with `/admin`), `npm run check` passing, all five comp-diff
-scripts exiting 0, and the fidelity audit reporting 109 of 109 pages at ≥99% against the live
+scripts exiting 0, and the fidelity audit reporting 104 of 104 pages at ≥99% against the live
 source. A full sweep of **every `<a>` in `dist/` — 42,599 internal links across 329 pages —
 finds four dead targets**: the three the footer links on every page (`/privacy-policy/`,
 `/editorial-guidelines/`, `/sitemap.xml`) and one relative href inside an imported blog body.
@@ -22,15 +22,17 @@ links only, which is how 984 footer 404s stayed invisible.
 Run `git status` for where you are; this file deliberately does **not** name the working branch,
 because that line went stale three times in the session that first wrote it.
 
-**The practice-area pages are imported and there is a template for them.** 109 pages across nine
+**The practice-area pages are imported and there is a template for them.** 104 pages across nine
 cities, on a light template built like the blog post. That is the single biggest change since the
 last handoff and it moves the project's biggest dependency off the critical path.
 
-**The blog archive is 181 posts, not 167.** WordPress has two post types and the article-shaped
+**The blog archive is 186 posts, not 167.** WordPress has two post types and the article-shaped
 content is spread across both — see below.
 
-Marker inventory: **43 `TODO(launch)`, 5 `TODO(video)`, 4 `TODO(sanity)`, 1 `TODO(content)`.**
-Grep all four before launch, not just the first.
+Marker inventory: **33 `TODO(launch)`, 5 `TODO(video)`, 4 `TODO(sanity)`, 1 `TODO(content)`.**
+Grep all four before launch, not just the first — and **grep with the colon**. `TODO(launch)` also
+appears in eleven comments that DISCUSS a marker rather than being one, which is how this line
+previously read 43. `grep -rn "TODO(launch):"` is the count that means anything.
 
 ## The scope was twice what this file said
 
@@ -87,12 +89,34 @@ page whose job is to link them. The comp is not an inventory; the live hub is th
   subset check, which would have stopped catching a dropped entry. Instead the departures are
   declared — `ADDED_GROUPS`, `ADDED_ITEMS`, `RENAMED` — applied to the comp's arrays, and the
   result compared for exact equality. Adding an entry without declaring it still fails.
-- **EVERY LABEL IS THE HUB'S NOW, with one exception.** The comp shortens sixteen of them —
-  "E-Scooter Accidents" for "Dockless Bike / E-Scooter Accidents", "10 Things to Do After a Fall"
-  for "10 Things To Do After a Slip and Fall Accident" — and the hub's wording is the firm's own,
-  so it wins. **The exception is the personal-injury row**, which reads "Personal Injury" in every
-  group: the hub says "Personal Injury Overview" in four, "Personal Injuries" in Denver and
-  "Personal Injury" in the rest, and the column read as a mistake. By request.
+- **THE TWO TOPICAL GROUPS ARE FOLDED INTO DENVER.** "Premises Liability" and "Other Legal
+  Services" were geographic outliers under a heading that reads "by location" — a mismatch the
+  data module flagged and tolerated from the start. Every one of their eight entries pointed at a
+  Denver page, so they fold in cleanly and the heading is now true of the whole section. **Nine
+  groups, 102 entries, Denver 48.**
+
+  **The fold dropped two duplicates**: `denver-premises-liability-lawyer` and
+  `denver-negligent-ice-snow-removal-attorneys` were each listed twice on the page, once per
+  group. Dropping the first is also the requested relabel — the surviving entry is Denver's plain
+  **"Premises Liability"**, not the topical group's "Premises Liability Overview".
+
+  `diff-comp-practice-areas.py` now **fails on any duplicate within a group**. Folding is how one
+  gets introduced and reading a 48-entry column is not how one gets found. It also has
+  `REMOVED_GROUPS` with an assertion that the removal took, after `REMOVED_ITEMS` silently removed
+  three of five on a previous change.
+- **EVERY LABEL IS THE HUB'S NOW, with two exceptions, and both are the word "Overview".** The
+  comp shortens most of them — "E-Scooter Accidents" for "Dockless Bike / E-Scooter Accidents",
+  and so on — and the hub's wording is the firm's own, so it wins. Except:
+  - **the personal-injury row**, "Personal Injury" in every group. The hub says "Personal Injury
+    Overview" in four, "Personal Injuries" in Denver and "Personal Injury" in the rest.
+  - **Denver's product-liability entry**, plain "Product Liability". The hub calls that one
+    "Product Liability Overview" and every other city's plain, so it was the only "Overview" left
+    once the personal-injury rows and "Premises Liability Overview" went.
+
+  Both by request, both for the same reason: an "Overview" on one row of a column where five
+  siblings have none reads as a mistake rather than a distinction. **There is no "Overview" label
+  anywhere on the page now.** That also flattened `RENAMED` in the diff script, which had been
+  keyed by group for exactly that one entry.
 - **A LABEL LIVES IN THREE PLACES and they must not drift**: `practiceAreas.ts`, the manifest in
   `scripts/practice-area-pages.mjs`, and the page's own content JSON, which the importer writes
   from the manifest. Change all three or re-run the import. One slug breaks the one-to-one —
@@ -103,27 +127,247 @@ page whose job is to link them. The comp is not an inventory; the live hub is th
 - **The hub's "Privacy Policy/Disclaimer" entry was deliberately NOT added.** No privacy page
   exists; `ROUTES.privacy` is reserved, not built.
 
-**The remaining diff against the hub is exactly six entries and nothing else**: the five
-personal-injury rows, and the privacy link. Re-checkable — extract the hub's `practice-area-item`
+**The page no longer mirrors the hub's structure**, only its links: nine city groups against the
+hub's eleven, and its two topical groups folded away. What still differs entry-for-entry: the five
+personal-injury rows (relabelled), the privacy link (no page), and the five slip-and-fall articles
+that moved to the blog. Re-checkable — extract the hub's `practice-area-item`
 blocks and compare labels and slugs group by group.
 
 Verified after: build green at 329 pages, `npm run check` clean, all five comp diffs at 0, the
-fidelity audit still 109 of 109, and every internal link on the built page resolving except the
+fidelity audit still 104 of 104, and every internal link on the built page resolving except the
 three site-wide ones below.
 
 ## The light template
 
-`src/components/practice/area/` — `AreaArticle`, `AreaSidebar`, `AreaFaqs` — plus
-`practice/CityAreas`. Built like the blog post, by request, and **deliberately separate from the
-heavy `practice/detail/` kit**, which stays reserved for special cases.
+`src/components/practice/area/` — `AreaArticle`, `AreaSidebar`, `AreaFaqs`. Built like the blog
+post, by request, and **deliberately separate from the heavy `practice/detail/` kit**, which stays
+reserved for special cases.
 
 ```
-AreaArticle   .parea       cream    grid 1.8fr / 1fr, same ratio as the post page
-  ├ h1 · PostContents · Prose · AreaFaqs
-  └ AreaSidebar  .pside    form → practice areas → related articles
-CityAreas     .cityareas   alt      other practice areas in this city, grouped by topic
-ContactDetails .ct         cream    unchanged
+AreaArticle    .parea      cream   grid 1.8fr / 1fr, same ratio as the post page
+  ├ .parea__cat · .parea__title · .parea__meta
+  ├ PostContents · Prose · AreaFaqs
+  ├ .parea__fact          spans both columns, row 2
+  └ AreaSidebar  .pside   form → practice areas → related articles
+AwardsBar      .awards     SUNK    the homepage band, in the city band's old slot
+ContactDetails .ct         cream   unchanged
 ```
+
+**NO PAGE HEADER, and it took three passes to get back there.** The template opened on its own
+title, then gained Testimonials' photo band, then `/results/`' forest band, then lost both — all
+by request. It now opens the way the post comp does: the site header runs straight into the cream
+article. The whole hero apparatus is gone from `getPracticeAreaPageCopy()` — no `photo`,
+`photoMobile`, `photoAlt`, `minHeight` — and `[slug].astro` imports no `PageHeader` at all.
+
+**If a header is ever asked for again, the title MOVES.** Two `<h1>`s cannot happen, and that is
+the thing to settle before styling anything. It has now been moved out and back twice.
+
+**`.parea__cat`, `.parea__title` and `.parea__meta` carry `.post__*`'s rules byte-identical** —
+verified against the built CSS, not just written to match.
+
+**The eyebrow is the firm's tagline** — "Tough lawyers for tough cases", the same on all 104,
+where the post page prints its category. **It has been four things**: the city, then the constant
+"Practice Area", then the city again, then this. The city kept stuttering against the 84 titles
+that open with one ("Denver" over "Denver Truck Accident Lawyer"), and trimming the title instead
+was declined — see below. It lives on `PracticeAreaPageCopy`, not on the article, because it is
+one string for every page.
+
+Note it is **not a category**, which is what the slot holds on the post page. These are service
+pages and have no taxonomy above them, so the slot took marketing copy instead.
+
+**The meta line is the post's minus the reviewer** — written by the firm, the date, the read time.
+No reviewer there, because the fact-check band at the foot now names one and a byline reviewer
+would say it twice. The date is WordPress's `modified` when there is one (all 104 have one)
+labelled "Updated", falling back to `date` labelled "Posted" — publishing dates run back to 2016
+on copy revised this year. `FIRM` is **exported from `blog.ts`** rather than re-typed, so the
+firm's own byline has one home.
+
+**`readTime` is derived AFTER the dropped sections, not before**, so the figure describes what the
+reader actually gets.
+
+### THE CITY STAYS IN THE H1 — an SEO call that was asked for and declined
+
+Trimming the city out of the title, leaving it only in the eyebrow, was requested **conditional on
+it not affecting SEO**. It would, on two counts, so it was not done:
+
+- **These 104 pages rank on exactly that phrase today.** The H1 is the primary on-page heading for
+  a local-intent query, and the whole point of a `<city> <practice area> lawyer` landing page is
+  that phrase. Doing it AT CUTOVER, alongside a replatform, is the part that really settles it: if
+  traffic moves afterwards nobody can tell which change did it.
+- **It is not a mechanical edit.** The titles come in five shapes — 84 `<City> …`, 9 `… <City>`,
+  5 `… in <City>, Colorado`, 1 `<City>, CO …`, and 9 with no city in them at all — so stripping
+  the city by pattern yields `"Brain Injury Attorney in , Colorado"` and `", CO Car Accident
+  Lawyer"`. Doing it properly is 100 hand-authored titles, not a find-and-replace.
+
+The `<title>` tag is a separate field (`metaTitle`, the live site's own) and was never in scope.
+Worth revisiting post-launch with real traffic data, one city at a time.
+
+### Two body sections the template drops
+
+Removed by request, because the page already says both things somewhere better:
+
+| Heading | Why | Where it still says it |
+|---|---|---|
+| `<City> <Area> Lawyer Near Me` | office address, phone, GeoCoordinates | the footer, on every page |
+| `<City> <Area> Resources` | a bullet list of the firm's own articles | the sidebar's Related articles |
+
+**A third, `Awards and Accolades`, is dropped on all 30 pages that carry it** — an h2 and the
+firm's six award badges, byte-identical every time, and `AwardsBar` now renders those same six
+under the article. It lives in `DROPPED_EVERYWHERE` rather than the per-slug list because it is an
+exact whole-heading match on a string with one meaning, where "Near Me" and "Resources" are two
+words that also appear in real editorial copy. **180 images left the body copy**; 51 prose figures
+remain across all 104 pages.
+
+**Dropped in the getter, never in the content files** — `content.config.ts` states the rule: the
+files keep WordPress's version and the getter coalesces, because a GROQ projection is what does
+the coalescing after the swap. It also means re-running the importer cannot put them back.
+
+**WRITTEN DOWN, NOT MATCHED BY PATTERN, and that is the whole point.** A pattern on "Near Me" and
+"Resources" catches fourteen headings and one of them is not this chrome at all:
+`thornton-bicycle-accident-lawyer`'s "Bicycle Accident Resources in Thornton, Colorado" is Bike
+Thornton and Bicycle Colorado with their addresses and phone numbers — unique editorial copy that
+neither reason covers. So `DROPPED_SECTIONS` and `KEPT_SECTIONS` list every candidate and **a
+candidate in neither THROWS**, the same guarantee `PRACTICE_AREA_PAGES` gives the importer. A
+declared drop the body no longer contains throws too.
+
+13 sections across 11 pages, 78 blocks, 50 list items, 48 links, plus the 30 award blocks.
+**Both lists are duplicated in `scripts/audit-practice-area-fidelity.py`** — a `.py` script cannot
+import a `.ts` module — and drift between the two shows up on the next run in both directions.
+
+### The city band is GONE, and the awards bar has its slot
+
+`practice/CityAreas.astro` is deleted. It was grouped by topic, then flattened to one grid, then
+removed outright — all by request. **The sidebar's Practice Areas card is the only route to a
+sibling now**, which is why its "View All" link is load-bearing rather than a convenience. Do not
+drop it to tidy the card.
+
+### The sidebar card: named, windowed, self-highlighting
+
+Three more changes by request, and the second and third only work together.
+
+- **The heading names the city** — "Denver Practice Areas". A whole string from
+  `getPracticeAreaSidebarLinks()`, not a name the template interpolates.
+- **`more` renders unconditionally** and reads "View All Practice Areas". It used to appear only when the city
+  had more areas than the card holds, which meant **the four-page cities offered no route to the
+  directory at all**.
+- **The current page is IN the list, highlighted, not dropped.**
+
+**WHICH FORCED A WINDOW RATHER THAN A HEAD, and that is the part worth not re-deriving.** The card
+holds twelve and Denver has 48. A plain `.slice(0, 12)` would drop the current page out of its own
+card on 36 of them, and highlighting something that is not on screen is not a highlight. So the
+slice is **centred on the current page and clamped at both ends** — the reader sees where they sit
+among the city's areas with neighbours either side, and the "View All" link carries the rest. A city with
+twelve or fewer shows all of them and the window never moves.
+
+The highlighted row is a **`<span>`, not a link to the page you are already on** (the convention
+`AreaLinkList` set for unlinked rows) and carries `aria-current="page"`.
+
+**TEXT ONLY, NO BACKGROUND**, by request — it briefly carried a `--dh-gold-tint` block bled to the
+card's edges.
+
+**THE LABEL IS `--dh-gold-deep` AT 3.29:1, KNOWINGLY. Do not "fix" it back.** That is under AA's
+4.5 for text this size — `--text-md` tops out at 16px, short of the 18.66px bold that would exempt
+it. It was measured, raised, and chosen at Rhan's request over the alternative, which was
+`--dh-ink` at 14.08:1 with `font-weight: 800` alone carrying the highlight. The 800 stays either
+way and does more work at low contrast than it would at high: heavier strokes are what keep the
+label legible.
+
+**What would fix it properly is a token, not a tweak.** The gold ladder stops at
+`--dh-gold-deep`, which was itself darkened to pass on CREAM, not on white. A `--dh-gold-deeper`
+at ~4.5:1 would serve this and anything else that ever wants gold text on a white card. Not
+invented for one use; worth doing if a second one appears.
+
+**Not `--accent`** either: red is what every row in this card turns on hover, and a permanently
+red row reads as one stuck mid-hover.
+
+Re-checkable, and it is the check that matters here: every built practice-area page's
+`pside-areas` card should have **exactly one** `--current` row, a "View All Practice Areas"
+link, no self-link, and
+every other row a same-city practice area. 104 cards, 1,010 rows, all clean.
+
+### The five `resource` pages moved to the blog — practice areas are 104 now
+
+WordPress filed five articles under practice areas and the legacy hub lists them in its Premises
+Liability group, so the import kept them there, marked `resource: true`. They are articles by
+every measure — 539–748 words, no FAQ, article titles, no body images — against a real
+practice-area page's 1,500–3,000 words and an FAQ accordion.
+
+**What surfaced it**: one of them sat in the "Practice areas" sidebar card on **54 Denver pages**.
+The card caps at twelve and sorts by label, and `10 Things To Do…` sorts before every letter, so
+that one made the cut everywhere while the other four sat just outside it — latent, not absent.
+
+| Moved to `src/content/blog/` | Category |
+|---|---|
+| `10-things-to-do-after-a-slip-and-fall-accident` | Slip and Fall |
+| `should-you-hire-a-lawyer-for-a-slip-and-fall-injury-case` | Slip and Fall |
+| `types-of-slip-and-fall-accidents` | Slip and Fall |
+| `what-are-colorados-slip-and-fall-laws` | Slip and Fall |
+| `colorado-premises-liability-law` | Premises Liability — the one that is not about a fall |
+
+- **NO SLUG CHANGED, so no redirect was needed.** All five URLs are flat at the root and still
+  resolve; `[slug].astro` serves them from the other branch now. The page count stayed 329.
+- **Hand-converted, not re-imported.** The bodies were already Portable Text from the same
+  converter, and re-running the blog import risks rewriting `_key`s across all 181 existing files
+  (see below). Only `excerpt` was missing; it was fetched from the same `/wp/v2/pages` records the
+  importer reads, and title / dates / `legacyId` were asserted equal to the live source before the
+  move. The written files are in the importer's own field order.
+- **BOTH MANIFESTS WERE UPDATED, so a re-import agrees**: the five are in `EXCLUDED_SLUGS` in
+  `scripts/practice-area-pages.mjs` and in `PAGE_ARTICLES` in `blog-category-overrides.mjs`.
+  Without that pair, the next import puts them straight back.
+- **The hub's Premises Liability group is four entries.** This is the **only** place the directory
+  drops something the live hub links — everything else in that file is an addition or a rename. A
+  removal there does NOT remove the page; check the collection before assuming a slug is gone.
+- `REMOVED_ITEMS` in `diff-comp-practice-areas.py` declares it, **matched after the rename** — the
+  trap is that three of the five read identically in the comp and the hub and two do not, so a
+  half-comp half-renamed list silently removes three and leaves two. It did, first try. There is
+  now an assertion that every `REMOVED_ITEMS` entry actually took.
+- **`resource: true` is a flag no page sets now.** The field, and the sidebar filter that reads
+  it, both stay: the SHAPE recurs — the firm files articles under practice areas — and the next
+  import may bring another.
+
+Blog archive is **186**; `/news` renders 185 cards plus the featured panel. Slip and Fall now
+holds 6 and Premises Liability 3, and both already led a post, so neither tab is new.
+
+Re-checkable: walk every built practice-area page's `pside-areas` card and assert each href is a
+practice-area page in that page's own city. 970 links across 104 cards, all clean.
+
+`getCityAreaLinks()` and `getCityBandTitles()` went with it. **`src/data/cities.ts` has been
+orphaned and un-orphaned three times** in as many changes — out with the city band, back for a
+city eyebrow, out when the eyebrow became the tagline, and back again for the sidebar's "Denver
+Practice Areas" heading. It IS imported today. Do not delete it on the strength of one grep. Kept rather than deleted — it is the only place the nine cities are written
+down in prose, and `footer/ServiceAreaBand.astro` still points at it for the `serviceCity`
+documents the CMS phase needs — but `City.bandTitle` was pruned (nine strings heading a band that
+does not exist) and `getTopics()` was already unrendered. **Its header promised an
+`assertCityCoverage()` that has never existed**; that claim is gone too. Fair game to delete the
+whole module if the CMS phase decides otherwise.
+
+**`AwardsBar` fills the slot, `tone="sunk"`.** Not the default `lifted`, which is `--dh-cream-50`
+— 1.009:1 against `.parea`'s cream-100, the invisible-surface trap. Exactly the About page's
+reasoning for the same choice. Without it the page ran cream → cream.
+
+### The fact-check band, on BOTH templates
+
+`AreaArticle` renders `.parea__fact`, `.post__fact`'s markup and rules verbatim, spanning both
+columns on row 2 — and **the copy on both is new, by request**:
+
+> This page has been written, edited, and reviewed by a team of legal writers following our
+> comprehensive editorial guidelines. This page was approved by attorney, K.C. Harpring, a Denver
+> personal injury attorney with extensive legal expertise.
+
+- **One source for both**: `reviewedBy()` in `blog.ts`, with `getReviewedBy()` beside it for
+  callers that have no reviewer key of their own. "This page", not "this article", because the one
+  string serves 104 service pages as well as 186 posts. The name is interpolated from the roster,
+  not typed — the comp says "KC Harpring" and the live site "KC Harping".
+- **"our comprehensive editorial guidelines" is NOT a link.** `/editorial-guidelines/` is reserved
+  and unbuilt; linking it would ship a 404 on 290 pages. Make it a link when the page lands.
+- **The attorney's name IS a link**, to their profile — the affordance the old copy already had.
+- **It retired a `TODO(launch)`.** The old copy claimed "tried personal injury cases to verdict in
+  Colorado courts for more than 20 years", one of README's unverified stat claims; the new wording
+  makes no numeric claim. `diff-comp-blog-post.py` now asserts that string is **absent**, so it
+  cannot creep back unreviewed. The homepage's `20 Years` stat is still unconfirmed.
+- `factCheck` is derived, not stored — the practice-area collection has no field for it, the same
+  way WordPress has none for the blog's. It sits on the article rather than the page copy because
+  in Sanity it becomes an overridable per-document field.
 
 **It is a sibling of `PostArticle`, not a reuse of it**, and the reason is not preference. Their
 props are typed against `BlogPost` / `BlogPostArticle`, which are already the GROQ projections
@@ -135,10 +379,11 @@ exactly the **ancestor** blind spot `README.md` documents that `check:styles` ca
 What IS shared: `Prose`, `PostContents`, `ContactForm`, and **`.pside*`, which moved to
 `global.css`** when the second sidebar arrived — same reasoning as `.prose__*` and `.eyebrow`.
 
-**`.dir`'s link rows moved to `practice/AreaLinkList`** now that three components draw them.
-`cocounsel/PracticeAreaLinks` is knowingly still separate — different glyph, different ramp, and
-no diff script watching that page. **`diff-comp-practice-areas.py` reads `arealist__link` now**; a
-class rename in that component breaks it, which is the point.
+**`.dir`'s link rows live in `practice/AreaLinkList`.** Extracted when a third component drew
+them; `AreaDirectory` is the only caller left inside `practice/` now that the city band is gone,
+and it stays extracted anyway — **`diff-comp-practice-areas.py` reads `arealist__link`**, so
+folding it back would move a class a committed check depends on. `cocounsel/PracticeAreaLinks` is
+knowingly still separate: different glyph, different ramp, and no diff script watching that page.
 
 ## `/practice-areas` runs cream → WHITE → forest
 
@@ -154,17 +399,19 @@ directory's top padding, which only worked while the two shared a surface. Both 
 `--space-section` now. Full order: photo hero → `.feat` cream → `.dir` white → StatsBand forest →
 WhyUs cream-50 → AttorneysBand sunk → ContactDetails cream. No two adjacent match.
 
-## Surfaces: the light page's band is `--alt`, and that is load-bearing
+## Surfaces: the light page's second band is `sunk`, and that is load-bearing
 
-`.parea` cream → `.cityareas` **alt** → `.ct` cream. Cream in the middle would have put three
-identical surfaces in a row, which nothing in the build checks for. `--forest` was the other
-candidate — it is what `RelatedPosts` occupies in that slot on the post page — but it would mean
-re-colouring the whole chevroned link treatment for dark and makes a *light* template's foot
-heavier than its body. Reordering `ContactDetails` above the band was rejected outright:
+`.parea` cream → `.awards` **sunk** → `.ct` cream. Cream in the middle would put
+three identical surfaces in a row, which nothing in the build checks for, and `lifted` — the
+awards bar's own default — is cream-50, which is 1.009:1 against cream-100 and would look like
+nothing at all. Reordering `ContactDetails` up was rejected outright when this slot first came up:
 `#contact` is what every `.btn` on the page targets.
 
-**The surface order for both branches is now written into `[slug].astro` as a comment.** It is
-still unchecked by anything; re-read it after any reorder.
+That slot has now held three things: a topic-grouped city band on `--alt`, then a flat one, then
+this. If a fourth arrives, the constraint is the same — **not cream, and visibly not cream**.
+
+**The surface order for both branches is written into `[slug].astro` as a comment.** It is still
+unchecked by anything; re-read it after any reorder.
 
 ## The import
 
@@ -194,7 +441,7 @@ the same converter.
 
 **The FAQ accordion is real content and is NOT in `content.rendered`.** Not in `acf` either
 (empty array), and there is no FAQ post type. It lives only in the rendered HTML, inside
-`div.faq-block`. 28 of the 109 pages carry one, 153 items in total, ~570 words on the motorcycle
+`div.faq-block`. 28 of the 109 imported pages carried one, 153 items in total, ~570 words on the motorcycle
 page alone. **So each page is fetched twice** — JSON for the body, HTML for the FAQ — and the FAQ
 has its own audit that throws on a count mismatch. The query is scoped to `.faq-block
 .accordion-item` because a bare `.accordion-item` matches **53** times on one of these pages: the
@@ -219,7 +466,7 @@ images came back. **Keep the audit.**
 ## The fidelity audit — and why it is committed
 
 **`scripts/audit-practice-area-fidelity.py`.** No comp exists for this template, so the source is
-the check: 109 of 109 pages at ≥99% similarity against live, with h2 / h3 / image / list-item /
+the check: 104 of 104 pages at ≥99% similarity against live, with h2 / h3 / image / list-item /
 FAQ counts asserted exactly on top of the ratio.
 
 This file's previous version recorded the blog import at "167 of 167 at ≥99%". That was a real
@@ -324,7 +571,7 @@ practice-area pages carry the legacy `(303) 756-3812` inside imported body copy*
 
 - **No comp exists for the light practice-area template.** It was specified in conversation as
   "like the blog post, with a different sidebar and a different bottom band" and built that way.
-  Worth a look before 109 pages ship on it.
+  Worth a look before 104 pages ship on it.
 - **Confirm the second Car Accidents design is final.** Less urgent than it was — that kit is now
   explicitly the special-case template rather than the model for everything.
 - **Two comps arrived with that redesign and are not built**: `DH - Attorney Bio v1.html` — and
@@ -351,7 +598,7 @@ practice-area pages carry the legacy `(303) 756-3812` inside imported body copy*
 **Blockers for launch, not for building**
 
 - `/api/consult` does not exist. Two form components are rendered from **six** call sites and
-  reach **326 of the 329 built pages** — the light template put one on 109 more through
+  reach **326 of the 329 built pages** — the light template put one on 104 more through
   `AreaSidebar` — and every one of them 404s on submit. One endpoint, not two: a hidden `kind`
   field tells the payloads apart.
 - The production URL is not yet a Sanity CORS origin, so the deployed `/admin` loads but fails
@@ -392,7 +639,7 @@ rather than creating one.
 
 - **`components/practice/area/`** — the light template. **`components/practice/detail/`** — the
   heavy kit, special cases only.
-- **`practice/AreaLinkList`** — chevroned link rows, used by the directory and every city band.
+- **`practice/AreaLinkList`** — chevroned link rows. One caller now (`AreaDirectory`); see above.
 - **`lib/portableText.ts`'s `toPlainText()`** — Portable Text to a string, for JSON-LD.
 - **`scripts/lib/wp-portable-text.mjs`** — WordPress HTML to Portable Text, both importers.
 - **`PostThumb.astro`** — every post card's art, both branches.
@@ -410,6 +657,21 @@ rather than creating one.
 - **`.btn` is full width below 640px**, as the rule rather than the exception.
 - **`.arrow` on every arrow inside something that navigates**, and `.arrow-link__label` on the
   label whenever that link is underlined.
+
+## Two prose rules that changed, site-wide
+
+Both live in `global.css` and therefore reach the blog as well as the practice areas.
+
+- **Body images are `max-width: 100%`, not `width: 100%`.** The old rule stretched every image to
+  the 760px measure, which upscaled the 150px and 300px sources among them past their own pixels.
+  A photograph wider than the column still fills it; a small one renders at its own size.
+  `ProseImage`'s `sizes` still describes the column, which is fine: it is an upper bound, and a
+  small source's srcset carries no candidate above its intrinsic width.
+- **`.prose__link:hover` now reads as a hover.** It always existed — `color` alone, #e14a32 to
+  #cf6624, about 1.2:1 against each other, with no transition, so it landed instantly and was easy
+  to miss. The underline thickens to 2px as well, and both animate on one clock.
+  `transition` names the longhands rather than `all`, because `text-decoration` itself cannot be
+  animated but `text-decoration-color` and `-thickness` can.
 
 ## Traps worth knowing before touching a section
 

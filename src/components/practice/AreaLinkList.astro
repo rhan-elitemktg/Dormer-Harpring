@@ -6,6 +6,12 @@
 // changes" about `cocounsel/PracticeAreaLinks.astro`; `practice/CityAreas`
 // made it three, which is where copying stops being cheaper than sharing.
 //
+// CityAreas is GONE — the practice-area city band was removed by request and
+// the sidebar answers that question now. So this is back to one caller inside
+// `practice/`, and it stays extracted anyway: `diff-comp-practice-areas.py`
+// reads `arealist__link`, and folding it back would move a class a committed
+// check depends on.
+//
 // IT OWNS ALL OF ITS OWN STYLES, and that is the point rather than tidiness.
 // The classes are declared in the same template that emits them, so the scoped
 // rules match — where a parent styling `.arealist__link` through a class it

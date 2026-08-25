@@ -13,42 +13,52 @@
 // holds the same nine keys, because the importer is a plain `.mjs` script and a
 // `.ts` module has no business being imported into it — or the reverse. The
 // duplication is checked rather than trusted: the `city` enum in
-// `content.config.ts` fails the build on a value it does not know, and
-// `assertCityCoverage()` below fails on a city with no pages.
+// `content.config.ts` fails the build on a value it does not know.
+//
+// (The header used to promise an `assertCityCoverage()` "below" that fails on a
+// city with no pages. There has never been one. Removed rather than written:
+// the schema enum already rejects an unknown city, and a city with no pages is
+// not currently an error — it is what a new city looks like before its import.)
+//
+// NOTHING IMPORTS THIS MODULE ANY MORE. `getCityBandTitles()` and the hero
+// eyebrow's city lookup were its two readers and both went when the city band
+// was removed by request. Kept, not deleted, because this is the only place the
+// nine cities are written down in prose, and `footer/ServiceAreaBand.astro`
+// still points at it for the `serviceCity` documents the CMS phase will need.
+// Fair game to delete if that phase decides otherwise.
 
 export interface City {
   _key: string;
   name: string;
-  /** Heads the "other practice areas here" band. Written as a whole string
-   *  rather than interpolated at the component, because no component owns
-   *  content — same rule the rest of the data layer follows. */
-  bandTitle: string;
 }
 
 /**
- * Display order, and the order the city band's groups are read in.
+ * Display order.
  *
  * Denver first because it is half the pages; the rest are ordered by page count
  * descending, which is the same rule `getBlogCategories()` uses for the tab row
  * and for the same reason — the biggest sets are where the eye should land.
+ *
+ * `bandTitle` is gone from this shape: nine strings heading a band that no
+ * longer exists.
  */
 export async function getCities(): Promise<City[]> {
   return [
-    { _key: "denver", name: "Denver", bandTitle: "More Denver practice areas" },
-    { _key: "thornton", name: "Thornton", bandTitle: "More Thornton practice areas" },
-    { _key: "boulder", name: "Boulder", bandTitle: "More Boulder practice areas" },
-    { _key: "highlands-ranch", name: "Highlands Ranch", bandTitle: "More Highlands Ranch practice areas" },
-    { _key: "aurora", name: "Aurora", bandTitle: "More Aurora practice areas" },
-    { _key: "lakewood", name: "Lakewood", bandTitle: "More Lakewood practice areas" },
-    { _key: "greeley", name: "Greeley", bandTitle: "More Greeley practice areas" },
-    { _key: "fort-collins", name: "Fort Collins", bandTitle: "More Fort Collins practice areas" },
-    { _key: "grand-junction", name: "Grand Junction", bandTitle: "More Grand Junction practice areas" },
+    { _key: "denver", name: "Denver" },
+    { _key: "thornton", name: "Thornton" },
+    { _key: "boulder", name: "Boulder" },
+    { _key: "highlands-ranch", name: "Highlands Ranch" },
+    { _key: "aurora", name: "Aurora" },
+    { _key: "lakewood", name: "Lakewood" },
+    { _key: "greeley", name: "Greeley" },
+    { _key: "fort-collins", name: "Fort Collins" },
+    { _key: "grand-junction", name: "Grand Junction" },
   ];
 }
 
 export interface Topic {
   _key: string;
-  /** The group heading inside a city band. */
+  /** The group heading a city band would have used. */
   title: string;
 }
 
@@ -61,8 +71,12 @@ export interface Topic {
  * entirely. So the grouping is generated from this vocabulary rather than
  * ported, and `scripts/practice-area-pages.mjs` assigns every page to one.
  *
- * Five groups: enough to keep Denver's 54 siblings readable, few enough that a
- * four-page city does not shatter into singletons.
+ * NOTHING RENDERS THIS EITHER. The city band grouped by it, then stopped, then
+ * the band itself was removed — all by request. Kept for the same reason as
+ * `getCities()` above: `topic` is still a required field on every page, the
+ * collection schema still validates against this exact vocabulary, and the
+ * manifest still assigns one. This is where the five values are written down in
+ * prose.
  */
 export async function getTopics(): Promise<Topic[]> {
   return [

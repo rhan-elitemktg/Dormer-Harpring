@@ -402,14 +402,36 @@ export interface AreaGroup {
  * again, so this list cannot silently rot back.
  *
  * Departures from the comp, all about scope or consistency, none presentation:
- *  - Its last two groups, "Premises Liability" and "Other Legal Services", are
- *    topical rather than geographic, which the section heading ("by location")
- *    does not describe. Kept anyway — matching the comp is the instruction, and
- *    the heading is the comp's own wording.
+ *  - ITS LAST TWO GROUPS ARE GONE. "Premises Liability" and "Other Legal
+ *    Services" are topical rather than geographic, which the section heading
+ *    ("by location") does not describe — a mismatch this comment flagged and
+ *    tolerated for a long time. Folded into the Denver column by request, which
+ *    is where every one of their entries pointed anyway: all eight are Denver
+ *    pages. The heading is now true of the whole section.
+ *
+ *    THE FOLD DROPPED TWO ENTRIES AS DUPLICATES of Denver's own —
+ *    `denver-premises-liability-lawyer` and
+ *    `denver-negligent-ice-snow-removal-attorneys` were listed twice on the
+ *    page, once per group. Dropping the first is also the requested relabel:
+ *    the surviving entry is Denver's plain "Premises Liability", not the
+ *    topical group's "Premises Liability Overview".
+ *    `diff-comp-practice-areas.py` now fails on ANY duplicate within a group,
+ *    because folding is how one gets introduced and reading is not how one gets
+ *    found.
  *  - Greeley, Fort Collins and Grand Junction are added from the live hub. See
  *    the comment on the Greeley group.
  *  - Six Denver entries are added from the live hub — five branded-truck pages
  *    and Daycare Injury.
+ *  - FIVE ARE REMOVED from the Premises Liability group, which the hub and the
+ *    comp both carry: "Premises Liability Factors", "Slip and Fall Accident
+ *    Laws in Colorado", "Slip and Fall Case Types", "Slip and Fall Injury Cases
+ *    – Hiring a Lawyer" and "10 Things To Do After a Slip and Fall Accident".
+ *    They are articles and moved to the blog by request. Their slugs are
+ *    unchanged, so the URLs still resolve — the blog template serves them now,
+ *    and `/news` lists them. The group is four entries.
+ *    NOTE this is the ONLY place the directory drops something the hub links.
+ *    Removing an entry here does not remove the page; check the collection
+ *    before assuming a slug is gone.
  *  - Grand Junction reads car → truck → motorcycle. The hub has that one group
  *    the other way round and its two siblings this way; normalised, by request.
  *
@@ -464,13 +486,19 @@ export async function getPracticeAreaGroups(): Promise<AreaGroup[]> {
         { _key: "fedex-truck", label: "FedEx Truck Accident", href: practiceAreaPath("denver-fedex-truck-accident-lawyer") },
         { _key: "funeral", label: "Funeral Home Negligence", href: practiceAreaPath("colorado-funeral-home-negligence-lawyer") },
         { _key: "garbage-truck", label: "Garbage Truck Accident", href: practiceAreaPath("denver-garbage-truck-accident-lawyer") },
+        { _key: "bad-faith", label: "Insurance Bad Faith", href: practiceAreaPath("denver-insurance-bad-faith-lawyer") },
+        { _key: "legal-malpractice", label: "Legal Malpractice", href: practiceAreaPath("legal-malpractice-attorney") },
+        { _key: "life-bad-faith", label: "Life Insurance Bad Faith", href: practiceAreaPath("denver-life-insurance-bad-faith-lawyer") },
         { _key: "motorcycle", label: "Motorcycle Accidents", href: practiceAreaPath("motorcycle-accident-lawyer-denver") },
         { _key: "malpractice", label: "Medical Malpractice", href: practiceAreaPath("denver-medical-malpractice-lawyer") },
+        { _key: "building", label: "Negligent Building Maintenance", href: practiceAreaPath("denver-negligent-building-maintenance-attorneys") },
         { _key: "ice-snow", label: "Negligent Ice/Snow Removal", href: practiceAreaPath("denver-negligent-ice-snow-removal-attorneys") },
+        { _key: "security", label: "Negligent Security", href: practiceAreaPath("denver-negligent-security-lawyers") },
         { _key: "nursing-home", label: "Nursing Home Abuse", href: practiceAreaPath("nursing-home-abuse-lawyer") },
         { _key: "pedestrian", label: "Pedestrian Accidents", href: practiceAreaPath("denver-pedestrian-accident-lawyer") },
+        { _key: "pet-bad-faith", label: "Pet Insurance Bad Faith", href: practiceAreaPath("denver-pet-insurance-bad-faith-lawyer") },
         { _key: "premises", label: "Premises Liability", href: practiceAreaPath("denver-premises-liability-lawyer") },
-        { _key: "product", label: "Product Liability Overview", href: practiceAreaPath("denver-product-liability-lawyer") },
+        { _key: "product", label: "Product Liability", href: practiceAreaPath("denver-product-liability-lawyer") },
         { _key: "rideshare", label: "Rideshare Accidents", href: practiceAreaPath("denver-uber-accident-lawyer") },
         { _key: "rtd", label: "RTD Denver Accidents", href: practiceAreaPath("rtd-denver-accidents") },
         { _key: "sexual-assault", label: "Sexual Assault", href: practiceAreaPath("denver-sexual-assault-lawyer") },
@@ -598,31 +626,6 @@ export async function getPracticeAreaGroups(): Promise<AreaGroup[]> {
         { _key: "car", label: "Car Accident", href: locationPath("grand-junction-car-accident-lawyer") },
         { _key: "truck", label: "Truck Accident", href: locationPath("grand-junction-truck-accident-lawyer") },
         { _key: "motorcycle", label: "Motorcycle Accident", href: locationPath("grand-junction-motorcycle-accident-lawyer") },
-      ],
-    },
-    {
-      _key: "premises-liability",
-      title: "Premises Liability",
-      items: [
-        { _key: "overview", label: "Premises Liability Overview", href: practiceAreaPath("denver-premises-liability-lawyer") },
-        { _key: "building", label: "Negligent Building Maintenance", href: practiceAreaPath("denver-negligent-building-maintenance-attorneys") },
-        { _key: "ice-snow", label: "Negligent Ice/Snow Removal", href: practiceAreaPath("denver-negligent-ice-snow-removal-attorneys") },
-        { _key: "security", label: "Negligent Security", href: practiceAreaPath("denver-negligent-security-lawyers") },
-        { _key: "factors", label: "Premises Liability Factors", href: practiceAreaPath("colorado-premises-liability-law") },
-        { _key: "laws", label: "Slip and Fall Accident Laws in Colorado", href: practiceAreaPath("what-are-colorados-slip-and-fall-laws") },
-        { _key: "case-types", label: "Slip and Fall Case Types", href: practiceAreaPath("types-of-slip-and-fall-accidents") },
-        { _key: "hiring", label: "Slip and Fall Injury Cases – Hiring a Lawyer", href: practiceAreaPath("should-you-hire-a-lawyer-for-a-slip-and-fall-injury-case") },
-        { _key: "after-a-fall", label: "10 Things To Do After a Slip and Fall Accident", href: practiceAreaPath("10-things-to-do-after-a-slip-and-fall-accident") },
-      ],
-    },
-    {
-      _key: "other",
-      title: "Other Legal Services",
-      items: [
-        { _key: "bad-faith", label: "Insurance Bad Faith", href: practiceAreaPath("denver-insurance-bad-faith-lawyer") },
-        { _key: "legal-malpractice", label: "Legal Malpractice", href: practiceAreaPath("legal-malpractice-attorney") },
-        { _key: "life-bad-faith", label: "Life Insurance Bad Faith", href: practiceAreaPath("denver-life-insurance-bad-faith-lawyer") },
-        { _key: "pet-bad-faith", label: "Pet Insurance Bad Faith", href: practiceAreaPath("denver-pet-insurance-bad-faith-lawyer") },
       ],
     },
   ];

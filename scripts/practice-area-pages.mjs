@@ -13,10 +13,22 @@
 //                           last; `nursing-home-abuse-lawyer` and
 //                           `rtd-denver-accidents` carry no city at all
 //
-// And the boundary is not even clean: five pages that read as articles
-// (`types-of-slip-and-fall-accidents` and friends) are LINKED FROM THE
-// DIRECTORY as practice areas, so excluding them by shape ships five 404s at
-// cutover. They are kept, marked `resource: true`.
+// The boundary was not even clean. Five pages that read as articles
+// (`types-of-slip-and-fall-accidents` and friends) are LINKED FROM THE LEGACY
+// DIRECTORY as practice areas, so they were imported as practice areas and
+// marked `resource: true` rather than excluded by shape — which would have
+// shipped five 404s at cutover.
+//
+// THAT IS NO LONGER TRUE. All five moved to the BLOG by request: 539–748 words,
+// no FAQ, article titles, and one of them sat in the "Practice areas" sidebar
+// card on 54 Denver pages reading exactly like the blog post it is. They are in
+// EXCLUDED_SLUGS below and in PAGE_ARTICLES in `blog-category-overrides.mjs`,
+// and the hub no longer links them — so nothing 404s: their slugs are still
+// their live URLs, served by the blog template instead.
+//
+// `resource` is therefore a field no page sets. It stays on the schema and in
+// the sidebar filter because the SHAPE recurs — the firm files articles under
+// practice areas — and the next import may well bring another.
 //
 // So the classification is written down instead of inferred, the same way
 // `blog-category-overrides.mjs` writes down the eleven the API cannot answer.
@@ -26,7 +38,8 @@
 //
 // TOPIC IS INVENTED HERE. Nothing upstream carries one; the live site's own
 // sidebar bands are hand-maintained and disagree with each other. It exists so
-// the city band can group Denver's 47 entries instead of listing them flat.
+// the city band could group Denver's entries instead of listing them flat. That
+// band has since been removed; nothing renders `topic` today.
 
 /** Display order. `denver` first because it is two-thirds of the pages. */
 export const CITIES = [
@@ -106,24 +119,19 @@ export const PRACTICE_AREA_PAGES = {
   "denver-uninsured-and-underinsured-motorcyclist-accident-lawyer": { city: "denver", topic: "motor-vehicle", label: "Uninsured and Underinsured Motorcyclist Accidents" },
   "denver-whiplash-injury-attorney": { city: "denver", topic: "motor-vehicle", label: "Whiplash Injuries" },
   "colorado-defective-helmet": { city: "denver", topic: "other", label: "Defective Helmets", statewide: true },
-  "denver-product-liability-lawyer": { city: "denver", topic: "other", label: "Product Liability Overview" },
+  "denver-product-liability-lawyer": { city: "denver", topic: "other", label: "Product Liability" },
   "denver-sexual-assault-lawyer": { city: "denver", topic: "other", label: "Sexual Assault" },
   "colorado-wildfire-attorney": { city: "denver", topic: "other", label: "Wildfire Litigation", statewide: true },
-  "10-things-to-do-after-a-slip-and-fall-accident": { city: "denver", topic: "premises", label: "10 Things To Do After a Slip and Fall Accident", resource: true },
-  "what-are-colorados-slip-and-fall-laws": { city: "denver", topic: "premises", label: "Slip and Fall Accident Laws in Colorado", resource: true },
   "denver-construction-accident-attorney": { city: "denver", topic: "premises", label: "Construction Accidents" },
   "denver-daycare-injury-lawyers": { city: "denver", topic: "premises", label: "Daycare Injury" },
   "denver-dog-bite-lawyer": { city: "denver", topic: "premises", label: "Dog Bites" },
   "denver-dram-shop-lawyer": { city: "denver", topic: "premises", label: "Dram Shop Liability" },
-  "should-you-hire-a-lawyer-for-a-slip-and-fall-injury-case": { city: "denver", topic: "premises", label: "Slip and Fall Injury Cases – Hiring a Lawyer", resource: true },
   "denver-negligent-building-maintenance-attorneys": { city: "denver", topic: "premises", label: "Negligent Building Maintenance" },
   "denver-negligent-ice-snow-removal-attorneys": { city: "denver", topic: "premises", label: "Negligent Ice/Snow Removal" },
   "denver-negligent-security-lawyers": { city: "denver", topic: "premises", label: "Negligent Security" },
-  "colorado-premises-liability-law": { city: "denver", topic: "premises", label: "Premises Liability Factors", resource: true },
   "denver-premises-liability-lawyer": { city: "denver", topic: "premises", label: "Premises Liability Overview" },
   "denver-ski-accident-lawyer": { city: "denver", topic: "premises", label: "Ski Accidents" },
   "denver-slip-and-fall-lawyer": { city: "denver", topic: "premises", label: "Slip and Fall Accidents" },
-  "types-of-slip-and-fall-accidents": { city: "denver", topic: "premises", label: "Slip and Fall Case Types", resource: true },
   "denver-trampoline-park-injury-lawyer": { city: "denver", topic: "premises", label: "Trampoline Park Injuries" },
   "colorado-funeral-home-negligence-lawyer": { city: "denver", topic: "professional", label: "Funeral Home Negligence", statewide: true },
   "denver-insurance-bad-faith-lawyer": { city: "denver", topic: "professional", label: "Insurance Bad Faith" },
@@ -189,6 +197,7 @@ export const PRACTICE_AREA_PAGES = {
  * lists none of these fourteen.
  */
 export const EXCLUDED_SLUGS = {
+  "10-things-to-do-after-a-slip-and-fall-accident": "article, not a practice area — imported into the BLOG, see PAGE_ARTICLES",
   "2023-big-little-gala-hosted-by-big-brothers-big-sisters-of-colorado": "community involvement write-up",
   "a-great-success-at-the-2025-cca-convention": "community involvement write-up",
   "a-week-of-cinema-at-the-denver-film-festival-48": "community involvement write-up",
@@ -211,6 +220,7 @@ export const EXCLUDED_SLUGS = {
   "clothes-to-kids-denver": "community involvement write-up",
   "co-counsel": "site page",
   "colorado-motorcycle-laws-important-information-for-riders": "article, not a practice area — imported into the BLOG, see PAGE_ARTICLES",
+  "colorado-premises-liability-law": "article, not a practice area — imported into the BLOG, see PAGE_ARTICLES",
   "common-causes-of-car-accidents-in-colorado": "article, not a practice area — imported into the BLOG, see PAGE_ARTICLES",
   "common-causes-of-truck-accidents-in-colorado": "article, not a practice area — imported into the BLOG, see PAGE_ARTICLES",
   "common-types-of-car-accidents": "article, not a practice area — imported into the BLOG, see PAGE_ARTICLES",
@@ -263,15 +273,18 @@ export const EXCLUDED_SLUGS = {
   "results": "site page",
   "reviews": "site page",
   "sean-dormer": "community involvement write-up",
+  "should-you-hire-a-lawyer-for-a-slip-and-fall-injury-case": "article, not a practice area — imported into the BLOG, see PAGE_ARTICLES",
   "standing-together-for-access-and-expression-with-the-cwba": "community involvement write-up",
   "stepping-up-for-a-cause-our-2025-pikes-peak-challenge-experience": "community involvement write-up",
   "thank-you": "site page",
   "tim-garvey": "community involvement write-up",
   "traffic-collision-lawyer": "overlaps denver-car-accident-lawyer; scope unresolved",
   "true-companions-animal-shelter-clinic": "community involvement write-up",
+  "types-of-slip-and-fall-accidents": "article, not a practice area — imported into the BLOG, see PAGE_ARTICLES",
   "volunteer-day-project-cure": "community involvement write-up",
   "volunteering-at-metro-carings-fresh-foods-market": "community involvement write-up",
   "we-dont-waste": "community involvement write-up",
+  "what-are-colorados-slip-and-fall-laws": "article, not a practice area — imported into the BLOG, see PAGE_ARTICLES",
   "what-to-do-after-a-car-accident-in-colorado": "article, not a practice area — imported into the BLOG, see PAGE_ARTICLES",
   "what-to-do-after-a-motorcycle-accident": "article, not a practice area — imported into the BLOG, see PAGE_ARTICLES",
   "what-to-do-after-a-truck-accident-in-colorado": "article, not a practice area — imported into the BLOG, see PAGE_ARTICLES",

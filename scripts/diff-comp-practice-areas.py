@@ -110,49 +110,97 @@ ADDED_ITEMS = {
         "Garbage Truck Accident": "Funeral Home Negligence",
         "Tow Truck Accident": "Spinal Cord Injury",
         "UPS Truck Accident": "Uninsured & Underinsured Motorists",
+        # The six folded in from the two removed topical groups, at their
+        # alphabetical positions in this column. Anchors are COMP items, so
+        # three share one and append in the order declared here.
+        "Insurance Bad Faith": "Funeral Home Negligence",
+        "Legal Malpractice": "Funeral Home Negligence",
+        "Life Insurance Bad Faith": "Funeral Home Negligence",
+        "Negligent Building Maintenance": "Medical Malpractice",
+        "Negligent Security": "Negligent Ice / Snow Removal",
+        "Pet Insurance Bad Faith": "Pedestrian Accidents",
     },
 }
+
+# Whole groups the comp and the live hub carry that the built page does NOT.
+#
+# Both are TOPICAL, not geographic, under a heading that reads "by location" —
+# the mismatch the data module has flagged since the page was built. Their
+# entries fold into the Denver column instead (see ADDED_ITEMS), which is where
+# they all point anyway: every one of them is a Denver page.
+#
+# The five slip-and-fall articles that used to sit in "Premises Liability" need
+# no entry here: they moved to the BLOG collection, the group that held them is
+# gone, and their slugs still resolve from the other branch of [slug].astro.
+#
+# Folding drops TWO entries as duplicates of Denver's own — "Premises Liability
+# Overview" and "Negligent Ice/Snow Removal" both point at pages Denver already
+# lists. The first is also the requested relabel: Denver's entry reads plain
+# "Premises Liability", so dropping the Overview one IS the rename.
+REMOVED_GROUPS = {"Premises Liability", "Other Legal Services"}
 
 # Renames: the comp's shortened wording replaced by the live hub's own, since
-# the hub is now the source for these labels and not only for the URLs. Keyed by
-# group, because one of them is group-specific — "Product Liability" is
-# "Product Liability Overview" in the Denver column and plain everywhere else,
-# on the hub as much as here, so a global rename would corrupt five groups.
+# the hub is the source for these labels and not only for the URLs.
+#
+# FLAT, not keyed by group. It was keyed, for exactly one entry: the hub calls
+# Denver's product-liability page "Product Liability Overview" and every other
+# city's plain "Product Liability", so a global rename would have corrupted five
+# groups. That entry is gone — the label is plain everywhere now, by request,
+# for the same reason "Premises Liability Overview" went. Key it again the day a
+# rename is genuinely group-specific; nothing here needs it today.
+#
+# Three renames also went with the "Premises Liability" group when it folded
+# into Denver — "Colorado Slip and Fall Laws", "Hiring a Slip and Fall Lawyer"
+# and "10 Things to Do After a Fall" appear in the comp ONLY in that group, so
+# they can no longer fire. Kept out rather than left dead: a rename for an entry
+# the page does not have reads as a rename the page performs.
 RENAMED = {
-    "*": {
-        "E-Scooter Accidents": "Dockless Bike / E-Scooter Accidents",
-        "Drowsy Driving Accidents": "Drowsy Driving Accident",
-        "Negligent Ice / Snow Removal": "Negligent Ice/Snow Removal",
-        "Side-Impact Accidents": "Side-Impact Accident",
-        "Uninsured & Underinsured Motorists":
-            "Uninsured and Underinsured Motorcyclist Accidents",
-        "Off-Road Vehicle Accidents": "Off-Road Recreational Vehicle Accidents",
-        "Colorado Slip and Fall Laws": "Slip and Fall Accident Laws in Colorado",
-        "Hiring a Slip and Fall Lawyer": "Slip and Fall Injury Cases – Hiring a Lawyer",
-        "10 Things to Do After a Fall": "10 Things To Do After a Slip and Fall Accident",
-        # The one rename that runs the OTHER way. Comp and hub both say
-        # "Overview" here, in four groups and not the other two; dropped by
-        # request, because the column read as a mistake. It is also why Denver's
-        # entry is "Personal Injury" and not the hub's "Personal Injuries".
-        "Personal Injury Overview": "Personal Injury",
-    },
-    "Denver Personal Injury": {"Product Liability": "Product Liability Overview"},
+    "E-Scooter Accidents": "Dockless Bike / E-Scooter Accidents",
+    "Drowsy Driving Accidents": "Drowsy Driving Accident",
+    "Negligent Ice / Snow Removal": "Negligent Ice/Snow Removal",
+    "Side-Impact Accidents": "Side-Impact Accident",
+    "Uninsured & Underinsured Motorists":
+        "Uninsured and Underinsured Motorcyclist Accidents",
+    "Off-Road Vehicle Accidents": "Off-Road Recreational Vehicle Accidents",
+    # The one rename that runs the OTHER way — toward the comp, away from the
+    # hub. Comp and hub both say "Overview" here, in four groups and not the
+    # other two; dropped by request, because the column read as a mistake. It is
+    # also why Denver's entry is "Personal Injury" and not the hub's "Personal
+    # Injuries".
+    "Personal Injury Overview": "Personal Injury",
 }
 
-def rename(group, item):
-    return RENAMED.get(group, {}).get(item) or RENAMED["*"].get(item, item)
+def rename(item):
+    return RENAMED.get(item, item)
 
 expected_groups = []
 for title, items in comp_groups:
+    # Additions anchored to a removed group still fire — they are placed BEFORE
+    # it, and the three city groups are anchored to "Premises Liability".
     for added_title, added_items in ADDED_GROUPS.get(title, []):
         expected_groups.append((added_title, added_items))
+    if title in REMOVED_GROUPS:
+        continue
     out = []
     for item in items:
-        out.append(rename(title, item))
+        out.append(rename(item))
         for new, follows in ADDED_ITEMS.get(title, {}).items():
             if follows == item:
                 out.append(new)
     expected_groups.append((title, out))
+
+_still = sorted(REMOVED_GROUPS & {t for t, _ in expected_groups})
+if _still:
+    ok = False
+    print(f"  ✗ REMOVED_GROUPS did not take: {_still}")
+
+# Folding two groups into one makes a duplicate cheap to introduce and invisible
+# to read. Nothing else in this file would catch it.
+for _t, _items in expected_groups:
+    _dupes = sorted({i for i in _items if _items.count(i) > 1})
+    if _dupes:
+        ok = False
+        print(f"  ✗ duplicate entries in {_t!r}: {_dupes}")
 
 print("\nDIRECTORY GROUPS  (comp + declared departures)")
 cmp("group titles / order", [t for t, _ in expected_groups], [t for t, _ in built_groups])

@@ -1,13 +1,12 @@
 {
   "slug": "colorado-premises-liability-law",
   "title": "Colorado Premises Liability Law",
-  "label": "Premises Liability Factors",
-  "city": "denver",
-  "topic": "premises",
-  "statewide": false,
-  "resource": true,
-  "metaTitle": "Colorado Premises Liability Law",
-  "metaDescription": "Our Denver premises liability lawyers explain the important factors to look at in a premises liability case. Call for a free consultation.",
+  "excerpt": "When accidents and injuries happen on others’ properties, there may be various options for recovery, depending on the details of the accident. These types of claims are generally referred to as premises liability claims, and Colorado’s Premises Liability Act sets the standards for how and when an injured victim can recover damages. When an injured […]",
+  "publishedAt": "2016-05-18T16:40:35",
+  "modifiedAt": "2026-02-26T14:32:53",
+  "categories": [
+    "premises-liability"
+  ],
   "body": [
     {
       "_type": "block",
@@ -349,8 +348,14 @@
       ]
     }
   ],
-  "faqs": [],
-  "publishedAt": "2016-05-18T16:40:35",
-  "modifiedAt": "2026-02-26T14:32:53",
+  "factCheck": [],
+  "author": {
+    "name": "Dormer Harpring",
+    "href": "/about"
+  },
+  "reviewer": {
+    "name": "K.C. Harpring",
+    "href": "/meet-our-attorneys/k-c-harpring"
+  },
   "legacyId": 219
 }

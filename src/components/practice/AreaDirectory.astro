@@ -2,15 +2,18 @@
 // "Every case we handle, by location." — the full practice-area directory,
 // grouped by city and set in four columns of chevroned links.
 //
-// The eleven groups are wildly uneven (Denver has 42 entries, "Other Legal
-// Services" 4), which is why each group is its own grid rather than one grid
-// the groups flow through: a shared grid would let a short group's links sit
-// beside Denver's tail and read as part of it.
+// The nine groups are wildly uneven (Denver has 48 entries, Grand Junction 4),
+// which is why each group is its own grid rather than one grid the groups flow
+// through: a shared grid would let a short group's links sit beside Denver's
+// tail and read as part of it. Every group is a CITY now — the comp's two
+// topical groups folded into Denver, so the section heading's "by location" is
+// finally true of all of it.
 //
-// The link rows themselves are `AreaLinkList`, shared with `CityAreas` — the
-// band at the foot of every practice-area page. `cocounsel/PracticeAreaLinks`
-// is a third copy of the same affordance and is knowingly still separate; see
-// the note in AreaLinkList.
+// The link rows themselves are `AreaLinkList`. It was shared with `CityAreas`,
+// the band at the foot of every practice-area page, until that band was removed
+// by request; this is its only caller now. `cocounsel/PracticeAreaLinks` is a
+// third copy of the same affordance and is knowingly still separate; see the
+// note in AreaLinkList.
 import Eyebrow from "../Eyebrow.astro";
 import AreaLinkList from "./AreaLinkList.astro";
 import type { AreaGroup, PracticeAreasPage } from "../../data/practiceAreas";
@@ -104,7 +107,7 @@ const { section, groups } = Astro.props;
   }
 
   /* The four-column grid, its equal-height fix and the whole link treatment
-     moved to AreaLinkList when CityAreas became the third caller. Nothing here
-     may style them: those classes land on that component's markup and carry
-     ITS cid, so a rule here would compile and match nothing. */
+     live in AreaLinkList. Nothing here may style them: those classes land on
+     that component's markup and carry ITS cid, so a rule here would compile and
+     match nothing. */
 </style>

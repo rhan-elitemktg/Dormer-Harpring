@@ -106,6 +106,24 @@ export const PAGE_ARTICLES = {
   "common-types-of-motorcycle-accident-injuries": ["motorcycle-accidents"],
   // cf. colorados-motorcycle-licensing-requirements → Motorcycle Accidents
   "colorado-motorcycle-laws-important-information-for-riders": ["motorcycle-accidents"],
+
+  /* --- Slip and fall / premises.
+     THESE FIVE ARRIVED LATE, and by a different road than the fourteen above.
+     They were imported as PRACTICE AREAS, not missed — the legacy hub lists
+     them in its Premises Liability group, so `resource: true` kept them where
+     the firm filed them. They read as articles by every measure (539–748 words,
+     no FAQ, article titles) and one of them sat in the "Practice areas" sidebar
+     card on 54 Denver pages, which is what surfaced it. Moved by request; see
+     the header of `practice-area-pages.mjs`, which now excludes all five. */
+  // cf. are-slip-and-fall-injuries-covered-by-insurance → Slip and Fall
+  "10-things-to-do-after-a-slip-and-fall-accident": ["slip-and-fall"],
+  "should-you-hire-a-lawyer-for-a-slip-and-fall-injury-case": ["slip-and-fall"],
+  "types-of-slip-and-fall-accidents": ["slip-and-fall"],
+  "what-are-colorados-slip-and-fall-laws": ["slip-and-fall"],
+  /* The one that is NOT about a fall — Colorado's premises liability statute
+     generally. cf. understanding-plaintiff-status-under-colorados-premises-
+     liability-act → Premises Liability */
+  "colorado-premises-liability-law": ["premises-liability"],
 };
 
 /**

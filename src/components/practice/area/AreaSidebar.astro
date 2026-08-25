@@ -30,34 +30,46 @@ const { page, areas, related } = Astro.props;
   <ContactForm form={page.form} variant="sidebar" />
 
   {
-    /* CAPPED, and the cap is visible. Denver has 54 siblings; the card shows
-       twelve and hands the rest to the directory. The city band at the foot of
-       the page is where the full set lives, so nothing is hidden — this is the
-       shortcut, not the index. */
+    /* A WINDOW, not the head of the list — twelve entries centred on the page
+       you are reading, which is IN the list and highlighted rather than
+       dropped. See `getPracticeAreaSidebarLinks()` for why the two go together.
+
+       THIS IS THE ONLY ROUTE TO A SIBLING. The city band at the foot of the
+       page used to carry the full set and was removed by request, so `more`
+       stopped being a convenience and became the way out. It renders
+       unconditionally now — the four-page cities used to get no link at all.
+       Do not drop it to tidy the card. */
     areas.items.length > 0 && (
       <section class="pside__card" aria-labelledby="pside-areas">
         <div class="pside__head">
           <h2 class="pside__title" id="pside-areas">
-            {page.areasLabel}
+            {areas.title}
           </h2>
         </div>
         <ul class="pside__list">
           {areas.items.map((area) => (
             <li class="pside__item">
-              <a class="pside__cat" href={area.href!}>
-                {area.label}
-              </a>
+              {/* A <span>, not a link to the page you are already on. Same
+                  convention as `AreaLinkList`'s unlinked rows. `aria-current`
+                  says out loud what the tint says visually. */}
+              {area.current ? (
+                <span class="pside__cat pside__cat--current" aria-current="page">
+                  {area.label}
+                </span>
+              ) : (
+                <a class="pside__cat" href={area.href!}>
+                  {area.label}
+                </a>
+              )}
             </li>
           ))}
         </ul>
-        {areas.more && (
-          <a class="pside__more arrow-link" href={areas.more.href}>
-            <span class="arrow-link__label">{areas.more.label}</span>
-            <span class="arrow" aria-hidden="true">
-              &#8594;
-            </span>
-          </a>
-        )}
+        <a class="pside__more arrow-link" href={areas.more.href}>
+          <span class="arrow-link__label">{areas.more.label}</span>
+          <span class="arrow" aria-hidden="true">
+            &#8594;
+          </span>
+        </a>
       </section>
     )
   }

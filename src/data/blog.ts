@@ -242,29 +242,53 @@ async function byline(memberKey: string): Promise<PostByline> {
 }
 
 /** Every post is written by the firm and reviewed by an attorney — the live
- *  site's byline convention, which the comp reproduces on all thirteen cards. */
-const FIRM: PostByline = { name: "Dormer Harpring", href: ROUTES.attorneys };
+ *  site's byline convention, which the comp reproduces on all thirteen cards.
+ *
+ *  EXPORTED because the practice-area template's meta line credits the same
+ *  author, and this is one byline the whole site shares. Imported by
+ *  `practiceAreaPages.ts` rather than re-typed there: two copies of the firm's
+ *  own name and profile link is two places to rename it and one to forget. */
+export const FIRM: PostByline = { name: "Dormer Harpring", href: ROUTES.attorneys };
 
 /**
- * The reviewed-by band at the foot of an article.
+ * The reviewed-by band at the foot of an article — and now at the foot of a
+ * practice-area page too, with the SAME copy, by request.
  *
- * ONE SOURCE FOR ONE SENTENCE. It is per-post data — in Sanity it becomes a
- * field an editor can rewrite for a post reviewed by someone else — but every
- * post that exists today is reviewed by the same person, and two hand-copied
- * versions of this would drift the moment one is edited.
+ * ONE SOURCE FOR ONE SENTENCE, across both templates. It is per-document data —
+ * in Sanity it becomes a field an editor can rewrite for a page reviewed by
+ * someone else — but everything that exists today is reviewed by the same
+ * person, and two hand-copied versions of this would drift the moment one is
+ * edited. `practiceAreaPages.ts` imports it rather than repeating it.
  *
- * TODO(launch): "more than 20 years" is one of the unverified stat claims in
- * README's table. It was already on the one built article; deriving the
- * imported posts from the same sentence puts it on every post the import
- * brings, so it needs confirming before launch rather than after.
+ * "This page", not "this article", on both — the requested wording, and the
+ * one string has to serve 109 service pages as well as 181 posts.
+ *
+ * THE NAME IS INTERPOLATED, NOT TYPED. The roster is the source: the comp
+ * writes "KC Harpring" and the live site "KC Harping", and `byline()` takes
+ * whatever `team.ts` says.
+ *
+ * WHAT THIS COPY DROPPED, deliberately: "who has tried personal injury cases to
+ * verdict in Colorado courts for more than 20 years." That was a `TODO(launch)`
+ * — one of README's unverified stat claims, and the new wording makes no
+ * numeric claim at all, so the marker goes with it.
+ *
+ * "our comprehensive editorial guidelines" is NOT A LINK, and that is not an
+ * oversight. `/editorial-guidelines/` is in `RESERVED_PATHS` and is not built;
+ * linking it would ship a 404 on 290 pages. Make it a link when the page lands.
  */
 function reviewedBy(reviewer: PostByline): PortableTextBlock[] {
   return pt(
-    "This article was written and reviewed by the team at Dormer Harpring " +
-      `and approved by founding partner [${reviewer.name}](${reviewer.href}), who has ` +
-      "tried personal injury cases to verdict in Colorado courts for more " +
-      "than 20 years."
+    "This page has been written, edited, and reviewed by a team of legal " +
+      "writers following our comprehensive editorial guidelines. This page was " +
+      `approved by attorney, [${reviewer.name}](${reviewer.href}), a Denver ` +
+      "personal injury attorney with extensive legal expertise."
   );
+}
+
+/** The same band, resolved. For `practiceAreaPages.ts`, which has no reviewer
+ *  of its own and no reason to know which roster key to look up. */
+export async function getReviewedBy(): Promise<PortableTextBlock[]> {
+  return reviewedBy(await byline("k-c-harpring"));
 }
 
 export async function getFeaturedPost(): Promise<FeaturedPost> {
@@ -578,8 +602,10 @@ export async function getBlogPostArticles(): Promise<BlogPostArticle[]> {
       slug: "can-you-sue-a-trampoline-park-if-you-signed-a-waiver",
       body,
       readTime: readTime(body),
-      // TODO(launch): "more than 20 years" is the same unverified claim as the
-      // homepage's `20 Years` stat. The comp asserts it; nobody has confirmed it.
+      // The TODO(launch) that sat here — "more than 20 years", the same
+      // unverified claim as the homepage's `20 Years` stat — went with the
+      // rewritten copy, which makes no numeric claim. The homepage stat is
+      // still unconfirmed; see README's table.
       factCheck: reviewedBy(kc),
     },
   ];

@@ -1,13 +1,12 @@
 {
   "slug": "what-are-colorados-slip-and-fall-laws",
   "title": "What are Colorado’s Slip and Fall Laws?",
-  "label": "Slip and Fall Accident Laws in Colorado",
-  "city": "denver",
-  "topic": "premises",
-  "statewide": false,
-  "resource": true,
-  "metaTitle": "What are Colorado's Slip and Fall Laws?",
-  "metaDescription": "We explain Colorado laws surrounding slip and fall accidents. For help after a slip and fall, call our Denver premises liability lawyers.",
+  "excerpt": "Colorado laws regarding slip and falls are known as premises liability laws. These laws are complicated, and an attorney’s help navigating them can be crucial to successfully recovering from a slip and fall accident. At Dormer Harpring, our Denver slip and fall accident lawyers know Colorado premises liability laws inside and out. Dedicated to helping […]",
+  "publishedAt": "2016-05-10T21:46:52",
+  "modifiedAt": "2026-02-26T14:33:47",
+  "categories": [
+    "slip-and-fall"
+  ],
   "body": [
     {
       "_type": "block",
@@ -398,8 +397,14 @@
       ]
     }
   ],
-  "faqs": [],
-  "publishedAt": "2016-05-10T21:46:52",
-  "modifiedAt": "2026-02-26T14:33:47",
+  "factCheck": [],
+  "author": {
+    "name": "Dormer Harpring",
+    "href": "/about"
+  },
+  "reviewer": {
+    "name": "K.C. Harpring",
+    "href": "/meet-our-attorneys/k-c-harpring"
+  },
   "legacyId": 3424
 }

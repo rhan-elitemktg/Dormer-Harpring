@@ -91,10 +91,11 @@ const current = normalizePath(Astro.url.pathname);
     </nav>
 
     <div class="header__aside">
-      {/* TODO(IA): no Spanish page exists yet. Rendered because every comp
-          shows it; wire to the Spanish landing page once there is one. */}
-      <button type="button" class="header__lang">En Español</button>
-
+      {/* NO "EN ESPAÑOL" BUTTON, and its absence is deliberate — removed by
+          request. Every comp draws one, but no Spanish page exists and the
+          button was a <button> with no handler: it announced a language the
+          site cannot serve and did nothing when pressed. Re-add it as a real
+          link, not a button, if a Spanish landing page is ever built. */}
       {
         /* aria-label is set unconditionally and matches the visible text,
            because below 420px the number is replaced by the icon and the link
@@ -304,29 +305,6 @@ const current = normalizePath(Astro.url.pathname);
     gap: var(--space-4);
   }
 
-  .header__lang {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    padding: var(--space-2) var(--space-4);
-    border: 1px solid rgba(244, 239, 231, 0.4);
-    border-radius: var(--radius-pill);
-    background: rgba(20, 26, 22, 0.28);
-    font-family: var(--font-ui);
-    font-weight: 600;
-    font-size: var(--text-label);
-    line-height: 1;
-    color: var(--text-on-dark);
-    white-space: nowrap;
-    cursor: pointer;
-    transition: border-color var(--transition), color var(--transition);
-  }
-
-  .header__lang:hover {
-    border-color: var(--dh-gold-light);
-    color: var(--dh-gold-light);
-  }
-
   .header__phone {
     display: flex;
     flex-direction: column;
@@ -372,8 +350,7 @@ const current = normalizePath(Astro.url.pathname);
      Re-measure this if a nav label changes length: "Testimonials" replacing
      "Attorneys" is what moved it from ~1150 to 1192. */
   @media (max-width: 1200px) {
-    .header__nav,
-    .header__lang {
+    .header__nav {
       display: none;
     }
   }
