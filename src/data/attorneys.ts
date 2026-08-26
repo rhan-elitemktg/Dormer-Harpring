@@ -18,6 +18,7 @@ import timGarvey from "../assets/attorneys/attorney-3.jpg";
 import kcPortrait from "../assets/attorneys/kc-harpring.jpg";
 import lauraBrowne from "../assets/team/laura-browne.jpg";
 import { attorneyPath } from "../lib/routePaths";
+import { PLACEHOLDER_VIDEO, type VideoRef } from "../lib/video";
 
 export interface AttorneyCardData {
   _key: string;
@@ -28,6 +29,10 @@ export interface AttorneyCardData {
   location: string;
   href: string;
   portrait: ImageMetadata;
+  /** The card's portrait opens this in a popover; the name below it goes to
+   *  `href`. Two controls, deliberately — see AttorneyCard.astro.
+   *  TODO(video): PLACEHOLDER_VIDEO on all four until real ids land. */
+  video: VideoRef;
 }
 
 export interface AttorneysSection {
@@ -70,6 +75,7 @@ const CARDS: Record<string, AttorneyCardData> = {
     role: "Founding Partner",
     location: "Denver",
     href: attorneyPath("k-c-harpring"),
+    video: PLACEHOLDER_VIDEO,
     portrait: kcHarpring,
   },
   "sean-dormer": {
@@ -78,6 +84,7 @@ const CARDS: Record<string, AttorneyCardData> = {
     role: "Founding Partner",
     location: "Denver",
     href: attorneyPath("sean-dormer"),
+    video: PLACEHOLDER_VIDEO,
     portrait: seanDormer,
   },
   "tim-garvey": {
@@ -86,6 +93,7 @@ const CARDS: Record<string, AttorneyCardData> = {
     role: "Attorney",
     location: "Denver",
     href: attorneyPath("tim-garvey"),
+    video: PLACEHOLDER_VIDEO,
     portrait: timGarvey,
   },
   // The comp package ships no card portrait for Laura, so hers comes from the
@@ -97,6 +105,7 @@ const CARDS: Record<string, AttorneyCardData> = {
     role: "Attorney",
     location: "Denver",
     href: attorneyPath("laura-browne"),
+    video: PLACEHOLDER_VIDEO,
     portrait: lauraBrowne,
   },
 };
