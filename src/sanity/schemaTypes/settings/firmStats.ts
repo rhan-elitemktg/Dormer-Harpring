@@ -4,10 +4,11 @@
 // carry this band with identical figures, and four numbers duplicated across
 // seven pages is four numbers that will disagree within a year.
 //
-// TODO(launch): "$70M+" and "20 Years" are claims the firm has to stand behind.
-// The live site says "over $70 million" and Sean Dormer was admitted in 2005,
-// so both check out today — but "20 Years" ages badly as a typed string, and
-// Colorado's advertising rules care about the first one.
+// The "$70M+" and "20 Years" figures are unverified claims the firm has to
+// stand behind. The marker for that lives in `src/data/stats.ts` and NOT here:
+// one launch item wants one marker, or closing it leaves the other behind and
+// the pre-launch grep counts it twice. Same reason this file does not repeat
+// the reasoning — that is in stats.ts too.
 import { defineField, defineType } from "sanity";
 // Subpath, not the barrel — see the note in sanity/structure/index.ts.
 import { BarChartIcon } from "@sanity/icons/BarChart";

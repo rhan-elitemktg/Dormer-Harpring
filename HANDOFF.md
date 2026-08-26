@@ -198,6 +198,25 @@ last handoff and it moves the project's biggest dependency off the critical path
 content is spread across both — see below.
 
 Marker inventory: **39 `TODO(launch)`, 14 `TODO(video)`, 5 `TODO(sanity)`, 1 `TODO(content)`.**
+
+**USE `git grep`, AND THE METHOD IS PART OF THE NUMBER.** This line has now been wrong three
+times, each for a different reason. It read 43 when the grep counted eleven comments that
+DISCUSS a marker rather than being one — the colon fixed that. It read 38 against a count
+silently scoped to `src/` and `scripts/`. And a `grep -rn … .` with `grep -v '^./HANDOFF.md'`
+reads 41, because BSD grep strips the `./` and the exclusion never matches, so this file's own
+examples count themselves.
+
+`git grep` has none of those problems: it is repo-scoped, respects `.gitignore`, and takes
+real pathspecs.
+
+```sh
+git grep -F -c "TODO(launch):" -- . ':!HANDOFF.md' ':!README.md' | awk -F: '{s+=$2} END {print s}'
+```
+
+Phases 0 and 1 added **no new launch items** — 39 before, 39 after, measured that way at both
+commits. One briefly appeared when the `firmStats` schema repeated `stats.ts`'s
+unverified-claims marker; a second marker for one item is how closing it leaves the other
+behind.
 Grep all four before launch, not just the first — and **grep with the colon**. `TODO(launch)` also
 appears in eleven comments that DISCUSS a marker rather than being one, which is how this line
 previously read 43. `grep -rn "TODO(launch):"` is the count that means anything.
