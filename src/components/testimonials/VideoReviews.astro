@@ -55,6 +55,22 @@ const { section, reviews } = Astro.props;
     padding: 0;
   }
 
+  /* THE CARD IS NO LONGER A DIRECT CHILD OF THIS <li>. VideoPopover's wrapper
+     is `display: contents`, which passes layout straight through — but once
+     Wistia initialises it injects a real `div.wistia_click_to_play` between the
+     two, and that div is `height: auto`. `.vcard`'s `height: 100%` then
+     resolves against a content-sized box instead of the grid row, so every card
+     except the tallest came up short and the names stopped lining up.
+
+     `display: grid` rather than `flex`: a lone grid item stretches on BOTH axes
+     by default, so this fixes the height without also needing a width rule on a
+     child whose class belongs to Wistia and must not be targeted. It holds
+     before Wistia loads (the card is the item) and after (its div is), so there
+     is no flash of ragged cards on the way. */
+  .vids__grid > li {
+    display: grid;
+  }
+
   @media (max-width: 1080px) {
     .vids__grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
