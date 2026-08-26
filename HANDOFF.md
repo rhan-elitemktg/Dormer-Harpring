@@ -8,6 +8,101 @@ either here, and don't record anything `git log` already knows.
 
 _Last updated: 2026-08-26._
 
+## The Sanity integration — Phases 0, 1 and 2 are in
+
+**316 content documents are in Sanity and 17 of 28 data modules read from it.** The eleven
+still holding literals are all Phase 3/4 material — page copy, the blog, the practice areas,
+redirects — except `practiceAreas.ts`, which is deliberately deferred (below).
+
+### Phase 2 landed in five slices, each verified separately
+
+| | Documents | |
+|---|---|---|
+| 2a | 6 awards, 6 core values, sharedSections | the image path, proved |
+| 2b | 20 FAQs, 99 case results | no images — a clean raw byte-diff |
+| 2c | 18 testimonials | three lists merged into one record per client |
+| 2d | 30 team members | roster and bio pages joined |
+| 2e | 49 across seven types, plus the attorney rail | the last hand-authored content |
+
+**Slicing was not caution — it is how three real problems were found**, each on the smallest
+slice that could expose it: the award keys (the build died immediately), attribute order (112
+meaningless diffs), and the founding partner's name (below).
+
+### `scripts/compare-builds.py` is the check that made this possible
+
+A raw byte-diff dies the moment an image moves: one award badge changes the markup on 111
+pages. The comparator normalises `src` and `srcset` on `<img>` and `<source>` ONLY, so every
+page lands in IDENTICAL, IMAGES-only or CHANGED — and everything else, including alt, width,
+height, class and every byte of prose, is still compared strictly.
+
+```sh
+python3 scripts/compare-builds.py snapshot before.json   # then build, then:
+python3 scripts/compare-builds.py compare before.json
+```
+
+Tested all three ways. `dist/admin/` is excluded: its bundle hash moves on every schema
+change, which would make the exit code mean "you changed a schema".
+
+### THE FOUNDING PARTNER'S NAME WAS WRONG ON THREE PAGES
+
+The attorney rail spelled him **"KC Harpring"** where his own bio page and 297 of the 300
+built pages spelled him **"K.C. Harpring"**. The three exceptions were exactly the three pages
+whose cards came from a separate map in `attorneys.ts` — keyed `kc-harpring` while the roster
+was keyed `k-c-harpring`, which is also why joining on `_key` found three of four and the
+seed's assertion caught it.
+
+Reading the cards off the roster corrected all three. The signature beside the quote, and the
+homepage's firm-intro quote, were corrected to match. **0 of 300 pages disagree now.**
+
+Not a new decision: the project already treats the roster as authoritative, which is why the
+fact-check band interpolates the name rather than typing it. `diff-comp-about.py` went red,
+and the departure is declared in its `EXPECTED` table beside the two phone numbers and tested
+in both directions. The comp says "KC Harpring"; the live site is worse still and says
+"KC Harping".
+
+`home/firm/AttorneyQuoteCard.astro` was the last one and is marked `TODO(sanity)`: it imports
+its own portrait, which breaks the no-component-owns-content rule, and nothing joined its name
+to the roster — which is exactly why it was last.
+
+### `practiceAreas.ts` is deliberately NOT in Phase 2
+
+Its 13 cards across three lists all point at practice-area pages that exist — every one of the
+12 distinct hrefs was checked and resolves. So the card fields (the two blurbs, the insight,
+the icon key, the panel image) belong **on those page documents in Phase 3**. A separate
+card collection now would be a type to merge away later.
+
+Four of the thirteen appear in both the home and featured lists with the SAME href and
+DIFFERENT blurbs. Do not collapse those into one field.
+
+### Three collections have keys that are named from somewhere else
+
+`award` (9 references from `carAccidents.ts`), `testimonial` (2, same file) and `teamMember`
+(3, from `blog.ts`). Each carries a `key` slug projected as `_key`. **That key is content:**
+renaming one fails the build rather than quietly rendering the wrong badge. All three are
+marked `TODO(sanity)` to become real references when `carAccidents.ts` and the blog move.
+
+Sweep for more before any later migration — this is the command that found all three:
+
+```sh
+grep -rnoE '\b[a-z]+Key\b' src/data/*.ts | awk -F: '{print $1": "$3}' | sort | uniq -c
+```
+
+### Seeding, as it now works
+
+`scripts/seed-collections-2*.ts` → NDJSON → `sanity dataset import --replace`. Images ride
+along as `_sanityAsset` with an ABSOLUTE `file://` path.
+
+- **Seeded documents get generated ids**, so `--replace` has nothing to match on and a second
+  import ADDS a second set. `scripts/sanity-purge.ts <types> --yes` first. Singletons are the
+  exception — fixed ids, so `--replace` genuinely replaces.
+- **A document that gains fields across slices must be re-emitted WHOLE.** `--replace`
+  replaces entirely: writing four team members with only their rail fields would have deleted
+  25 biographies. Both 2c and 2e read the live document back and merge, stripping `_rev`.
+- **`scripts/lib/stub-vite-modules.ts` stubs image imports AND `sanity:client`**, so a
+  partially-swapped module still imports in plain Node. The stub's `fetch` throws rather than
+  returning empty, so calling an already-swapped getter names itself instead of writing a
+  document full of nothing.
+
 ## The Sanity integration has started — Phases 0 and 1 are in
 
 **The pipeline exists and four documents are through it.** `src/data/` is 4 of 28 modules
@@ -1139,8 +1234,9 @@ entry and both files to fix.
    Studio for unlisted videos beyond the five the site already embeds.
 3. **One Wistia player per popover, initialised eagerly** — 15 on the homepage, 20 on
    `/denver-car-accident-lawyer/`. Inherent to the class-based embed; wants a pass before launch.
-4. **Sanity Phase 2 — Collections, hand-authored.** Fifteen modules, ~230 documents, plus the
-   `sharedSections` singleton (see "Repeated bands split three ways" above):
+4. ~~**Sanity Phase 2 — Collections, hand-authored.**~~ **DONE** — 316 documents across
+   twelve collection types and four singletons. See the section at the top of this file.
+   What it did NOT cover, and why:
    `attorney` (27 + the two dogs) · `caseResult` (89) · `testimonial` (21) · `award` · `faq`
    (20) · `practiceArea` · `coreValue` · `city` · the four community types · `newsMention` ·
    `insight`. This is where the editable CARD images land. Four modelling calls are already
@@ -1149,6 +1245,10 @@ entry and both files to fix.
    three duplicated case results, the nine `href="#"` placeholders, and `AREA_TO_BLOG_CATEGORY`
    becoming a per-page reference list.
 5. **Sanity Phase 3 — Collections, imported.** 313 documents, 203 body images, script-driven.
+   **Plus `practiceAreas.ts`'s 13 cards**, which belong on the page documents rather than in a
+   collection of their own — see the section at the top. And the directory
+   (`getPracticeAreaGroups()`, 102 entries in 9 groups) with `assertDirectoryJoin()`, which is
+   coupled to the pages for the same reason.
    Bodies are already Portable Text from the same converter, so they upload unchanged — but
    **preserve the existing `_key`s rather than regenerating**: Sanity requires uniqueness
    within each array and a collision is a silently dropped item, not an error. Then
