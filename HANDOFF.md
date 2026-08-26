@@ -1008,25 +1008,48 @@ should expect to build.
 1. **There is no Sanity client.** `sanityClient` appears in exactly four places and all four are
    comments. `@sanity/astro` is configured and serves the `sanity:client` virtual module, but
    nothing imports it. Step one, and it is the whole of step one.
-2. **TYPESCRIPT IS NOT INSTALLED.** `AGENTS.md` says "TS strict"; `typescript` and
-   `@astrojs/check` are in neither dependency list and there is no typecheck script. Nothing has
-   ever verified a type in this repo — `astro check` offers to install both when you run it.
-   This matters more here than it normally would: TypeGen's entire value is generated types, and
-   today nothing would consume them.
+2. **TypeScript is installed now, and the repo does NOT typecheck.** `typescript` and
+   `@astrojs/check` are devDependencies and `npm run check:types` runs `astro check`. First run:
+   **9 errors, 97 hints across 205 files.** Nothing had ever verified a type here, so this is
+   accumulated, not new.
+
+   **PIN TYPESCRIPT TO 6.x. TypeScript 7 does not work.** The 7.0 native compiler does not expose
+   the programmatic API `astro check` relies on, and the CLI fails outright with a message
+   pointing at withastro/roadmap#1321. `npm i -D typescript` installs 7 and breaks the check.
+
+   **`check:types` is deliberately NOT in `npm run check`.** That chain is `&&`-ed and currently
+   green; wiring a 9-error check into it turns the gate red for everything. Wire it in once the
+   nine are closed, and not before.
+
+   **Two of the nine are a genuinely broken reference, not strictness noise.** `data/home.ts:72`
+   annotates `getRecentResults()` as returning `CaseResult[]` and never imports the type — it
+   lives in `caseResults.ts` — and `home/RecentResults.astro` imports `CaseResult` FROM
+   `data/home`, which does not export it. The build passes because Vite strips types without
+   checking them. Worth fixing before the getters become projections. The rest: two in
+   `sanity.config.ts` (`string | undefined` into a `string` field), three in `prose/ProseH*.astro`
+   (`Block` vs `BlockLike`), two in `src/sanity/theme.ts`. Most of the 97 hints are
+   `src/sanity/eliteTheme.js`, a vendored minified file whose single 56KB line is also why the
+   raw output is over a megabyte.
 3. **No TypeGen path** — no `sanity.cli.ts`, no `typegen` script, no `sanity.types.ts`. Note
    `sanity-typegen.json` is deprecated; configuration belongs in `sanity.cli.ts` with
    `typegen.enabled`, which regenerates during `sanity dev` / `sanity build`.
-4. **`tsconfig.json` has no `types` entry**, so `sanity:client` will not resolve. The Sanity
-   guide says to add `"types": ["@sanity/astro/module"]`. **Deliberately NOT applied**: a `types`
-   array REPLACES TypeScript's automatic `@types` inclusion, and with no typechecker installed
-   there is no way to prove it harmless. Do it together with item 2.
-5. **The asset surface is 112 distinct images** imported by the data layer, plus **203 more**
+4. **The asset surface is 112 distinct images** imported by the data layer, plus **203 more**
    inside the content collections. `src/content` is 39M.
-6. **`getStaticPaths` does not see module scope.** Astro hoists it into its own module context,
+5. **`getStaticPaths` does not see module scope.** Astro hoists it into its own module context,
    so a module-level `const QUERY = defineQuery(...)` throws `ReferenceError` at request time.
    Define queries used inside it there, or import them. Both `[slug].astro` files are affected.
-7. **The production URL is still not a Sanity CORS origin**, so the deployed `/admin` loads and
+6. **The production URL is still not a Sanity CORS origin**, so the deployed `/admin` loads and
    fails sign-in. Unchanged, and still not a blocker for building.
+
+**`tsconfig.json` NEEDS NO `types` ENTRY, and an earlier version of this section was wrong to
+say it did.** The Sanity guide's Astro page says to add `"types": ["@sanity/astro/module"]` —
+that instruction is for a project without an ambient declaration. This one has had it all along:
+`src/env.d.ts` carries `/// <reference types="@sanity/astro/module" />` beside the `astro/client`
+one. Verified rather than reasoned — a throwaway page importing `sanityClient` from
+`sanity:client` and reading `.config().projectId` typechecked clean and added zero errors.
+
+Adding the entry anyway would be worse than redundant: a `types` array REPLACES TypeScript's
+automatic `@types` inclusion, so it trades a working setup for a narrower one. Leave it out.
 
 **Eight stale comments were corrected**, all numeric claims the imports had overtaken: the blog
 counts (167 → 186, and 107 → 125 without featured art), the fact-check sentence's audience
