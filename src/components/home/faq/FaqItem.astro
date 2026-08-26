@@ -141,6 +141,10 @@ const { faq, ctaLabel, open } = Astro.props;
   }
 
   .faq__video {
+    /* Explicit, because this element used to be a <div> and is now an <a>:
+       block vs inline is the difference between a 400px card and a 0x0 one,
+       and `aspect-ratio` does nothing to an inline box. */
+    display: block;
     position: relative;
     aspect-ratio: 16 / 10;
     border-radius: var(--radius-5);

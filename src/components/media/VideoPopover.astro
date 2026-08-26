@@ -1,47 +1,43 @@
 ---
 // The ONE place the site opens a video in a popover.
 //
-// Same reasoning as `Picture.astro` and `PlayButton.astro`: the markup is not
-// interesting, but having one owner is. Switching provider, changing the
-// popover options, or replacing Wistia's runtime with a hand-rolled lightbox is
-// one file rather than a grep for `wistia_` across nine components.
+// WISTIA NEVER TOUCHES OUR MARKUP, and that is the whole design. This component
+// renders NO wrapper around the slot — the caller's own <a>, poster and play
+// glyph go into the page untouched — and the popover is driven from Wistia's
+// JS API instead of its class-based embed.
 //
-// THIS RENDERS THE WRAPPER, NOT THE TRIGGER. The caller supplies its own <a>
-// as the slotted child. That looks like more work at each call site and it is
-// the only shape that works:
+// THAT IS NOT PREFERENCE. The class-based version (`wistia_embed
+// wistia_async_<id> popover=true popoverContent=link` on a wrapper) shipped
+// first and broke every thumbnail on the site, in two ways at once, both
+// measured in the browser rather than guessed:
 //
-//   Astro scopes a component's <style> to elements in THAT component's
-//   template. Make this component render the trigger and the caller's class
-//   lands on markup carrying THIS file's cid — so `.vcard`, `.trvid`,
-//   `.bio__video` and the rest silently stop being styled. That is not
-//   theoretical: the first cut of this component did exactly that and
-//   check:styles caught 35 unmatchable rules across 25 pages.
+//  1. WISTIA WRAPS THE TRIGGER IN `div.wistia_click_to_play`. The wrapper here
+//     was `display: contents` so the caller's <a> could go on being the grid or
+//     flex item its parent expects. Wistia's injected div takes that role
+//     instead, leaving the <a> a plain inline child of it — so `.faq__video`
+//     and `.vcard`, which had no explicit `display`, computed to `inline` and
+//     collapsed to 0x0. Their posters are `position: absolute; inset: 0`, so a
+//     0x0 box means a 0x0 image.
+//  2. IT DESTROYS `.lazy-fade`. Layout's fade script attaches load listeners at
+//     parse time; Wistia re-creates the nodes when it wraps them, the listeners
+//     go with them, `.is-loaded` never lands and every poster stays at
+//     `opacity: 0` — including the ones whose geometry was still correct. That
+//     is why the thumbnails vanished even where the layout survived.
 //
-//   For most of them the fix would be `:global()` bounded by an ancestor in
-//   the caller's own template — but these classes ARE the caller's root
-//   element, so there is no ancestor to bind to. `.vcard` is also rendered by
-//   TWO different components with different styles, so an unbounded
-//   `:global(.vcard)` would have them overwrite each other.
+// Neither is Wistia misbehaving; that is what an embed library does. The fix is
+// to stop handing it our markup.
 //
-// So the caller keeps its element and its cid, and this keeps the Wistia
-// contract. The href still comes from `videoWatchUrl()` — nothing outside
-// `lib/video.ts` composes a video URL.
-//
-// THE TRIGGER MUST BE AN <a> WITH A REAL href. Wistia's `popoverContent=link`
-// binds the anchor inside this wrapper; if its runtime is blocked, slow, or JS
-// is off, that href still reaches the film. An inert <button> is the shape
-// `TeamCard.astro` and `ProseLink.astro` both argue against.
+// THE TRIGGER IS THE CALLER'S <a> WITH A REAL href, and it stays one: the click
+// handler below only calls preventDefault once it knows the API is there, so if
+// the runtime is blocked, slow or JS is off, the href still reaches the film.
+// An inert control is the shape `TeamCard.astro` and `ProseLink.astro` both
+// argue against.
 //
 // YOUTUBE GETS NO POPOVER, deliberately. Wistia's runtime only plays Wistia
 // media, and adding YouTube's iframe API would mean a second video runtime plus
 // the cookie conversation `videoEmbedUrl` documents. A `youtube` record renders
-// its link untouched — this component simply adds nothing around it.
-import {
-  WISTIA_RUNTIME,
-  wistiaMediaScript,
-  wistiaPopoverClass,
-  type VideoRef,
-} from "../../lib/video";
+// its link and this component adds nothing at all.
+import { WISTIA_RUNTIME, wistiaMediaScript, type VideoRef } from "../../lib/video";
 
 interface Props {
   video: VideoRef;
@@ -51,32 +47,23 @@ const { video } = Astro.props;
 const isWistia = video.provider === "wistia";
 ---
 
-{
-  isWistia ? (
-    <span class:list={["vpop", wistiaPopoverClass(video.id)]}>
-      <slot />
-    </span>
-  ) : (
-    <slot />
-  )
-}
+<slot />
 
 {
   /* `is:inline`, so Astro leaves a third-party runtime it cannot see alone.
      Both are `async`; neither blocks paint. Loaded per embed rather than from
      Layout, so the ~300 pages with no video never fetch a video player.
 
-     KNOWN COST: a page with N popovers emits N identical pairs of these —
-     15 on the homepage, 20 on /denver-car-accident-lawyer/. It is markup waste
-     rather than a bug: same URL, so the browser fetches each once, and E-v1.js
-     is idempotent by design. The .jsonp duplication disappears on its own once
-     the placeholders are replaced and the ids actually differ.
+     KNOWN COST: a page with N popovers emits N identical pairs — 15 on the
+     homepage, 20 on /denver-car-accident-lawyer/. Markup waste rather than a
+     bug: same URL so the browser fetches each once, and E-v1.js is idempotent.
+     The .jsonp half resolves itself once the placeholder ids diverge.
 
      TODO(video): if the runtime tag is worth deduping, the fix is a `hasVideo`
      prop on Layout emitting it once in <head>. NOT a module-level "already
      emitted" flag in this file — Astro renders every page in one process, so
-     that state leaks across pages and the second page onward silently loses
-     its player. */
+     that state leaks across pages and every page after the first silently
+     loses its player. */
   isWistia && (
     <>
       <script is:inline async src={wistiaMediaScript(video.id)} />
@@ -85,15 +72,48 @@ const isWistia = video.provider === "wistia";
   )
 }
 
-<style>
-  /* Carries Wistia's config classes and nothing else, so it must not affect
-     layout: `display: contents` takes it out of the box tree entirely and the
-     caller's <a> sits exactly where its own element used to.
+<script>
+  // Hoisted, NOT `is:inline` — Astro bundles this once however many popovers a
+  // page carries, which is exactly what a delegated listener wants. The
+  // third-party <script src> above cannot be hoisted the same way, which is why
+  // only that one is inline.
+  //
+  // Matched on the HREF rather than a data attribute, because the trigger is
+  // slotted content: this component cannot put an attribute on markup the
+  // caller owns. Both shapes `videoWatchUrl()` can produce are handled — the
+  // account subdomain lands the day WISTIA_ACCOUNT is filled in, and this must
+  // not quietly stop working on that day.
+  const WISTIA_HREF = /wistia\.(?:net|com)\/(?:embed\/iframe|medias)\/([a-z0-9]+)/i;
 
-     NOTE those config classes are PARSED BY WISTIA, not matched by CSS.
-     Nothing anywhere may target `.wistia_embed` or `wistia_async_*` — they are
-     data wearing a class attribute. */
-  .vpop {
-    display: contents;
+  /** Wistia needs an embed on the page to hand back an API. Created on demand
+   *  rather than rendered: one hidden host per media, only once anyone actually
+   *  clicks, and never inside markup we drew. */
+  function ensureHost(id: string): void {
+    if (document.querySelector(`.wistia_async_${id}`)) return;
+    const host = document.createElement("span");
+    host.className = `wistia_embed wistia_async_${id} popover=true`;
+    host.style.display = "none";
+    document.body.appendChild(host);
   }
-</style>
+
+  document.addEventListener("click", (event) => {
+    const target = event.target as HTMLElement | null;
+    const link = target?.closest<HTMLAnchorElement>("a[href*='wistia']");
+    if (!link) return;
+
+    const match = link.getAttribute("href")?.match(WISTIA_HREF);
+    const wistia = (window as unknown as { Wistia?: { api(id: string): unknown } }).Wistia;
+    // No runtime yet, or an href we do not recognise: let the browser follow
+    // the link. Never preventDefault on a path we cannot complete.
+    if (!match || !wistia) return;
+
+    const id = match[1];
+    ensureHost(id);
+
+    const api = wistia.api(id) as { popover?: { show(): void } } | null;
+    if (!api?.popover) return; // still initialising — the href does the job
+
+    event.preventDefault();
+    api.popover.show();
+  });
+</script>
