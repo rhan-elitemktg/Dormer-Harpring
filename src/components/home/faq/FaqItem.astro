@@ -7,6 +7,8 @@
 // to be present in the page. A JS-swapped panel would put it out of the DOM.
 import Picture from "../../media/Picture.astro";
 import PlayButton from "../../media/PlayButton.astro";
+import VideoPopover from "../../media/VideoPopover.astro";
+import { videoWatchUrl } from "../../../lib/video";
 import type { Faq } from "../../../data/faqs";
 import { ROUTES } from "../../../lib/routePaths";
 import faqCover from "../../../assets/home/faq-video-cover.jpg";
@@ -27,10 +29,8 @@ const { faq, ctaLabel, open } = Astro.props;
   </summary>
 
   <div class="faq__body">
-    {
-      /* TODO(video): inert until the attorney answers have a host and IDs. */
-    }
-    <div class="faq__video" data-video>
+    <VideoPopover video={faq.video}>
+      <a class="faq__video" href={videoWatchUrl(faq.video)}>
       <Picture
         src={faqCover}
         alt="Attorney answering a question on camera"
@@ -42,7 +42,8 @@ const { faq, ctaLabel, open } = Astro.props;
       <span class="faq__watch">&#9654; Watch &middot; {faq.videoLength}</span>
       <PlayButton tone="light" size={62} class="faq__play" />
       <span class="faq__video-label">Attorney video</span>
-    </div>
+      </a>
+    </VideoPopover>
 
     <div>
       <p class="faq__a">{faq.answer}</p>

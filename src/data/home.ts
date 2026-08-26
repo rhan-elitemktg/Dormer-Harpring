@@ -16,7 +16,7 @@
 
 import { pt, type PortableTextBlock } from "./portableText";
 import { practiceAreaPath } from "../lib/routePaths";
-import type { VideoRef } from "../lib/video";
+import { PLACEHOLDER_VIDEO, type VideoRef } from "../lib/video";
 
 export interface HomeHero {
   eyebrow: string;
@@ -233,6 +233,8 @@ export interface HomeFirmIntro {
   helpTitle: string;
   helpPoints: HelpPoint[];
   videoLabel: string;
+  /** TODO(video): the firm film. PLACEHOLDER_VIDEO until a real id lands. */
+  video: VideoRef;
   quote: { text: string; name: string; role: string };
   aside: { title: string; text: string; ctaLabel: string };
 }
@@ -278,6 +280,7 @@ export async function getHomeFirmIntro(): Promise<HomeFirmIntro> {
       },
     ],
     videoLabel: "Watch our firm video",
+    video: PLACEHOLDER_VIDEO,
     quote: {
       text:
         "You focus on getting better. We'll handle the insurance company, the " +

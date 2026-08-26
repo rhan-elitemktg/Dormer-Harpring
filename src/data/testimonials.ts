@@ -9,7 +9,7 @@
 // and the rail's order is content, not code.
 import type { ImageMetadata } from "astro";
 import { pt, type PortableTextBlock } from "./portableText";
-import type { VideoRef } from "../lib/video";
+import { PLACEHOLDER_VIDEO, type VideoRef } from "../lib/video";
 import teamPhoto from "../assets/team/skyline.jpg";
 import teamCrop from "../assets/team/skyline-crop.jpg";
 import evelyn from "../assets/testimonials/evelyn.jpg";
@@ -22,6 +22,8 @@ import videoCover1 from "../assets/testimonials/video-cover-1.jpg";
 export interface VideoTestimonial {
   _key: string;
   kind: "video";
+  /** The rail card's popover. Was inert until every slot got the stand-in. */
+  video: VideoRef;
   name: string;
   /** Runtime, shown on the poster. */
   length: string;
@@ -52,7 +54,7 @@ export async function getReviewSummary(): Promise<ReviewSummary> {
 /** Alternating video and written, exactly as the comp orders them. */
 export async function getHomeTestimonials(): Promise<Testimonial[]> {
   return [
-    { _key: "evelyn", kind: "video", name: "Evelyn", length: "2:14", poster: evelyn },
+    { _key: "evelyn", kind: "video", name: "Evelyn", length: "2:14", video: PLACEHOLDER_VIDEO, poster: evelyn },
     {
       _key: "lisa-kelly",
       kind: "quote",
@@ -63,7 +65,7 @@ export async function getHomeTestimonials(): Promise<Testimonial[]> {
         "Jessica and Nancy made the entire process from start to finish painless.",
       name: "Lisa Kelly",
     },
-    { _key: "ben", kind: "video", name: "Ben", length: "1:38", poster: ben },
+    { _key: "ben", kind: "video", name: "Ben", length: "1:38", video: PLACEHOLDER_VIDEO, poster: ben },
     {
       _key: "nadia-borja",
       kind: "quote",
@@ -74,7 +76,7 @@ export async function getHomeTestimonials(): Promise<Testimonial[]> {
         "inquired, the staff was welcoming and professional.",
       name: "Nadia Borja",
     },
-    { _key: "joel", kind: "video", name: "Joel", length: "1:52", poster: joel },
+    { _key: "joel", kind: "video", name: "Joel", length: "1:52", video: PLACEHOLDER_VIDEO, poster: joel },
     {
       _key: "ashlee-wagoner",
       kind: "quote",
@@ -85,7 +87,7 @@ export async function getHomeTestimonials(): Promise<Testimonial[]> {
         "case. They took the time to thoroughly explain every step.",
       name: "Ashlee Wagoner",
     },
-    { _key: "elijah", kind: "video", name: "Elijah", length: "2:03", poster: elijah },
+    { _key: "elijah", kind: "video", name: "Elijah", length: "2:03", video: PLACEHOLDER_VIDEO, poster: elijah },
     {
       _key: "marcus-delgado",
       kind: "quote",
@@ -96,7 +98,7 @@ export async function getHomeTestimonials(): Promise<Testimonial[]> {
         "turn. I always felt like a priority, never a number.",
       name: "Marcus Delgado",
     },
-    { _key: "kelly", kind: "video", name: "Kelly", length: "1:47", poster: kelly },
+    { _key: "kelly", kind: "video", name: "Kelly", length: "1:47", video: PLACEHOLDER_VIDEO, poster: kelly },
   ];
 }
 
@@ -187,28 +189,32 @@ export async function getVideoReviews(): Promise<VideoReview[]> {
   return [
     {
       _key: "evelyn",
-      video: { provider: "youtube", id: "kFdrOgblr6A" },
+      /* TODO(video): was YouTube kFdrOgblr6A — "Client Testimonial - Evelyn (unlisted)". */
+      video: PLACEHOLDER_VIDEO,
       name: "Evelyn",
       quote: "They made me feel like part of the family — I had a good team on my side.",
       poster: evelyn,
     },
     {
       _key: "ben",
-      video: { provider: "youtube", id: "sMGtyzxGaxY" },
+      /* TODO(video): was YouTube sMGtyzxGaxY — "Client Testimonial - Ben (public)". */
+      video: PLACEHOLDER_VIDEO,
       name: "Ben",
       quote: "Jessica is a great lawyer. She cares about people.",
       poster: ben,
     },
     {
       _key: "joel",
-      video: { provider: "youtube", id: "AhfhEBczLcY" },
+      /* TODO(video): was YouTube AhfhEBczLcY — "Client Testimonial: Joel (unlisted)". */
+      video: PLACEHOLDER_VIDEO,
       name: "Joel",
       quote: "Stay away from the billboards — these guys are the best.",
       poster: joel,
     },
     {
       _key: "elijah",
-      video: { provider: "youtube", id: "aqX7B7vu1ZI" },
+      /* TODO(video): was YouTube aqX7B7vu1ZI — "Client Testimonial - Elijah (unlisted)". */
+      video: PLACEHOLDER_VIDEO,
       name: "Elijah",
       quote:
         "It really made me so grateful that there are people out there helping " +
@@ -217,7 +223,8 @@ export async function getVideoReviews(): Promise<VideoReview[]> {
     },
     {
       _key: "kelly",
-      video: { provider: "youtube", id: "B3-hJPujs0U" },
+      /* TODO(video): was YouTube B3-hJPujs0U — "Client Testimonial (unlisted)". */
+      video: PLACEHOLDER_VIDEO,
       name: "Kelly",
       quote:
         "This team of champions were so attentive, so responsive, so professional, " +
@@ -226,7 +233,8 @@ export async function getVideoReviews(): Promise<VideoReview[]> {
     },
     {
       _key: "sean-client",
-      video: { provider: "youtube", id: "-cSgLpR2TfA" },
+      /* TODO(video): was YouTube -cSgLpR2TfA — "DORMER HARPRING TESTIMONIAL (public)". */
+      video: PLACEHOLDER_VIDEO,
       name: "Former client",
       quote: "Sean guided me every step of the way.",
       poster: videoCover1,

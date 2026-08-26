@@ -9,7 +9,7 @@
 import type { ImageMetadata } from "astro";
 import { pt, type PortableTextBlock } from "./portableText";
 import { attorneyPath, blogPath } from "../lib/routePaths";
-import { videoWatchUrl, type VideoRef } from "../lib/video";
+import { PLACEHOLDER_VIDEO, videoWatchUrl, type VideoRef } from "../lib/video";
 import seanVideoPoster from "../assets/team/sean-dormer-video.jpg";
 import seanLg from "../assets/team/sean-dormer-lg.jpg";
 import kcLg from "../assets/team/kc-harpring-lg.jpg";
@@ -502,7 +502,9 @@ const PROFILES: TeamProfile[] = [
         "to play his guitar and sing, but mostly just to himself."
     ),
     video: {
-      ref: { provider: "youtube", id: "LT-oU3yqtmA" },
+      /* TODO(video): was YouTube LT-oU3yqtmA — "Sean Dormer 2024 Profile"
+         (unlisted, so no channel listing will ever surface it). */
+      ref: PLACEHOLDER_VIDEO,
       poster: seanVideoPoster,
       alt: "Sean Dormer presenting with a model of the spine",
     },
@@ -575,7 +577,8 @@ const PROFILES: TeamProfile[] = [
         // video URL, or the Wistia migration stops being a data change.
         _key: "about-film",
         label: "About Dormer Harpring",
-        href: videoWatchUrl({ provider: "youtube", id: "OUGOMAWgrmc" }),
+        /* TODO(video): was YouTube OUGOMAWgrmc — "About Dormer Harpring" (public). */
+        href: videoWatchUrl(PLACEHOLDER_VIDEO),
       },
     ],
   },

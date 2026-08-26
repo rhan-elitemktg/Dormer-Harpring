@@ -10,6 +10,7 @@ import { getImage } from "astro:assets";
 import Header from "../Header.astro";
 import PlayButton from "../media/PlayButton.astro";
 import VideoPopover from "../media/VideoPopover.astro";
+import { videoWatchUrl } from "../../lib/video";
 import HeroStats from "./hero/HeroStats.astro";
 import type { HomeHero, HomeStat } from "../../data/home";
 import heroPhoto from "../../assets/team/skyline.jpg";
@@ -95,12 +96,14 @@ const [desktop, teamCrop] = await Promise.all([
            its runtime is blocked or JS is off the href still reaches the film.
            The `.btn` classes are unchanged, so it looks exactly as drawn. */
       }
-      <VideoPopover
-        video={hero.videoCta.video}
-        class="btn btn--light btn--lg hero__video"
-      >
-        <PlayButton tone="dark" size={38} />
-        {hero.videoCta.label}
+      <VideoPopover video={hero.videoCta.video}>
+        <a
+          class="btn btn--light btn--lg hero__video"
+          href={videoWatchUrl(hero.videoCta.video)}
+        >
+          <PlayButton tone="dark" size={38} />
+          {hero.videoCta.label}
+        </a>
       </VideoPopover>
     </div>
 
@@ -228,12 +231,9 @@ const [desktop, teamCrop] = await Promise.all([
     gap: var(--space-5);
   }
 
-  /* Bounded by `.hero__ctas`, an element in THIS template. `.hero__video` is a
-     class handed to VideoPopover, so it lands on that component's <a> and
-     carries ITS cid — a bare `.hero__video {}` rule here compiles and matches
-     nothing. check:styles caught exactly this when the inert <button> became a
-     component, which is the case README documents. */
-  .hero__ctas :global(.hero__video) {
+  /* Plain, not `:global()`: the <a> is in THIS template — VideoPopover wraps
+     it rather than rendering it, for exactly this reason. */
+  .hero__video {
     gap: var(--space-4);
   }
 

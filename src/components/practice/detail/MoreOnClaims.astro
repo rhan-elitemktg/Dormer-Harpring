@@ -37,6 +37,10 @@ const { more } = Astro.props;
                   class="morefeat__img"
                 />
                 <span class="morefeat__dur">{feature.length}</span>
+                {/* Decorative, and it stays that way: this card is already a
+                    link to the article, so the glyph cannot become a popover
+                    trigger without nesting one <a> inside another. Same
+                    decision as AttorneyCard — see the note there. */}
                 <span class="morefeat__play" aria-hidden="true">
                   <svg width="16" height="18" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M8 5.5v13l11-6.5z" />

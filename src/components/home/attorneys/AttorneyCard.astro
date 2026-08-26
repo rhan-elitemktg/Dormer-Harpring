@@ -37,9 +37,18 @@ const sizes =
     />
     <span class="acard__scrim" aria-hidden="true"></span>
     {
-      /* TODO(video): the comp intends an attorney video intro here. Until one
-         exists the whole card navigates to the bio, so this is a visual cue
-         rather than a control — it is not a <button> and takes no click. */
+      /* STILL A VISUAL CUE, NOT A CONTROL, and now for a structural reason
+         rather than a missing video. Every other play affordance on the site
+         became a Wistia popover; this one cannot, because the whole card is
+         already an <a> to the attorney's bio and an <a> may not contain
+         another <a>. Making the glyph its own trigger means the card stops
+         being one link — a bio link plus a separate play button — which is a
+         change to what the comp draws, not a wiring job.
+
+         TODO(video): needs a design decision. Either the card keeps navigating
+         to the bio and the glyph goes (it currently promises a video it does
+         not play), or the card splits into two controls. The bio page itself
+         DOES have a working popover for the attorneys who have a film. */
     }
     <PlayButton tone="light" size={46} class="acard__play" />
   </span>

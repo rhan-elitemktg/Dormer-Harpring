@@ -19,6 +19,7 @@
 import Picture from "../../media/Picture.astro";
 import PlayButton from "../../media/PlayButton.astro";
 import Eyebrow from "../../Eyebrow.astro";
+import VideoPopover from "../../media/VideoPopover.astro";
 import { videoWatchUrl } from "../../../lib/video";
 import type { VideoReview } from "../../../data/testimonials";
 import type { ResultsSection } from "../../../data/carAccidents";
@@ -54,12 +55,8 @@ const { results, reviews, id } = Astro.props;
 
             if (review) {
               return (
-                <a
-                  class="res res--vid"
-                  href={videoWatchUrl(review.video)}
-                  target="_blank"
-                  rel="noopener"
-                >
+                <VideoPopover video={review.video}>
+                  <a class="res res--vid" href={videoWatchUrl(review.video)}>
                   <Picture
                     src={review.poster}
                     alt={`${review.name} — client testimonial video`}
@@ -84,7 +81,8 @@ const { results, reviews, id } = Astro.props;
                   <p class="res__chg">{review.name}</p>
 
                   <PlayButton tone="light" size={44} class="res__play" />
-                </a>
+                  </a>
+                </VideoPopover>
               );
             }
 

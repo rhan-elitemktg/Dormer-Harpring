@@ -21,6 +21,7 @@ import AttorneyFacts from "./AttorneyFacts.astro";
 import BioQuote from "./BioQuote.astro";
 import type { TeamMember, TeamProfile } from "../../data/team";
 import type { FirmDetails } from "../../data/site";
+import VideoPopover from "../media/VideoPopover.astro";
 import { videoWatchUrl } from "../../lib/video";
 import { ROUTES } from "../../lib/routePaths";
 
@@ -126,12 +127,8 @@ const quoteText = hasQuote
 
       {
         profile.video && (
-          <a
-            class="bio__video"
-            href={videoWatchUrl(profile.video.ref)}
-            target="_blank"
-            rel="noopener"
-          >
+          <VideoPopover video={profile.video.ref}>
+            <a class="bio__video" href={videoWatchUrl(profile.video.ref)}>
             <Picture
               src={profile.video.poster}
               alt={profile.video.alt}
@@ -145,9 +142,11 @@ const quoteText = hasQuote
               </svg>
             </span>
             <span class="visually-hidden">
-              Watch {member.name}'s profile film on YouTube
+              {/* No longer "on YouTube": it opens in a popover on this page. */}
+              Watch {member.name}'s profile film
             </span>
-          </a>
+            </a>
+          </VideoPopover>
         )
       }
 

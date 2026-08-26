@@ -87,3 +87,25 @@ export function wistiaMediaScript(id: string): string {
 export function wistiaPopoverClass(id: string): string {
   return `wistia_embed wistia_async_${id} popover=true popoverContent=link`;
 }
+
+
+/**
+ * THE STAND-IN every un-migrated slot points at.
+ *
+ * By request, so every play affordance on the site is a working popover today
+ * rather than an inert control, with the real ids arriving per record once the
+ * Sanity phase gives an editor somewhere to type them. It is the firm's "Who We
+ * Are" film — a real, published video, so nothing 404s and nothing plays a
+ * dead embed.
+ *
+ * IT IS ALSO THE HOMEPAGE HERO'S GENUINE VIDEO, and that collision is the one
+ * thing to know here. `home.ts` writes its id as a LITERAL rather than
+ * importing this, deliberately: the hero is correct and finished, the others
+ * are placeholders that happen to share an id today. Grep for
+ * `PLACEHOLDER_VIDEO` to get exactly the slots still waiting on a real one —
+ * grepping for the id itself would wrongly include the hero.
+ *
+ * TODO(video): 39 slots. Each carries the YouTube id it should map to, where
+ * one is known.
+ */
+export const PLACEHOLDER_VIDEO: VideoRef = { provider: "wistia", id: "b4n3r4pchd" };
