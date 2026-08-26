@@ -132,7 +132,8 @@ export const CORE_VALUES_QUERY = defineQuery(`*[_type == "coreValue"] | order(or
  */
 export const SHARED_SECTIONS_QUERY = defineQuery(
   `*[_type == "sharedSections" && _id == "sharedSections"][0]{
-  coreValues{ eyebrow, title }
+  coreValues{ eyebrow, title },
+  reviewSummary{ count, rating, source }
 }`
 );
 
@@ -198,5 +199,56 @@ export const CO_COUNSEL_RESULTS_QUERY = defineQuery(
 export const HOME_RESULTS_QUERY = defineQuery(
   `*[_type == "caseResult" && shownOn == "home"] | order(order asc){
   "_key": _id, tag, badge, "wonInCourt": coalesce(wonInCourt, false), offered, recovered, story
+}`
+);
+
+/**
+ * The homepage rail — filmed and written interleaved, in the comps' own order.
+ *
+ * ONE COLLECTION, TWO PRESENTATIONS. These are the same records the
+ * /testimonials page renders; the rail shows a filmed card's runtime and a
+ * written card's TRIMMED quote, where the page shows the full one. The
+ * projection is what reshapes them, which is why the two lists can share a
+ * collection without either losing anything.
+ *
+ * `kind` is derived from `format` because the rail's discriminator is the
+ * card's shape, not the review's medium — the components have always read
+ * `kind`, and renaming a field an editor sees to match a component's prop is
+ * the wrong way round.
+ */
+export const HOME_TESTIMONIALS_QUERY = defineQuery(
+  `*[_type == "testimonial" && onHomeRail == true] | order(railOrder asc){
+  "_key": key.current,
+  "kind": select(format == "video" => "video", "quote"),
+  name,
+  video{ provider, id },
+  poster,
+  length,
+  "headline": railHeadline,
+  "body": railBody
+}`
+);
+
+/** The /testimonials page's filmed reviews. */
+export const VIDEO_REVIEWS_QUERY = defineQuery(
+  `*[_type == "testimonial" && onReviewsPage == true && format == "video"]
+  | order(reviewOrder asc){
+  "_key": key.current,
+  video{ provider, id },
+  name,
+  quote,
+  poster
+}`
+);
+
+/** The /testimonials page's written reviews. */
+export const WRITTEN_REVIEWS_QUERY = defineQuery(
+  `*[_type == "testimonial" && onReviewsPage == true && format == "written"]
+  | order(reviewOrder asc){
+  "_key": key.current,
+  name,
+  source,
+  quote,
+  body
 }`
 );

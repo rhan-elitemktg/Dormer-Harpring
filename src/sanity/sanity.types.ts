@@ -25,6 +25,11 @@ export type SharedSections = {
     eyebrow: string;
     title: string;
   };
+  reviewSummary?: {
+    count: string;
+    rating: string;
+    source: string;
+  };
 };
 
 export type FirmStats = {
@@ -153,6 +158,70 @@ export type Geopoint = {
   alt?: number;
 };
 
+export type SanityImageAssetReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
+};
+
+export type Testimonial = {
+  _id: string;
+  _type: "testimonial";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  key: Slug;
+  name: string;
+  format: "video" | "written";
+  video?: VideoRef;
+  poster?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+  };
+  length?: string;
+  quote: string;
+  body?: string;
+  source?: "google";
+  onReviewsPage?: boolean;
+  reviewOrder?: number;
+  onHomeRail?: boolean;
+  railOrder?: number;
+  railHeadline?: string;
+  railBody?: string;
+};
+
+export type SanityImageCrop = {
+  _type: "sanity.imageCrop";
+  top: number;
+  bottom: number;
+  left: number;
+  right: number;
+};
+
+export type SanityImageHotspot = {
+  _type: "sanity.imageHotspot";
+  x: number;
+  y: number;
+  height: number;
+  width: number;
+};
+
+export type VideoRef = {
+  _type: "videoRef";
+  provider: "wistia" | "youtube";
+  id: string;
+};
+
+export type Slug = {
+  _type: "slug";
+  current: string;
+  source?: string;
+};
+
 export type Faq = {
   _id: string;
   _type: "faq";
@@ -165,12 +234,6 @@ export type Faq = {
   video: VideoRef;
   videoLength: string;
   order: number;
-};
-
-export type VideoRef = {
-  _type: "videoRef";
-  provider: "wistia" | "youtube";
-  id: string;
 };
 
 export type CoreValue = {
@@ -213,13 +276,6 @@ export type CaseResult = {
   order: number;
 };
 
-export type SanityImageAssetReference = {
-  _ref: string;
-  _type: "reference";
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
-};
-
 export type Award = {
   _id: string;
   _type: "award";
@@ -237,28 +293,6 @@ export type Award = {
   };
   height: number;
   order: number;
-};
-
-export type SanityImageCrop = {
-  _type: "sanity.imageCrop";
-  top: number;
-  bottom: number;
-  left: number;
-  right: number;
-};
-
-export type SanityImageHotspot = {
-  _type: "sanity.imageHotspot";
-  x: number;
-  y: number;
-  height: number;
-  width: number;
-};
-
-export type Slug = {
-  _type: "slug";
-  current: string;
-  source?: string;
 };
 
 export type Seo = {
@@ -452,15 +486,16 @@ export type AllSanitySchemaTypes =
   | Navigation
   | FirmDetails
   | Geopoint
-  | Faq
-  | VideoRef
-  | CoreValue
-  | CaseResult
   | SanityImageAssetReference
-  | Award
+  | Testimonial
   | SanityImageCrop
   | SanityImageHotspot
+  | VideoRef
   | Slug
+  | Faq
+  | CoreValue
+  | CaseResult
+  | Award
   | Seo
   | InlineText
   | SimpleText
@@ -627,11 +662,16 @@ export type CORE_VALUES_QUERY_RESULT = Array<{
 
 // Source: src/sanity/lib/queries.ts
 // Variable: SHARED_SECTIONS_QUERY
-// Query: *[_type == "sharedSections" && _id == "sharedSections"][0]{  coreValues{ eyebrow, title }}
+// Query: *[_type == "sharedSections" && _id == "sharedSections"][0]{  coreValues{ eyebrow, title },  reviewSummary{ count, rating, source }}
 export type SHARED_SECTIONS_QUERY_RESULT = {
   coreValues: {
     eyebrow: string;
     title: string;
+  } | null;
+  reviewSummary: {
+    count: string;
+    rating: string;
+    source: string;
   } | null;
 } | null;
 
@@ -720,6 +760,60 @@ export type HOME_RESULTS_QUERY_RESULT = Array<{
   story: string;
 }>;
 
+// Source: src/sanity/lib/queries.ts
+// Variable: HOME_TESTIMONIALS_QUERY
+// Query: *[_type == "testimonial" && onHomeRail == true] | order(railOrder asc){  "_key": key.current,  "kind": select(format == "video" => "video", "quote"),  name,  video{ provider, id },  poster,  length,  "headline": railHeadline,  "body": railBody}
+export type HOME_TESTIMONIALS_QUERY_RESULT = Array<{
+  _key: string;
+  kind: "quote" | "video";
+  name: string;
+  video: {
+    provider: "wistia" | "youtube";
+    id: string;
+  } | null;
+  poster: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+  } | null;
+  length: string | null;
+  headline: string | null;
+  body: string | null;
+}>;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: VIDEO_REVIEWS_QUERY
+// Query: *[_type == "testimonial" && onReviewsPage == true && format == "video"]  | order(reviewOrder asc){  "_key": key.current,  video{ provider, id },  name,  quote,  poster}
+export type VIDEO_REVIEWS_QUERY_RESULT = Array<{
+  _key: string;
+  video: {
+    provider: "wistia" | "youtube";
+    id: string;
+  } | null;
+  name: string;
+  quote: string;
+  poster: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+  } | null;
+}>;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: WRITTEN_REVIEWS_QUERY
+// Query: *[_type == "testimonial" && onReviewsPage == true && format == "written"]  | order(reviewOrder asc){  "_key": key.current,  name,  source,  quote,  body}
+export type WRITTEN_REVIEWS_QUERY_RESULT = Array<{
+  _key: string;
+  name: string;
+  source: "google" | null;
+  quote: string;
+  body: string | null;
+}>;
+
 // Query TypeMap
 import "@sanity/client";
 declare module "@sanity/client" {
@@ -730,11 +824,14 @@ declare module "@sanity/client" {
     '*[_type == "firmStats" && _id == "firmStats"][0]{\n  "stats": coalesce(stats[]{ _key, big, label }, [])\n}': FIRM_STATS_QUERY_RESULT;
     '*[_type == "award"] | order(order asc){\n  "_key": key.current,\n  alt,\n  image,\n  height\n}': AWARDS_QUERY_RESULT;
     '*[_type == "coreValue"] | order(order asc){\n  "_key": _id,\n  title,\n  body,\n  iconKey\n}': CORE_VALUES_QUERY_RESULT;
-    '*[_type == "sharedSections" && _id == "sharedSections"][0]{\n  coreValues{ eyebrow, title }\n}': SHARED_SECTIONS_QUERY_RESULT;
+    '*[_type == "sharedSections" && _id == "sharedSections"][0]{\n  coreValues{ eyebrow, title },\n  reviewSummary{ count, rating, source }\n}': SHARED_SECTIONS_QUERY_RESULT;
     '*[_type == "faq" && shownOn == "home"]\n  | order(order asc){\n  "_key": _id,\n  question,\n  answer,\n  videoLength,\n  video{ provider, id }\n}': HOME_FAQS_QUERY_RESULT;
     '*[_type == "faq" && shownOn == "car-accidents"] | order(order asc){\n  "_key": _id,\n  question,\n  answer,\n  videoLength,\n  video{ provider, id }\n}': CAR_ACCIDENT_FAQS_QUERY_RESULT;
     '*[_type == "caseResult" && shownOn == "results"] | order(order asc){\n  "_key": _id, tag, badge, "wonInCourt": coalesce(wonInCourt, false), offered, recovered, story\n}': CASE_RESULTS_QUERY_RESULT;
     '*[_type == "caseResult" && shownOn == "co-counsel"] | order(order asc){\n  "_key": _id, tag, badge, "wonInCourt": coalesce(wonInCourt, false), offered, recovered, story\n}': CO_COUNSEL_RESULTS_QUERY_RESULT;
     '*[_type == "caseResult" && shownOn == "home"] | order(order asc){\n  "_key": _id, tag, badge, "wonInCourt": coalesce(wonInCourt, false), offered, recovered, story\n}': HOME_RESULTS_QUERY_RESULT;
+    '*[_type == "testimonial" && onHomeRail == true] | order(railOrder asc){\n  "_key": key.current,\n  "kind": select(format == "video" => "video", "quote"),\n  name,\n  video{ provider, id },\n  poster,\n  length,\n  "headline": railHeadline,\n  "body": railBody\n}': HOME_TESTIMONIALS_QUERY_RESULT;
+    '*[_type == "testimonial" && onReviewsPage == true && format == "video"]\n  | order(reviewOrder asc){\n  "_key": key.current,\n  video{ provider, id },\n  name,\n  quote,\n  poster\n}': VIDEO_REVIEWS_QUERY_RESULT;
+    '*[_type == "testimonial" && onReviewsPage == true && format == "written"]\n  | order(reviewOrder asc){\n  "_key": key.current,\n  name,\n  source,\n  quote,\n  body\n}': WRITTEN_REVIEWS_QUERY_RESULT;
   }
 }

@@ -52,6 +52,35 @@ export const sharedSections = defineType({
         defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
       ],
     }),
+    defineField({
+      name: "reviewSummary",
+      title: "Review rating",
+      type: "object",
+      description:
+        "The rating shown beside a testimonials heading. Appears on the homepage, About, the " +
+        "attorney bios and the Car Accidents page — four places, one figure.",
+      options: { columns: 3 },
+      fields: [
+        defineField({
+          name: "count",
+          type: "string",
+          description: 'How many — "300+".',
+          validation: (rule) => rule.required(),
+        }),
+        defineField({
+          name: "rating",
+          type: "string",
+          description: 'The score — "5.0".',
+          validation: (rule) => rule.required(),
+        }),
+        defineField({
+          name: "source",
+          type: "string",
+          description: 'Where from — "Google".',
+          validation: (rule) => rule.required(),
+        }),
+      ],
+    }),
   ],
   preview: {
     prepare: () => ({ title: "Shared Sections" }),
