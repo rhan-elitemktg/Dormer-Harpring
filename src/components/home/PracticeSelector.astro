@@ -318,7 +318,15 @@ const { section, areas, promise, catastrophic } = Astro.props;
   // `hidden` attribute and the selected state. With JS unavailable the first
   // panel stays visible and every tab is still a labelled heading for its
   // content, so nothing is lost but the switching.
-  for (const list of document.querySelectorAll<HTMLElement>('[role="tablist"]')) {
+  // SCOPED TO THIS COMPONENT'S OWN CLASS, NOT `[role="tablist"]`. A bare role
+  // selector is global, and the homepage renders three tablists — this one,
+  // NewsInsights' feed switch, and PromiseBand's carousel dots. This loop used
+  // to claim all three. It double-bound the feed switch, which has its own
+  // identical handler, and it broke the promise dots outright: they carry no
+  // `aria-controls` and are driven by PromiseBand's `show()`, so an arrow key
+  // here moved focus and flipped `aria-selected` while the slide stayed put.
+  // Do not widen this back.
+  for (const list of document.querySelectorAll<HTMLElement>(".pa__tablist")) {
     const tabs = [...list.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
     if (tabs.length === 0) continue;
 

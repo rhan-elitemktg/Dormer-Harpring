@@ -1,6 +1,6 @@
 // SANITY SWAP POINT — the cities the firm runs landing pages for.
 //
-// Nine of them, carrying 109 practice-area pages between them. Until this
+// Nine of them, carrying 104 practice-area pages between them. Until this
 // import, only four were named anywhere in the project and five —Aurora,
 // Boulder, Highlands Ranch, Lakewood and Thornton — appeared in no data file,
 // no comp and no navigation, despite having 41 live pages between them.

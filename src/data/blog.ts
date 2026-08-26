@@ -63,7 +63,7 @@ export interface BlogCategory {
   /**
    * The legacy WordPress category slug, read off the scrape's `/category/*`
    * directories rather than derived from the title — `Auto Insurance` is
-   * `auto-insurance-accident-claims` there, and 167 posts' archive URLs depend
+   * `auto-insurance-accident-claims` there, and 186 posts' archive URLs depend
    * on it. Nothing links to `/category/<slug>` yet (those pages are not built),
    * but the tab filter keys off it and the CMS phase will.
    */
@@ -84,7 +84,7 @@ export interface BlogPost {
   /**
    * THE post's category — one, not a list.
    *
-   * WordPress lets a post carry several and 28 of the imported 167 do, but by
+   * WordPress lets a post carry several and 28 of the imported 186 do, but by
    * Rhan's direction a post belongs to exactly one here: the first its source
    * record lists. The content files keep every slug, because the getter is
    * where a projection narrows — see `getImportedPosts`.
@@ -93,7 +93,7 @@ export interface BlogPost {
   /**
    * Card art — the post's own featured image, or `null`.
    *
-   * NULL FOR 107 OF THE 167 IMPORTED POSTS, which have no featured image on the
+   * NULL FOR 125 OF THE 186 IMPORTED POSTS, which have no featured image on the
    * legacy site at all. `PostThumb.astro` draws the branded placeholder for
    * those. It used to fall back to a practice-area photograph chosen by
    * category, which gave every post in a category the same picture — the cards
@@ -150,19 +150,27 @@ export async function getBlogPage(): Promise<BlogPageCopy> {
 }
 
 /**
- * The tab row: EVERY category the blog has, ordered by how many posts each
- * holds.
+ * The tab row: every category a post actually LEADS with, ordered by how many
+ * posts each holds.
  *
- * ALL 23, NOT THE COMP'S SIX. `CategoryTabs.astro` was already built to
- * overflow into a horizontal scroll for exactly this — the comp draws six, the
- * live blog has twenty-three, and an editor will add more. Rhan's direction is
- * that the row scrolls rather than being capped or grouped.
+ * 22 TABS FROM 23 CATEGORY DOCUMENTS, NOT THE COMP'S SIX. `CategoryTabs.astro`
+ * was already built to overflow into a horizontal scroll for exactly this — the
+ * comp draws six and an editor will add more. Rhan's direction is that the row
+ * scrolls rather than being capped or grouped.
+ *
+ * THE MISSING ONE IS `auto-insurance-accident-claims`, and it is structural
+ * rather than a bug here. A post belongs to exactly ONE category — the first
+ * its source record lists — so a category no post leads with has no posts to
+ * filter to and can never be reached. Thirteen posts carry that one second and
+ * none first. Rendering a tab for it would open an empty panel, so the count
+ * follows the leading category, not the collection. Open question in
+ * HANDOFF.md: whether those thirteen should lead with it instead.
  *
  * ORDERED BY POST COUNT, DESCENDING. In a row that scrolls, order decides what
- * a reader meets before they interact: Auto Accident (54) and Personal Injury
- * (49) sit where the eye lands, and the single-post categories are the ones you
+ * a reader meets before they interact: Auto Accident (63) and Personal Injury
+ * (35) sit where the eye lands, and the single-post categories are the ones you
  * scroll for. Alphabetical would lead with Awards and Bike Accidents and bury
- * the two covering two thirds of the archive.
+ * the two covering half the archive.
  *
  * `all` is not here — it is the sentinel the component renders itself, and
  * there is no `/category/all` behind it.
@@ -261,7 +269,7 @@ export const FIRM: PostByline = { name: "Dormer Harpring", href: ROUTES.attorney
  * edited. `practiceAreaPages.ts` imports it rather than repeating it.
  *
  * "This page", not "this article", on both — the requested wording, and the
- * one string has to serve 109 service pages as well as 181 posts.
+ * one string has to serve 104 service pages as well as 186 posts.
  *
  * THE NAME IS INTERPOLATED, NOT TYPED. The roster is the source: the comp
  * writes "KC Harpring" and the live site "KC Harping", and `byline()` takes
@@ -317,7 +325,7 @@ export async function getFeaturedPost(): Promise<FeaturedPost> {
  * the comp, of which only four were real posts — the other eight were titles
  * the designer invented, shipped with `href: null` so their cards rendered
  * unlinked rather than dead. All twelve are gone: the import brings the actual
- * 166 (167 less the featured post, which is hand-authored and shown above), so
+ * 185 (186 less the featured post, which is hand-authored and shown above), so
  * every card leads somewhere and the tab row filters a real archive instead of
  * a placeholder.
  *

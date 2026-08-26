@@ -1,8 +1,11 @@
 // Homepage FAQ.
 //
 // SANITY SWAP POINT — mirrors the future `src/sanity/lib/faqs.ts`. These become
-// `faq` documents; 65 of the legacy site's 98 practice-area pages carry their
-// own accordion, so this is a collection rather than page-local copy.
+// `faq` documents; 28 of the 104 imported practice-area pages carry their own
+// accordion, so this is a collection rather than page-local copy. That figure
+// was "65 of 98" while it was an estimate off the scrape — the import counted
+// them: 28 pages, 153 items. The accordion is not in `content.rendered`, which
+// is why guessing was ever necessary; see scripts/import-practice-areas.mjs.
 //
 // The answers stay plain strings rather than Portable Text on purpose: they
 // also feed FAQPage structured data, which takes a string, and an answer with
@@ -69,7 +72,7 @@ export async function getFaqSection(): Promise<FaqSection> {
  * for free. That answers the question HANDOFF.md left open.
  *
  * A collection rather than page copy for the reason the note at the top of this
- * file gives: 65 of the legacy site's 98 practice-area pages carry their own
+ * file gives: 28 of the 104 imported practice-area pages carry their own
  * accordion, so a `faq` document belongs to a practice area, and the next
  * detail page adds a `getXFaqs()` here rather than a field on its own document.
  */

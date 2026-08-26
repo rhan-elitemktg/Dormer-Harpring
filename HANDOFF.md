@@ -6,13 +6,42 @@ Architecture, conventions and the design source of truth live in `AGENTS.md` (sy
 `CLAUDE.md`, loaded automatically). Pre-launch decisions live in `README.md`. Don't restate
 either here, and don't record anything `git log` already knows.
 
-_Last updated: 2026-08-25._
+_Last updated: 2026-08-26._
 
 ## State
 
 Build is green: **332 pages** — 330 that render a site header and footer, plus `404.html` and
-`/admin`. `npm run check` passes, all five comp-diff scripts exit 0, and the fidelity audit
-reports 104 of 104 pages at ≥99% against the live source.
+`/admin`. `npm run check` passes and the fidelity audit reports 104 of 104 pages at ≥99% against
+the live source.
+
+**The five comp-diff scripts run again, and all five are at 0.** The `Operation not permitted`
+on everything under `~/Downloads/Dormer Harpring/` is gone — it was macOS Downloads access, it
+came back on its own, and nothing in the repo ever had to change for it. If it returns, the tell
+is that plain `head` fails too, not just the scripts.
+
+**One of the five had gone stale while it could not run, and it failed in the right direction.**
+`diff-comp-car-accidents.py` declared "the result video card links to the real testimonial",
+asserting `youtube.com/watch?v=kFdrOgblr6A` in the built page. The Wistia migration made every
+play affordance a popover, so that declaration stopped being true and the script went red on the
+declaration rather than passing quietly — the both-directions contract earning its keep on a
+check that had been dark for a while. Rewritten to match what the card does now.
+
+**It is matched STRUCTURALLY, not by Wistia id, and that is the part not to undo.** That slot is
+`PLACEHOLDER_VIDEO` like the other 43; pinning the id would assert that the placeholder is
+correct and would go red on the very change that fixes it. It matches the popover wrapper around
+the `res res--vid` anchor instead, and holds the page to having no `youtube.com/watch` link left
+anywhere on it — the only youtube URL that survives is the footer's `@denvertrial` channel.
+
+Departures for that page are still **19**: one declaration replaced by one declaration.
+
+**Testing a break on this page needs the right wrapper, and the obvious way is wrong.** All 20
+popovers on `/denver-car-accident-lawyer/` carry the same `wistia_async_b4n3r4pchd` class, so a
+first-occurrence replace to break the result card hits a different card and the check passes —
+which reads as a weak assertion when it is really a bad test. Find the `res res--vid` anchor and
+walk back to the wrapper before it.
+
+**Every video on the site is a Wistia popover now**, and that work turned up a pattern worth
+reading before touching anything near one — see "Video" below.
 
 **Do not re-run the fidelity audit as part of a routine sweep.** It fetches all 104 practice-area
 pages from the live WordPress site and has taken anywhere from two minutes to over an hour. It
@@ -52,7 +81,7 @@ last handoff and it moves the project's biggest dependency off the critical path
 **The blog archive is 186 posts, not 167.** WordPress has two post types and the article-shaped
 content is spread across both — see below.
 
-Marker inventory: **38 `TODO(launch)`, 5 `TODO(video)`, 4 `TODO(sanity)`, 1 `TODO(content)`.**
+Marker inventory: **38 `TODO(launch)`, 14 `TODO(video)`, 4 `TODO(sanity)`, 1 `TODO(content)`.**
 Grep all four before launch, not just the first — and **grep with the colon**. `TODO(launch)` also
 appears in eleven comments that DISCUSS a marker rather than being one, which is how this line
 previously read 43. `grep -rn "TODO(launch):"` is the count that means anything.
@@ -610,6 +639,125 @@ re-run rewrites every `_key` across all 313 content files. Every changed line wa
 a phone line and nothing else; the 35,179 `_key`s are untouched. Same gate as always —
 `git status --porcelain src/content` after any converter change.
 
+## Video — every play affordance is a Wistia popover
+
+**No record says `youtube` any more.** Nine affordances, seven wired, two deliberately not:
+
+| | |
+|---|---|
+| `Hero` · `FirmIntro` · `FaqItem` | were inert — now popovers |
+| `RailVideoCard` · `DetailVideo` | were inert — now popovers |
+| `VideoReviewCard` · `AttorneyBio` · `ResultStories` | were link-outs to YouTube — now popovers |
+| `AttorneyCard` | portrait opens the film, name/role go to the bio (see below) |
+| `MoreOnClaims` | still decorative — the card is already a link to an article |
+
+178 popover anchors across 30 pages, each with a working href as its no-JS fallback.
+
+### THE ONE THING TO READ BEFORE TOUCHING A POPOVER
+
+**Wistia moves the trigger into a `div.wistia_click_to_play` of its own.** That single fact broke
+three unrelated things, each of which looked like a different bug and cost a round trip to
+diagnose:
+
+1. **Layout collapse.** `VideoPopover`'s wrapper is `display: contents` so the caller's `<a>`
+   keeps its parent's grid/flex place. Wistia's div takes that role instead, leaving the `<a>` a
+   plain inline child of it — so `.faq__video` and `.vcard`, which relied on a tag default for
+   `display`, computed to `inline` and collapsed to **0×0**. Their posters are `position:
+   absolute; inset: 0`, so a 0×0 box is a 0×0 image. Both declare `display: block` now.
+2. **`.lazy-fade` stopped working.** Re-creating the nodes dropped the per-image load listeners,
+   so `.is-loaded` never landed and posters sat at `opacity: 0` — correctly sized, fully
+   downloaded, invisible. Fixed in `Layout.astro`, not worked around: it delegates from the
+   document **with capture** now, which survives node replacement *and* covers a lazy image that
+   decodes whenever the reader scrolls to it. A timed re-run cannot cover that second case and
+   the first attempt at this wrongly tried.
+3. **`height: 100%` stopped resolving.** `.vcard` on `/testimonials` inherits the grid row's
+   height through its `<li>`, which is what puts the name on the floor of the card. Wistia's div
+   sits between them at `height: auto`, so the tallest card matched by coincidence and the rest
+   came up short. Fixed on the `<li>`: `display: grid` makes whatever is inside it a lone grid
+   item, and a lone grid item stretches on **both** axes — so it needs no rule on a child whose
+   class belongs to Wistia.
+
+**The pattern: anything that assumed the trigger is a direct child of its parent, or that its
+nodes survive, is wrong once Wistia initialises.** Before launch, sweep for `height: 100%`,
+`align-self`, `:first-child`/`nth-child` and per-node listeners anywhere near a popover — three
+were found one at a time and there is no reason to think that was all of them.
+
+### How it is wired, and why not the other way
+
+Wistia's own class-based popover: `wistia_embed wistia_async_<id> popover=true
+popoverContent=link` on the wrapper, with the caller's `<a>` inside.
+
+**Driving it from `Wistia.api(id).popover.show()` instead does NOT work**, and it is worth not
+re-attempting: that needs an embed initialised WITH popover options and IN LAYOUT. A
+`display: none` host initialises without them and throws `Cannot read properties of undefined
+(reading 'popoverborderradius')`; flipping its display afterwards does not re-initialise it.
+E-v1.js also discovers embeds by POLLING, so a host created on click is not ready on that tick —
+asking once and giving up is why the hero opened nothing for a while and just followed its href.
+
+**KNOWN COST, not addressed: a page initialises one Wistia player per popover, eagerly.** Fifteen
+on the homepage, twenty on `/denver-car-accident-lawyer/`. That is inherent to the class-based
+embed and wants its own pass before launch. The duplicate `<script>` tags are the smaller half of
+it and resolve themselves once the ids diverge.
+
+### PLACEHOLDER_VIDEO — 44 slots, one stand-in
+
+`lib/video.ts` exports it; every un-migrated slot points at it, by request, so the whole site
+works today and the ids swap per record once Sanity gives an editor somewhere to type them.
+
+**`home.ts` writes the hero's id as a LITERAL instead, deliberately.** The hero's video is
+correct and finished; the other 44 only happen to share an id today. Grep `PLACEHOLDER_VIDEO` to
+get exactly what still needs a real id — grepping the id itself wrongly includes the hero.
+
+**Every real YouTube id is preserved in a comment beside its record**, with the video's title and
+whether it was public or unlisted. Without that the mapping is gone: nobody could tell which
+testimonial slot wanted which film, and five of the eight were unlisted.
+
+### The firm's YouTube channel: 20 videos, and 5 are UNLISTED
+
+`@denvertrial` — channel `UCW0qcYz_K1ArgbzY436FA2A`. **15 public**, and **5 unlisted that the
+site embeds**: Evelyn (`kFdrOgblr6A`), Joel (`AhfhEBczLcY`), Elijah (`aqX7B7vu1ZI`), an unnamed
+testimonial (`B3-hJPujs0U`) and Sean's 2024 profile (`LT-oU3yqtmA`).
+
+**Nothing public can enumerate an unlisted video.** `yt-dlp`, the RSS feed and the channel page
+all return only the 15; those five were found by working backwards from ids in the codebase. So
+a migration driven off the channel listing would have quietly moved 15 videos and left five dead
+embeds. **There may be more unlisted videos than these five** — only YouTube Studio's Content
+list holds the complete set, and nobody has checked the true total.
+
+Downloads are the firm's to make from Studio or Google Takeout: those give the original masters
+and include unlisted videos, where anything scraping the public streams gives a re-encoded
+delivery copy and cannot see them at all.
+
+### The attorney card is two controls now
+
+By request, and it unblocked something. The card was a single `<a>` wrapping portrait, name and
+role — which is why the play glyph sat there promising a video it could not play: an `<a>` may
+not contain another `<a>`. It is a `<div>` now with two siblings — `.acard__media` to the film,
+`.acard__link` (wrapping name and role) to the bio. The name's hover is bound to the name's own
+link rather than the card, since they are separate controls.
+
+**This changed the About page too.** `AttorneyCard` is rendered by both `home/AttorneysBand` (the
+`.attys` rail) and `about/TeamPreview` (the four-up grid). The brief named `.attys`; applying it
+to one and not the other would make the same card behave differently on two pages.
+
+`MoreOnClaims` has the same shape and was left alone — its card is already a link to an article,
+so the glyph would need the same split, which is a design change rather than a wiring job.
+
+## Nav: the current page highlights inside a dropdown
+
+Viewing `/community-involvement/` and opening "About" shows Community Involvement in the same
+treatment hover gives. Most of it already existed — `Header.astro` computes `current` through
+`normalizePath` and puts `aria-current` on the top-level links; this extends it to the children
+and adds the selector to the existing hover rule so the two cannot drift.
+
+`aria-current` carries it rather than a class, matching the top-level items: the styling and what
+a screen reader announces are the same fact. A child with no `href` is skipped —
+`normalizePath(undefined)` would throw.
+
+**`MobileNav` has NO current-page logic at all** — it does not import `normalizePath` and renders
+no `aria-current` anywhere. Its sublinks want the same treatment and hover is not the relevant
+state there, so it needs its own visual decision.
+
 ## The footer, the header and the favicon
 
 Six changes to the footer and one to the header, all by request.
@@ -813,21 +961,93 @@ entry and both files to fix.
    the number fails the check. The four news mentions are real published articles (FOX31,
    Denver7, OutThere Colorado, The Mountain Mail) and their URLs are findable; the four insight
    teasers and the checklist point at articles nobody has written.
-2. **Move both collections into Sanity.** The blog and the practice areas are now two collections
+2. **Real Wistia ids.** 44 slots point at one stand-in (`PLACEHOLDER_VIDEO`), which is the whole
+   site's video layer resting on a single film. Each record names the YouTube id it should map
+   to. Blocked on the firm re-hosting the remaining videos — and on someone checking YouTube
+   Studio for unlisted videos beyond the five the site already embeds.
+3. **One Wistia player per popover, initialised eagerly** — 15 on the homepage, 20 on
+   `/denver-car-accident-lawyer/`. Inherent to the class-based embed; wants a pass before launch.
+4. **Move both collections into Sanity.** The blog and the practice areas are now two collections
    with the same contract, and the getters are already the projections. Plus the four Portable
    Text object types the post template deferred (`callout`, `phoneBand`, `attorneyCard`,
    `pullQuote`), whose intended home is commented in `prose/components.ts` — and which the
-   practice-area chrome maps onto almost exactly.
-3. `/new-seo-setup` — per-page meta, a Global SEO Settings singleton, JSON-LD, `sitemap.xml`,
+   practice-area chrome maps onto almost exactly. **Read "Sanity readiness" below first** — the
+   content is in better shape than the tooling is.
+5. `/new-seo-setup` — per-page meta, a Global SEO Settings singleton, JSON-LD, `sitemap.xml`,
    `robots.txt`, editor-managed redirects. **The practice-area pages already carry real
    `metaTitle` / `metaDescription` from the live site's own meta**, so that layer has something
    true to start from. `BlogPosting` JSON-LD belongs to this phase, and so does `sitemap.xml` — **which
    nothing links any more**: the footer points at the human `/sitemap/` now. The XML file's every
    URL is absolute off `site:`, so it cannot be written before the www-vs-apex call.
-4. `/studio-polish ux` — audits the filled-out schema, so it waits.
+6. `/studio-polish ux` — audits the filled-out schema, so it waits.
 
 No comp exists for **privacy / disclaimer**, **sitemap** or **404**. All three are built on the
 light template's shell anyway — see below.
+
+## Sanity readiness
+
+Audited against the whole tree before the integration starts. **The content is ready; the
+tooling is not.** Nothing below is a code change waiting to happen — it is what the next session
+should expect to build.
+
+**The four green lights, all re-checkable:**
+
+- **35,179 `_key`s across both collections: zero duplicates, zero missing.** This is the one that
+  would have bitten during upload, because Sanity requires `_key` uniqueness WITHIN each array
+  and a collision surfaces as a silently dropped array item rather than an error. Re-check by
+  walking every array of typed objects in `src/content/**/*.json`.
+- **290 slugs, zero collisions** between the 186 blog posts and the 104 practice areas. They
+  share `[slug].astro` at the root, so a collision is a page that cannot be served.
+- **80 async getters, and the data layer is clean**: no hex codes, no SVG markup, no style
+  strings. The convention held.
+- **No component owns content.** All 127 checked — not one declares a content array in its
+  frontmatter.
+
+**The blockers, in the order they bite:**
+
+1. **There is no Sanity client.** `sanityClient` appears in exactly four places and all four are
+   comments. `@sanity/astro` is configured and serves the `sanity:client` virtual module, but
+   nothing imports it. Step one, and it is the whole of step one.
+2. **TYPESCRIPT IS NOT INSTALLED.** `AGENTS.md` says "TS strict"; `typescript` and
+   `@astrojs/check` are in neither dependency list and there is no typecheck script. Nothing has
+   ever verified a type in this repo — `astro check` offers to install both when you run it.
+   This matters more here than it normally would: TypeGen's entire value is generated types, and
+   today nothing would consume them.
+3. **No TypeGen path** — no `sanity.cli.ts`, no `typegen` script, no `sanity.types.ts`. Note
+   `sanity-typegen.json` is deprecated; configuration belongs in `sanity.cli.ts` with
+   `typegen.enabled`, which regenerates during `sanity dev` / `sanity build`.
+4. **`tsconfig.json` has no `types` entry**, so `sanity:client` will not resolve. The Sanity
+   guide says to add `"types": ["@sanity/astro/module"]`. **Deliberately NOT applied**: a `types`
+   array REPLACES TypeScript's automatic `@types` inclusion, and with no typechecker installed
+   there is no way to prove it harmless. Do it together with item 2.
+5. **The asset surface is 112 distinct images** imported by the data layer, plus **203 more**
+   inside the content collections. `src/content` is 39M.
+6. **`getStaticPaths` does not see module scope.** Astro hoists it into its own module context,
+   so a module-level `const QUERY = defineQuery(...)` throws `ReferenceError` at request time.
+   Define queries used inside it there, or import them. Both `[slug].astro` files are affected.
+7. **The production URL is still not a Sanity CORS origin**, so the deployed `/admin` loads and
+   fails sign-in. Unchanged, and still not a blocker for building.
+
+**Eight stale comments were corrected**, all numeric claims the imports had overtaken: the blog
+counts (167 → 186, and 107 → 125 without featured art), the fact-check sentence's audience
+(109/181 → 104/186), the FAQ estimate ("65 of the legacy site's 98" → the counted 28 of 104),
+and cities (109 → 104). **Verified inert by hashing all 332 built pages before and after —
+byte-identical.**
+
+The tab-row comment needed more than a number. It claimed the row renders every category; it
+renders **22 of 23**. `auto-insurance-accident-claims` is unreachable because a post belongs to
+exactly one category — the first its record lists — and thirteen posts carry that one second,
+none first. Already an open question below; now recorded where the code is.
+
+**Duplication found and deliberately left alone:**
+
+- `ContactForm` / `CoCounselForm` share their label, `:focus` and honeypot rules verbatim — and
+  are headed for one `/api/consult` endpoint anyway.
+- `.spage__grid` / `.post__grid` / `.parea__grid` are identical, as are the three `__main` rules.
+  That is **three** callers against the documented four-caller threshold for extracting, so it
+  stays. Note the threshold is now one away.
+- Repeated utilities: absolute-fill `object-fit: cover` in four files, visually-hidden in two,
+  the awards rail in three.
 
 ## Open
 
@@ -840,6 +1060,13 @@ light template's shell anyway — see below.
   confirm hub-only. `assertDirectoryJoin()` cannot decide this for you — see its note.
 - **The favicon's green is not the site's.** `#314641` against `--dh-forest-100` `#2c3b31`.
   Designer call.
+- **`MoreOnClaims`' play glyph promises a video it cannot play.** Same shape the attorney card
+  had before it was split: the card is already a link to an article, so the glyph needs its own
+  control or it should go.
+- **`faq-video-cover.jpg` is 607×609 — square — in a 16/10 box.** `object-fit: cover` with
+  `object-position: center top` crops roughly the bottom 40%. Not a layout bug; a 16:10 crop
+  would use the frame better.
+- **`MobileNav` has no current-page highlight**, where the desktop nav now does.
 - **Three live Denver pages were excluded as duplicates** and want a ruling:
   `personal-injury-attorney` (duplicates the homepage), `car-accident` and
   `traffic-collision-lawyer` (both overlap `denver-car-accident-lawyer`, which the heavy template
@@ -945,6 +1172,10 @@ rather than creating one.
 - **`lib/portableText.ts`'s `toPlainText()`** — Portable Text to a string, for JSON-LD.
 - **`scripts/lib/wp-portable-text.mjs`** — WordPress HTML to Portable Text, both importers.
 - **`PostThumb.astro`** — every post card's art, both branches.
+- **`media/VideoPopover.astro`** — the ONE place a video opens in a popover. It renders the
+  Wistia wrapper; the CALLER supplies its own `<a href={videoWatchUrl(...)}>` as the slotted
+  trigger, so the caller keeps its element and its scoped styles. Read its header before
+  changing it — the alternatives were tried and are recorded there.
 - **`media/PlayButton.astro`** owns the pulse. **Three components still hand-roll a play circle**
   and so do not pulse: `testimonials/VideoReviewCard`, `team/AttorneyBio`,
   `practice/detail/MoreOnClaims`.
@@ -977,6 +1208,22 @@ Both live in `global.css` and therefore reach the blog as well as the practice a
 
 ## Traps worth knowing before touching a section
 
+- **A component script that queries `document` by a GENERIC selector reaches other
+  components.** `home/PracticeSelector` looped `document.querySelectorAll('[role="tablist"]')`,
+  and the homepage renders three tablists. It double-bound `home/NewsInsights`, which has its
+  own near-identical handler, and it broke `home/PromiseBand` outright: those dots carry no
+  `aria-controls` and are driven by PromiseBand's `show()`, so an arrow key flipped
+  `aria-selected` and moved focus while the slide stayed put — the announced state and the
+  visible slide disagreed, and nothing corrected it, because PromiseBand has no keydown handler.
+  Both tab sets scope to their own class now.
+
+  **An ARIA role is not an identifier and neither is user-facing text.** NewsInsights keyed off
+  `[aria-label="News and insights"]`, which is copy — rewording it would have silently unwired
+  the tabs. **Swept: there are only five document-level queries in the whole component tree**,
+  and the other three are correct — `img.lazy-fade` (Layout's delegated capture handler, global
+  on purpose), `[data-promise]`, and `.play`, which reaches only PlayButton's own instances
+  because the three hand-rolled play circles use `vcard__play` / `bio__play` / `morefeat__play`.
+  That is also exactly why those three do not pulse.
 - **A text decoration on a flex container reaches the arrow inside it.** The fix is
   `.arrow-link__label`.
 - **A light card inside `.section--forest` must declare its own heading colour**, or it renders at

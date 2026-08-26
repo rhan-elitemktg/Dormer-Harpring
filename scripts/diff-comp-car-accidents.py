@@ -551,11 +551,26 @@ EXPECTED = [
         "interaction whose only job was to hide them",
     ),
     (
-        "the result video card links to the real testimonial",
-        "youtube.com/watch?v=kFdrOgblr6A" in built and "caResLb" not in built,
+        "the result video card opens the film in a Wistia popover",
+        # Matched STRUCTURALLY, never by id: this slot is PLACEHOLDER_VIDEO today
+        # and swaps to Evelyn's real Wistia id when the firm finishes re-hosting.
+        # Pinning the id here would assert that the placeholder is correct, and
+        # would go red on the very change that fixes it.
+        re.search(
+            r'class="vpop wistia_embed wistia_async_[a-z0-9]+ popover=true'
+            r' popoverContent=link"[^>]*>\s*<a class="res res--vid"'
+            r' href="https://fast\.wistia\.net/embed/iframe/[a-z0-9]+"',
+            built,
+        )
+        is not None
+        and "caResLb" not in built
+        and "youtube.com/watch" not in built,
         "the comp opens a lightbox that shows the poster IMAGE and the quote again — "
-        "there is no player in it. This client's video is one of the six real ones on "
-        "the @denvertrial channel, so the card links out as /testimonials already does",
+        "there is no player in it, so the card plays the film instead. It was a link "
+        "out to YouTube (kFdrOgblr6A, unlisted) until the Wistia migration; every play "
+        "affordance on the site is a popover now, and the anchor's Wistia iframe URL is "
+        "its no-JS fallback. The last clause holds the page to that — the only youtube "
+        "link left anywhere on it is the footer's @denvertrial channel",
     ),
     (
         "the checklist teaser links to a placeholder",
