@@ -1,11 +1,20 @@
-// The firm's core values.
+// The firm's core values, and the heading above them.
 //
-// SANITY SWAP POINT — mirrors the future `src/sanity/lib/coreValues.ts`. These
-// become `coreValue` documents; the band renders on both the homepage and the
-// About page, which is why the component sits at src/components/ root.
+// SANITY: the six cards are `coreValue` documents; the heading is on the
+// `sharedSections` singleton, because it is IDENTICAL on all five pages that
+// render the band — About, Co-Counsel, the homepage, Meet Our Attorneys and
+// News. A band whose heading differs per page keeps it on that page instead;
+// see the note on the `sharedSections` schema type for why that distinction had
+// to be measured rather than assumed.
 //
-// The comp stores a full SVG string on each record. Here it is an `iconKey`
-// resolved by components/icons/ValueIcon.astro — see the note there.
+// NO SVG IN THE DATA. The comps store a raw SVG string on each record. Here a
+// record carries only an `iconKey` and `components/icons/ValueIcon.astro` owns
+// the markup — markup in a content field is not something an editor can fill
+// in, and it becomes an injection surface the moment the field is CMS-backed.
+// The Studio offers the six keys that have a glyph and nothing else.
+import { sanityClient } from "sanity:client";
+import { CORE_VALUES_QUERY, SHARED_SECTIONS_QUERY } from "../sanity/lib/queries";
+import { once, required } from "../sanity/lib/fetch";
 
 export interface CoreValue {
   _key: string;
@@ -20,47 +29,20 @@ export interface CoreValuesSection {
   title: string;
 }
 
+/** The `sharedSections` singleton. Shared with whatever else lands on it. */
+function shared() {
+  return once("sharedSections", async () =>
+    required(await sanityClient.fetch(SHARED_SECTIONS_QUERY), "Shared Sections")
+  );
+}
+
 export async function getCoreValuesSection(): Promise<CoreValuesSection> {
-  return { eyebrow: "What drives us", title: "Our core values" };
+  const { coreValues } = await shared();
+  return { eyebrow: coreValues?.eyebrow ?? "", title: coreValues?.title ?? "" };
 }
 
 export async function getCoreValues(): Promise<CoreValue[]> {
-  return [
-    {
-      _key: "commitment",
-      title: "Commitment",
-      body: "We work hard to get results and stay loyal to our goals.",
-      iconKey: "commitment",
-    },
-    {
-      _key: "integrity",
-      title: "Integrity",
-      body: "We don't need a reason to do the right thing.",
-      iconKey: "integrity",
-    },
-    {
-      _key: "compassion",
-      title: "Compassion & Kindness",
-      body: "We provide client-centered service through compassionate communication.",
-      iconKey: "compassion",
-    },
-    {
-      _key: "community",
-      title: "Community",
-      body: "We strive to be a voice for others, placing purpose above ourselves.",
-      iconKey: "community",
-    },
-    {
-      _key: "innovation",
-      title: "Innovation",
-      body: "We're committed to continuous learning and improvement to serve with excellence.",
-      iconKey: "innovation",
-    },
-    {
-      _key: "teamwork",
-      title: "Teamwork",
-      body: "We support one another and unite around a shared purpose.",
-      iconKey: "teamwork",
-    },
-  ];
+  return once("coreValues", async () =>
+    required(await sanityClient.fetch(CORE_VALUES_QUERY), "Core Values")
+  );
 }

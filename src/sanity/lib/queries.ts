@@ -95,3 +95,43 @@ export const CONTACT_SETTINGS_QUERY = defineQuery(`*[_type == "contactSettings" 
 export const FIRM_STATS_QUERY = defineQuery(`*[_type == "firmStats" && _id == "firmStats"][0]{
   "stats": coalesce(stats[]{ _key, big, label }, [])
 }`);
+
+/**
+ * Award badges for the trust bar, in the order they are drawn.
+ *
+ * `_key` IS PROJECTED FROM `key.current`, NOT FROM `_id`, and that difference
+ * is load-bearing. The heavy Car Accidents page names six awards by key and
+ * `[slug].astro` throws when one is missing — projecting the generated document
+ * id broke that build on the first attempt. Ordered by an explicit `order`
+ * field rather than by creation date: a collection of documents has no
+ * inherent order, and this band's is the comps' own.
+ *
+ * `image` comes back whole — `{_type, asset:{_ref}}` — because that is what
+ * `urlFor()` takes. Do not project into it.
+ */
+export const AWARDS_QUERY = defineQuery(`*[_type == "award"] | order(order asc){
+  "_key": key.current,
+  alt,
+  image,
+  height
+}`);
+
+/** The six core values, in the order the cards are drawn. */
+export const CORE_VALUES_QUERY = defineQuery(`*[_type == "coreValue"] | order(order asc){
+  "_key": _id,
+  title,
+  body,
+  iconKey
+}`);
+
+/**
+ * Headings for bands that appear on more than one page.
+ *
+ * Only two qualify — see the note on the schema type. A band whose heading
+ * differs per page is that page's content, not this document's.
+ */
+export const SHARED_SECTIONS_QUERY = defineQuery(
+  `*[_type == "sharedSections" && _id == "sharedSections"][0]{
+  coreValues{ eyebrow, title }
+}`
+);

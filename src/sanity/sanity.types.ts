@@ -15,6 +15,18 @@
 export declare const internalGroqTypeReferenceTo: unique symbol;
 
 // Source: src/sanity/schema.json
+export type SharedSections = {
+  _id: string;
+  _type: "sharedSections";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  coreValues?: {
+    eyebrow: string;
+    title: string;
+  };
+};
+
 export type FirmStats = {
   _id: string;
   _type: "firmStats";
@@ -141,6 +153,24 @@ export type Geopoint = {
   alt?: number;
 };
 
+export type CoreValue = {
+  _id: string;
+  _type: "coreValue";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title: string;
+  body: string;
+  iconKey:
+    | "commitment"
+    | "integrity"
+    | "compassion"
+    | "community"
+    | "innovation"
+    | "teamwork";
+  order: number;
+};
+
 export type SanityImageAssetReference = {
   _ref: string;
   _type: "reference";
@@ -148,19 +178,23 @@ export type SanityImageAssetReference = {
   [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
 };
 
-export type Seo = {
-  _type: "seo";
-  metaTitle?: string;
-  metaDescription?: string;
-  canonicalUrl?: string;
-  noIndex?: boolean;
-  ogImage?: {
+export type Award = {
+  _id: string;
+  _type: "award";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  key: Slug;
+  alt: string;
+  image: {
     asset?: SanityImageAssetReference;
     media?: unknown;
     hotspot?: SanityImageHotspot;
     crop?: SanityImageCrop;
     _type: "image";
   };
+  height: number;
+  order: number;
 };
 
 export type SanityImageCrop = {
@@ -177,6 +211,27 @@ export type SanityImageHotspot = {
   y: number;
   height: number;
   width: number;
+};
+
+export type Slug = {
+  _type: "slug";
+  current: string;
+  source?: string;
+};
+
+export type Seo = {
+  _type: "seo";
+  metaTitle?: string;
+  metaDescription?: string;
+  canonicalUrl?: string;
+  noIndex?: boolean;
+  ogImage?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+  };
 };
 
 export type InlineText = Array<{
@@ -348,22 +403,20 @@ export type SanityImageAsset = {
   source?: SanityAssetSourceData;
 };
 
-export type Slug = {
-  _type: "slug";
-  current: string;
-  source?: string;
-};
-
 export type AllSanitySchemaTypes =
+  | SharedSections
   | FirmStats
   | ContactSettings
   | Navigation
   | FirmDetails
   | Geopoint
+  | CoreValue
   | SanityImageAssetReference
-  | Seo
+  | Award
   | SanityImageCrop
   | SanityImageHotspot
+  | Slug
+  | Seo
   | InlineText
   | SimpleText
   | RichText
@@ -375,8 +428,7 @@ export type AllSanitySchemaTypes =
   | SanityImageMetadata
   | SanityFileAsset
   | SanityAssetSourceData
-  | SanityImageAsset
-  | Slug;
+  | SanityImageAsset;
 
 // Source: src/sanity/lib/queries.ts
 // Variable: FIRM_DETAILS_QUERY
@@ -496,6 +548,48 @@ export type FIRM_STATS_QUERY_RESULT = {
   }>;
 } | null;
 
+// Source: src/sanity/lib/queries.ts
+// Variable: AWARDS_QUERY
+// Query: *[_type == "award"] | order(order asc){  "_key": key.current,  alt,  image,  height}
+export type AWARDS_QUERY_RESULT = Array<{
+  _key: string;
+  alt: string;
+  image: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+  };
+  height: number;
+}>;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: CORE_VALUES_QUERY
+// Query: *[_type == "coreValue"] | order(order asc){  "_key": _id,  title,  body,  iconKey}
+export type CORE_VALUES_QUERY_RESULT = Array<{
+  _key: string;
+  title: string;
+  body: string;
+  iconKey:
+    | "commitment"
+    | "community"
+    | "compassion"
+    | "innovation"
+    | "integrity"
+    | "teamwork";
+}>;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: SHARED_SECTIONS_QUERY
+// Query: *[_type == "sharedSections" && _id == "sharedSections"][0]{  coreValues{ eyebrow, title }}
+export type SHARED_SECTIONS_QUERY_RESULT = {
+  coreValues: {
+    eyebrow: string;
+    title: string;
+  } | null;
+} | null;
+
 // Query TypeMap
 import "@sanity/client";
 declare module "@sanity/client" {
@@ -504,5 +598,8 @@ declare module "@sanity/client" {
     '*[_type == "navigation" && _id == "navigation"][0]{\n  "aboutMenu": coalesce(aboutMenu[]{ label, href }, []),\n  "practiceAreasMenu": coalesce(practiceAreasMenu[]{ label, href }, []),\n  "locationsMenu": coalesce(locationsMenu[]{ label, href }, []),\n  "footerPracticeAreas": coalesce(footerPracticeAreas[]{ label, href }, []),\n  "footerNav": coalesce(footerNav[]{ label, href }, []),\n  "serviceAreas": coalesce(serviceAreas, [])\n}': NAVIGATION_QUERY_RESULT;
     '*[_type == "contactSettings" && _id == "contactSettings"][0]{\n  eyebrow,\n  title,\n  "reassurances": coalesce(reassurances, []),\n  callPrompt,\n  callBadge,\n  form{ title, lede, submitLabel, disclaimer },\n  photoAlt,\n  callCard{ label, note },\n  textCard{ label, note },\n  emailCard{ label, note },\n  officeCard{ label, note },\n  hours{ label, note }\n}': CONTACT_SETTINGS_QUERY_RESULT;
     '*[_type == "firmStats" && _id == "firmStats"][0]{\n  "stats": coalesce(stats[]{ _key, big, label }, [])\n}': FIRM_STATS_QUERY_RESULT;
+    '*[_type == "award"] | order(order asc){\n  "_key": key.current,\n  alt,\n  image,\n  height\n}': AWARDS_QUERY_RESULT;
+    '*[_type == "coreValue"] | order(order asc){\n  "_key": _id,\n  title,\n  body,\n  iconKey\n}': CORE_VALUES_QUERY_RESULT;
+    '*[_type == "sharedSections" && _id == "sharedSections"][0]{\n  coreValues{ eyebrow, title }\n}': SHARED_SECTIONS_QUERY_RESULT;
   }
 }

@@ -14,10 +14,14 @@ import { navLink } from "./objects/navLink";
 import { inlineText, richText, simpleText } from "./objects/richText";
 import { seo } from "./objects/seo";
 
+import { award } from "./collections/award";
+import { coreValue } from "./collections/coreValue";
+
 import { contactSettings } from "./settings/contactSettings";
 import { firmDetails } from "./settings/firmDetails";
 import { firmStats } from "./settings/firmStats";
 import { navigation } from "./settings/navigation";
+import { sharedSections } from "./settings/sharedSections";
 
 /** Shared field types. Not documents — these are what documents are built from. */
 const objects: SchemaTypeDefinition[] = [link, navLink, richText, simpleText, inlineText, seo];
@@ -26,7 +30,7 @@ const objects: SchemaTypeDefinition[] = [link, navLink, richText, simpleText, in
 const pages: SchemaTypeDefinition[] = [];
 
 /** Repeatable content. Phase 2 (hand-authored) and Phase 3 (imported). */
-const collections: SchemaTypeDefinition[] = [];
+const collections: SchemaTypeDefinition[] = [award, coreValue];
 
 /** Firm-wide singletons. Phase 1. */
 const settings: SchemaTypeDefinition[] = [
@@ -34,6 +38,7 @@ const settings: SchemaTypeDefinition[] = [
   navigation,
   contactSettings,
   firmStats,
+  sharedSections,
 ];
 
 export const schemaTypes: SchemaTypeDefinition[] = [

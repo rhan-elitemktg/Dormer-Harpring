@@ -26,6 +26,9 @@ import { EarthGlobeIcon } from "@sanity/icons/EarthGlobe";
 import { EnvelopeIcon } from "@sanity/icons/Envelope";
 import { MenuIcon } from "@sanity/icons/Menu";
 import { BarChartIcon } from "@sanity/icons/BarChart";
+import { BlockElementIcon } from "@sanity/icons/BlockElement";
+import { StarIcon } from "@sanity/icons/Star";
+import { HeartIcon } from "@sanity/icons/Heart";
 
 /**
  * SINGLETONS ARE ENFORCED HERE, NOT IN THE SCHEMA. There is no `singleton: true`
@@ -60,7 +63,10 @@ function singleton(
 const PAGES: [string, string, ComponentType?][] = [];
 
 /** COLLECTIONS — repeatable content. Phase 2 (hand-authored), Phase 3 (imported). */
-const COLLECTIONS: [string, string, ComponentType?][] = [];
+const COLLECTIONS: [string, string, ComponentType?][] = [
+  ["award", "Awards", StarIcon],
+  ["coreValue", "Core Values", HeartIcon],
+];
 
 /**
  * SITE SETTINGS — firm-wide singletons.
@@ -73,6 +79,7 @@ const SETTINGS: [string, string, ComponentType?][] = [
   ["navigation", "Navigation", MenuIcon],
   ["contactSettings", "Contact & Consultation", EnvelopeIcon],
   ["firmStats", "Firm Stats", BarChartIcon],
+  ["sharedSections", "Shared Sections", BlockElementIcon],
 ];
 
 /**

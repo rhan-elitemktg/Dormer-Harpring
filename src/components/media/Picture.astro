@@ -71,16 +71,25 @@ const dims = sanity ? imageDimensions(src as SanityImageSource) : null;
 
 {
   sanity ? (
+    /*
+       ATTRIBUTE ORDER MATCHES ASTRO'S `<Image>` EXACTLY, and it is not
+       cosmetic. HTML does not care, but the migration's strongest check is a
+       byte-diff of every built page, and a reordered attribute list makes 112
+       pages differ for no reason — burying the one change that would matter.
+       Astro emits: src, srcset, alt, sizes, loading, fetchpriority, decoding,
+       width, height, class. Keep it that way, or a Sanity image and a local one
+       stop being comparable.
+    */
     <img
       src={srcFor(src as SanityImageSource, widths)}
       srcset={srcSetFor(src as SanityImageSource, widths)}
-      sizes={sizes}
       alt={alt}
-      width={dims?.width}
-      height={dims?.height}
+      sizes={sizes}
       loading={loading}
       fetchpriority={fetchpriority}
       decoding={decoding}
+      width={dims?.width}
+      height={dims?.height}
       class:list={classList}
     />
   ) : (
