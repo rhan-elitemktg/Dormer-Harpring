@@ -270,14 +270,19 @@ export const WRITTEN_REVIEWS_QUERY = defineQuery(
  * the trailing slash.
  *
  * `awards[].image` and `photo` come back whole — `urlFor()` takes the object.
+ *
+ * ORDERED BY `orderRank`, the LexoRank string the drag-and-drop plugin rewrites
+ * when a row moves. It replaced a `position` number that had to be edited on
+ * four documents to reorder four people. There is no `photoLarge`: one portrait
+ * now serves the team page, the bio and the rail, with the hotspot deriving
+ * each crop.
  */
-export const TEAM_QUERY = defineQuery(`*[_type == "teamMember"] | order(order asc){
+export const TEAM_QUERY = defineQuery(`*[_type == "teamMember"] | order(orderRank){
   "_key": key.current,
   name,
   role,
   kind,
   photo,
-  photoLarge,
   bio,
   "memorial": coalesce(memorial, false),
   "hasProfile": coalesce(hasProfile, false),
@@ -293,7 +298,7 @@ export const TEAM_QUERY = defineQuery(`*[_type == "teamMember"] | order(order as
  * `[slug].astro` still matches on.
  */
 export const TEAM_PROFILES_QUERY = defineQuery(
-  `*[_type == "teamMember" && hasProfile == true] | order(order asc){
+  `*[_type == "teamMember" && hasProfile == true] | order(orderRank){
   "slug": key.current,
   category,
   lede,
@@ -354,6 +359,14 @@ export const SPONSORSHIPS_QUERY = defineQuery(`*[_type == "sponsorship"] | order
  * `href` is built by `attorneyPath()` in the getter, not here: three layers
  * already agree on the trailing slash and a projection must not become a
  * fourth.
+ *
+ * THE PORTRAIT IS THE PERSON'S ONE PORTRAIT. There used to be a separate rail
+ * crop — and for two of the four it was a different photograph entirely, which
+ * is how Sean Dormer appeared on the site as two different people. One image,
+ * hotspot-cropped per surface.
+ *
+ * Ordered by `railOrder`, NOT `orderRank`: the rail's sequence genuinely
+ * differs from the team page's — it leads with the other partner.
  */
 export const ATTORNEY_RAIL_QUERY = defineQuery(
   `*[_type == "teamMember" && onAttorneyRail == true] | order(railOrder asc){
@@ -361,7 +374,7 @@ export const ATTORNEY_RAIL_QUERY = defineQuery(
   name,
   role,
   location,
-  "portrait": railPortrait,
+  "portrait": photo,
   "video": railVideo{ provider, id },
   "onHomeRail": coalesce(onHomeRail, false)
 }`

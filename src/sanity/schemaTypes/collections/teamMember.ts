@@ -1,31 +1,51 @@
 // One person at the firm — and their bio page, where they have one.
 //
-// ONE DOCUMENT, NOT TWO. The codebase held a roster (`getTeam`) and a set of
-// bio pages (`getTeamProfiles`) as separate lists joined by key, and every one
-// of the 25 profiles matches a roster entry exactly. They are the same person;
-// splitting them means an editor updating a name in one place and not the other.
+// ONE DOCUMENT, NOT TWO. The codebase held a roster and a set of bio pages as
+// separate lists joined by key, and every one of the 25 profiles matched a
+// roster entry exactly. They are the same person; splitting them means an
+// editor updating a name in one place and not the other.
 //
-// The five without a profile are staff whose bio page was never written. They
-// still appear on the team page — their card simply does not link.
+// THE FORM IS DIFFERENT FOR EACH GROUP, and that is the point of grouping them.
+// The desk opens Team into Founding Partners, Attorneys, Staff and Office Dogs;
+// showing all four the same twenty fields would make the separation cosmetic.
+// What each group actually uses was COUNTED, not guessed, across all 30
+// documents:
 //
-// TWO PEOPLE HAVE NO PHOTOGRAPH. Alexandra Petroff and Dinorah Gutierrez appear
-// in the comps but nowhere on the live site, so their cards fall back to a
-// monogram of their initials rather than leaving a hole. That is why `photo` is
-// optional and must stay optional.
+//   partners only   card bio, accolades, figures band, bio eyebrow, profile film
+//   staff only      standfirst  (16 of 20 have one; no attorney or partner does)
+//   dogs only       in loving memory
+//   not staff/dogs  email, press links, the attorney rail
+//   not dogs        education, bio page
+//   everyone        portrait, name, role
+//
+// A field hidden here is not deleted — the data survives and reappears if the
+// condition is met again. What it stops is an editor filling in a field that
+// nothing on their page renders.
 import { defineField, defineType, type ConditionalPropertyCallback } from "sanity";
+import { orderRankField } from "@sanity/orderable-document-list";
 // Subpath, not the barrel — see the note in sanity/structure/index.ts.
 import { UsersIcon } from "@sanity/icons/Users";
 
-/**
- * Hide the bio-page fields until someone turns the bio page on.
- *
- * Typed through Sanity's own `ConditionalPropertyCallback` rather than a
- * hand-written parameter shape: `SanityDocument` shares no properties with an
- * inline `{ hasProfile?: boolean }`, so the structural check fails outright
- * rather than narrowing. The read is what needs the cast, not the signature.
- */
+/** The document's `kind`, read through the cast Sanity's own callback type needs. */
+const kindOf = (document: unknown) => (document as { kind?: string } | undefined)?.kind;
+
+/** Show only for these groups. */
+const only =
+  (...kinds: string[]): ConditionalPropertyCallback =>
+  ({ document }) =>
+    !kinds.includes(kindOf(document) ?? "");
+
+/** Show for everyone EXCEPT these groups. */
+const except =
+  (...kinds: string[]): ConditionalPropertyCallback =>
+  ({ document }) =>
+    kinds.includes(kindOf(document) ?? "");
+
 const noProfile: ConditionalPropertyCallback = ({ document }) =>
   !(document as { hasProfile?: boolean } | undefined)?.hasProfile;
+
+const notOnRail: ConditionalPropertyCallback = ({ document }) =>
+  !(document as { onAttorneyRail?: boolean } | undefined)?.onAttorneyRail;
 
 export const teamMember = defineType({
   name: "teamMember",
@@ -39,11 +59,46 @@ export const teamMember = defineType({
   ],
   fields: [
     /*
-     * STABLE, AND NAMED FROM ELSEWHERE. `blog.ts` keys a post's reviewer into a
-     * team member by this, and it is also the bio page's URL segment — so it is
-     * doubly content. Same shape as the award and testimonial keys; see the
-     * award type for what happened the one time a key like this was dropped.
+     * HIDDEN, NOT REMOVED, and the difference matters. The four desk lists are
+     * FILTERS on this field and the team page builds its sections from it, so
+     * deleting it would break both. Hidden by request: the group is implied by
+     * which list you created the person in, and a dropdown repeating it is
+     * noise.
+     *
+     * THE COST, RECORDED SO IT IS NOT A SURPRISE: nobody can move a person
+     * between groups in the Studio any more — a paralegal who becomes an
+     * attorney needs this field un-hidden, or the document editing via the API.
+     *
+     * `sanity.config.ts` removes this type from the global "create new" menu,
+     * so every creation path goes through a group and therefore sets `kind`. A
+     * document with no `kind` would match none of the four filters and be
+     * invisible in the desk — content that exists and cannot be reached.
      */
+    defineField({
+      name: "kind",
+      title: "Group",
+      type: "string",
+      group: "card",
+      hidden: true,
+      options: {
+        list: [
+          { title: "Founding partner", value: "partner" },
+          { title: "Attorney", value: "attorney" },
+          { title: "Staff", value: "staff" },
+          { title: "Office dog", value: "dog" },
+        ],
+      },
+      validation: (rule) => rule.required(),
+    }),
+
+    /*
+     * Drag-and-drop, by request. `orderRank` is a LexoRank string the plugin
+     * rewrites when a row is dragged — never typed, so it is hidden. It
+     * replaced a `position` number that had to be edited on four documents to
+     * reorder four people.
+     */
+    orderRankField({ type: "teamMember", hidden: true }),
+
     defineField({
       name: "key",
       title: "URL / reference key",
@@ -70,30 +125,18 @@ export const teamMember = defineType({
       description: 'As shown under the name — "Founding Partner", "Paralegal".',
       validation: (rule) => rule.required(),
     }),
-    defineField({
-      name: "kind",
-      title: "Group",
-      type: "string",
-      group: "card",
-      description: "Which section of the team page this person appears in.",
-      options: {
-        list: [
-          { title: "Founding partner", value: "partner" },
-          { title: "Attorney", value: "attorney" },
-          { title: "Staff", value: "staff" },
-          { title: "Office dog", value: "dog" },
-        ],
-      },
-      validation: (rule) => rule.required(),
-    }),
-    defineField({
-      name: "order",
-      title: "Position",
-      type: "number",
-      group: "card",
-      description: "Low numbers first, within the group above.",
-      validation: (rule) => rule.required(),
-    }),
+
+    /*
+     * ONE PORTRAIT, USED EVERYWHERE. There were two — a tight 460×580 for the
+     * team page and a wider 600×800 for the founding-partner cards — plus a
+     * third for the attorney rail. Collapsed by request, and it is only
+     * possible because these are Sanity assets: the hotspot below derives every
+     * tighter crop from one source, where a local import had to be re-exported
+     * per shape.
+     *
+     * So the WIDEST source is the one to keep. Cropping in is free; cropping
+     * out is not.
+     */
     defineField({
       name: "photo",
       title: "Portrait",
@@ -101,19 +144,9 @@ export const teamMember = defineType({
       group: "card",
       options: { hotspot: true },
       description:
-        "OPTIONAL. Two people have no photograph and their card shows their initials instead " +
-        "— which is deliberate, not a gap to fill with a stand-in.",
-    }),
-    defineField({
-      name: "photoLarge",
-      title: "Wide portrait",
-      type: "image",
-      group: "card",
-      options: { hotspot: true },
-      description:
-        "The wider crop the founding-partner cards need. The bio page deliberately uses the " +
-        "tight portrait above instead.",
-      hidden: ({ document }) => (document as { kind?: string } | undefined)?.kind !== "partner",
+        "Used on the team page, the bio page and the attorney rail. Set the hotspot to the " +
+        "face — the narrower cards crop to it. OPTIONAL: two people have no photograph and " +
+        "their card shows their initials instead, which is deliberate rather than a gap.",
     }),
     defineField({
       name: "memorial",
@@ -122,15 +155,17 @@ export const teamMember = defineType({
       group: "card",
       initialValue: false,
       description: 'Adds "In Loving Memory" above the role.',
+      // Only one record has ever used this and it is a dog. Un-hide it if it
+      // ever has to apply to a person.
+      hidden: only("dog"),
     }),
     defineField({
       name: "bio",
       title: "Card bio",
       type: "simpleText",
       group: "card",
-      description:
-        "The short paragraph on the founding-partner cards. Most people have none — the card " +
-        "shows their name and role only.",
+      description: "The paragraph on the founding-partner cards.",
+      hidden: only("partner"),
     }),
     defineField({
       name: "awards",
@@ -138,8 +173,9 @@ export const teamMember = defineType({
       type: "array",
       group: "card",
       description:
-        "Badges shown on this person's card. These are their own, not the firm-wide awards in " +
-        "the trust bar.",
+        "Badges shown on this person's card. Their own, not the firm-wide awards in the " +
+        "trust bar.",
+      hidden: only("partner"),
       of: [
         {
           type: "object",
@@ -158,72 +194,6 @@ export const teamMember = defineType({
       ],
     }),
 
-    /*
-     * A THIRD PRESENTATION OF THE SAME PERSON. The homepage and About render a
-     * short attorney rail whose cards use a WIDER marketing crop than the team
-     * page and a different portrait file entirely — and whose portrait opens a
-     * film while the name goes to the bio. All four people in it are already
-     * team members, so this is fields on their record rather than a second
-     * collection of the same humans.
-     */
-    defineField({
-      name: "onAttorneyRail",
-      title: "Show in the attorney rail",
-      type: "boolean",
-      group: "rail",
-      initialValue: false,
-      description: "The short rail on the homepage and About. Four people today.",
-    }),
-    defineField({
-      name: "railOrder",
-      title: "Position in the rail",
-      type: "number",
-      group: "rail",
-      hidden: ({ document }) => !(document as { onAttorneyRail?: boolean } | undefined)?.onAttorneyRail,
-    }),
-    defineField({
-      name: "onHomeRail",
-      title: "Also on the homepage",
-      type: "boolean",
-      group: "rail",
-      initialValue: false,
-      description:
-        "The homepage rail is a SUBSET of About's — About shows four, the homepage three. " +
-        "Leave this off to appear on About only.",
-      hidden: ({ document }) => !(document as { onAttorneyRail?: boolean } | undefined)?.onAttorneyRail,
-    }),
-    defineField({
-      name: "railPortrait",
-      title: "Rail portrait",
-      type: "image",
-      group: "rail",
-      options: { hotspot: true },
-      description:
-        "A wider crop than the team-page portrait, and a different photograph. The rail card " +
-        "is drawn for this shape.",
-      hidden: ({ document }) => !(document as { onAttorneyRail?: boolean } | undefined)?.onAttorneyRail,
-    }),
-    defineField({
-      name: "location",
-      title: "City",
-      type: "string",
-      group: "rail",
-      description:
-        'Shown after the role. The two are stored apart because the separator ("·") is ' +
-        "presentation and an editor should not have to type it.",
-      hidden: ({ document }) => !(document as { onAttorneyRail?: boolean } | undefined)?.onAttorneyRail,
-    }),
-    defineField({
-      name: "railVideo",
-      title: "Rail card film",
-      type: "videoRef",
-      group: "rail",
-      description:
-        "The card's portrait opens this; the name below it goes to the bio. Two controls, " +
-        "deliberately — an <a> may not contain another <a>, which is why the card was split.",
-      hidden: ({ document }) => !(document as { onAttorneyRail?: boolean } | undefined)?.onAttorneyRail,
-    }),
-
     defineField({
       name: "hasProfile",
       title: "Has a bio page",
@@ -233,6 +203,7 @@ export const teamMember = defineType({
       description:
         "Turn on to give this person their own page. While it is off their card does not " +
         "link anywhere, which is how the five people without a written bio appear today.",
+      hidden: except("dog"),
     }),
     defineField({
       name: "category",
@@ -240,10 +211,10 @@ export const teamMember = defineType({
       type: "string",
       group: "profile",
       description:
-        'The small line above the name on the bio page. Defaults to the job title — the two ' +
+        'The small line above the name on the bio page. Defaults to the job title — the ' +
         'partners are the exception, whose cards read "Founding Partner" but whose bios open ' +
         '"Attorney · Founding Partner".',
-      hidden: noProfile,
+      hidden: only("partner"),
     }),
     defineField({
       name: "lede",
@@ -252,9 +223,9 @@ export const teamMember = defineType({
       rows: 3,
       group: "profile",
       description:
-        "The single sentence pulled out beside the portrait. STAFF ONLY — the attorney bios " +
-        "have no standfirst and open on their first body paragraph instead.",
-      hidden: noProfile,
+        "The single sentence pulled out beside the portrait. Staff bios only — an attorney " +
+        "bio has none and opens on its first body paragraph instead.",
+      hidden: only("staff"),
     }),
     defineField({
       name: "email",
@@ -267,14 +238,15 @@ export const teamMember = defineType({
         "address that bounces is worse than none — clear the field and the contact line " +
         "closes up on its own.",
       validation: (rule) => rule.email(),
-      hidden: noProfile,
+      hidden: only("partner", "attorney"),
     }),
     defineField({
       name: "facts",
       title: "Figures band",
       type: "array",
       group: "profile",
-      description: "The three-up dark band under the name. The two partners only.",
+      description: "The three-up dark band under the name.",
+      hidden: only("partner"),
       of: [
         {
           type: "object",
@@ -291,7 +263,6 @@ export const teamMember = defineType({
           preview: { select: { title: "value", subtitle: "label" } },
         },
       ],
-      hidden: noProfile,
     }),
     defineField({
       name: "body",
@@ -308,7 +279,7 @@ export const teamMember = defineType({
       of: [{ type: "string" }],
       group: "profile",
       description: "Degrees, most recent first.",
-      hidden: noProfile,
+      hidden: except("dog"),
     }),
     defineField({
       name: "links",
@@ -317,14 +288,14 @@ export const teamMember = defineType({
       group: "profile",
       of: [{ type: "navLink" }],
       description: "Real destinations only — press mentions and directory listings.",
-      hidden: noProfile,
+      hidden: only("partner", "attorney"),
     }),
     defineField({
       name: "video",
       title: "Profile film",
       type: "object",
       group: "profile",
-      hidden: noProfile,
+      hidden: only("partner", "attorney"),
       fields: [
         defineField({ name: "ref", title: "Video", type: "videoRef" }),
         defineField({
@@ -336,9 +307,65 @@ export const teamMember = defineType({
         defineField({ name: "alt", title: "Poster alt text", type: "string" }),
       ],
     }),
-  ],
-  orderings: [
-    { name: "position", title: "Position", by: [{ field: "order", direction: "asc" }] },
+
+    /*
+     * THE RAIL IS ATTORNEYS AND PARTNERS ONLY. It is the short "meet our
+     * attorneys" band on the homepage and About, and no staff member or dog has
+     * ever been on it.
+     *
+     * There is no rail PORTRAIT any more — the card uses the one portrait above
+     * like every other surface.
+     */
+    defineField({
+      name: "onAttorneyRail",
+      title: "Show in the attorney rail",
+      type: "boolean",
+      group: "rail",
+      initialValue: false,
+      description: "The short rail on the homepage and About. Four people today.",
+      hidden: only("partner", "attorney"),
+    }),
+    defineField({
+      name: "railOrder",
+      title: "Position in the rail",
+      type: "number",
+      group: "rail",
+      description:
+        "A separate sequence from the team page's — the rail leads with a different partner. " +
+        "Low numbers first.",
+      hidden: notOnRail,
+    }),
+    defineField({
+      name: "onHomeRail",
+      title: "Also on the homepage",
+      type: "boolean",
+      group: "rail",
+      initialValue: false,
+      description:
+        "The homepage rail is a SUBSET of About's — About shows four, the homepage three. " +
+        "Leave this off to appear on About only.",
+      hidden: notOnRail,
+    }),
+    defineField({
+      name: "location",
+      title: "City",
+      type: "string",
+      group: "rail",
+      description:
+        'Shown after the role on the rail card. Stored apart from the role because the ' +
+        'separator ("·") is presentation and an editor should not have to type it.',
+      hidden: notOnRail,
+    }),
+    defineField({
+      name: "railVideo",
+      title: "Rail card film",
+      type: "videoRef",
+      group: "rail",
+      description:
+        "The card's portrait opens this; the name below it goes to the bio. Two controls, " +
+        "deliberately — an <a> may not contain another <a>, which is why the card was split.",
+      hidden: notOnRail,
+    }),
   ],
   preview: {
     select: { title: "name", role: "role", kind: "kind", media: "photo" },

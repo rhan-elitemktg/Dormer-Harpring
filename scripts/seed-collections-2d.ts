@@ -52,7 +52,10 @@ async function main() {
     };
 
     if (member.photo) doc.photo = asset(member.photo as unknown as { src: string });
-    if (member.photoLarge) doc.photoLarge = asset(member.photoLarge as unknown as { src: string });
+    // `photoLarge` was seeded here too. The field was collapsed into `photo`
+    // shortly after, by request — one portrait per person, cropped per surface
+    // by the hotspot. See scripts/migrate-team-fields.ts, which did the move.
+    // This script cannot run again anyway: team.ts reads from Sanity now.
     if (member.bio) doc.bio = member.bio;
     if (member.awards) {
       doc.awards = member.awards.map((a) => ({

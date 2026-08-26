@@ -34,10 +34,9 @@ interface Props {
 const { member, profile, firm } = Astro.props;
 
 const firstName = member.name.split(" ")[0];
-// `photo`, not `photoLarge` — deliberately unlike PartnerCard.astro:12. The two
-// founding partners' `-lg` files are a wider torso crop; this card wants the
-// same tight headshot the other five attorneys get, so the larger crop stays on
-// the index cards and never reaches this page. Not an oversight to "fix".
+// There is ONE portrait per person now, so this and PartnerCard render the
+// same asset. They used to differ deliberately — a tight crop here, a wider
+// one on the card — and the hotspot does that instead.
 const portrait = member.photo;
 
 // The comp sets the pull quote as a card with the attorney cited underneath,

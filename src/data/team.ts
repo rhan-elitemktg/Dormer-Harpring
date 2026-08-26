@@ -65,15 +65,14 @@ export interface TeamMember {
   role: string;
   kind: TeamKind;
   /**
+   * ONE PORTRAIT, EVERY SURFACE — the team page, the bio and the attorney rail.
+   * There were three fields; the hotspot on a Sanity asset derives each crop
+   * from one source, which a local import could not do.
+   *
    * Absent for the two people the firm has no photograph of. The card falls
    * back to their initials rather than leaving a hole.
    */
   photo?: ImageMetadata | SanityImageSource;
-  /**
-   * The wider crop the founding-partner cards on the index need. The bio page
-   * deliberately uses the tight `photo` instead — see AttorneyBio.astro.
-   */
-  photoLarge?: ImageMetadata | SanityImageSource;
   /**
    * Set by `getTeam` for anyone who has a profile below, and by nobody else —
    * see the note there. Absent for the two people with no live bio page.

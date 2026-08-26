@@ -11,6 +11,8 @@
 // then Pages — see the phase plan. The desk shows Pages first because that is
 // where someone looking for "the About page" starts.
 import type { StructureBuilder, StructureResolver } from "sanity/structure";
+import type { ConfigContext } from "sanity";
+import { orderableDocumentListDeskItem } from "@sanity/orderable-document-list";
 import type { ComponentType } from "react";
 // ONE SUBPATH PER ICON, AND THE OBVIOUS IMPORT IS THE BROKEN ONE.
 // `import { CogIcon } from "@sanity/icons"` is what the docs say and it
@@ -92,11 +94,10 @@ const PAGES: [string, string, ComponentType?][] = [];
  */
 const GROUPED: Record<
   string,
-  { field: string; template: string; groups: [string, string, ComponentType?][] }
+  { field: string; groups: [string, string, ComponentType?][] }
 > = {
   teamMember: {
     field: "kind",
-    template: "teamMember-by-kind",
     groups: [
       ["partner", "Founding Partners", UsersIcon],
       ["attorney", "Attorneys", UsersIcon],
@@ -106,9 +107,23 @@ const GROUPED: Record<
   },
 };
 
-/** One collection's desk entry — a plain list, or sub-lists when it is grouped. */
+/**
+ * One collection's desk entry — a plain list, or drag-orderable sub-lists.
+ *
+ * `orderableDocumentListDeskItem` is the plugin's own list. It replaces a
+ * `documentTypeList` entirely rather than decorating one: it renders its own
+ * drag-and-drop pane, writes the `orderRank` field as rows move, and sets the
+ * group's field on anything created inside it — which is why the separate
+ * initial-value template this used to need is gone.
+ *
+ * That last part is load-bearing. A document with no `kind` matches none of the
+ * four filters and is INVISIBLE in the desk — content that exists and cannot be
+ * reached — so every creation path has to set it. `sanity.config.ts` closes the
+ * other one by taking this type out of the global "create new" menu.
+ */
 function collection(
   S: StructureBuilder,
+  context: ConfigContext,
   type: string,
   title: string,
   icon?: ComponentType
@@ -125,23 +140,16 @@ function collection(
         .title(title)
         .items(
           spec.groups.map(([value, groupTitle, groupIcon]) =>
-            S.listItem()
-              .title(groupTitle)
-              .icon(groupIcon)
-              .id(`${type}-${value}`)
-              .child(
-                S.documentTypeList(type)
-                  .title(groupTitle)
-                  .filter(`_type == $type && ${spec.field} == $value`)
-                  .params({ type, value })
-                  // Without this the list ignores the type's own `orderings`
-                  // and falls back to last-edited, which reshuffles a rail
-                  // every time someone opens a card.
-                  .defaultOrdering([{ field: "order", direction: "asc" }])
-                  .initialValueTemplates([
-                    S.initialValueTemplateItem(spec.template, { [spec.field]: value }),
-                  ])
-              )
+            orderableDocumentListDeskItem({
+              type,
+              id: `${type}-${value}`,
+              title: groupTitle,
+              icon: groupIcon,
+              filter: `${spec.field} == $value`,
+              params: { value },
+              S,
+              context,
+            })
           )
         )
     );
@@ -186,7 +194,7 @@ const SETTINGS: [string, string, ComponentType?][] = [
  */
 export const SINGLETON_TYPES = [...PAGES, ...SETTINGS].map(([type]) => type);
 
-export const structure: StructureResolver = (S) => {
+export const structure: StructureResolver = (S, context) => {
   const placed = new Set([...PAGES, ...COLLECTIONS, ...SETTINGS].map(([type]) => type));
 
   /**
@@ -223,7 +231,7 @@ export const structure: StructureResolver = (S) => {
           S.list()
             .title("Collections")
             .items(
-              COLLECTIONS.map(([type, title, icon]) => collection(S, type, title, icon))
+              COLLECTIONS.map(([type, title, icon]) => collection(S, context, type, title, icon))
             )
         ),
 

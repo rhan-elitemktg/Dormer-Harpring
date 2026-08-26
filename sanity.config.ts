@@ -67,29 +67,21 @@ export default defineConfig({
   plugins: [structureTool({ structure })],
   schema: {
     types: schemaTypes,
+  },
 
+  document: {
     /*
-     * INITIAL-VALUE TEMPLATES FOR THE DESK'S GROUPED LISTS.
+     * TAKE `teamMember` OUT OF THE GLOBAL "CREATE NEW" MENU.
      *
-     * The Team collection opens into four sub-lists filtered by `kind`. A
-     * filter alone does not tell the "＋" button anything, so a member created
-     * inside Staff would have no group — and a document matching none of the
-     * four filters is INVISIBLE in the desk, which is content that exists and
-     * cannot be reached.
+     * Team opens into four sub-lists filtered on `kind`, and `kind` is hidden
+     * in the form by request — so the ONLY thing that sets it is creating a
+     * person inside one of those lists. The navbar's global create button
+     * bypasses that: it would make a team member with no group, matching none
+     * of the four filters, invisible in the desk and unreachable in the Studio.
      *
-     * The template is parameterised rather than one per group, because the
-     * groups are already written down once in `src/sanity/structure/index.ts`
-     * and a second copy here would be a second place to forget.
+     * Removing it here leaves exactly one creation path, which is the one that
+     * sets the field. Every other type is untouched.
      */
-    templates: (prev) => [
-      ...prev,
-      {
-        id: "teamMember-by-kind",
-        title: "Team member",
-        schemaType: "teamMember",
-        parameters: [{ name: "kind", type: "string" }],
-        value: ({ kind }: { kind: string }) => ({ kind }),
-      },
-    ],
+    newDocumentOptions: (prev) => prev.filter((item) => item.templateId !== "teamMember"),
   },
 });
