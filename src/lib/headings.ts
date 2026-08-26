@@ -9,15 +9,44 @@
 // already holds, so it keeps working unchanged when the body arrives from GROQ
 // instead of from `pt()`.
 
-/** The shape both a `pt()` block and an astro-portabletext `node` satisfy. */
+/**
+ * The shape both a `pt()` block and an astro-portabletext `node` satisfy.
+ *
+ * `_type` IS WHAT FIXES THE TYPE ERROR. `text: unknown` is a separate choice.
+ * Keeping the two apart matters, because only one of them is load-bearing.
+ *
+ * The error was TYPESCRIPT'S WEAK TYPE DETECTION: a target whose properties are
+ * ALL optional rejects any source sharing none of its property names, and
+ * `ArbitraryTypedObject` is `TypedObject & { [key: string]: any }` — an index
+ * signature does not count as a shared name. So `{ text?: string }[]` and
+ * `{ text?: unknown }[]` both failed with "has no properties in common"; only
+ * adding a REQUIRED `_type` cleared it. That name is the one every child has:
+ * both arms extend `TypedObject`, `pt()` writes `_type: "span"`, and
+ * `content.config.ts` requires it.
+ *
+ * `text` is `unknown` because it is TRUE, not because it is needed — with
+ * `_type` present, `text?: string` also compiles, since that index signature
+ * makes `text` `any` on the object arm. But a block's children are spans, which
+ * carry `text`, and inline objects, which do not, so `string` would be a
+ * declaration this module cannot honour. Narrowing it back would typecheck and
+ * lie.
+ *
+ * Nothing about the runtime changed: `blockText` already discarded anything
+ * without usable text. The types were describing a stricter world than the
+ * format allows.
+ */
 interface BlockLike {
   style?: string;
-  children?: { text?: string }[];
+  children?: { _type: string; text?: unknown }[];
 }
 
-/** A block's plain text — every span concatenated, marks discarded. */
+/** A block's plain text — every span concatenated, marks and inline objects
+ *  discarded. The `typeof` guard is what drops the objects; `?? ""` could not,
+ *  because a non-string `text` is not nullish. */
 export function blockText(node: BlockLike | undefined): string {
-  return (node?.children ?? []).map((child) => child.text ?? "").join("");
+  return (node?.children ?? [])
+    .map((child) => (typeof child.text === "string" ? child.text : ""))
+    .join("");
 }
 
 /**

@@ -49,7 +49,7 @@ only checks imported practice-area body copy, so a change to components, chrome 
 scripts cannot affect its result. Run it when `src/content/practice-areas/` or the importer
 changed, and background it when you do.
 
-**`npm run check` is THREE linters now, and one of them could never fail.**
+**`npm run check` is FOUR linters now, and one of them could never fail.**
 `scripts/check-links.py` is the new one — 33,754 internal links across 330 pages, every target
 resolved against what `dist/` actually serves plus `vercel.json`. (The count fell from 39,484
 when the eighteen footer city chips stopped being links — 5,904 of them — and Editorial
@@ -1008,25 +1008,88 @@ should expect to build.
 1. **There is no Sanity client.** `sanityClient` appears in exactly four places and all four are
    comments. `@sanity/astro` is configured and serves the `sanity:client` virtual module, but
    nothing imports it. Step one, and it is the whole of step one.
-2. **TYPESCRIPT IS NOT INSTALLED.** `AGENTS.md` says "TS strict"; `typescript` and
-   `@astrojs/check` are in neither dependency list and there is no typecheck script. Nothing has
-   ever verified a type in this repo — `astro check` offers to install both when you run it.
-   This matters more here than it normally would: TypeGen's entire value is generated types, and
-   today nothing would consume them.
+2. **TypeScript is installed now, and the repo does NOT typecheck.** `typescript` and
+   `@astrojs/check` are devDependencies and `npm run check:types` runs `astro check`. First run:
+   **9 errors, 97 hints across 205 files.** Nothing had ever verified a type here, so this is
+   accumulated, not new.
+
+   **PIN TYPESCRIPT TO 6.x. TypeScript 7 does not work.** The 7.0 native compiler does not expose
+   the programmatic API `astro check` relies on, and the CLI fails outright with a message
+   pointing at withastro/roadmap#1321. `npm i -D typescript` installs 7 and breaks the check.
+
+   **`check:types` is deliberately NOT in `npm run check`.** That chain is `&&`-ed and currently
+   green; wiring a 9-error check into it turns the gate red for everything. Wire it in once the
+   nine are closed, and not before.
+
+   **Nine became SEVEN: the one genuinely broken reference is fixed.** `data/home.ts` annotated
+   `getRecentResults()` as returning `CaseResult[]` without importing the type — it lives in
+   `caseResults.ts` — while `home/RecentResults.astro` imported `CaseResult` FROM `data/home`,
+   which never exported it. Both sides now take it from `caseResults`, which is where the four
+   other callers and `coCounsel.ts` already took it and what `home.ts`'s own comment said all
+   along. **Type-only: all 332 pages hash identical before and after.** It had been broken the
+   whole time and the build never noticed, because Vite strips types without checking them —
+   which is the argument for item 2 in one line.
+
+   **`sanity.config.ts` is closed too — 7 down to 5.** `projectId` and `dataset` were
+   `string | undefined` going into `string` fields. They are read through a `required()` helper
+   that throws with the variable's name and where to set it, which narrows both.
+
+   **THAT DOES NOT IMPROVE `npm run build`, AND THE FIRST VERSION OF THE COMMENT CLAIMED IT DID.**
+   Building with `.env` moved aside still fails with "Configuration must contain `projectId`"
+   from `@sanity/client`'s `initConfig` — because the client the prerender constructs is
+   configured by the `sanity()` integration in `astro.config.mjs`, reading the same variables
+   through Vite's `loadEnv`, and it gets there first. `sanity.config.ts` covers the two entry
+   points that read it directly: the browser Studio bundle and the Sanity CLI. **Guarding
+   `astro.config.mjs` is the other half and is not done.**
+
+   Worth knowing either way: **the build already died without those variables**, so this changed
+   the message, never whether it fails. Only `dist/admin/index.html` changed, and only its studio
+   bundle hash — the other 331 pages are byte-identical.
+
+   **ZERO ERRORS NOW, AND `check:types` IS IN `npm run check`.** All nine are closed and the
+   gate is wired, so this stops being a list somebody has to remember. It runs FIRST in the
+   chain — it is the only one that does not read `dist/`, so it gives a real signal without a
+   build. **Tested in both directions**: a deliberate `const x: number = "s"` turns
+   `npm run check` red, removing it turns it green.
+
+   **It runs at `--minimumSeverity error`.** Warnings and hints are not the gate, and
+   `src/sanity/eliteTheme.js` — a vendored minified file whose single 56KB line is one line —
+   otherwise buries the output in ~700KB of noise. A gate nobody can read is a gate nobody runs.
+
+   That same 56KB line is why **`awk 'length < 400'` on `astro check` output silently drops real
+   errors**: a filtered count read 5 where the truth was 7. Count with `grep -c ' - error '` on
+   the raw text.
+
+   **The last two fixes, both type-only, both hash-verified against all 332 pages:**
+   - `lib/headings.ts`'s `BlockLike` gained a REQUIRED `_type`, which is what actually cleared
+     the three `ProseH*` errors — TypeScript's weak type detection rejects an all-optional target
+     that shares no property name with its source, and `ArbitraryTypedObject`'s `[key: string]:
+     any` index signature does not count as a shared name. `text` also became `unknown`, which is
+     a separate choice: it is true (inline objects carry no `text`), not required.
+   - `src/sanity/eliteTheme.d.ts` now declares both colour schemes present, which is a claim
+     about the GENERATED module rather than about `StudioTheme` in general — checked against the
+     built file. That is where the fix belongs; a non-null assertion at the use site would assert
+     the same thing with none of the explanation.
 3. **No TypeGen path** — no `sanity.cli.ts`, no `typegen` script, no `sanity.types.ts`. Note
    `sanity-typegen.json` is deprecated; configuration belongs in `sanity.cli.ts` with
    `typegen.enabled`, which regenerates during `sanity dev` / `sanity build`.
-4. **`tsconfig.json` has no `types` entry**, so `sanity:client` will not resolve. The Sanity
-   guide says to add `"types": ["@sanity/astro/module"]`. **Deliberately NOT applied**: a `types`
-   array REPLACES TypeScript's automatic `@types` inclusion, and with no typechecker installed
-   there is no way to prove it harmless. Do it together with item 2.
-5. **The asset surface is 112 distinct images** imported by the data layer, plus **203 more**
+4. **The asset surface is 112 distinct images** imported by the data layer, plus **203 more**
    inside the content collections. `src/content` is 39M.
-6. **`getStaticPaths` does not see module scope.** Astro hoists it into its own module context,
+5. **`getStaticPaths` does not see module scope.** Astro hoists it into its own module context,
    so a module-level `const QUERY = defineQuery(...)` throws `ReferenceError` at request time.
    Define queries used inside it there, or import them. Both `[slug].astro` files are affected.
-7. **The production URL is still not a Sanity CORS origin**, so the deployed `/admin` loads and
+6. **The production URL is still not a Sanity CORS origin**, so the deployed `/admin` loads and
    fails sign-in. Unchanged, and still not a blocker for building.
+
+**`tsconfig.json` NEEDS NO `types` ENTRY, and an earlier version of this section was wrong to
+say it did.** The Sanity guide's Astro page says to add `"types": ["@sanity/astro/module"]` —
+that instruction is for a project without an ambient declaration. This one has had it all along:
+`src/env.d.ts` carries `/// <reference types="@sanity/astro/module" />` beside the `astro/client`
+one. Verified rather than reasoned — a throwaway page importing `sanityClient` from
+`sanity:client` and reading `.config().projectId` typechecked clean and added zero errors.
+
+Adding the entry anyway would be worse than redundant: a `types` array REPLACES TypeScript's
+automatic `@types` inclusion, so it trades a working setup for a narrower one. Leave it out.
 
 **Eight stale comments were corrected**, all numeric claims the imports had overtaken: the blog
 counts (167 → 186, and 107 → 125 without featured art), the fact-check sentence's audience

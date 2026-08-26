@@ -15,6 +15,7 @@
 //    are re-derived in CSS instead, because no editor will ever type one.
 
 import { pt, type PortableTextBlock } from "./portableText";
+import type { CaseResult } from "./caseResults";
 import { practiceAreaPath } from "../lib/routePaths";
 import { PLACEHOLDER_VIDEO, type VideoRef } from "../lib/video";
 
