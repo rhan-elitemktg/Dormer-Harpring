@@ -14,11 +14,31 @@ Build is green: **332 pages** — 330 that render a site header and footer, plus
 `/admin`. `npm run check` passes and the fidelity audit reports 104 of 104 pages at ≥99% against
 the live source.
 
-**THE FIVE COMP-DIFF SCRIPTS CANNOT RUN RIGHT NOW.** Every file under
-`~/Downloads/Dormer Harpring/` returns `Operation not permitted` — to plain `head`, not just to
-the scripts — so this is macOS access to the Downloads folder rather than anything in the repo.
-Nothing has verified a page against its comp since. Restore that access before the next change
-to About, the blog index, a blog post, Car Accidents or Practice Areas.
+**The five comp-diff scripts run again, and all five are at 0.** The `Operation not permitted`
+on everything under `~/Downloads/Dormer Harpring/` is gone — it was macOS Downloads access, it
+came back on its own, and nothing in the repo ever had to change for it. If it returns, the tell
+is that plain `head` fails too, not just the scripts.
+
+**One of the five had gone stale while it could not run, and it failed in the right direction.**
+`diff-comp-car-accidents.py` declared "the result video card links to the real testimonial",
+asserting `youtube.com/watch?v=kFdrOgblr6A` in the built page. The Wistia migration made every
+play affordance a popover, so that declaration stopped being true and the script went red on the
+declaration rather than passing quietly — the both-directions contract earning its keep on a
+check that had been dark for a while. Rewritten to match what the card does now.
+
+**It is matched STRUCTURALLY, not by Wistia id, and that is the part not to undo.** That slot is
+`PLACEHOLDER_VIDEO` like the other 43; pinning the id would assert that the placeholder is
+correct and would go red on the very change that fixes it. It matches the popover wrapper around
+the `res res--vid` anchor instead, and holds the page to having no `youtube.com/watch` link left
+anywhere on it — the only youtube URL that survives is the footer's `@denvertrial` channel.
+
+Departures for that page are still **19**: one declaration replaced by one declaration.
+
+**Testing a break on this page needs the right wrapper, and the obvious way is wrong.** All 20
+popovers on `/denver-car-accident-lawyer/` carry the same `wistia_async_b4n3r4pchd` class, so a
+first-occurrence replace to break the result card hits a different card and the check passes —
+which reads as a weak assertion when it is really a bad test. Find the `res res--vid` anchor and
+walk back to the wrapper before it.
 
 **Every video on the site is a Wistia popover now**, and that work turned up a pattern worth
 reading before touching anything near one — see "Video" below.
