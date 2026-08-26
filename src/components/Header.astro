@@ -71,6 +71,9 @@ const current = normalizePath(Astro.url.pathname);
                           href={child.href ?? "#"}
                           target={child.external ? "_blank" : undefined}
                           rel={child.external ? "noopener" : undefined}
+                          {...(child.href && current === normalizePath(child.href)
+                            ? { "aria-current": "page" as const }
+                            : {})}
                         >
                           {child.label}
                           {child.external && (
@@ -287,8 +290,18 @@ const current = normalizePath(Astro.url.pathname);
     transition: background-color var(--transition), color var(--transition);
   }
 
+  /* The page you are on, shown exactly as hover shows it — by request. A
+     dropdown is closed until you reach for it, so this is not competing with
+     the hover state, it is telling you where you already are the moment the
+     menu opens.
+
+     `aria-current` carries it rather than a class: the styling and the thing a
+     screen reader announces are the same fact, and the top-level items in this
+     same nav already work that way. A child with no href cannot be current —
+     `child.href` is nullable, and normalizePath(undefined) would throw. */
   .header__menu-link:hover,
-  .header__menu-link:focus-visible {
+  .header__menu-link:focus-visible,
+  .header__menu-link[aria-current="page"] {
     background: rgba(199, 154, 84, 0.16);
     color: var(--dh-white);
   }
