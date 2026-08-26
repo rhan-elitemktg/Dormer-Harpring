@@ -26,23 +26,44 @@ export interface PortableTextLink {
 }
 
 /**
- * An image placed in the flow of a body.
+ * An image placed in the flow of a body, as this shim and the content
+ * collections write it — a LOCAL import.
  *
- * In Sanity this is an `image` field inside the `blockContent` array, and the
- * projection returns an asset reference where `src` holds an `ImageMetadata`
- * today — which is exactly the swap `Picture.astro` already exists to absorb.
  * `alt` is a field on the object rather than on the asset: the same photograph
  * describes differently in two articles.
  */
 export interface PortableTextImage {
   _type: "image";
   _key: string;
-  src: ImageMetadata; // Sanity phase: | SanityImageSource
+  src: ImageMetadata;
   alt: string;
 }
 
+/**
+ * The same object once the body lives in Sanity — an asset REFERENCE instead of
+ * an import.
+ *
+ * Two shapes rather than one widened shape with both fields optional, and that
+ * is deliberate: optional-both typechecks a node carrying NEITHER, which is a
+ * body image that renders nothing. A union makes the renderer say which one it
+ * is holding, and `ptImage()` stays strict about the only one it can build.
+ *
+ * The transition is genuinely two-shaped — hand-authored copy and the imported
+ * collections write the local form today, and Sanity writes this one — so
+ * `ProseImage.astro` handles both until `src/content/` retires.
+ */
+export interface SanityBodyImage {
+  _type: "image";
+  _key: string;
+  asset: { _ref: string; _type: "reference" };
+  alt: string;
+}
+
+/** A body image in whichever form the renderer was handed. */
+export type BodyImage = PortableTextImage | SanityBodyImage;
+
 /** Anything that can appear in a body field. */
-export type PortableTextNode = PortableTextBlock | PortableTextImage;
+export type PortableTextNode = PortableTextBlock | BodyImage;
 
 export interface PortableTextBlock {
   _type: "block";

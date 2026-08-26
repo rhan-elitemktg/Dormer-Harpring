@@ -2,12 +2,28 @@
 // The ONE place the site decides how an image is rendered.
 //
 // Every component renders <Picture>, never <Image> or a bare <img>. That is not
-// style policing: most of these images (attorney portraits, practice-area
-// photos, the community mosaic, badges, video posters) become Sanity assets in
-// the CMS phase. With this wrapper that swap is a branch in one file; without
-// it, it is an edit to every component on the site.
+// style policing: card and interactive images (attorney portraits, practice-area
+// cards, the community mosaic, badges, video posters) are Sanity assets, and
+// with this wrapper that difference is a branch in one file instead of an edit
+// to every component on the site.
+//
+// TWO BRANCHES, AND THE SPLIT IS DELIBERATE:
+//
+//   ImageMetadata      a local import from src/assets — large decorative art,
+//                      page-header photographs, band backgrounds, the logos.
+//                      Optimised at build time by Astro, as it always was.
+//   SanityImageSource  an editor-owned asset. Served from Sanity's CDN, which
+//                      applies the hotspot and crop the editor set and picks
+//                      the format by content negotiation. See lib/image.ts for
+//                      why these do NOT go through Astro's build pipeline.
+//
+// The props are identical either way. A caller does not know or care which kind
+// of image it was handed, which is what makes moving one from src/assets into
+// the Studio a data change rather than a component change.
 import { Image } from "astro:assets";
 import type { ImageMetadata } from "astro";
+import type { SanityImageSource } from "@sanity/image-url";
+import { isSanityImage, imageDimensions, srcFor, srcSetFor } from "../../sanity/lib/image";
 
 // STYLING THIS FROM A PARENT: the `class` you pass lands on the <img> below,
 // which is in THIS component's template — so it carries this component's
@@ -19,7 +35,7 @@ import type { ImageMetadata } from "astro";
 // diff cannot see it.
 
 interface Props {
-  src: ImageMetadata; // Sanity phase: | SanityImageSource
+  src: ImageMetadata | SanityImageSource;
   alt: string;
   widths?: number[];
   sizes?: string;
@@ -36,15 +52,47 @@ const {
   eager = false,
   class: className,
 } = Astro.props;
+
+// Shared by both branches, so the two cannot drift on the thing that is most
+// visible when it is wrong — the fade-in and the loading priority.
+const classList = [className, !eager && "lazy-fade"];
+const loading = eager ? "eager" : "lazy";
+const fetchpriority = eager ? "high" : undefined;
+const decoding = eager ? "sync" : "async";
+
+const sanity = isSanityImage(src);
+// Read from the asset reference, not from a network call — 290 images is 290
+// round trips otherwise. Null when the ref is not in Sanity's documented
+// `image-<hash>-<w>x<h>-<fmt>` shape, and null means the attributes are omitted
+// rather than guessed: a wrong width/height reserves the wrong box, so the
+// layout still shifts and now the shift is baked into the markup.
+const dims = sanity ? imageDimensions(src as SanityImageSource) : null;
 ---
 
-<Image
-  src={src}
-  alt={alt}
-  widths={widths}
-  sizes={sizes}
-  loading={eager ? "eager" : "lazy"}
-  fetchpriority={eager ? "high" : undefined}
-  decoding={eager ? "sync" : "async"}
-  class:list={[className, !eager && "lazy-fade"]}
-/>
+{
+  sanity ? (
+    <img
+      src={srcFor(src as SanityImageSource, widths)}
+      srcset={srcSetFor(src as SanityImageSource, widths)}
+      sizes={sizes}
+      alt={alt}
+      width={dims?.width}
+      height={dims?.height}
+      loading={loading}
+      fetchpriority={fetchpriority}
+      decoding={decoding}
+      class:list={classList}
+    />
+  ) : (
+    <Image
+      src={src as ImageMetadata}
+      alt={alt}
+      widths={widths}
+      sizes={sizes}
+      loading={loading}
+      fetchpriority={fetchpriority}
+      decoding={decoding}
+      class:list={classList}
+    />
+  )
+}

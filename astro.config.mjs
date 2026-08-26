@@ -4,11 +4,39 @@ import { loadEnv } from "vite";
 import sanity from "@sanity/astro";
 import react from "@astrojs/react";
 
-const { PUBLIC_SANITY_PROJECT_ID, PUBLIC_SANITY_DATASET } = loadEnv(
-  process.env.NODE_ENV ?? "development",
-  process.cwd(),
-  ""
-);
+const env = loadEnv(process.env.NODE_ENV ?? "development", process.cwd(), "");
+
+/**
+ * Read one required variable or fail with a message naming it.
+ *
+ * THIS IS THE HALF `sanity.config.ts` COULD NOT COVER. That file guards the two
+ * entry points that read it directly — the browser Studio bundle and the Sanity
+ * CLI — but the client the prerender uses is configured HERE, by the `sanity()`
+ * integration below, and it gets there first. Without this, a missing .env fails
+ * with `@sanity/client`'s "Configuration must contain `projectId`", which names
+ * no variable, no file and no fix.
+ *
+ * The build already died without these; this only changes the message.
+ *
+ * @param {"PUBLIC_SANITY_PROJECT_ID" | "PUBLIC_SANITY_DATASET"} name
+ * @returns {string}
+ */
+function required(name) {
+  const value = env[name];
+  if (!value) {
+    throw new Error(
+      `${name} is not set, so the Sanity client cannot be configured.\n` +
+        `Add it to .env at the repository root — the same file serves the site, ` +
+        `the embedded Studio and the Sanity CLI.\n` +
+        `On a deploy, set it in the hosting provider's environment instead; ` +
+        `.env is not committed.`
+    );
+  }
+  return value;
+}
+
+const PUBLIC_SANITY_PROJECT_ID = required("PUBLIC_SANITY_PROJECT_ID");
+const PUBLIC_SANITY_DATASET = required("PUBLIC_SANITY_DATASET");
 
 // https://astro.build/config
 export default defineConfig({
@@ -78,10 +106,24 @@ export default defineConfig({
   ],
 
   integrations: [
+    // THE ONE CLIENT. `IntegrationOptions` is `ClientConfig` plus the studio
+    // keys, so everything the site's fetches need is configured here rather
+    // than in a wrapper module — `import { sanityClient } from "sanity:client"`
+    // gets exactly this, everywhere.
     sanity({
       projectId: PUBLIC_SANITY_PROJECT_ID,
       dataset: PUBLIC_SANITY_DATASET,
+      // Pinned, not floating. GROQ's behaviour is versioned by date, so an
+      // unpinned client can change what a query returns on an unrelated day.
+      apiVersion: "2026-08-01",
+      // The build is static and runs once per publish, so there is no cache to
+      // warm and a stale CDN read would ship stale content for a whole deploy.
       useCdn: false,
+      // DRAFTS MUST NOT BUILD. Without this the client returns whatever the
+      // editor last typed, so an unpublished draft would go live on the next
+      // deploy — including one nobody meant to ship. `published` is what makes
+      // the Studio's Publish button mean something.
+      perspective: "published",
       studioBasePath: "/admin",
     }),
     react(),

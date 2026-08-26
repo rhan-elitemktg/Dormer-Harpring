@@ -1,5 +1,6 @@
 import { defineConfig } from "sanity";
 import { structureTool } from "sanity/structure";
+import { structure } from "./src/sanity/structure";
 import { schemaTypes } from "./src/sanity/schemaTypes/index";
 import { eliteTheme } from "./src/sanity/theme";
 import { EliteMark } from "./src/sanity/components/EliteMark";
@@ -63,7 +64,7 @@ export default defineConfig({
   theme: eliteTheme,
   projectId,
   dataset,
-  plugins: [structureTool()],
+  plugins: [structureTool({ structure })],
   schema: {
     types: schemaTypes,
   },

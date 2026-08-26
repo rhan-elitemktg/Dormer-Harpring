@@ -16,6 +16,7 @@
     "check:links": "python3 scripts/check-links.py",
     "check:types": "astro check --minimumSeverity error",
     "check": "npm run check:types && npm run check:styles && npm run check:tokens && npm run check:links",
+    "typegen": "sanity schema extract --path=./src/sanity/schema.json --enforce-required-fields --force && sanity typegen generate",
     "build:redirects": "tsx scripts/build-redirects.ts"
   },
   "dependencies": {
