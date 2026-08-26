@@ -1,3 +1,6 @@
+import { sanityClient } from "sanity:client";
+import { CITIES_QUERY } from "../sanity/lib/queries";
+import { once, required } from "../sanity/lib/fetch";
 // SANITY SWAP POINT — the cities the firm runs landing pages for.
 //
 // Nine of them, carrying 104 practice-area pages between them. Until this
@@ -43,17 +46,7 @@ export interface City {
  * longer exists.
  */
 export async function getCities(): Promise<City[]> {
-  return [
-    { _key: "denver", name: "Denver" },
-    { _key: "thornton", name: "Thornton" },
-    { _key: "boulder", name: "Boulder" },
-    { _key: "highlands-ranch", name: "Highlands Ranch" },
-    { _key: "aurora", name: "Aurora" },
-    { _key: "lakewood", name: "Lakewood" },
-    { _key: "greeley", name: "Greeley" },
-    { _key: "fort-collins", name: "Fort Collins" },
-    { _key: "grand-junction", name: "Grand Junction" },
-  ];
+  return once("cities", async () => required(await sanityClient.fetch(CITIES_QUERY), "Cities"));
 }
 
 export interface Topic {

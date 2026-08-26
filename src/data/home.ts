@@ -257,7 +257,7 @@ export async function getHomeFirmIntro(): Promise<HomeFirmIntro> {
       text:
         "You focus on getting better. We'll handle the insurance company, the " +
         "paperwork, and the phone calls — and you'll always reach me, never a case number.",
-      name: "KC Harpring",
+      name: "K.C. Harpring",
       role: "Founding Partner",
     },
     aside: {

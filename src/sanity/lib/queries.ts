@@ -133,7 +133,14 @@ export const CORE_VALUES_QUERY = defineQuery(`*[_type == "coreValue"] | order(or
 export const SHARED_SECTIONS_QUERY = defineQuery(
   `*[_type == "sharedSections" && _id == "sharedSections"][0]{
   coreValues{ eyebrow, title },
-  reviewSummary{ count, rating, source }
+  reviewSummary{ count, rating, source },
+  attorneysBand{
+    eyebrow,
+    title,
+    quote,
+    ctaLabel,
+    signature{ name, role, attorneyKey, portrait }
+  }
 }`
 );
 
@@ -296,5 +303,66 @@ export const TEAM_PROFILES_QUERY = defineQuery(
   education,
   "links": links[]{ _key, label, href },
   video{ ref{ provider, id }, poster, alt }
+}`
+);
+
+/** The nine cities that have practice-area pages. */
+export const CITIES_QUERY = defineQuery(`*[_type == "city"] | order(order asc){
+  "_key": key.current, name
+}`);
+
+/** Press mentions — the firm in someone else's publication. */
+export const NEWS_MENTIONS_QUERY = defineQuery(`*[_type == "newsMention"] | order(order asc){
+  "_key": _id, outlet, logo, date, headline, href
+}`);
+
+/** Insight teaser cards. */
+export const INSIGHTS_QUERY = defineQuery(`*[_type == "insight"] | order(order asc){
+  "_key": _id, category, iconKey, readTime, title, href
+}`);
+
+/** The homepage's community mosaic. */
+export const COMMUNITY_PHOTOS_QUERY = defineQuery(`*[_type == "communityPhoto"] | order(order asc){
+  "_key": _id, image, org, caption, span
+}`);
+
+/** Charity logos in the homepage strip. */
+export const NGO_PARTNERS_QUERY = defineQuery(`*[_type == "ngoPartner"] | order(order asc){
+  "_key": _id, name, logo
+}`);
+
+/** The Community page's partner cards. */
+export const COMMUNITY_PARTNERS_QUERY = defineQuery(
+  `*[_type == "communityPartner"] | order(order asc){
+  "_key": _id, org, logo, photo, body
+}`
+);
+
+/** Teams, events and causes the firm sponsors. */
+export const SPONSORSHIPS_QUERY = defineQuery(`*[_type == "sponsorship"] | order(order asc){
+  "_key": _id, name, body
+}`);
+
+/**
+ * The attorney rail — a third presentation of people who are already team
+ * members, with a wider crop and a film on the portrait.
+ *
+ * ONE QUERY FOR BOTH RAILS. About shows all four and the homepage a subset, so
+ * the getters filter on `onHomeRail` rather than running two near-identical
+ * queries — and `once()` then makes it one request for both pages.
+ *
+ * `href` is built by `attorneyPath()` in the getter, not here: three layers
+ * already agree on the trailing slash and a projection must not become a
+ * fourth.
+ */
+export const ATTORNEY_RAIL_QUERY = defineQuery(
+  `*[_type == "teamMember" && onAttorneyRail == true] | order(railOrder asc){
+  "_key": key.current,
+  name,
+  role,
+  location,
+  "portrait": railPortrait,
+  "video": railVideo{ provider, id },
+  "onHomeRail": coalesce(onHomeRail, false)
 }`
 );

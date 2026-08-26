@@ -33,6 +33,10 @@ import { CaseIcon } from "@sanity/icons/Case";
 import { HelpCircleIcon } from "@sanity/icons/HelpCircle";
 import { CommentIcon } from "@sanity/icons/Comment";
 import { UsersIcon } from "@sanity/icons/Users";
+import { BookIcon } from "@sanity/icons/Book";
+import { BulbOutlineIcon } from "@sanity/icons/BulbOutline";
+import { ImageIcon } from "@sanity/icons/Image";
+import { PinIcon } from "@sanity/icons/Pin";
 
 /**
  * SINGLETONS ARE ENFORCED HERE, NOT IN THE SCHEMA. There is no `singleton: true`
@@ -74,6 +78,13 @@ const COLLECTIONS: [string, string, ComponentType?][] = [
   ["faq", "FAQs", HelpCircleIcon],
   ["award", "Awards", StarIcon],
   ["coreValue", "Core Values", HeartIcon],
+  ["newsMention", "Press Mentions", BookIcon],
+  ["insight", "Insight Teasers", BulbOutlineIcon],
+  ["communityPartner", "Community Partners", UsersIcon],
+  ["communityPhoto", "Community Photos", ImageIcon],
+  ["ngoPartner", "Charity Partners", HeartIcon],
+  ["sponsorship", "Sponsorships", StarIcon],
+  ["city", "Cities", PinIcon],
 ];
 
 /**

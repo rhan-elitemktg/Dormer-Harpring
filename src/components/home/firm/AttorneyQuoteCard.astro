@@ -1,5 +1,12 @@
 ---
 // The founding-partner pull quote beside the firm intro.
+//
+// TODO(sanity): THIS COMPONENT OWNS ITS OWN PORTRAIT, which breaks the rule
+// that no component owns content — `kcHarpring` is imported here rather than
+// arriving as a prop. It is also the reason this card was the last place on the
+// site still spelling the founding partner's name "KC Harpring": it takes its
+// name from `getHomeFirmIntro()` and nothing joined it to the roster. The name
+// is corrected; the portrait moves when the homepage document lands in Phase 4.
 import Picture from "../../media/Picture.astro";
 import kcHarpring from "../../../assets/attorneys/kc-harpring.jpg";
 

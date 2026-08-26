@@ -35,6 +35,7 @@ export const teamMember = defineType({
   groups: [
     { name: "card", title: "Card", default: true },
     { name: "profile", title: "Bio page" },
+    { name: "rail", title: "Attorney rail" },
   ],
   fields: [
     /*
@@ -155,6 +156,72 @@ export const teamMember = defineType({
           preview: { select: { title: "alt", media: "image" } },
         },
       ],
+    }),
+
+    /*
+     * A THIRD PRESENTATION OF THE SAME PERSON. The homepage and About render a
+     * short attorney rail whose cards use a WIDER marketing crop than the team
+     * page and a different portrait file entirely — and whose portrait opens a
+     * film while the name goes to the bio. All four people in it are already
+     * team members, so this is fields on their record rather than a second
+     * collection of the same humans.
+     */
+    defineField({
+      name: "onAttorneyRail",
+      title: "Show in the attorney rail",
+      type: "boolean",
+      group: "rail",
+      initialValue: false,
+      description: "The short rail on the homepage and About. Four people today.",
+    }),
+    defineField({
+      name: "railOrder",
+      title: "Position in the rail",
+      type: "number",
+      group: "rail",
+      hidden: ({ document }) => !(document as { onAttorneyRail?: boolean } | undefined)?.onAttorneyRail,
+    }),
+    defineField({
+      name: "onHomeRail",
+      title: "Also on the homepage",
+      type: "boolean",
+      group: "rail",
+      initialValue: false,
+      description:
+        "The homepage rail is a SUBSET of About's — About shows four, the homepage three. " +
+        "Leave this off to appear on About only.",
+      hidden: ({ document }) => !(document as { onAttorneyRail?: boolean } | undefined)?.onAttorneyRail,
+    }),
+    defineField({
+      name: "railPortrait",
+      title: "Rail portrait",
+      type: "image",
+      group: "rail",
+      options: { hotspot: true },
+      description:
+        "A wider crop than the team-page portrait, and a different photograph. The rail card " +
+        "is drawn for this shape.",
+      hidden: ({ document }) => !(document as { onAttorneyRail?: boolean } | undefined)?.onAttorneyRail,
+    }),
+    defineField({
+      name: "location",
+      title: "City",
+      type: "string",
+      group: "rail",
+      description:
+        'Shown after the role. The two are stored apart because the separator ("·") is ' +
+        "presentation and an editor should not have to type it.",
+      hidden: ({ document }) => !(document as { onAttorneyRail?: boolean } | undefined)?.onAttorneyRail,
+    }),
+    defineField({
+      name: "railVideo",
+      title: "Rail card film",
+      type: "videoRef",
+      group: "rail",
+      description:
+        "The card's portrait opens this; the name below it goes to the bio. Two controls, " +
+        "deliberately — an <a> may not contain another <a>, which is why the card was split.",
+      hidden: ({ document }) => !(document as { onAttorneyRail?: boolean } | undefined)?.onAttorneyRail,
     }),
 
     defineField({

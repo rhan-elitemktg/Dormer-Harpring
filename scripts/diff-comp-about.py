@@ -124,8 +124,25 @@ comp_team = re.findall(r"name: '([^']+)', roleLine: '([^']+)'", blk)
 built_team_names = [unesc(x) for x in re.findall(r'<span class="acard__name[^"]*"[^>]*>(.*?)</span>', built, re.S)]
 built_team_roles = [unesc(x) for x in re.findall(r'<span class="acard__role[^"]*"[^>]*>(.*?)</span>', built, re.S)]
 
+# DECLARED DEPARTURE: the comp writes the founding partner's name without its
+# stops — "KC Harpring" — and the built site writes "K.C. Harpring". This is not
+# a new choice; it is the site's existing one finally applied consistently. His
+# own bio page has always said "K.C. Harpring", and so did 297 of the 300 built
+# pages. The three that did not were the attorney rail on this page, the
+# homepage and Practice Areas, which read their cards from a separate map.
+#
+# Consolidating the rail onto the team roster in Sanity removed that map, so
+# all 300 now agree. The comp is the odd one out, as it already is on both
+# phone numbers — and the live site is worse still, publishing "KC Harping".
+#
+# Asserted as a departure rather than loosened, so a REGRESSION to the comp's
+# spelling still fails here.
+COMP_PARTNER = "KC Harpring"
+SITE_PARTNER = "K.C. Harpring"
+comp_team_names = [SITE_PARTNER if n == COMP_PARTNER else n for n, _ in comp_team]
+
 print("\nMEET THE TEAM")
-cmp("names / order", [n for n, _ in comp_team], built_team_names)
+cmp("names / order", comp_team_names, built_team_names)
 cmp("role lines / order", [r.replace("·", "·") for _, r in comp_team], built_team_roles)
 
 
@@ -221,6 +238,17 @@ EXPECTED = [
         "inside commented-out markup. Both retired, neither kept as a fallback. The firmDetails "
         "singleton in Sanity is the "
         "only place a phone number may live, so this reads from there",
+    ),
+    (
+        "the founding partner's name is spelled the site's way, not the comp's",
+        SITE_PARTNER in built_text and COMP_PARTNER not in built_text.replace(SITE_PARTNER, ""),
+        "the comp writes \"KC Harpring\" without its stops; his own bio page and 299 of the 300 "
+        "built pages write \"K.C. Harpring\". The three that disagreed were the attorney rails on "
+        "this page, the homepage and Practice Areas, whose cards came from a separate map keyed "
+        "`kc-harpring` while the roster was keyed `k-c-harpring`. Consolidating the rail onto the "
+        "roster in Sanity removed that map, so all 300 now agree. The comp is the odd one out, as "
+        "it already is on both phone numbers, and the live site is worse still — it publishes "
+        "\"KC Harping\"",
     ),
     (
         # Searched in the RAW html, not `built_text` — alt lives in an attribute,

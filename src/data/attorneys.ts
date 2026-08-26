@@ -12,13 +12,15 @@
 //
 // The comp also carries a `primary` boolean that no markup reads — dropped.
 import type { ImageMetadata } from "astro";
-import kcHarpring from "../assets/attorneys/attorney-1.jpg";
-import seanDormer from "../assets/attorneys/attorney-2.jpg";
-import timGarvey from "../assets/attorneys/attorney-3.jpg";
-import kcPortrait from "../assets/attorneys/kc-harpring.jpg";
-import lauraBrowne from "../assets/team/laura-browne.jpg";
 import { attorneyPath } from "../lib/routePaths";
-import { PLACEHOLDER_VIDEO, type VideoRef } from "../lib/video";
+import type { SanityImageSource } from "@sanity/image-url";
+import { sanityClient } from "sanity:client";
+import { ATTORNEY_RAIL_QUERY, SHARED_SECTIONS_QUERY } from "../sanity/lib/queries";
+import { once, required } from "../sanity/lib/fetch";
+// PLACEHOLDER_VIDEO is no longer imported: the stand-in ids are FIELDS in the
+// Studio now, so grepping the constant finds exactly the slots still needing a
+// real one — and this module is no longer one of them.
+import type { VideoRef } from "../lib/video";
 
 export interface AttorneyCardData {
   _key: string;
@@ -28,7 +30,7 @@ export interface AttorneyCardData {
   role: string;
   location: string;
   href: string;
-  portrait: ImageMetadata;
+  portrait: ImageMetadata | SanityImageSource;
   /** The card's portrait opens this in a popover; the name below it goes to
    *  `href`. Two controls, deliberately — see AttorneyCard.astro.
    *  TODO(video): PLACEHOLDER_VIDEO on all four until real ids land. */
@@ -39,79 +41,76 @@ export interface AttorneysSection {
   eyebrow: string;
   title: string;
   quote: string;
-  signature: { name: string; role: string; href: string; portrait: ImageMetadata };
+  signature: { name: string; role: string; href: string; portrait: ImageMetadata | SanityImageSource };
   ctaLabel: string;
 }
 
 export async function getAttorneysSection(): Promise<AttorneysSection> {
+  const { attorneysBand } = await once("sharedSections", async () =>
+    required(await sanityClient.fetch(SHARED_SECTIONS_QUERY), "Shared Sections")
+  );
+  if (!attorneysBand?.signature) {
+    throw new Error(
+      "Shared Sections has no attorney-rail band, so the homepage and Practice Areas cannot " +
+        "render their attorney section. Fill it in at /admin → Site Settings → Shared Sections."
+    );
+  }
+
+  const { signature } = attorneysBand;
   return {
-    eyebrow: "Meet our team",
-    title: "The people in your corner.",
-    quote:
-      "We're a boutique Denver firm on purpose. We take fewer cases so a named " +
-      "partner can handle yours personally — the same lawyer, start to finish, " +
-      "who knows your file by heart.",
+    eyebrow: attorneysBand.eyebrow!,
+    title: attorneysBand.title!,
+    quote: attorneysBand.quote!,
     signature: {
-      name: "KC Harpring",
-      role: "Founding Partner",
-      href: attorneyPath("k-c-harpring"),
-      portrait: kcPortrait,
+      name: signature.name!,
+      role: signature.role!,
+      // The KEY is stored, not the path — `attorneyPath()` stays the only thing
+      // that builds an internal URL, so the trailing slash has one owner.
+      href: attorneyPath(signature.attorneyKey!),
+      portrait: signature.portrait as SanityImageSource,
     },
-    ctaLabel: "Meet our attorneys",
+    ctaLabel: attorneysBand.ctaLabel!,
   };
 }
 
-/**
- * The card records, keyed by slug. Two pages select from this map and they pick
- * DIFFERENT sets — the homepage rail takes three, the About grid four — which
- * is exactly the shape the CMS will have: one `attorney` document per person,
- * referenced by whichever page wants it. One copy here means a portrait swap or
- * a title change is a single edit rather than a grep.
+/*
+ * THE `CARDS` MAP IS GONE. It kept one record per person so a portrait swap
+ * was a single edit — the right instinct, and the note on it predicted exactly
+ * what happened: "one `attorney` document per person, referenced by whichever
+ * page wants it". That is now literally true. The rail fields live on the team
+ * member, so there is one record per person for real rather than one map that
+ * happened to mirror the roster.
+ *
+ * A note the map made, worth keeping: the homepage takes three and About four,
+ * and the homepage's is a SUBSET. The seed asserted that before relying on it.
  */
-const CARDS: Record<string, AttorneyCardData> = {
-  "kc-harpring": {
-    _key: "kc-harpring",
-    name: "KC Harpring",
-    role: "Founding Partner",
-    location: "Denver",
-    href: attorneyPath("k-c-harpring"),
-    video: PLACEHOLDER_VIDEO,
-    portrait: kcHarpring,
-  },
-  "sean-dormer": {
-    _key: "sean-dormer",
-    name: "Sean Dormer",
-    role: "Founding Partner",
-    location: "Denver",
-    href: attorneyPath("sean-dormer"),
-    video: PLACEHOLDER_VIDEO,
-    portrait: seanDormer,
-  },
-  "tim-garvey": {
-    _key: "tim-garvey",
-    name: "Tim Garvey",
-    role: "Attorney",
-    location: "Denver",
-    href: attorneyPath("tim-garvey"),
-    video: PLACEHOLDER_VIDEO,
-    portrait: timGarvey,
-  },
-  // The comp package ships no card portrait for Laura, so hers comes from the
-  // live site's team page. Same shoot as the other three — one wood-plank
-  // backdrop, one lighting setup — so the row of four reads as one set.
-  "laura-browne": {
-    _key: "laura-browne",
-    name: "Laura Browne",
-    role: "Attorney",
-    location: "Denver",
-    href: attorneyPath("laura-browne"),
-    video: PLACEHOLDER_VIDEO,
-    portrait: lauraBrowne,
-  },
-};
+
+
+/**
+ * The rail's cards, from the team members that carry rail fields.
+ *
+ * ONE FETCH FOR BOTH RAILS. The homepage shows a SUBSET of About's four, so
+ * both getters read the same query and filter — and `once()` makes that one
+ * request however many pages ask.
+ */
+async function attorneyRail(): Promise<(AttorneyCardData & { onHomeRail: boolean })[]> {
+  const rows = await once("attorneyRail", async () =>
+    required(await sanityClient.fetch(ATTORNEY_RAIL_QUERY), "Team (attorney rail)")
+  );
+  return rows.map((row) => ({
+    _key: row._key!,
+    name: row.name!,
+    role: row.role!,
+    location: row.location ?? "",
+    href: attorneyPath(row._key!),
+    portrait: row.portrait as SanityImageSource,
+    video: row.video as VideoRef,
+    onHomeRail: row.onHomeRail,
+  }));
+}
 
 export async function getHomeAttorneys(): Promise<AttorneyCardData[]> {
-  return [CARDS["kc-harpring"], CARDS["sean-dormer"], CARDS["tim-garvey"]];
+  return (await attorneyRail()).filter((card) => card.onHomeRail);
 }
 
 /**
@@ -121,10 +120,5 @@ export async function getHomeAttorneys(): Promise<AttorneyCardData[]> {
  * rail that could take more.
  */
 export async function getAboutAttorneys(): Promise<AttorneyCardData[]> {
-  return [
-    CARDS["kc-harpring"],
-    CARDS["sean-dormer"],
-    CARDS["tim-garvey"],
-    CARDS["laura-browne"],
-  ];
+  return attorneyRail();
 }

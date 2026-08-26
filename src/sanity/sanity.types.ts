@@ -15,6 +15,13 @@
 export declare const internalGroqTypeReferenceTo: unique symbol;
 
 // Source: src/sanity/schema.json
+export type SanityImageAssetReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
+};
+
 export type SharedSections = {
   _id: string;
   _type: "sharedSections";
@@ -30,6 +37,40 @@ export type SharedSections = {
     rating: string;
     source: string;
   };
+  attorneysBand?: {
+    eyebrow: string;
+    title: string;
+    quote: string;
+    signature?: {
+      name: string;
+      role: string;
+      attorneyKey: string;
+      portrait: {
+        asset?: SanityImageAssetReference;
+        media?: unknown;
+        hotspot?: SanityImageHotspot;
+        crop?: SanityImageCrop;
+        _type: "image";
+      };
+    };
+    ctaLabel: string;
+  };
+};
+
+export type SanityImageCrop = {
+  _type: "sanity.imageCrop";
+  top: number;
+  bottom: number;
+  left: number;
+  right: number;
+};
+
+export type SanityImageHotspot = {
+  _type: "sanity.imageHotspot";
+  x: number;
+  y: number;
+  height: number;
+  width: number;
 };
 
 export type FirmStats = {
@@ -158,11 +199,206 @@ export type Geopoint = {
   alt?: number;
 };
 
-export type SanityImageAssetReference = {
-  _ref: string;
-  _type: "reference";
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
+export type City = {
+  _id: string;
+  _type: "city";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  key: Slug;
+  name: string;
+  order: number;
+};
+
+export type Slug = {
+  _type: "slug";
+  current: string;
+  source?: string;
+};
+
+export type Sponsorship = {
+  _id: string;
+  _type: "sponsorship";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  name: string;
+  body: string;
+  order: number;
+};
+
+export type NgoPartner = {
+  _id: string;
+  _type: "ngoPartner";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  name: string;
+  logo: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+  };
+  order: number;
+};
+
+export type CommunityPhoto = {
+  _id: string;
+  _type: "communityPhoto";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  image: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+  };
+  org: string;
+  caption: string;
+  span: 3 | 4 | 5 | 12;
+  order: number;
+};
+
+export type CommunityPartner = {
+  _id: string;
+  _type: "communityPartner";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  org: string;
+  logo: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+  };
+  photo?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+  };
+  body: string;
+  order: number;
+};
+
+export type Insight = {
+  _id: string;
+  _type: "insight";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title: string;
+  category: string;
+  iconKey: string;
+  readTime: string;
+  href: string;
+  order: number;
+};
+
+export type NewsMention = {
+  _id: string;
+  _type: "newsMention";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  outlet: string;
+  logo: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+  };
+  date: string;
+  headline: string;
+  href: string;
+  order: number;
+};
+
+export type CoreValue = {
+  _id: string;
+  _type: "coreValue";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title: string;
+  body: string;
+  iconKey:
+    | "commitment"
+    | "integrity"
+    | "compassion"
+    | "community"
+    | "innovation"
+    | "teamwork";
+  order: number;
+};
+
+export type Award = {
+  _id: string;
+  _type: "award";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  key: Slug;
+  alt: string;
+  image: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+  };
+  height: number;
+  order: number;
+};
+
+export type Faq = {
+  _id: string;
+  _type: "faq";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  question: string;
+  answer: string;
+  shownOn: "home" | "car-accidents";
+  video: VideoRef;
+  videoLength: string;
+  order: number;
+};
+
+export type VideoRef = {
+  _type: "videoRef";
+  provider: "wistia" | "youtube";
+  id: string;
+};
+
+export type CaseResult = {
+  _id: string;
+  _type: "caseResult";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  tag: string;
+  recovered: string;
+  offered: string;
+  badge:
+    | "Trial Win"
+    | "Settlement"
+    | "Judgment"
+    | "Trial Counsel"
+    | "Co-Counsel"
+    | "Local Counsel";
+  wonInCourt?: boolean;
+  story: string;
+  shownOn: "results" | "co-counsel" | "home";
+  order: number;
 };
 
 export type Testimonial = {
@@ -192,107 +428,6 @@ export type Testimonial = {
   railOrder?: number;
   railHeadline?: string;
   railBody?: string;
-};
-
-export type SanityImageCrop = {
-  _type: "sanity.imageCrop";
-  top: number;
-  bottom: number;
-  left: number;
-  right: number;
-};
-
-export type SanityImageHotspot = {
-  _type: "sanity.imageHotspot";
-  x: number;
-  y: number;
-  height: number;
-  width: number;
-};
-
-export type VideoRef = {
-  _type: "videoRef";
-  provider: "wistia" | "youtube";
-  id: string;
-};
-
-export type Slug = {
-  _type: "slug";
-  current: string;
-  source?: string;
-};
-
-export type Faq = {
-  _id: string;
-  _type: "faq";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  question: string;
-  answer: string;
-  shownOn: "home" | "car-accidents";
-  video: VideoRef;
-  videoLength: string;
-  order: number;
-};
-
-export type CoreValue = {
-  _id: string;
-  _type: "coreValue";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  title: string;
-  body: string;
-  iconKey:
-    | "commitment"
-    | "integrity"
-    | "compassion"
-    | "community"
-    | "innovation"
-    | "teamwork";
-  order: number;
-};
-
-export type CaseResult = {
-  _id: string;
-  _type: "caseResult";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  tag: string;
-  recovered: string;
-  offered: string;
-  badge:
-    | "Trial Win"
-    | "Settlement"
-    | "Judgment"
-    | "Trial Counsel"
-    | "Co-Counsel"
-    | "Local Counsel";
-  wonInCourt?: boolean;
-  story: string;
-  shownOn: "results" | "co-counsel" | "home";
-  order: number;
-};
-
-export type Award = {
-  _id: string;
-  _type: "award";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  key: Slug;
-  alt: string;
-  image: {
-    asset?: SanityImageAssetReference;
-    media?: unknown;
-    hotspot?: SanityImageHotspot;
-    crop?: SanityImageCrop;
-    _type: "image";
-  };
-  height: number;
-  order: number;
 };
 
 export type TeamMember = {
@@ -333,6 +468,18 @@ export type TeamMember = {
     alt: string;
     _key: string;
   }>;
+  onAttorneyRail?: boolean;
+  railOrder?: number;
+  onHomeRail?: boolean;
+  railPortrait?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+  };
+  location?: string;
+  railVideo?: VideoRef;
   hasProfile?: boolean;
   category?: string;
   lede?: string;
@@ -547,22 +694,29 @@ export type SanityImageAsset = {
 };
 
 export type AllSanitySchemaTypes =
+  | SanityImageAssetReference
   | SharedSections
+  | SanityImageCrop
+  | SanityImageHotspot
   | FirmStats
   | ContactSettings
   | Navigation
   | FirmDetails
   | Geopoint
-  | SanityImageAssetReference
-  | Testimonial
-  | SanityImageCrop
-  | SanityImageHotspot
-  | VideoRef
+  | City
   | Slug
-  | Faq
+  | Sponsorship
+  | NgoPartner
+  | CommunityPhoto
+  | CommunityPartner
+  | Insight
+  | NewsMention
   | CoreValue
-  | CaseResult
   | Award
+  | Faq
+  | VideoRef
+  | CaseResult
+  | Testimonial
   | TeamMember
   | RichText
   | SimpleText
@@ -730,7 +884,7 @@ export type CORE_VALUES_QUERY_RESULT = Array<{
 
 // Source: src/sanity/lib/queries.ts
 // Variable: SHARED_SECTIONS_QUERY
-// Query: *[_type == "sharedSections" && _id == "sharedSections"][0]{  coreValues{ eyebrow, title },  reviewSummary{ count, rating, source }}
+// Query: *[_type == "sharedSections" && _id == "sharedSections"][0]{  coreValues{ eyebrow, title },  reviewSummary{ count, rating, source },  attorneysBand{    eyebrow,    title,    quote,    ctaLabel,    signature{ name, role, attorneyKey, portrait }  }}
 export type SHARED_SECTIONS_QUERY_RESULT = {
   coreValues: {
     eyebrow: string;
@@ -740,6 +894,24 @@ export type SHARED_SECTIONS_QUERY_RESULT = {
     count: string;
     rating: string;
     source: string;
+  } | null;
+  attorneysBand: {
+    eyebrow: string;
+    title: string;
+    quote: string;
+    ctaLabel: string;
+    signature: {
+      name: string;
+      role: string;
+      attorneyKey: string;
+      portrait: {
+        asset?: SanityImageAssetReference;
+        media?: unknown;
+        hotspot?: SanityImageHotspot;
+        crop?: SanityImageCrop;
+        _type: "image";
+      };
+    } | null;
   } | null;
 } | null;
 
@@ -956,6 +1128,130 @@ export type TEAM_PROFILES_QUERY_RESULT = Array<{
   } | null;
 }>;
 
+// Source: src/sanity/lib/queries.ts
+// Variable: CITIES_QUERY
+// Query: *[_type == "city"] | order(order asc){  "_key": key.current, name}
+export type CITIES_QUERY_RESULT = Array<{
+  _key: string;
+  name: string;
+}>;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: NEWS_MENTIONS_QUERY
+// Query: *[_type == "newsMention"] | order(order asc){  "_key": _id, outlet, logo, date, headline, href}
+export type NEWS_MENTIONS_QUERY_RESULT = Array<{
+  _key: string;
+  outlet: string;
+  logo: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+  };
+  date: string;
+  headline: string;
+  href: string;
+}>;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: INSIGHTS_QUERY
+// Query: *[_type == "insight"] | order(order asc){  "_key": _id, category, iconKey, readTime, title, href}
+export type INSIGHTS_QUERY_RESULT = Array<{
+  _key: string;
+  category: string;
+  iconKey: string;
+  readTime: string;
+  title: string;
+  href: string;
+}>;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: COMMUNITY_PHOTOS_QUERY
+// Query: *[_type == "communityPhoto"] | order(order asc){  "_key": _id, image, org, caption, span}
+export type COMMUNITY_PHOTOS_QUERY_RESULT = Array<{
+  _key: string;
+  image: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+  };
+  org: string;
+  caption: string;
+  span: 12 | 3 | 4 | 5;
+}>;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: NGO_PARTNERS_QUERY
+// Query: *[_type == "ngoPartner"] | order(order asc){  "_key": _id, name, logo}
+export type NGO_PARTNERS_QUERY_RESULT = Array<{
+  _key: string;
+  name: string;
+  logo: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+  };
+}>;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: COMMUNITY_PARTNERS_QUERY
+// Query: *[_type == "communityPartner"] | order(order asc){  "_key": _id, org, logo, photo, body}
+export type COMMUNITY_PARTNERS_QUERY_RESULT = Array<{
+  _key: string;
+  org: string;
+  logo: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+  };
+  photo: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+  } | null;
+  body: string;
+}>;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: SPONSORSHIPS_QUERY
+// Query: *[_type == "sponsorship"] | order(order asc){  "_key": _id, name, body}
+export type SPONSORSHIPS_QUERY_RESULT = Array<{
+  _key: string;
+  name: string;
+  body: string;
+}>;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: ATTORNEY_RAIL_QUERY
+// Query: *[_type == "teamMember" && onAttorneyRail == true] | order(railOrder asc){  "_key": key.current,  name,  role,  location,  "portrait": railPortrait,  "video": railVideo{ provider, id },  "onHomeRail": coalesce(onHomeRail, false)}
+export type ATTORNEY_RAIL_QUERY_RESULT = Array<{
+  _key: string;
+  name: string;
+  role: string;
+  location: string | null;
+  portrait: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+  } | null;
+  video: {
+    provider: "wistia" | "youtube";
+    id: string;
+  } | null;
+  onHomeRail: boolean | false;
+}>;
+
 // Query TypeMap
 import "@sanity/client";
 declare module "@sanity/client" {
@@ -966,7 +1262,7 @@ declare module "@sanity/client" {
     '*[_type == "firmStats" && _id == "firmStats"][0]{\n  "stats": coalesce(stats[]{ _key, big, label }, [])\n}': FIRM_STATS_QUERY_RESULT;
     '*[_type == "award"] | order(order asc){\n  "_key": key.current,\n  alt,\n  image,\n  height\n}': AWARDS_QUERY_RESULT;
     '*[_type == "coreValue"] | order(order asc){\n  "_key": _id,\n  title,\n  body,\n  iconKey\n}': CORE_VALUES_QUERY_RESULT;
-    '*[_type == "sharedSections" && _id == "sharedSections"][0]{\n  coreValues{ eyebrow, title },\n  reviewSummary{ count, rating, source }\n}': SHARED_SECTIONS_QUERY_RESULT;
+    '*[_type == "sharedSections" && _id == "sharedSections"][0]{\n  coreValues{ eyebrow, title },\n  reviewSummary{ count, rating, source },\n  attorneysBand{\n    eyebrow,\n    title,\n    quote,\n    ctaLabel,\n    signature{ name, role, attorneyKey, portrait }\n  }\n}': SHARED_SECTIONS_QUERY_RESULT;
     '*[_type == "faq" && shownOn == "home"]\n  | order(order asc){\n  "_key": _id,\n  question,\n  answer,\n  videoLength,\n  video{ provider, id }\n}': HOME_FAQS_QUERY_RESULT;
     '*[_type == "faq" && shownOn == "car-accidents"] | order(order asc){\n  "_key": _id,\n  question,\n  answer,\n  videoLength,\n  video{ provider, id }\n}': CAR_ACCIDENT_FAQS_QUERY_RESULT;
     '*[_type == "caseResult" && shownOn == "results"] | order(order asc){\n  "_key": _id, tag, badge, "wonInCourt": coalesce(wonInCourt, false), offered, recovered, story\n}': CASE_RESULTS_QUERY_RESULT;
@@ -977,5 +1273,13 @@ declare module "@sanity/client" {
     '*[_type == "testimonial" && onReviewsPage == true && format == "written"]\n  | order(reviewOrder asc){\n  "_key": key.current,\n  name,\n  source,\n  quote,\n  body\n}': WRITTEN_REVIEWS_QUERY_RESULT;
     '*[_type == "teamMember"] | order(order asc){\n  "_key": key.current,\n  name,\n  role,\n  kind,\n  photo,\n  photoLarge,\n  bio,\n  "memorial": coalesce(memorial, false),\n  "hasProfile": coalesce(hasProfile, false),\n  "awards": awards[]{ _key, image, alt }\n}': TEAM_QUERY_RESULT;
     '*[_type == "teamMember" && hasProfile == true] | order(order asc){\n  "slug": key.current,\n  category,\n  lede,\n  email,\n  "facts": facts[]{ _key, value, label },\n  body,\n  education,\n  "links": links[]{ _key, label, href },\n  video{ ref{ provider, id }, poster, alt }\n}': TEAM_PROFILES_QUERY_RESULT;
+    '*[_type == "city"] | order(order asc){\n  "_key": key.current, name\n}': CITIES_QUERY_RESULT;
+    '*[_type == "newsMention"] | order(order asc){\n  "_key": _id, outlet, logo, date, headline, href\n}': NEWS_MENTIONS_QUERY_RESULT;
+    '*[_type == "insight"] | order(order asc){\n  "_key": _id, category, iconKey, readTime, title, href\n}': INSIGHTS_QUERY_RESULT;
+    '*[_type == "communityPhoto"] | order(order asc){\n  "_key": _id, image, org, caption, span\n}': COMMUNITY_PHOTOS_QUERY_RESULT;
+    '*[_type == "ngoPartner"] | order(order asc){\n  "_key": _id, name, logo\n}': NGO_PARTNERS_QUERY_RESULT;
+    '*[_type == "communityPartner"] | order(order asc){\n  "_key": _id, org, logo, photo, body\n}': COMMUNITY_PARTNERS_QUERY_RESULT;
+    '*[_type == "sponsorship"] | order(order asc){\n  "_key": _id, name, body\n}': SPONSORSHIPS_QUERY_RESULT;
+    '*[_type == "teamMember" && onAttorneyRail == true] | order(railOrder asc){\n  "_key": key.current,\n  name,\n  role,\n  location,\n  "portrait": railPortrait,\n  "video": railVideo{ provider, id },\n  "onHomeRail": coalesce(onHomeRail, false)\n}': ATTORNEY_RAIL_QUERY_RESULT;
   }
 }

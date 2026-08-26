@@ -16,6 +16,13 @@ import { inlineText, richText, simpleText } from "./objects/richText";
 import { seo } from "./objects/seo";
 
 import { award } from "./collections/award";
+import { city } from "./collections/city";
+import { communityPartner } from "./collections/communityPartner";
+import { communityPhoto } from "./collections/communityPhoto";
+import { insight } from "./collections/insight";
+import { newsMention } from "./collections/newsMention";
+import { ngoPartner } from "./collections/ngoPartner";
+import { sponsorship } from "./collections/sponsorship";
 import { caseResult } from "./collections/caseResult";
 import { coreValue } from "./collections/coreValue";
 import { faq } from "./collections/faq";
@@ -45,11 +52,18 @@ const pages: SchemaTypeDefinition[] = [];
 /** Repeatable content. Phase 2 (hand-authored) and Phase 3 (imported). */
 const collections: SchemaTypeDefinition[] = [
   teamMember,
-  award,
-  caseResult,
-  coreValue,
-  faq,
   testimonial,
+  caseResult,
+  faq,
+  award,
+  coreValue,
+  newsMention,
+  insight,
+  communityPartner,
+  communityPhoto,
+  ngoPartner,
+  sponsorship,
+  city,
 ];
 
 /** Firm-wide singletons. Phase 1. */

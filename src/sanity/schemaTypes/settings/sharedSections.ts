@@ -81,6 +81,52 @@ export const sharedSections = defineType({
         }),
       ],
     }),
+    defineField({
+      name: "attorneysBand",
+      title: "Attorney rail",
+      type: "object",
+      description:
+        "The heading and pull quote above the attorney cards. Appears on the homepage and " +
+        "Practice Areas — two pages, one piece of copy.",
+      fields: [
+        defineField({ name: "eyebrow", type: "string", validation: (rule) => rule.required() }),
+        defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
+        defineField({
+          name: "quote",
+          type: "text",
+          rows: 4,
+          description: "The signed pull quote beside the cards.",
+          validation: (rule) => rule.required(),
+        }),
+        defineField({
+          name: "signature",
+          title: "Signed by",
+          type: "object",
+          description:
+            "Whose quote it is. The portrait is a small signature crop, not the rail card's.",
+          fields: [
+            defineField({ name: "name", type: "string", validation: (rule) => rule.required() }),
+            defineField({ name: "role", type: "string", validation: (rule) => rule.required() }),
+            defineField({
+              name: "attorneyKey",
+              title: "Links to",
+              type: "string",
+              description:
+                "The team member's reference key, so the signature links to their bio. " +
+                "TODO(sanity): a real reference once every page type exists to point at.",
+              validation: (rule) => rule.required(),
+            }),
+            defineField({
+              name: "portrait",
+              type: "image",
+              options: { hotspot: true },
+              validation: (rule) => rule.required(),
+            }),
+          ],
+        }),
+        defineField({ name: "ctaLabel", type: "string", validation: (rule) => rule.required() }),
+      ],
+    }),
   ],
   preview: {
     prepare: () => ({ title: "Shared Sections" }),

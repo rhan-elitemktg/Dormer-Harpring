@@ -7,6 +7,10 @@
 // like one type with a flag; they are not. Keeping them apart means the CMS
 // swap is two clean substitutions rather than an unpicking job.
 import type { ImageMetadata } from "astro";
+import type { SanityImageSource } from "@sanity/image-url";
+import { sanityClient } from "sanity:client";
+import { INSIGHTS_QUERY, NEWS_MENTIONS_QUERY } from "../sanity/lib/queries";
+import { once, required } from "../sanity/lib/fetch";
 import denver7 from "../assets/news/denver7.webp";
 import fox31 from "../assets/news/fox31-cw2.webp";
 import mountainMail from "../assets/news/mountain-mail.webp";
@@ -15,7 +19,7 @@ import outthere from "../assets/news/outthere.webp";
 export interface NewsMention {
   _key: string;
   outlet: string;
-  logo: ImageMetadata;
+  logo: ImageMetadata | SanityImageSource;
   /** Display string, not a date object — editors type "Mar 2026". */
   date: string;
   headline: string;
@@ -63,43 +67,9 @@ export async function getFeedSection(): Promise<FeedSection> {
 
 /** TODO(content): every `href` is a placeholder — the comp points them all at #news. */
 export async function getNewsMentions(): Promise<NewsMention[]> {
-  return [
-    {
-      _key: "adventure-park",
-      outlet: "FOX31 / CW2",
-      logo: fox31,
-      date: "Mar 2026",
-      headline:
-        "Family files lawsuit after child fell 20 feet, broke spine at adventure park in Denver",
-      href: "#",
-    },
-    {
-      _key: "dating-app",
-      outlet: "Denver7 ABC",
-      logo: denver7,
-      date: "Feb 2026",
-      headline:
-        "Denver cardiologist convicted of drugging, assaulting women; victims file suit against dating app",
-      href: "#",
-    },
-    {
-      _key: "tinder-hinge",
-      outlet: "OutThere Colorado",
-      logo: outthere,
-      date: "Jan 2026",
-      headline: "Six victims of Denver rapist sue the parent company of Tinder and Hinge",
-      href: "#",
-    },
-    {
-      _key: "saguache-jail",
-      outlet: "The Mountain Mail",
-      logo: mountainMail,
-      date: "Nov 2025",
-      headline:
-        "Jurors find Saguache County jail liable, award $4 million to victim's family",
-      href: "#",
-    },
-  ];
+  return once("newsMentions", async () =>
+    required(await sanityClient.fetch(NEWS_MENTIONS_QUERY), "Press Mentions")
+  );
 }
 
 /**
@@ -108,38 +78,7 @@ export async function getNewsMentions(): Promise<NewsMention[]> {
  * editor can fill in, and the tint is picked in CSS off the same key.
  */
 export async function getInsightPosts(): Promise<InsightPost[]> {
-  return [
-    {
-      _key: "claim-worth",
-      category: "Your case",
-      iconKey: "value",
-      readTime: "5 min read",
-      title: "What is my personal injury claim worth?",
-      href: "#",
-    },
-    {
-      _key: "first-48",
-      category: "After a crash",
-      iconKey: "clock",
-      readTime: "4 min read",
-      title: "What to do in the first 48 hours after an accident",
-      href: "#",
-    },
-    {
-      _key: "adjusters",
-      category: "Insurance",
-      iconKey: "shield",
-      readTime: "3 min read",
-      title: "Talking to adjusters: what not to say",
-      href: "#",
-    },
-    {
-      _key: "how-long",
-      category: "The process",
-      iconKey: "steps",
-      readTime: "2 min read",
-      title: "How long will my personal injury case take?",
-      href: "#",
-    },
-  ];
+  return once("insights", async () =>
+    required(await sanityClient.fetch(INSIGHTS_QUERY), "Insight Teasers")
+  );
 }
