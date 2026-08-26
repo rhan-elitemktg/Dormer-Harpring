@@ -115,6 +115,43 @@ static imports hoist above it.
 
 Payloads land in `scratch/`, which is gitignored: the script is the record, not its output.
 
+### Repeated bands split THREE ways, and you have to check which
+
+Rhan asked what the plan is for components that repeat across pages — `.values` as the
+example. The answer is not one answer, and `.values` happens to show all three parts.
+
+| Part of a repeated band | Goes to | Phase |
+|---|---|---|
+| Its **items** — the six values, the awards, the testimonial records | a Collection | 2 or 3 |
+| Its **heading, identical on every page it appears on** | a `sharedSections` singleton | 2 |
+| Its **heading, different per page** | that page's own singleton | 4 |
+
+**The third row is not hypothetical here.** `TestimonialRail` (homepage) and
+`about/InTheirWords` render the SAME testimonial records under DIFFERENT headings — About's
+come from `aboutPage.reviews`. Items shared, heading page-local. So "a repeated band is a
+singleton" is wrong as a rule.
+
+**Measured rather than assumed — only TWO section-copy getters are shared at all:**
+
+```
+getCoreValuesSection   5 pages   about, co-counsel, index, meet-our-attorneys, news
+getAttorneysSection    2 pages   index, practice-areas
+```
+
+The other six (`getFaqSection`, `getFeedSection`, `getPracticeSection`, `getPracticePromise`,
+`getCommunitySection`, `getCarAccidentFaqSection`) are used on ONE page each, so they belong
+to that page's singleton in Phase 4 and not to any shared document. Re-check with:
+
+```sh
+grep -roE '\bget[A-Z][A-Za-z]*Section\(' src/pages | sort | uniq -c | sort -rn
+```
+
+So: **a `sharedSections` singleton holding exactly those two**, built in Phase 2 so each band
+moves as a unit — items and heading together — and filed under **Site Settings** in the desk,
+because that is where an editor looks for copy that is not on one page. It grows only when a
+section is genuinely rendered on two or more pages; six one-page sections in a "shared"
+document would be a lie the desk tells.
+
 ### Not done, and known
 
 - **The production URL is still not a Sanity CORS origin**, so the deployed `/admin` loads and
@@ -1102,7 +1139,8 @@ entry and both files to fix.
    Studio for unlisted videos beyond the five the site already embeds.
 3. **One Wistia player per popover, initialised eagerly** — 15 on the homepage, 20 on
    `/denver-car-accident-lawyer/`. Inherent to the class-based embed; wants a pass before launch.
-4. **Sanity Phase 2 — Collections, hand-authored.** Fifteen modules, ~230 documents:
+4. **Sanity Phase 2 — Collections, hand-authored.** Fifteen modules, ~230 documents, plus the
+   `sharedSections` singleton (see "Repeated bands split three ways" above):
    `attorney` (27 + the two dogs) · `caseResult` (89) · `testimonial` (21) · `award` · `faq`
    (20) · `practiceArea` · `coreValue` · `city` · the four community types · `newsMention` ·
    `insight`. This is where the editable CARD images land. Four modelling calls are already
