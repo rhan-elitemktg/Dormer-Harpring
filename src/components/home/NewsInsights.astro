@@ -211,7 +211,12 @@ const { section, news, insights } = Astro.props;
   // Same pattern as the practice-area selector: both panels stay in the DOM and
   // only `hidden` moves, so the eight cards are crawlable and survive JS
   // failing to load.
-  for (const list of document.querySelectorAll<HTMLElement>('[aria-label="News and insights"]')) {
+  //
+  // Keyed on this component's own class rather than its `aria-label`. The label
+  // is user-facing copy; rewording it would have silently unwired the tabs. Both
+  // homepage tab sets scope to their own class for that reason — see the note in
+  // PracticeSelector, which used to reach this switch as well and bind it twice.
+  for (const list of document.querySelectorAll<HTMLElement>(".feed__switch")) {
     const tabs = [...list.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
 
     const select = (index: number, moveFocus = false) => {

@@ -971,7 +971,8 @@ entry and both files to fix.
    with the same contract, and the getters are already the projections. Plus the four Portable
    Text object types the post template deferred (`callout`, `phoneBand`, `attorneyCard`,
    `pullQuote`), whose intended home is commented in `prose/components.ts` — and which the
-   practice-area chrome maps onto almost exactly.
+   practice-area chrome maps onto almost exactly. **Read "Sanity readiness" below first** — the
+   content is in better shape than the tooling is.
 5. `/new-seo-setup` — per-page meta, a Global SEO Settings singleton, JSON-LD, `sitemap.xml`,
    `robots.txt`, editor-managed redirects. **The practice-area pages already carry real
    `metaTitle` / `metaDescription` from the live site's own meta**, so that layer has something
@@ -982,6 +983,71 @@ entry and both files to fix.
 
 No comp exists for **privacy / disclaimer**, **sitemap** or **404**. All three are built on the
 light template's shell anyway — see below.
+
+## Sanity readiness
+
+Audited against the whole tree before the integration starts. **The content is ready; the
+tooling is not.** Nothing below is a code change waiting to happen — it is what the next session
+should expect to build.
+
+**The four green lights, all re-checkable:**
+
+- **35,179 `_key`s across both collections: zero duplicates, zero missing.** This is the one that
+  would have bitten during upload, because Sanity requires `_key` uniqueness WITHIN each array
+  and a collision surfaces as a silently dropped array item rather than an error. Re-check by
+  walking every array of typed objects in `src/content/**/*.json`.
+- **290 slugs, zero collisions** between the 186 blog posts and the 104 practice areas. They
+  share `[slug].astro` at the root, so a collision is a page that cannot be served.
+- **80 async getters, and the data layer is clean**: no hex codes, no SVG markup, no style
+  strings. The convention held.
+- **No component owns content.** All 127 checked — not one declares a content array in its
+  frontmatter.
+
+**The blockers, in the order they bite:**
+
+1. **There is no Sanity client.** `sanityClient` appears in exactly four places and all four are
+   comments. `@sanity/astro` is configured and serves the `sanity:client` virtual module, but
+   nothing imports it. Step one, and it is the whole of step one.
+2. **TYPESCRIPT IS NOT INSTALLED.** `AGENTS.md` says "TS strict"; `typescript` and
+   `@astrojs/check` are in neither dependency list and there is no typecheck script. Nothing has
+   ever verified a type in this repo — `astro check` offers to install both when you run it.
+   This matters more here than it normally would: TypeGen's entire value is generated types, and
+   today nothing would consume them.
+3. **No TypeGen path** — no `sanity.cli.ts`, no `typegen` script, no `sanity.types.ts`. Note
+   `sanity-typegen.json` is deprecated; configuration belongs in `sanity.cli.ts` with
+   `typegen.enabled`, which regenerates during `sanity dev` / `sanity build`.
+4. **`tsconfig.json` has no `types` entry**, so `sanity:client` will not resolve. The Sanity
+   guide says to add `"types": ["@sanity/astro/module"]`. **Deliberately NOT applied**: a `types`
+   array REPLACES TypeScript's automatic `@types` inclusion, and with no typechecker installed
+   there is no way to prove it harmless. Do it together with item 2.
+5. **The asset surface is 112 distinct images** imported by the data layer, plus **203 more**
+   inside the content collections. `src/content` is 39M.
+6. **`getStaticPaths` does not see module scope.** Astro hoists it into its own module context,
+   so a module-level `const QUERY = defineQuery(...)` throws `ReferenceError` at request time.
+   Define queries used inside it there, or import them. Both `[slug].astro` files are affected.
+7. **The production URL is still not a Sanity CORS origin**, so the deployed `/admin` loads and
+   fails sign-in. Unchanged, and still not a blocker for building.
+
+**Eight stale comments were corrected**, all numeric claims the imports had overtaken: the blog
+counts (167 → 186, and 107 → 125 without featured art), the fact-check sentence's audience
+(109/181 → 104/186), the FAQ estimate ("65 of the legacy site's 98" → the counted 28 of 104),
+and cities (109 → 104). **Verified inert by hashing all 332 built pages before and after —
+byte-identical.**
+
+The tab-row comment needed more than a number. It claimed the row renders every category; it
+renders **22 of 23**. `auto-insurance-accident-claims` is unreachable because a post belongs to
+exactly one category — the first its record lists — and thirteen posts carry that one second,
+none first. Already an open question below; now recorded where the code is.
+
+**Duplication found and deliberately left alone:**
+
+- `ContactForm` / `CoCounselForm` share their label, `:focus` and honeypot rules verbatim — and
+  are headed for one `/api/consult` endpoint anyway.
+- `.spage__grid` / `.post__grid` / `.parea__grid` are identical, as are the three `__main` rules.
+  That is **three** callers against the documented four-caller threshold for extracting, so it
+  stays. Note the threshold is now one away.
+- Repeated utilities: absolute-fill `object-fit: cover` in four files, visually-hidden in two,
+  the awards rail in three.
 
 ## Open
 
@@ -1142,6 +1208,22 @@ Both live in `global.css` and therefore reach the blog as well as the practice a
 
 ## Traps worth knowing before touching a section
 
+- **A component script that queries `document` by a GENERIC selector reaches other
+  components.** `home/PracticeSelector` looped `document.querySelectorAll('[role="tablist"]')`,
+  and the homepage renders three tablists. It double-bound `home/NewsInsights`, which has its
+  own near-identical handler, and it broke `home/PromiseBand` outright: those dots carry no
+  `aria-controls` and are driven by PromiseBand's `show()`, so an arrow key flipped
+  `aria-selected` and moved focus while the slide stayed put — the announced state and the
+  visible slide disagreed, and nothing corrected it, because PromiseBand has no keydown handler.
+  Both tab sets scope to their own class now.
+
+  **An ARIA role is not an identifier and neither is user-facing text.** NewsInsights keyed off
+  `[aria-label="News and insights"]`, which is copy — rewording it would have silently unwired
+  the tabs. **Swept: there are only five document-level queries in the whole component tree**,
+  and the other three are correct — `img.lazy-fade` (Layout's delegated capture handler, global
+  on purpose), `[data-promise]`, and `.play`, which reaches only PlayButton's own instances
+  because the three hand-rolled play circles use `vcard__play` / `bio__play` / `morefeat__play`.
+  That is also exactly why those three do not pulse.
 - **A text decoration on a flex container reaches the arrow inside it.** The fix is
   `.arrow-link__label`.
 - **A light card inside `.section--forest` must declare its own heading colour**, or it renders at
