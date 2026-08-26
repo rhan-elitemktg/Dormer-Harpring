@@ -520,21 +520,7 @@
         },
         "optional": false
       },
-      "phoneE164": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "string"
-        },
-        "optional": false
-      },
       "sms": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "string"
-        },
-        "optional": false
-      },
-      "smsE164": {
         "type": "objectAttribute",
         "value": {
           "type": "string"

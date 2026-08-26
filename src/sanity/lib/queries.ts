@@ -33,14 +33,16 @@ import { defineQuery } from "groq";
  * `geo` is flattened out of Sanity's `geopoint` — that type carries `_type` and
  * an optional `alt` the site has no use for, and `FirmAddress`'s neighbours are
  * all flat.
+ *
+ * There is no `phoneE164` / `smsE164` here because there are no such fields:
+ * both are derived from the displayed number in `data/site.ts`. See
+ * `sanity/lib/phone.ts`.
  */
 export const FIRM_DETAILS_QUERY = defineQuery(`*[_type == "firmDetails" && _id == "firmDetails"][0]{
   name,
   legalName,
   phone,
-  phoneE164,
   sms,
-  smsE164,
   email,
   address{ street, unit, city, region, postalCode, country },
   "geo": { "lat": geo.lat, "lng": geo.lng },

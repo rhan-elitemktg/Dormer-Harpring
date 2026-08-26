@@ -111,9 +111,7 @@ export type FirmDetails = {
   name: string;
   legalName: string;
   phone: string;
-  phoneE164: string;
   sms: string;
-  smsE164: string;
   email?: string;
   address: {
     street: string;
@@ -382,14 +380,12 @@ export type AllSanitySchemaTypes =
 
 // Source: src/sanity/lib/queries.ts
 // Variable: FIRM_DETAILS_QUERY
-// Query: *[_type == "firmDetails" && _id == "firmDetails"][0]{  name,  legalName,  phone,  phoneE164,  sms,  smsE164,  email,  address{ street, unit, city, region, postalCode, country },  "geo": { "lat": geo.lat, "lng": geo.lng },  mapUrl,  mapPlaceCid,  hours,  hoursDisplay,  socials[]{ name, href },  "directoryProfiles": coalesce(directoryProfiles, [])}
+// Query: *[_type == "firmDetails" && _id == "firmDetails"][0]{  name,  legalName,  phone,  sms,  email,  address{ street, unit, city, region, postalCode, country },  "geo": { "lat": geo.lat, "lng": geo.lng },  mapUrl,  mapPlaceCid,  hours,  hoursDisplay,  socials[]{ name, href },  "directoryProfiles": coalesce(directoryProfiles, [])}
 export type FIRM_DETAILS_QUERY_RESULT = {
   name: string;
   legalName: string;
   phone: string;
-  phoneE164: string;
   sms: string;
-  smsE164: string;
   email: string | null;
   address: {
     street: string;
@@ -504,7 +500,7 @@ export type FIRM_STATS_QUERY_RESULT = {
 import "@sanity/client";
 declare module "@sanity/client" {
   interface SanityQueries {
-    '*[_type == "firmDetails" && _id == "firmDetails"][0]{\n  name,\n  legalName,\n  phone,\n  phoneE164,\n  sms,\n  smsE164,\n  email,\n  address{ street, unit, city, region, postalCode, country },\n  "geo": { "lat": geo.lat, "lng": geo.lng },\n  mapUrl,\n  mapPlaceCid,\n  hours,\n  hoursDisplay,\n  socials[]{ name, href },\n  "directoryProfiles": coalesce(directoryProfiles, [])\n}': FIRM_DETAILS_QUERY_RESULT;
+    '*[_type == "firmDetails" && _id == "firmDetails"][0]{\n  name,\n  legalName,\n  phone,\n  sms,\n  email,\n  address{ street, unit, city, region, postalCode, country },\n  "geo": { "lat": geo.lat, "lng": geo.lng },\n  mapUrl,\n  mapPlaceCid,\n  hours,\n  hoursDisplay,\n  socials[]{ name, href },\n  "directoryProfiles": coalesce(directoryProfiles, [])\n}': FIRM_DETAILS_QUERY_RESULT;
     '*[_type == "navigation" && _id == "navigation"][0]{\n  "aboutMenu": coalesce(aboutMenu[]{ label, href }, []),\n  "practiceAreasMenu": coalesce(practiceAreasMenu[]{ label, href }, []),\n  "locationsMenu": coalesce(locationsMenu[]{ label, href }, []),\n  "footerPracticeAreas": coalesce(footerPracticeAreas[]{ label, href }, []),\n  "footerNav": coalesce(footerNav[]{ label, href }, []),\n  "serviceAreas": coalesce(serviceAreas, [])\n}': NAVIGATION_QUERY_RESULT;
     '*[_type == "contactSettings" && _id == "contactSettings"][0]{\n  eyebrow,\n  title,\n  "reassurances": coalesce(reassurances, []),\n  callPrompt,\n  callBadge,\n  form{ title, lede, submitLabel, disclaimer },\n  photoAlt,\n  callCard{ label, note },\n  textCard{ label, note },\n  emailCard{ label, note },\n  officeCard{ label, note },\n  hours{ label, note }\n}': CONTACT_SETTINGS_QUERY_RESULT;
     '*[_type == "firmStats" && _id == "firmStats"][0]{\n  "stats": coalesce(stats[]{ _key, big, label }, [])\n}': FIRM_STATS_QUERY_RESULT;

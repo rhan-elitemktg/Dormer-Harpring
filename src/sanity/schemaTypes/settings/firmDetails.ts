@@ -13,32 +13,7 @@
 import { defineField, defineType } from "sanity";
 // Subpath, not the barrel — see the note in sanity/structure/index.ts.
 import { EarthGlobeIcon } from "@sanity/icons/EarthGlobe";
-
-const E164 = /^\+[1-9]\d{1,14}$/;
-
-/** Digits only, so a display number and its E.164 form can be compared. */
-const digits = (value: string) => value.replace(/\D/g, "");
-
-/**
- * A display number and its E.164 twin must be the same number.
- *
- * Worth a validator rather than a description because the failure is silent and
- * expensive: the page would print one number and every `tel:` link would dial
- * another, and a visitor who taps rather than reads reaches the wrong firm. US
- * numbers are compared on the last ten digits, so the leading country code on
- * one side and not the other is not a false alarm.
- */
-const matchesDisplay = (displayField: string, label: string) =>
-  function (value: unknown, context: { document?: Record<string, unknown> }) {
-    if (typeof value !== "string" || !E164.test(value)) {
-      return `Must be E.164 — +13037563812, no spaces, brackets or dashes.`;
-    }
-    const display = context.document?.[displayField];
-    if (typeof display !== "string" || display.trim() === "") return true;
-    const a = digits(value).slice(-10);
-    const b = digits(display).slice(-10);
-    return a === b || `This is a different number from the ${label} above (${display}).`;
-  };
+import { validatePhone } from "../../lib/phone";
 
 export const firmDetails = defineType({
   name: "firmDetails",
@@ -69,36 +44,33 @@ export const firmDetails = defineType({
       validation: (rule) => rule.required(),
     }),
 
+    /*
+     * ONE FIELD PER NUMBER. What a tap dials is DERIVED from what a visitor
+     * reads — see sanity/lib/phone.ts. These were briefly two fields each,
+     * with a validator making sure they agreed; a rule whose whole job is to
+     * stop two fields disagreeing is a rule that would not exist if there were
+     * one field.
+     *
+     * `validatePhone` is the same function the site derives with, so the Studio
+     * cannot save a number the site cannot dial.
+     */
     defineField({
       name: "phone",
-      title: "Phone (as shown)",
+      title: "Phone number",
       type: "string",
       group: "contact",
-      description: "The number as a visitor reads it — (303) 756-3812.",
-      validation: (rule) => rule.required(),
-    }),
-    defineField({
-      name: "phoneE164",
-      title: "Phone (for dialling)",
-      type: "string",
-      group: "contact",
-      description: "The same number in E.164 — +13037563812. This is what a tap actually dials.",
-      validation: (rule) => rule.required().custom(matchesDisplay("phone", "phone")),
+      description:
+        "Written the way a visitor reads it — (303) 756-3812. What a tap dials is worked out " +
+        "from this, so there is nothing else to keep in step.",
+      validation: (rule) => rule.required().custom(validatePhone),
     }),
     defineField({
       name: "sms",
-      title: "Text number (as shown)",
+      title: "Text number",
       type: "string",
       group: "contact",
-      description: "The footer's Text number — (720) 730-7997.",
-      validation: (rule) => rule.required(),
-    }),
-    defineField({
-      name: "smsE164",
-      title: "Text number (for messaging)",
-      type: "string",
-      group: "contact",
-      validation: (rule) => rule.required().custom(matchesDisplay("sms", "text number")),
+      description: "The footer's Text number — (720) 730-7997. Same rule as the phone above.",
+      validation: (rule) => rule.required().custom(validatePhone),
     }),
     defineField({
       name: "email",

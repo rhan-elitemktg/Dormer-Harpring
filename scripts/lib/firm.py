@@ -24,7 +24,7 @@ import urllib.parse
 import urllib.request
 
 _API_VERSION = "2026-08-01"
-_QUERY = '*[_type == "firmDetails"][0]{phone, sms, phoneE164, smsE164}'
+_QUERY = '*[_type == "firmDetails"][0]{phone, sms}'
 
 _cache = None
 
@@ -60,7 +60,12 @@ def _env():
 
 
 def firm_details():
-    """`{phone, sms, phoneE164, smsE164}` from Sanity. Fetched once per run."""
+    """`{phone, sms}` from Sanity. Fetched once per run.
+
+    Only the DISPLAYED numbers. The E.164 forms are derived in TypeScript
+    (`src/sanity/lib/phone.ts`) rather than stored, so there is nothing to read
+    here — and these checks assert against what the page prints anyway.
+    """
     global _cache
     if _cache is not None:
         return _cache

@@ -33,6 +33,7 @@
 import { sanityClient } from "sanity:client";
 import { FIRM_DETAILS_QUERY } from "../sanity/lib/queries";
 import { once, required } from "../sanity/lib/fetch";
+import { toE164 } from "../sanity/lib/phone";
 
 export interface FirmAddress {
   street: string;
@@ -54,13 +55,19 @@ export interface FirmDetails {
   legalName: string;
   /** The number shown and dialled everywhere. */
   phone: string;
-  /** E.164, for `tel:` hrefs and JSON-LD. */
+  /**
+   * E.164, for `tel:` hrefs and JSON-LD.
+   *
+   * DERIVED from `phone`, not stored — the Studio holds one number per line.
+   * The field stays on this interface so no call site moved.
+   */
   phoneE164: string;
   /**
    * The footer's "Text" number. NOT the comps' (720) 734-6230, which 29 comp
    * files carry — the comps have now been wrong about both numbers.
    */
   sms: string;
+  /** Derived from `sms`, exactly as `phoneE164` is derived from `phone`. */
   smsE164: string;
   email?: string;
   address: FirmAddress;
@@ -111,8 +118,27 @@ export async function getFirmDetails(): Promise<FirmDetails> {
     );
   }
 
+  // DERIVED, NOT STORED. The Studio holds one number per line and this works
+  // out what a tap dials, using the same function the Studio validates with —
+  // so a number that reaches here is one `toE164` already accepted. The throw
+  // is for the case where that stops being true (a field renamed, a document
+  // imported around the Studio), because the alternative is a `tel:` href that
+  // dials nothing and a build that never mentions it.
+  const phoneE164 = toE164(firm.phone);
+  const smsE164 = toE164(firm.sms);
+  if (!phoneE164 || !smsE164) {
+    throw new Error(
+      `Firm Details has a phone number that cannot be dialled: ` +
+        `${!phoneE164 ? `phone "${firm.phone}"` : `text number "${firm.sms}"`}.\n` +
+        `Use a plain US number like (303) 756-3812 at /admin → Site Settings → Firm Details. ` +
+        `Letters and extensions are not supported — see src/sanity/lib/phone.ts.`
+    );
+  }
+
   return {
     ...firm,
+    phoneE164,
+    smsE164,
     email: firm.email ?? undefined,
     address: { ...firm.address, unit: firm.address.unit ?? undefined },
     geo: { lat, lng },

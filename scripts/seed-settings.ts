@@ -17,10 +17,23 @@
 // `S.document().documentId(...)` in the desk pins to, and it is what makes
 // `*[_id == "firmDetails"][0]` the cheapest possible fetch.
 //
+// SEED BEFORE YOU SWAP — THIS IS A ONE-WAY DOOR. Once a module's getter reads
+// `sanity:client`, plain Node cannot import that module at all: `sanity:client`
+// is a VITE VIRTUAL module that only exists inside an Astro build, so the
+// import fails with ERR_UNSUPPORTED_ESM_URL_SCHEME. The script that reads a
+// module's literals stops working the moment those literals are gone, which is
+// the correct shape but takes people by surprise. `main()` catches it and says
+// so, because tsx has been seen exiting 0 on the raw failure — a seed that
+// silently does nothing, leaving a stale payload that then imports cleanly.
+//
 //   npx tsx scripts/seed-settings.ts
-//   npx sanity dataset import <the file it names> production --replace
+//   npx sanity dataset import <the file it names> --dataset production --replace
+//
+// `--replace` is a TRUE replace, not a merge: a field dropped from the payload
+// is dropped from the document. Verified, after an earlier reading of the
+// opposite turned out to be a stale query against a seed that had not re-run.
 import "./lib/stub-assets";
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 
 const OUT = resolve(process.cwd(), "scratch/settings.ndjson");
@@ -33,7 +46,39 @@ const keyOf = (s: string) =>
     .replace(/^-+|-+$/g, "")
     .slice(0, 48) || "item";
 
+/**
+ * Refuse to run against a module that has already been swapped to Sanity.
+ *
+ * CHECKED BY READING THE SOURCE, NOT BY CATCHING THE IMPORT. `sanity:client` is
+ * a Vite virtual module, so plain Node fails on it with
+ * ERR_UNSUPPORTED_ESM_URL_SCHEME — thrown from a SYNCHRONOUS load hook, outside
+ * the promise chain, where a try/catch around `await import()` cannot see it.
+ * tsx then exits 0, so the seed appears to succeed while writing nothing and
+ * leaving whatever payload was on disk from last time. That stale payload
+ * imports perfectly happily, which is how a removed field came back.
+ *
+ * Kept SEPARATE from the imports below rather than wrapping them, because a
+ * templated `import(\`../src/data/${name}.ts\`)` is untyped — every callback
+ * downstream then infers `any` and `check:types` goes red. The literal imports
+ * in `main()` keep their types; this just runs first.
+ */
+function assertNotSwapped(...names: string[]) {
+  for (const name of names) {
+    const file = resolve(process.cwd(), `src/data/${name}.ts`);
+    if (!/from ["']sanity:client["']/.test(readFileSync(file, "utf8"))) continue;
+    console.error(
+      `\nsrc/data/${name}.ts already reads from Sanity, so it holds no literals to seed.\n\n` +
+        `That module has been swapped and Sanity is its source of truth now — this script's\n` +
+        `job there is done. To change its content, edit it in the Studio at /admin.\n\n` +
+        `Seeding is one-way: seed FIRST, verify, then swap the getter.\n`
+    );
+    process.exit(1);
+  }
+}
+
 async function main() {
+  assertNotSwapped("site", "navigation", "contact", "stats");
+
   const site = await import("../src/data/site.ts");
   const nav = await import("../src/data/navigation.ts");
   const contact = await import("../src/data/contact.ts");
@@ -88,10 +133,9 @@ async function main() {
       _type: "firmDetails",
       name: firm.name,
       legalName: firm.legalName,
+      // No phoneE164 / smsE164: both are derived from the displayed number.
       phone: firm.phone,
-      phoneE164: firm.phoneE164,
       sms: firm.sms,
-      smsE164: firm.smsE164,
       ...(firm.email ? { email: firm.email } : {}),
       address: { ...firm.address },
       geo: { _type: "geopoint", lat: firm.geo.lat, lng: firm.geo.lng },
