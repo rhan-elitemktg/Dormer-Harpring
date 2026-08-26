@@ -49,7 +49,7 @@ only checks imported practice-area body copy, so a change to components, chrome 
 scripts cannot affect its result. Run it when `src/content/practice-areas/` or the importer
 changed, and background it when you do.
 
-**`npm run check` is THREE linters now, and one of them could never fail.**
+**`npm run check` is FOUR linters now, and one of them could never fail.**
 `scripts/check-links.py` is the new one — 33,754 internal links across 330 pages, every target
 resolved against what `dist/` actually serves plus `vercel.json`. (The count fell from 39,484
 when the eighteen footer city chips stopped being links — 5,904 of them — and Editorial
@@ -1046,12 +1046,30 @@ should expect to build.
    the message, never whether it fails. Only `dist/admin/index.html` changed, and only its studio
    bundle hash — the other 331 pages are byte-identical.
 
-   **The five left are decisions, not slips.** Three in `prose/ProseH*.astro` —
-   astro-portabletext's `Block` against `lib/headings.ts`'s `BlockLike`. Two in
-   `src/sanity/theme.ts`. Most of the 97 hints are `src/sanity/eliteTheme.js`, a vendored
-   minified file whose single 56KB line is also why the raw output runs over a megabyte — **and
-   why `awk 'length < 400'` on that output silently drops real errors.** Count with
-   `grep -c ' - error '` on the raw text; a filtered count read 5 where the truth was 7.
+   **ZERO ERRORS NOW, AND `check:types` IS IN `npm run check`.** All nine are closed and the
+   gate is wired, so this stops being a list somebody has to remember. It runs FIRST in the
+   chain — it is the only one that does not read `dist/`, so it gives a real signal without a
+   build. **Tested in both directions**: a deliberate `const x: number = "s"` turns
+   `npm run check` red, removing it turns it green.
+
+   **It runs at `--minimumSeverity error`.** Warnings and hints are not the gate, and
+   `src/sanity/eliteTheme.js` — a vendored minified file whose single 56KB line is one line —
+   otherwise buries the output in ~700KB of noise. A gate nobody can read is a gate nobody runs.
+
+   That same 56KB line is why **`awk 'length < 400'` on `astro check` output silently drops real
+   errors**: a filtered count read 5 where the truth was 7. Count with `grep -c ' - error '` on
+   the raw text.
+
+   **The last two fixes, both type-only, both hash-verified against all 332 pages:**
+   - `lib/headings.ts`'s `BlockLike` gained a REQUIRED `_type`, which is what actually cleared
+     the three `ProseH*` errors — TypeScript's weak type detection rejects an all-optional target
+     that shares no property name with its source, and `ArbitraryTypedObject`'s `[key: string]:
+     any` index signature does not count as a shared name. `text` also became `unknown`, which is
+     a separate choice: it is true (inline objects carry no `text`), not required.
+   - `src/sanity/eliteTheme.d.ts` now declares both colour schemes present, which is a claim
+     about the GENERATED module rather than about `StudioTheme` in general — checked against the
+     built file. That is where the fix belongs; a non-null assertion at the use site would assert
+     the same thing with none of the explanation.
 3. **No TypeGen path** — no `sanity.cli.ts`, no `typegen` script, no `sanity.types.ts`. Note
    `sanity-typegen.json` is deprecated; configuration belongs in `sanity.cli.ts` with
    `typegen.enabled`, which regenerates during `sanity dev` / `sanity build`.

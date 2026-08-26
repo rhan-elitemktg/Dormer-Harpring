@@ -30,9 +30,14 @@ npm run dev                  # site + Studio, both on :4321
 npm run build && npm run check
 ```
 
-`npm run check` is not optional. It runs three linters for three failure modes the build
+`npm run check` is not optional. It runs four linters for four failure modes the build
 cannot see, all of which fail **silently** — README.md has the full explanation:
 
+- `check:types` — `astro check`. The build strips types without checking them, so a type
+  error ships green. It ran for the first time with **9 errors already in the tree**, one of
+  them a genuinely broken reference. Runs at `--minimumSeverity error`: warnings and hints
+  are not the gate, and `src/sanity/eliteTheme.js` is a vendored minified file whose single
+  56KB line otherwise buries the output in ~700KB of noise.
 - `check:styles` — a scoped CSS rule that can never match, because the class it targets was
   passed to a child component and so never carries this file's `data-astro-cid`.
 - `check:tokens` — an undefined `var()`, which invalidates its whole declaration rather than
@@ -42,7 +47,12 @@ cannot see, all of which fail **silently** — README.md has the full explanatio
   string it is handed, so this is a green build and a production 404. It caught 984 of them
   in the footer, on every page of the site.
 
-`check:styles` and `check:links` read `dist/`, so build first. Dev runs on 4321 and that exact origin is
+**TypeScript must stay on 6.x.** The 7.0 native compiler does not expose the programmatic API
+`astro check` needs, and the CLI fails outright — a routine `npm i -D typescript` installs 7
+and breaks `check:types`.
+
+`check:styles` and `check:links` read `dist/`, so build first. `check:types` does not, which is
+why it runs first in the chain: it gives a real signal without a build. Dev runs on 4321 and that exact origin is
 registered with Sanity CORS — don't move it.
 
 ## Architecture: the Sanity swap
@@ -168,7 +178,8 @@ src/lib/        routePaths · schema · seo · video
 src/styles/     global.css — tokens, .btn, .container, .section, .prose, .rail-dots
 src/scripts/    rail · loadMore · phoneMask (self-executing, imported by components)
 src/assets/     optimized images, by subject
-scripts/        the three check:* linters · prep-assets.mjs (one-off comp extraction)
+scripts/        three of the four check:* linters · prep-assets.mjs (comp extraction)
+                (check:types is `astro check`, not a script here)
                 diff-comp-practice-areas.py (built page vs comp content, run by hand)
 ```
 
