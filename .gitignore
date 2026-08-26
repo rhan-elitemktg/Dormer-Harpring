@@ -25,3 +25,6 @@ pnpm-debug.log*
 
 # Python bytecode from the diff/audit scripts
 __pycache__/
+
+# one-off migration payloads (the SCRIPT is the record, not its output)
+scratch/

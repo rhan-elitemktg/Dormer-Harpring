@@ -17,6 +17,12 @@
 # Nine DELIBERATE differences are asserted rather than flagged; see EXPECTED
 # below. Each is a decision recorded in the code it belongs to.
 
+import os
+import sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__))))
+from lib.firm import firm_details  # noqa: E402
+
 import re, html, sys
 
 COMP = "/Users/rhanpemberton/Downloads/Dormer Harpring/Dormer Harpring Claude Files/DH - Blog.html"
@@ -72,17 +78,16 @@ def present(label, needles):
 
 built_text = unesc(built)
 
-# site.ts is the single source for the firm's phone number, and a .py script
-# cannot import a .ts module — so it is read out by regex rather than repeated.
-SITE_PHONE = re.search(
-    r'phone:\s*"([^"]+)"',
-    open("src/data/site.ts", encoding="utf-8").read(),
-).group(1)
-
-SITE_SMS = re.search(
-    r'sms:\s*"([^"]+)"',
-    open("src/data/site.ts", encoding="utf-8").read(),
-).group(1)
+# THE FIRM'S NUMBERS COME FROM SANITY, which is where the site reads them.
+# They used to be pulled out of `src/data/site.ts` by regex — a .py script
+# cannot import a .ts module — but that file no longer holds a literal, so the
+# regex matched nothing and this line threw. Querying the dataset keeps ONE
+# source of truth, which is the entire point: the alternative is writing the
+# number down a second time, and a second number in the codebase is a second
+# number that can ship. See scripts/lib/firm.py.
+_FIRM = firm_details()
+SITE_PHONE = _FIRM["phone"]
+SITE_SMS = _FIRM["sms"]
 
 # BOTH numbers the comps carry, and the comps are wrong about both. Excluded
 # from the info-card value comparison and asserted as a declared departure
@@ -228,7 +233,7 @@ grid_html = built[built.index('class="posts__grid"') :]
 EXPECTED = [
     (
         # The comps' own infoCardsData values are excluded from present("values")
-        # above; both numbers are asserted here instead, against site.ts.
+        # above; both numbers are asserted here instead, against Sanity.
         "both phone numbers are the firm's, not the comps'",
         SITE_PHONE in built_text
         and SITE_SMS in built_text
@@ -238,7 +243,8 @@ EXPECTED = [
         "confirmed (303) 756-3812, the number its live site publishes in JSON-LD and on its "
         "contact page. Text: the comps say (720) 734-6230 across 29 files; the firm confirmed "
         "(720) 730-7997, which the live site publishes 864 times and which the comps carry only "
-        "inside commented-out markup. Both retired, neither kept as a fallback. site.ts is the "
+        "inside commented-out markup. Both retired, neither kept as a fallback. The firmDetails "
+        "singleton in Sanity is the "
         "only place a phone number may live, so this reads from there",
     ),
     (

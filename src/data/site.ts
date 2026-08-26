@@ -1,13 +1,38 @@
 // Firm-wide facts: NAP, phones, hours, socials.
 //
-// SANITY SWAP POINT. This module is shaped exactly as the future
-// `src/sanity/lib/firmDetails.ts` will be: an async function returning the
-// projection of a `firmDetails` singleton. When the Sanity phase lands, the
-// body becomes a `sanityClient.fetch(...)` and the only other change is the
-// import line in whichever files call it. Keep the shape and the export name.
+// SANITY: this reads the `firmDetails` singleton. The interfaces below are the
+// projection's shape, which is why they did not change when the values moved —
+// `FIRM_DETAILS_QUERY` returns exactly this and no call site was touched.
 //
 // Nothing in the codebase may hardcode a phone number or address — everything
-// reads from here, so the launch-day swap to a live CallRail number is one edit.
+// reads from here, so a change is one edit in the Studio and a redeploy.
+//
+// WHY THERE IS NO FALLBACK. If the document is missing the build THROWS rather
+// than returning defaults. A second copy of the phone number in this file is a
+// second number that can ship by accident, which is not hypothetical: this file
+// once recorded (866) 683-6894 as "the firm's choice" and it was not. The 866
+// number is retired, not kept as a spare.
+//
+// Content still waiting on the firm, and now waiting on it IN THE STUDIO:
+//
+//   TODO(launch): the contact email is UNVERIFIED. The comp's contact card
+//   supplies info@dormerharpring.com; the live site publishes no contact
+//   address anywhere (the only one in its markup is a WordPress author account
+//   leaking into blog JSON-LD). The card renders only when `email` is set, so
+//   clearing the field in the Studio is the whole change if the firm would
+//   rather not publish one.
+//
+//   TODO(launch): the office hours are the live site's JSON-LD, not the comp's.
+//   The Contact comp shows "Mon–Fri, 8:30am – 5:30pm"; `hours` and
+//   `hoursDisplay` currently say 9–5. They sit side by side in the Studio
+//   because a page showing one set while the structured data asserts another is
+//   worse than either being wrong alone — change both together.
+//
+//   TODO(launch): if CallRail dynamic insertion returns, `phone` stays the
+//   static fallback and the swap pool is configured in the CallRail dashboard.
+import { sanityClient } from "sanity:client";
+import { FIRM_DETAILS_QUERY } from "../sanity/lib/queries";
+import { once, required } from "../sanity/lib/fetch";
 
 export interface FirmAddress {
   street: string;
@@ -32,12 +57,8 @@ export interface FirmDetails {
   /** E.164, for `tel:` hrefs and JSON-LD. */
   phoneE164: string;
   /**
-   * The footer's "Text" number: (720) 730-7997, confirmed by the firm.
-   *
-   * NOT the comps' (720) 734-6230, which 29 comp files carry. Same shape as
-   * `phone` above — the live site publishes 730-7997 (864 uses) and has the
-   * comps' number only inside commented-out markup, and the live one is right.
-   * The comps have now been wrong about both numbers.
+   * The footer's "Text" number. NOT the comps' (720) 734-6230, which 29 comp
+   * files carry — the comps have now been wrong about both numbers.
    */
   sms: string;
   smsE164: string;
@@ -68,81 +89,34 @@ export interface FirmDetails {
   directoryProfiles: string[];
 }
 
-/**
- * Phone: (303) 756-3812 site-wide — the number the live site publishes in its
- * JSON-LD and on its contact page, confirmed by the firm as the correct one.
- *
- * THIS REVERSES AN EARLIER DECISION, deliberately. The comps carry
- * (866) 683-6894 on every interior header and this file recorded that as "the
- * firm's choice"; it was not. The 866 number is retired — it is not a fallback
- * and it is not kept anywhere, because a second number in the data layer is a
- * second number that can ship by accident.
- *
- * (303) 555-0100 is NOT a third number and does not belong here: it is the
- * `placeholder` and `title` hint on the two forms' phone inputs — an example of
- * the format the VISITOR should type, on 326 pages. 555-01xx is the reserved
- * fictional range, which is what makes it safe for that. This file's comment
- * used to say it "is not used anywhere", which was wrong in a way that invited
- * someone to grep for it and delete it.
- *
- * Changing it is this one line plus `phoneE164`: nothing else in the codebase
- * may hardcode a number, so the header, the footer, every `tel:` href, the
- * JSON-LD and the Thank You lede all follow. Imported WordPress body copy is
- * the exception and had to be rewritten separately — it carried SIX different
- * firm numbers across 200 pages; see HANDOFF.md.
- * TODO(launch): if CallRail dynamic insertion returns, this stays the static
- * fallback and the swap pool is configured in the CallRail dashboard.
- */
 export async function getFirmDetails(): Promise<FirmDetails> {
+  const firm = await once("firmDetails", async () =>
+    required(await sanityClient.fetch(FIRM_DETAILS_QUERY), "Firm Details")
+  );
+
+  // COALESCED EXPLICITLY RATHER THAN CAST. A blanket `as FirmDetails` would
+  // typecheck and would also hide a real shape mismatch — the projection
+  // returns `null` where this interface says `undefined`, and the two are not
+  // the same thing to a component doing `{firm.email && …}`. Four fields
+  // differ and each is handled on its own line.
+  const { lat, lng } = firm.geo;
+  if (lat === null || lng === null) {
+    // NOT coalesced to 0. That is a real coordinate in the Gulf of Guinea, and
+    // it would ship as the firm's location in the LocalBusiness structured
+    // data — wrong in a way no page would show.
+    throw new Error(
+      `Firm Details has no map pin, so the firm's structured data would assert the wrong ` +
+        `location. Set it in the Studio at /admin → Site Settings → Firm Details → ` +
+        `Address & hours, and publish.`
+    );
+  }
+
   return {
-    name: "Dormer Harpring",
-    legalName: "Dormer Harpring, LLC",
-    phone: "(303) 756-3812",
-    phoneE164: "+13037563812",
-    sms: "(720) 730-7997",
-    smsE164: "+17207307997",
-    address: {
-      // "Ct", not "Court": the live site publishes both (866 uses to 571) and
-      // every comp uses the short form, which is also what fits the contact
-      // card and the footer column without wrapping "Unit 110" onto its own
-      // line. NAP text should be identical everywhere it appears.
-      street: "3457 Ringsby Ct",
-      unit: "Unit 110",
-      city: "Denver",
-      region: "CO",
-      postalCode: "80216",
-      country: "US",
-    },
-    geo: { lat: 39.7726247, lng: -104.9820183 },
-    mapUrl: "https://maps.app.goo.gl/eHCD8AG7775NpvgP9",
-    // Resolved from the link above: it lands on
-    // /maps/place/Dormer+Harpring+Denver+Personal+Injury+Lawyers/@39.7726247,-104.9820183
-    // whose data segment carries 0xb26d4f70291b281e — this in decimal.
-    mapPlaceCid: "12857019854357211166",
-    // TODO(launch): the Contact comp shows "Mon–Fri, 8:30am – 5:30pm". These
-    // are the hours the live site actually publishes in its JSON-LD, so they
-    // ship until someone confirms otherwise — and the two fields are kept
-    // side by side because a page showing one set while the structured data
-    // asserts another is worse than either being wrong alone.
-    hours: "Mo-Fr 09:00-17:00",
-    hoursDisplay: "Mon–Fri, 9:00am – 5:00pm",
-    // TODO(launch): UNVERIFIED. The comp's contact card shows this address;
-    // the live site publishes no contact email anywhere (the only address in
-    // its markup is a WordPress author account leaking into blog JSON-LD).
-    // The card renders only when this is set, so clearing it is the whole
-    // change if the firm would rather not publish one.
-    email: "info@dormerharpring.com",
-    // The five the comps draw, in their order. The live site's `sameAs` omits
-    // Instagram, TikTok and YouTube even though its footer links them — fixed
-    // here, since everything below feeds the JSON-LD too.
-    socials: [
-      { name: "facebook", href: "https://www.facebook.com/DenverTrial" },
-      { name: "linkedin", href: "https://www.linkedin.com/company/dormer-harpring-llc/" },
-      { name: "youtube", href: "https://www.youtube.com/@denvertrial" },
-      { name: "tiktok", href: "https://www.tiktok.com/@denvertrial" },
-      { name: "instagram", href: "https://www.instagram.com/denver_trial/" },
-    ],
-    directoryProfiles: ["https://www.yelp.com/biz/dormer-harpring-denver-5"],
+    ...firm,
+    email: firm.email ?? undefined,
+    address: { ...firm.address, unit: firm.address.unit ?? undefined },
+    geo: { lat, lng },
+    socials: firm.socials ?? [],
   };
 }
 

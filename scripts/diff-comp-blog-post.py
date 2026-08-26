@@ -18,6 +18,12 @@
 # Not wired into `npm run check`, which must stay runnable without the design
 # folder — this needs it. Run it by hand when touching the page or its data.
 
+import os
+import sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__))))
+from lib.firm import firm_details  # noqa: E402
+
 import re, html, sys
 
 COMP = "/Users/rhanpemberton/Downloads/Dormer Harpring/Dormer Harpring Claude Files/DH - Blog Post.html"
@@ -29,14 +35,12 @@ BUILT = (
 comp = open(COMP, encoding="utf-8", errors="replace").read()
 built = open(BUILT, encoding="utf-8", errors="replace").read()
 
-# site.ts is the single source for the firm's phone number, and a .py script
-# cannot import a .ts module — so it is read out by regex rather than repeated.
-# Repeating the literal is exactly what made the phone assertion below wrong
-# when the number changed.
-SITE_PHONE = re.search(
-    r'phone:\s*"([^"]+)"',
-    open("src/data/site.ts", encoding="utf-8").read(),
-).group(1)
+# THE FIRM'S NUMBER COMES FROM SANITY, which is where the site reads it. It
+# used to be pulled out of `src/data/site.ts` by regex — a .py script cannot
+# import a .ts module — but that file no longer holds a literal, so the regex
+# matched nothing and this line threw. Querying the dataset keeps ONE source of
+# truth. See scripts/lib/firm.py.
+SITE_PHONE = firm_details()["phone"]
 
 
 def unesc(s):
@@ -337,8 +341,9 @@ EXPECTED = [
         "the phone number is the site's, not the article's",
         SITE_PHONE in built_text and "747-4404" not in built_text,
         "the live article closes on (303) 747-4404, which is not the number the firm publishes; "
-        "site.ts is the only place a phone number may live, so it is read from there rather than "
-        "transcribed. Asserted against site.ts rather than a literal, because this assertion has "
+        "the firmDetails singleton in Sanity is the only place a phone number may live, so it is "
+        "read from there rather than transcribed. Asserted against the dataset rather than a "
+        "literal, because this assertion has "
         "already been wrong once — it hardcoded (866) 683-6894 and forbade 756-3812, and when the "
         "firm confirmed 756-3812 as correct it was forbidding the right answer",
     ),

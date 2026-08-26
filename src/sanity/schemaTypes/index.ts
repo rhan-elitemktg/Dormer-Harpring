@@ -10,11 +10,17 @@
 import type { SchemaTypeDefinition } from "sanity";
 
 import { link } from "./objects/link";
+import { navLink } from "./objects/navLink";
 import { inlineText, richText, simpleText } from "./objects/richText";
 import { seo } from "./objects/seo";
 
+import { contactSettings } from "./settings/contactSettings";
+import { firmDetails } from "./settings/firmDetails";
+import { firmStats } from "./settings/firmStats";
+import { navigation } from "./settings/navigation";
+
 /** Shared field types. Not documents — these are what documents are built from. */
-const objects: SchemaTypeDefinition[] = [link, richText, simpleText, inlineText, seo];
+const objects: SchemaTypeDefinition[] = [link, navLink, richText, simpleText, inlineText, seo];
 
 /** One document per route. Phase 4. */
 const pages: SchemaTypeDefinition[] = [];
@@ -23,7 +29,12 @@ const pages: SchemaTypeDefinition[] = [];
 const collections: SchemaTypeDefinition[] = [];
 
 /** Firm-wide singletons. Phase 1. */
-const settings: SchemaTypeDefinition[] = [];
+const settings: SchemaTypeDefinition[] = [
+  firmDetails,
+  navigation,
+  contactSettings,
+  firmStats,
+];
 
 export const schemaTypes: SchemaTypeDefinition[] = [
   ...objects,

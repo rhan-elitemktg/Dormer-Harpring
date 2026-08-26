@@ -22,6 +22,10 @@ import type { ComponentType } from "react";
 import { CogIcon } from "@sanity/icons/Cog";
 import { DocumentIcon } from "@sanity/icons/Document";
 import { DocumentsIcon } from "@sanity/icons/Documents";
+import { EarthGlobeIcon } from "@sanity/icons/EarthGlobe";
+import { EnvelopeIcon } from "@sanity/icons/Envelope";
+import { MenuIcon } from "@sanity/icons/Menu";
+import { BarChartIcon } from "@sanity/icons/BarChart";
 
 /**
  * SINGLETONS ARE ENFORCED HERE, NOT IN THE SCHEMA. There is no `singleton: true`
@@ -58,8 +62,18 @@ const PAGES: [string, string, ComponentType?][] = [];
 /** COLLECTIONS — repeatable content. Phase 2 (hand-authored), Phase 3 (imported). */
 const COLLECTIONS: [string, string, ComponentType?][] = [];
 
-/** SITE SETTINGS — firm-wide singletons. Phase 1. */
-const SETTINGS: [string, string, ComponentType?][] = [];
+/**
+ * SITE SETTINGS — firm-wide singletons.
+ *
+ * Firm Details first: it is the one every other document borrows from, and the
+ * one a client is most likely to have come here to change.
+ */
+const SETTINGS: [string, string, ComponentType?][] = [
+  ["firmDetails", "Firm Details", EarthGlobeIcon],
+  ["navigation", "Navigation", MenuIcon],
+  ["contactSettings", "Contact & Consultation", EnvelopeIcon],
+  ["firmStats", "Firm Stats", BarChartIcon],
+];
 
 /**
  * Every type pinned to a fixed document id. Anything in here must be kept out

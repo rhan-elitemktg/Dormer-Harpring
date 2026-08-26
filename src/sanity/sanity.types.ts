@@ -15,6 +15,134 @@
 export declare const internalGroqTypeReferenceTo: unique symbol;
 
 // Source: src/sanity/schema.json
+export type FirmStats = {
+  _id: string;
+  _type: "firmStats";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  stats: Array<{
+    big: string;
+    label: string;
+    _key: string;
+  }>;
+};
+
+export type ContactSettings = {
+  _id: string;
+  _type: "contactSettings";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  eyebrow: string;
+  title: string;
+  reassurances?: Array<string>;
+  callPrompt?: string;
+  callBadge?: string;
+  form?: {
+    title: string;
+    lede?: string;
+    submitLabel: string;
+    disclaimer?: string;
+  };
+  photoAlt?: string;
+  callCard?: {
+    label: string;
+    note?: string;
+  };
+  textCard?: {
+    label: string;
+    note?: string;
+  };
+  emailCard?: {
+    label: string;
+    note?: string;
+  };
+  officeCard?: {
+    label: string;
+    note?: string;
+  };
+  hours?: {
+    label: string;
+    note?: string;
+  };
+};
+
+export type Navigation = {
+  _id: string;
+  _type: "navigation";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  aboutMenu?: Array<
+    {
+      _key: string;
+    } & NavLink
+  >;
+  practiceAreasMenu?: Array<
+    {
+      _key: string;
+    } & NavLink
+  >;
+  locationsMenu?: Array<
+    {
+      _key: string;
+    } & NavLink
+  >;
+  footerPracticeAreas?: Array<
+    {
+      _key: string;
+    } & NavLink
+  >;
+  footerNav?: Array<
+    {
+      _key: string;
+    } & NavLink
+  >;
+  serviceAreas?: Array<string>;
+};
+
+export type FirmDetails = {
+  _id: string;
+  _type: "firmDetails";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  name: string;
+  legalName: string;
+  phone: string;
+  phoneE164: string;
+  sms: string;
+  smsE164: string;
+  email?: string;
+  address: {
+    street: string;
+    unit?: string;
+    city: string;
+    region: string;
+    postalCode: string;
+    country: string;
+  };
+  geo: Geopoint;
+  mapUrl: string;
+  mapPlaceCid: string;
+  hoursDisplay: string;
+  hours: string;
+  socials?: Array<{
+    name: "facebook" | "linkedin" | "youtube" | "tiktok" | "instagram";
+    href: string;
+    _key: string;
+  }>;
+  directoryProfiles?: Array<string>;
+};
+
+export type Geopoint = {
+  _type: "geopoint";
+  lat?: number;
+  lng?: number;
+  alt?: number;
+};
+
 export type SanityImageAssetReference = {
   _ref: string;
   _type: "reference";
@@ -121,6 +249,12 @@ export type RichText = Array<
     }
 >;
 
+export type NavLink = {
+  _type: "navLink";
+  label: string;
+  href: string;
+};
+
 export type Link = {
   _type: "link";
   href?: string;
@@ -216,13 +350,6 @@ export type SanityImageAsset = {
   source?: SanityAssetSourceData;
 };
 
-export type Geopoint = {
-  _type: "geopoint";
-  lat?: number;
-  lng?: number;
-  alt?: number;
-};
-
 export type Slug = {
   _type: "slug";
   current: string;
@@ -230,6 +357,11 @@ export type Slug = {
 };
 
 export type AllSanitySchemaTypes =
+  | FirmStats
+  | ContactSettings
+  | Navigation
+  | FirmDetails
+  | Geopoint
   | SanityImageAssetReference
   | Seo
   | SanityImageCrop
@@ -237,6 +369,7 @@ export type AllSanitySchemaTypes =
   | InlineText
   | SimpleText
   | RichText
+  | NavLink
   | Link
   | SanityImagePaletteSwatch
   | SanityImagePalette
@@ -245,5 +378,135 @@ export type AllSanitySchemaTypes =
   | SanityFileAsset
   | SanityAssetSourceData
   | SanityImageAsset
-  | Geopoint
   | Slug;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: FIRM_DETAILS_QUERY
+// Query: *[_type == "firmDetails" && _id == "firmDetails"][0]{  name,  legalName,  phone,  phoneE164,  sms,  smsE164,  email,  address{ street, unit, city, region, postalCode, country },  "geo": { "lat": geo.lat, "lng": geo.lng },  mapUrl,  mapPlaceCid,  hours,  hoursDisplay,  socials[]{ name, href },  "directoryProfiles": coalesce(directoryProfiles, [])}
+export type FIRM_DETAILS_QUERY_RESULT = {
+  name: string;
+  legalName: string;
+  phone: string;
+  phoneE164: string;
+  sms: string;
+  smsE164: string;
+  email: string | null;
+  address: {
+    street: string;
+    unit: string | null;
+    city: string;
+    region: string;
+    postalCode: string;
+    country: string;
+  };
+  geo: {
+    lat: number | null;
+    lng: number | null;
+  };
+  mapUrl: string;
+  mapPlaceCid: string;
+  hours: string;
+  hoursDisplay: string;
+  socials: Array<{
+    name: "facebook" | "instagram" | "linkedin" | "tiktok" | "youtube";
+    href: string;
+  }> | null;
+  directoryProfiles: Array<string> | Array<never>;
+} | null;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: NAVIGATION_QUERY
+// Query: *[_type == "navigation" && _id == "navigation"][0]{  "aboutMenu": coalesce(aboutMenu[]{ label, href }, []),  "practiceAreasMenu": coalesce(practiceAreasMenu[]{ label, href }, []),  "locationsMenu": coalesce(locationsMenu[]{ label, href }, []),  "footerPracticeAreas": coalesce(footerPracticeAreas[]{ label, href }, []),  "footerNav": coalesce(footerNav[]{ label, href }, []),  "serviceAreas": coalesce(serviceAreas, [])}
+export type NAVIGATION_QUERY_RESULT = {
+  aboutMenu:
+    | Array<{
+        label: string;
+        href: string;
+      }>
+    | Array<never>;
+  practiceAreasMenu:
+    | Array<{
+        label: string;
+        href: string;
+      }>
+    | Array<never>;
+  locationsMenu:
+    | Array<{
+        label: string;
+        href: string;
+      }>
+    | Array<never>;
+  footerPracticeAreas:
+    | Array<{
+        label: string;
+        href: string;
+      }>
+    | Array<never>;
+  footerNav:
+    | Array<{
+        label: string;
+        href: string;
+      }>
+    | Array<never>;
+  serviceAreas: Array<string> | Array<never>;
+} | null;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: CONTACT_SETTINGS_QUERY
+// Query: *[_type == "contactSettings" && _id == "contactSettings"][0]{  eyebrow,  title,  "reassurances": coalesce(reassurances, []),  callPrompt,  callBadge,  form{ title, lede, submitLabel, disclaimer },  photoAlt,  callCard{ label, note },  textCard{ label, note },  emailCard{ label, note },  officeCard{ label, note },  hours{ label, note }}
+export type CONTACT_SETTINGS_QUERY_RESULT = {
+  eyebrow: string;
+  title: string;
+  reassurances: Array<string> | Array<never>;
+  callPrompt: string | null;
+  callBadge: string | null;
+  form: {
+    title: string;
+    lede: string | null;
+    submitLabel: string;
+    disclaimer: string | null;
+  } | null;
+  photoAlt: string | null;
+  callCard: {
+    label: string;
+    note: string | null;
+  } | null;
+  textCard: {
+    label: string;
+    note: string | null;
+  } | null;
+  emailCard: {
+    label: string;
+    note: string | null;
+  } | null;
+  officeCard: {
+    label: string;
+    note: string | null;
+  } | null;
+  hours: {
+    label: string;
+    note: string | null;
+  } | null;
+} | null;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: FIRM_STATS_QUERY
+// Query: *[_type == "firmStats" && _id == "firmStats"][0]{  "stats": coalesce(stats[]{ _key, big, label }, [])}
+export type FIRM_STATS_QUERY_RESULT = {
+  stats: Array<{
+    _key: string;
+    big: string;
+    label: string;
+  }>;
+} | null;
+
+// Query TypeMap
+import "@sanity/client";
+declare module "@sanity/client" {
+  interface SanityQueries {
+    '*[_type == "firmDetails" && _id == "firmDetails"][0]{\n  name,\n  legalName,\n  phone,\n  phoneE164,\n  sms,\n  smsE164,\n  email,\n  address{ street, unit, city, region, postalCode, country },\n  "geo": { "lat": geo.lat, "lng": geo.lng },\n  mapUrl,\n  mapPlaceCid,\n  hours,\n  hoursDisplay,\n  socials[]{ name, href },\n  "directoryProfiles": coalesce(directoryProfiles, [])\n}': FIRM_DETAILS_QUERY_RESULT;
+    '*[_type == "navigation" && _id == "navigation"][0]{\n  "aboutMenu": coalesce(aboutMenu[]{ label, href }, []),\n  "practiceAreasMenu": coalesce(practiceAreasMenu[]{ label, href }, []),\n  "locationsMenu": coalesce(locationsMenu[]{ label, href }, []),\n  "footerPracticeAreas": coalesce(footerPracticeAreas[]{ label, href }, []),\n  "footerNav": coalesce(footerNav[]{ label, href }, []),\n  "serviceAreas": coalesce(serviceAreas, [])\n}': NAVIGATION_QUERY_RESULT;
+    '*[_type == "contactSettings" && _id == "contactSettings"][0]{\n  eyebrow,\n  title,\n  "reassurances": coalesce(reassurances, []),\n  callPrompt,\n  callBadge,\n  form{ title, lede, submitLabel, disclaimer },\n  photoAlt,\n  callCard{ label, note },\n  textCard{ label, note },\n  emailCard{ label, note },\n  officeCard{ label, note },\n  hours{ label, note }\n}': CONTACT_SETTINGS_QUERY_RESULT;
+    '*[_type == "firmStats" && _id == "firmStats"][0]{\n  "stats": coalesce(stats[]{ _key, big, label }, [])\n}': FIRM_STATS_QUERY_RESULT;
+  }
+}

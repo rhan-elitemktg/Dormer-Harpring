@@ -78,7 +78,7 @@ SITE_HOSTS = {"www.denvertrial.com", "denvertrial.com"}
 OFF_SITE_SCHEMES = {"http", "https", "mailto", "javascript", "data"}
 
 # E.164: a plus, a non-zero country digit, then up to fourteen more. No spaces,
-# no parens, no dashes. `firmDetails.smsE164` in src/data/site.ts is named for
+# no parens, no dashes. `smsE164` on the firmDetails singleton is named for
 # this format, so it is the site's own convention and not an invention here.
 E164 = re.compile(r"^\+[1-9]\d{1,14}$")
 

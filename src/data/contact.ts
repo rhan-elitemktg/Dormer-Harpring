@@ -1,8 +1,21 @@
-// The consultation band — "Take the first step."
+// The consultation band — "Take the first step." — and the contact card
+// beside it.
 //
-// SANITY SWAP POINT. This band appears on 12 of the 14 comps, so the copy is a
-// singleton (`contactBand`) rather than page-local content.
+// SANITY: both read the `contactSettings` singleton. It appears on 12 of the 14
+// comps, which is what makes it a singleton rather than page-local content.
+//
+// THE STUDIO HOLDS COPY; EVERY VALUE IS STILL DERIVED. The cards below get
+// their label and their note from Sanity and their phone number, text number,
+// email and address from `firmDetails` — never from a field an editor could
+// retype. A page that keeps its own copy of the phone number is how a site ends
+// up publishing two, which this one has already been through.
+//
+// The photograph stays a local import: it is large decorative art, not editor
+// content, per the image rule.
 import type { ImageMetadata } from "astro";
+import { sanityClient } from "sanity:client";
+import { CONTACT_SETTINGS_QUERY } from "../sanity/lib/queries";
+import { once, required } from "../sanity/lib/fetch";
 import { getFirmDetails } from "./site";
 import teamPhoto from "../assets/team/attorneys-skyline.jpg";
 
@@ -21,23 +34,35 @@ export interface ContactBand {
   };
 }
 
+/** The `contactSettings` singleton, whichever getter asked for it. */
+function settings() {
+  return once("contactSettings", async () =>
+    required(await sanityClient.fetch(CONTACT_SETTINGS_QUERY), "Contact & Consultation")
+  );
+}
+
+/**
+ * A field the schema does not force an editor to fill.
+ *
+ * Empty rather than a stand-in: these are labels and notes in fixed design
+ * slots, and a blank slot reads as "nothing to say here" where invented copy
+ * would read as the firm's own words.
+ */
+const text = (value: string | null | undefined) => value ?? "";
+
 export async function getContactBand(): Promise<ContactBand> {
+  const copy = await settings();
   return {
-    eyebrow: "Free case review",
-    title: "Talk to an attorney about your case.",
-    reassurances: [
-      "Free & completely confidential",
-      "No fee unless we win",
-      "We come to you — home or hospital",
-    ],
-    callPrompt: "Prefer to talk now?",
-    callBadge: "24/7",
+    eyebrow: copy.eyebrow,
+    title: copy.title,
+    reassurances: copy.reassurances,
+    callPrompt: text(copy.callPrompt),
+    callBadge: text(copy.callBadge),
     form: {
-      title: "Take the first step.",
-      lede: "Tell us what happened. It's free, confidential, and there's no obligation.",
-      submitLabel: "Request my free case review",
-      disclaimer:
-        "By submitting, you agree to be contacted about your case. No fee unless we win.",
+      title: copy.form?.title ?? "",
+      lede: text(copy.form?.lede),
+      submitLabel: copy.form?.submitLabel ?? "",
+      disclaimer: text(copy.form?.disclaimer),
     },
   };
 }
@@ -46,10 +71,6 @@ export async function getContactBand(): Promise<ContactBand> {
 // The photo + info cards + office-hours block that sits beside the form on the
 // interior pages. A SINGLETON, not page content: the Contact and Testimonials
 // comps carry it byte-identically, and the remaining interior pages repeat it.
-//
-// Every VALUE below comes from `firmDetails` — the labels and the notes are the
-// only copy here. A page that keeps its own copy of the phone number is how a
-// site ends up publishing two.
 
 export interface ContactInfoCard {
   _key: string;
@@ -77,7 +98,8 @@ export interface ContactDetails {
 }
 
 export async function getContactDetails(): Promise<ContactDetails> {
-  const firm = await getFirmDetails();
+  const [firm, copy] = await Promise.all([getFirmDetails(), settings()]);
+
   const street = firm.address.unit
     ? `${firm.address.street}, ${firm.address.unit}`
     : firm.address.street;
@@ -86,53 +108,57 @@ export async function getContactDetails(): Promise<ContactDetails> {
     {
       _key: "call",
       iconKey: "phone",
-      label: "Call us",
+      label: text(copy.callCard?.label),
       value: firm.phone,
       href: `tel:${firm.phoneE164}`,
-      note: "Answered 24/7 — free consultation.",
+      note: text(copy.callCard?.note),
     },
     {
       _key: "text",
       iconKey: "message",
-      label: "Text us",
+      label: text(copy.textCard?.label),
       value: firm.sms,
       href: `sms:${firm.smsE164}`,
-      note: "Send a message any time.",
+      note: text(copy.textCard?.note),
     },
-    // Only when there is an address to show. See the TODO in site.ts: the comp
-    // supplies one the live site has never published, so this card has to be
-    // able to disappear without leaving a hole in the grid.
+    // Only when there is an address to show. See the TODO(launch) in site.ts:
+    // the comp supplies an email the live site has never published, so this
+    // card has to be able to disappear without leaving a hole in the grid.
+    // Clearing the field in the Studio is the whole change.
     ...(firm.email
       ? [
           {
             _key: "email",
             iconKey: "mail" as const,
-            label: "Email",
+            label: text(copy.emailCard?.label),
             value: firm.email,
             href: `mailto:${firm.email}`,
-            note: "We reply within one business day.",
+            note: text(copy.emailCard?.note),
           },
         ]
       : []),
     {
       _key: "office",
       iconKey: "pin",
-      label: "Office",
+      label: text(copy.officeCard?.label),
       value: street,
       value2: `${firm.address.city}, ${firm.address.region} ${firm.address.postalCode}`,
       href: firm.mapUrl,
-      note: "RiNo district",
+      note: text(copy.officeCard?.note),
     },
   ];
 
   return {
     photo: teamPhoto,
-    photoAlt: "The Dormer Harpring attorneys in Denver",
+    photoAlt: text(copy.photoAlt),
     cards,
     hours: {
-      label: "Office hours",
+      label: text(copy.hours?.label),
+      // Composed here rather than typed in the Studio: the hours themselves are
+      // firmDetails', and "Calls answered 24/7" is the same claim the call
+      // card's note makes. One source, two places it shows.
       value: `${firm.hoursDisplay} · Calls answered 24/7`,
-      note: "Can't make it to us? We come to you — at home or in the hospital.",
+      note: text(copy.hours?.note),
       ctaLabel: `Call ${firm.phone}`,
       ctaHref: `tel:${firm.phoneE164}`,
     },
