@@ -11,6 +11,7 @@
 import type { ImageMetadata } from "astro";
 import seanDormer from "../assets/attorneys/attorney-2.jpg";
 import { ROUTES } from "../lib/routePaths";
+import { PLACEHOLDER_VIDEO, type VideoRef } from "../lib/video";
 
 export interface Faq {
   _key: string;
@@ -18,6 +19,9 @@ export interface Faq {
   answer: string;
   /** Runtime of the attorney video that answers it. */
   videoLength: string;
+  /** TODO(video): the attorney's filmed answer. PLACEHOLDER_VIDEO for now —
+   *  every FAQ shows the same stand-in until each gets its own id. */
+  video: VideoRef;
 }
 
 export interface FaqSection {
@@ -75,6 +79,7 @@ export async function getCarAccidentFaqs(): Promise<Faq[]> {
       _key: "how-long",
       question: "How long do I have to file?",
       videoLength: "2 min",
+      video: PLACEHOLDER_VIDEO,
       answer:
         "Three years from the date of a motor vehicle crash, two years for most other " +
         "injury claims (C.R.S. 13-80-101). The three-year rule is the exception, not the " +
@@ -86,6 +91,7 @@ export async function getCarAccidentFaqs(): Promise<Faq[]> {
       _key: "public-entity",
       question: "What if a bus, RTD vehicle, or city property was involved?",
       videoLength: "90 sec",
+      video: PLACEHOLDER_VIDEO,
       answer:
         "Colorado's Governmental Immunity Act requires written notice to the correct " +
         "public entity within 182 days of the injury (C.R.S. 24-10-109) — RTD, city and " +
@@ -97,6 +103,7 @@ export async function getCarAccidentFaqs(): Promise<Faq[]> {
       _key: "recorded-statement",
       question: "The adjuster wants a recorded statement.",
       videoLength: "2 min",
+      video: PLACEHOLDER_VIDEO,
       answer:
         "You have no obligation to give one to the other driver's insurer. The call comes " +
         "early on purpose — before a specialist, before imaging, while you are still " +
@@ -109,6 +116,7 @@ export async function getCarAccidentFaqs(): Promise<Faq[]> {
       _key: "uninsured",
       question: "What if the other driver was uninsured or underinsured?",
       videoLength: "2 min",
+      video: PLACEHOLDER_VIDEO,
       answer:
         "Your own policy is what pays. That is what uninsured and underinsured motorist " +
         "coverage is for. Making the claim turns your insurer into the opposing party — " +
@@ -120,6 +128,7 @@ export async function getCarAccidentFaqs(): Promise<Faq[]> {
       _key: "low-limits",
       question: "What if the other driver's policy limits are too low?",
       videoLength: "90 sec",
+      video: PLACEHOLDER_VIDEO,
       answer:
         "Then we look for coverage elsewhere. Colorado's minimum liability limits are low " +
         "enough that a serious injury can exhaust them in the first month of treatment. " +
@@ -131,6 +140,7 @@ export async function getCarAccidentFaqs(): Promise<Faq[]> {
       _key: "own-insurance",
       question: "Do I have to use my own insurance?",
       videoLength: "2 min",
+      video: PLACEHOLDER_VIDEO,
       answer:
         "Often yes, and using it is not an admission of anything. MedPay, uninsured " +
         "motorist, and collision coverage exist precisely for this, and using them does " +
@@ -141,6 +151,7 @@ export async function getCarAccidentFaqs(): Promise<Faq[]> {
       _key: "order",
       question: "In what order should the policies pay?",
       videoLength: "2 min",
+      video: PLACEHOLDER_VIDEO,
       answer:
         "MedPay pays first and fastest, health insurance covers what MedPay does not, and " +
         "underinsured motorist coverage comes into play only after the at-fault driver's " +
@@ -152,6 +163,7 @@ export async function getCarAccidentFaqs(): Promise<Faq[]> {
       _key: "passenger",
       question: "What if I was a passenger?",
       videoLength: "90 sec",
+      video: PLACEHOLDER_VIDEO,
       answer:
         "Passengers are almost never at fault, which usually makes liability " +
         "straightforward and coverage the harder question. There may be claims against " +
@@ -164,6 +176,7 @@ export async function getCarAccidentFaqs(): Promise<Faq[]> {
       _key: "working",
       question: "What if the crash happened while I was working?",
       videoLength: "2 min",
+      video: PLACEHOLDER_VIDEO,
       answer:
         "You likely have two claims, not one. Workers' compensation covers medical " +
         "treatment and part of your lost wages regardless of fault, and it starts " +
@@ -175,6 +188,7 @@ export async function getCarAccidentFaqs(): Promise<Faq[]> {
       _key: "rental",
       question: "What if the crash happened in a rental or borrowed car?",
       videoLength: "90 sec",
+      video: PLACEHOLDER_VIDEO,
       answer:
         "You are generally still covered, often by more than one policy. In Colorado " +
         "coverage tends to follow the vehicle first and the driver second, so the owner's " +
@@ -186,6 +200,7 @@ export async function getCarAccidentFaqs(): Promise<Faq[]> {
       _key: "denied",
       question: "What if the other driver's insurance company denies the claim?",
       videoLength: "2 min",
+      video: PLACEHOLDER_VIDEO,
       answer:
         "A denial is a position, not a verdict. Insurers deny on disputed liability, " +
         "alleged pre-existing conditions, gaps in treatment, or simply because nobody " +
@@ -197,6 +212,7 @@ export async function getCarAccidentFaqs(): Promise<Faq[]> {
       _key: "commercial",
       question: "What if a commercial or employer vehicle was involved?",
       videoLength: "2 min",
+      video: PLACEHOLDER_VIDEO,
       answer:
         "Then there are likely two tracks running at once: a workers' compensation claim " +
         "and a separate claim against the at-fault driver, and they interact — the comp " +
@@ -237,6 +253,7 @@ export async function getHomeFaqs(): Promise<Faq[]> {
       _key: "how-help",
       question: "How can a personal injury lawyer help me?",
       videoLength: "2 min",
+      video: PLACEHOLDER_VIDEO,
       answer:
         "We take the entire fight off your plate — dealing with the insurer, gathering " +
         "evidence, valuing your claim, and negotiating (or trying) for its full worth. " +
@@ -247,6 +264,7 @@ export async function getHomeFaqs(): Promise<Faq[]> {
       _key: "what-recover",
       question: "What can I recover?",
       videoLength: "2 min",
+      video: PLACEHOLDER_VIDEO,
       answer:
         "Colorado law lets you recover economic damages — medical bills, future care, " +
         "lost wages, and lost earning capacity — along with non-economic damages for " +
@@ -258,6 +276,7 @@ export async function getHomeFaqs(): Promise<Faq[]> {
       _key: "process",
       question: "What is the process?",
       videoLength: "3 min",
+      video: PLACEHOLDER_VIDEO,
       answer:
         "It begins with a free consultation, then investigation and medical treatment, " +
         "a demand to the insurer, negotiation, and — if they will not pay fairly — " +
@@ -268,6 +287,7 @@ export async function getHomeFaqs(): Promise<Faq[]> {
       _key: "court",
       question: "Do I have to go to court?",
       videoLength: "2 min",
+      video: PLACEHOLDER_VIDEO,
       answer:
         "Usually not. The large majority of injury cases settle out of court. But our " +
         "willingness to try a case is exactly what pushes insurers to offer full " +
@@ -277,6 +297,7 @@ export async function getHomeFaqs(): Promise<Faq[]> {
       _key: "cost",
       question: "What does it cost?",
       videoLength: "1 min",
+      video: PLACEHOLDER_VIDEO,
       answer:
         "Nothing upfront. We work on contingency, meaning our fee is a percentage of " +
         "what we recover — and if we do not win, you owe no attorney's fee. We also " +
@@ -286,6 +307,7 @@ export async function getHomeFaqs(): Promise<Faq[]> {
       _key: "how-long",
       question: "How long will my case take?",
       videoLength: "2 min",
+      video: PLACEHOLDER_VIDEO,
       answer:
         "It depends on the severity of your injuries and whether the insurer negotiates " +
         "in good faith. Simpler claims can resolve in months; serious-injury or disputed " +
@@ -296,6 +318,7 @@ export async function getHomeFaqs(): Promise<Faq[]> {
       _key: "worth-pursuing",
       question: "Is my case worth pursuing?",
       videoLength: "1 min",
+      video: PLACEHOLDER_VIDEO,
       answer:
         "If someone else's negligence caused you real harm, it is worth a conversation. " +
         "A free consultation tells you honestly whether you have a claim, what it may be " +
@@ -305,6 +328,7 @@ export async function getHomeFaqs(): Promise<Faq[]> {
       _key: "insurer-called",
       question: "The insurer already called me — what now?",
       videoLength: "2 min",
+      video: PLACEHOLDER_VIDEO,
       answer:
         "Do not give a recorded statement or accept a quick offer. Early calls are " +
         "designed to lock you into a low number before you know the extent of your " +

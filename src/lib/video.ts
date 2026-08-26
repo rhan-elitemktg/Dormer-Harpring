@@ -5,9 +5,15 @@
 // not a hunt through components for hardcoded youtube.com strings. So nothing
 // else in the codebase may build a video URL; everything calls through here.
 //
-// TODO(launch): when Wistia lands, set WISTIA_ACCOUNT below and flip the
-// `provider` on each record in `src/data/testimonials.ts`. Nothing else has to
-// change — and once no record says "youtube" any more, that branch can go.
+// Wistia has landed for the homepage hero. The rest of the records still say
+// "youtube" and flip one at a time as each video is re-hosted.
+//
+// TODO(launch): set WISTIA_ACCOUNT below once we know the firm's subdomain —
+// the media JSON exposes only account IDs (154783 / yrknbv2cuk), never the
+// vanity host, so it has to come from the Wistia dashboard. Until then
+// `videoWatchUrl` falls back to Wistia's own hosted player, which works but is
+// unbranded. That fallback is NOT cosmetic here: it is the href behind every
+// popover trigger, and it is what a visitor with JS off actually follows.
 
 export type VideoProvider = "youtube" | "wistia";
 
@@ -48,3 +54,58 @@ export function videoEmbedUrl({ provider, id }: VideoRef): string {
   }
   return `https://www.youtube-nocookie.com/embed/${id}`;
 }
+
+
+/* -------------------------------------------------------------------------
+ * Wistia popover embeds
+ *
+ * Wistia's runtime reads its configuration out of the CLASS NAME — the media
+ * id and every option ride on the element as `wistia_async_<id>`,
+ * `popover=true` and so on. That is Wistia's own contract, not an invention
+ * here, and it is why these look like classes doing a job classes should not
+ * do. They are parsed, not matched: no stylesheet may target them.
+ * ---------------------------------------------------------------------- */
+
+/** Wistia's player runtime. Idempotent — including it more than once per page
+ *  is safe, which is what lets each embed carry its own copy rather than
+ *  Layout loading it on all 330 pages for the handful that have a video. */
+export const WISTIA_RUNTIME = "https://fast.wistia.net/assets/external/E-v1.js";
+
+/** Per-media config, fetched ahead of the click so the popover opens without a
+ *  round trip. Optional to Wistia; the difference is visible on first click. */
+export function wistiaMediaScript(id: string): string {
+  return `https://fast.wistia.net/embed/medias/${id}.jsonp`;
+}
+
+/**
+ * The class string that configures a popover whose TRIGGER IS THE LINK INSIDE
+ * IT — `popoverContent=link`. The alternative Wistia offers is a thumbnail it
+ * renders itself, which would replace the hero's designed CTA with a video
+ * still. This way the button stays exactly as drawn and Wistia only binds the
+ * click.
+ */
+export function wistiaPopoverClass(id: string): string {
+  return `wistia_embed wistia_async_${id} popover=true popoverContent=link`;
+}
+
+
+/**
+ * THE STAND-IN every un-migrated slot points at.
+ *
+ * By request, so every play affordance on the site is a working popover today
+ * rather than an inert control, with the real ids arriving per record once the
+ * Sanity phase gives an editor somewhere to type them. It is the firm's "Who We
+ * Are" film — a real, published video, so nothing 404s and nothing plays a
+ * dead embed.
+ *
+ * IT IS ALSO THE HOMEPAGE HERO'S GENUINE VIDEO, and that collision is the one
+ * thing to know here. `home.ts` writes its id as a LITERAL rather than
+ * importing this, deliberately: the hero is correct and finished, the others
+ * are placeholders that happen to share an id today. Grep for
+ * `PLACEHOLDER_VIDEO` to get exactly the slots still waiting on a real one —
+ * grepping for the id itself would wrongly include the hero.
+ *
+ * TODO(video): 39 slots. Each carries the YouTube id it should map to, where
+ * one is known.
+ */
+export const PLACEHOLDER_VIDEO: VideoRef = { provider: "wistia", id: "b4n3r4pchd" };

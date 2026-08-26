@@ -6,12 +6,14 @@
 // matter: centred, it sat on the title; red, it was the fourth red thing in the
 // viewport and read as the page's primary action rather than as a video.
 //
-// INERT, like every video panel on the site bar the six real client
-// testimonials. `[data-video]` is the marker `global.css` uses to run the play
-// ring's pulse on hover, and these become real <button>s when the lightbox
-// lands. Deliberately not an <a> to nowhere in the meantime.
+// It opens a Wistia popover now. It was a `[data-video]` <div> — inert, marked
+// only so global.css could run the play ring's pulse on hover. VideoPopover
+// renders an <a>, which `.play`'s own script already treats as a trigger, so
+// the pulse survives the change without `[data-video]`.
 import PlayButton from "../../media/PlayButton.astro";
 import Picture from "../../media/Picture.astro";
+import VideoPopover from "../../media/VideoPopover.astro";
+import { videoWatchUrl } from "../../../lib/video";
 import type { VideoPanel } from "../../../data/carAccidents";
 
 interface Props {
@@ -24,7 +26,8 @@ interface Props {
 const { video, focus = "default", class: className } = Astro.props;
 ---
 
-<div class:list={["trvid", className]} data-video>
+<VideoPopover video={video.video}>
+  <a class:list={["trvid", className]} href={videoWatchUrl(video.video)}>
   <Picture
     src={video.poster}
     alt={video.alt}
@@ -36,7 +39,8 @@ const { video, focus = "default", class: className } = Astro.props;
   <span class="trvid__dur">{video.length}</span>
   <PlayButton tone="light" size={60} class="trvid__pbtn" />
   <span class="trvid__cap"><span class="trvid__ttl">{video.title}</span></span>
-</div>
+  </a>
+</VideoPopover>
 
 <style>
   .trvid {

@@ -9,6 +9,8 @@
 import { getImage } from "astro:assets";
 import Header from "../Header.astro";
 import PlayButton from "../media/PlayButton.astro";
+import VideoPopover from "../media/VideoPopover.astro";
+import { videoWatchUrl } from "../../lib/video";
 import HeroStats from "./hero/HeroStats.astro";
 import type { HomeHero, HomeStat } from "../../data/home";
 import heroPhoto from "../../assets/team/skyline.jpg";
@@ -88,14 +90,21 @@ const [desktop, teamCrop] = await Promise.all([
       </a>
 
       {
-        /* TODO(video): no source exists for any of the homepage's play buttons
-           yet. Rendered as designed but inert — it gets a data-video-id and the
-           lightbox once we have a host and IDs. */
+        /* WAS AN INERT <button> — rendered as designed and doing nothing at all,
+           because no video source existed. It has one now, and VideoPopover
+           makes it an <a>: Wistia binds the click and opens the popover, and if
+           its runtime is blocked or JS is off the href still reaches the film.
+           The `.btn` classes are unchanged, so it looks exactly as drawn. */
       }
-      <button type="button" class="btn btn--light btn--lg hero__video">
-        <PlayButton tone="dark" size={38} />
-        {hero.videoCta.label}
-      </button>
+      <VideoPopover video={hero.videoCta.video}>
+        <a
+          class="btn btn--light btn--lg hero__video"
+          href={videoWatchUrl(hero.videoCta.video)}
+        >
+          <PlayButton tone="dark" size={38} />
+          {hero.videoCta.label}
+        </a>
+      </VideoPopover>
     </div>
 
     <HeroStats stats={stats} />
@@ -222,6 +231,8 @@ const [desktop, teamCrop] = await Promise.all([
     gap: var(--space-5);
   }
 
+  /* Plain, not `:global()`: the <a> is in THIS template — VideoPopover wraps
+     it rather than rendering it, for exactly this reason. */
   .hero__video {
     gap: var(--space-4);
   }

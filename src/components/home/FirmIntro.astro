@@ -3,6 +3,8 @@
 // firm video and the two aside cards on the right.
 import Picture from "../media/Picture.astro";
 import PlayButton from "../media/PlayButton.astro";
+import VideoPopover from "../media/VideoPopover.astro";
+import { videoWatchUrl } from "../../lib/video";
 import Prose from "../prose/Prose.astro";
 import AttorneyQuoteCard from "./firm/AttorneyQuoteCard.astro";
 import ConsultCard from "./firm/ConsultCard.astro";
@@ -73,10 +75,8 @@ const { intro } = Astro.props;
     </div>
 
     <aside class="intro__aside">
-      {
-        /* TODO(video): inert until the firm video has a host and an ID. */
-      }
-      <button type="button" class="intro__video">
+      <VideoPopover video={intro.video}>
+        <a class="intro__video" href={videoWatchUrl(intro.video)}>
         <Picture
           src={firmVideoCover}
           alt="The Dormer Harpring team"
@@ -85,7 +85,8 @@ const { intro } = Astro.props;
         <span class="intro__video-scrim" aria-hidden="true"></span>
         <PlayButton tone="light" size={88} class="intro__video-play" />
         <span class="intro__video-label">{intro.videoLabel}</span>
-      </button>
+        </a>
+      </VideoPopover>
 
       <AttorneyQuoteCard quote={intro.quote} />
       <ConsultCard aside={intro.aside} />

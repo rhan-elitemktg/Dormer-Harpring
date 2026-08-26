@@ -43,6 +43,7 @@ import whyPhoto from "../assets/practice/why-attorneys-desktop.jpg";
 import whyPhotoMobile from "../assets/practice/why-attorneys-mobile.jpg";
 import consultPhoto from "../assets/blog/consult.jpg";
 import kcHarpring from "../assets/team/kc-harpring-lg.jpg";
+import { PLACEHOLDER_VIDEO, type VideoRef } from "../lib/video";
 
 /**
  * In-page anchor ids, in one place because two things must agree about them:
@@ -99,6 +100,8 @@ export interface VideoPanel {
   alt: string;
   title: string;
   length: string;
+  /** TODO(video): PLACEHOLDER_VIDEO until these two panels have real ids. */
+  video: VideoRef;
 }
 
 export interface DetailHeroProof {
@@ -465,6 +468,7 @@ const carAccidents: PracticeAreaDetail = {
       alt: "",
       title: "What to do after a car accident",
       length: "1:14",
+      video: PLACEHOLDER_VIDEO,
     },
     help: {
       text:
@@ -591,6 +595,7 @@ const carAccidents: PracticeAreaDetail = {
       alt: "",
       title: "The three things a case needs",
       length: "1:30",
+      video: PLACEHOLDER_VIDEO,
     },
     items: [
       {

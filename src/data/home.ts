@@ -16,6 +16,7 @@
 
 import { pt, type PortableTextBlock } from "./portableText";
 import { practiceAreaPath } from "../lib/routePaths";
+import { PLACEHOLDER_VIDEO, type VideoRef } from "../lib/video";
 
 export interface HomeHero {
   eyebrow: string;
@@ -23,7 +24,10 @@ export interface HomeHero {
   headline: string[];
   lede: string;
   primaryCta: { label: string; href: string };
-  videoCta: { label: string };
+  /** The hero's "Watch our video" affordance. `video` is a reference, never a
+   *  URL — `src/lib/video.ts` is the only place one gets built, so re-hosting
+   *  is a change to `provider` here and nothing else. */
+  videoCta: { label: string; video: VideoRef };
 }
 
 export interface HomeStat {
@@ -40,7 +44,14 @@ export async function getHomeHero(): Promise<HomeHero> {
       "When you're hurt, everything changes. We take on fewer cases — so yours " +
       "gets our full attention, and our full fight.",
     primaryCta: { label: "Talk to a lawyer", href: practiceAreaPath("contact") },
-    videoCta: { label: "Watch our video" },
+    videoCta: {
+      label: "Watch our video",
+      /* "Dormer Harpring - Who We Are", 3:20, 1080p — the same film that is
+         public on the firm's YouTube channel as `p3nycI7XqbI`, now re-hosted.
+         Wistia's player colour for this account is already #151e19, which is
+         this site's own --dh-forest-600. */
+      video: { provider: "wistia", id: "b4n3r4pchd" },
+    },
   };
 }
 
@@ -222,6 +233,8 @@ export interface HomeFirmIntro {
   helpTitle: string;
   helpPoints: HelpPoint[];
   videoLabel: string;
+  /** TODO(video): the firm film. PLACEHOLDER_VIDEO until a real id lands. */
+  video: VideoRef;
   quote: { text: string; name: string; role: string };
   aside: { title: string; text: string; ctaLabel: string };
 }
@@ -267,6 +280,7 @@ export async function getHomeFirmIntro(): Promise<HomeFirmIntro> {
       },
     ],
     videoLabel: "Watch our firm video",
+    video: PLACEHOLDER_VIDEO,
     quote: {
       text:
         "You focus on getting better. We'll handle the insurance company, the " +

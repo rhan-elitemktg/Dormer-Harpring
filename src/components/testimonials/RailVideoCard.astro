@@ -2,6 +2,8 @@
 // A client video testimonial in the rail: poster, play button, runtime, name.
 import Picture from "../media/Picture.astro";
 import PlayButton from "../media/PlayButton.astro";
+import VideoPopover from "../media/VideoPopover.astro";
+import { videoWatchUrl } from "../../lib/video";
 import type { VideoTestimonial } from "../../data/testimonials";
 
 interface Props {
@@ -14,8 +16,8 @@ const { testimonial } = Astro.props;
 const initial = testimonial.name.trim().charAt(0).toUpperCase();
 ---
 
-{/* TODO(video): inert until the testimonials have a host and IDs. */}
-<button type="button" class="vcard">
+<VideoPopover video={testimonial.video}>
+  <a class="vcard" href={videoWatchUrl(testimonial.video)}>
   <Picture
     src={testimonial.poster}
     alt={`${testimonial.name}, client testimonial video`}
@@ -28,10 +30,15 @@ const initial = testimonial.name.trim().charAt(0).toUpperCase();
     <span class="vcard__name">{testimonial.name}</span>
     <span class="vcard__length">{testimonial.length}</span>
   </span>
-</button>
+  </a>
+</VideoPopover>
 
 <style>
   .vcard {
+    /* Explicit, because this element used to be a <button> and is now an <a>:
+       an inline box ignores width and min-height, which collapses the card and
+       with it the absolutely positioned poster inside it. */
+    display: block;
     position: relative;
     flex: none;
     width: 320px;

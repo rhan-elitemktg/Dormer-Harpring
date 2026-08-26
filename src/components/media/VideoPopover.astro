@@ -1,0 +1,107 @@
+---
+// The ONE place the site opens a video in a popover.
+//
+// Wistia's own class-based popover, which is what it is built for: the runtime
+// reads its configuration off the CLASS NAME of the wrapper below, binds the
+// <a> inside it (`popoverContent=link`) and opens the film in its lightbox.
+// Those classes are PARSED BY WISTIA, not matched by CSS — nothing anywhere may
+// target `.wistia_embed` or `wistia_async_*`.
+//
+// DRIVING IT FROM THE JS API INSTEAD DOES NOT WORK, and the reason is worth
+// keeping. `Wistia.api(id).popover.show()` needs an embed that was initialised
+// WITH popover options and IS IN LAYOUT. A `display: none` host initialises
+// without them and then throws `Cannot read properties of undefined (reading
+// 'popoverborderradius')` when shown; flipping its display afterwards does not
+// re-initialise it. Measured, not assumed.
+//
+// THE TRIGGER IS THE CALLER'S <a> WITH A REAL href. Wistia binds the click; if
+// its runtime is blocked or JS is off, the href still reaches the film. An
+// inert control is the shape `TeamCard.astro` and `ProseLink.astro` argue
+// against.
+//
+// WISTIA REWRITES WHAT IS INSIDE THIS WRAPPER — it moves the <a> into a
+// `div.wistia_click_to_play` of its own. Two consequences the callers have to
+// live with, both fixed rather than worked around:
+//   1. That div becomes the grid/flex item, not the caller's <a>. Any root that
+//      relied on a tag default for `display` collapses to 0x0 — which is what
+//      emptied `.faq__video` and `.vcard`. Both declare `display: block` now.
+//   2. Re-creating the nodes drops the load listeners `.lazy-fade` depends on,
+//      so posters stay at `opacity: 0`. The script below re-runs that pass.
+//
+// YOUTUBE GETS NO POPOVER, deliberately. Wistia's runtime only plays Wistia
+// media; adding YouTube's iframe API would mean a second video runtime plus the
+// cookie conversation `videoEmbedUrl` documents. A `youtube` record renders its
+// link with nothing around it.
+import {
+  WISTIA_RUNTIME,
+  wistiaMediaScript,
+  wistiaPopoverClass,
+  type VideoRef,
+} from "../../lib/video";
+
+interface Props {
+  video: VideoRef;
+}
+
+const { video } = Astro.props;
+const isWistia = video.provider === "wistia";
+---
+
+{
+  isWistia ? (
+    <span class:list={["vpop", wistiaPopoverClass(video.id)]}>
+      <slot />
+    </span>
+  ) : (
+    <slot />
+  )
+}
+
+{
+  /* `is:inline`, so Astro leaves a third-party runtime it cannot see alone.
+     Both are `async`; neither blocks paint. Loaded per embed rather than from
+     Layout, so the ~300 pages with no video never fetch a video player.
+
+     KNOWN COST: a page with N popovers emits N identical pairs. Markup waste
+     rather than a bug — same URL, so the browser fetches each once, and
+     E-v1.js is idempotent. TODO(video): dedupe via a `hasVideo` prop on Layout
+     if it matters. NOT a module-level flag here: Astro renders every page in
+     one process, so that state leaks and every page after the first loses its
+     player. */
+  isWistia && (
+    <>
+      <script is:inline async src={wistiaMediaScript(video.id)} />
+      <script is:inline async src={WISTIA_RUNTIME} />
+    </>
+  )
+}
+
+<script>
+  // Hoisted, so Astro bundles it once however many popovers a page carries.
+  //
+  // REPAIRS `.lazy-fade` AFTER WISTIA'S DOM SURGERY. Layout's fade script
+  // attaches load listeners at parse time and adds `.is-loaded` when each image
+  // decodes. Wistia re-creates the nodes when it wraps a trigger, the listeners
+  // go with them, and any poster that finished loading in between is stranded
+  // at `opacity: 0` — invisible, at the right size, forever. Re-running the
+  // pass costs one query and fixes it.
+  function markLoadedImages(): void {
+    for (const img of document.querySelectorAll<HTMLImageElement>("img.lazy-fade")) {
+      if (img.complete && img.naturalWidth > 0) img.classList.add("is-loaded");
+    }
+  }
+
+  // Wistia initialises by polling, so there is no single event to hang this on.
+  // A few passes over the first seconds covers it without leaving a timer running.
+  for (const delay of [1000, 2500, 5000]) window.setTimeout(markLoadedImages, delay);
+</script>
+
+<style>
+  /* Carries Wistia's config classes and nothing else, so it must not affect
+     layout: `display: contents` takes it out of the box tree and whatever
+     Wistia puts inside inherits the caller's place in its parent's grid or
+     flex row. */
+  .vpop {
+    display: contents;
+  }
+</style>
