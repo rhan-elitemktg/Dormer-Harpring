@@ -1021,15 +1021,23 @@ should expect to build.
    green; wiring a 9-error check into it turns the gate red for everything. Wire it in once the
    nine are closed, and not before.
 
-   **Two of the nine are a genuinely broken reference, not strictness noise.** `data/home.ts:72`
-   annotates `getRecentResults()` as returning `CaseResult[]` and never imports the type — it
-   lives in `caseResults.ts` — and `home/RecentResults.astro` imports `CaseResult` FROM
-   `data/home`, which does not export it. The build passes because Vite strips types without
-   checking them. Worth fixing before the getters become projections. The rest: two in
-   `sanity.config.ts` (`string | undefined` into a `string` field), three in `prose/ProseH*.astro`
-   (`Block` vs `BlockLike`), two in `src/sanity/theme.ts`. Most of the 97 hints are
-   `src/sanity/eliteTheme.js`, a vendored minified file whose single 56KB line is also why the
-   raw output is over a megabyte.
+   **Nine became SEVEN: the one genuinely broken reference is fixed.** `data/home.ts` annotated
+   `getRecentResults()` as returning `CaseResult[]` without importing the type — it lives in
+   `caseResults.ts` — while `home/RecentResults.astro` imported `CaseResult` FROM `data/home`,
+   which never exported it. Both sides now take it from `caseResults`, which is where the four
+   other callers and `coCounsel.ts` already took it and what `home.ts`'s own comment said all
+   along. **Type-only: all 332 pages hash identical before and after.** It had been broken the
+   whole time and the build never noticed, because Vite strips types without checking them —
+   which is the argument for item 2 in one line.
+
+   **The seven left are decisions, not slips.** Two in `sanity.config.ts` — `projectId` and
+   `dataset` are `string | undefined` going into `string` fields, so the real question is what
+   should happen when the env vars are absent. Three in `prose/ProseH*.astro` — astro-portabletext's
+   `Block` against `lib/headings.ts`'s `BlockLike`. Two in `src/sanity/theme.ts`. Most of the 97
+   hints are `src/sanity/eliteTheme.js`, a vendored minified file whose single 56KB line is also
+   why the raw output runs over a megabyte — **and why `awk 'length < 400'` on that output
+   silently drops real errors.** Count with `grep -c ' - error '` on the raw text; a filtered
+   count read 5 where the truth was 7.
 3. **No TypeGen path** — no `sanity.cli.ts`, no `typegen` script, no `sanity.types.ts`. Note
    `sanity-typegen.json` is deprecated; configuration belongs in `sanity.cli.ts` with
    `typegen.enabled`, which regenerates during `sanity dev` / `sanity build`.
