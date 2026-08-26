@@ -19,6 +19,7 @@ import { award } from "./collections/award";
 import { caseResult } from "./collections/caseResult";
 import { coreValue } from "./collections/coreValue";
 import { faq } from "./collections/faq";
+import { teamMember } from "./collections/teamMember";
 import { testimonial } from "./collections/testimonial";
 
 import { contactSettings } from "./settings/contactSettings";
@@ -42,7 +43,14 @@ const objects: SchemaTypeDefinition[] = [
 const pages: SchemaTypeDefinition[] = [];
 
 /** Repeatable content. Phase 2 (hand-authored) and Phase 3 (imported). */
-const collections: SchemaTypeDefinition[] = [award, caseResult, coreValue, faq, testimonial];
+const collections: SchemaTypeDefinition[] = [
+  teamMember,
+  award,
+  caseResult,
+  coreValue,
+  faq,
+  testimonial,
+];
 
 /** Firm-wide singletons. Phase 1. */
 const settings: SchemaTypeDefinition[] = [

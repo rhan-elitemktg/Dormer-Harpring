@@ -295,6 +295,122 @@ export type Award = {
   order: number;
 };
 
+export type TeamMember = {
+  _id: string;
+  _type: "teamMember";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  key: Slug;
+  name: string;
+  role: string;
+  kind: "partner" | "attorney" | "staff" | "dog";
+  order: number;
+  photo?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+  };
+  photoLarge?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+  };
+  memorial?: boolean;
+  bio?: SimpleText;
+  awards?: Array<{
+    image: {
+      asset?: SanityImageAssetReference;
+      media?: unknown;
+      hotspot?: SanityImageHotspot;
+      crop?: SanityImageCrop;
+      _type: "image";
+    };
+    alt: string;
+    _key: string;
+  }>;
+  hasProfile?: boolean;
+  category?: string;
+  lede?: string;
+  email?: string;
+  facts?: Array<{
+    value: string;
+    label: string;
+    _key: string;
+  }>;
+  body?: RichText;
+  education?: Array<string>;
+  links?: Array<
+    {
+      _key: string;
+    } & NavLink
+  >;
+  video?: {
+    ref?: VideoRef;
+    poster?: {
+      asset?: SanityImageAssetReference;
+      media?: unknown;
+      hotspot?: SanityImageHotspot;
+      crop?: SanityImageCrop;
+      _type: "image";
+    };
+    alt?: string;
+  };
+};
+
+export type RichText = Array<
+  | {
+      children?: Array<{
+        marks?: Array<string>;
+        text?: string;
+        _type: "span";
+        _key: string;
+      }>;
+      style?: "normal" | "h2" | "h3" | "h4" | "blockquote";
+      listItem?: "bullet" | "number";
+      markDefs?: Array<
+        {
+          _key: string;
+        } & Link
+      >;
+      level?: number;
+      _type: "block";
+      _key: string;
+    }
+  | {
+      asset?: SanityImageAssetReference;
+      media?: unknown;
+      hotspot?: SanityImageHotspot;
+      crop?: SanityImageCrop;
+      alt?: string;
+      _type: "image";
+      _key: string;
+    }
+>;
+
+export type SimpleText = Array<{
+  children?: Array<{
+    marks?: Array<string>;
+    text?: string;
+    _type: "span";
+    _key: string;
+  }>;
+  style?: "normal";
+  listItem?: never;
+  markDefs?: Array<
+    {
+      _key: string;
+    } & Link
+  >;
+  level?: number;
+  _type: "block";
+  _key: string;
+}>;
+
 export type Seo = {
   _type: "seo";
   metaTitle?: string;
@@ -328,55 +444,6 @@ export type InlineText = Array<{
   _type: "block";
   _key: string;
 }>;
-
-export type SimpleText = Array<{
-  children?: Array<{
-    marks?: Array<string>;
-    text?: string;
-    _type: "span";
-    _key: string;
-  }>;
-  style?: "normal";
-  listItem?: never;
-  markDefs?: Array<
-    {
-      _key: string;
-    } & Link
-  >;
-  level?: number;
-  _type: "block";
-  _key: string;
-}>;
-
-export type RichText = Array<
-  | {
-      children?: Array<{
-        marks?: Array<string>;
-        text?: string;
-        _type: "span";
-        _key: string;
-      }>;
-      style?: "normal" | "h2" | "h3" | "h4" | "blockquote";
-      listItem?: "bullet" | "number";
-      markDefs?: Array<
-        {
-          _key: string;
-        } & Link
-      >;
-      level?: number;
-      _type: "block";
-      _key: string;
-    }
-  | {
-      asset?: SanityImageAssetReference;
-      media?: unknown;
-      hotspot?: SanityImageHotspot;
-      crop?: SanityImageCrop;
-      alt?: string;
-      _type: "image";
-      _key: string;
-    }
->;
 
 export type NavLink = {
   _type: "navLink";
@@ -496,10 +563,11 @@ export type AllSanitySchemaTypes =
   | CoreValue
   | CaseResult
   | Award
+  | TeamMember
+  | RichText
+  | SimpleText
   | Seo
   | InlineText
-  | SimpleText
-  | RichText
   | NavLink
   | Link
   | SanityImagePaletteSwatch
@@ -814,6 +882,80 @@ export type WRITTEN_REVIEWS_QUERY_RESULT = Array<{
   body: string | null;
 }>;
 
+// Source: src/sanity/lib/queries.ts
+// Variable: TEAM_QUERY
+// Query: *[_type == "teamMember"] | order(order asc){  "_key": key.current,  name,  role,  kind,  photo,  photoLarge,  bio,  "memorial": coalesce(memorial, false),  "hasProfile": coalesce(hasProfile, false),  "awards": awards[]{ _key, image, alt }}
+export type TEAM_QUERY_RESULT = Array<{
+  _key: string;
+  name: string;
+  role: string;
+  kind: "attorney" | "dog" | "partner" | "staff";
+  photo: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+  } | null;
+  photoLarge: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+  } | null;
+  bio: SimpleText | null;
+  memorial: boolean | false;
+  hasProfile: boolean | false;
+  awards: Array<{
+    _key: string;
+    image: {
+      asset?: SanityImageAssetReference;
+      media?: unknown;
+      hotspot?: SanityImageHotspot;
+      crop?: SanityImageCrop;
+      _type: "image";
+    };
+    alt: string;
+  }> | null;
+}>;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: TEAM_PROFILES_QUERY
+// Query: *[_type == "teamMember" && hasProfile == true] | order(order asc){  "slug": key.current,  category,  lede,  email,  "facts": facts[]{ _key, value, label },  body,  education,  "links": links[]{ _key, label, href },  video{ ref{ provider, id }, poster, alt }}
+export type TEAM_PROFILES_QUERY_RESULT = Array<{
+  slug: string;
+  category: string | null;
+  lede: string | null;
+  email: string | null;
+  facts: Array<{
+    _key: string;
+    value: string;
+    label: string;
+  }> | null;
+  body: RichText | null;
+  education: Array<string> | null;
+  links: Array<{
+    _key: string;
+    label: string;
+    href: string;
+  }> | null;
+  video: {
+    ref: {
+      provider: "wistia" | "youtube";
+      id: string;
+    } | null;
+    poster: {
+      asset?: SanityImageAssetReference;
+      media?: unknown;
+      hotspot?: SanityImageHotspot;
+      crop?: SanityImageCrop;
+      _type: "image";
+    } | null;
+    alt: string | null;
+  } | null;
+}>;
+
 // Query TypeMap
 import "@sanity/client";
 declare module "@sanity/client" {
@@ -833,5 +975,7 @@ declare module "@sanity/client" {
     '*[_type == "testimonial" && onHomeRail == true] | order(railOrder asc){\n  "_key": key.current,\n  "kind": select(format == "video" => "video", "quote"),\n  name,\n  video{ provider, id },\n  poster,\n  length,\n  "headline": railHeadline,\n  "body": railBody\n}': HOME_TESTIMONIALS_QUERY_RESULT;
     '*[_type == "testimonial" && onReviewsPage == true && format == "video"]\n  | order(reviewOrder asc){\n  "_key": key.current,\n  video{ provider, id },\n  name,\n  quote,\n  poster\n}': VIDEO_REVIEWS_QUERY_RESULT;
     '*[_type == "testimonial" && onReviewsPage == true && format == "written"]\n  | order(reviewOrder asc){\n  "_key": key.current,\n  name,\n  source,\n  quote,\n  body\n}': WRITTEN_REVIEWS_QUERY_RESULT;
+    '*[_type == "teamMember"] | order(order asc){\n  "_key": key.current,\n  name,\n  role,\n  kind,\n  photo,\n  photoLarge,\n  bio,\n  "memorial": coalesce(memorial, false),\n  "hasProfile": coalesce(hasProfile, false),\n  "awards": awards[]{ _key, image, alt }\n}': TEAM_QUERY_RESULT;
+    '*[_type == "teamMember" && hasProfile == true] | order(order asc){\n  "slug": key.current,\n  category,\n  lede,\n  email,\n  "facts": facts[]{ _key, value, label },\n  body,\n  education,\n  "links": links[]{ _key, label, href },\n  video{ ref{ provider, id }, poster, alt }\n}': TEAM_PROFILES_QUERY_RESULT;
   }
 }

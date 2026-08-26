@@ -52,6 +52,11 @@ import awardExpertiseTruck from "../assets/awards/expertise-truck.webp";
 import awardTop100 from "../assets/awards/top-100-litigators.webp";
 import awardSuperLawyersKc from "../assets/awards/super-lawyers-kc.webp";
 
+import type { SanityImageSource } from "@sanity/image-url";
+import { sanityClient } from "sanity:client";
+import { TEAM_PROFILES_QUERY, TEAM_QUERY } from "../sanity/lib/queries";
+import { once, required } from "../sanity/lib/fetch";
+
 export type TeamKind = "partner" | "attorney" | "staff" | "dog";
 
 export interface TeamMember {
@@ -63,12 +68,12 @@ export interface TeamMember {
    * Absent for the two people the firm has no photograph of. The card falls
    * back to their initials rather than leaving a hole.
    */
-  photo?: ImageMetadata;
+  photo?: ImageMetadata | SanityImageSource;
   /**
    * The wider crop the founding-partner cards on the index need. The bio page
    * deliberately uses the tight `photo` instead — see AttorneyBio.astro.
    */
-  photoLarge?: ImageMetadata;
+  photoLarge?: ImageMetadata | SanityImageSource;
   /**
    * Set by `getTeam` for anyone who has a profile below, and by nobody else —
    * see the note there. Absent for the two people with no live bio page.
@@ -76,7 +81,7 @@ export interface TeamMember {
   href?: string;
   bio?: PortableTextBlock[];
   /** Personal accolades, shown on the founding-partner cards. */
-  awards?: { _key: string; image: ImageMetadata; alt: string }[];
+  awards?: { _key: string; image: ImageMetadata | SanityImageSource; alt: string }[];
   /** Shows "In Loving Memory" above the role. */
   memorial?: boolean;
 }
@@ -92,276 +97,21 @@ export function initialsOf(name: string): string {
 }
 
 export async function getTeam(): Promise<TeamMember[]> {
-  const roster: Omit<TeamMember, "href">[] = [
-    {
-      _key: "sean-dormer",
-      name: "Sean Dormer",
-      role: "Founding Partner",
-      kind: "partner",
-      photo: seanSm,
-      photoLarge: seanLg,
-      bio: pt(
-        "Sean was shaped most by his tenure as a student attorney in CU Law School’s " +
-        "Defense Clinic, representing clients with limited means for free. Twenty years " +
-        "later he is still picking fights with bullies — taking clients other lawyers " +
-        "rejected, bringing their cases to trial, and winning against long odds. In 2017 he " +
-        "took a permanently injured single mother’s case against one of the country’s " +
-        "largest grocery chains, which offered $250,000; the jury returned $1.77 million " +
-        "and the case settled for $2.1 million. He speaks on trial technique for the " +
-        "Colorado Trial Lawyers Association and has testified for fairer injury laws at the " +
-        "state legislature. Born and raised in Colorado, he spends his time with his wife, " +
-        "their dog and two cats, and anything the mountains allow."
-      ),
-      // Six, which is what the bio comp lays out and what the live site shows
-      // for him. The one omission is his Super Lawyers "Rising Stars" badge —
-      // see the README; it is an early-career award he has since aged out of,
-      // and his press links now carry plain Super Lawyers instead.
-      awards: [
-        { _key: "top-20-verdicts", image: awardTop20Verdicts, alt: "TopVerdict Top 20 Jury Verdicts Colorado" },
-        { _key: "multi-million", image: awardMultiMillion, alt: "Multi-Million Dollar Advocates Forum" },
-        { _key: "avvo-10", image: awardAvvo10, alt: "Avvo Rating 10.0 Superb" },
-        { _key: "top-100", image: awardTop100, alt: "America’s Top 100 High Stakes Litigators" },
-        { _key: "expertise-pi", image: awardExpertisePi, alt: "Expertise Best Personal Injury Attorneys in Denver" },
-        { _key: "best-lawyers", image: awardBestLawyers, alt: "Best Lawyers" },
-      ],
-    },
-    {
-      _key: "k-c-harpring",
-      name: "K.C. Harpring",
-      role: "Founding Partner",
-      kind: "partner",
-      photo: kcSm,
-      photoLarge: kcLg,
-      bio: pt(
-        "K.C. has always wanted work that improves the day-to-day lives of real people " +
-        "rather than the bottom line of a faceless company. He tried corporate law in " +
-        "Chicago and Spain, then found his calling in DePaul’s Poverty Law clinic — where " +
-        "he won back the home of a single mother wrongfully evicted over a clerical error. " +
-        "That moment became the driving force behind his practice. After passing the " +
-        "Colorado bar in 2014 he worked at a high-volume plaintiff’s firm and saw a model " +
-        "that could not give clients the service they deserved, so he partnered with Sean " +
-        "to build something different. Outside the office he is in the foothills with his " +
-        "partner and their two dogs — hiking, skiing, and working through the Colorado " +
-        "Mountain Club’s mountaineering courses."
-      ),
-      awards: [
-        { _key: "national-trial-40", image: awardNationalTrial40, alt: "The National Trial Lawyers Top 40 Under 40" },
-        { _key: "ones-to-watch", image: awardOnesToWatch, alt: "Best Lawyers: Ones to Watch" },
-        { _key: "avvo-10", image: awardAvvo10, alt: "Avvo Rating 10.0 Superb" },
-        { _key: "super-lawyers", image: awardSuperLawyersKc, alt: "Colorado Super Lawyers Rising Stars" },
-        { _key: "expertise-truck", image: awardExpertiseTruck, alt: "Expertise Best Truck Accident Lawyers in Denver" },
-        { _key: "best-lawyers", image: awardBestLawyers, alt: "Best Lawyers" },
-      ],
-    },
-    {
-      _key: "tim-garvey",
-      name: "Tim Garvey",
-      role: "Attorney",
-      kind: "attorney",
-      photo: timgarvey,
-    },
-    {
-      _key: "laura-browne",
-      name: "Laura Browne",
-      role: "Attorney",
-      kind: "attorney",
-      photo: laurabrowne,
-    },
-    {
-      _key: "jessica-mauser",
-      name: "Jessica Mauser",
-      role: "Attorney",
-      kind: "attorney",
-      photo: jessicamauser,
-    },
-    {
-      _key: "amy-rogers",
-      name: "Amy Rogers",
-      role: "Attorney",
-      kind: "attorney",
-      photo: amyrogers,
-    },
-    {
-      _key: "greg-bentley",
-      name: "Greg Bentley",
-      role: "Attorney",
-      kind: "attorney",
-      photo: gregbentley,
-    },
-    {
-      _key: "marcie-emch",
-      name: "Marcie Emch",
-      role: "Litigation Paralegal",
-      kind: "staff",
-      photo: marcieemch,
-    },
-    {
-      _key: "kassandra-burival",
-      name: "Kassandra Burival",
-      role: "Litigation Paralegal",
-      kind: "staff",
-      photo: kassandraburival,
-    },
-    {
-      _key: "brittany-freeman",
-      name: "Brittany Freeman",
-      role: "Litigation Paralegal",
-      kind: "staff",
-      photo: brittanyfreeman,
-    },
-    {
-      _key: "cindy-waller",
-      name: "Cindy Waller",
-      role: "Litigation Paralegal",
-      kind: "staff",
-      photo: cindywaller,
-    },
-    {
-      _key: "brittany-lesmeister",
-      name: "Brittany Lesmeister",
-      role: "Litigation Paralegal",
-      kind: "staff",
-      photo: brittanylesmeister,
-    },
-    {
-      _key: "julie-altenhofen",
-      name: "Julie Altenhofen",
-      role: "Paralegal",
-      kind: "staff",
-      photo: juliealtenhofen,
-    },
-    {
-      _key: "ashley-reisman",
-      name: "Ashley Reisman",
-      role: "Paralegal",
-      kind: "staff",
-      photo: ashleyreisman,
-    },
-    {
-      _key: "david-garber",
-      name: "David Garber",
-      role: "Paralegal",
-      kind: "staff",
-      photo: davidgarber,
-    },
-    {
-      _key: "alexandra-petroff",
-      name: "Alexandra Petroff",
-      role: "Paralegal",
-      kind: "staff",
-    },
-    {
-      _key: "abby-houk",
-      name: "Abby Houk",
-      role: "Intake Specialist",
-      kind: "staff",
-      photo: abbyhouk,
-    },
-    {
-      _key: "jessica-ayala",
-      name: "Jessica Ayala",
-      role: "Intake Specialist",
-      kind: "staff",
-      photo: jessicaayala,
-    },
-    {
-      _key: "livi-lesch",
-      name: "Livi Lesch",
-      role: "Office Manager",
-      kind: "staff",
-      photo: livilesch,
-    },
-    {
-      _key: "leana-kim",
-      name: "Leana Kim",
-      role: "Office Assistant",
-      kind: "staff",
-      photo: leanakim,
-    },
-    {
-      _key: "maddy-ricciardi",
-      name: "Maddy Ricciardi",
-      role: "Controller",
-      kind: "staff",
-      photo: maddyricciardi,
-    },
-    {
-      _key: "morgan-jewel",
-      name: "Morgan Jewel",
-      role: "Law Clerk",
-      kind: "staff",
-      photo: morganjewel,
-    },
-    {
-      _key: "rachel-pavelko",
-      name: "Rachel Pavelko",
-      role: "Law Clerk",
-      kind: "staff",
-      photo: rachelpavelko,
-    },
-    {
-      _key: "ella-nelson",
-      name: "Ella Nelson",
-      role: "Legal Assistant",
-      kind: "staff",
-      photo: ellanelson,
-    },
-    {
-      _key: "dinorah-gutierrez",
-      name: "Dinorah Gutierrez",
-      role: "Legal Assistant",
-      kind: "staff",
-    },
-    {
-      _key: "michael-greer",
-      // "Paralegal" on the live roster and on his own bio page; the comp still
-      // has the "Legal Assistant" he was hired as. See the README.
-      name: "Michael Greer",
-      role: "Paralegal",
-      kind: "staff",
-      photo: michaelgreer,
-    },
-    {
-      _key: "marilyn-morales",
-      name: "Marilyn Morales",
-      role: "Legal Assistant",
-      kind: "staff",
-      photo: marilynmorales,
-    },
-    {
-      _key: "randy-ira-sawpring",
-      name: "Randy Ira Sawpring",
-      role: "Chief of Security",
-      kind: "dog",
-      photo: randysawpring,
-    },
-    {
-      _key: "jane-gonzales-dormer",
-      name: "Jane Gonzales-Dormer",
-      role: "Greeter",
-      kind: "dog",
-      photo: janegonzalesdormer,
-      memorial: true,
-    },
-    {
-      _key: "bella-mae-sawpring",
-      name: "Bella Mae Sawpring",
-      role: "Hype Girl",
-      kind: "dog",
-      photo: bellasawpring,
-    },
-  ];
+  const roster = await once("team", async () =>
+    required(await sanityClient.fetch(TEAM_QUERY), "Team")
+  );
 
   // A card links to a bio when, and only when, that bio exists. Derived rather
-  // than written out per person because a hand-written href outlives the page
-  // it points at: the homepage rail linked Tim Garvey to a route
-  // `getStaticPaths` had never built. In Sanity this is the same condition,
-  // `defined(bio)`, evaluated in the projection.
-  return roster.map((member) =>
-    PROFILES.some((profile) => profile.slug === member._key)
-      ? { ...member, href: attorneyPath(member._key) }
-      : member
-  );
+  // than stored, because a hand-written href outlives the page it points at:
+  // the homepage rail once linked Tim Garvey to a route `getStaticPaths` had
+  // never built. `hasProfile` is the same condition the Studio toggles, and
+  // `attorneyPath()` is the only thing allowed to build the URL — three layers
+  // already agree on the trailing slash and a projection must not become a
+  // fourth.
+  return roster.map(({ hasProfile, ...member }) => ({
+    ...(member as TeamMember),
+    ...(hasProfile ? { href: attorneyPath(member._key!) } : {}),
+  }));
 }
 
 // ---------------------------------------------------------------------------
@@ -436,7 +186,7 @@ export interface TeamProfile {
    */
   links?: ProfileLink[];
   /** A profile film, where one exists. */
-  video?: { ref: VideoRef; poster: ImageMetadata; alt: string };
+  video?: { ref: VideoRef; poster: ImageMetadata | SanityImageSource; alt: string };
 }
 
 const PROFILES: TeamProfile[] = [
@@ -1496,12 +1246,16 @@ const PROFILES: TeamProfile[] = [
 
 /** Undefined for anyone without a profile — today, the two people the live site
  *  has no page for. `getStaticPaths` builds only the pages that exist. */
-export async function getTeamProfile(
-  slug: string
-): Promise<TeamProfile | undefined> {
-  return PROFILES.find((profile) => profile.slug === slug);
+/** Undefined for anyone without a bio page. `getStaticPaths` builds only the
+ *  pages that exist. */
+export async function getTeamProfile(slug: string): Promise<TeamProfile | undefined> {
+  const profiles = await getTeamProfiles();
+  return profiles.find((profile) => profile.slug === slug);
 }
 
 export async function getTeamProfiles(): Promise<TeamProfile[]> {
-  return PROFILES;
+  const profiles = await once("teamProfiles", async () =>
+    required(await sanityClient.fetch(TEAM_PROFILES_QUERY), "Team (bio pages)")
+  );
+  return profiles as TeamProfile[];
 }

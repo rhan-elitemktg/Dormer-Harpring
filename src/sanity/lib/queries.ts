@@ -252,3 +252,49 @@ export const WRITTEN_REVIEWS_QUERY = defineQuery(
   body
 }`
 );
+
+/**
+ * The roster — everyone, in the order the team page renders them.
+ *
+ * `href` IS DERIVED IN THE GETTER, NOT HERE, because `attorneyPath()` in
+ * `lib/routePaths.ts` is the only thing allowed to build an internal URL. A
+ * projection that string-concatenated "/meet-our-attorneys/" would be a second
+ * place the route shape lives, and there are already three layers agreeing on
+ * the trailing slash.
+ *
+ * `awards[].image` and `photo` come back whole — `urlFor()` takes the object.
+ */
+export const TEAM_QUERY = defineQuery(`*[_type == "teamMember"] | order(order asc){
+  "_key": key.current,
+  name,
+  role,
+  kind,
+  photo,
+  photoLarge,
+  bio,
+  "memorial": coalesce(memorial, false),
+  "hasProfile": coalesce(hasProfile, false),
+  "awards": awards[]{ _key, image, alt }
+}`);
+
+/**
+ * The bio pages — only the people who have one.
+ *
+ * One document per person carries both this and the roster card above; the two
+ * projections are the two presentations. `slug` is the same key the roster
+ * returns as `_key`, which is what joined them before the merge and what
+ * `[slug].astro` still matches on.
+ */
+export const TEAM_PROFILES_QUERY = defineQuery(
+  `*[_type == "teamMember" && hasProfile == true] | order(order asc){
+  "slug": key.current,
+  category,
+  lede,
+  email,
+  "facts": facts[]{ _key, value, label },
+  body,
+  education,
+  "links": links[]{ _key, label, href },
+  video{ ref{ provider, id }, poster, alt }
+}`
+);
