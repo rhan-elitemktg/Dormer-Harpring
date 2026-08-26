@@ -23,7 +23,7 @@
     "@astrojs/react": "^6.0.2",
     "@sanity/astro": "^3.5.0",
     "@sanity/image-url": "^2.1.1",
-    "@sanity/orderable-document-list": "^2.0.23",
+    "@sanity/orderable-document-list": "2.0.10",
     "astro": "^7.1.6",
     "astro-portabletext": "^0.13.0",
     "groq": "^6.9.0",
@@ -41,5 +41,8 @@
     "@types/react-is": "^19.2.0",
     "node-html-parser": "^9.0.1",
     "typescript": "^6.0.3"
+  },
+  "overrides": {
+    "sanity-plugin-utils": "2.0.12"
   }
 }
