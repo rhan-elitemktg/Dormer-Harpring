@@ -25,8 +25,11 @@
 //   1. That div becomes the grid/flex item, not the caller's <a>. Any root that
 //      relied on a tag default for `display` collapses to 0x0 — which is what
 //      emptied `.faq__video` and `.vcard`. Both declare `display: block` now.
-//   2. Re-creating the nodes drops the load listeners `.lazy-fade` depends on,
-//      so posters stay at `opacity: 0`. The script below re-runs that pass.
+//   2. Re-creating the nodes drops any per-node load listener. That is fixed in
+//      Layout, where `.lazy-fade` lives: it delegates from the document with
+//      capture now, so replacing a node cannot detach it. Timed re-runs used to
+//      paper over it here and could not — a lazy image decodes when the reader
+//      scrolls to it, which is long after any timer.
 //
 // YOUTUBE GETS NO POPOVER, deliberately. Wistia's runtime only plays Wistia
 // media; adding YouTube's iframe API would mean a second video runtime plus the
@@ -76,25 +79,6 @@ const isWistia = video.provider === "wistia";
   )
 }
 
-<script>
-  // Hoisted, so Astro bundles it once however many popovers a page carries.
-  //
-  // REPAIRS `.lazy-fade` AFTER WISTIA'S DOM SURGERY. Layout's fade script
-  // attaches load listeners at parse time and adds `.is-loaded` when each image
-  // decodes. Wistia re-creates the nodes when it wraps a trigger, the listeners
-  // go with them, and any poster that finished loading in between is stranded
-  // at `opacity: 0` — invisible, at the right size, forever. Re-running the
-  // pass costs one query and fixes it.
-  function markLoadedImages(): void {
-    for (const img of document.querySelectorAll<HTMLImageElement>("img.lazy-fade")) {
-      if (img.complete && img.naturalWidth > 0) img.classList.add("is-loaded");
-    }
-  }
-
-  // Wistia initialises by polling, so there is no single event to hang this on.
-  // A few passes over the first seconds covers it without leaving a timer running.
-  for (const delay of [1000, 2500, 5000]) window.setTimeout(markLoadedImages, delay);
-</script>
 
 <style>
   /* Carries Wistia's config classes and nothing else, so it must not affect

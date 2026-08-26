@@ -127,16 +127,36 @@ const organization = legalServiceSchema(firm, siteUrl);
     <Footer />
 
     <script>
-      // Fade each lazy image in once it has actually decoded. Images already
-      // complete at hydration (cached, or decoded before this ran) are marked
-      // immediately, so nothing can get stuck invisible.
-      for (const img of document.querySelectorAll<HTMLImageElement>("img.lazy-fade")) {
-        if (img.complete) {
+      // Fade each lazy image in once it has actually decoded.
+      //
+      // DELEGATED, WITH CAPTURE — not a listener per image, and that is
+      // load-bearing. `load` does not bubble, but a capturing listener on the
+      // document observes it anyway, and unlike a per-node listener it survives
+      // the node being REPLACED.
+      //
+      // It used to attach one listener per <img> at parse time, which broke in
+      // two ways once videos arrived. Wistia re-creates the markup around a
+      // popover trigger, so those listeners went with the old nodes; and a lazy
+      // image far down the page decodes whenever the reader scrolls to it,
+      // which can be minutes later. Either way `.is-loaded` never landed and
+      // the poster sat at `opacity: 0` — correctly sized, fully downloaded and
+      // invisible. That is what emptied the FAQ thumbnail.
+      const markLoaded = (event: Event) => {
+        const img = event.target;
+        if (img instanceof HTMLImageElement && img.classList.contains("lazy-fade")) {
           img.classList.add("is-loaded");
-        } else {
-          img.addEventListener("load", () => img.classList.add("is-loaded"), { once: true });
-          img.addEventListener("error", () => img.classList.add("is-loaded"), { once: true });
         }
+      };
+
+      // `error` too: a poster that 404s should still reveal whatever sits
+      // behind it rather than leaving a permanently blank box.
+      document.addEventListener("load", markLoaded, true);
+      document.addEventListener("error", markLoaded, true);
+
+      // Anything already decoded before this ran (cached, or finished during
+      // parse) never fires an event, so sweep those once up front.
+      for (const img of document.querySelectorAll<HTMLImageElement>("img.lazy-fade")) {
+        if (img.complete) img.classList.add("is-loaded");
       }
     </script>
   </body>

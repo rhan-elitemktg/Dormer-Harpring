@@ -7,8 +7,21 @@
 // a second component with a hundred duplicated lines of CSS. The About comp
 // also moves the play glyph to the bottom-left corner; not adopted, so the
 // glyph is centred on every attorney card the site draws.
+//
+// TWO CONTROLS, NOT ONE, by request: the PORTRAIT opens the attorney's film in
+// a popover, the NAME AND ROLE go to their bio. The card used to be a single
+// <a> wrapping all three, which is why the play glyph sat there promising a
+// video it could not play — an <a> may not contain another <a>, so the glyph
+// had nowhere to become a trigger. Splitting the card is what makes it
+// possible; the wrapper is a <div> now and the two links are siblings.
+//
+// The hover that reddens the name is bound to the NAME'S link, not the card:
+// they are separate controls now, and lighting up the name when the pointer is
+// over the portrait would say they are one.
 import Picture from "../../media/Picture.astro";
 import PlayButton from "../../media/PlayButton.astro";
+import VideoPopover from "../../media/VideoPopover.astro";
+import { videoWatchUrl } from "../../../lib/video";
 import type { AttorneyCardData } from "../../../data/attorneys";
 
 interface Props {
@@ -26,35 +39,30 @@ const sizes =
     : "(max-width: 640px) 100vw, (max-width: 1080px) 50vw, 25vw";
 ---
 
-<a class:list={["acard", `acard--${layout}`]} href={attorney.href}>
-  <span class="acard__media">
-    <Picture
-      src={attorney.portrait}
-      alt={attorney.name}
-      widths={[272, 544, 700]}
-      sizes={sizes}
-      class="acard__portrait"
-    />
-    <span class="acard__scrim" aria-hidden="true"></span>
-    {
-      /* STILL A VISUAL CUE, NOT A CONTROL, and now for a structural reason
-         rather than a missing video. Every other play affordance on the site
-         became a Wistia popover; this one cannot, because the whole card is
-         already an <a> to the attorney's bio and an <a> may not contain
-         another <a>. Making the glyph its own trigger means the card stops
-         being one link — a bio link plus a separate play button — which is a
-         change to what the comp draws, not a wiring job.
+<div class:list={["acard", `acard--${layout}`]}>
+  <VideoPopover video={attorney.video}>
+    <a
+      class="acard__media"
+      href={videoWatchUrl(attorney.video)}
+      aria-label={`Watch ${attorney.name}'s video`}
+    >
+      <Picture
+        src={attorney.portrait}
+        alt={attorney.name}
+        widths={[272, 544, 700]}
+        sizes={sizes}
+        class="acard__portrait"
+      />
+      <span class="acard__scrim" aria-hidden="true"></span>
+      <PlayButton tone="light" size={46} class="acard__play" />
+    </a>
+  </VideoPopover>
 
-         TODO(video): needs a design decision. Either the card keeps navigating
-         to the bio and the glyph goes (it currently promises a video it does
-         not play), or the card splits into two controls. The bio page itself
-         DOES have a working popover for the attorneys who have a film. */
-    }
-    <PlayButton tone="light" size={46} class="acard__play" />
-  </span>
-  <span class="acard__name">{attorney.name}</span>
-  <span class="acard__role">{attorney.role} &middot; {attorney.location}</span>
-</a>
+  <a class="acard__link" href={attorney.href}>
+    <span class="acard__name">{attorney.name}</span>
+    <span class="acard__role">{attorney.role} &middot; {attorney.location}</span>
+  </a>
+</div>
 
 <style>
   .acard {
@@ -133,8 +141,18 @@ const sizes =
     color: #8a806e;
   }
 
-  .acard:hover .acard__name,
-  .acard:focus-visible .acard__name {
+  /* The name's own link, so the two stack the way they did inside the single
+     <a> this card used to be. */
+  .acard__link {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Bound to the NAME'S link, not the card — the portrait beside it is a
+     separate control now, and reddening the name on its hover would say the
+     two are one. */
+  .acard__link:hover .acard__name,
+  .acard__link:focus-visible .acard__name {
     color: var(--dh-red-verdict);
   }
 
