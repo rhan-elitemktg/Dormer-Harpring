@@ -1030,14 +1030,28 @@ should expect to build.
    whole time and the build never noticed, because Vite strips types without checking them —
    which is the argument for item 2 in one line.
 
-   **The seven left are decisions, not slips.** Two in `sanity.config.ts` — `projectId` and
-   `dataset` are `string | undefined` going into `string` fields, so the real question is what
-   should happen when the env vars are absent. Three in `prose/ProseH*.astro` — astro-portabletext's
-   `Block` against `lib/headings.ts`'s `BlockLike`. Two in `src/sanity/theme.ts`. Most of the 97
-   hints are `src/sanity/eliteTheme.js`, a vendored minified file whose single 56KB line is also
-   why the raw output runs over a megabyte — **and why `awk 'length < 400'` on that output
-   silently drops real errors.** Count with `grep -c ' - error '` on the raw text; a filtered
-   count read 5 where the truth was 7.
+   **`sanity.config.ts` is closed too — 7 down to 5.** `projectId` and `dataset` were
+   `string | undefined` going into `string` fields. They are read through a `required()` helper
+   that throws with the variable's name and where to set it, which narrows both.
+
+   **THAT DOES NOT IMPROVE `npm run build`, AND THE FIRST VERSION OF THE COMMENT CLAIMED IT DID.**
+   Building with `.env` moved aside still fails with "Configuration must contain `projectId`"
+   from `@sanity/client`'s `initConfig` — because the client the prerender constructs is
+   configured by the `sanity()` integration in `astro.config.mjs`, reading the same variables
+   through Vite's `loadEnv`, and it gets there first. `sanity.config.ts` covers the two entry
+   points that read it directly: the browser Studio bundle and the Sanity CLI. **Guarding
+   `astro.config.mjs` is the other half and is not done.**
+
+   Worth knowing either way: **the build already died without those variables**, so this changed
+   the message, never whether it fails. Only `dist/admin/index.html` changed, and only its studio
+   bundle hash — the other 331 pages are byte-identical.
+
+   **The five left are decisions, not slips.** Three in `prose/ProseH*.astro` —
+   astro-portabletext's `Block` against `lib/headings.ts`'s `BlockLike`. Two in
+   `src/sanity/theme.ts`. Most of the 97 hints are `src/sanity/eliteTheme.js`, a vendored
+   minified file whose single 56KB line is also why the raw output runs over a megabyte — **and
+   why `awk 'length < 400'` on that output silently drops real errors.** Count with
+   `grep -c ' - error '` on the raw text; a filtered count read 5 where the truth was 7.
 3. **No TypeGen path** — no `sanity.cli.ts`, no `typegen` script, no `sanity.types.ts`. Note
    `sanity-typegen.json` is deprecated; configuration belongs in `sanity.cli.ts` with
    `typegen.enabled`, which regenerates during `sanity dev` / `sanity build`.
