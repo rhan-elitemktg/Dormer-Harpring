@@ -67,5 +67,29 @@ export default defineConfig({
   plugins: [structureTool({ structure })],
   schema: {
     types: schemaTypes,
+
+    /*
+     * INITIAL-VALUE TEMPLATES FOR THE DESK'S GROUPED LISTS.
+     *
+     * The Team collection opens into four sub-lists filtered by `kind`. A
+     * filter alone does not tell the "＋" button anything, so a member created
+     * inside Staff would have no group — and a document matching none of the
+     * four filters is INVISIBLE in the desk, which is content that exists and
+     * cannot be reached.
+     *
+     * The template is parameterised rather than one per group, because the
+     * groups are already written down once in `src/sanity/structure/index.ts`
+     * and a second copy here would be a second place to forget.
+     */
+    templates: (prev) => [
+      ...prev,
+      {
+        id: "teamMember-by-kind",
+        title: "Team member",
+        schemaType: "teamMember",
+        parameters: [{ name: "kind", type: "string" }],
+        value: ({ kind }: { kind: string }) => ({ kind }),
+      },
+    ],
   },
 });

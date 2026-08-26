@@ -70,6 +70,83 @@ function singleton(
  */
 const PAGES: [string, string, ComponentType?][] = [];
 
+/**
+ * COLLECTIONS THAT OPEN INTO SUB-LISTS RATHER THAN ONE LONG LIST.
+ *
+ * Keyed by document type: the field to split on, and the groups in the order an
+ * editor should meet them. Thirty people in one alphabetical list is a list you
+ * scroll; four named groups is a list you navigate.
+ *
+ * THE GROUPS MUST COVER EVERY POSSIBLE VALUE, because a document matching none
+ * of them is invisible in the desk — content that exists and cannot be reached,
+ * which is the silent-failure shape this project's four linters exist to catch.
+ * That holds here because each `field` below is a CLOSED list in its schema and
+ * is `required()`, so a published document must carry one of these values. If a
+ * fifth option is ever added to one of those lists, it has to be added here in
+ * the same change.
+ *
+ * Each group also carries an initial-value template, so "＋" inside Staff
+ * creates a staff member rather than one with no group at all. The templates
+ * are registered in `sanity.config.ts`; without them the field would be blank
+ * on creation and the new document would land nowhere.
+ */
+const GROUPED: Record<
+  string,
+  { field: string; template: string; groups: [string, string, ComponentType?][] }
+> = {
+  teamMember: {
+    field: "kind",
+    template: "teamMember-by-kind",
+    groups: [
+      ["partner", "Founding Partners", UsersIcon],
+      ["attorney", "Attorneys", UsersIcon],
+      ["staff", "Staff", UsersIcon],
+      ["dog", "Office Dogs", HeartIcon],
+    ],
+  },
+};
+
+/** One collection's desk entry — a plain list, or sub-lists when it is grouped. */
+function collection(
+  S: StructureBuilder,
+  type: string,
+  title: string,
+  icon?: ComponentType
+) {
+  const spec = GROUPED[type];
+  if (!spec) return S.documentTypeListItem(type).title(title).icon(icon);
+
+  return S.listItem()
+    .title(title)
+    .icon(icon)
+    .id(type)
+    .child(
+      S.list()
+        .title(title)
+        .items(
+          spec.groups.map(([value, groupTitle, groupIcon]) =>
+            S.listItem()
+              .title(groupTitle)
+              .icon(groupIcon)
+              .id(`${type}-${value}`)
+              .child(
+                S.documentTypeList(type)
+                  .title(groupTitle)
+                  .filter(`_type == $type && ${spec.field} == $value`)
+                  .params({ type, value })
+                  // Without this the list ignores the type's own `orderings`
+                  // and falls back to last-edited, which reshuffles a rail
+                  // every time someone opens a card.
+                  .defaultOrdering([{ field: "order", direction: "asc" }])
+                  .initialValueTemplates([
+                    S.initialValueTemplateItem(spec.template, { [spec.field]: value }),
+                  ])
+              )
+          )
+        )
+    );
+}
+
 /** COLLECTIONS — repeatable content. Phase 2 (hand-authored), Phase 3 (imported). */
 const COLLECTIONS: [string, string, ComponentType?][] = [
   ["teamMember", "Team", UsersIcon],
@@ -146,9 +223,7 @@ export const structure: StructureResolver = (S) => {
           S.list()
             .title("Collections")
             .items(
-              COLLECTIONS.map(([type, title, icon]) =>
-                S.documentTypeListItem(type).title(title).icon(icon)
-              )
+              COLLECTIONS.map(([type, title, icon]) => collection(S, type, title, icon))
             )
         ),
 
