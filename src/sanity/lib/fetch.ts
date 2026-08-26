@@ -54,7 +54,11 @@ export function required<T>(value: T | null | undefined, what: string): NonNulla
 const inFlight = new Map<string, Promise<unknown>>();
 
 export function once<T>(key: string, fetcher: () => Promise<T>): Promise<T> {
-  if (!import.meta.env.PROD) return fetcher();
+  // Optional-chained because this module is also imported OUTSIDE Vite: the
+  // seed scripts pull data modules into plain Node, where `import.meta.env` is
+  // undefined and a bare `.PROD` throws a TypeError that masks the real error
+  // underneath it.
+  if (!import.meta.env?.PROD) return fetcher();
 
   const existing = inFlight.get(key);
   if (existing) return existing as Promise<T>;

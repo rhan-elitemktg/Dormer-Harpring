@@ -29,6 +29,8 @@ import { BarChartIcon } from "@sanity/icons/BarChart";
 import { BlockElementIcon } from "@sanity/icons/BlockElement";
 import { StarIcon } from "@sanity/icons/Star";
 import { HeartIcon } from "@sanity/icons/Heart";
+import { CaseIcon } from "@sanity/icons/Case";
+import { HelpCircleIcon } from "@sanity/icons/HelpCircle";
 
 /**
  * SINGLETONS ARE ENFORCED HERE, NOT IN THE SCHEMA. There is no `singleton: true`
@@ -64,6 +66,8 @@ const PAGES: [string, string, ComponentType?][] = [];
 
 /** COLLECTIONS — repeatable content. Phase 2 (hand-authored), Phase 3 (imported). */
 const COLLECTIONS: [string, string, ComponentType?][] = [
+  ["caseResult", "Case Results", CaseIcon],
+  ["faq", "FAQs", HelpCircleIcon],
   ["award", "Awards", StarIcon],
   ["coreValue", "Core Values", HeartIcon],
 ];

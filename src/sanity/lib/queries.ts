@@ -135,3 +135,68 @@ export const SHARED_SECTIONS_QUERY = defineQuery(
   coreValues{ eyebrow, title }
 }`
 );
+
+/**
+ * FAQ accordions, one page's at a time.
+ *
+ * `shownOn` rather than a reference, for now: the homepage and the heavy Car
+ * Accidents page are the only two hand-authored accordions, and the 28 imported
+ * practice-area pages carry theirs inline on their own document. When those
+ * move, an FAQ belongs to a practice area and this becomes a reference.
+ *
+ * The answer is a plain string, not Portable Text — it also feeds FAQPage
+ * structured data, which takes a string.
+ */
+export const HOME_FAQS_QUERY = defineQuery(`*[_type == "faq" && shownOn == "home"]
+  | order(order asc){
+  "_key": _id,
+  question,
+  answer,
+  videoLength,
+  video{ provider, id }
+}`);
+
+/** The heavy Car Accidents page's twelve. Same shape, same components. */
+export const CAR_ACCIDENT_FAQS_QUERY = defineQuery(
+  `*[_type == "faq" && shownOn == "car-accidents"] | order(order asc){
+  "_key": _id,
+  question,
+  answer,
+  videoLength,
+  video{ provider, id }
+}`
+);
+
+/**
+ * The three case-result lists.
+ *
+ * `wonInCourt` is coalesced because a Sanity boolean is optional at the type
+ * level whatever its initialValue — and the projection is where that belongs,
+ * rather than three `?? false`s at three call sites.
+ *
+ * THREE QUERIES, NOT ONE FILTERED THREE WAYS AT THE CALL SITE, because they are
+ * three different lists that happen to share a shape — and two of them contain
+ * records the archive also contains, six in the same words and three in
+ * different ones. See the note on the `caseResult` schema type: they are
+ * migrated faithfully rather than merged, because choosing which wording the
+ * firm publishes about a real case is the firm's call.
+ */
+export const CASE_RESULTS_QUERY = defineQuery(
+  `*[_type == "caseResult" && shownOn == "results"] | order(order asc){
+  "_key": _id, tag, badge, "wonInCourt": coalesce(wonInCourt, false), offered, recovered, story
+}`
+);
+
+/** The seven won alongside another firm. */
+export const CO_COUNSEL_RESULTS_QUERY = defineQuery(
+  `*[_type == "caseResult" && shownOn == "co-counsel"] | order(order asc){
+  "_key": _id, tag, badge, "wonInCourt": coalesce(wonInCourt, false), offered, recovered, story
+}`
+);
+
+/** The three the homepage leads with. */
+export const HOME_RESULTS_QUERY = defineQuery(
+  `*[_type == "caseResult" && shownOn == "home"] | order(order asc){
+  "_key": _id, tag, badge, "wonInCourt": coalesce(wonInCourt, false), offered, recovered, story
+}`
+);

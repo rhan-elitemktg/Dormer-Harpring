@@ -11,11 +11,14 @@ import type { SchemaTypeDefinition } from "sanity";
 
 import { link } from "./objects/link";
 import { navLink } from "./objects/navLink";
+import { videoRef } from "./objects/videoRef";
 import { inlineText, richText, simpleText } from "./objects/richText";
 import { seo } from "./objects/seo";
 
 import { award } from "./collections/award";
+import { caseResult } from "./collections/caseResult";
 import { coreValue } from "./collections/coreValue";
+import { faq } from "./collections/faq";
 
 import { contactSettings } from "./settings/contactSettings";
 import { firmDetails } from "./settings/firmDetails";
@@ -24,13 +27,21 @@ import { navigation } from "./settings/navigation";
 import { sharedSections } from "./settings/sharedSections";
 
 /** Shared field types. Not documents — these are what documents are built from. */
-const objects: SchemaTypeDefinition[] = [link, navLink, richText, simpleText, inlineText, seo];
+const objects: SchemaTypeDefinition[] = [
+  link,
+  navLink,
+  videoRef,
+  richText,
+  simpleText,
+  inlineText,
+  seo,
+];
 
 /** One document per route. Phase 4. */
 const pages: SchemaTypeDefinition[] = [];
 
 /** Repeatable content. Phase 2 (hand-authored) and Phase 3 (imported). */
-const collections: SchemaTypeDefinition[] = [award, coreValue];
+const collections: SchemaTypeDefinition[] = [award, caseResult, coreValue, faq];
 
 /** Firm-wide singletons. Phase 1. */
 const settings: SchemaTypeDefinition[] = [

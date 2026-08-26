@@ -5,6 +5,9 @@
 import type { ImageMetadata } from "astro";
 import { pt, type PortableTextBlock } from "./portableText";
 import type { CaseResult } from "./caseResults";
+import { sanityClient } from "sanity:client";
+import { CO_COUNSEL_RESULTS_QUERY } from "../sanity/lib/queries";
+import { once, required } from "../sanity/lib/fetch";
 import { practiceAreaPath } from "../lib/routePaths";
 import heroPhoto from "../assets/cocounsel/hero.jpg";
 import heroCrop from "../assets/cocounsel/hero-crop.jpg";
@@ -168,82 +171,7 @@ export async function getCoCounselPage(): Promise<CoCounselPage> {
  * so they render through the shared ResultCard.
  */
 export async function getCoCounselResults(): Promise<CaseResult[]> {
-  return [
-    {
-      _key: "civil-rights",
-      tag: "Civil Rights",
-      badge: "Co-Counsel",
-      wonInCourt: false,
-      offered: "Denied",
-      recovered: "$4M",
-      story:
-        "Our client's son was held in a cell after missing a court date on a " +
-        "traffic issue, where he tragically passed away. Co-counseled with a local firm.",
-    },
-    {
-      _key: "oil-gas",
-      tag: "Oil & Gas Rig Injuries",
-      badge: "Co-Counsel",
-      wonInCourt: false,
-      offered: "Denied",
-      recovered: "$2.3M",
-      story:
-        "Clients were injured by an explosion caused by a drilling rig. Hired by " +
-        "a Texas firm as co-counsel in Colorado.",
-    },
-    {
-      _key: "boating",
-      tag: "Boating Injury",
-      badge: "Co-Counsel",
-      wonInCourt: false,
-      offered: "Denied",
-      recovered: "$1.8M",
-      story:
-        "Settlement following successful litigation in Chicago, Illinois with local counsel.",
-    },
-    {
-      _key: "car-crash",
-      tag: "Car Crash",
-      badge: "Trial Counsel",
-      wonInCourt: true,
-      offered: "$150K",
-      recovered: "$1.3M",
-      story:
-        "Our client was hit in a head-on collision and suffered a leg injury. " +
-        "Hired by a local personal injury firm as trial counsel.",
-    },
-    {
-      _key: "rear-end",
-      tag: "Rear-End Car Accident",
-      badge: "Trial Counsel",
-      wonInCourt: true,
-      offered: "$450K",
-      recovered: "Confidential",
-      story:
-        "Confidential settlement following the exclusion of defense experts. Hired " +
-        "by a local personal injury firm to act as trial counsel.",
-    },
-    {
-      _key: "t-bone",
-      tag: "T-Bone Crash",
-      badge: "Co-Counsel",
-      wonInCourt: false,
-      offered: "$150K",
-      recovered: "$465K",
-      story:
-        "Warehouse manager t-boned by a delivery truck driver who disputed " +
-        "liability. Co-counseled with a local firm.",
-    },
-    {
-      _key: "wrongful-death",
-      tag: "Wrongful Death",
-      badge: "Co-Counsel",
-      wonInCourt: false,
-      offered: "Denied",
-      recovered: "$300K",
-      story:
-        "Clients' father passed away from complications following a slip and fall " +
-        "in a bath tub at a Denver hotel.",
-    },
-  ];
+  return once("caseResults:co-counsel", async () =>
+    required(await sanityClient.fetch(CO_COUNSEL_RESULTS_QUERY), "Case Results (Co-Counsel)")
+  );
 }

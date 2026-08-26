@@ -12,7 +12,7 @@
 //
 //   npx tsx scripts/seed-collections-2a.ts
 //   npx sanity dataset import scratch/collections-2a.ndjson --dataset production --replace
-import "./lib/stub-assets";
+import "./lib/stub-vite-modules";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 
@@ -68,8 +68,6 @@ function doc(type: string, fields: Record<string, unknown>) {
 }
 
 async function main() {
-  assertNotSwapped("awards", "coreValues", "attorneys");
-
   const awardsModule = await import("../src/data/awards.ts");
   const valuesModule = await import("../src/data/coreValues.ts");
 

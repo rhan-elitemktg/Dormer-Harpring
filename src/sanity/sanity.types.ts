@@ -153,6 +153,26 @@ export type Geopoint = {
   alt?: number;
 };
 
+export type Faq = {
+  _id: string;
+  _type: "faq";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  question: string;
+  answer: string;
+  shownOn: "home" | "car-accidents";
+  video: VideoRef;
+  videoLength: string;
+  order: number;
+};
+
+export type VideoRef = {
+  _type: "videoRef";
+  provider: "wistia" | "youtube";
+  id: string;
+};
+
 export type CoreValue = {
   _id: string;
   _type: "coreValue";
@@ -168,6 +188,28 @@ export type CoreValue = {
     | "community"
     | "innovation"
     | "teamwork";
+  order: number;
+};
+
+export type CaseResult = {
+  _id: string;
+  _type: "caseResult";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  tag: string;
+  recovered: string;
+  offered: string;
+  badge:
+    | "Trial Win"
+    | "Settlement"
+    | "Judgment"
+    | "Trial Counsel"
+    | "Co-Counsel"
+    | "Local Counsel";
+  wonInCourt?: boolean;
+  story: string;
+  shownOn: "results" | "co-counsel" | "home";
   order: number;
 };
 
@@ -410,7 +452,10 @@ export type AllSanitySchemaTypes =
   | Navigation
   | FirmDetails
   | Geopoint
+  | Faq
+  | VideoRef
   | CoreValue
+  | CaseResult
   | SanityImageAssetReference
   | Award
   | SanityImageCrop
@@ -590,6 +635,91 @@ export type SHARED_SECTIONS_QUERY_RESULT = {
   } | null;
 } | null;
 
+// Source: src/sanity/lib/queries.ts
+// Variable: HOME_FAQS_QUERY
+// Query: *[_type == "faq" && shownOn == "home"]  | order(order asc){  "_key": _id,  question,  answer,  videoLength,  video{ provider, id }}
+export type HOME_FAQS_QUERY_RESULT = Array<{
+  _key: string;
+  question: string;
+  answer: string;
+  videoLength: string;
+  video: {
+    provider: "wistia" | "youtube";
+    id: string;
+  };
+}>;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: CAR_ACCIDENT_FAQS_QUERY
+// Query: *[_type == "faq" && shownOn == "car-accidents"] | order(order asc){  "_key": _id,  question,  answer,  videoLength,  video{ provider, id }}
+export type CAR_ACCIDENT_FAQS_QUERY_RESULT = Array<{
+  _key: string;
+  question: string;
+  answer: string;
+  videoLength: string;
+  video: {
+    provider: "wistia" | "youtube";
+    id: string;
+  };
+}>;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: CASE_RESULTS_QUERY
+// Query: *[_type == "caseResult" && shownOn == "results"] | order(order asc){  "_key": _id, tag, badge, "wonInCourt": coalesce(wonInCourt, false), offered, recovered, story}
+export type CASE_RESULTS_QUERY_RESULT = Array<{
+  _key: string;
+  tag: string;
+  badge:
+    | "Co-Counsel"
+    | "Judgment"
+    | "Local Counsel"
+    | "Settlement"
+    | "Trial Counsel"
+    | "Trial Win";
+  wonInCourt: boolean | false;
+  offered: string;
+  recovered: string;
+  story: string;
+}>;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: CO_COUNSEL_RESULTS_QUERY
+// Query: *[_type == "caseResult" && shownOn == "co-counsel"] | order(order asc){  "_key": _id, tag, badge, "wonInCourt": coalesce(wonInCourt, false), offered, recovered, story}
+export type CO_COUNSEL_RESULTS_QUERY_RESULT = Array<{
+  _key: string;
+  tag: string;
+  badge:
+    | "Co-Counsel"
+    | "Judgment"
+    | "Local Counsel"
+    | "Settlement"
+    | "Trial Counsel"
+    | "Trial Win";
+  wonInCourt: boolean | false;
+  offered: string;
+  recovered: string;
+  story: string;
+}>;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: HOME_RESULTS_QUERY
+// Query: *[_type == "caseResult" && shownOn == "home"] | order(order asc){  "_key": _id, tag, badge, "wonInCourt": coalesce(wonInCourt, false), offered, recovered, story}
+export type HOME_RESULTS_QUERY_RESULT = Array<{
+  _key: string;
+  tag: string;
+  badge:
+    | "Co-Counsel"
+    | "Judgment"
+    | "Local Counsel"
+    | "Settlement"
+    | "Trial Counsel"
+    | "Trial Win";
+  wonInCourt: boolean | false;
+  offered: string;
+  recovered: string;
+  story: string;
+}>;
+
 // Query TypeMap
 import "@sanity/client";
 declare module "@sanity/client" {
@@ -601,5 +731,10 @@ declare module "@sanity/client" {
     '*[_type == "award"] | order(order asc){\n  "_key": key.current,\n  alt,\n  image,\n  height\n}': AWARDS_QUERY_RESULT;
     '*[_type == "coreValue"] | order(order asc){\n  "_key": _id,\n  title,\n  body,\n  iconKey\n}': CORE_VALUES_QUERY_RESULT;
     '*[_type == "sharedSections" && _id == "sharedSections"][0]{\n  coreValues{ eyebrow, title }\n}': SHARED_SECTIONS_QUERY_RESULT;
+    '*[_type == "faq" && shownOn == "home"]\n  | order(order asc){\n  "_key": _id,\n  question,\n  answer,\n  videoLength,\n  video{ provider, id }\n}': HOME_FAQS_QUERY_RESULT;
+    '*[_type == "faq" && shownOn == "car-accidents"] | order(order asc){\n  "_key": _id,\n  question,\n  answer,\n  videoLength,\n  video{ provider, id }\n}': CAR_ACCIDENT_FAQS_QUERY_RESULT;
+    '*[_type == "caseResult" && shownOn == "results"] | order(order asc){\n  "_key": _id, tag, badge, "wonInCourt": coalesce(wonInCourt, false), offered, recovered, story\n}': CASE_RESULTS_QUERY_RESULT;
+    '*[_type == "caseResult" && shownOn == "co-counsel"] | order(order asc){\n  "_key": _id, tag, badge, "wonInCourt": coalesce(wonInCourt, false), offered, recovered, story\n}': CO_COUNSEL_RESULTS_QUERY_RESULT;
+    '*[_type == "caseResult" && shownOn == "home"] | order(order asc){\n  "_key": _id, tag, badge, "wonInCourt": coalesce(wonInCourt, false), offered, recovered, story\n}': HOME_RESULTS_QUERY_RESULT;
   }
 }

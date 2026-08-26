@@ -32,8 +32,8 @@
 // `--replace` is a TRUE replace, not a merge: a field dropped from the payload
 // is dropped from the document. Verified, after an earlier reading of the
 // opposite turned out to be a stale query against a seed that had not re-run.
-import "./lib/stub-assets";
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import "./lib/stub-vite-modules";
+import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 
 const OUT = resolve(process.cwd(), "scratch/settings.ndjson");
@@ -46,39 +46,15 @@ const keyOf = (s: string) =>
     .replace(/^-+|-+$/g, "")
     .slice(0, 48) || "item";
 
-/**
- * Refuse to run against a module that has already been swapped to Sanity.
- *
- * CHECKED BY READING THE SOURCE, NOT BY CATCHING THE IMPORT. `sanity:client` is
- * a Vite virtual module, so plain Node fails on it with
- * ERR_UNSUPPORTED_ESM_URL_SCHEME — thrown from a SYNCHRONOUS load hook, outside
- * the promise chain, where a try/catch around `await import()` cannot see it.
- * tsx then exits 0, so the seed appears to succeed while writing nothing and
- * leaving whatever payload was on disk from last time. That stale payload
- * imports perfectly happily, which is how a removed field came back.
- *
- * Kept SEPARATE from the imports below rather than wrapping them, because a
- * templated `import(\`../src/data/${name}.ts\`)` is untyped — every callback
- * downstream then infers `any` and `check:types` goes red. The literal imports
- * in `main()` keep their types; this just runs first.
- */
-function assertNotSwapped(...names: string[]) {
-  for (const name of names) {
-    const file = resolve(process.cwd(), `src/data/${name}.ts`);
-    if (!/from ["']sanity:client["']/.test(readFileSync(file, "utf8"))) continue;
-    console.error(
-      `\nsrc/data/${name}.ts already reads from Sanity, so it holds no literals to seed.\n\n` +
-        `That module has been swapped and Sanity is its source of truth now — this script's\n` +
-        `job there is done. To change its content, edit it in the Studio at /admin.\n\n` +
-        `Seeding is one-way: seed FIRST, verify, then swap the getter.\n`
-    );
-    process.exit(1);
-  }
-}
+// NO MODULE-LEVEL "already swapped" GUARD. There used to be one, and it became
+// wrong the moment a module was swapped one getter at a time: `home.ts` has
+// six and only `getRecentResults()` moved in Phase 2b, so refusing the whole
+// module would block the other five from ever being seeded. The guard is
+// per-GETTER now and lives in the stub — calling one that already reads from
+// Sanity throws, naming the problem, instead of writing a document full of
+// nothing. See scripts/lib/stub-vite-modules.ts.
 
 async function main() {
-  assertNotSwapped("site", "navigation", "contact", "stats");
-
   const site = await import("../src/data/site.ts");
   const nav = await import("../src/data/navigation.ts");
   const contact = await import("../src/data/contact.ts");
