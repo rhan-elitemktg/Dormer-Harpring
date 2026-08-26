@@ -8,6 +8,122 @@ either here, and don't record anything `git log` already knows.
 
 _Last updated: 2026-08-26._
 
+## The Sanity integration has started — Phases 0 and 1 are in
+
+**The pipeline exists and four documents are through it.** `src/data/` is 4 of 28 modules
+Sanity-backed; the other 24 still return literals and are untouched.
+
+The agreed shape, decided with Rhan before any code:
+
+| | |
+|---|---|
+| Desk | **Pages → Collections → Site Settings**. The client's order, NOT the build order |
+| Build order | Foundation → Settings → Collections → Pages, because pages reference collections |
+| Imported content | All 290 blog + practice-area documents move; `src/content/` retires (Phase 3) |
+| Editable surface | Every visible string, **except the main nav's top level** |
+| Publish → live | Sanity webhook → Vercel Deploy Hook. The site stays a pure static build |
+
+**THE VERIFICATION THAT MATTERS IS THE BYTE-DIFF, and it is available to every later phase.**
+A content migration should be output-neutral, so hash all 332 built pages before and after and
+account for every difference. Phases 0 and 1 both came back with **331 of 332 identical** —
+the only page that changed is `dist/admin/index.html`, and only its Studio bundle hash. Do not
+lose this check by making a cosmetic change in the same commit as a migration.
+
+### What is built
+
+- `sanity.cli.ts` + `npm run typegen` (`sanity schema extract && sanity typegen generate`).
+- `src/sanity/lib/` — `image.ts` (Sanity CDN URLs), `queries.ts` (every `defineQuery`),
+  `fetch.ts` (`required()` and `once()`).
+- `Picture.astro` and `ProseImage.astro` branch on local-import vs Sanity asset. Props are
+  identical either way, so moving an image into the Studio is a data change.
+- Field types: `richText`, `simpleText`, `inlineText`, `link`, `navLink`, `seo`.
+- The desk, with a catch-all that surfaces any document type not placed in a group.
+- Four singletons: Firm Details, Navigation, Contact & Consultation, Firm Stats.
+
+### Five things that will bite the next phase
+
+1. **`once()` in `sanity/lib/fetch.ts` is not optional.** The first Sanity-backed build took
+   **3m35s against 44s** — every page renders the header, the footer and usually the contact
+   band, so four singletons became roughly two thousand round trips. With `once()` it is back
+   at 43.6s. Any new getter that does not use it re-introduces this, and the arithmetic
+   against 186 posts and 104 practice areas is a build nobody waits for.
+2. **Filter queries on `_type` as well as `_id`.** An id alone tells typegen nothing about
+   shape, so the generated result type is a union across every document type in the dataset —
+   one all-null variant each — and every field reads as possibly null however the schema is
+   validated. With `_type` the projection types itself.
+3. **`@sanity/icons` lies about its own runtime.** `index.d.ts` declares every named icon and
+   the barrel exports none of them (it exports a lazy map). `import { CogIcon } from
+   "@sanity/icons"` TYPECHECKS and then dies at bundle time. Import from the subpath:
+   `@sanity/icons/Cog`. `check:types` cannot catch this; only a build can.
+4. **typegen parses every matched file as ordinary TypeScript**, so a `.d.ts` is a parse
+   error. Declaration files, the vendored `eliteTheme.js` and typegen's own output are
+   excluded in `sanity.cli.ts`. Widening that glob re-breaks it.
+5. **`getStaticPaths` still cannot see module scope.** Both `[slug].astro` files are affected.
+   `src/sanity/lib/queries.ts` exists so queries can be imported rather than closed over.
+
+### Coalescing goes in the projection or on its own line — never in a cast
+
+`as FirmDetails` typechecks and hides a real mismatch: a projection returns `null` where the
+interfaces say `undefined`, and the two are not the same to a component doing
+`{firm.email && …}`. `getFirmDetails()` handles four fields explicitly, and **throws** on a
+missing map pin rather than defaulting to 0 — a real coordinate in the Gulf of Guinea that
+would ship as the firm's location in its structured data.
+
+`required()` throws when a singleton is absent. **Hard cutover, no fallbacks**: a getter that
+quietly falls back to a literal is a second copy of the content that can ship by accident,
+which is precisely the failure this codebase already had with a phone number.
+
+### The main nav's top level is code, on purpose
+
+`TOP_LEVEL` in `src/data/navigation.ts` holds the six items — labels, destinations, order,
+existence. The Studio cannot rename one, reorder them, add a seventh or delete one. It owns
+the second level down: three dropdown lists, plus the footer's columns and chips.
+
+**One NAMED field per menu, not a generic list with a parent key.** An editor cannot invent a
+menu or attach one to the wrong parent, and a menu appearing under Results — which has none by
+design — is a code change. That constraint IS the guarantee that was asked for. The footer
+stays fully editable: it is flat, and the request was about the main nav.
+
+`external` is **derived from the href now, not stored.** The flag was a checkbox someone had
+to remember; forget it on a pasted `https://` URL and the link opens in the same tab with no
+glyph and nothing reports it. `ProseLink` already worked this way, so it is now one rule.
+
+### The three Python checks that read `site.ts` are repointed
+
+`diff-comp-about.py`, `diff-comp-blog.py` and `diff-comp-blog-post.py` each pulled the phone
+out of `src/data/site.ts` by regex. That literal is gone, so `.group(1)` threw on `None` —
+a declaration that stopped being true failing loudly rather than passing quietly. They query
+the same dataset the build queries now, through **`scripts/lib/firm.py`**. The dataset is
+public-read, so no token; it does need the network, which these scripts already did.
+
+Tested in both directions: the built page's number swapped for the retired `(303) 747-4404`
+exits 1, restoring it exits 0.
+
+### Seeding: the pattern the later phases reuse
+
+`scripts/seed-settings.ts` reads the values out of the static modules and writes NDJSON for
+`sanity dataset import --replace`. NDJSON rather than `client.create()` calls because it uses
+the CLI's own credentials (no write token to mint or store), `--replace` makes a re-run
+idempotent, and it is the only route that can carry images via `_sanityAsset` — which Phase 3
+needs for 203 body images. Proving it on four documents was cheaper than proving it on 313.
+
+**`scripts/lib/stub-assets.ts` is what makes that possible at all.** A plain Node script
+cannot import anything under `src/data/`: those modules import images, which outside Astro is
+`ERR_UNKNOWN_FILE_EXTENSION`, and the whole module fails to load. A `node:module` hook answers
+image imports with a stub. Import it BEFORE the dynamic import, and use `await import()` —
+static imports hoist above it.
+
+Payloads land in `scratch/`, which is gitignored: the script is the record, not its output.
+
+### Not done, and known
+
+- **The production URL is still not a Sanity CORS origin**, so the deployed `/admin` loads and
+  fails sign-in. `http://localhost:4321` is registered — don't move dev off 4321.
+- **No webhook yet.** Publishing in the Studio changes nothing on the live site until someone
+  redeploys. That is Phase 5.
+- **Nothing is wired for Visual Editing**, so array projections omit `_key` where the
+  interface has none. Adding it is what that phase is for.
+
 ## State
 
 Build is green: **332 pages** — 330 that render a site header and footer, plus `404.html` and
@@ -81,7 +197,7 @@ last handoff and it moves the project's biggest dependency off the critical path
 **The blog archive is 186 posts, not 167.** WordPress has two post types and the article-shaped
 content is spread across both — see below.
 
-Marker inventory: **38 `TODO(launch)`, 14 `TODO(video)`, 4 `TODO(sanity)`, 1 `TODO(content)`.**
+Marker inventory: **39 `TODO(launch)`, 14 `TODO(video)`, 5 `TODO(sanity)`, 1 `TODO(content)`.**
 Grep all four before launch, not just the first — and **grep with the colon**. `TODO(launch)` also
 appears in eleven comments that DISCUSS a marker rather than being one, which is how this line
 previously read 43. `grep -rn "TODO(launch):"` is the count that means anything.
@@ -967,19 +1083,40 @@ entry and both files to fix.
    Studio for unlisted videos beyond the five the site already embeds.
 3. **One Wistia player per popover, initialised eagerly** — 15 on the homepage, 20 on
    `/denver-car-accident-lawyer/`. Inherent to the class-based embed; wants a pass before launch.
-4. **Move both collections into Sanity.** The blog and the practice areas are now two collections
-   with the same contract, and the getters are already the projections. Plus the four Portable
-   Text object types the post template deferred (`callout`, `phoneBand`, `attorneyCard`,
-   `pullQuote`), whose intended home is commented in `prose/components.ts` — and which the
-   practice-area chrome maps onto almost exactly. **Read "Sanity readiness" below first** — the
-   content is in better shape than the tooling is.
-5. `/new-seo-setup` — per-page meta, a Global SEO Settings singleton, JSON-LD, `sitemap.xml`,
+4. **Sanity Phase 2 — Collections, hand-authored.** Fifteen modules, ~230 documents:
+   `attorney` (27 + the two dogs) · `caseResult` (89) · `testimonial` (21) · `award` · `faq`
+   (20) · `practiceArea` · `coreValue` · `city` · the four community types · `newsMention` ·
+   `insight`. This is where the editable CARD images land. Four modelling calls are already
+   flagged elsewhere in this file and belong in that phase: the homepage's nine practice-area
+   blurbs vs `/practice-areas`' (different copy for the same nine — do not collapse them), the
+   three duplicated case results, the nine `href="#"` placeholders, and `AREA_TO_BLOG_CATEGORY`
+   becoming a per-page reference list.
+5. **Sanity Phase 3 — Collections, imported.** 313 documents, 203 body images, script-driven.
+   Bodies are already Portable Text from the same converter, so they upload unchanged — but
+   **preserve the existing `_key`s rather than regenerating**: Sanity requires uniqueness
+   within each array and a collision is a silently dropped item, not an error. Then
+   `content.config.ts` retires. **Do not delete `practice-area-pages.mjs` or
+   `blog-category-overrides.mjs` blindly** — `EXCLUDED_SLUGS`, `PAGE_ARTICLES` and the "a page
+   in neither throws" contract encode decisions, not mechanics.
+   Plus the four Portable Text object types the post template deferred (`callout`, `phoneBand`,
+   `attorneyCard`, `pullQuote`), whose intended home is commented in `prose/components.ts` —
+   and which the practice-area chrome maps onto almost exactly.
+   Open in that phase: the heavy `PracticeAreaDetail` in `carAccidents.ts` — 45KB across ~20
+   section interfaces for ONE page. Recommendation on the table is to keep the structure in
+   code and move only its text and images.
+6. **Sanity Phase 4 — Pages.** Sixteen singletons, every visible string a field. `homePage` is
+   the largest (26 getters in one `Promise.all`). The two template-chrome singletons —
+   `blogPostTemplate` and `practiceAreaTemplate` — sit under **Pages**, not Settings: they hold
+   copy that appears ON a page, which is exactly what the SEO team will reach for.
+7. **Sanity Phase 5** — the webhook, CORS, then `/studio-polish ux`, which audits the
+   filled-out schema and so waits until there is one.
+8. `/new-seo-setup` — per-page meta, a Global SEO Settings singleton, JSON-LD, `sitemap.xml`,
    `robots.txt`, editor-managed redirects. **The practice-area pages already carry real
    `metaTitle` / `metaDescription` from the live site's own meta**, so that layer has something
-   true to start from. `BlogPosting` JSON-LD belongs to this phase, and so does `sitemap.xml` — **which
+   true to start from — and the `seo` object type is already stubbed to hold them when they
+   land in Phase 3. `BlogPosting` JSON-LD belongs to this phase, and so does `sitemap.xml` — **which
    nothing links any more**: the footer points at the human `/sitemap/` now. The XML file's every
    URL is absolute off `site:`, so it cannot be written before the www-vs-apex call.
-6. `/studio-polish ux` — audits the filled-out schema, so it waits.
 
 No comp exists for **privacy / disclaimer**, **sitemap** or **404**. All three are built on the
 light template's shell anyway — see below.
@@ -1005,9 +1142,12 @@ should expect to build.
 
 **The blockers, in the order they bite:**
 
-1. **There is no Sanity client.** `sanityClient` appears in exactly four places and all four are
-   comments. `@sanity/astro` is configured and serves the `sanity:client` virtual module, but
-   nothing imports it. Step one, and it is the whole of step one.
+1. ~~**There is no Sanity client.**~~ **CLOSED in Phase 0.** `@sanity/astro`'s `sanity:client`
+   is now imported by `src/data/{site,navigation,contact,stats}.ts` and by
+   `src/sanity/lib/image.ts`. The client is configured entirely in `astro.config.mjs` —
+   `IntegrationOptions` is `ClientConfig` plus the studio keys, so there is no wrapper module
+   and one client serves everything. `perspective: "published"` so a draft cannot go live on
+   the next deploy; `apiVersion` pinned because GROQ's behaviour is versioned by date.
 2. **TypeScript is installed now, and the repo does NOT typecheck.** `typescript` and
    `@astrojs/check` are devDependencies and `npm run check:types` runs `astro check`. First run:
    **9 errors, 97 hints across 205 files.** Nothing had ever verified a type here, so this is
@@ -1070,16 +1210,32 @@ should expect to build.
      about the GENERATED module rather than about `StudioTheme` in general — checked against the
      built file. That is where the fix belongs; a non-null assertion at the use site would assert
      the same thing with none of the explanation.
-3. **No TypeGen path** — no `sanity.cli.ts`, no `typegen` script, no `sanity.types.ts`. Note
-   `sanity-typegen.json` is deprecated; configuration belongs in `sanity.cli.ts` with
-   `typegen.enabled`, which regenerates during `sanity dev` / `sanity build`.
+3. ~~**No TypeGen path.**~~ **CLOSED in Phase 0**, but not the way the note assumed.
+   `sanity.cli.ts` exists and `npm run typegen` is `sanity schema extract && sanity typegen
+   generate`, writing `src/sanity/{schema.json,sanity.types.ts}` — both committed.
+
+   **`typegen.enabled` IS DELIBERATELY OMITTED.** It regenerates during `sanity dev` /
+   `sanity build`, and this Studio is EMBEDDED in Astro — neither command is ever run here, so
+   the hook would never fire and setting it true would be a claim that does not hold. Run
+   `npm run typegen` after any schema or query change; `check:types` is the gate that catches
+   a stale run.
 4. **The asset surface is 112 distinct images** imported by the data layer, plus **203 more**
-   inside the content collections. `src/content` is 39M.
+   inside the content collections. `src/content` is 39M. **They split two ways** by Rhan's
+   rule: large decorative art (page-header photographs, band backgrounds, the two logos) stays
+   a local import through Astro's build pipeline; card and interactive images become Sanity
+   assets on its CDN. `Picture.astro` already branches, so each move is a data change.
+
+   The Sanity branch does NOT go through Astro's `<Image>`, on purpose: ~290 remote fetches
+   would add minutes to every build, and Astro re-crops from the original, throwing away the
+   hotspot an editor set. Dimensions are read out of the asset reference rather than fetched —
+   290 images is 290 round trips — and are omitted rather than guessed when the ref is not in
+   Sanity's documented shape, because a wrong width/height bakes the layout shift into the
+   markup.
 5. **`getStaticPaths` does not see module scope.** Astro hoists it into its own module context,
    so a module-level `const QUERY = defineQuery(...)` throws `ReferenceError` at request time.
    Define queries used inside it there, or import them. Both `[slug].astro` files are affected.
 6. **The production URL is still not a Sanity CORS origin**, so the deployed `/admin` loads and
-   fails sign-in. Unchanged, and still not a blocker for building.
+   fails sign-in. Unchanged, and still not a blocker for building. Phase 5.
 
 **`tsconfig.json` NEEDS NO `types` ENTRY, and an earlier version of this section was wrong to
 say it did.** The Sanity guide's Astro page says to add `"types": ["@sanity/astro/module"]` —
@@ -1322,5 +1478,14 @@ hero at all** — it opens on its title, the way the blog post does.
 
 Elite brand theme applied at scaffold time: light-locked palette, ELITE emblem as the workspace
 `icon`, centred login card. Cosmetic only and fails gracefully — worth a glance after major Sanity
-upgrades. The desk is empty because there are no content types yet. Expected — both collections
-live in `src/content/` for now, on purpose.
+upgrades.
+
+**The desk is no longer empty.** `structureTool({ structure })` draws three groups — Pages,
+Collections, Site Settings — from `src/sanity/structure/index.ts`. Pages and Collections are
+empty lists today; Site Settings holds four singletons. A document type added to `schemaTypes`
+but not placed in one of the three arrays shows up under a divider at the bottom rather than
+becoming invisible, which is the same silent-failure shape the four linters exist to catch.
+
+Singletons are enforced by `documentId()` in the structure, not by a schema option — there is
+no `singleton: true`. `SINGLETON_TYPES` is what keeps them out of the catch-all, so a
+singleton is never shown twice with edits to the second copy going nowhere.
