@@ -17,11 +17,13 @@ import { seo } from "./objects/seo";
 
 import { aboutPage } from "./pages/aboutPage";
 import { blogIndexPage } from "./pages/blogIndexPage";
+import { blogPostTemplate } from "./pages/blogPostTemplate";
 import { carAccidentsPage } from "./pages/carAccidentsPage";
 import { coCounselPage } from "./pages/coCounselPage";
 import { communityPage } from "./pages/communityPage";
 import { contactPage } from "./pages/contactPage";
 import { homePage } from "./pages/homePage";
+import { practiceAreaTemplate } from "./pages/practiceAreaTemplate";
 import { practiceAreasPage } from "./pages/practiceAreasPage";
 import { resultsPage } from "./pages/resultsPage";
 import { teamPage } from "./pages/teamPage";
@@ -81,6 +83,8 @@ const pages: SchemaTypeDefinition[] = [
   blogIndexPage,
   contactPage,
   thankYouPage,
+  blogPostTemplate,
+  practiceAreaTemplate,
 ];
 
 /**

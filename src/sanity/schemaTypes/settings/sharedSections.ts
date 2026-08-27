@@ -19,6 +19,10 @@
 //   getAttorneysSection    2 pages   index, practice-areas
 //   getHomeWhyUs           2 pages   index, practice-areas
 //
+// Phase 4 added a fourth thing to this document that is not a heading at all —
+// the sidebar consultation form's copy, identical across the 290 pages the two
+// article templates serve. Same rule, same reason: one record, changed once.
+//
 // The other six — FAQ, feed, practice, practice promise, community, car-accident
 // FAQ — are each used on ONE page, so they belong to that page's document. Six
 // one-page sections filed in a document called "Shared" would be a lie the desk
@@ -224,6 +228,51 @@ export const sharedSections = defineType({
           validation: (rule) => rule.required().min(1),
         }),
         defineField({ name: "ctaLabel", type: "string", validation: (rule) => rule.required() }),
+      ],
+    }),
+
+    /*
+     * THE CONSULTATION FORM IN AN ARTICLE'S SIDEBAR — 290 pages, one piece of
+     * copy, and the third distinct set of form wording on this site.
+     *
+     * Here rather than on the two template documents that render it, and the
+     * rule is the client's own: change a record once and every page that shows
+     * it follows. Two copies across `blogPostTemplate` and
+     * `practiceAreaTemplate` would be two places to update and one to forget —
+     * they are byte-identical today because they were written together.
+     *
+     * NOT THE SAME FORM AS THE PAGE-FOOT ONE, which is on Contact &
+     * Consultation and says "Take the first step." Same component, different
+     * variant, deliberately different copy: the sidebar's is short because it
+     * sits beside an article someone is reading.
+     */
+    defineField({
+      name: "sidebarForm",
+      title: "Sidebar consultation form",
+      type: "object",
+      description:
+        "The short form in the sidebar of every blog post and every practice-area page — 290 " +
+        "of them. The longer form at the foot of a page is separate, on Contact & Consultation.",
+      fields: [
+        defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
+        defineField({ name: "lede", type: "text", rows: 2, validation: (rule) => rule.required() }),
+        defineField({
+          name: "submitLabel",
+          type: "string",
+          description:
+            "Sentence case. The button uppercases it, so the case typed here is this data " +
+            "layer's convention rather than the design's.",
+          validation: (rule) => rule.required(),
+        }),
+        defineField({
+          name: "disclaimer",
+          title: "Note under the button",
+          type: "string",
+          description:
+            "The design draws this as a small gold note rather than the sentence the page-foot " +
+            "form carries. Same field, same slot, styled as the label it is.",
+          validation: (rule) => rule.required(),
+        }),
       ],
     }),
   ],

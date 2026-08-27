@@ -70,6 +70,12 @@ export type SharedSections = {
     }>;
     ctaLabel: string;
   };
+  sidebarForm?: {
+    title: string;
+    lede: string;
+    submitLabel: string;
+    disclaimer: string;
+  };
 };
 
 export type SanityImageCrop = {
@@ -480,6 +486,38 @@ export type SimpleText = Array<{
   _type: "block";
   _key: string;
 }>;
+
+export type PracticeAreaTemplate = {
+  _id: string;
+  _type: "practiceAreaTemplate";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  eyebrow: string;
+  meta: {
+    writtenByLabel: string;
+    updatedLabel: string;
+    postedLabel: string;
+  };
+  contentsLabel: string;
+  relatedSidebarLabel: string;
+  faqsTitle: string;
+  factCheckLabel: string;
+};
+
+export type BlogPostTemplate = {
+  _id: string;
+  _type: "blogPostTemplate";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  contentsLabel: string;
+  categoriesLabel: string;
+  relatedSidebarLabel: string;
+  relatedTitle: string;
+  factCheckLabel: string;
+  readMoreLabel: string;
+};
 
 export type ThankYouPage = {
   _id: string;
@@ -1195,6 +1233,8 @@ export type AllSanitySchemaTypes =
   | TeamMember
   | RichText
   | SimpleText
+  | PracticeAreaTemplate
+  | BlogPostTemplate
   | ThankYouPage
   | ContactPage
   | BlogIndexPage
@@ -1374,7 +1414,7 @@ export type CORE_VALUES_QUERY_RESULT = Array<{
 
 // Source: src/sanity/lib/queries.ts
 // Variable: SHARED_SECTIONS_QUERY
-// Query: *[_type == "sharedSections" && _id == "sharedSections"][0]{  coreValues{ eyebrow, title },  reviewSummary{ count, rating, source },  attorneysBand{    eyebrow,    title,    quote,    ctaLabel,    signature{ name, role, attorneyKey, portrait }  },  whyUs{    eyebrow,    title{ lead, accent },    lede,    "points": coalesce(points[]{ _key, title, body }, []),    ctaLabel  }}
+// Query: *[_type == "sharedSections" && _id == "sharedSections"][0]{  coreValues{ eyebrow, title },  reviewSummary{ count, rating, source },  attorneysBand{    eyebrow,    title,    quote,    ctaLabel,    signature{ name, role, attorneyKey, portrait }  },  whyUs{    eyebrow,    title{ lead, accent },    lede,    "points": coalesce(points[]{ _key, title, body }, []),    ctaLabel  },  sidebarForm{ title, lede, submitLabel, disclaimer }}
 export type SHARED_SECTIONS_QUERY_RESULT = {
   coreValues: {
     eyebrow: string;
@@ -1416,6 +1456,12 @@ export type SHARED_SECTIONS_QUERY_RESULT = {
       body: string;
     }>;
     ctaLabel: string;
+  } | null;
+  sidebarForm: {
+    title: string;
+    lede: string;
+    submitLabel: string;
+    disclaimer: string;
   } | null;
 } | null;
 
@@ -2251,6 +2297,34 @@ export type BLOG_INDEX_PAGE_QUERY_RESULT = {
   emptyLabel: string;
 } | null;
 
+// Source: src/sanity/lib/queries.ts
+// Variable: BLOG_POST_TEMPLATE_QUERY
+// Query: *[_type == "blogPostTemplate" && _id == "blogPostTemplate"][0]{  contentsLabel,  categoriesLabel,  relatedSidebarLabel,  relatedTitle,  factCheckLabel,  readMoreLabel}
+export type BLOG_POST_TEMPLATE_QUERY_RESULT = {
+  contentsLabel: string;
+  categoriesLabel: string;
+  relatedSidebarLabel: string;
+  relatedTitle: string;
+  factCheckLabel: string;
+  readMoreLabel: string;
+} | null;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: PRACTICE_AREA_TEMPLATE_QUERY
+// Query: *[_type == "practiceAreaTemplate" && _id == "practiceAreaTemplate"][0]{  eyebrow,  meta{ writtenByLabel, updatedLabel, postedLabel },  contentsLabel,  relatedSidebarLabel,  faqsTitle,  factCheckLabel}
+export type PRACTICE_AREA_TEMPLATE_QUERY_RESULT = {
+  eyebrow: string;
+  meta: {
+    writtenByLabel: string;
+    updatedLabel: string;
+    postedLabel: string;
+  };
+  contentsLabel: string;
+  relatedSidebarLabel: string;
+  faqsTitle: string;
+  factCheckLabel: string;
+} | null;
+
 // Query TypeMap
 import "@sanity/client";
 declare module "@sanity/client" {
@@ -2261,7 +2335,7 @@ declare module "@sanity/client" {
     '*[_type == "firmStats" && _id == "firmStats"][0]{\n  "stats": coalesce(stats[]{ _key, big, label }, [])\n}': FIRM_STATS_QUERY_RESULT;
     '*[_type == "award"] | order(order asc){\n  "_key": key.current,\n  alt,\n  image,\n  height\n}': AWARDS_QUERY_RESULT;
     '*[_type == "coreValue"] | order(order asc){\n  "_key": _id,\n  title,\n  body,\n  iconKey\n}': CORE_VALUES_QUERY_RESULT;
-    '*[_type == "sharedSections" && _id == "sharedSections"][0]{\n  coreValues{ eyebrow, title },\n  reviewSummary{ count, rating, source },\n  attorneysBand{\n    eyebrow,\n    title,\n    quote,\n    ctaLabel,\n    signature{ name, role, attorneyKey, portrait }\n  },\n  whyUs{\n    eyebrow,\n    title{ lead, accent },\n    lede,\n    "points": coalesce(points[]{ _key, title, body }, []),\n    ctaLabel\n  }\n}': SHARED_SECTIONS_QUERY_RESULT;
+    '*[_type == "sharedSections" && _id == "sharedSections"][0]{\n  coreValues{ eyebrow, title },\n  reviewSummary{ count, rating, source },\n  attorneysBand{\n    eyebrow,\n    title,\n    quote,\n    ctaLabel,\n    signature{ name, role, attorneyKey, portrait }\n  },\n  whyUs{\n    eyebrow,\n    title{ lead, accent },\n    lede,\n    "points": coalesce(points[]{ _key, title, body }, []),\n    ctaLabel\n  },\n  sidebarForm{ title, lede, submitLabel, disclaimer }\n}': SHARED_SECTIONS_QUERY_RESULT;
     '*[_type == "homePage" && _id == "homePage"][0].faqs[]{\n  _key,\n  question,\n  answer,\n  videoLength,\n  video{ provider, id }\n}': HOME_FAQS_QUERY_RESULT;
     '*[_type == "carAccidentsPage" && _id == "carAccidentsPage"][0].faqs[]{\n  _key,\n  question,\n  answer,\n  videoLength,\n  video{ provider, id }\n}': CAR_ACCIDENT_FAQS_QUERY_RESULT;
     '*[_type == "caseResult" && shownOn == "results"] | order(order asc){\n  "_key": _id, tag, badge, "wonInCourt": coalesce(wonInCourt, false), offered, recovered, story\n}': CASE_RESULTS_QUERY_RESULT;
@@ -2302,5 +2376,7 @@ declare module "@sanity/client" {
     '*[_type == "resultsPage" && _id == "resultsPage"][0]{\n  eyebrow, title, lede, moreLabel\n}': RESULTS_PAGE_QUERY_RESULT;
     '*[_type == "coCounselPage" && _id == "coCounselPage"][0]{\n  eyebrow,\n  title,\n  lede,\n  ctaLabel,\n  ctaNote,\n  partnership{ eyebrow, title, intro, callout, terms },\n  results{ eyebrow, title, lede },\n  areas{\n    eyebrow,\n    title,\n    ctaLabel,\n    "items": coalesce(items[]{ _key, label, href }, [])\n  },\n  form{ title, lede, requiredNote, submitLabel, disclaimer }\n}': CO_COUNSEL_PAGE_QUERY_RESULT;
     '*[_type == "blogIndexPage" && _id == "blogIndexPage"][0]{\n  eyebrow,\n  title,\n  lede,\n  categoryLabel,\n  allLabel,\n  featuredBadge,\n  readMoreLabel,\n  loadMoreLabel,\n  emptyLabel\n}': BLOG_INDEX_PAGE_QUERY_RESULT;
+    '*[_type == "blogPostTemplate" && _id == "blogPostTemplate"][0]{\n  contentsLabel,\n  categoriesLabel,\n  relatedSidebarLabel,\n  relatedTitle,\n  factCheckLabel,\n  readMoreLabel\n}': BLOG_POST_TEMPLATE_QUERY_RESULT;
+    '*[_type == "practiceAreaTemplate" && _id == "practiceAreaTemplate"][0]{\n  eyebrow,\n  meta{ writtenByLabel, updatedLabel, postedLabel },\n  contentsLabel,\n  relatedSidebarLabel,\n  faqsTitle,\n  factCheckLabel\n}': PRACTICE_AREA_TEMPLATE_QUERY_RESULT;
   }
 }

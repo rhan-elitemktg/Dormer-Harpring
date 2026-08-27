@@ -81,12 +81,12 @@ function singleton(
  * reads across the header; alphabetical would put Thank You between Results and
  * Testimonials and Contact above everything.
  *
- * TWELVE OF AN EVENTUAL FIFTEEN. Still to come: the two TEMPLATE singletons —
- * `blogPostTemplate` and `practiceAreaTemplate`, which hold the chrome that
- * appears ON a post or a service page (the fact-check band's wording, the
- * sidebar headings) and which belong here rather than in Settings for exactly
- * that reason: it is copy on a page, which is what the SEO team reaches for —
- * and the three utility pages, which arrive together as one `sitePage` group.
+ * FOURTEEN OF AN EVENTUAL FIFTEEN. The two TEMPLATE singletons at the foot hold
+ * the chrome every post and every service page renders — the contents box's
+ * heading, the byline's labels, the fact-check tag — and they belong here rather
+ * than in Settings for exactly that reason: it is copy on a page, which is what
+ * the SEO team reaches for. Still to come: the three utility pages (privacy,
+ * sitemap, 404), which arrive together as one `sitePage` group.
  */
 const PAGES: [string, string, ComponentType?][] = [
   ["homePage", "Homepage", HomeIcon],
@@ -101,6 +101,11 @@ const PAGES: [string, string, ComponentType?][] = [
   ["blogIndexPage", "Blog index", DocumentTextIcon],
   ["contactPage", "Contact", EnvelopeIcon],
   ["thankYouPage", "Thank You", CheckmarkCircleIcon],
+  // The two TEMPLATES last, after the routes. They are not pages an editor can
+  // visit — they are the chrome every post and every service page renders — so
+  // they sit under the list rather than inside it.
+  ["blogPostTemplate", "Blog post template", DocumentTextIcon],
+  ["practiceAreaTemplate", "Practice area template", CaseIcon],
 ];
 
 /**

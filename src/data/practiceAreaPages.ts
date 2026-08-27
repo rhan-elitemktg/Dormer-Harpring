@@ -15,6 +15,8 @@ import { sanityClient } from "sanity:client";
 import {
   PRACTICE_AREA_ARTICLES_QUERY,
   PRACTICE_AREA_PAGES_QUERY,
+  PRACTICE_AREA_TEMPLATE_QUERY,
+  SHARED_SECTIONS_QUERY,
 } from "../sanity/lib/queries";
 import { once, required } from "../sanity/lib/fetch";
 import { getCities } from "./cities";
@@ -323,24 +325,29 @@ export interface PracticeAreaPageCopy {
  * has no hero at all, and its byline names a reviewer these pages do not have.
  */
 export async function getPracticeAreaPageCopy(): Promise<PracticeAreaPageCopy> {
+  const [copy, shared] = await Promise.all([
+    once("practiceAreaTemplate", async () =>
+      required(
+        await sanityClient.fetch(PRACTICE_AREA_TEMPLATE_QUERY),
+        "Practice area template",
+        "Pages"
+      )
+    ),
+    once("sharedSections", async () =>
+      required(await sanityClient.fetch(SHARED_SECTIONS_QUERY), "Shared Sections")
+    ),
+  ]);
+
   return {
-    eyebrow: "Tough lawyers for tough cases",
+    ...copy,
     meta: {
+      // The firm writes all 104, and its name and link come from `blog.ts`'s
+      // one byline rather than being typed into a second place.
       author: FIRM,
-      writtenByLabel: "Written by",
-      updatedLabel: "Updated",
-      postedLabel: "Posted",
+      ...copy.meta,
     },
-    contentsLabel: "On this page",
-    relatedSidebarLabel: "Related articles",
-    faqsTitle: "Frequently asked questions",
-    factCheckLabel: "Fact-checked",
-    form: {
-      title: "Get a free case review",
-      lede: "Tell us what happened. An attorney reviews every request personally.",
-      submitLabel: "Review my case",
-      disclaimer: "Free & confidential",
-    },
+    // Shared with the blog post template — see the note there.
+    form: required(shared.sidebarForm, "Shared Sections → Sidebar consultation form"),
   };
 }
 
