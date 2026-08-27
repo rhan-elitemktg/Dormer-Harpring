@@ -18,6 +18,7 @@ import { seo } from "./objects/seo";
 import { carAccidentsPage } from "./pages/carAccidentsPage";
 import { communityPage } from "./pages/communityPage";
 import { homePage } from "./pages/homePage";
+import { practiceAreasPage } from "./pages/practiceAreasPage";
 
 import { award } from "./collections/award";
 import { blogCategory } from "./collections/blogCategory";
@@ -50,11 +51,17 @@ const objects: SchemaTypeDefinition[] = [
 /**
  * One document per route.
  *
- * Phase 2f put the three below here early, holding only the lists that were
- * wrongly filed as collections. Their COPY is still Phase 4 and lands on these
- * same documents — so a Phase 4 seed must merge rather than replace.
+ * Phase 2f put three of these here early, holding only the lists that were
+ * wrongly filed as collections, and Phase 3d added `practiceAreasPage` for the
+ * directory and the featured grid. Their COPY is still Phase 4 and lands on
+ * these same documents — so a Phase 4 seed must merge rather than replace.
  */
-const pages: SchemaTypeDefinition[] = [homePage, communityPage, carAccidentsPage];
+const pages: SchemaTypeDefinition[] = [
+  homePage,
+  practiceAreasPage,
+  communityPage,
+  carAccidentsPage,
+];
 
 /**
  * Repeatable content. Phase 2 (hand-authored) and Phase 3 (imported).

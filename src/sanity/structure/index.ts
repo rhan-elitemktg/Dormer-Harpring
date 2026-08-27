@@ -40,6 +40,7 @@ import { HeartFilledIcon } from "@sanity/icons/HeartFilled";
 import { WarningOutlineIcon } from "@sanity/icons/WarningOutline";
 import { TagIcon } from "@sanity/icons/Tag";
 import { DocumentTextIcon } from "@sanity/icons/DocumentText";
+import { ThLargeIcon } from "@sanity/icons/ThLarge";
 
 /**
  * SINGLETONS ARE ENFORCED HERE, NOT IN THE SCHEMA. There is no `singleton: true`
@@ -71,12 +72,14 @@ function singleton(
  * chrome that appears ON a page — the fact-check band's wording, the sidebar
  * headings — which is exactly the copy the SEO team will want to reach.
  *
- * The three below arrived in Phase 2f holding only the lists that had been
- * filed as collections without being shared by anything. Their copy is Phase 4,
- * and the rest of the routes with it — this is three of an eventual sixteen.
+ * Three arrived in Phase 2f holding only the lists that had been filed as
+ * collections without being shared by anything; Phase 3d added Practice Areas
+ * for the directory and the featured grid. Their copy is Phase 4, and the rest
+ * of the routes with it — this is four of an eventual sixteen.
  */
 const PAGES: [string, string, ComponentType?][] = [
   ["homePage", "Homepage", HomeIcon],
+  ["practiceAreasPage", "Practice Areas", ThLargeIcon],
   ["communityPage", "Community Involvement", HeartFilledIcon],
   ["carAccidentsPage", "Car Accidents", WarningOutlineIcon],
 ];

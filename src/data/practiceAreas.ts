@@ -11,25 +11,39 @@
 // built for a layout that was cut. `caseTypes` and `relatedInjuries` are dead
 // for the same reason.
 import type { ImageMetadata } from "astro";
+import type { SanityImageSource } from "@sanity/image-url";
+import { sanityClient } from "sanity:client";
+import {
+  HOME_CATASTROPHIC_QUERY,
+  HOME_PRACTICE_AREAS_QUERY,
+  PRACTICE_AREAS_PAGE_QUERY,
+} from "../sanity/lib/queries";
+import { once, required } from "../sanity/lib/fetch";
 import { pt, type PortableTextBlock } from "./portableText";
-import { ROUTES, locationPath, practiceAreaPath } from "../lib/routePaths";
-import carAccident from "../assets/home/practice-car-accident.jpg";
-import truck from "../assets/home/practice-truck.jpg";
-import motorcycle from "../assets/home/practice-motorcycle.jpg";
-import bicycle from "../assets/home/practice-bicycle.jpg";
-import slipAndFall from "../assets/home/practice-slip-and-fall.jpg";
-import pedestrian from "../assets/home/practice-pedestrian.jpg";
-// Same source frame as `slipAndFall` — the package ships one premises-liability
-// photograph, which the homepage labels Slip & Fall and this page labels
-// Premises Liability. Imported under both names so each page's list reads as
-// its own comp does.
-import premisesLiability from "../assets/home/practice-slip-and-fall.jpg";
-import dogBite from "../assets/home/practice-dog-bite.jpg";
-import brainInjury from "../assets/home/practice-brain-injury.jpg";
-import wrongfulDeath from "../assets/home/practice-wrongful-death.jpg";
-import burns from "../assets/home/practice-burns.jpg";
+import { ROUTES, practiceAreaPath } from "../lib/routePaths";
 import heroPhoto from "../assets/team/skyline.jpg";
 import heroCrop from "../assets/team/skyline-crop.jpg";
+
+/* ELEVEN PRACTICE-AREA PHOTOGRAPHS LEFT WITH PHASE 3d and nothing reported it.
+   They fed the three card rails, which are arrays on `homePage` and
+   `practiceAreasPage` now, so their images are Sanity assets. The FILES stay in
+   `src/assets/home/` — `home.ts` still imports several of them, `npm run backup`
+   is `--no-assets`, and git is the only copy of these originals outside Sanity.
+
+   One of them was imported TWICE under two names, `slipAndFall` and
+   `premisesLiability`, because the package ships one premises photograph that
+   the homepage labels Slip & Fall and /practice-areas labels Premises
+   Liability. Both cards now carry their own asset reference and the aliasing is
+   gone with them.
+
+   `locationPath` went too. It built the SAME `/${slug}/` shape
+   `practiceAreaPath` does — the directory used one for Denver and the other for
+   the eight other cities, which was a distinction with no difference once the
+   site went flat at the root. 55 call sites, all in the list that is now a
+   reference array — so `routePaths.ts` still exports it and NOTHING calls it.
+   Left there rather than pruned here: it is one of five identical helpers that
+   exist to name the kinds of URL this site has, and deciding whether that set
+   should shrink is a routing question, not a migration one. */
 
 export interface PracticeSection {
   eyebrow: string;
@@ -66,73 +80,66 @@ export interface PracticeAreaSummary {
   iconKey: string;
   blurb: string;
   href: string;
-  /** Panels without one fall back to an icon plate. */
-  image?: ImageMetadata;
+  /** Panels without one fall back to an icon plate.
+   *
+   *  The same union `Picture` takes. A card's photograph is a Sanity asset since
+   *  Phase 3d; `ImageMetadata` stays because a local import is still a valid
+   *  thing to hand a card, and narrowing here would push the widening onto the
+   *  component instead. */
+  image?: ImageMetadata | SanityImageSource;
 }
 
+/**
+ * The `/practice-areas` document, read once per build.
+ *
+ * Two getters draw from it — the featured grid and the directory — and
+ * `assertDirectoryJoin()` runs over the second on the same page. `once()` is
+ * what keeps that one round trip rather than three.
+ */
+async function practiceAreasDocument() {
+  return once("practiceAreasPage", async () =>
+    required(await sanityClient.fetch(PRACTICE_AREAS_PAGE_QUERY), "Practice Areas", "Pages")
+  );
+}
+
+/**
+ * A card row from a projection, with the URL rule kept where it belongs.
+ *
+ * The card's own copy — name, icon, blurb, photograph — is stored per card,
+ * because these rails rename most of what they link to: "Bicycle Accidents" for
+ * a page filed as "Bike Accidents", "Slip & Fall" for "Slip and Fall Accidents".
+ * That is why they are not references to a `practiceArea` with the name read
+ * off it, and why the homepage's blurbs and /practice-areas' can differ for the
+ * same area — four of them do.
+ */
+function toSummary(row: {
+  _key: string;
+  name: string | null;
+  iconKey: string | null;
+  blurb: string | null;
+  href: string | null;
+  image: unknown;
+}): PracticeAreaSummary {
+  if (!row.href) throw new Error(`practice areas: card "${row.name ?? row._key}" has no destination.`);
+  return {
+    _key: row._key,
+    name: row.name ?? "",
+    iconKey: row.iconKey ?? "",
+    blurb: row.blurb ?? "",
+    href: row.href,
+    // Coalesced on its own line rather than in a cast: the projection returns
+    // null where this interface says undefined, and the two are not the same to
+    // a component doing `{card.image && …}`.
+    ...(row.image ? { image: row.image as SanityImageSource } : {}),
+  };
+}
+
+/** The homepage's six-card rail. */
 export async function getHomePracticeAreas(): Promise<PracticeAreaSummary[]> {
-  return [
-    {
-      _key: "car",
-      name: "Car Accidents",
-      iconKey: "car-accident",
-      blurb:
-        "How we handle car accident cases in Denver — the common issues, who is " +
-        "liable, and how we build the claim.",
-      href: practiceAreaPath("denver-car-accident-lawyer"),
-      image: carAccident,
-    },
-    {
-      _key: "truck",
-      name: "Truck Accidents",
-      iconKey: "truck-accident",
-      blurb:
-        "Commercial truck cases — federal regulations, multiple defendants, and the " +
-        "evidence that decides the outcome.",
-      href: practiceAreaPath("denver-truck-accident-lawyer"),
-      image: truck,
-    },
-    {
-      _key: "motorcycle",
-      name: "Motorcycle Accidents",
-      iconKey: "motorcycle-accident",
-      blurb:
-        "Motorcycle cases — the bias riders face on the road, and how we counter it " +
-        "with facts.",
-      href: practiceAreaPath("motorcycle-accident-lawyer-denver"),
-      image: motorcycle,
-    },
-    {
-      _key: "bicycle",
-      name: "Bicycle Accidents",
-      iconKey: "bicycle-accident",
-      blurb:
-        "Bicycle crash cases — driver liability, right-of-way, and the severe " +
-        "injuries cyclists suffer in Denver traffic.",
-      href: practiceAreaPath("denver-bicycle-accident-lawyer"),
-      image: bicycle,
-    },
-    {
-      _key: "slip",
-      name: "Slip & Fall",
-      iconKey: "slip-and-fall",
-      blurb:
-        "Premises liability — proving negligence and unsafe conditions on someone " +
-        "else's property.",
-      href: practiceAreaPath("denver-slip-and-fall-lawyer"),
-      image: slipAndFall,
-    },
-    {
-      _key: "pedestrian",
-      name: "Pedestrian Accidents",
-      iconKey: "pedestrian-accident",
-      blurb:
-        "Pedestrian cases — crosswalk and right-of-way law, and the serious injuries " +
-        "these crashes cause.",
-      href: practiceAreaPath("denver-pedestrian-accident-lawyer"),
-      image: pedestrian,
-    },
-  ];
+  const rows = await once("homePracticeAreas", async () =>
+    required(await sanityClient.fetch(HOME_PRACTICE_AREAS_QUERY), "Homepage", "Pages")
+  );
+  return rows.map(toSummary);
 }
 
 /**
@@ -150,107 +157,15 @@ export async function getHomePracticeAreas(): Promise<PracticeAreaSummary[]> {
  * The sets differ too: this page carries Premises Liability and Dog Bites
  * where the homepage carries Slip & Fall and Pedestrian Accidents.
  */
+/**
+ * The `/practice-areas` featured grid.
+ *
+ * ONE READ FOR THIS PAGE, shared with the directory below — both live on the
+ * same document, and `once()` means the page fetches it once however many
+ * getters ask.
+ */
 export async function getFeaturedPracticeAreas(): Promise<PracticeAreaSummary[]> {
-  return [
-    {
-      _key: "car",
-      name: "Car Accidents",
-      iconKey: "car-accident",
-      blurb:
-        "Denver crashes are rarely as simple as the insurer claims. We build " +
-        "liability from the scene up and value the injury for the whole future, " +
-        "not just the ER bill.",
-      href: practiceAreaPath("denver-car-accident-lawyer"),
-      image: carAccident,
-    },
-    {
-      _key: "truck",
-      name: "Truck Accidents",
-      iconKey: "truck-accident",
-      blurb:
-        "Commercial cases turn on federal regulations, logs, and multiple " +
-        "defendants. We move fast to preserve the evidence carriers are allowed " +
-        "to destroy.",
-      href: practiceAreaPath("denver-truck-accident-lawyer"),
-      image: truck,
-    },
-    {
-      _key: "motorcycle",
-      name: "Motorcycle Accidents",
-      iconKey: "motorcycle-accident",
-      blurb:
-        "Riders face bias before the first question is asked. We counter it with " +
-        "reconstruction, physical evidence, and testimony that puts fault where " +
-        "it belongs.",
-      href: practiceAreaPath("motorcycle-accident-lawyer-denver"),
-      image: motorcycle,
-    },
-    {
-      _key: "bicycle",
-      name: "Bicycle Accidents",
-      iconKey: "bicycle-accident",
-      blurb:
-        "Right-of-way law protects cyclists, but drivers and their insurers argue " +
-        "otherwise. We prove what happened and what the injuries will really cost.",
-      href: practiceAreaPath("denver-bicycle-accident-lawyer"),
-      image: bicycle,
-    },
-    {
-      // The comp names this panel Premises Liability but gives it the
-      // slip-and-fall icon — the broader area, its most common case type.
-      _key: "premises",
-      name: "Premises Liability",
-      iconKey: "slip-and-fall",
-      blurb:
-        "Slip and fall, negligent security, unsafe maintenance. Colorado premises " +
-        "law is technical — and we have taken these cases to verdict against " +
-        "national chains.",
-      href: practiceAreaPath("denver-premises-liability-lawyer"),
-      image: premisesLiability,
-    },
-    {
-      _key: "brain",
-      name: "Brain Injuries",
-      iconKey: "brain-injury",
-      blurb:
-        "Concussions and TBI rarely show on a scan, which is exactly what insurers " +
-        "exploit. We document the long-term cost with the medicine and the people " +
-        "who know you.",
-      href: practiceAreaPath("denver-brain-injury-lawyer"),
-      image: brainInjury,
-    },
-    {
-      _key: "wrongful-death",
-      name: "Wrongful Death",
-      iconKey: "wrongful-death",
-      blurb:
-        "When a family loses someone to negligence, accountability matters as much " +
-        "as compensation. We handle these cases with the care they demand.",
-      href: practiceAreaPath("denver-wrongful-death-lawyer"),
-      image: wrongfulDeath,
-    },
-    {
-      _key: "dog-bite",
-      name: "Dog Bites",
-      iconKey: "dog-bite",
-      blurb:
-        "Colorado has a strict liability statute for serious dog bite injuries. We " +
-        "handle the claim — usually against a homeowner policy — so you can heal.",
-      href: practiceAreaPath("denver-dog-bite-lawyer"),
-      image: dogBite,
-    },
-    {
-      _key: "burns",
-      name: "Burn Injuries",
-      iconKey: "burns",
-      blurb:
-        "Burns mean surgeries, scarring, and a permanently altered life. These " +
-        "claims are valued for the whole future, and we build them that way from " +
-        "day one.",
-      href: practiceAreaPath("denver-burn-injury-attorney"),
-      image: burns,
-    },
-  ];
+  return (await practiceAreasDocument()).featuredAreas.map(toSummary);
 }
 
 /**
@@ -274,47 +189,20 @@ export interface CatastrophicArea {
 }
 
 export async function getCatastrophicAreas(): Promise<CatastrophicArea[]> {
-  return [
-    {
-      _key: "tbi",
-      name: "Traumatic Brain Injury",
-      iconKey: "brain-injury",
-      insight:
-        "Mild concussions to life-altering TBI — we prove the long-term cost insurers " +
-        "try to minimize.",
-      href: practiceAreaPath("denver-brain-injury-lawyer"),
-    },
-    {
-      _key: "spinal",
-      name: "Spinal Cord Injury",
-      iconKey: "spinal-cord",
-      insight:
-        "Paralysis and permanent mobility loss demand lifetime-care planning. We build " +
-        "the full-value claim.",
-      href: practiceAreaPath("denver-spinal-cord-injury-lawyer"),
-    },
-    {
-      _key: "burns",
-      name: "Severe Burns",
-      iconKey: "burns",
-      insight:
-        "Disfigurement and multiple surgeries — valued for the whole future, not just " +
-        "the ER bill.",
-      href: practiceAreaPath("denver-burn-injury-attorney"),
-    },
-    {
-      _key: "wrongful-death",
-      name: "Wrongful Death",
-      iconKey: "wrongful-death",
-      insight: "Holding the responsible party accountable when a family loses someone.",
-      href: practiceAreaPath("denver-wrongful-death-lawyer"),
-    },
-  ];
+  const rows = await once("catastrophicAreas", async () =>
+    required(await sanityClient.fetch(HOME_CATASTROPHIC_QUERY), "Homepage", "Pages")
+  );
+  return rows.map((row) => {
+    if (!row.href) throw new Error(`practice areas: panel "${row.name ?? row._key}" has no destination.`);
+    return {
+      _key: row._key,
+      name: row.name ?? "",
+      iconKey: row.iconKey ?? "",
+      insight: row.insight ?? "",
+      href: row.href,
+    } satisfies CatastrophicArea;
+  });
 }
-
-/* ------------------------------------------------------------------
-   The /practice-areas page itself.
-   ------------------------------------------------------------------ */
 
 export interface PracticeAreasPage {
   eyebrow: string;
@@ -458,175 +346,30 @@ export interface AreaGroup {
  * ship. Add the entry when the page lands.
  */
 export async function getPracticeAreaGroups(): Promise<AreaGroup[]> {
-  return [
-    {
-      _key: "denver",
-      title: "Denver Personal Injury",
-      items: [
-        // The legacy hub points this one at the homepage, which doubles as its
-        // Denver PI overview page. `navigation.ts` drops the equivalent nav
-        // item for that reason; here the comp shows it, so it stays.
-        { _key: "pi", label: "Personal Injury", href: ROUTES.home },
-        { _key: "amazon-truck", label: "Amazon Truck Accident", href: practiceAreaPath("denver-amazon-truck-accident-lawyer") },
-        { _key: "amputation", label: "Amputation Injuries", href: practiceAreaPath("denver-amputation-injury-lawyer") },
-        { _key: "bike", label: "Bike Accidents", href: practiceAreaPath("denver-bicycle-accident-lawyer") },
-        { _key: "birth", label: "Birth Injuries", href: practiceAreaPath("denver-birth-injury-lawyer") },
-        { _key: "brain", label: "Brain Injuries", href: practiceAreaPath("denver-brain-injury-lawyer") },
-        { _key: "burn", label: "Burn Injuries", href: practiceAreaPath("denver-burn-injury-attorney") },
-        { _key: "bus", label: "Bus Accidents", href: practiceAreaPath("denver-bus-accident-lawyer") },
-        { _key: "car", label: "Car Accidents", href: practiceAreaPath("denver-car-accident-lawyer") },
-        { _key: "child", label: "Child Injuries", href: practiceAreaPath("denver-child-injury-lawyer") },
-        { _key: "construction", label: "Construction Accidents", href: practiceAreaPath("denver-construction-accident-attorney") },
-        { _key: "daycare", label: "Daycare Injury", href: practiceAreaPath("denver-daycare-injury-lawyers") },
-        { _key: "distracted", label: "Distracted Driver Accidents", href: practiceAreaPath("denver-distracted-driver-accident-lawyer") },
-        { _key: "scooter", label: "Dockless Bike / E-Scooter Accidents", href: practiceAreaPath("denver-scooter-accident-lawyer") },
-        { _key: "dog", label: "Dog Bites", href: practiceAreaPath("denver-dog-bite-lawyer") },
-        { _key: "dram-shop", label: "Dram Shop Liability", href: practiceAreaPath("denver-dram-shop-lawyer") },
-        { _key: "drowsy", label: "Drowsy Driving Accident", href: practiceAreaPath("denver-drowsy-driving-accident-lawyer") },
-        { _key: "fedex-truck", label: "FedEx Truck Accident", href: practiceAreaPath("denver-fedex-truck-accident-lawyer") },
-        { _key: "funeral", label: "Funeral Home Negligence", href: practiceAreaPath("colorado-funeral-home-negligence-lawyer") },
-        { _key: "garbage-truck", label: "Garbage Truck Accident", href: practiceAreaPath("denver-garbage-truck-accident-lawyer") },
-        { _key: "bad-faith", label: "Insurance Bad Faith", href: practiceAreaPath("denver-insurance-bad-faith-lawyer") },
-        { _key: "legal-malpractice", label: "Legal Malpractice", href: practiceAreaPath("legal-malpractice-attorney") },
-        { _key: "life-bad-faith", label: "Life Insurance Bad Faith", href: practiceAreaPath("denver-life-insurance-bad-faith-lawyer") },
-        { _key: "motorcycle", label: "Motorcycle Accidents", href: practiceAreaPath("motorcycle-accident-lawyer-denver") },
-        { _key: "malpractice", label: "Medical Malpractice", href: practiceAreaPath("denver-medical-malpractice-lawyer") },
-        { _key: "building", label: "Negligent Building Maintenance", href: practiceAreaPath("denver-negligent-building-maintenance-attorneys") },
-        { _key: "ice-snow", label: "Negligent Ice/Snow Removal", href: practiceAreaPath("denver-negligent-ice-snow-removal-attorneys") },
-        { _key: "security", label: "Negligent Security", href: practiceAreaPath("denver-negligent-security-lawyers") },
-        { _key: "nursing-home", label: "Nursing Home Abuse", href: practiceAreaPath("nursing-home-abuse-lawyer") },
-        { _key: "pedestrian", label: "Pedestrian Accidents", href: practiceAreaPath("denver-pedestrian-accident-lawyer") },
-        { _key: "pet-bad-faith", label: "Pet Insurance Bad Faith", href: practiceAreaPath("denver-pet-insurance-bad-faith-lawyer") },
-        { _key: "premises", label: "Premises Liability", href: practiceAreaPath("denver-premises-liability-lawyer") },
-        { _key: "product", label: "Product Liability", href: practiceAreaPath("denver-product-liability-lawyer") },
-        { _key: "rideshare", label: "Rideshare Accidents", href: practiceAreaPath("denver-uber-accident-lawyer") },
-        { _key: "rtd", label: "RTD Denver Accidents", href: practiceAreaPath("rtd-denver-accidents") },
-        { _key: "sexual-assault", label: "Sexual Assault", href: practiceAreaPath("denver-sexual-assault-lawyer") },
-        { _key: "side-impact", label: "Side-Impact Accident", href: practiceAreaPath("denver-side-impact-accident-lawyer") },
-        { _key: "ski", label: "Ski Accidents", href: practiceAreaPath("denver-ski-accident-lawyer") },
-        { _key: "slip", label: "Slip and Fall Accidents", href: practiceAreaPath("denver-slip-and-fall-lawyer") },
-        { _key: "spinal", label: "Spinal Cord Injury", href: practiceAreaPath("denver-spinal-cord-injury-lawyer") },
-        { _key: "tow-truck", label: "Tow Truck Accident", href: practiceAreaPath("denver-tow-truck-accident-lawyer") },
-        { _key: "trampoline", label: "Trampoline Park Injuries", href: practiceAreaPath("denver-trampoline-park-injury-lawyer") },
-        { _key: "truck", label: "Truck Accidents", href: practiceAreaPath("denver-truck-accident-lawyer") },
-        { _key: "uninsured", label: "Uninsured and Underinsured Motorcyclist Accidents", href: practiceAreaPath("denver-uninsured-and-underinsured-motorcyclist-accident-lawyer") },
-        { _key: "ups-truck", label: "UPS Truck Accident", href: practiceAreaPath("denver-ups-truck-accident-lawyer") },
-        { _key: "whiplash", label: "Whiplash Injuries", href: practiceAreaPath("denver-whiplash-injury-attorney") },
-        { _key: "wrongful-death", label: "Wrongful Death", href: practiceAreaPath("denver-wrongful-death-lawyer") },
-        { _key: "wildfire", label: "Wildfire Litigation", href: practiceAreaPath("colorado-wildfire-attorney") },
-      ],
-    },
-    {
-      _key: "aurora",
-      title: "Aurora Personal Injury",
-      items: [
-        { _key: "pi", label: "Personal Injury", href: locationPath("aurora-personal-injury-attorney") },
-        { _key: "brain", label: "Brain Injuries", href: locationPath("aurora-brain-injury-lawyer") },
-        { _key: "car", label: "Car Accidents", href: locationPath("aurora-car-accident-lawyer") },
-        { _key: "premises", label: "Premises Liability", href: locationPath("aurora-premises-liability-attorney") },
-        { _key: "product", label: "Product Liability", href: locationPath("aurora-product-liability-attorney") },
-        { _key: "truck", label: "Truck Accidents", href: locationPath("aurora-truck-accident-attorney") },
-      ],
-    },
-    {
-      _key: "boulder",
-      title: "Boulder Personal Injury",
-      items: [
-        { _key: "pi", label: "Personal Injury", href: locationPath("boulder-personal-injury-attorney") },
-        { _key: "brain", label: "Brain Injuries", href: locationPath("boulder-brain-injury-lawyer") },
-        { _key: "car", label: "Car Accidents", href: locationPath("boulder-car-accident-lawyer") },
-        { _key: "hit-and-run", label: "Hit and Run Accidents", href: locationPath("boulder-hit-and-run-accident-attorney") },
-        { _key: "off-road", label: "Off-Road Recreational Vehicle Accidents", href: locationPath("boulder-off-road-recreational-vehicle-accident-attorney") },
-        { _key: "premises", label: "Premises Liability", href: locationPath("boulder-premises-liability-attorney") },
-        { _key: "product", label: "Product Liability", href: locationPath("boulder-product-liability-attorney") },
-        { _key: "truck", label: "Truck Accidents", href: locationPath("boulder-truck-accident-attorney") },
-      ],
-    },
-    {
-      _key: "highlands-ranch",
-      title: "Highlands Ranch Personal Injury",
-      items: [
-        { _key: "pi", label: "Personal Injury", href: locationPath("highlands-ranch-personal-injury-attorney") },
-        { _key: "brain", label: "Brain Injuries", href: locationPath("highlands-ranch-brain-injury-lawyer") },
-        { _key: "car", label: "Car Accidents", href: locationPath("highlands-ranch-car-accident-lawyer") },
-        { _key: "elder-abuse", label: "Financial Elder Abuse", href: locationPath("highlands-ranch-financial-elder-abuse-lawyer") },
-        { _key: "premises", label: "Premises Liability", href: locationPath("highlands-ranch-premises-liability-attorney") },
-        { _key: "product", label: "Product Liability", href: locationPath("highlands-ranch-product-liability-attorney") },
-        { _key: "truck", label: "Truck Accidents", href: locationPath("highlands-ranch-truck-accident-attorney") },
-      ],
-    },
-    {
-      _key: "lakewood",
-      title: "Lakewood Personal Injury",
-      items: [
-        { _key: "pi", label: "Personal Injury", href: locationPath("lakewood-personal-injury-attorney") },
-        { _key: "brain", label: "Brain Injuries", href: locationPath("lakewood-brain-injury-lawyer") },
-        { _key: "car", label: "Car Accidents", href: locationPath("lakewood-car-accident-lawyer") },
-        { _key: "premises", label: "Premises Liability", href: locationPath("lakewood-premises-liability-attorney") },
-        { _key: "product", label: "Product Liability", href: locationPath("lakewood-product-liability-attorney") },
-        { _key: "truck", label: "Truck Accidents", href: locationPath("lakewood-truck-accident-attorney") },
-      ],
-    },
-    {
-      _key: "thornton",
-      title: "Thornton Personal Injury",
-      items: [
-        { _key: "pi", label: "Personal Injury", href: locationPath("thornton-personal-injury-attorney") },
-        { _key: "brain", label: "Brain Injury", href: locationPath("thornton-brain-injury-lawyer") },
-        { _key: "bicycle", label: "Bicycle Accidents", href: locationPath("thornton-bicycle-accident-lawyer") },
-        { _key: "car", label: "Car Accidents", href: locationPath("thornton-car-accident-attorney") },
-        { _key: "dog", label: "Dog Bite", href: locationPath("thornton-dog-bite-attorney") },
-        { _key: "motorcycle", label: "Motorcycle Accidents", href: locationPath("thornton-motorcycle-accident-lawyer") },
-        { _key: "pedestrian", label: "Pedestrian Accidents", href: locationPath("thornton-pedestrian-accident-attorney") },
-        { _key: "premises", label: "Premises Liability", href: locationPath("thornton-premises-liability-lawyer") },
-        { _key: "product", label: "Product Liability", href: locationPath("thornton-product-liability-attorney") },
-        { _key: "slip", label: "Slip and Fall Accidents", href: locationPath("thornton-slip-and-fall-accident-lawyer") },
-        { _key: "spinal", label: "Spinal Cord Injury", href: locationPath("thornton-spinal-cord-injury-lawyer") },
-        { _key: "truck", label: "Truck Accidents", href: locationPath("thornton-truck-accident-attorney") },
-        { _key: "workplace", label: "Workplace Injuries", href: locationPath("thornton-workplace-injury-attorney") },
-        { _key: "wrongful-death", label: "Wrongful Death", href: locationPath("thornton-wrongful-death-lawyer") },
-      ],
-    },
-    /* Greeley, Fort Collins and Grand Junction are NOT in the comp. They are in
-       the live hub, with thirteen live pages between them, and until now this
-       build served all thirteen while linking none of them from the directory —
-       reachable only from each other's city bands. Added from the live list;
-       the comp is not an inventory. Their live group titles are the bare city
-       name, unlike every other group's "<City> Personal Injury"; the suffix is
-       ours, for consistency down the column. */
-    {
-      _key: "greeley",
-      title: "Greeley Personal Injury",
-      items: [
-        { _key: "pi", label: "Personal Injury", href: locationPath("greeley-personal-injury-lawyer") },
-        { _key: "car", label: "Car Accident", href: locationPath("greeley-car-accident-lawyer") },
-        { _key: "truck", label: "Truck Accident", href: locationPath("greeley-truck-accident-lawyer") },
-        { _key: "motorcycle", label: "Motorcycle Accident", href: locationPath("greeley-motorcycle-accident-lawyer") },
-        { _key: "wrongful-death", label: "Wrongful Death", href: locationPath("greeley-wrongful-death-lawyer") },
-      ],
-    },
-    {
-      _key: "fort-collins",
-      title: "Fort Collins Personal Injury",
-      items: [
-        { _key: "pi", label: "Personal Injury", href: locationPath("fort-collins-personal-injury-lawyer") },
-        { _key: "car", label: "Car Accident", href: locationPath("fort-collins-car-accident-lawyer") },
-        { _key: "truck", label: "Truck Accident", href: locationPath("fort-collins-truck-accident-lawyer") },
-        { _key: "motorcycle", label: "Motorcycle Accident", href: locationPath("fort-collins-motorcycle-accident-lawyer") },
-      ],
-    },
-    {
-      _key: "grand-junction",
-      title: "Grand Junction Personal Injury",
-      items: [
-        // Truck before motorcycle. The live hub puts them the other way round
-        // here and only here — its two sibling groups both read car → truck →
-        // motorcycle — so this one is normalised rather than followed.
-        { _key: "pi", label: "Personal Injury", href: locationPath("grand-junction-personal-injury-lawyer") },
-        { _key: "car", label: "Car Accident", href: locationPath("grand-junction-car-accident-lawyer") },
-        { _key: "truck", label: "Truck Accident", href: locationPath("grand-junction-truck-accident-lawyer") },
-        { _key: "motorcycle", label: "Motorcycle Accident", href: locationPath("grand-junction-motorcycle-accident-lawyer") },
-      ],
-    },
-  ];
+  const doc = await practiceAreasDocument();
+
+  return doc.directory.map((group) => ({
+    _key: group._key,
+    title: group.title ?? "",
+    items: group.items.map((item) => {
+      /* A ROW EITHER NAMES A PAGE OR CARRIES ITS OWN HREF, never both. Two of
+         the 102 are the second kind and both are real: "Personal Injury" points
+         at the homepage, which doubles as the firm's Denver PI overview, and
+         "Car Accidents" at the one slug the heavy hand-authored template serves,
+         which is not a `practiceArea` document at all.
+
+         `practiceAreaPath()` builds the path rather than the projection, so the
+         trailing slash stays decided in one place — three layers already agree
+         on it and a GROQ string concat must not become a fourth. */
+      const href = item.href ?? (item.slug ? practiceAreaPath(item.slug) : null);
+      if (!href) {
+        throw new Error(
+          `practice areas: directory row "${item.label ?? item._key}" in "${group.title}" ` +
+            `points at nothing. Open /admin under Pages › Practice Areas and either pick a ` +
+            `page for it or give it a destination.`
+        );
+      }
+      return { _key: item._key, label: item.label ?? "", href };
+    }),
+  }));
 }

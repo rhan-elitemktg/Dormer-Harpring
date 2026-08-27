@@ -439,6 +439,63 @@ export const FEATURED_POST_QUERY = defineQuery(
  * from the body after this, never stored.
  */
 /*
+ * THE PRACTICE-AREA CARD RAILS AND THE DIRECTORY — Phase 3d.
+ *
+ * Three lists of cards and one directory, on the two page documents that render
+ * them. None of it is a collection: each list appears on exactly one page, which
+ * is the rule the Collections group is built on.
+ *
+ * A CARD STORES ITS OWN NAME; A DIRECTORY ROW BORROWS THE PAGE'S. That split is
+ * the data's, not a preference — 99 of the directory's 100 page rows print the
+ * referenced page's short name, where the rails rename almost every card
+ * ("Bicycle Accidents" for a page filed as "Bike Accidents", "Traumatic Brain
+ * Injury" for "Brain Injuries"). So the directory coalesces onto the reference
+ * and the rails do not have one.
+ */
+
+/** The homepage's six-card rail. */
+export const HOME_PRACTICE_AREAS_QUERY = defineQuery(
+  `*[_type == "homePage" && _id == "homePage"][0].practiceAreaCards[]{
+    _key, name, iconKey, blurb, href, image
+  }`
+);
+
+/** The homepage's four catastrophic-injury panels. No photographs — an icon. */
+export const HOME_CATASTROPHIC_QUERY = defineQuery(
+  `*[_type == "homePage" && _id == "homePage"][0].catastrophicAreas[]{
+    _key, name, iconKey, insight, href
+  }`
+);
+
+/**
+ * `/practice-areas` — the featured grid and the full directory.
+ *
+ * `href` IS NOT BUILT HERE. A row either carries its own (the two that are not
+ * practice-area pages) or names one, and the getter turns a slug into a path
+ * with `practiceAreaPath()`. Three layers already agree on the trailing slash
+ * and a projection must not become a fourth — the same reason `TEAM_QUERY`
+ * returns no href.
+ *
+ * `label` coalesces onto the referenced page's short name, so 99 of the 100
+ * rows have nothing stored and cannot drift from the page they point at.
+ */
+export const PRACTICE_AREAS_PAGE_QUERY = defineQuery(
+  `*[_type == "practiceAreasPage" && _id == "practiceAreasPage"][0]{
+    "featuredAreas": coalesce(featuredAreas[]{ _key, name, iconKey, blurb, href, image }, []),
+    "directory": coalesce(directory[]{
+      _key,
+      title,
+      "items": coalesce(items[]{
+        _key,
+        "label": coalesce(label, page->label),
+        "slug": page->slug.current,
+        href
+      }, [])
+    }, [])
+  }`
+);
+
+/*
  * THE 104 IMPORTED PRACTICE-AREA PAGES — the light template's content.
  *
  * Same split as the blog's, for the same reason: the sidebar card lists a
