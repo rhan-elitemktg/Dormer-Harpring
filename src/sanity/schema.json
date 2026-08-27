@@ -2857,10 +2857,20 @@
         },
         "optional": true
       },
-      "onHomeRail": {
+      "railPlacement": {
         "type": "objectAttribute",
         "value": {
-          "type": "boolean"
+          "type": "union",
+          "of": [
+            {
+              "type": "string",
+              "value": "both"
+            },
+            {
+              "type": "string",
+              "value": "about-only"
+            }
+          ]
         },
         "optional": true
       },

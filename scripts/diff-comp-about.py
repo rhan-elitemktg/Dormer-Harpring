@@ -63,6 +63,32 @@ def cmp(label, a, b):
             print(f"          built: {y!r}")
 
 
+def cmp_subsequence(label, comp, built, why):
+    """Every comp entry present, in the comp's order — extras allowed.
+
+    NOT A LOOSENED `cmp`. It still fails when a comp entry DISAPPEARS or when
+    two of them swap places; what it tolerates is an entry the comp never had.
+
+    That distinction is the whole reason it exists. This page's attorney grid is
+    CMS-backed now — an editor ticks "add to the rail" and a card appears — so
+    pinning it to a four-name snapshot means the check goes red every time
+    someone does their job, which is how a check gets ignored. The comp's four
+    are still the guarantee.
+    """
+    global ok
+    it = iter(built)
+    missing = [name for name in comp if not any(b == name for b in it)]
+    if not missing:
+        extra = [b for b in built if b not in comp]
+        note = f" (+{len(extra)} added since: {', '.join(extra)})" if extra else ""
+        print(f"  ✓ {label}{note}")
+        return
+    ok = False
+    print(f"  ✗ {label} — {why}")
+    for name in missing:
+        print(f"      comp entry missing from the built page, or out of order: {name!r}")
+
+
 def present(label, needles):
     """Each string must appear in the built page."""
     global ok
@@ -141,9 +167,23 @@ COMP_PARTNER = "KC Harpring"
 SITE_PARTNER = "K.C. Harpring"
 comp_team_names = [SITE_PARTNER if n == COMP_PARTNER else n for n, _ in comp_team]
 
+# THE ATTORNEY GRID IS EDITOR-CONTROLLED, so this compares as a SUBSEQUENCE.
+# The comp draws four cards; the rail is a checkbox on a team member in Sanity
+# now, and adding one is an ordinary editorial act rather than a departure from
+# the design. Removing or reordering one of the comp's four still fails.
 print("\nMEET THE TEAM")
-cmp("names / order", comp_team_names, built_team_names)
-cmp("role lines / order", [r.replace("·", "·") for _, r in comp_team], built_team_roles)
+cmp_subsequence(
+    "names / order",
+    comp_team_names,
+    built_team_names,
+    "one of the comp's four attorneys is gone from the rail, or they have been reordered",
+)
+cmp_subsequence(
+    "role lines / order",
+    [r.replace("·", "·") for _, r in comp_team],
+    built_team_roles,
+    "a comp attorney's role line changed",
+)
 
 
 # ---------------------------------------------------------------- expect cards

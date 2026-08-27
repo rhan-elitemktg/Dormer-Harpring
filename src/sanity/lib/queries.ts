@@ -403,15 +403,32 @@ export const SPONSORSHIPS_QUERY = defineQuery(`*[_type == "sponsorship"] | order
  *
  * Ordered by `railOrder`, NOT `orderRank`: the rail's sequence genuinely
  * differs from the team page's — it leads with the other partner.
+ *
+ * A MISSING `railOrder` SORTS LAST, NOT ARBITRARILY. Adding someone to the rail
+ * is a checkbox, so an unpositioned card is the normal state right after one is
+ * added; without the coalesce they land wherever null happens to sort and the
+ * rail reshuffles. Ties fall back to the team page's own group-then-rank order,
+ * so two unpositioned attorneys still come out in a sensible sequence rather
+ * than at random.
  */
 export const ATTORNEY_RAIL_QUERY = defineQuery(
-  `*[_type == "teamMember" && onAttorneyRail == true] | order(railOrder asc){
+  `*[_type == "teamMember" && onAttorneyRail == true] | order(
+  coalesce(railOrder, 9999) asc,
+  select(
+    kind == "partner" => 1,
+    kind == "attorney" => 2,
+    kind == "staff" => 3,
+    kind == "dog" => 4,
+    5
+  ) asc,
+  orderRank asc
+){
   "_key": key.current,
   name,
   role,
   location,
   "portrait": photo,
   "video": railVideo{ provider, id },
-  "onHomeRail": coalesce(onHomeRail, false)
+  "placement": coalesce(railPlacement, "both")
 }`
 );

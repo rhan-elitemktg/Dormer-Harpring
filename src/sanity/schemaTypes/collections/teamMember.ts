@@ -335,15 +335,36 @@ export const teamMember = defineType({
         "Low numbers first.",
       hidden: notOnRail,
     }),
+    /*
+     * WHERE THE CARD APPEARS — a choice, not an "also on the homepage" tickbox.
+     *
+     * It was that tickbox, defaulting to off, and it was wrong in a way
+     * `initialValue` cannot fix: every attorney ALREADY EXISTS as a document,
+     * so ticking "add to the rail" on one never triggers an initial value. The
+     * card went to About and silently not to the homepage, which is exactly
+     * what Rhan hit on the first person he added.
+     *
+     * A string with a coalesced default fixes what a boolean could not: unset
+     * reads as "both", so adding someone to the rail puts them on both pages
+     * and keeping them off the homepage is a deliberate choice. See
+     * ATTORNEY_RAIL_QUERY, which does the coalescing.
+     */
     defineField({
-      name: "onHomeRail",
-      title: "Also on the homepage",
-      type: "boolean",
+      name: "railPlacement",
+      title: "Where the card appears",
+      type: "string",
       group: "rail",
-      initialValue: false,
+      initialValue: "both",
       description:
-        "The homepage rail is a SUBSET of About's — About shows four, the homepage three. " +
-        "Leave this off to appear on About only.",
+        "About shows the whole rail. The homepage can show a shorter version of it — pick " +
+        "\"About only\" to keep someone off the homepage.",
+      options: {
+        list: [
+          { title: "Homepage and About", value: "both" },
+          { title: "About only", value: "about-only" },
+        ],
+        layout: "radio",
+      },
       hidden: notOnRail,
     }),
     defineField({

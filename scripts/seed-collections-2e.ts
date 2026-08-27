@@ -176,7 +176,12 @@ async function main() {
       onHomeRail: railHome.some((h) => h.href === card.href),
       railPortrait: asset(card.portrait as unknown as { src: string }),
       location: card.location,
-      railVideo: { _type: "videoRef", provider: card.video.provider, id: card.video.id },
+      // Optional since the card gained a no-film branch. Every one of the four
+      // this seed ran against had a stand-in id, so this never fired — it is
+      // here because the TYPE is now honest about it.
+      ...(card.video
+        ? { railVideo: { _type: "videoRef", provider: card.video.provider, id: card.video.id } }
+        : {}),
     };
   });
 

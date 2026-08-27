@@ -490,7 +490,7 @@ export type TeamMember = {
   };
   onAttorneyRail?: boolean;
   railOrder?: number;
-  onHomeRail?: boolean;
+  railPlacement?: "both" | "about-only";
   location?: string;
   railVideo?: VideoRef;
 };
@@ -1211,7 +1211,7 @@ export type SPONSORSHIPS_QUERY_RESULT = Array<{
 
 // Source: src/sanity/lib/queries.ts
 // Variable: ATTORNEY_RAIL_QUERY
-// Query: *[_type == "teamMember" && onAttorneyRail == true] | order(railOrder asc){  "_key": key.current,  name,  role,  location,  "portrait": photo,  "video": railVideo{ provider, id },  "onHomeRail": coalesce(onHomeRail, false)}
+// Query: *[_type == "teamMember" && onAttorneyRail == true] | order(  coalesce(railOrder, 9999) asc,  select(    kind == "partner" => 1,    kind == "attorney" => 2,    kind == "staff" => 3,    kind == "dog" => 4,    5  ) asc,  orderRank asc){  "_key": key.current,  name,  role,  location,  "portrait": photo,  "video": railVideo{ provider, id },  "placement": coalesce(railPlacement, "both")}
 export type ATTORNEY_RAIL_QUERY_RESULT = Array<{
   _key: string;
   name: string;
@@ -1228,7 +1228,7 @@ export type ATTORNEY_RAIL_QUERY_RESULT = Array<{
     provider: "wistia";
     id: string;
   } | null;
-  onHomeRail: boolean | false;
+  placement: "about-only" | "both";
 }>;
 
 // Query TypeMap
@@ -1259,6 +1259,6 @@ declare module "@sanity/client" {
     '*[_type == "ngoPartner"] | order(order asc){\n  "_key": _id, name, logo\n}': NGO_PARTNERS_QUERY_RESULT;
     '*[_type == "communityPartner"] | order(order asc){\n  "_key": _id, org, logo, photo, body\n}': COMMUNITY_PARTNERS_QUERY_RESULT;
     '*[_type == "sponsorship"] | order(order asc){\n  "_key": _id, name, body\n}': SPONSORSHIPS_QUERY_RESULT;
-    '*[_type == "teamMember" && onAttorneyRail == true] | order(railOrder asc){\n  "_key": key.current,\n  name,\n  role,\n  location,\n  "portrait": photo,\n  "video": railVideo{ provider, id },\n  "onHomeRail": coalesce(onHomeRail, false)\n}': ATTORNEY_RAIL_QUERY_RESULT;
+    '*[_type == "teamMember" && onAttorneyRail == true] | order(\n  coalesce(railOrder, 9999) asc,\n  select(\n    kind == "partner" => 1,\n    kind == "attorney" => 2,\n    kind == "staff" => 3,\n    kind == "dog" => 4,\n    5\n  ) asc,\n  orderRank asc\n){\n  "_key": key.current,\n  name,\n  role,\n  location,\n  "portrait": photo,\n  "video": railVideo{ provider, id },\n  "placement": coalesce(railPlacement, "both")\n}': ATTORNEY_RAIL_QUERY_RESULT;
   }
 }
