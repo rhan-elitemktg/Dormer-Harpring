@@ -93,6 +93,23 @@ const PREFIXES = [
 ];
 
 /**
+ * A short, stable prefix for one `pt()` call's keys.
+ *
+ * FNV-1a rather than anything from `node:crypto`: this runs in the same module
+ * the browser bundle imports, and it only has to be stable and short — it is a
+ * disambiguator, not a checksum.
+ */
+function keyPrefix(paragraphs: string[]): string {
+  const source = paragraphs.join("\u0000");
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < source.length; i += 1) {
+    hash ^= source.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193) >>> 0;
+  }
+  return hash.toString(36);
+}
+
+/**
  * Build Portable Text blocks, one per argument.
  *
  *   pt("Plain, then **bold**, then [a link](/somewhere).")
@@ -104,8 +121,26 @@ const PREFIXES = [
  *
  * Marks are not nestable — a link's label is plain text. That is a limit of the
  * shim, not of Portable Text, and it has never come up in this copy.
+ *
+ * EVERY KEY IS PREFIXED PER CALL, and that is not cosmetic. Keys used to be
+ * `b0`, `b1`, … numbered from zero WITHIN THE CALL, so a body assembled from
+ * more than one call — which is the normal way to place an image mid-article —
+ * carried each key twice. The trampoline-park post had 28 duplicate block keys
+ * out of 58 and nothing reported it, because `_key` never reaches the markup:
+ * the renderer uses it as a list key and Portable Text only asks that it be
+ * unique within its own array.
+ *
+ * It becomes fatal the moment that body is uploaded. SANITY REQUIRES `_key`
+ * UNIQUENESS WITHIN AN ARRAY AND A COLLISION IS A SILENTLY DROPPED ITEM, not an
+ * error — half that article would have vanished with a green import.
+ *
+ * The prefix is derived from the call's own content, so it is deterministic
+ * between runs (a counter would give the same body different keys on every
+ * build) and differs between calls unless two are byte-identical, in which case
+ * they are the same content anyway.
  */
 export function pt(...paragraphs: string[]): PortableTextBlock[] {
+  const call = keyPrefix(paragraphs);
   return paragraphs.map((raw, blockIndex) => {
     const prefix = PREFIXES.find((candidate) => raw.startsWith(candidate.mark));
     const text = prefix ? raw.slice(prefix.mark.length) : raw;
@@ -118,7 +153,7 @@ export function pt(...paragraphs: string[]): PortableTextBlock[] {
       if (!value) return;
       children.push({
         _type: "span",
-        _key: `b${blockIndex}s${children.length}`,
+        _key: `${call}b${blockIndex}s${children.length}`,
         text: value,
         marks,
       });
@@ -135,7 +170,7 @@ export function pt(...paragraphs: string[]): PortableTextBlock[] {
       if (match[1] !== undefined) {
         push(match[1], ["strong"]);
       } else {
-        const key = `b${blockIndex}m${markDefs.length}`;
+        const key = `${call}b${blockIndex}m${markDefs.length}`;
         markDefs.push({ _type: "link", _key: key, href: match[3] });
         push(match[2], [key]);
       }
@@ -145,7 +180,7 @@ export function pt(...paragraphs: string[]): PortableTextBlock[] {
 
     return {
       _type: "block" as const,
-      _key: `b${blockIndex}`,
+      _key: `${call}b${blockIndex}`,
       style: prefix?.style ?? ("normal" as const),
       markDefs,
       children,
