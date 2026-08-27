@@ -8,46 +8,238 @@ either here, and don't record anything `git log` already knows.
 
 _Last updated: 2026-08-27._
 
-## The Sanity integration — Phases 0 through 3 are in
+## The Sanity integration — Phases 0 through 4 are in
 
-**486 content documents in Sanity; every content collection is gone.** `src/content/` and
-`src/content.config.ts` are deleted and nothing imports `astro:content`. **Twenty of the 28
-data modules read Sanity.** Of the eight that do not, six are page COPY — `aboutPage`,
-`contactPage`, `teamPage`, `thankYou`, `sitePages` and the heavy `carAccidents` — which is
-Phase 4. `portableText.ts` is an authoring shim rather than content, and `redirects.ts` is the
-redirect table, which becomes editor-managed in `/new-seo-setup`.
+**499 content documents in Sanity, and `src/data/` no longer holds page copy.** Every route's
+strings are a field on a page singleton; the data layer is 5,724 lines down to 4,724, and
+`carAccidents.ts` alone went from 1,227 to 598. Only `portableText.ts` (an authoring shim) and
+`redirects.ts` (the redirect table, which becomes editor-managed in `/new-seo-setup`) do not
+read Sanity.
 
-It was 172 documents before Phase 3. The blog (186 posts, 23 categories), the practice areas
-(104 pages), the `/practice-areas` directory and the three card rails all moved, along with
-328 image uploads.
+**Phase 4 was six slices and every one was output-neutral.** Cumulatively: **327 of 329 pages
+byte-identical, 2 image-URLs-only, 0 changed.** The two are the homepage and Car Accidents,
+which are the only pages where an image moved — the FAQ ask card's portrait in 4a and five card
+images in 4f. Per slice:
 
-Build is **330 pages in 10 seconds**, down from 47: Astro no longer optimises 202 body and
-card images, because they are served from Sanity's CDN.
+| | What moved | Diff |
+|---|---|---|
+| 4a | The homepage's nine copy getters, plus Why Us → `sharedSections` | 327 identical, 2 images |
+| 4b | Eight route singletons: about, team, contact, thank-you, testimonials, results, co-counsel, blog index | 329 identical |
+| 4c | The two article templates, and one sidebar form for both | 329 identical |
+| 4d | Privacy, sitemap and 404 — three documents of one `sitePage` type | 329 identical |
+| 4e | `practiceAreasPage` and `communityPage` copy | 329 identical |
+| 4f | The heavy Car Accidents page: fifteen sections, 270 strings, 89 array members | 328 identical, 1 image |
 
-**293 of the 329 pages differ from the pre-phase build, and the arithmetic is exact**: 187 from
-3b, 104 from 3c, 2 from 3d, with no overlap. Each slice was verified on its own — both trees
-built, image URLs and the `<time datetime>` `Z` normalised away, and every residual difference
-named. Only two survived that: the category row reordering on 186 pages (the trampoline merge,
-below) and a sidebar sort regression on 22 (GROQ collation, below). Do not read the cumulative
-number as unexplained change; read the per-slice commits.
+**Read the per-slice commits, not the cumulative number.** Each slice was seeded, verified
+against the code, swept for dead literals, swapped, built and diffed on its own.
 
 ### What is built
 
 - `sanity.cli.ts` + `npm run typegen`. `npm run backup` exports the dataset (documents only)
-  to wherever you point it — take one before anything destructive.
-- `src/sanity/lib/` — `image.ts` (CDN URLs), `queries.ts` (every `defineQuery`), `fetch.ts`
-  (`required()` and `once()`).
+  to wherever you point it — take one before anything destructive. Phase 4's is at
+  `scratch/backups/pre-phase4.tar.gz`.
+- `src/sanity/lib/` — `image.ts` (CDN URLs), `queries.ts` (56 `defineQuery` projections),
+  `fetch.ts` (`required()` and `once()`).
 - `Picture.astro` has THREE branches: a local import, a Sanity asset, and a plain URL on a
   host we do not control. The third takes a `remoteSize` because dimensions cannot be read
   off a URL, and omitting them shifts the layout as the image lands.
 - Field types: `richText`, `answerText`, `simpleText`, `inlineText`, `link`, `navLink`,
   `videoRef`, `seo`.
-- Nine collection types and nine singletons — four Pages, five Site Settings — in a desk of
-  Pages / Collections / Site Settings.
+- Nine collection types, **fifteen page documents** and five Site Settings singletons, in a
+  desk of Pages / Collections / Site Settings.
 - `scripts/lib/sanity.py` — one GROQ reader for every Python check. `lib/firm.py` is one
   query on top of it.
 
+### THE DESK IS FIFTEEN PAGES NOW, IN NAV ORDER
+
+Twelve routes, then the two TEMPLATES, then a "Utility pages" sub-list holding three.
+
+**In the order of the main nav, then the pages the nav does not reach** — an editor reads down
+the list the way a visitor reads across the header. Alphabetical would put Thank You between
+Results and Testimonials and Contact above everything.
+
+The two templates — `blogPostTemplate`, `practiceAreaTemplate` — hold the chrome that appears
+ON a post or a service page, and sit under Pages rather than Settings for exactly that reason:
+it is copy on a page, which is what the SEO team reaches for.
+
+**The three utility pages are three documents of ONE type.** They are the same document in
+every way that matters — a title, an optional lede, a body, no taxonomy above and no collection
+beneath — so three near-identical schema files would be three places to keep in step. Each is
+still pinned to its own `_id`, because there is no route that would serve a fourth. `sitePage`
+is in `SINGLETON_TYPES` for the same reason every other singleton type is: a generic list
+beside the three pinned ones lets an editor fill in a copy nothing reads. The desk needed a
+second helper for it — `singleton()` pins a type to an id of the same NAME, and here three ids
+share one type.
+
+### `getHomeWhyUs` WAS MISSED FOR A PHASE, AND THE METHOD IS WHY
+
+`sharedSections` recorded that exactly two section getters render on more than one page. The
+sweep behind that number was
+
+```sh
+grep -roE '\bget[A-Z][A-Za-z]*Section\(' src/pages | sort | uniq -c
+```
+
+which can only find getters whose NAME ends in "Section" — and Why Us is `getHomeWhyUs`. There
+are three. **Grep the call sites, not the naming convention:**
+
+```sh
+for g in $(grep -hoE 'export async function (get\w+)' src/data/*.ts | awk '{print $4}'); do
+  printf '%-28s ' "$g"; grep -rl "\b$g(" src/pages | tr '\n' ' '; echo
+done
+```
+
+A convention is not a fact about the code, and this one was two-thirds true.
+
+### A SENTINEL THAT ALSO APPEARS IN A COMMENT IS A GUARD THAT CANNOT FIRE
+
+Every Phase 4 migration refuses to run once its source has moved, asserted **per getter**
+against a string that exists only inside the literal it migrates — a module-shaped check
+("does this file import `sanity:client`?") stopped meaning anything the moment one getter in a
+module could move without the others.
+
+Tested by running each `--verify` after its swap. In 4a, seven of eight sentinels fired and the
+eighth did not: `community.ts` opens on `// "Rooted in Denver." — the homepage's community
+mosaic`, so the plain `includes()` still found the string and the guard reported a literal that
+was gone. **Strip comments before looking.** Same shape that has made this project's
+`TODO(launch)` count wrong four times.
+
+### A COMMENT BESIDE A LITERAL CANNOT SURVIVE THAT LITERAL MOVING TO A CMS
+
+**It happened for the third time, and the count caught it.** `TODO(launch)` read 41 before
+Phase 4 and **36** after: ten subjects in `carAccidents.ts` and one in `coCounsel.ts` lost
+their marker when their literal became a field. All eleven are back, on the fields they mark.
+
+It reads 41 again and **that is a coincidence, not a proof** — eleven markers moved into the
+schema, two collapsed into one (both crash-type tiles with no page are one `href` field now),
+and one is genuinely new (the co-counsel page's unverified "$300,000 average" claim, which had
+no marker before). Two more were briefly DUPLICATED, which is the same failure one step on:
+moving a marker onto a field while leaving a copy on the interface is how closing one leaves
+the other behind.
+
+**A marker belongs where the thing it marks is EDITED.** After Phase 4 that is usually a schema
+field, not a data module. Earlier precedents still hold: the trampoline article's marker lives
+in `diff-comp-blog-post.py` because no file in `src/` owns that sentence any more, and
+`YOUTUBE_ORIGINS` in `lib/video.ts` holds eight ids recovered from git history.
+
+**Re-measure with `git grep` after every phase. Do not subtract.** Current inventory:
+**41 `TODO(launch)`, 8 `TODO(video)`, 10 `TODO(sanity)`, 3 `TODO(content)`.** Phase 4 closed
+two `TODO(sanity)` — the award and testimonial key references, below — and added one for the
+Homepage document's form.
+
+### PAGE-HEADER ART DID NOT MOVE, AND NEITHER DID ITS ALT TEXT
+
+The line Phase 2 drew still holds and Phase 4 extended it with one rule:
+
+> **A photograph belonging to a CARD whose copy is editable moves with that card. A photograph
+> that is the page's or a band's backdrop stays a local import.**
+
+So the FAQ ask card's portrait, the two Car Accidents video posters, its two feature-card
+posters and its reviewer's portrait are Sanity assets; the eight page headers, the
+art-directed "why us" pair and the timeline's backdrop are not.
+
+**The alt text stayed with the photograph, and that is the half worth not undoing.** An alt
+that describes a picture the editor cannot see or change is a field that drifts with nothing
+checking it — and About's carries a live `TODO(launch)` about who is actually in the frame,
+which would not have survived the move. Eight `photoAlt`/`imageAlt` strings are the only prose
+left in `src/data/`, besides the fact-check sentence below.
+
+**`PageHeader` is why the art itself did not move**: it art-directs a panorama above 760px and
+a portrait crop below through a hand-built `<picture>` running `getImage()` over both sources.
+Making that editable is a rewrite of the component, not a data change. **If the client wants
+page art editable, the answer is to move `PageHeader` and all eight headers at once** — not one
+page at a time.
+
+### THE FACT-CHECK SENTENCE IS THE ONE STRING PHASE 4 DID NOT MOVE
+
+`factCheckLabel` — the tag above the band — is a field on both templates. The SENTENCE inside
+it is not, and this is a named gap rather than an oversight: it interpolates the reviewing
+attorney's name and links to their bio, both read from the roster. The comp spells him "KC
+Harpring" and the live site "KC Harping"; `byline()` takes whatever Collections → Team says.
+Storing the sentence freezes that name on 290 pages.
+
+**Making it editable needs a decision nobody has made** — either a placeholder syntax for the
+one substitution, or dropping the per-post derivation so an editor types the name and a check
+asserts it matches a published team member. Nothing is blocked today: all 186 posts name the
+same reviewer, `blogPost.factCheck` already exists as the per-document override, and 0 of 186
+use it.
+
+### THE SIDEBAR FORM IS ONE FIELD FOR TWO TEMPLATES
+
+Its copy is byte-identical across the 290 pages the two article templates serve, so it lives
+once on `sharedSections` and both getters read it. The 4c seed **asserts the two sources agree
+before collapsing them** and refuses to write if they have diverged — picking a winner silently
+is how one of them quietly disappears.
+
+It is the site's THIRD set of form copy. The page-foot form is on `contactSettings` and says
+something different again; Co-Counsel's referral form is its own.
+
+### THREE KEY-STRINGS BECAME REAL REFERENCES IN 4f
+
+The Car Accidents page named an award, a testimonial and five attorneys by STRING key, and this
+file has recorded why that mattered since Phase 2: renaming a key rendered the wrong badge, and
+it broke a build once. They are `reference` fields now and a reference cannot dangle. The
+reviewer's name and bio link come off the roster too, so the page can no longer disagree with
+it about a spelling.
+
+**The keys survive**: the projections resolve each reference back to `key.current`, because the
+components read a key and the whole migration rests on no call site moving. What the key stops
+being is the only thing standing between a rename and the wrong badge.
+
+**The reviewer is joined on the HREF, not the name** — the same trap Phase 2 hit, where three
+of four card records matched the roster on a key and the fourth did not, and the href was the
+authoritative half. Every join in 4f is asserted before anything is written.
+
+### FIFTEEN NAMED SECTIONS, NOT A PAGE BUILDER
+
+`carAccidentsPage` is the largest document in the dataset and every section on it is a named
+field bound to a component that draws it one way — the triage rows are a coloured-pill list,
+the timeline a numbered rail over a phase table, the results cards put an "offered" figure
+beside a "recovered" one. An array of interchangeable blocks would let an editor reorder or
+delete the thing that made the design work, and this is the SECOND design this page has had.
+
+**Adding a section is a code change, and that cost is the guarantee** — the same trade the
+navigation singleton makes with its three named menus.
+
+Four things stayed in code besides the art, each for a reason worth not re-deriving:
+
+- **The section anchors.** `CA_SECTION_IDS` is read by the nav's hrefs AND by the sections' own
+  `id` attributes. Two things that must agree get one source, so the Studio stores which
+  SECTION a nav item jumps to and the getter builds the anchor. The seed asserts each item's
+  existing href already matches its own section key before relying on that.
+- **The slug and the join key.** Routing, and `routePaths.ts` owns URLs here. A slug an editor
+  could edit is ~300 legacy redirects pointing at nothing, with a green build.
+- **The map's title.** The literal carried a second copy of the firm's name.
+- **The counts.** The seed asserts all 22 — a section that quietly lost a row is exactly what a
+  270-string migration hides.
+
+### `scripts/check-phone.py` — the open item Phase 4 made necessary
+
+`check:links` validates a `tel:` href's FORMAT and would pass `tel:+13037474404`, the retired
+number, happily. This validates the VALUE, and Phase 4 is why it exists rather than staying on
+the "worth doing" list: **two page documents now store the firm's number as CONTENT** — the
+Thank You lede and the privacy policy's closing sentence both carry it as text and inside a
+`tel:` link, because a link mid-sentence is what Portable Text is for.
+
+```sh
+python3 scripts/check-phone.py        # reads dist/, so build first
+```
+
+Two assertions. Every dialable link reaches the firm's own number, read from the same
+`firmDetails` the site renders from; and **none of the seven RETIRED numbers appears anywhere**
+— as an href, as displayed text, or in an attribute. A closed list of named numbers rather than
+a regex over phone-shaped strings, which would also match sixty-odd Shutterstock asset ids, two
+X status ids and a PACER document id. The three numbers in the body copy that are NOT the
+firm's — Denver Police non-emergency, Bike Thornton, Bicycle Colorado — are deliberately absent
+from it, and so is the `(303) 555-0100` form hint.
+
+2,373 dialable links across 329 pages, all correct. **Tested in four directions before being
+trusted**: a wrong `tel:`, a retired number in displayed text only, a `KNOWN_TEL` declaration
+nothing matches, and an empty `dist/`. Not in `npm run check` — it needs the network, like the
+five comp diffs and the fidelity audit.
+
 ### A COLLECTION IS FOR CONTENT REUSED IN MORE THAN ONE PLACE
+
 
 That is the rule Phase 2f set, and it is the client's: the Collections group exists so a
 record is changed once and every page that shows it follows. A type that renders on one page
@@ -143,7 +335,10 @@ behind a green import.
 
 Fixed in the shim with a per-call prefix derived from the call's own content — a counter
 would give the same body different keys on every build and make a migration's output
-irreproducible. **Phase 4 moves roughly eighty more hand-authored bodies through `pt()`.**
+irreproducible. **Phase 4 moved every remaining `pt()` body through it and each of its six
+migrations asserts `_key` uniqueness on the whole payload before writing** — a green import
+that loses half a privacy policy is the failure being guarded against, and the assertion walks
+the document rather than checking one array.
 
 ### THE BUILD MACHINE'S TIMEZONE DECIDED A POST'S DATE
 
@@ -205,8 +400,12 @@ a save still shows on the next reload. Warm dev requests went from timing out to
 
 **THE GENERAL SHAPE IS WORTH REMEMBERING: a getter that is cheap per page becomes O(pages)
 network reads the moment its source moves behind HTTP, and only dev shows it.** The build
-never did, because `once()` covered it there. Before Phase 4 adds more per-page getters, time
-a dev request as well as a build.
+never did, because `once()` covered it there.
+
+**Phase 4 added 22 more `once()` keys and did not slow anything**, because every one of them is
+a SINGLETON read once per build rather than a per-page getter — 56 round trips total, against
+330 pages. The shape to watch for is still the other one: a getter called from inside
+`getStaticPaths`. Time a dev request as well as a build whenever one of those appears.
 
 `toPost()` also resolved a byline per row — 185 lookups per `getBlogPosts()`. `credits()`
 reads the roster once and returns a Map; a linear `.find()` over 26 people, 185 times, across
@@ -353,11 +552,14 @@ worked this way.
 
 ### Three collections have keys that are named from somewhere else
 
-`award` (9 references from `carAccidents.ts`), `testimonial` (2, same file) and `teamMember`
-(3, from `blog.ts` before Phase 3b, now one reference field). Each carries a `key` slug
-projected as `_key`. **That key is content:** renaming one fails the build rather than quietly
-rendering the wrong badge. The award and testimonial pair are still `TODO(sanity)` to become
-real references when `carAccidents.ts` moves; the blog's became one in 3b.
+`award`, `testimonial` and `teamMember` each carry a `key` slug projected as `_key`. **That
+key is content:** renaming one fails the build rather than quietly rendering the wrong badge.
+
+**ALL THREE ARE REAL `reference` FIELDS NOW** — the blog's in 3b, the award and testimonial
+pair in 4f, along with the five attorneys the Car Accidents rail names and its reviewer. The
+keys survive: every projection resolves the reference back to `key.current`, because the
+components read a key and the whole migration rests on no call site moving. What a key stops
+being is the only thing standing between a rename and the wrong record.
 
 Sweep before any later migration — this is the command that found all three:
 
@@ -378,13 +580,16 @@ That is what Phase 2f corrected and what 3d confirmed: the two card rails render
 and are arrays on the page that renders them.
 
 The third row is not hypothetical: `TestimonialRail` and `about/InTheirWords` render the SAME
-records under DIFFERENT headings. Only two section-copy getters are shared at all — core
-values (5 pages) and the attorneys band (2). The other six are one-page and belong to that
-page in Phase 4.
+records under DIFFERENT headings, About's coming from its own page document.
 
-```sh
-grep -roE '\bget[A-Z][A-Za-z]*Section\(' src/pages | sort | uniq -c
-```
+**THREE getters are shared, not two** — core values (5 pages), the attorneys band (2) and Why
+Us (2). The `*Section(` grep this section used to carry found only the first two, because Why
+Us is `getHomeWhyUs`; see the note at the top of this file for the sweep that finds all three.
+Everything else is one-page and lives on that page's document.
+
+**Phase 4 added a FOURTH thing to `sharedSections` that is not a heading at all** — the sidebar
+consultation form's copy, identical across the 290 pages the two article templates serve. Same
+rule, same reason: one record, changed once.
 
 ### The Studio is shaped for editors, not for the schema
 
@@ -446,9 +651,16 @@ photographs, `getCollection`, `getFirmDetails`, `ptImage`. 3d stranded twelve mo
 one image imported TWICE under two names and `locationPath`, which had 55 call sites and now
 has none.
 
+**Phase 4 swept after every slice too, and the sweep found things two phases old.** 4b stranded
+thirteen symbols, SIX of which had been dead since PHASE 2: `testimonials.ts` still imported
+five client portraits and a video cover whose records became Sanity assets two phases earlier,
+and nothing had reported them. 4f took `carAccidents.ts` from 1,227 lines to 598 and stranded
+nothing, because the swap rewrote its import block in the same edit.
+
 **`git grep -c` the symbol, and check the count is more than one.** Most of those names also
 appear as substrings in prose or in `AREA_TO_BLOG_CATEGORY`, so a bare grep reads a dead
-import as live. `carAccidents.ts` is the big one still to come.
+import as live. The sweep that found them parses the import clauses and then looks for each
+binding in the file with its comments stripped — a bare grep counts the import line itself.
 
 ### A COMMENT BESIDE A LITERAL CANNOT SURVIVE THAT LITERAL MOVING TO A CMS
 
@@ -490,8 +702,25 @@ reuses the existing asset rather than uploading twice.
 
 **Every migration asserts its joins before writing anything.** 3b asserts 23 categories and
 exactly one reviewer; 3c asserts its own trimmed body matches the site's for all 104; 3d
-asserts exactly two non-reference directory rows. A seed that silently drops the rows it could
+asserts exactly two non-reference directory rows; 4f asserts all three of its key-to-reference
+joins and all 22 of the page's section counts. A seed that silently drops the rows it could
 not match is how a whole column disappears from a page nobody re-reads.
+
+**Four Phase 4 migrations read a document back and merged**, and each refuses to write when the
+read comes back without the list it must keep — `homePage.faqs`, `sharedSections.attorneysBand`,
+`practiceAreasPage.directory`, `communityPage.partners`, `carAccidentsPage.faqs`. That guard is
+the only thing between a copy migration and deleting three earlier phases.
+
+**`--verify` COMPARES SANITY AGAINST THE CODE, so it only means anything before the swap.**
+Every Phase 4 script says so in its header and refuses to run afterwards. Run it between the
+import and the swap; after the swap it is comparing the dataset with itself.
+
+**A SEED THAT WIDENS AN INTERFACE BREAKS ITS OWN READ.** Moving the FAQ ask card's portrait to
+Sanity widened `FaqSection.ask.portrait` to `ImageMetadata | SanityImageSource`, and the
+migration script that produced it stopped typechecking on its own `.src`. Discriminate on a
+field only one member has (`"src" in image`), never with a type predicate — a predicate over
+`SanityImageSource` narrows the false branch to `never`. The discrimination is also a real
+assertion: an image that is already a reference means the getter has moved.
 
 ### Not done, and known
 
@@ -505,6 +734,12 @@ not match is how a whole column disappears from a page nobody re-reads.
 - **`routePaths.ts` exports `locationPath` and nothing calls it.** One of five identical
   helpers that name the kinds of URL this site has; whether that set should shrink is a
   routing question, not a migration one.
+- **The Homepage document is sixteen fields and the form is a long scroll.** Practice Areas and
+  Car Accidents got Sanity field GROUPS in Phase 4 — three tabs and six — and the homepage
+  wants them too. An editor-UX decision, so it belongs to `/studio-polish ux`, which audits a
+  filled-out schema and now has one. `TODO(sanity)` on the type.
+- **The fact-check SENTENCE is still derived**, not editable. See the note at the top of this
+  file for what making it editable would need.
 
 ## State
 
@@ -520,12 +755,15 @@ their links went with them. `check:links` is clean at 33,630 links across 328 pa
 
 Build is green: **330 pages in 10 seconds** — 328 that render a site header and footer, plus
 `404.html` and `/admin`. It was 47s before Phase 3; Astro no longer optimises 202 body and card
-images, because they come off Sanity's CDN. `npm run check` passes and the fidelity audit reports
-104 of 104 pages at ≥99% against the live source — re-run after Phase 3c, against slugs read from
-the dataset.
+images, because they come off Sanity's CDN. Phase 4 did not slow it: it added 22 `once()` keys,
+so a build now makes **56 HTTP round trips total** rather than per page. `npm run check` passes,
+`check-phone.py` passes, all five comp diffs are green, and the fidelity audit reports 104 of
+104 pages at ≥99% against the live source — last run after Phase 3c, and Phase 4 cannot have
+affected it (it touches no practice-area body copy).
 
-**All five comp-diff scripts are green, and three of them now carry DECLARED DEPARTURES for
-things an editor controls.** `diff-comp-about.py` no longer pins the attorney grid to the
+**Every string on this site is editable now, and the comp diffs are the thing that still
+holds it to a design.** All five are green. Three carry DECLARED DEPARTURES for things an
+editor legitimately controls. `diff-comp-about.py` no longer pins the attorney grid to the
 comp's four names in order — who is on the rail and in what order are both editorial acts
 now, so it asserts the comp's four are PRESENT and reports extras. It still fails when one of
 them disappears or two swap; tested both ways. Its `EXPECTED` table also declares the
@@ -604,10 +842,11 @@ last handoff and it moves the project's biggest dependency off the critical path
 **The blog archive is 186 posts, not 167.** WordPress has two post types and the article-shaped
 content is spread across both — see below.
 
-Marker inventory: **41 `TODO(launch)`, 8 `TODO(video)`, 11 `TODO(sanity)`, 3 `TODO(content)`.**
-Re-measured with `git grep` after Phase 3, which closed none and briefly LOST one — see "A
-comment beside a literal cannot survive that literal moving to a CMS" above. 41 before, 40
-after, 41 once it was recovered into the check that still asserts it.
+Marker inventory: **41 `TODO(launch)`, 8 `TODO(video)`, 10 `TODO(sanity)`, 3 `TODO(content)`.**
+Re-measured with `git grep` after Phase 4, which briefly lost ELEVEN launch markers and
+duplicated two more — see "A comment beside a literal cannot survive that literal moving to a
+CMS" above for what happened and why 41 → 41 is a coincidence rather than a proof. Phase 4
+closed two `TODO(sanity)` and added one.
 
 **THE VIDEO FIGURE WAS WRONG, AND IT IS A FOURTH REASON FOR THIS LINE TO BE WRONG.** It read 6
 here, with a note saying it "fell from 8 to 6 because two were DELETED WITH THE LITERAL they
@@ -1527,74 +1766,61 @@ entry and both files to fix.
 
 ## Next
 
-1. **The 9 remaining dead links on the homepage** — the ONLY dead links left on the site.
-   `KNOWN_DEAD` in `check-links.py` is empty. Eight are `homePage.pressMentions[]` and
+1. **The 9 remaining dead links** — the ONLY dead links left on the site. `KNOWN_DEAD` in
+   `check-links.py` is empty. Eight are `homePage.pressMentions[]` and
    `homePage.insightTeasers[]`, read through `data/news.ts`, every `href` a literal `"#"`,
    marked `TODO(content)` rather than `TODO(launch)` — which is how they stayed off the launch
-   list. **They are editable in the Studio now**, on the Homepage document, so filling one in
-   is an editor's job rather than a code change — lower the `KNOWN_PLACEHOLDER` count in the
-   same change or `check:links` fails. The ninth is the Car Accidents checklist teaser. `#` must not reach production.
-   All nine are declared in `KNOWN_PLACEHOLDER` **by count**, so removing one without lowering
-   the number fails the check. The four news mentions are real published articles (FOX31,
-   Denver7, OutThere Colorado, The Mountain Mail) and their URLs are findable; the four insight
-   teasers and the checklist point at articles nobody has written.
+   list. The ninth is the Car Accidents checklist teaser, which IS a `TODO(launch)`: unlike the
+   homepage's eight it promises "8 things to do after a car accident" to a reader who has just
+   been in one. **All nine are editable in the Studio now**, so filling one in is an editor's
+   job rather than a code change — lower the `KNOWN_PLACEHOLDER` count in the same change or
+   `check:links` fails. It is keyed **by count**, so removing one without lowering the number
+   fails. The four news mentions are real published articles (FOX31, Denver7, OutThere
+   Colorado, The Mountain Mail) and their URLs are findable; the four insight teasers and the
+   checklist point at articles nobody has written. `#` must not reach production.
 2. **Real Wistia ids.** 33 slots still point at one stand-in, which is the whole site's video
-   layer resting on a single film — 3 in code (`carAccidents.ts`, `home.ts`) and 30 as FIELDS
-   in Sanity (20 FAQs — 8 on the Homepage document and 12 on Car Accidents since Phase 2f,
-   no longer a collection — 6 testimonials, 4 team films). **The YouTube ids they map to are in
-   `YOUTUBE_ORIGINS` in `src/lib/video.ts`** — no longer in comments beside their records,
-   because those records moved to Sanity and took the comments with them. Five of the eight
-   are unlisted and cannot be re-derived. Blocked on the firm re-hosting the videos, and on
-   someone checking YouTube Studio for unlisted ones beyond those five.
+   layer resting on a single film — and after Phase 4 **only ONE is still in code**
+   (`lib/video.ts`'s constant itself). The rest are FIELDS: 20 FAQs, 6 testimonials, 4 team
+   films, the homepage's firm intro, and the two Car Accidents video panels. **The YouTube ids
+   they map to are in `YOUTUBE_ORIGINS` in `src/lib/video.ts`** — no longer in comments beside
+   their records, because those records moved to Sanity and took the comments with them. Five
+   of the eight are unlisted and cannot be re-derived. Blocked on the firm re-hosting the
+   videos, and on someone checking YouTube Studio for unlisted ones beyond those five.
 
-   **Grepping `PLACEHOLDER_VIDEO` no longer finds them all** — it finds the 3 code-side ones.
-   The rest are data. The full sweep is a grep AND a query; both are written down at the top
-   of `src/lib/video.ts`.
+   **Grepping `PLACEHOLDER_VIDEO` no longer finds them** — the full sweep is a grep AND a
+   query, both written down at the top of `src/lib/video.ts`, and the query half needs
+   updating for the two Car Accidents panels Phase 4f moved.
 3. **One Wistia player per popover, initialised eagerly** — 15 on the homepage, 20 on
    `/denver-car-accident-lawyer/`. Inherent to the class-based embed; wants a pass before launch.
-4. ~~**Sanity Phases 2, 2f and 3.**~~ **ALL DONE.** 486 content documents across nine
-   collection types and nine singletons, 277 image assets, and `src/content/` deleted. Every
-   slice ended byte-identical or with every changed page explained. The findings are at the
-   top of this file; the ones that will matter next are `pt()`'s duplicate keys, GROQ's
-   codepoint `order()`, and that a comment beside a literal does not survive the literal.
+4. ~~**Sanity Phases 2, 2f, 3 and 4.**~~ **ALL DONE.** 499 content documents across nine
+   collection types, fifteen page documents and five settings singletons, 279 image assets,
+   and no page copy left in `src/data/`. Every slice ended byte-identical or with every changed
+   page explained. The findings that will matter next are at the top of this file; the ones
+   most likely to bite are `pt()`'s duplicate keys, GROQ's codepoint `order()`, and that a
+   comment beside a literal does not survive the literal.
 5. **The four Portable Text object types the post template deferred** — `callout`, `phoneBand`,
    `attorneyCard`, `pullQuote`, whose intended home is commented in `prose/components.ts`, and
-   which the practice-area chrome maps onto almost exactly. **Deliberately NOT in Phase 3**:
-   nothing in the 290 imported documents uses them and no renderer exists, so adding them then
-   would have shipped four editor controls that draw nothing. They belong with the page copy.
-6. **Sanity Phase 4 — Pages. NEXT.** Sixteen singletons, every visible string a field.
-   `homePage` is the largest (26 getters in one `Promise.all`). The two template-chrome
-   singletons — `blogPostTemplate` and `practiceAreaTemplate` — sit under **Pages**, not
-   Settings: they hold copy that appears ON a page, which is exactly what the SEO team will
-   reach for.
-   **FOUR OF THE SIXTEEN ALREADY EXIST** — `homePage`, `communityPage` and `carAccidentsPage`
-   from Phase 2f, `practiceAreasPage` from 3d. So this phase ADDS fields to live documents, and
-   any seed for them must READ EACH ONE BACK AND MERGE: `dataset import --replace` replaces a
-   document whole, and emitting only the copy fields would delete the directory and eighty
-   array members. `migrate-pages-2f.ts` and `migrate-practice-cards-3d.ts` both do the
-   read-back-and-merge; the second also refuses to write when the read comes back empty, which
-   is the guard worth copying.
-   **`carAccidents.ts` is the open modelling question** — 45KB across ~20 section interfaces
-   for ONE page, so a page document rather than a collection either way. Recommendation on the
-   table is to keep the structure in code and move only its text and images. It is also the
-   last big dead-literal risk: read "Dead literals survive a getter swap" before starting.
-   **`pt()` is what builds most of those bodies** — see its duplicate-key fix at the top, and
-   assert `_key` uniqueness on the payload before importing anything.
-   Five of the six one-page section getters named on `sharedSections` now have a document to
-   go to — `getFaqSection`, `getCarAccidentFaqSection`, `getFeedSection`, `getCommunitySection`,
-   `getCommunityPage`. Consolidating the per-array queries into one query per page belongs
-   here too, not before: 2f kept one query per array deliberately, since `once()` already makes
-   the whole build cost 8 round trips and a shared fetcher would have had no owning module.
-7. **Sanity Phase 5** — the webhook, CORS, then `/studio-polish ux`, which audits the
-   filled-out schema and so waits until there is one.
-8. `/new-seo-setup` — per-page meta, a Global SEO Settings singleton, JSON-LD, `sitemap.xml`,
+   which the practice-area chrome maps onto almost exactly. **Deliberately NOT in Phases 3 or
+   4**: nothing in the 290 imported documents uses them and no renderer exists, so adding them
+   would ship four editor controls that draw nothing. They want a renderer first.
+6. **Sanity Phase 5 — NEXT.** The webhook (publishing changes nothing on the live site until
+   someone redeploys), the production URL as a CORS origin (the deployed `/admin` loads and
+   fails sign-in), then `/studio-polish ux`. That last one audits a filled-out schema and now
+   has one — start with the Homepage document's sixteen fields, which want Sanity's field
+   groups the way Practice Areas and Car Accidents got them in Phase 4.
+7. `/new-seo-setup` — per-page meta, a Global SEO Settings singleton, JSON-LD, `sitemap.xml`,
    `robots.txt`, editor-managed redirects. **The practice-area pages already carry real
-   `metaTitle` / `metaDescription` from the live site's own meta**, and Phase 3c put them where
-   they belong: the `seo` object on all 104 `practiceArea` documents, which is what that type
-   was stubbed early for. So this layer has something true to start from. `BlogPosting` JSON-LD
-   belongs to this phase, and so does `sitemap.xml` — **which
-   nothing links any more**: the footer points at the human `/sitemap/` now. The XML file's every
-   URL is absolute off `site:`, so it cannot be written before the www-vs-apex call.
+   `metaTitle` / `metaDescription` from the live site's own meta** on all 104 `practiceArea`
+   documents, and Phase 4f put the Car Accidents page's on a `seo` object too — so this layer
+   has something true to start from and the field type is already proven on two shapes.
+   `BlogPosting` JSON-LD belongs here, and so does `sitemap.xml` — **which nothing links any
+   more**: the footer points at the human `/sitemap/`. The XML file's every URL is absolute off
+   `site:`, so it cannot be written before the www-vs-apex call.
+8. **`redirects.ts` is the last data module holding content**, and it is deliberate: the
+   redirect table becomes editor-managed in `/new-seo-setup`. `portableText.ts` is the only
+   other non-Sanity module and it is an authoring shim rather than content — **`blog.ts` is now
+   the only file in `src/` that CALLS `pt()` at all**, for the one fact-check sentence, so the
+   shim is one caller away from being types only. Its TYPES are still load-bearing everywhere.
 
 No comp exists for **privacy / disclaimer**, **sitemap** or **404**. All three are built on the
 light template's shell anyway — see below.
@@ -1776,9 +2002,9 @@ none first. Already an open question below; now recorded where the code is.
   posts a practice area's sidebar shows. Keyed on the area slug rather than its topic, because
   topic is five buckets and would put car-accident posts on the motorcycle page — which is what
   the live site does. In Sanity this wants to be a `relatedPosts` reference array on the
-  `practiceArea` document — **which now exists**, so this is buildable rather than blocked. It
-  is a content decision for the firm (which five articles belong on each of 104 pages), not a
-  migration step, which is why Phase 3 left it inferred.
+  `practiceArea` document, and **Phase 4f proved the pattern on three cross-references at once**,
+  so the shape is settled. What is left is a content decision for the firm — which five articles
+  belong on each of 104 pages — not a migration step.
 - **Auto Insurance & Accident Claims has no tab** — 13 posts carry it second, none first.
 - **`site:` in `astro.config.mjs`** — www vs apex, still unsettled.
 - **Two crash types on the heavy detail page** — rear-end and head-on.
@@ -1786,13 +2012,9 @@ none first. Already an open question below; now recorded where the code is.
 - **`src/assets` holds twelve images nothing references.** Eleven practice-area photographs and
   `consult.jpg`, all now Sanity assets. Kept because git is the only copy of the originals
   outside Sanity; delete them only alongside a decision about asset backup.
-- **`check:links` validates a `tel:` href's FORMAT but not its VALUE.** It rejects anything that
-  is not E.164 and would pass `tel:+13037474404` — the old number — happily. That gap widened in
-  Phase 3: the firm's number appears 261 times as text and 69 times as a `tel:` href across
-  bodies that are now EDITABLE, where before they were version-controlled JSON a human reviewed.
-  Asserting every `tel:` equals `firmDetails.phoneE164` is a few lines on top of
-  `scripts/lib/sanity.py` and would have caught the six-number mess before it was found by hand.
-  Not built in Phase 3 because it is a new check rather than a repoint of an existing one.
+- ~~**`check:links` validates a `tel:` href's FORMAT but not its VALUE.**~~ **CLOSED in Phase
+  4** — `scripts/check-phone.py`, and Phase 4 is what made it necessary rather than merely
+  worth doing: two page documents now store the firm's number as CONTENT. See the note above.
 
 **Waiting on the firm** — content, not code. `README.md` has the full table. Unchanged: the seven
 attorney emails, the office address and hours, the `$70M+ / 20 Years` stat claims.
