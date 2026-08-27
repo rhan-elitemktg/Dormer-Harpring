@@ -54,7 +54,11 @@ record is changed once and every page that shows it follows. A type that renders
 is a field on that page's document, and filing it as a collection makes an editor hunt a
 global list for something that only ever appears in one spot.
 
-Counted against the build, not argued:
+Counted against the build, not argued — **pages whose getter runs**, which is not the same as
+pages carrying a given record. Re-measure that way or the number means something else: probing
+for one award's alt text reads 116 rather than the band's 111, because five attorney bios draw
+the same badges as accolades, and probing for a core value's title reads 329, because
+"Community" is in the footer nav on every page.
 
 | Staying | Pages | | Moved to a page document | Pages |
 |---|---|---|---|---|
@@ -62,7 +66,7 @@ Counted against the build, not argued:
 | Blog Categories | 187 | | Insight Teasers | 1 |
 | Awards | 111 | | Community Photos | 1 |
 | Practice Areas | 107 | | Charity Partners | 1 |
-| Cities | 104 | | Community Partners | 1 |
+| Cities | 107 | | Community Partners | 1 |
 | Team | 29 | | Sponsorships | 1 |
 | Testimonials | 27 | | FAQs | 2 |
 | Core Values | 5 | | Practice-area card rails | 1 each |
