@@ -13,7 +13,8 @@ interface Props {
 }
 
 const { member } = Astro.props;
-const portrait = member.photoLarge ?? member.photo;
+// One portrait per person now — this used to prefer a separate wider crop.
+const portrait = member.photo;
 ---
 
 <article class="pcard">

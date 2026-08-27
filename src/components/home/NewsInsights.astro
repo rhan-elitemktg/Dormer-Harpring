@@ -7,13 +7,13 @@
 import Eyebrow from "../Eyebrow.astro";
 import NewsCard from "./news/NewsCard.astro";
 import ArticleCard from "./news/ArticleCard.astro";
-import type { FeedSection, NewsMention, InsightPost } from "../../data/news";
+import type { FeedSection, PressMention, InsightTeaser } from "../../data/news";
 import { ROUTES } from "../../lib/routePaths";
 
 interface Props {
   section: FeedSection;
-  news: NewsMention[];
-  insights: InsightPost[];
+  news: PressMention[];
+  insights: InsightTeaser[];
 }
 
 const { section, news, insights } = Astro.props;

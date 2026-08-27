@@ -18,6 +18,17 @@
 // The hover that reddens the name is bound to the NAME'S link, not the card:
 // they are separate controls now, and lighting up the name when the pointer is
 // over the portrait would say they are one.
+//
+// A VIDEO IS OPTIONAL, and it has to be. Every rail card carried one while the
+// four were written down in code; the moment an editor could add a fifth, the
+// first one they added had no film and the page threw. Without a video the
+// portrait keeps its frame and simply loses the play glyph and its scrim — the
+// scrim exists to give that glyph contrast, so it goes with it.
+//
+// The portrait still links to the BIO in that case, rather than going inert.
+// It is `tabindex="-1"` and `aria-hidden` because the name below it already
+// links to the same page: sighted users get a bigger target, and keyboard and
+// screen-reader users get one stop instead of two saying the same thing.
 import Picture from "../../media/Picture.astro";
 import PlayButton from "../../media/PlayButton.astro";
 import VideoPopover from "../../media/VideoPopover.astro";
@@ -40,27 +51,43 @@ const sizes =
 ---
 
 <div class:list={["acard", `acard--${layout}`]}>
-  <VideoPopover video={attorney.video}>
-    <a
-      class="acard__media"
-      href={videoWatchUrl(attorney.video)}
-      aria-label={`Watch ${attorney.name}'s video`}
-    >
-      <Picture
-        src={attorney.portrait}
-        alt={attorney.name}
-        widths={[272, 544, 700]}
-        sizes={sizes}
-        class="acard__portrait"
-      />
-      <span class="acard__scrim" aria-hidden="true"></span>
-      <PlayButton tone="light" size={46} class="acard__play" />
-    </a>
-  </VideoPopover>
+  {
+    attorney.video ? (
+      <VideoPopover video={attorney.video}>
+        <a
+          class="acard__media"
+          href={videoWatchUrl(attorney.video)}
+          aria-label={`Watch ${attorney.name}'s video`}
+        >
+          <Picture
+            src={attorney.portrait}
+            alt={attorney.name}
+            widths={[272, 544, 700]}
+            sizes={sizes}
+            class="acard__portrait"
+          />
+          <span class="acard__scrim" aria-hidden="true" />
+          <PlayButton tone="light" size={46} class="acard__play" />
+        </a>
+      </VideoPopover>
+    ) : (
+      <a class="acard__media" href={attorney.href} tabindex="-1" aria-hidden="true">
+        <Picture
+          src={attorney.portrait}
+          alt={attorney.name}
+          widths={[272, 544, 700]}
+          sizes={sizes}
+          class="acard__portrait"
+        />
+      </a>
+    )
+  }
 
   <a class="acard__link" href={attorney.href}>
     <span class="acard__name">{attorney.name}</span>
-    <span class="acard__role">{attorney.role} &middot; {attorney.location}</span>
+    {/* The role alone. The card carried a city after it — dropped by request,
+        and with it the separator that dangled whenever the city was empty. */}
+    <span class="acard__role">{attorney.role}</span>
   </a>
 </div>
 

@@ -16,6 +16,9 @@
 
 import { pt, type PortableTextBlock } from "./portableText";
 import type { CaseResult } from "./caseResults";
+import { sanityClient } from "sanity:client";
+import { HOME_RESULTS_QUERY } from "../sanity/lib/queries";
+import { once, required } from "../sanity/lib/fetch";
 import { practiceAreaPath } from "../lib/routePaths";
 import { PLACEHOLDER_VIDEO, type VideoRef } from "../lib/video";
 
@@ -71,41 +74,9 @@ export async function getHomeStats(): Promise<HomeStat[]> {
  * there covers reconciling the two at the Sanity phase.
  */
 export async function getRecentResults(): Promise<CaseResult[]> {
-  return [
-    {
-      _key: "kingsoopers",
-      tag: "Slip & Fall",
-      badge: "Trial Win",
-      wonInCourt: true,
-      offered: "$250K",
-      recovered: "$2.1M",
-      story:
-        "King Soopers disputed liability and offered $250K. A Boulder jury awarded " +
-        "our client $1.77M — resolved at $2.1M with interest and costs.",
-    },
-    {
-      _key: "disputed-crash",
-      tag: "Car Accident",
-      badge: "Trial Win",
-      wonInCourt: true,
-      offered: "$250K",
-      recovered: "$669K",
-      story:
-        "The insurer offered $250K on a disputed crash. We took it to a jury and " +
-        "won a $668,642 judgment for our client.",
-    },
-    {
-      _key: "low-speed",
-      tag: "Low-Speed Collision",
-      badge: "Trial Win",
-      wonInCourt: true,
-      offered: "$15K",
-      recovered: "$263K",
-      story:
-        "A low-speed crash the insurer valued at just $15K. The jury awarded " +
-        "$263,121 — roughly 17× the offer.",
-    },
-  ];
+  return once("caseResults:home", async () =>
+    required(await sanityClient.fetch(HOME_RESULTS_QUERY), "Case Results (Homepage)")
+  );
 }
 
 export interface WhyPoint {
@@ -286,7 +257,7 @@ export async function getHomeFirmIntro(): Promise<HomeFirmIntro> {
       text:
         "You focus on getting better. We'll handle the insurance company, the " +
         "paperwork, and the phone calls — and you'll always reach me, never a case number.",
-      name: "KC Harpring",
+      name: "K.C. Harpring",
       role: "Founding Partner",
     },
     aside: {

@@ -1,6 +1,6 @@
 // "8 min read", derived from a body rather than typed beside it.
 //
-// `InsightPost` in data/news.ts carries a hand-written `readTime` because those
+// `InsightTeaser` in data/news.ts carries a hand-written `readTime` because those
 // four records have no body to measure — they are teasers pointing at articles
 // that live elsewhere. A blog post has its body right there, and a hand-written
 // figure on one of those is wrong the first time a paragraph is added and

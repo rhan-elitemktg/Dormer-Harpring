@@ -22,6 +22,7 @@ import BioQuote from "./BioQuote.astro";
 import type { TeamMember, TeamProfile } from "../../data/team";
 import type { FirmDetails } from "../../data/site";
 import VideoPopover from "../media/VideoPopover.astro";
+import PlayButton from "../media/PlayButton.astro";
 import { videoWatchUrl } from "../../lib/video";
 import { ROUTES } from "../../lib/routePaths";
 
@@ -34,10 +35,9 @@ interface Props {
 const { member, profile, firm } = Astro.props;
 
 const firstName = member.name.split(" ")[0];
-// `photo`, not `photoLarge` — deliberately unlike PartnerCard.astro:12. The two
-// founding partners' `-lg` files are a wider torso crop; this card wants the
-// same tight headshot the other five attorneys get, so the larger crop stays on
-// the index cards and never reaches this page. Not an oversight to "fix".
+// There is ONE portrait per person now, so this and PartnerCard render the
+// same asset. They used to differ deliberately — a tight crop here, a wider
+// one on the card — and the hotspot does that instead.
 const portrait = member.photo;
 
 // The comp sets the pull quote as a card with the attorney cited underneath,
@@ -125,31 +125,6 @@ const quoteText = hasQuote
         )
       }
 
-      {
-        profile.video && (
-          <VideoPopover video={profile.video.ref}>
-            <a class="bio__video" href={videoWatchUrl(profile.video.ref)}>
-            <Picture
-              src={profile.video.poster}
-              alt={profile.video.alt}
-              widths={[640, 900, 1280]}
-              sizes="(max-width: 980px) 100vw, 60vw"
-              class="bio__poster"
-            />
-            <span class="bio__play" aria-hidden="true">
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M8 5.5v13l11-6.5z" />
-              </svg>
-            </span>
-            <span class="visually-hidden">
-              {/* No longer "on YouTube": it opens in a popover on this page. */}
-              Watch {member.name}'s profile film
-            </span>
-            </a>
-          </VideoPopover>
-        )
-      }
-
       <Prose value={bodyBefore} class="bio__body" />
       {hasQuote && <BioQuote text={quoteText} member={member} />}
       <Prose value={bodyAfter} class="bio__body" />
@@ -158,15 +133,44 @@ const quoteText = hasQuote
     <aside class="bio__side">
       <div class="bio__card">
         {
-          portrait && (
-            <Picture
-              src={portrait}
-              alt={member.name}
-              widths={[320, 600]}
-              sizes="(max-width: 980px) 100vw, 25vw"
-              class="bio__portrait"
-            />
-          )
+          /* THE PORTRAIT IS THE PLAY AFFORDANCE, by request. There was a
+             separate 16:9 poster block in the article above, which meant a
+             second image to upload and describe for a film the person's own
+             photograph already illustrates. Clicking the portrait opens the
+             same Wistia popover every other video on the site uses.
+
+             The <a> declares `display: block` rather than leaning on a tag
+             default: Wistia moves this trigger into a `div.wistia_click_to_play`
+             of its own on init, and anything relying on being a direct child of
+             its parent computes to `inline` and collapses to 0x0. That has
+             already cost this project two components. */
+          portrait &&
+            (profile.video ? (
+              <VideoPopover video={profile.video}>
+                <a
+                  class="bio__portrait-link"
+                  href={videoWatchUrl(profile.video)}
+                  aria-label={`Watch ${member.name}'s profile film`}
+                >
+                  <Picture
+                    src={portrait}
+                    alt={member.name}
+                    widths={[320, 600]}
+                    sizes="(max-width: 980px) 100vw, 25vw"
+                    class="bio__portrait"
+                  />
+                  <PlayButton tone="light" size={64} class="bio__play" />
+                </a>
+              </VideoPopover>
+            ) : (
+              <Picture
+                src={portrait}
+                alt={member.name}
+                widths={[320, 600]}
+                sizes="(max-width: 980px) 100vw, 25vw"
+                class="bio__portrait"
+              />
+            ))
         }
         <div class="bio__card-body">
           <p class="bio__card-name">{member.name}</p>
@@ -325,49 +329,22 @@ const quoteText = hasQuote
     object-fit: contain;
   }
 
-  /* Hidden until the rail can actually scroll. Kept in the DOM at every width
-     rather than rendered conditionally, because the breakpoint is a CSS fact —
-     the server has no idea how wide the viewport is. */
-  .bio__video {
+  /* The portrait doubles as the film's trigger. `position: relative` is what
+     the play button centres against, and `display: block` is load-bearing —
+     see the note on the markup. */
+  .bio__portrait-link {
     position: relative;
     display: block;
-    aspect-ratio: 16 / 9;
-    margin-bottom: var(--space-9);
-    border-radius: var(--radius-6);
-    overflow: hidden;
-    background: var(--dh-forest-500);
   }
 
-  .bio__video :global(.bio__poster) {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-
-  .bio__play {
+  /* PlayButton owns the ring, the glyph and the pulse. This used to be a
+     hand-rolled circle and an inline SVG here, which is why the bio was one of
+     three play affordances on the site that did not pulse. */
+  .bio__portrait-link :global(.bio__play) {
     position: absolute;
     left: 50%;
     top: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 78px;
-    height: 78px;
-    border-radius: var(--radius-full);
-    background: rgba(225, 74, 50, 0.94);
-    color: var(--dh-white);
-    /* Both transforms in one declaration — a hover rule setting only `scale`
-       would drop the centring translate. */
-    transform: translate(-50%, -50%) scale(1);
-    transition: transform var(--transition);
-  }
-
-  .bio__video:hover .bio__play,
-  .bio__video:focus-visible .bio__play {
-    transform: translate(-50%, -50%) scale(1.08);
+    transform: translate(-50%, -50%);
   }
 
   .bio :global(.bio__body .prose__p) {

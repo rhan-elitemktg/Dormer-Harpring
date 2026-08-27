@@ -1,28 +1,38 @@
 // The homepage's two-tab feed.
 //
-// SANITY SWAP POINT — and deliberately TWO exports rather than one merged list,
-// because these become two separate collections: `newsMention` (press coverage,
-// pointing off-site) and `blogPost` (167 of them on the legacy site, pointing
-// in-site). The comp merges them behind one tab switch, which makes them look
-// like one type with a flag; they are not. Keeping them apart means the CMS
-// swap is two clean substitutions rather than an unpicking job.
+// DELIBERATELY TWO EXPORTS rather than one merged list. The comp merges them
+// behind one tab switch, which makes them look like one type with a flag; they
+// are not. Press mentions point off-site to somebody else's publication and
+// insight teasers point in-site at articles the firm writes.
+//
+// BOTH ARE ARRAYS ON THE `homePage` DOCUMENT since Phase 2f, not collections.
+// They render on one page, and a Collection is for content reused in more than
+// one place. The header here used to predict `newsMention` and `blogPost` as
+// two collections; the blog half of that still holds — those 186 posts are
+// genuinely reusable — and is Phase 3.
 import type { ImageMetadata } from "astro";
-import denver7 from "../assets/news/denver7.webp";
-import fox31 from "../assets/news/fox31-cw2.webp";
-import mountainMail from "../assets/news/mountain-mail.webp";
-import outthere from "../assets/news/outthere.webp";
+import type { SanityImageSource } from "@sanity/image-url";
+import { sanityClient } from "sanity:client";
+import { INSIGHT_TEASERS_QUERY, PRESS_MENTIONS_QUERY } from "../sanity/lib/queries";
+import { once, required } from "../sanity/lib/fetch";
 
-export interface NewsMention {
+// THE ASSET IMPORTS THAT USED TO SIT HERE ARE GONE — the getters have read
+// Sanity since Phase 2e and nothing referenced them; an unused module-level
+// import is not an error, so nothing reported them for four commits. The FILES
+// stay in `src/assets/`: `npm run backup` runs `--no-assets`, so git is the only
+// copy of those originals outside Sanity's asset store.
+
+export interface PressMention {
   _key: string;
   outlet: string;
-  logo: ImageMetadata;
+  logo: ImageMetadata | SanityImageSource;
   /** Display string, not a date object — editors type "Mar 2026". */
   date: string;
   headline: string;
   href: string;
 }
 
-export interface InsightPost {
+export interface InsightTeaser {
   _key: string;
   /** Category name; also picks the card's tint and icon. */
   category: string;
@@ -62,44 +72,10 @@ export async function getFeedSection(): Promise<FeedSection> {
 }
 
 /** TODO(content): every `href` is a placeholder — the comp points them all at #news. */
-export async function getNewsMentions(): Promise<NewsMention[]> {
-  return [
-    {
-      _key: "adventure-park",
-      outlet: "FOX31 / CW2",
-      logo: fox31,
-      date: "Mar 2026",
-      headline:
-        "Family files lawsuit after child fell 20 feet, broke spine at adventure park in Denver",
-      href: "#",
-    },
-    {
-      _key: "dating-app",
-      outlet: "Denver7 ABC",
-      logo: denver7,
-      date: "Feb 2026",
-      headline:
-        "Denver cardiologist convicted of drugging, assaulting women; victims file suit against dating app",
-      href: "#",
-    },
-    {
-      _key: "tinder-hinge",
-      outlet: "OutThere Colorado",
-      logo: outthere,
-      date: "Jan 2026",
-      headline: "Six victims of Denver rapist sue the parent company of Tinder and Hinge",
-      href: "#",
-    },
-    {
-      _key: "saguache-jail",
-      outlet: "The Mountain Mail",
-      logo: mountainMail,
-      date: "Nov 2025",
-      headline:
-        "Jurors find Saguache County jail liable, award $4 million to victim's family",
-      href: "#",
-    },
-  ];
+export async function getPressMentions(): Promise<PressMention[]> {
+  return once("pressMentions", async () =>
+    required(await sanityClient.fetch(PRESS_MENTIONS_QUERY), "Homepage", "Pages")
+  );
 }
 
 /**
@@ -107,39 +83,8 @@ export async function getNewsMentions(): Promise<NewsMention[]> {
  * from the category, so only `iconKey` survives here — a hex is not a field an
  * editor can fill in, and the tint is picked in CSS off the same key.
  */
-export async function getInsightPosts(): Promise<InsightPost[]> {
-  return [
-    {
-      _key: "claim-worth",
-      category: "Your case",
-      iconKey: "value",
-      readTime: "5 min read",
-      title: "What is my personal injury claim worth?",
-      href: "#",
-    },
-    {
-      _key: "first-48",
-      category: "After a crash",
-      iconKey: "clock",
-      readTime: "4 min read",
-      title: "What to do in the first 48 hours after an accident",
-      href: "#",
-    },
-    {
-      _key: "adjusters",
-      category: "Insurance",
-      iconKey: "shield",
-      readTime: "3 min read",
-      title: "Talking to adjusters: what not to say",
-      href: "#",
-    },
-    {
-      _key: "how-long",
-      category: "The process",
-      iconKey: "steps",
-      readTime: "2 min read",
-      title: "How long will my personal injury case take?",
-      href: "#",
-    },
-  ];
+export async function getInsightTeasers(): Promise<InsightTeaser[]> {
+  return once("insightTeasers", async () =>
+    required(await sanityClient.fetch(INSIGHT_TEASERS_QUERY), "Homepage", "Pages")
+  );
 }

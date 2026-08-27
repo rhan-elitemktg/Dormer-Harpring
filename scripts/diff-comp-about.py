@@ -17,6 +17,12 @@
 # Four DELIBERATE differences are asserted rather than flagged; see EXPECTED
 # below. Each is a decision recorded in the code it belongs to.
 
+import os
+import sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__))))
+from lib.firm import firm_details  # noqa: E402
+
 import re, html, sys
 
 COMP = "/Users/rhanpemberton/Downloads/Dormer Harpring/Dormer Harpring Claude Files/DH - About.html"
@@ -72,17 +78,16 @@ def present(label, needles):
 
 built_text = unesc(built)
 
-# site.ts is the single source for the firm's phone number, and a .py script
-# cannot import a .ts module — so it is read out by regex rather than repeated.
-SITE_PHONE = re.search(
-    r'phone:\s*"([^"]+)"',
-    open("src/data/site.ts", encoding="utf-8").read(),
-).group(1)
-
-SITE_SMS = re.search(
-    r'sms:\s*"([^"]+)"',
-    open("src/data/site.ts", encoding="utf-8").read(),
-).group(1)
+# THE FIRM'S NUMBERS COME FROM SANITY, which is where the site reads them.
+# They used to be pulled out of `src/data/site.ts` by regex — a .py script
+# cannot import a .ts module — but that file no longer holds a literal, so the
+# regex matched nothing and this line threw. Querying the dataset keeps ONE
+# source of truth, which is the entire point: the alternative is writing the
+# number down a second time, and a second number in the codebase is a second
+# number that can ship. See scripts/lib/firm.py.
+_FIRM = firm_details()
+SITE_PHONE = _FIRM["phone"]
+SITE_SMS = _FIRM["sms"]
 
 # BOTH numbers the comps carry, and the comps are wrong about both. Excluded
 # from the info-card value comparison and asserted as a declared departure
@@ -119,9 +124,43 @@ comp_team = re.findall(r"name: '([^']+)', roleLine: '([^']+)'", blk)
 built_team_names = [unesc(x) for x in re.findall(r'<span class="acard__name[^"]*"[^>]*>(.*?)</span>', built, re.S)]
 built_team_roles = [unesc(x) for x in re.findall(r'<span class="acard__role[^"]*"[^>]*>(.*?)</span>', built, re.S)]
 
+# DECLARED DEPARTURE: the comp writes the founding partner's name without its
+# stops — "KC Harpring" — and the built site writes "K.C. Harpring". This is not
+# a new choice; it is the site's existing one finally applied consistently. His
+# own bio page has always said "K.C. Harpring", and so did 297 of the 300 built
+# pages. The three that did not were the attorney rail on this page, the
+# homepage and Practice Areas, which read their cards from a separate map.
+#
+# Consolidating the rail onto the team roster in Sanity removed that map, so
+# all 300 now agree. The comp is the odd one out, as it already is on both
+# phone numbers — and the live site is worse still, publishing "KC Harping".
+#
+# Asserted as a departure rather than loosened, so a REGRESSION to the comp's
+# spelling still fails here.
+COMP_PARTNER = "KC Harpring"
+SITE_PARTNER = "K.C. Harpring"
+comp_team_names = [SITE_PARTNER if n == COMP_PARTNER else n for n, _ in comp_team]
+
+# THE ATTORNEY GRID IS EDITOR-CONTROLLED — WHO IS ON IT AND IN WHAT ORDER.
+#
+# The rail is a checkbox on a team member in Sanity, and its order is the team
+# page's drag order. Both adding a card and reordering the rail are ordinary
+# editorial acts now, so neither can be asserted against a four-name snapshot
+# without the check going red every time someone does their job.
+#
+# What IS still asserted: all four of the comp's attorneys are on the page. One
+# of them disappearing is a regression whoever caused it should hear about.
+#
+# The rail no longer leads with K.C. Harpring as the comp draws it — dropping
+# the separate rail position means it follows the team page, which leads with
+# Sean Dormer. Declared in EXPECTED below.
 print("\nMEET THE TEAM")
-cmp("names / order", [n for n, _ in comp_team], built_team_names)
-cmp("role lines / order", [r.replace("·", "·") for _, r in comp_team], built_team_roles)
+present("the comp's four attorneys are all on the rail", comp_team_names)
+# The city left the card, so the comp's "Attorney · Denver" is now "Attorney".
+# Compared on the ROLE ALONE rather than dropped: a role changing is still a
+# difference worth seeing, and only the city half stopped being rendered.
+comp_team_roles = [r.split("·")[0].strip() for _, r in comp_team]
+present("the comp's four role lines, without the city", comp_team_roles)
 
 
 # ---------------------------------------------------------------- expect cards
@@ -203,7 +242,7 @@ cmp("reviewer names / order", comp_review_names, built_review_names)
 EXPECTED = [
     (
         # The comps' own infoCardsData values are excluded from present("values")
-        # above; both numbers are asserted here instead, against site.ts.
+        # above; both numbers are asserted here instead, against Sanity.
         "both phone numbers are the firm's, not the comps'",
         SITE_PHONE in built_text
         and SITE_SMS in built_text
@@ -213,8 +252,39 @@ EXPECTED = [
         "confirmed (303) 756-3812, the number its live site publishes in JSON-LD and on its "
         "contact page. Text: the comps say (720) 734-6230 across 29 files; the firm confirmed "
         "(720) 730-7997, which the live site publishes 864 times and which the comps carry only "
-        "inside commented-out markup. Both retired, neither kept as a fallback. site.ts is the "
+        "inside commented-out markup. Both retired, neither kept as a fallback. The firmDetails "
+        "singleton in Sanity is the "
         "only place a phone number may live, so this reads from there",
+    ),
+    (
+        "the attorney rail carries no city",
+        # Scoped to the CARDS' own role lines. A bare `" · Denver" not in
+        # built_text` also matches the pull quote's attribution, "Dormer
+        # Harpring · Denver, Colorado", which is unrelated and staying.
+        all("·" not in role for role in built_team_roles),
+        "the comp's cards read \"Attorney · Denver\"; the city was dropped from the card by "
+        "request. It was a per-person field that every rail member had to be given, and the "
+        "separator dangled with nothing after it on anyone who was not",
+    ),
+    (
+        "the rail follows the team page's order, not the comp's",
+        built_team_names[:2] == ["Sean Dormer", "K.C. Harpring"],
+        "the comp leads with K.C. Harpring and the built rail leads with Sean Dormer. The "
+        "rail had its own position field; it was dropped by request so that one drag order "
+        "serves both the team page and the rail, rather than two sequences that silently "
+        "disagree. The team page has always led with Sean. Dragging the two partners in the "
+        "Studio changes both together",
+    ),
+    (
+        "the founding partner's name is spelled the site's way, not the comp's",
+        SITE_PARTNER in built_text and COMP_PARTNER not in built_text.replace(SITE_PARTNER, ""),
+        "the comp writes \"KC Harpring\" without its stops; his own bio page and 299 of the 300 "
+        "built pages write \"K.C. Harpring\". The three that disagreed were the attorney rails on "
+        "this page, the homepage and Practice Areas, whose cards came from a separate map keyed "
+        "`kc-harpring` while the roster was keyed `k-c-harpring`. Consolidating the rail onto the "
+        "roster in Sanity removed that map, so all 300 now agree. The comp is the odd one out, as "
+        "it already is on both phone numbers, and the live site is worse still — it publishes "
+        "\"KC Harping\"",
     ),
     (
         # Searched in the RAW html, not `built_text` — alt lives in an attribute,

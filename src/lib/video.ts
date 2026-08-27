@@ -31,8 +31,33 @@ export interface VideoRef {
  */
 const WISTIA_ACCOUNT = "";
 
+/**
+ * Fail loudly on a video record that is missing or half-filled.
+ *
+ * WHY THIS EXISTS. A `videoRef` that came back null from a projection produced
+ * `TypeError: Cannot destructure property 'provider' of 'object null'` from the
+ * line below — during a page render, naming no field, no document and no
+ * person. It took a dataset comparison to work out which of thirty team members
+ * had lost their film.
+ *
+ * Every play affordance on the site routes through this module, so one check
+ * here covers all nine of them.
+ */
+function assertVideo(ref: VideoRef | null | undefined): VideoRef {
+  if (!ref || !ref.id) {
+    throw new Error(
+      `A video record is missing its id, so no play link can be built for it.\n` +
+        `Every video is a { provider, id } pair — find the record with an empty ` +
+        `"Video ID" in the Studio at /admin and fill it in, or remove the field.\n` +
+        `Received: ${JSON.stringify(ref)}`
+    );
+  }
+  return ref;
+}
+
 /** Where a "play" affordance sends someone who is leaving the page. */
-export function videoWatchUrl({ provider, id }: VideoRef): string {
+export function videoWatchUrl(ref: VideoRef): string {
+  const { provider, id } = assertVideo(ref);
   if (provider === "wistia") {
     return WISTIA_ACCOUNT
       ? `https://${WISTIA_ACCOUNT}.wistia.com/medias/${id}`
@@ -48,7 +73,8 @@ export function videoWatchUrl({ provider, id }: VideoRef): string {
  * moment the iframe loads, which would put every page carrying a video into the
  * consent conversation. Wistia does not set cookies until playback begins.
  */
-export function videoEmbedUrl({ provider, id }: VideoRef): string {
+export function videoEmbedUrl(ref: VideoRef): string {
+  const { provider, id } = assertVideo(ref);
   if (provider === "wistia") {
     return `https://fast.wistia.net/embed/iframe/${id}`;
   }
@@ -101,11 +127,137 @@ export function wistiaPopoverClass(id: string): string {
  * IT IS ALSO THE HOMEPAGE HERO'S GENUINE VIDEO, and that collision is the one
  * thing to know here. `home.ts` writes its id as a LITERAL rather than
  * importing this, deliberately: the hero is correct and finished, the others
- * are placeholders that happen to share an id today. Grep for
- * `PLACEHOLDER_VIDEO` to get exactly the slots still waiting on a real one —
- * grepping for the id itself would wrongly include the hero.
+ * are placeholders that happen to share an id today.
  *
- * TODO(video): 39 slots. Each carries the YouTube id it should map to, where
- * one is known.
+ * GREPPING `PLACEHOLDER_VIDEO` NO LONGER FINDS THEM ALL, and that changed
+ * quietly when the content moved. Most slots are FIELDS in Sanity now, holding
+ * the stand-in id as data. Today it is:
+ *
+ *   3   in code      carAccidents.ts (two panels), home.ts (the FAQ band)
+ *   30  in Sanity    20 in faqs[].video.id — 8 on homePage, 12 on carAccidentsPage
+ *                    6 testimonial.video.id, 4 teamMember.videoId
+ *
+ * So the full sweep is a grep AND a query:
+ *
+ *   git grep -n PLACEHOLDER_VIDEO -- src
+ *   *[video.id == "b4n3r4pchd" || videoId == "b4n3r4pchd"
+ *     || count(faqs[video.id == "b4n3r4pchd"]) > 0]{
+ *     _type, "name": coalesce(name, _id), "faqSlots": count(faqs[video.id == "b4n3r4pchd"])
+ *   }
+ *
+ * THE `faqs[]` CLAUSE IS NOT OPTIONAL and was added in Phase 2f. The FAQs used
+ * to be documents with their own `video.id`, which the first two clauses found;
+ * they are array members on two page documents now, so a query without the third
+ * clause returns 10 slots and looks complete. It should total 30.
+ *
+ * Do NOT grep the id in code to find them: `home.ts` writes it as a literal for
+ * the hero, whose video is correct and finished, and that would wrongly include
+ * it.
+ *
+ * TODO(video): 33 slots. `YOUTUBE_ORIGINS` below carries the id each maps to,
+ * where one is known.
  */
+/**
+ * THE YOUTUBE MAPPING, AND WHY IT LIVES HERE NOW.
+ *
+ * Every record used to carry a `TODO(video): was YouTube <id>` comment beside
+ * it, which was the ONLY record of which film belonged in which slot. Moving
+ * those records into Sanity deleted their comments with them — six in the
+ * testimonials slice and two more with the attorney bios — and nobody noticed
+ * for four commits, because a comment disappearing is not a test failure.
+ *
+ * FIVE OF THESE EIGHT ARE UNLISTED. Nothing public can enumerate an unlisted
+ * video: yt-dlp, the RSS feed and the channel page all return only the 15
+ * public ones. These five were found by working backwards from ids in the
+ * codebase, so losing this table means losing them for good — a re-derivation
+ * is not available. Only YouTube Studio's Content list holds the true total,
+ * and nobody has checked whether there are more than five.
+ *
+ * A code comment beside a literal cannot survive that literal moving to a CMS.
+ * A table in the module that owns video URLs can, which is the whole point of
+ * putting it here rather than beside the records again.
+ *
+ * Keyed by the record's own key in Sanity. TODO(video): as each film is
+ * re-hosted, set the Wistia id on that record and strike its row.
+ */
+export const YOUTUBE_ORIGINS: Record<string, { id: string; title: string; listed: boolean }> = {
+  // testimonial
+  evelyn: { id: "kFdrOgblr6A", title: "Client Testimonial - Evelyn", listed: false },
+  ben: { id: "sMGtyzxGaxY", title: "Client Testimonial - Ben", listed: true },
+  joel: { id: "AhfhEBczLcY", title: "Client Testimonial: Joel", listed: false },
+  elijah: { id: "aqX7B7vu1ZI", title: "Client Testimonial - Elijah", listed: false },
+  kelly: { id: "B3-hJPujs0U", title: "Client Testimonial", listed: false },
+  "sean-client": { id: "-cSgLpR2TfA", title: "DORMER HARPRING TESTIMONIAL", listed: true },
+  // teamMember — Sean's profile film
+  "sean-dormer": { id: "LT-oU3yqtmA", title: "Sean Dormer 2024 Profile", listed: false },
+  // a LINK on Sean's bio, not an embed — the "About Dormer Harpring" row
+  "sean-dormer:about-film": {
+    id: "OUGOMAWgrmc",
+    title: "About Dormer Harpring",
+    listed: true,
+  },
+};
+
 export const PLACEHOLDER_VIDEO: VideoRef = { provider: "wistia", id: "b4n3r4pchd" };
+
+
+/* -------------------------------------------------------------------------
+ * Poster frames, when nobody uploaded one
+ * ---------------------------------------------------------------------- */
+
+/** What a Wistia poster is asked for at. 16:9, and big enough for the widest
+ *  slot that renders one (the bio page's film, at 1280). */
+const POSTER = { width: 1280, height: 720 };
+
+/**
+ * One request per video id, however many pages ask.
+ *
+ * The 33 un-migrated slots all point at the SAME stand-in id today, so this is
+ * one request for the whole build rather than 33 — the same reasoning as `once()`
+ * in sanity/lib/fetch.ts, and it matters for the same reason.
+ */
+const posters = new Map<string, Promise<string | null>>();
+
+/**
+ * The film's own thumbnail, for when an editor uploads no poster frame.
+ *
+ * WHY oEMBED AND NOT A PREDICTABLE URL. Wistia's thumbnails live under a
+ * per-delivery hash that cannot be derived from the media id — the obvious
+ * guess, `embed-ssl.wistia.com/deliveries/<id>.jpg`, is a 404. oEmbed is the
+ * documented way to turn an id into a thumbnail and it needs no account or key.
+ *
+ * Returns null rather than throwing when Wistia cannot be reached: a poster is
+ * a fallback for a fallback, and taking the whole build down because a third
+ * party is slow would be the wrong trade. Callers fall back again, to the
+ * person's own portrait, so there is always something to render.
+ */
+export function wistiaPosterUrl(id: string): Promise<string | null> {
+  const cached = posters.get(id);
+  if (cached) return cached;
+
+  const request = (async () => {
+    try {
+      const response = await fetch(
+        `https://fast.wistia.com/oembed?url=${encodeURIComponent(
+          `https://home.wistia.com/medias/${id}`
+        )}`
+      );
+      if (!response.ok) return null;
+      const url: unknown = (await response.json())?.thumbnail_url;
+      if (typeof url !== "string" || url === "") return null;
+      // The URL carries the crop it was rendered at; ask for ours instead.
+      return url.replace(
+        /image_crop_resized=\d+x\d+/,
+        `image_crop_resized=${POSTER.width}x${POSTER.height}`
+      );
+    } catch {
+      return null;
+    }
+  })();
+
+  posters.set(id, request);
+  return request;
+}
+
+/** The dimensions `wistiaPosterUrl` renders at, for `Picture`'s `remoteSize`. */
+export const WISTIA_POSTER_SIZE = POSTER;

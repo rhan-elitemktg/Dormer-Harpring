@@ -6,14 +6,14 @@ import Picture from "../media/Picture.astro";
 import type {
   CommunitySection,
   CommunityPhoto,
-  NgoPartner,
+  CharityPartner,
 } from "../../data/community";
 import { ROUTES } from "../../lib/routePaths";
 
 interface Props {
   section: CommunitySection;
   photos: CommunityPhoto[];
-  partners: NgoPartner[];
+  partners: CharityPartner[];
 }
 
 const { section, photos, partners } = Astro.props;
