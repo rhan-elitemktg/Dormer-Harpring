@@ -54,7 +54,6 @@ import {
   getBlogPostPage,
   getBlogPosts,
   getFeaturedPost,
-  getImportedArticles,
   getRelatedPosts,
   getRelatedPostsForArea,
 } from "../data/blog";
@@ -75,21 +74,44 @@ import {
   getVideoReviews,
 } from "../data/testimonials";
 
+/**
+ * A STUDIO EDIT DOES NOT SHOW ON THIS ROUTE UNTIL THE MODULE IS INVALIDATED.
+ *
+ * `astro dev` caches what `getStaticPaths` returns and only re-runs it when the
+ * module graph changes — a source file edit. That was invisible while this
+ * content lived in `src/content/`, because the content-collection loader has its
+ * own invalidation and saving a JSON file triggered it. Phase 3 moved the
+ * content behind HTTP, where nothing tells Astro anything happened.
+ *
+ * Publishing in the Studio therefore changes 290 of the 330 pages with no
+ * visible effect until you touch a file. `npm run dev:refresh` does exactly
+ * that, for this route and the attorney bios; restarting the dev server works
+ * too. A BUILD IS NEVER AFFECTED — it runs `getStaticPaths` once, from cold.
+ *
+ * The static pages have no such problem: they re-run their frontmatter per
+ * request, so `once()`'s five-second dev window is all that stands between a
+ * publish and a reload showing it.
+ *
+ * The real fix is Sanity's live content / Visual Editing, which is Phase 5.
+ */
 export const getStaticPaths = (async () => {
-  const [handAuthored, imported, featured, posts, details, areaPages] = await Promise.all([
+  const [articles, featured, posts, details, areaPages] = await Promise.all([
     getBlogPostArticles(),
-    getImportedArticles(),
     getFeaturedPost(),
     getBlogPosts(),
     getPracticeAreaDetails(),
     getPracticeAreaArticles(),
   ]);
 
-  // ONE FEED AGAIN. `getBlogPosts()` IS the imported archive now, so the third
-  // list this used to union in would have duplicated every card. Articles still
-  // come from two places — the hand-authored one and the import — because a
-  // post's BODY can be curated even when its card is not.
-  const articles = [...handAuthored, ...imported];
+  // ONE LIST OF ARTICLES, ONE FEED. Both used to be unions: the articles were
+  // the hand-authored one plus the import, and the feed had been three lists
+  // before that. Phase 3b made every post a document, so `getBlogPostArticles()`
+  // is all 186 and `getBlogPosts()` is the 185 the panel does not already show.
+  //
+  // The feed still has the featured post PREPENDED rather than queried in — it
+  // is excluded from `getBlogPosts()` on purpose, because /news renders it in
+  // its own panel above the grid, and the join below needs every article to
+  // find its card.
   const feed = [featured, ...posts];
 
   // Walk the ARTICLES, not the feed — the same contract

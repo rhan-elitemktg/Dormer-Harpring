@@ -67,19 +67,44 @@ export default defineConfig({
   plugins: [structureTool({ structure })],
   schema: {
     types: schemaTypes,
+
+    /*
+     * ONE PARAMETERISED TEMPLATE, so "＋" inside a city's list makes a page IN
+     * that city.
+     *
+     * Team needs no equivalent: `orderableDocumentListDeskItem` sets its group's
+     * field on anything created inside it, which is half of why that plugin is
+     * worth its pin. The practice areas use a plain filtered list — nothing
+     * reads a drag order for them — so the template is what closes the same
+     * hole. Without it a page created inside Denver would have no `city`, match
+     * none of the nine filters, and be invisible in the desk: content that
+     * exists and cannot be reached.
+     */
+    templates: (prev) => [
+      ...prev,
+      {
+        id: "practiceArea-by-city",
+        title: "Practice Area (in this city)",
+        schemaType: "practiceArea",
+        parameters: [{ name: "value", type: "string" }],
+        value: ({ value }: { value: string }) => ({ city: value }),
+      },
+    ],
   },
 
   document: {
     /*
      * WHAT THE GLOBAL "CREATE NEW" MENU MUST NOT OFFER.
      *
-     * `teamMember`, because Team opens into four sub-lists filtered on `kind`,
-     * and `kind` is hidden in the form by request — so the ONLY thing that sets
-     * it is creating a person inside one of those lists. The navbar's global
-     * create button bypasses that: it would make a team member with no group,
-     * matching none of the four filters, invisible in the desk and unreachable
-     * in the Studio. Removing it leaves exactly one creation path, and it is the
-     * one that sets the field.
+     * `teamMember` and `practiceArea`, because both open into sub-lists filtered
+     * on a field the global button does not set — `kind` for one, `city` for the
+     * other. Same failure either way: a document matching none of its groups is
+     * invisible in the desk.
+     *
+     * On `teamMember` specifically: `kind` is hidden in the form by request,
+     * so the ONLY thing that sets it is creating a person inside one of those
+     * lists. Removing the type from this menu leaves exactly one creation path,
+     * and it is the one that sets the field.
      *
      * EVERY SINGLETON, because a singleton is a singleton only by convention
      * here — `documentId()` in the desk pins one to a fixed id, and nothing
@@ -96,7 +121,9 @@ export default defineConfig({
     newDocumentOptions: (prev) =>
       prev.filter(
         (item) =>
-          item.templateId !== "teamMember" && !SINGLETON_TYPES.includes(item.templateId)
+          item.templateId !== "teamMember" &&
+          item.templateId !== "practiceArea" &&
+          !SINGLETON_TYPES.includes(item.templateId)
       ),
   },
 });

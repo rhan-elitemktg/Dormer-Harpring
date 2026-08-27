@@ -19,6 +19,9 @@ import { getFirmDetails } from "../../data/site";
 import { getContactBand, getContactDetails } from "../../data/contact";
 import { getHomeTestimonials, getReviewSummary } from "../../data/testimonials";
 
+/* A Studio edit does not show here until the module is invalidated — `astro dev`
+   caches `getStaticPaths`. `npm run dev:refresh`, or restart. Builds are never
+   affected. The long version is in `src/pages/[slug].astro`. */
 export const getStaticPaths = (async () => {
   const [profiles, team] = await Promise.all([getTeamProfiles(), getTeam()]);
 

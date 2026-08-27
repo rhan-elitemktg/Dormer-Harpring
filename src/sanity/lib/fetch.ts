@@ -57,26 +57,46 @@ export function required<T>(
  * share one request: `Promise.all([getFirmDetails(), settings()])` on the same
  * tick would otherwise start two.
  *
- * PRODUCTION ONLY, and that is the point of the branch. A build reads a dataset
- * that cannot change under it — one process, one `published` perspective — so
- * caching is free and correct. `astro dev` is the opposite case: an editor
- * saving in the Studio expects the next reload to show it, and a module-level
- * cache would hold the old value until the dev server restarted. Slower dev
- * requests are the right trade for that.
+ * FOREVER IN A BUILD, FOR A FEW SECONDS IN DEV — and the dev half is not a
+ * refinement, it is what makes `astro dev` usable at all.
+ *
+ * This used to be production-only, on the reasoning that a build reads a dataset
+ * that cannot change under it while an editor saving in the Studio expects the
+ * next reload to show it. The trade was named as "slower dev requests". After
+ * Phase 3 that stopped being true in kind: 290 of the 330 pages route through
+ * one `[slug].astro`, whose `getStaticPaths` calls `getRelatedPosts()` 372
+ * times, and each of those re-derives the whole feed. Measured with no cache,
+ * ONE dev request needed **nine minutes** of network for the blog branch alone.
+ * That is not slow, it is hung — the page never loads and nothing says why.
+ *
+ * A SHORT TTL KEEPS BOTH PROPERTIES. Everything inside a single
+ * `getStaticPaths` run shares one fetch, because that run takes well under a
+ * second once it is not re-fetching; and a reload a few seconds later reads the
+ * dataset again, so an editor's save still shows up on the next reload the way
+ * it always did. The window is deliberately shorter than the time it takes a
+ * person to alt-tab, save, and come back.
+ *
+ * The build is unaffected: `PROD` skips the expiry entirely, so a build still
+ * makes exactly one request per key however long it runs.
  */
-const inFlight = new Map<string, Promise<unknown>>();
+const DEV_TTL_MS = 5_000;
+
+const inFlight = new Map<string, { at: number; promise: Promise<unknown> }>();
 
 export function once<T>(key: string, fetcher: () => Promise<T>): Promise<T> {
   // Optional-chained because this module is also imported OUTSIDE Vite: the
   // seed scripts pull data modules into plain Node, where `import.meta.env` is
   // undefined and a bare `.PROD` throws a TypeError that masks the real error
-  // underneath it.
-  if (!import.meta.env?.PROD) return fetcher();
+  // underneath it. Those scripts get the dev behaviour, which is what they want
+  // — a migration that runs for a minute should not pin a stale read.
+  const forever = import.meta.env?.PROD === true;
 
   const existing = inFlight.get(key);
-  if (existing) return existing as Promise<T>;
+  if (existing && (forever || Date.now() - existing.at < DEV_TTL_MS)) {
+    return existing.promise as Promise<T>;
+  }
 
   const promise = fetcher();
-  inFlight.set(key, promise);
+  inFlight.set(key, { at: Date.now(), promise });
   return promise;
 }

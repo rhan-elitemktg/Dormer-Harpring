@@ -8,29 +8,44 @@ either here, and don't record anything `git log` already knows.
 
 _Last updated: 2026-08-27._
 
-## The Sanity integration — Phases 0, 1, 2 and 2f are in
+## The Sanity integration — Phases 0 through 3 are in
 
-**255 content documents in Sanity; 17 of 28 data modules read from it.** The eleven still
-holding literals are Phase 3/4 material — page copy, the blog, the practice areas, redirects.
+**486 content documents in Sanity; every content collection is gone.** `src/content/` and
+`src/content.config.ts` are deleted and nothing imports `astro:content`. **Twenty of the 28
+data modules read Sanity.** Of the eight that do not, six are page COPY — `aboutPage`,
+`contactPage`, `teamPage`, `thankYou`, `sitePages` and the heavy `carAccidents` — which is
+Phase 4. `portableText.ts` is an authoring shim rather than content, and `redirects.ts` is the
+redirect table, which becomes editor-managed in `/new-seo-setup`.
 
-It was 312 until 2f moved sixty documents off seven collections and onto three page
-documents. Nothing was deleted that the site reads: the build is byte-identical across the
-whole change.
+It was 172 documents before Phase 3. The blog (186 posts, 23 categories), the practice areas
+(104 pages), the `/practice-areas` directory and the three card rails all moved, along with
+328 image uploads.
 
-Build is **330 pages** (was 332: two attorney bio pages went with four departed staff, below).
+Build is **330 pages in 10 seconds**, down from 47: Astro no longer optimises 202 body and
+card images, because they are served from Sanity's CDN.
+
+**293 of the 329 pages differ from the pre-phase build, and the arithmetic is exact**: 187 from
+3b, 104 from 3c, 2 from 3d, with no overlap. Each slice was verified on its own — both trees
+built, image URLs and the `<time datetime>` `Z` normalised away, and every residual difference
+named. Only two survived that: the category row reordering on 186 pages (the trampoline merge,
+below) and a sidebar sort regression on 22 (GROQ collation, below). Do not read the cumulative
+number as unexplained change; read the per-slice commits.
 
 ### What is built
 
-- `sanity.cli.ts` + `npm run typegen`. `npm run backup` exports the dataset (documents only,
-  ~50K) to wherever you point it — take one before anything destructive.
+- `sanity.cli.ts` + `npm run typegen`. `npm run backup` exports the dataset (documents only)
+  to wherever you point it — take one before anything destructive.
 - `src/sanity/lib/` — `image.ts` (CDN URLs), `queries.ts` (every `defineQuery`), `fetch.ts`
   (`required()` and `once()`).
 - `Picture.astro` has THREE branches: a local import, a Sanity asset, and a plain URL on a
   host we do not control. The third takes a `remoteSize` because dimensions cannot be read
   off a URL, and omitting them shifts the layout as the image lands.
-- Field types: `richText`, `simpleText`, `inlineText`, `link`, `navLink`, `videoRef`, `seo`.
-- Six collection types and eight singletons — three Pages, five Site Settings — in a desk of
+- Field types: `richText`, `answerText`, `simpleText`, `inlineText`, `link`, `navLink`,
+  `videoRef`, `seo`.
+- Nine collection types and nine singletons — four Pages, five Site Settings — in a desk of
   Pages / Collections / Site Settings.
+- `scripts/lib/sanity.py` — one GROQ reader for every Python check. `lib/firm.py` is one
+  query on top of it.
 
 ### A COLLECTION IS FOR CONTENT REUSED IN MORE THAN ONE PLACE
 
@@ -39,77 +54,118 @@ record is changed once and every page that shows it follows. A type that renders
 is a field on that page's document, and filing it as a collection makes an editor hunt a
 global list for something that only ever appears in one spot.
 
-Counted against the build, not argued:
+Counted against the build, not argued — **pages whose getter runs**, which is not the same as
+pages carrying a given record. Re-measure that way or the number means something else: probing
+for one award's alt text reads 116 rather than the band's 111, because five attorney bios draw
+the same badges as accolades, and probing for a core value's title reads 329, because
+"Community" is in the footer nav on every page.
 
 | Staying | Pages | | Moved to a page document | Pages |
 |---|---|---|---|---|
-| Awards | 111 | | Press Mentions | 1 |
-| Cities | 104 | | Insight Teasers | 1 |
-| Team | 29 | | Community Photos | 1 |
-| Testimonials | 27 | | Charity Partners | 1 |
-| Core Values | 5 | | Community Partners | 1 |
-| Case Results | 3 | | Sponsorships | 1 |
-| | | | FAQs | 2 |
+| Blog Posts | 294 | | Press Mentions | 1 |
+| Blog Categories | 187 | | Insight Teasers | 1 |
+| Awards | 111 | | Community Photos | 1 |
+| Practice Areas | 107 | | Charity Partners | 1 |
+| Cities | 107 | | Community Partners | 1 |
+| Team | 29 | | Sponsorships | 1 |
+| Testimonials | 27 | | FAQs | 2 |
+| Core Values | 5 | | Practice-area card rails | 1 each |
+| Case Results | 3 | | The directory | 3 |
 
-Sixty documents moved onto `homePage` (5 arrays), `communityPage` (2) and `carAccidentsPage`
-(1). **Before adding a collection, count the pages it renders on.**
+**Before adding a collection, count the pages it renders on.** The directory is the one
+borderline call in Phase 3 — it renders on three pages, but it is one editorial list about
+one page, so it lives on `practiceAreasPage` and the other two read it from there.
 
-**`faq`'s `shownOn` RADIO WAS THE TELL.** It existed only to split one collection back into
-the two page-local lists it always was — 8 homepage, 12 Car Accidents. The third caller its
-header cited, the 28 imported practice-area accordions (153 items), is not in Sanity at all:
-those arrive with the body copy in `src/content/practice-areas/`. `caseResult.shownOn` and
-`testimonial.onHomeRail` / `onReviewsPage` are NOT the same shape and stay — those types
-really do serve three and twenty-seven pages.
+### THE DIRECTORY IS REFERENCES; THE CARD RAILS ARE NOT
 
-**Every array member is an ANONYMOUS inline object**, following `teamMember.awards[]`. Checked
-in two places rather than assumed: `@sanity/schema` builds its duplicate-name set from the
-top-level types array only, so array members are never registered globally; and the live
-`awards[]` rows carry no `_type` at all. That is what let the three page documents exist
-BESIDE the seven collections instead of replacing them atomically — every step was
-independently revertible.
+Both were `practiceAreas.ts` literals and they went two different ways, decided by the data
+rather than by preference. Read this before modelling anything else that points at a page.
 
-`faqItemFields` is a shared fields ARRAY spread into both accordions, not a named object type:
-two callers is under the four-caller extraction threshold, and a top-level `faq` object would
-have collided with the `faq` document type while both existed. Phase 3's 28 practice-area
-accordions are when a named type earns itself.
+- **99 of the directory's 100 page rows print the referenced page's own short name.** So the
+  row is a `reference` and the label is an OVERRIDE, stored once — on
+  `denver-premises-liability-lawyer`, which the firm's hub calls "Premises Liability" in the
+  Denver column and "Premises Liability Overview" as a heading. Storing a label on each row
+  would have been 99 chances for the list and the page to disagree.
+- **A card renames almost everything it links to.** The homepage rail says "Bicycle
+  Accidents" for a page filed as "Bike Accidents", "Slip & Fall" for "Slip and Fall
+  Accidents", "Traumatic Brain Injury" for "Brain Injuries". Its blurb differs from
+  `/practice-areas`' blurb for the same area, and **four cards appear on both pages with the
+  same href and different copy**. So a card is copy that happens to link somewhere, and it
+  stores its own name and its own href.
 
-**`order` IS GONE FROM ALL SEVEN — array position is the order, and editors drag.** One real
-consequence: the community mosaic's widths have to add up row by row (5+3+4, 4+5+3, 12). That
-constraint lived in a comment in `data/community.ts`, which was safe while reordering meant
-typing a number into a form. It is the array field's `description` now, because **the person
-dragging never opens that file.** Any ordering constraint on a dragged array needs the same.
+**TWO DIRECTORY ROWS CANNOT BE REFERENCES, and both are real.** "Personal Injury" points at
+the HOMEPAGE, which doubles as the firm's Denver personal-injury overview the way the legacy
+hub does; "Car Accidents" points at the one slug the heavy hand-authored template serves,
+which is a practice-area page but not a `practiceArea` DOCUMENT. They are a second array
+member type (`customEntry`) rather than an optional href beside the reference — two fields
+where an editor must know to fill exactly one is a validator's job, where "add a Practice
+area" or "add Another link" needs no explaining. **The migration asserts there are exactly
+two**; a third means something changed that wants a look.
 
-**`required()` STOPPED BEING A NO-OP for these eight, and that is the upgrade.** A GROQ
-collection query returns `[]` when a type has no documents, never null, so
-`required(fetch(CHARITY_PARTNERS_QUERY), …)` could not throw however empty the dataset got —
-the homepage would have rendered a logo strip with no logos. Reading an array off a page
-document returns null. `required()` now takes a `where` (defaulting to "Site Settings") so the
-message names the right desk group, and `required().min(1)` on each array keeps the failure in
-the Studio at publish rather than in a deploy.
+This is what the `link` type's own `TODO(sanity)` was waiting for — "internal links become a
+`reference` … it cannot be declared yet, no document types exist". They exist now, and 100
+rows an editor would otherwise type as URLs is the list that most needed it.
 
-**A PLAIN `JSON.stringify` DEEP-COMPARE IS WRONG AGAINST SANITY.** The migration's `--verify`
-reported all eight groups as mismatched with every value identical: Sanity returns a stored
-object's keys in its own order, alphabetically, where an assembled member carries them in
-schema order. `canon()` in `scripts/migrate-pages-2f.ts` sorts keys at every depth. Reach for
-it before writing another one of these.
+### THE STORED PRACTICE-AREA BODY IS THE TRIMMED ONE
 
-**The ＋ menu could create a second singleton, and had been able to since Phase 1.**
-`SINGLETON_TYPES` was exported from `sanity/structure` and imported by nothing;
-`newDocumentOptions` filtered `teamMember` alone. A second `firmDetails` at a generated id
-opens, saves and publishes, and the site never reads it — every query filters the fixed `_id`.
-Closed, for the five settings singletons as well as the three new pages.
+A deliberate departure from the rule `content.config.ts` used to state — that files keep
+WordPress's shape and the getter coalesces, because a projection does the coalescing after a
+swap. **GROQ cannot express a heading-boundary walk**, and dropping "Near Me", "Resources"
+and "Awards and Accolades" means running from a chrome h2 to the next h2. Leaving it in the
+getter would have kept it there permanently AND shown editors three sections that never reach
+the page. 280 chrome blocks and 180 of the 231 body images never uploaded.
 
-**Three names were made one each**: `ngoPartner`/`NgoPartner`/`getNgoPartners`/
-`NGO_PARTNERS_QUERY` → charity partner throughout, and the same for press mentions and insight
-teasers. Type-only, hash-verified inert.
+**The manifest lives in `scripts/migrate-practice-areas-3c.ts` now, and the script proves the
+copy is faithful**: it re-derives every body through the site's own
+`getPracticeAreaArticles()` over the same input and refuses to write unless all 104 match
+block for block. `scripts/audit-practice-area-fidelity.py` keeps its own copy and needs it —
+that one compares against live WordPress, which still carries every section.
 
-**36 dead image imports went** — 4 in `news.ts`, 14 in `community.ts`, 18 in
-`communityPage.ts`, unreferenced since Phase 2e's swap and reported by nothing. The 29 FILES
-stay in `src/assets/`: `npm run backup` is `--no-assets`, so git is the only copy of those
-originals outside Sanity, and `prep-assets.mjs` still re-derives the partner logos.
+### GROQ's `order()` IS CODEPOINT ORDER, NOT COLLATION
 
-`scripts/migrate-pages-2f.ts` is kept rather than deleted — its `--verify` no longer works
-(the sources are purged) but its assertion list is the template for the next one of these.
+`| order(label asc)` put "RTD Denver Accidents" before "Rideshare Accidents" and "UPS Truck
+Accident" before "Uninsured and Underinsured Motorcyclist Accidents", because every capital
+sorts before every lowercase letter. `localeCompare` compares letters first and case last,
+which is what a reader scanning an alphabetical column expects. It moved two pairs across 22
+of the 104 sidebar cards, and only the byte-diff caught it.
+
+**Sort a human-readable list in the getter.** Use `order()` for dates and explicit `order`
+fields, where codepoints and intent agree.
+
+### `pt()` GAVE ONE ARTICLE 28 DUPLICATE BLOCK KEYS
+
+It numbered blocks `b0`, `b1`, … from zero WITHIN THE CALL, so a body assembled from more
+than one call — `[...pt(…), ptImage(…), ...pt(…)]`, the documented way to place an image
+mid-article — carried every key twice. Invisible on the site, because `_key` never reaches
+the markup; **fatal on upload, because Sanity requires uniqueness within an array and a
+collision is a silently dropped item, not an error.** Half that article would have vanished
+behind a green import.
+
+Fixed in the shim with a per-call prefix derived from the call's own content — a counter
+would give the same body different keys on every build and make a migration's output
+irreproducible. **Phase 4 moves roughly eighty more hand-authored bodies through `pt()`.**
+
+### THE BUILD MACHINE'S TIMEZONE DECIDED A POST'S DATE
+
+All 580 imported timestamps arrive without an offset — WordPress's `date` is the site's own
+wall clock — and JavaScript parses that form as the RUNNING machine's local time. Eleven sit
+at 19:00 or later, so west of Greenwich they crossed midnight and rendered the following day.
+Production was never affected (Vercel builds in UTC), which is exactly why nobody found it.
+
+`withZone` in `lib/dates.ts` reads an offset-less timestamp as UTC. A date-only string is
+left alone — the spec already parses `2026-06-23` as UTC midnight, and `2026-06-23Z` is
+`Invalid Date`, which would have shipped as the words "Invalid Date" on the featured post.
+
+### A CHECK THAT AUDITED ZERO PAGES REPORTED SUCCESS
+
+`audit-practice-area-fidelity.py` enumerated its slugs from
+`src/content/practice-areas/*.json`. Phase 3c deleted that directory, and the script printed
+**"MATCHES SOURCE" with exit 0 having checked nothing** — the silent-failure shape four
+linters exist to catch, in the script whose whole job is catching it.
+
+Two fixes, and the second is the one that generalises: it reads its slugs from the dataset,
+and **an empty list is a hard failure whatever the cause**, because zero pages agree with
+anything. **Any check that enumerates should assert it found something.**
 
 ### `scripts/compare-builds.py` is the check the whole migration rests on
 
@@ -125,18 +181,69 @@ python3 scripts/compare-builds.py compare before.json
 
 `dist/admin/` is excluded: its bundle hash moves on every schema change.
 
+**IT IS NOT ENOUGH ON ITS OWN WHEN A DATE FORMAT CHANGES.** Phase 3b moved 187 pages into
+CHANGED for one mechanical reason (`<time datetime>` gaining a `Z`), which buried a real
+content change in the same bucket. The way through is to build BOTH trees, normalise the
+known-mechanical difference as well as the image URLs, and re-classify — anything left is the
+finding. That is how the category reorder and the sidebar sort regression were both isolated.
+
+### `astro dev` HUNG AFTER PHASE 3, AND THE BUILD LOOKED FINE
+
+Every URL timed out — not slow, hung, with nothing in the terminal saying why. The build was
+10 seconds throughout, which is exactly what made it invisible.
+
+**`once()` was production-only.** That was right while the site read local files: a build
+reads a dataset that cannot change under it, where an editor saving in the Studio expects the
+next reload to show it. Phase 3 broke the assumption underneath it — 290 of the 330 pages now
+route through one `[slug].astro`, whose `getStaticPaths` calls `getRelatedPosts()` **372
+times**, and each of those re-derives the whole feed. Measured with no cache: **nine minutes
+of network for one dev request**, blog branch alone.
+
+`once()` now caches for **five seconds in dev** and forever in a build. Everything inside one
+`getStaticPaths` run shares a fetch; a reload a few seconds later reads the dataset again, so
+a save still shows on the next reload. Warm dev requests went from timing out to **20ms**.
+
+**THE GENERAL SHAPE IS WORTH REMEMBERING: a getter that is cheap per page becomes O(pages)
+network reads the moment its source moves behind HTTP, and only dev shows it.** The build
+never did, because `once()` covered it there. Before Phase 4 adds more per-page getters, time
+a dev request as well as a build.
+
+`toPost()` also resolved a byline per row — 185 lookups per `getBlogPosts()`. `credits()`
+reads the roster once and returns a Map; a linear `.find()` over 26 people, 185 times, across
+372 calls is 1.8 million comparisons for an answer that does not change.
+
+### A STUDIO EDIT DOES NOT SHOW IN DEV ON THE TWO DYNAMIC ROUTES
+
+Publish a change and 290 of the 330 pages keep serving the old value until a
+source file is touched. **`npm run dev:refresh`**, or restart the dev server.
+
+`astro dev` caches what `getStaticPaths` returns and re-runs it only when the module graph
+changes. That was invisible while the content lived in `src/content/` — the content-collection
+loader has its own invalidation, so saving a JSON file triggered it. Phase 3 moved the content
+behind HTTP, where nothing tells Astro anything happened.
+
+**The static pages are fine**: they re-run their frontmatter per request, so `once()`'s
+five-second dev window is all that stands between a publish and a reload showing it. **A BUILD
+IS NEVER AFFECTED** — it runs `getStaticPaths` once, from cold, which is why this can be true
+while `npm run build` shows the change immediately.
+
+Diagnosed the long way once already: check the DATASET first (a draft is invisible — the client
+reads `perspective: "published"`), then a fresh build, then dev. If the build shows it and dev
+does not, it is this. The real fix is Sanity's live content / Visual Editing, which is Phase 5.
+
 ### A GREEN BUILD CAN LIE. Delete `dist/` first.
 
 Three builds in a row reported "332 page(s) built" and exited 0 while the data behind them
-was already gone — Astro was writing over a stale `dist/`. `rm -rf dist && npm run build`
-surfaced it in seconds. Do that before trusting a build that is meant to prove something.
+was already gone — Astro was writing over a stale `dist/`. A FAILED build leaves a partial
+`dist/` behind too, which reads as a site that lost 325 pages. `rm -rf dist && npm run build`
+before trusting a build that is meant to prove something.
 
 ### Five things that will bite
 
 1. **`once()` in `sanity/lib/fetch.ts` is not optional.** The first Sanity-backed build took
    **3m35s against 44s** — every page renders the header, the footer and usually the contact
-   band, so four singletons became ~2,000 round trips. Any new getter that skips it brings
-   that back, and the arithmetic against 186 posts is a build nobody waits for.
+   band, so four singletons became ~2,000 round trips. Every getter added in Phase 3 uses it;
+   one that skips it costs a round trip per page against 294 pages.
 2. **Filter queries on `_type` as well as `_id`.** An id alone tells typegen nothing about
    shape, so the result type comes back as a union across every document type — one all-null
    variant each — and every field reads as possibly null however the schema is validated.
@@ -148,6 +255,30 @@ surfaced it in seconds. Do that before trusting a build that is meant to prove s
    `sanity.cli.ts`.
 5. **`getStaticPaths` cannot see module scope.** Both `[slug].astro` files are affected;
    `sanity/lib/queries.ts` exists so queries can be imported rather than closed over.
+
+### `scripts/lib/stub-vite-modules.ts` — how a Node script reads a data module
+
+Three things in `src/data/*.ts` only exist inside an Astro build, and all three are answered
+through `node:module`'s `registerHooks`: image imports, `sanity:client`, and `astro:content`.
+Call `registerDataModuleHooks()` BEFORE the dynamic import and use `await import()` — static
+imports hoist above it.
+
+**THE CLIENT HAS TWO MODES AND PHASE 3 IS WHY.** `"throw"` is right while Sanity is empty and
+the code is the source of truth: a seed calling an already-swapped getter would otherwise
+write a document full of nothing. `"live"` builds a real client configured exactly as
+`astro.config.mjs` configures the site's — needed the moment a migration must READ content
+earlier phases moved, which 3b did for the reviewer, the firm's phone and the taxonomy.
+
+**THE "ALREADY SWAPPED" GUARD MOVED, AND HAD TO.** It read the module for an import of
+`sanity:client` and refused if it found one — which stopped meaning anything the moment ONE
+getter in a module moved. Phase 3a swapped the categories in `blog.ts`; the 186 posts were
+still entirely in code. **Each migration now asserts against the SOURCE IT READS**, which is
+a question a module-shaped check cannot answer.
+
+Two smaller traps in that file, both of which cost a round trip: a `\0`-prefixed virtual URL
+cannot resolve a bare import (`ERR_INVALID_URL` walking up to `node_modules`), so the stubs
+are `file:` URLs pointing at files that do not exist; and `\"` inside a template literal
+collapses to `"` in the emitted source, which is a syntax error rather than an escape.
 
 ### THE DRAG-ORDER PLUGIN IS PINNED, AND CANNOT BE UPGRADED
 
@@ -170,6 +301,18 @@ up together. Until then, `npm install <anything>` can re-introduce the conflict 
 including `@csstools/*`, which rehashed every CSS chunk and made 296 pages differ for no
 reason. Restore the lockfile and add the one package onto it rather than accepting the churn.
 
+### A drag handle nothing reads is worse than no drag handle
+
+The desk's grouped-list helper only offered `orderableDocumentListDeskItem`, which writes an
+`orderRank` field as rows move. That is right for Team, whose page renders it. It is wrong
+for the 104 practice areas, which are sorted by their short name and store no position — a
+control that appears to work, saves a field and changes nothing on the site.
+
+So the helper takes an `orderable` flag. **The plain variant needs an initial-value template**
+to set the group's field, which the plugin's list does for free: without it a page created
+inside Denver has no `city`, matches none of the nine filters, and is invisible in the desk.
+`practiceArea` is out of the global create menu for the same reason `teamMember` is.
+
 ### Coalescing goes in the projection or on its own line — never in a cast
 
 `as FirmDetails` typechecks and hides a real mismatch: a projection returns `null` where the
@@ -180,6 +323,22 @@ would ship as the firm's location in its structured data.
 
 `required()` throws when a singleton is absent. **Hard cutover, no fallbacks**: a getter that
 quietly falls back to a literal is a second copy of the content that can ship by accident.
+
+`required()` CANNOT throw on a collection query — GROQ returns `[]` for a type with no
+documents, never null. Every collection getter needs a real guard downstream, and each of the
+Phase 3 ones has one: `getBlogPosts()` throws by slug on a post with no category,
+`getFeaturedPost()` throws unless exactly one post is featured, and `assertDirectoryJoin()`
+names every directory entry whose page is missing.
+
+### `href` IS NEVER PROJECTED
+
+Every Phase 3 query returns a slug and the getter calls `blogPath()` / `practiceAreaPath()`.
+Three layers already agree on the trailing slash — `astro.config.mjs`, `vercel.json` and
+`routePaths.ts` — and a GROQ string concat must not become a fourth. Same reason `TEAM_QUERY`
+returns no href and derives it from `hasProfile`.
+
+The same rule sends a byline through `byline()` rather than projecting `{name, href}`: one
+place turns a roster entry into a credit.
 
 ### The main nav's top level is code, on purpose
 
@@ -195,9 +354,10 @@ worked this way.
 ### Three collections have keys that are named from somewhere else
 
 `award` (9 references from `carAccidents.ts`), `testimonial` (2, same file) and `teamMember`
-(3, from `blog.ts`). Each carries a `key` slug projected as `_key`. **That key is content:**
-renaming one fails the build rather than quietly rendering the wrong badge. All three are
-`TODO(sanity)` to become real references when `carAccidents.ts` and the blog move.
+(3, from `blog.ts` before Phase 3b, now one reference field). Each carries a `key` slug
+projected as `_key`. **That key is content:** renaming one fails the build rather than quietly
+rendering the wrong badge. The award and testimonial pair are still `TODO(sanity)` to become
+real references when `carAccidents.ts` moves; the blog's became one in 3b.
 
 Sweep before any later migration — this is the command that found all three:
 
@@ -214,9 +374,8 @@ grep -rnoE '\b[a-z]+Key\b' src/data/*.ts | awk -F: '{print $1": "$3}' | sort | u
 | Its **heading, different per page** | that page's own singleton |
 
 **A band that is NOT repeated splits none of these ways — all of it belongs to its page.**
-That is what Phase 2f corrected: the community mosaic, the press feed and the two FAQ
-accordions each render once, and their items were in Collections anyway. Check the first
-column before the table applies at all.
+That is what Phase 2f corrected and what 3d confirmed: the two card rails render once each
+and are arrays on the page that renders them.
 
 The third row is not hypothetical: `TestimonialRail` and `about/InTheirWords` render the SAME
 records under DIFFERENT headings. Only two section-copy getters are shared at all — core
@@ -224,31 +383,22 @@ values (5 pages) and the attorneys band (2). The other six are one-page and belo
 page in Phase 4.
 
 ```sh
-grep -roE '\bget[A-Z][A-Za-z]*Section\(' src/pages | sort | uniq -c | sort -rn
+grep -roE '\bget[A-Z][A-Za-z]*Section\(' src/pages | sort | uniq -c
 ```
-
-### `practiceAreas.ts` is deliberately NOT in Phase 2
-
-Its 13 cards across three lists all point at practice-area pages that exist — all 12 distinct
-hrefs checked and resolving. So the card fields belong **on those page documents in Phase 3**;
-a separate card collection now would be a type to merge away.
-
-Four of the thirteen appear in both the home and featured lists with the SAME href and
-DIFFERENT blurbs. Do not collapse those into one field.
 
 ### The Studio is shaped for editors, not for the schema
 
 **Team opens into four groups** — Founding Partners (2), Attorneys (5), Staff (16), Office
 Dogs (3) — filtered on `kind`, which is `required()` and a closed list, so the four are
-exhaustive for anything publishable. **A fifth kind must be added to all three places at
-once**: the schema's option list, `GROUPED` in `sanity/structure`, and the `select()` in
-`TEAM_QUERY`. A document matching none of the filters is invisible in the desk.
+exhaustive for anything publishable. **Practice Areas opens into nine**, one per city, the
+same way. **A fifth value must be added in BOTH places at once**: the schema's option list
+and `GROUPED` in `sanity/structure`. A document matching none of the filters is invisible in
+the desk.
 
 `kind` is **hidden** in the form, by request — the group is implied by which list you created
 in. The cost, recorded because it is a surprise: **nobody can move a person between groups in
 the Studio.** A paralegal who becomes an attorney needs the field un-hidden or an API edit.
-`teamMember` is also removed from the global "create new" menu in `sanity.config.ts`, so the
-only creation path is inside a group, which is the only one that sets `kind`.
+`city` on a practice area is NOT hidden, so that one can be moved.
 
 **Each group shows only its own fields.** What each uses was counted, not guessed: card bio,
 accolades, figures band, bio eyebrow and the film are partners-only; the standfirst is
@@ -257,8 +407,7 @@ staff-only (16 of 20, and no attorney or partner has one); "in loving memory" is
 **The team page sorts by GROUP first, then rank.** The desk shows four filtered lists but
 `orderRank` is one global sequence and the page renders partners then everyone else flat — so
 a drag inside Attorneys used to move the row against the whole roster. Sorting by group makes
-interleaving impossible rather than merely absent. Tested by giving an attorney a rank below
-both partners and watching the boundary hold.
+interleaving impossible rather than merely absent.
 
 ### The attorney rail is one checkbox
 
@@ -271,9 +420,7 @@ always did. Visible on the homepage and About; dragging the two partners changes
 together. Declared in `diff-comp-about.py`.
 
 A film is OPTIONAL on the card: without one the portrait keeps its frame and loses the play
-glyph and its scrim. It was required only because the four rail members were written down in
-code and all carried a stand-in id — the first person an editor added without one threw at
-render.
+glyph and its scrim.
 
 ### The attorney bio's portrait IS the play button
 
@@ -282,56 +429,69 @@ uploaded and described for a video the person's own photograph already illustrat
 is now a bare Wistia id and the poster fields are gone.
 
 **A poster frame falls back to the film's own Wistia thumbnail**, and that is live on the
-testimonial cards, where the field is still optional and every record happens to have one
-today. `wistiaPosterUrl` in `lib/video.ts` uses oEmbed — there is no derivable URL, because
-thumbnails live under a per-delivery hash the media id does not contain, and the obvious
-guess is a 404. Memoised per id, so the slots pointing at one stand-in cost one request.
+testimonial cards. `wistiaPosterUrl` in `lib/video.ts` uses oEmbed — there is no derivable
+URL, because thumbnails live under a per-delivery hash the media id does not contain, and the
+obvious guess is a 404. Memoised per id.
 
 ### DEAD LITERALS SURVIVE A GETTER SWAP, AND NOTHING REPORTS THEM
 
 `team.ts` carried `PROFILES` — 1,054 lines of bio data — for four commits after
 `getTeamProfiles()` started reading Sanity. Nothing referenced it and nothing complained: an
-unused module-level const is not an error. The file is 180 lines now, from 1,275.
+unused module-level const is not an error.
 
-**Check for this after every swap.** The others were caught; `carAccidents.ts` and `blog.ts`
-are the big ones still to come.
+**Phase 3 swept after every slice, and every slice had some.** 3a stranded a nine-entry
+`CATEGORIES` map of which EIGHT were already dead before the phase began, one of them holding
+a `_key` that disagreed with its own slug. 3b stranded fifteen symbols — twelve practice-area
+photographs, `getCollection`, `getFirmDetails`, `ptImage`. 3d stranded twelve more, including
+one image imported TWICE under two names and `locationPath`, which had 55 call sites and now
+has none.
 
-The six spent seed scripts and two migrations are deleted. They could not run — their modules
-read from Sanity — and had broken three times as shapes evolved. `scripts/sanity-purge.ts`
-and `scripts/lib/stub-vite-modules.ts` are the reusable half and stay.
+**`git grep -c` the symbol, and check the count is more than one.** Most of those names also
+appear as substrings in prose or in `AREA_TO_BLOG_CATEGORY`, so a bare grep reads a dead
+import as live. `carAccidents.ts` is the big one still to come.
 
-### THE YOUTUBE MAPPING WAS ALMOST LOST, AND IS NOW IN ONE PLACE
+### A COMMENT BESIDE A LITERAL CANNOT SURVIVE THAT LITERAL MOVING TO A CMS
 
-Every record used to carry a `TODO(video): was YouTube <id>` comment. Moving those records
-into Sanity deleted the comments with them — six in the testimonials slice, two with the
-attorney bios — and it went unnoticed for four commits, because a comment disappearing is not
-a test failure.
+It happened in Phase 2 — every record's `TODO(video): was YouTube <id>` comment went with it,
+eight of them, unnoticed for four commits, recovered from git history into `YOUTUBE_ORIGINS`
+in `src/lib/video.ts`. Five of those eight are UNLISTED and cannot be re-derived from
+anything public.
 
-**All eight are recovered from git history into `YOUTUBE_ORIGINS` in `src/lib/video.ts`.**
-Five of them are UNLISTED: nothing public can enumerate those, they were originally found by
-working backwards from ids in the codebase, and a second re-derivation is not available.
+**It happened again in Phase 3b, and the marker count is what caught it.** The trampoline
+article's body carried `TODO(launch): confirm the intended wording with the firm` beside the
+sentence the live site truncates. The body became a `blogPost` document and the comment went
+with it. 41 launch markers before the phase, 40 after, nothing closed.
 
-The lesson generalises: **a comment beside a literal cannot survive that literal moving to a
-CMS.** Phase 3 moves 313 more records — check what their comments are carrying before they go.
+Recovered into `scripts/diff-comp-blog-post.py`, beside the assertion that still proves the
+departure. **A check is the right home for a marker whose subject is now editable** — no file
+in `src/` owns that sentence any more, and the assertion is the thing that still runs.
+
+**Re-measure with `git grep` after every phase. Do not subtract.**
 
 ### Seeding, as it works
 
-A script reads the literals → NDJSON → `sanity dataset import --replace`. Images ride along as
-`_sanityAsset` with an ABSOLUTE `file://` path.
+A script reads the source → NDJSON → `sanity dataset import`. Images ride along as
+`_sanityAsset` with an ABSOLUTE `file://` path, and the importer hashes each file so a repeat
+reuses the existing asset rather than uploading twice.
 
-- **Seed FIRST, verify, then swap the getter.** `scripts/lib/stub-vite-modules.ts` stubs image
-  imports AND `sanity:client`, so a partially-swapped module still imports in plain Node —
-  necessary because a module is swapped one getter at a time. The stub's `fetch` THROWS rather
-  than returning empty, so calling an already-swapped getter names itself instead of writing a
-  document full of nothing.
+- **Seed FIRST, verify, then swap the getter.** Swapping is a one-way door.
 - **Seeded documents get generated ids**, so `--replace` has nothing to match on and a second
   import ADDS a second set. `scripts/sanity-purge.ts <types> --yes` first. Singletons are the
-  exception.
-- **A document that gains fields across slices must be re-emitted WHOLE.** `--replace`
-  replaces entirely: writing four team members with only their rail fields would have deleted
-  25 biographies. Read the live document back and merge, stripping `_rev`.
-- **A query right after a write can be stale.** It is what made an earlier session believe
-  `--replace` merges rather than replaces. Re-query, or use the CLI.
+  exception — fixed ids, so `--replace` really does replace, which is why 3d used it and the
+  three collection migrations did not.
+- **A document that gains fields across slices must be re-emitted WHOLE.** 3d writes
+  `homePage`, which already carried five arrays from Phase 2f; it reads the document back,
+  merges, and **refuses to write at all if the read comes back without `faqs[]`**.
+- **A PLAIN `JSON.stringify` DEEP-COMPARE IS WRONG AGAINST SANITY.** It returns a stored
+  object's keys alphabetically where an assembled member carries them in schema order.
+  `canon()` sorts keys at every depth; both `migrate-pages-2f.ts` and `migrate-practice-cards-3d.ts`
+  carry it.
+- **A query right after a write can be stale.** Re-query, or use the CLI.
+
+**Every migration asserts its joins before writing anything.** 3b asserts 23 categories and
+exactly one reviewer; 3c asserts its own trimmed body matches the site's for all 104; 3d
+asserts exactly two non-reference directory rows. A seed that silently drops the rows it could
+not match is how a whole column disappears from a page nobody re-reads.
 
 ### Not done, and known
 
@@ -341,8 +501,10 @@ A script reads the literals → NDJSON → `sanity dataset import --replace`. Im
 - **Nothing is wired for Visual Editing**, so array projections omit `_key` where the interface
   has none.
 - **FAQs and testimonials still nest their video field** in a `videoRef` object showing one
-  input. The attorney film was flattened to a bare id; these were left alone. The FAQ half is
-  now `faqItemFields` in `schemaTypes/pages/`, so it is one edit for both accordions.
+  input. The attorney film was flattened to a bare id; these were left alone.
+- **`routePaths.ts` exports `locationPath` and nothing calls it.** One of five identical
+  helpers that name the kinds of URL this site has; whether that set should shrink is a
+  routing question, not a migration one.
 
 ## State
 
@@ -356,9 +518,11 @@ no photograph, no bio page).
 Nothing internal points at them: the team page and `/sitemap/` both read the collection, so
 their links went with them. `check:links` is clean at 33,630 links across 328 pages.
 
-Build is green: **330 pages** — 328 that render a site header and footer, plus `404.html` and
-`/admin`. `npm run check` passes and the fidelity audit reports 104 of 104 pages at ≥99% against
-the live source.
+Build is green: **330 pages in 10 seconds** — 328 that render a site header and footer, plus
+`404.html` and `/admin`. It was 47s before Phase 3; Astro no longer optimises 202 body and card
+images, because they come off Sanity's CDN. `npm run check` passes and the fidelity audit reports
+104 of 104 pages at ≥99% against the live source — re-run after Phase 3c, against slugs read from
+the dataset.
 
 **All five comp-diff scripts are green, and three of them now carry DECLARED DEPARTURES for
 things an editor controls.** `diff-comp-about.py` no longer pins the attorney grid to the
@@ -403,8 +567,10 @@ reading before touching anything near one — see "Video" below.
 **Do not re-run the fidelity audit as part of a routine sweep.** It fetches all 104 practice-area
 pages from the live WordPress site and has taken anywhere from two minutes to over an hour. It
 only checks imported practice-area body copy, so a change to components, chrome or the check
-scripts cannot affect its result. Run it when `src/content/practice-areas/` or the importer
-changed, and background it when you do.
+scripts cannot affect its result. Run it when the practice-area bodies or the importer change,
+and background it when you do. It reads its slugs from the DATASET now — see "A check that
+audited zero pages reported success" above for what it did on the commit that deleted the
+directory it used to read.
 
 **`npm run check` is FOUR linters now, and one of them could never fail.**
 `scripts/check-links.py` is the new one — 33,754 internal links across 330 pages, every target
@@ -439,7 +605,9 @@ last handoff and it moves the project's biggest dependency off the critical path
 content is spread across both — see below.
 
 Marker inventory: **41 `TODO(launch)`, 8 `TODO(video)`, 11 `TODO(sanity)`, 3 `TODO(content)`.**
-Phase 2f moved four markers between files and added none.
+Re-measured with `git grep` after Phase 3, which closed none and briefly LOST one — see "A
+comment beside a literal cannot survive that literal moving to a CMS" above. 41 before, 40
+after, 41 once it was recovered into the check that still asserts it.
 
 **THE VIDEO FIGURE WAS WRONG, AND IT IS A FOURTH REASON FOR THIS LINE TO BE WRONG.** It read 6
 here, with a note saying it "fell from 8 to 6 because two were DELETED WITH THE LITERAL they
@@ -515,7 +683,8 @@ a blog body.
   Pages carry no category at all, so this is required rather than a fallback.
 - **Posts are converted first and pages appended.** The converter's `mkKey` is one run-scoped
   counter; interleaving them would rewrite every `_key` in all 167 existing files. The gate held —
-  `git diff --name-only src/content/blog` returned nothing after the run.
+  `git diff --name-only src/content/blog` returned nothing after the run. That gate is gone with
+  the directory; the `_key`s themselves are in Sanity, uploaded verbatim.
 - **Four have titles close to an existing post** (`how-can-a-truck-accident-lawyer-help-me` vs
   `how-can-truck-accident-lawyer-help-denver`, and three others). Checked: 5–12% body similarity.
   They are distinct articles, not duplicates.
@@ -661,9 +830,12 @@ exact whole-heading match on a string with one meaning, where "Near Me" and "Res
 words that also appear in real editorial copy. **180 images left the body copy**; 51 prose figures
 remain across all 104 pages.
 
-**Dropped in the getter, never in the content files** — `content.config.ts` states the rule: the
-files keep WordPress's version and the getter coalesces, because a GROQ projection is what does
-the coalescing after the swap. It also means re-running the importer cannot put them back.
+**DROPPED AT MIGRATION SINCE PHASE 3c, not in the getter.** It used to run on every build, under
+`content.config.ts`'s rule that the files keep WordPress's version and the getter coalesces —
+because a projection is what does the coalescing after a swap. That rule does not reach this
+case: a heading-boundary walk is not something GROQ can express. The manifest is in
+`scripts/migrate-practice-areas-3c.ts` now and the stored body is already trimmed. See the
+section at the top of this file.
 
 **WRITTEN DOWN, NOT MATCHED BY PATTERN, and that is the whole point.** A pattern on "Near Me" and
 "Resources" catches fourteen headings and one of them is not this chrome at all:
@@ -739,7 +911,7 @@ practice-area page's 1,500–3,000 words and an FAQ accordion.
 The card caps at twelve and sorts by label, and `10 Things To Do…` sorts before every letter, so
 that one made the cut everywhere while the other four sat just outside it — latent, not absent.
 
-| Moved to `src/content/blog/` | Category |
+| Moved to the blog | Category |
 |---|---|
 | `10-things-to-do-after-a-slip-and-fall-accident` | Slip and Fall |
 | `should-you-hire-a-lawyer-for-a-slip-and-fall-injury-case` | Slip and Fall |
@@ -866,8 +1038,9 @@ the same converter.
   from it ran a 167-post import as a side effect and handed you its mutable module state. It is a
   factory now — **one converter per run**, because `mkKey` is a single run-scoped counter and a
   second instance (or a different iteration order) rewrites every `_key` in all 167 blog files.
-  The gate on that change is `git status --porcelain src/content/blog` coming back empty after a
-  re-run. It did, and it still must.
+  The gate on that change was `git status --porcelain src/content/blog` coming back empty after a
+  re-run. It did. The directory is gone now, so a re-run writes a fresh one and the gate becomes
+  a diff against what Sanity holds — `migrate-blog-3b.ts --verify` is that diff.
 - **`scripts/practice-area-pages.mjs`** is the manifest: every live page is in
   `PRACTICE_AREA_PAGES` or in `EXCLUDED_SLUGS` with a reason, and **a page in neither throws**.
   That is the whole anti-silent-drop guarantee. There is no programmatic discriminator and looking
@@ -1028,7 +1201,8 @@ reintroduce them, and `check:links` fails on any that appear.
 **Applied surgically, never by re-importing.** `mkKey` is a single run-scoped counter and a
 re-run rewrites every `_key` across all 313 content files. Every changed line was confirmed to be
 a phone line and nothing else; the 35,179 `_key`s are untouched. Same gate as always —
-`git status --porcelain src/content` after any converter change.
+`git status --porcelain src/content` after any converter change — which now means: re-import to a
+fresh directory, then diff it against the dataset before importing anything.
 
 ## Video — every play affordance is a Wistia popover
 
@@ -1378,42 +1552,34 @@ entry and both files to fix.
    of `src/lib/video.ts`.
 3. **One Wistia player per popover, initialised eagerly** — 15 on the homepage, 20 on
    `/denver-car-accident-lawyer/`. Inherent to the class-based embed; wants a pass before launch.
-4. ~~**Sanity Phase 2 — Collections, hand-authored.**~~ **DONE** — 312 documents across
-   twelve collection types and five singletons, plus an editor-facing pass over the Team
-   collection. See the section at the top of this file.
-4b. ~~**Sanity Phase 2f — the seven that were not collections.**~~ **DONE** — 60 documents
-   moved onto `homePage`, `communityPage` and `carAccidentsPage`; six collections and eight
-   singletons remain, 255 documents, build byte-identical throughout. The rule it set is at
-   the top of this file and in `schemaTypes/index.ts` and `structure/index.ts`.
-5. **Sanity Phase 3 — Collections, imported. NEXT.** 313 documents, 203 body images,
-   script-driven. Before starting, read "Dead literals survive a getter swap" and "The YouTube
-   mapping was almost lost" above — both bit during Phase 2 and both scale with this phase's
-   size.
-   **Plus `practiceAreas.ts`'s 13 cards**, which belong on the page documents rather than in a
-   collection of their own — see the section at the top. And the directory
-   (`getPracticeAreaGroups()`, 102 entries in 9 groups) with `assertDirectoryJoin()`, which is
-   coupled to the pages for the same reason.
-   Bodies are already Portable Text from the same converter, so they upload unchanged — but
-   **preserve the existing `_key`s rather than regenerating**: Sanity requires uniqueness
-   within each array and a collision is a silently dropped item, not an error. Then
-   `content.config.ts` retires. **Do not delete `practice-area-pages.mjs` or
-   `blog-category-overrides.mjs` blindly** — `EXCLUDED_SLUGS`, `PAGE_ARTICLES` and the "a page
-   in neither throws" contract encode decisions, not mechanics.
-   Plus the four Portable Text object types the post template deferred (`callout`, `phoneBand`,
-   `attorneyCard`, `pullQuote`), whose intended home is commented in `prose/components.ts` —
-   and which the practice-area chrome maps onto almost exactly.
-   Open in that phase: the heavy `PracticeAreaDetail` in `carAccidents.ts` — 45KB across ~20
-   section interfaces for ONE page. Recommendation on the table is to keep the structure in
-   code and move only its text and images.
-6. **Sanity Phase 4 — Pages.** Sixteen singletons, every visible string a field. `homePage` is
-   the largest (26 getters in one `Promise.all`). The two template-chrome singletons —
-   `blogPostTemplate` and `practiceAreaTemplate` — sit under **Pages**, not Settings: they hold
-   copy that appears ON a page, which is exactly what the SEO team will reach for.
-   **THREE OF THE SIXTEEN ALREADY EXIST** — Phase 2f created `homePage`, `communityPage` and
-   `carAccidentsPage` to hold the moved lists. So this phase ADDS fields to live documents, and
+4. ~~**Sanity Phases 2, 2f and 3.**~~ **ALL DONE.** 486 content documents across nine
+   collection types and nine singletons, 277 image assets, and `src/content/` deleted. Every
+   slice ended byte-identical or with every changed page explained. The findings are at the
+   top of this file; the ones that will matter next are `pt()`'s duplicate keys, GROQ's
+   codepoint `order()`, and that a comment beside a literal does not survive the literal.
+5. **The four Portable Text object types the post template deferred** — `callout`, `phoneBand`,
+   `attorneyCard`, `pullQuote`, whose intended home is commented in `prose/components.ts`, and
+   which the practice-area chrome maps onto almost exactly. **Deliberately NOT in Phase 3**:
+   nothing in the 290 imported documents uses them and no renderer exists, so adding them then
+   would have shipped four editor controls that draw nothing. They belong with the page copy.
+6. **Sanity Phase 4 — Pages. NEXT.** Sixteen singletons, every visible string a field.
+   `homePage` is the largest (26 getters in one `Promise.all`). The two template-chrome
+   singletons — `blogPostTemplate` and `practiceAreaTemplate` — sit under **Pages**, not
+   Settings: they hold copy that appears ON a page, which is exactly what the SEO team will
+   reach for.
+   **FOUR OF THE SIXTEEN ALREADY EXIST** — `homePage`, `communityPage` and `carAccidentsPage`
+   from Phase 2f, `practiceAreasPage` from 3d. So this phase ADDS fields to live documents, and
    any seed for them must READ EACH ONE BACK AND MERGE: `dataset import --replace` replaces a
-   document whole, and emitting only the copy fields would delete sixty array members.
-   `scripts/migrate-pages-2f.ts` already does the read-back-and-merge and is the model.
+   document whole, and emitting only the copy fields would delete the directory and eighty
+   array members. `migrate-pages-2f.ts` and `migrate-practice-cards-3d.ts` both do the
+   read-back-and-merge; the second also refuses to write when the read comes back empty, which
+   is the guard worth copying.
+   **`carAccidents.ts` is the open modelling question** — 45KB across ~20 section interfaces
+   for ONE page, so a page document rather than a collection either way. Recommendation on the
+   table is to keep the structure in code and move only its text and images. It is also the
+   last big dead-literal risk: read "Dead literals survive a getter swap" before starting.
+   **`pt()` is what builds most of those bodies** — see its duplicate-key fix at the top, and
+   assert `_key` uniqueness on the payload before importing anything.
    Five of the six one-page section getters named on `sharedSections` now have a document to
    go to — `getFaqSection`, `getCarAccidentFaqSection`, `getFeedSection`, `getCommunitySection`,
    `getCommunityPage`. Consolidating the per-array queries into one query per page belongs
@@ -1423,9 +1589,10 @@ entry and both files to fix.
    filled-out schema and so waits until there is one.
 8. `/new-seo-setup` — per-page meta, a Global SEO Settings singleton, JSON-LD, `sitemap.xml`,
    `robots.txt`, editor-managed redirects. **The practice-area pages already carry real
-   `metaTitle` / `metaDescription` from the live site's own meta**, so that layer has something
-   true to start from — and the `seo` object type is already stubbed to hold them when they
-   land in Phase 3. `BlogPosting` JSON-LD belongs to this phase, and so does `sitemap.xml` — **which
+   `metaTitle` / `metaDescription` from the live site's own meta**, and Phase 3c put them where
+   they belong: the `seo` object on all 104 `practiceArea` documents, which is what that type
+   was stubbed early for. So this layer has something true to start from. `BlogPosting` JSON-LD
+   belongs to this phase, and so does `sitemap.xml` — **which
    nothing links any more**: the footer points at the human `/sitemap/` now. The XML file's every
    URL is absolute off `site:`, so it cannot be written before the www-vs-apex call.
 
@@ -1434,16 +1601,19 @@ light template's shell anyway — see below.
 
 ## Sanity readiness
 
-Audited against the whole tree before the integration starts. **The content is ready; the
-tooling is not.** Nothing below is a code change waiting to happen — it is what the next session
-should expect to build.
+Written before the integration started, and kept because most of it is still the record of how
+the checks were made rather than a to-do list. **What was a blocker is closed; what was a green
+light was re-checked at upload.**
 
 **The four green lights, all re-checkable:**
 
 - **35,179 `_key`s across both collections: zero duplicates, zero missing.** This is the one that
   would have bitten during upload, because Sanity requires `_key` uniqueness WITHIN each array
-  and a collision surfaces as a silently dropped array item rather than an error. Re-check by
-  walking every array of typed objects in `src/content/**/*.json`.
+  and a collision surfaces as a silently dropped array item rather than an error. **It was
+  re-checked on the PAYLOAD, not just the source, and that is the version to copy** — 17,716
+  keys in the blog's NDJSON and 17,239 in the practice areas', zero duplicates in any array.
+  The source check would not have caught `pt()`'s 28 colliding keys, because those are
+  generated at build time and exist in no file.
 - **290 slugs, zero collisions** between the 186 blog posts and the 104 practice areas. They
   share `[slug].astro` at the root, so a collision is a page that cannot be served.
 - **80 async getters, and the data layer is clean**: no hex codes, no SVG markup, no style
@@ -1454,8 +1624,7 @@ should expect to build.
 **The blockers, in the order they bite:**
 
 1. ~~**There is no Sanity client.**~~ **CLOSED in Phase 0.** `@sanity/astro`'s `sanity:client`
-   is now imported by `src/data/{site,navigation,contact,stats}.ts` and by
-   `src/sanity/lib/image.ts`. The client is configured entirely in `astro.config.mjs` —
+   is imported by twenty data modules now, and by `src/sanity/lib/image.ts`. The client is configured entirely in `astro.config.mjs` —
    `IntegrationOptions` is `ClientConfig` plus the studio keys, so there is no wrapper module
    and one client serves everything. `perspective: "published"` so a draft cannot go live on
    the next deploy; `apiVersion` pinned because GROQ's behaviour is versioned by date.
@@ -1530,11 +1699,13 @@ should expect to build.
    the hook would never fire and setting it true would be a claim that does not hold. Run
    `npm run typegen` after any schema or query change; `check:types` is the gate that catches
    a stale run.
-4. **The asset surface is 112 distinct images** imported by the data layer, plus **203 more**
-   inside the content collections. `src/content` is 39M. **They split two ways** by Rhan's
-   rule: large decorative art (page-header photographs, band backgrounds, the two logos) stays
-   a local import through Astro's build pipeline; card and interactive images become Sanity
-   assets on its CDN. `Picture.astro` already branches, so each move is a data change.
+4. ~~**The asset surface is 112 distinct images** plus 203 in the content collections.~~
+   **DONE.** 277 image assets are in Sanity and `src/content`'s 39M has left the tree. The
+   split held: large decorative art (page-header photographs, band backgrounds, the two logos)
+   is still a local import through Astro's build pipeline; card, body and interactive images
+   are Sanity assets on its CDN. `Picture.astro` branches, so each move was a data change.
+   Eleven practice-area photographs and `consult.jpg` are now unreferenced by `src/` but stay
+   on disk — `npm run backup` is `--no-assets`, so git is the only copy of the originals.
 
    The Sanity branch does NOT go through Astro's `<Image>`, on purpose: ~290 remote fetches
    would add minutes to every build, and Astro re-crops from the original, throwing away the
@@ -1604,13 +1775,24 @@ none first. Already an open question below; now recorded where the code is.
 - **The `AREA_TO_BLOG_CATEGORY` map in `blog.ts` is inferred, not authored.** It decides which
   posts a practice area's sidebar shows. Keyed on the area slug rather than its topic, because
   topic is five buckets and would put car-accident posts on the motorcycle page — which is what
-  the live site does. In Sanity this wants to be a per-page reference list.
+  the live site does. In Sanity this wants to be a `relatedPosts` reference array on the
+  `practiceArea` document — **which now exists**, so this is buildable rather than blocked. It
+  is a content decision for the firm (which five articles belong on each of 104 pages), not a
+  migration step, which is why Phase 3 left it inferred.
 - **Auto Insurance & Accident Claims has no tab** — 13 posts carry it second, none first.
 - **`site:` in `astro.config.mjs`** — www vs apex, still unsettled.
 - **Two crash types on the heavy detail page** — rear-end and head-on.
 - **The three Denver crash figures are unsourced**, and `[year]` renders live in all three labels.
-- **`src/content` is now 39M** (30M blog, 8.7M practice areas), mostly images. Fine for git today;
-  worth watching.
+- **`src/assets` holds twelve images nothing references.** Eleven practice-area photographs and
+  `consult.jpg`, all now Sanity assets. Kept because git is the only copy of the originals
+  outside Sanity; delete them only alongside a decision about asset backup.
+- **`check:links` validates a `tel:` href's FORMAT but not its VALUE.** It rejects anything that
+  is not E.164 and would pass `tel:+13037474404` — the old number — happily. That gap widened in
+  Phase 3: the firm's number appears 261 times as text and 69 times as a `tel:` href across
+  bodies that are now EDITABLE, where before they were version-controlled JSON a human reviewed.
+  Asserting every `tel:` equals `firmDetails.phoneE164` is a few lines on top of
+  `scripts/lib/sanity.py` and would have caught the six-number mess before it was found by hand.
+  Not built in Phase 3 because it is a new check rather than a repoint of an existing one.
 
 **Waiting on the firm** — content, not code. `README.md` has the full table. Unchanged: the seven
 attorney emails, the office address and hours, the `$70M+ / 20 Years` stat claims.

@@ -356,6 +356,224 @@ export const CITIES_QUERY = defineQuery(`*[_type == "city"] | order(order asc){
   "_key": key.current, name
 }`);
 
+/**
+ * The blog taxonomy — all 23, unfiltered and unordered by anything meaningful.
+ *
+ * NEITHER THE FILTER NOR THE ORDER IS IN HERE, and both could have been. The row
+ * is ordered by how many posts LEAD with each category and drops any that no
+ * post leads with, which GROQ can express — but both are decisions with reasons
+ * written beside them in `getBlogCategories()` ("a tab that finds nothing is
+ * worse than no tab"), and a projection is the wrong place for a decision whose
+ * explanation lives somewhere else. The sort by slug is only so the result is
+ * stable between builds.
+ *
+ * `_key` IS THE SLUG, not the projected `_id`. The card's `data-category`
+ * attribute and 24 legacy `/category/<slug>/` redirects are keyed on it, so it
+ * is content — see the field's own description in the schema.
+ */
+export const BLOG_CATEGORIES_QUERY = defineQuery(
+  `*[_type == "blogCategory"] | order(slug.current asc){
+    "_key": slug.current, title, "slug": slug.current,
+    "posts": count(*[_type == "blogPost" && categories[0]._ref == ^._id])
+  }`
+);
+
+/*
+ * THE BLOG — three projections over one document type.
+ *
+ * The split is `getBlogPosts()` vs `getBlogPostArticles()`, which predates
+ * Sanity and is why it survives it: the feed is 185 card records and the bodies
+ * are 1,800 words each, so a card grid should not be pulling a whole archive of
+ * prose into memory to print a title.
+ *
+ * `href` IS NOT PROJECTED, on any of them. `blogPath(slug)` builds it, and three
+ * layers already agree on the trailing slash — a projection must not become a
+ * fourth. Same reason `TEAM_QUERY` returns no href.
+ *
+ * `reviewerKey` RATHER THAN A RESOLVED BYLINE, for the same reason: a byline is
+ * `{ name, href }`, and the href is `attorneyPath()`'s to build. `byline()` in
+ * `data/blog.ts` is the one place a team member becomes a credit, and it reads
+ * the roster that is already memoised for the header.
+ */
+
+/** One post as a card. Spread into the three below so they cannot drift. */
+const POST_CARD = `
+  "_key": slug.current,
+  "slug": slug.current,
+  title,
+  excerpt,
+  publishedAt,
+  "category": categories[0]->{ "_key": slug.current, title, "slug": slug.current },
+  image,
+  "reviewerKey": reviewer->key.current
+`;
+
+/**
+ * The feed, newest first — everything EXCEPT the featured post.
+ *
+ * `featured != true` rather than `!featured`: the field is absent on a document
+ * created before it existed, and GROQ's `!` on a null is null, not true, so the
+ * negation would drop every post that has never been near the toggle.
+ */
+export const BLOG_POSTS_QUERY = defineQuery(
+  `*[_type == "blogPost" && featured != true] | order(publishedAt desc){${POST_CARD}}`
+);
+
+/**
+ * The featured post — ALL of them, not `[0]`.
+ *
+ * Nothing in the schema can enforce "exactly one boolean among 186 documents",
+ * so the getter counts and throws. `[0]` here would silently pick one of two and
+ * quietly drop a post out of the feed as well, since the feed excludes them all.
+ */
+export const FEATURED_POST_QUERY = defineQuery(
+  `*[_type == "blogPost" && featured == true]{${POST_CARD}, "imageAlt": image.alt}`
+);
+
+/**
+ * The bodies, for `getStaticPaths`. Every post, featured included — it has a
+ * page like any other.
+ *
+ * `factCheck` is an editor's OVERRIDE and empty on all 186; the getter derives
+ * the standard band from the reviewer when it is absent. `readTime` is derived
+ * from the body after this, never stored.
+ */
+/*
+ * THE PRACTICE-AREA CARD RAILS AND THE DIRECTORY — Phase 3d.
+ *
+ * Three lists of cards and one directory, on the two page documents that render
+ * them. None of it is a collection: each list appears on exactly one page, which
+ * is the rule the Collections group is built on.
+ *
+ * A CARD STORES ITS OWN NAME; A DIRECTORY ROW BORROWS THE PAGE'S. That split is
+ * the data's, not a preference — 99 of the directory's 100 page rows print the
+ * referenced page's short name, where the rails rename almost every card
+ * ("Bicycle Accidents" for a page filed as "Bike Accidents", "Traumatic Brain
+ * Injury" for "Brain Injuries"). So the directory coalesces onto the reference
+ * and the rails do not have one.
+ */
+
+/** The homepage's six-card rail. */
+export const HOME_PRACTICE_AREAS_QUERY = defineQuery(
+  `*[_type == "homePage" && _id == "homePage"][0].practiceAreaCards[]{
+    _key, name, iconKey, blurb, href, image
+  }`
+);
+
+/** The homepage's four catastrophic-injury panels. No photographs — an icon. */
+export const HOME_CATASTROPHIC_QUERY = defineQuery(
+  `*[_type == "homePage" && _id == "homePage"][0].catastrophicAreas[]{
+    _key, name, iconKey, insight, href
+  }`
+);
+
+/**
+ * `/practice-areas` — the featured grid and the full directory.
+ *
+ * `href` IS NOT BUILT HERE. A row either carries its own (the two that are not
+ * practice-area pages) or names one, and the getter turns a slug into a path
+ * with `practiceAreaPath()`. Three layers already agree on the trailing slash
+ * and a projection must not become a fourth — the same reason `TEAM_QUERY`
+ * returns no href.
+ *
+ * `label` coalesces onto the referenced page's short name, so 99 of the 100
+ * rows have nothing stored and cannot drift from the page they point at.
+ */
+export const PRACTICE_AREAS_PAGE_QUERY = defineQuery(
+  `*[_type == "practiceAreasPage" && _id == "practiceAreasPage"][0]{
+    "featuredAreas": coalesce(featuredAreas[]{ _key, name, iconKey, blurb, href, image }, []),
+    "directory": coalesce(directory[]{
+      _key,
+      title,
+      "items": coalesce(items[]{
+        _key,
+        "label": coalesce(label, page->label),
+        "slug": page->slug.current,
+        href
+      }, [])
+    }, [])
+  }`
+);
+
+/*
+ * THE 104 IMPORTED PRACTICE-AREA PAGES — the light template's content.
+ *
+ * Same split as the blog's, for the same reason: the sidebar card lists a
+ * city's siblings on every one of these pages, and printing 50 labels should
+ * not pull 50 bodies of 1,500–3,000 words into memory.
+ *
+ * THE STORED BODY IS ALREADY TRIMMED. Three chrome sections were dropped at
+ * migration rather than at render, because dropping one means walking from an
+ * h2 to the next h2 and GROQ cannot express that. So there is no coalescing to
+ * do here — which is the point: the projection returns what the page shows.
+ * `scripts/migrate-practice-areas-3c.ts` carries the manifest and the reasoning.
+ *
+ * `href` is not projected. `practiceAreaPath(slug)` builds it, as everywhere.
+ */
+
+/**
+ * Every page as a link. UNORDERED, deliberately — the getter sorts.
+ *
+ * `| order(label asc)` was the obvious thing and it is WRONG for a list a human
+ * reads. GROQ orders by codepoint, so every capital sorts before every
+ * lowercase letter: "RTD Denver Accidents" lands before "Rideshare Accidents"
+ * and "UPS Truck Accident" before "Uninsured and Underinsured Motorcyclist
+ * Accidents". `localeCompare` — what this list has always used — compares
+ * letters first and case last, which is the order a reader scanning an
+ * alphabetical column expects. It moved two pairs across 22 of the 104 sidebar
+ * cards before the byte-diff caught it.
+ *
+ * So the sort stays in `getPracticeAreaPages()`, where the reason for it can be
+ * written down next to it.
+ */
+export const PRACTICE_AREA_PAGES_QUERY = defineQuery(
+  `*[_type == "practiceArea"]{
+    "_key": slug.current,
+    "slug": slug.current,
+    title,
+    label,
+    city,
+    topic,
+    "resource": coalesce(resource, false)
+  }`
+);
+
+/**
+ * The bodies, for `getStaticPaths`.
+ *
+ * `updatedAt` is `modifiedAt` renamed for the interface, which is what the meta
+ * line prints as "Updated" — all 104 have one, and `publishedAt` is the labelled
+ * "Posted" fallback for a page that does not.
+ *
+ * `readTime` and `factCheck` are both DERIVED in the getter — the first from
+ * this body's word count, the second from the fact-check sentence the blog and
+ * these pages share. Neither is stored on 104 documents.
+ */
+export const PRACTICE_AREA_ARTICLES_QUERY = defineQuery(
+  `*[_type == "practiceArea"]{
+    "_key": slug.current,
+    "slug": slug.current,
+    title,
+    city,
+    body,
+    "faqs": coalesce(faqs[]{ _key, question, answer }, []),
+    publishedAt,
+    "updatedAt": modifiedAt,
+    "metaTitle": seo.metaTitle,
+    "metaDescription": seo.metaDescription
+  }`
+);
+
+export const BLOG_ARTICLES_QUERY = defineQuery(
+  `*[_type == "blogPost"]{
+    "_key": slug.current,
+    "slug": slug.current,
+    body,
+    "factCheck": coalesce(factCheck, []),
+    "reviewerKey": reviewer->key.current
+  }`
+);
+
 /*
  * THE SIX BELOW READ ARRAYS ON A PAGE DOCUMENT, NOT COLLECTIONS.
  *

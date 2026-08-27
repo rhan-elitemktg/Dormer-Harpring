@@ -13,16 +13,20 @@
 // for: rich text rather than a row of text fields, with the markup limited to
 // what the design actually has.
 //
-// THREE TYPES, NOT ONE, because the right answer differs by field:
+// FOUR TYPES, NOT ONE, because the right answer differs by field:
 //
 //   richText    an article body. Headings, quotes, lists, images, links.
+//   answerText  an FAQ answer. Paragraphs, lists, links — no headings and no
+//               images, because the question above it is already the heading
+//               and a 760px figure inside an accordion panel is a layout
+//               nobody drew.
 //   simpleText  a card body, a lede, a blurb. Paragraphs and links only — an
 //               h2 inside a card would outrank the card's own heading, and a
 //               list inside a 60-word blurb is a design nobody drew.
 //   inlineText  one sentence, no paragraph breaks. For the places that are a
 //               string today but need to carry a link.
 //
-// The SEO team can add a link in all three. That is the point of all three.
+// The SEO team can add a link in all four. That is the point of all four.
 import { defineArrayMember, defineField, defineType } from "sanity";
 
 /** Bold and italic. Both are mapped; nothing else is. */
@@ -107,6 +111,40 @@ export const richText = defineType({
   title: "Rich text",
   type: "array",
   of: [fullBlock, bodyImage],
+});
+
+/**
+ * Paragraphs, lists and links — for an FAQ answer.
+ *
+ * A FOURTH TYPE RATHER THAN A LOOSENED `simpleText`, and the 153 imported
+ * answers are what settled it. Measured, not guessed: they use `normal` blocks,
+ * bulleted list items, `strong` and links, and nothing else — no headings, no
+ * images, no quotes. `simpleText` cannot hold the lists and `richText` would
+ * offer four things that render wrong here.
+ *
+ * `simpleText` is deliberately NOT widened to cover this. Its own rule is that a
+ * list inside a 60-word blurb is a layout nobody drew, and it is on ledes and
+ * card bodies all over the site; widening it for one caller would take that
+ * guarantee away from all of them.
+ */
+const listBlock = defineArrayMember({
+  type: "block",
+  styles: [{ title: "Paragraph", value: "normal" }],
+  lists: [
+    { title: "Bulleted", value: "bullet" },
+    { title: "Numbered", value: "number" },
+  ],
+  marks: {
+    decorators,
+    annotations: [{ type: "link" }],
+  },
+});
+
+export const answerText = defineType({
+  name: "answerText",
+  title: "Answer",
+  type: "array",
+  of: [listBlock],
 });
 
 export const simpleText = defineType({

@@ -1,5 +1,19 @@
-// Imports the legacy WordPress practice-area pages into the `practiceAreas`
-// content collection.
+// Imports the legacy WordPress practice-area pages.
+//
+// THE CONTENT COLLECTION IT WROTE INTO NO LONGER EXISTS. Phase 3 moved this
+// content into Sanity and deleted `src/content/` with `content.config.ts`, so
+// re-running this re-creates a directory nothing loads. Its output is an INPUT
+// to a migration now, not a live store:
+//
+//   node scripts/import-practice-areas.mjs
+//   npx tsx scripts/migrate-practice-areas-3c.ts
+//   npx sanity dataset import scratch/… --dataset production
+//   then delete the directory again
+//
+// It is kept rather than deleted because it is the only record of how to
+// re-derive this content from WordPress, and because the manifests it reads
+// encode DECISIONS — which live pages were deliberately excluded, which
+// WordPress "pages" are really articles — that nobody should have to re-make.
 //
 //   node scripts/import-practice-areas.mjs                 all 109
 //   node scripts/import-practice-areas.mjs --only <slug>   one, for inspection

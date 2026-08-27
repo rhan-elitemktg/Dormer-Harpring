@@ -1,11 +1,12 @@
 // The homepage's repeatable lists. A singleton.
 //
-// FIVE LISTS THAT EACH APPEAR ON EXACTLY ONE PAGE. They were collections until
+// SEVEN LISTS THAT EACH APPEAR ON EXACTLY ONE PAGE. Five were collections until
 // Phase 2f, which is the wrong group for them: a Collection exists for content
 // reused in more than one place — the six that stay reach 111, 104, 29, 27, 5
 // and 3 built pages — and every one of these reaches exactly this one. An
 // editor looking for the press cards was hunting a global list for something
-// that only ever renders here.
+// that only ever renders here. Phase 3d added the two card rails at the foot of
+// this file for the same reason, out of `data/practiceAreas.ts`.
 //
 // ARRAY POSITION IS THE ORDER, so the `order: number` each of these carried is
 // gone and editors drag instead. That is a real change for the mosaic — see the
@@ -26,6 +27,114 @@ export const homePage = defineType({
   type: "document",
   icon: HomeIcon,
   fields: [
+    /*
+     * THE SIX PRACTICE-AREA CARDS, and they are COPY rather than pointers.
+     *
+     * The obvious modelling — a reference to the `practiceArea` document, with
+     * the name and blurb read off it — is wrong here, and the data says so. This
+     * rail calls one card "Bicycle Accidents" where the page it links is filed
+     * as "Bike Accidents", and "Slip & Fall" where the page is "Slip and Fall
+     * Accidents". Its blurb is a one-line label where /practice-areas ships a
+     * two-sentence pitch for the same area. Four of the cards appear in both
+     * lists with the SAME href and DIFFERENT copy — so they are two lists of
+     * cards, not one list read twice.
+     *
+     * That also means the destination is a plain href rather than a reference:
+     * one of the six points at `/denver-car-accident-lawyer/`, which the heavy
+     * hand-authored template serves and which is therefore not a `practiceArea`
+     * document at all. `check:links` is what catches a dead one.
+     */
+    defineField({
+      name: "practiceAreaCards",
+      title: "Practice area cards",
+      type: "array",
+      description:
+        "The rail under the hero. Its wording is its own — this is not the same copy as the " +
+        "Practice Areas page's grid, and four of these areas appear on both with different " +
+        "blurbs. Drag to reorder.",
+      of: [
+        {
+          type: "object",
+          name: "areaCard",
+          fields: [
+            defineField({ name: "name", type: "string", validation: (rule) => rule.required() }),
+            defineField({
+              name: "iconKey",
+              title: "Icon",
+              type: "string",
+              description:
+                "Must match an icon in components/icons/PracticeIcon.astro — car-accident, " +
+                "truck-accident, slip-and-fall. An unknown key draws nothing.",
+              validation: (rule) => rule.required(),
+            }),
+            defineField({
+              name: "blurb",
+              type: "text",
+              rows: 2,
+              description: "One line. The Practice Areas page's version of the same card is longer.",
+              validation: (rule) => rule.required(),
+            }),
+            defineField({
+              name: "href",
+              title: "Destination",
+              type: "string",
+              validation: (rule) => rule.required().custom(validateHref),
+            }),
+            defineField({
+              name: "image",
+              type: "image",
+              options: { hotspot: true },
+              description: "Without one the card falls back to an icon plate.",
+            }),
+          ],
+          preview: { select: { title: "name", subtitle: "href", media: "image" } },
+        },
+      ],
+      validation: (rule) => rule.required().min(1),
+    }),
+
+    /*
+     * THE FOUR CATASTROPHIC-INJURY PANELS. Same shape one field short — these
+     * carry no photograph, and their one line of copy is an `insight` rather
+     * than a blurb, which is the field name the component reads.
+     */
+    defineField({
+      name: "catastrophicAreas",
+      title: "Catastrophic injury panels",
+      type: "array",
+      description: "The four panels further down the page. No photographs — these draw an icon.",
+      of: [
+        {
+          type: "object",
+          name: "catastrophicArea",
+          fields: [
+            defineField({ name: "name", type: "string", validation: (rule) => rule.required() }),
+            defineField({
+              name: "iconKey",
+              title: "Icon",
+              type: "string",
+              description: "Must match an icon in components/icons/PracticeIcon.astro.",
+              validation: (rule) => rule.required(),
+            }),
+            defineField({
+              name: "insight",
+              type: "text",
+              rows: 2,
+              validation: (rule) => rule.required(),
+            }),
+            defineField({
+              name: "href",
+              title: "Destination",
+              type: "string",
+              validation: (rule) => rule.required().custom(validateHref),
+            }),
+          ],
+          preview: { select: { title: "name", subtitle: "insight" } },
+        },
+      ],
+      validation: (rule) => rule.required().min(1),
+    }),
+
     defineField({
       name: "faqs",
       title: "FAQs",

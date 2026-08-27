@@ -11,7 +11,12 @@
 // and pulling each one's 1,500-word body into memory to print its label would
 // be absurd. `getPracticeAreaPages()` is the link shape; the body is fetched
 // once, for the page being built.
-import { getCollection } from "astro:content";
+import { sanityClient } from "sanity:client";
+import {
+  PRACTICE_AREA_ARTICLES_QUERY,
+  PRACTICE_AREA_PAGES_QUERY,
+} from "../sanity/lib/queries";
+import { once, required } from "../sanity/lib/fetch";
 import { getCities } from "./cities";
 import { practiceAreaPath, ROUTES } from "../lib/routePaths";
 import { readTime } from "../lib/readTime";
@@ -89,178 +94,100 @@ async function detailSlugs(): Promise<Set<string>> {
   return new Set((await getPracticeAreaDetails()).map((detail) => detail.slug));
 }
 
-/** Every imported page, in the link shape. Ordered by label so any slice of it
- *  reads alphabetically without a second sort at the call site. */
+/**
+ * Every page, in the link shape, ordered by the short name so any slice of it
+ * reads alphabetically without a second sort at the call site.
+ *
+ * SORTED HERE, NOT IN GROQ, and that is not a preference. `| order(label asc)`
+ * sorts by CODEPOINT, so every capital comes before every lowercase letter:
+ * "RTD Denver Accidents" before "Rideshare Accidents", "UPS Truck Accident"
+ * before "Uninsured and Underinsured Motorcyclist Accidents". `localeCompare`
+ * compares letters first and case last, which is the order someone scanning an
+ * alphabetical column expects. Moving the sort into the projection changed two
+ * pairs on 22 of the 104 sidebar cards.
+ *
+ * `once()` is not optional here. This list is read by all 104 pages' sidebar
+ * cards, by `/practice-areas`, by `/sitemap/` and by the three utility pages —
+ * without it that is one round trip per page for a list that cannot change
+ * under the build.
+ *
+ * `required()` cannot throw on a collection query — GROQ returns `[]` for a type
+ * with no documents. `assertDirectoryJoin()` is the real guard: it runs on
+ * `/practice-areas` and names every directory entry whose page is missing.
+ */
 export async function getPracticeAreaPages(): Promise<PracticeAreaPage[]> {
-  const [entries, claimed] = await Promise.all([getCollection("practiceAreas"), detailSlugs()]);
+  const [rows, claimed] = await Promise.all([
+    once("practiceAreaPages", async () =>
+      required(await sanityClient.fetch(PRACTICE_AREA_PAGES_QUERY), "Practice Areas", "Collections")
+    ),
+    detailSlugs(),
+  ]);
 
-  return entries
-    .filter((entry) => !claimed.has(entry.data.slug))
-    .map((entry) => ({
-      _key: entry.data.slug,
-      slug: entry.data.slug,
-      title: entry.data.title,
-      label: entry.data.label,
-      city: entry.data.city,
-      topic: entry.data.topic,
-      resource: entry.data.resource,
-      href: practiceAreaPath(entry.data.slug),
+  return rows
+    .filter((row) => row.slug !== null && !claimed.has(row.slug))
+    .map((row) => ({
+      _key: row.slug!,
+      slug: row.slug!,
+      title: row.title ?? "",
+      label: row.label ?? "",
+      city: row.city ?? "",
+      topic: row.topic ?? "",
+      resource: row.resource,
+      href: practiceAreaPath(row.slug!),
     }))
     .sort((a, b) => a.label.localeCompare(b.label));
 }
 
 /**
- * TWO BODY SECTIONS THE TEMPLATE DROPS, because the page already says both
- * things somewhere better:
+ * The bodies, for `getStaticPaths`.
  *
- *   "<City> <Area> Lawyer Near Me"  — the office address, phone and
- *                                     GeoCoordinates. The footer carries the
- *                                     address on every page. On three pages it
- *                                     is instead a list of sibling practice
- *                                     areas, which the sidebar and the city
- *                                     band both already carry.
- *   "<City> <Area> Resources"       — a bullet list of the firm's own blog
- *                                     articles. The sidebar's Related articles
- *                                     card is that list.
+ * THE STORED BODY IS ALREADY TRIMMED. This getter used to run
+ * `dropChromeSections()` — a walk from a chrome h2 to the next h2, dropping
+ * "Near Me", "Resources" and "Awards and Accolades" sections the page says
+ * better elsewhere. That walk moved into `scripts/migrate-practice-areas-3c.ts`
+ * and now runs once, at migration, rather than on every build: GROQ cannot
+ * express a heading-boundary walk, so leaving it here would have kept it here
+ * permanently AND shown an editor three sections that never reach the page.
  *
- * DROPPED IN THE GETTER, NOT IN THE CONTENT FILES. `content.config.ts` states
- * the rule: where the live WordPress data and the built site's shape disagree,
- * the files keep WordPress's version and the getter coalesces — because a GROQ
- * projection is what does the coalescing after the swap. It also means
- * re-running the importer cannot quietly put them back.
+ * The manifest — which section on which page, and the one lookalike that is real
+ * editorial copy — lives in that script and in
+ * `scripts/audit-practice-area-fidelity.py`. Both still need it: the audit
+ * compares the built page against the LIVE WordPress source, which still carries
+ * the sections.
  *
- * WRITTEN DOWN, NOT MATCHED BY PATTERN, and that is the whole point. A pattern
- * on "Near Me" and "Resources" catches fourteen headings, and one of them —
- * `thornton-bicycle-accident-lawyer`'s "Bicycle Accident Resources in Thornton,
- * Colorado" — is not this chrome at all. It is unique editorial copy pointing
- * at Bike Thornton and Bicycle Colorado, with their addresses and phone
- * numbers, and neither reason above covers it. Dropping it would delete real
- * content on a word match. So candidates are listed explicitly and a candidate
- * in neither list THROWS, the same guarantee `PRACTICE_AREA_PAGES` gives the
- * importer.
- *
- * A section runs from its h2 to the next h2, or to the end of the body.
+ * `readTime` is derived from what is stored, which is what the reader gets.
  */
-const DROPPED_SECTIONS: Record<string, string[]> = {
-  "denver-bicycle-accident-lawyer": ["Denver Car Accident Lawyer Near Me"],
-  "denver-brain-injury-lawyer": ["Brain Injury Resources", "Denver Medical Malpractice Lawyer Near Me"],
-  "denver-burn-injury-attorney": ["Denver Medical Malpractice Lawyer Near Me"],
-  "denver-drunk-driving-accident-lawyer": ["Denver Car Accident Lawyer Near Me"],
-  "denver-medical-malpractice-lawyer": ["Denver Medical Malpractice Lawyer Near Me"],
-  "denver-pedestrian-accident-lawyer": ["Denver Personal Injury Lawyer Near Me"],
-  "denver-spinal-cord-injury-lawyer": ["Denver Medical Malpractice Lawyer Near Me"],
-  "denver-truck-accident-lawyer": ["Denver Truck Accident Lawyer Near Me", "Denver Truck Accident Resources"],
-  "thornton-car-accident-attorney": ["Thornton Car Accident Resources"],
-  "thornton-personal-injury-attorney": ["Thornton Personal Injury Resources"],
-  "thornton-wrongful-death-lawyer": ["Thornton Wrongful Death Resources"],
-};
-
-/**
- * A heading dropped on EVERY page that carries it, matched in full rather than
- * by pattern — which is why it needs no per-slug list.
- *
- * "Awards and Accolades" is the firm's six award badges, byte-identical on all
- * 30 pages that have it: an h2 and six `<img>`s, no prose. **`AwardsBar` now
- * renders those same six badges under the article**, so leaving them in the
- * body shows them twice on the same page. That band is what replaced them.
- *
- * SAFE TO MATCH GLOBALLY, where "Near Me" and "Resources" were not: this is an
- * exact whole-heading match on a string with one meaning, not two words that
- * happen to appear in unrelated editorial copy. If a page ever heads real
- * content with this exact phrase, that is the day it goes back to a per-slug
- * list.
- */
-const DROPPED_EVERYWHERE = ["Awards and Accolades"];
-
-/** Headings the pattern below flags that are NOT chrome, with the reason. */
-const KEPT_SECTIONS: Record<string, string[]> = {
-  "thornton-bicycle-accident-lawyer": [
-    // Bike Thornton and Bicycle Colorado, with addresses and phone numbers.
-    // Third-party civic resources, not the firm's own article list.
-    "Bicycle Accident Resources in Thornton, Colorado",
-  ],
-};
-
-/** What makes a heading a CANDIDATE. Never what makes it droppable. */
-const CHROME_HEADING = /\bnear me\b|\bresources\b/i;
-
-const headingText = (node: PortableTextNode): string =>
-  node._type === "block" && (node as PortableTextBlock).style === "h2"
-    ? ((node as PortableTextBlock).children ?? []).map((child) => child.text).join("").trim()
-    : "";
-
-function dropChromeSections(slug: string, body: PortableTextNode[]): PortableTextNode[] {
-  const drop = DROPPED_SECTIONS[slug] ?? [];
-  const keep = KEPT_SECTIONS[slug] ?? [];
-  const out: PortableTextNode[] = [];
-  const hit = new Set<string>();
-
-  let dropping = false;
-  for (const node of body) {
-    const heading = headingText(node);
-    if (heading) {
-      dropping = false;
-      if (DROPPED_EVERYWHERE.includes(heading)) {
-        dropping = true;
-      } else if (CHROME_HEADING.test(heading)) {
-        if (drop.includes(heading)) {
-          dropping = true;
-          hit.add(heading);
-        } else if (!keep.includes(heading)) {
-          throw new Error(
-            `${slug}: body heading "${heading}" looks like the "Near Me" / ` +
-              `"Resources" chrome the template drops, but is in neither ` +
-              `DROPPED_SECTIONS nor KEPT_SECTIONS in data/practiceAreaPages.ts. ` +
-              `Add it to one — silently keeping it ships chrome, silently ` +
-              `dropping it deletes content.`
-          );
-        }
-      }
-    }
-    if (!dropping) out.push(node);
-  }
-
-  // A declared section that is not there any more means the source changed and
-  // the list did not. Louder than leaving a stale entry to rot.
-  const missing = drop.filter((heading) => !hit.has(heading));
-  if (missing.length) {
-    throw new Error(
-      `${slug}: DROPPED_SECTIONS names ${missing.map((m) => `"${m}"`).join(", ")}, ` +
-        `which the body no longer contains. Remove the entry, or fix the heading.`
-    );
-  }
-
-  return out;
-}
-
-/** The bodies, for `getStaticPaths`. */
 export async function getPracticeAreaArticles(): Promise<PracticeAreaArticle[]> {
-  const [entries, claimed, factCheck] = await Promise.all([
-    getCollection("practiceAreas"),
+  const [rows, claimed, factCheck] = await Promise.all([
+    once("practiceAreaArticles", async () =>
+      sanityClient.fetch(PRACTICE_AREA_ARTICLES_QUERY)
+    ),
     detailSlugs(),
     getReviewedBy(),
   ]);
 
-  return entries
-    .filter((entry) => !claimed.has(entry.data.slug))
-    .map((entry) => {
-      const body = dropChromeSections(entry.data.slug, entry.data.body);
-
+  return rows
+    .filter((row) => row.slug !== null && !claimed.has(row.slug))
+    .map((row) => {
+      const body = (row.body ?? []) as PortableTextNode[];
       return {
-        _key: entry.data.slug,
-        slug: entry.data.slug,
-        title: entry.data.title,
-        city: entry.data.city,
+        _key: row.slug!,
+        slug: row.slug!,
+        title: row.title ?? "",
+        city: row.city ?? "",
         body,
-        faqs: entry.data.faqs,
+        faqs: (row.faqs ?? []).map((faq) => ({
+          _key: faq._key,
+          question: faq.question ?? "",
+          answer: (faq.answer ?? []) as PortableTextBlock[],
+        })),
         factCheck,
-        publishedAt: entry.data.publishedAt,
-        updatedAt: entry.data.modifiedAt,
-        // AFTER the drop, so the figure describes what the reader actually gets.
+        publishedAt: row.publishedAt ?? "",
+        updatedAt: row.updatedAt ?? undefined,
         readTime: readTime(body),
-        metaTitle: entry.data.metaTitle,
-        metaDescription: entry.data.metaDescription,
-      };
+        metaTitle: row.metaTitle ?? "",
+        metaDescription: row.metaDescription ?? "",
+      } satisfies PracticeAreaArticle;
     });
 }
 

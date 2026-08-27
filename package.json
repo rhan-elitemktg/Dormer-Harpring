@@ -7,6 +7,7 @@
   },
   "scripts": {
     "dev": "astro dev",
+    "dev:refresh": "touch 'src/pages/[slug].astro' 'src/pages/meet-our-attorneys/[slug].astro'",
     "build": "npm run build:redirects && astro build",
     "preview": "astro preview",
     "astro": "astro",

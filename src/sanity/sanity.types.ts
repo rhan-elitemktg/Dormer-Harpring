@@ -310,6 +310,62 @@ export type VideoRef = {
   id: string;
 };
 
+export type BlogCategory = {
+  _id: string;
+  _type: "blogCategory";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title: string;
+  slug: Slug;
+  legacyId?: number;
+};
+
+export type BlogCategoryReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "blogCategory";
+};
+
+export type TeamMemberReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "teamMember";
+};
+
+export type BlogPost = {
+  _id: string;
+  _type: "blogPost";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title: string;
+  slug: Slug;
+  excerpt: string;
+  categories: Array<
+    {
+      _key: string;
+    } & BlogCategoryReference
+  >;
+  body: RichText;
+  factCheck?: RichText;
+  reviewer: TeamMemberReference;
+  image?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: "image";
+  };
+  featured?: boolean;
+  publishedAt: string;
+  modifiedAt?: string;
+  legacyId?: number;
+};
+
 export type TeamMember = {
   _id: string;
   _type: "teamMember";
@@ -457,12 +513,154 @@ export type CommunityPage = {
   }>;
 };
 
+export type PracticeAreaReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "practiceArea";
+};
+
+export type PracticeAreasPage = {
+  _id: string;
+  _type: "practiceAreasPage";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  featuredAreas: Array<{
+    name: string;
+    iconKey: string;
+    blurb: string;
+    href: string;
+    image?: {
+      asset?: SanityImageAssetReference;
+      media?: unknown;
+      hotspot?: SanityImageHotspot;
+      crop?: SanityImageCrop;
+      _type: "image";
+    };
+    _type: "areaCard";
+    _key: string;
+  }>;
+  directory: Array<{
+    title: string;
+    items: Array<
+      | {
+          page: PracticeAreaReference;
+          label?: string;
+          _type: "areaEntry";
+          _key: string;
+        }
+      | {
+          label: string;
+          href: string;
+          _type: "customEntry";
+          _key: string;
+        }
+    >;
+    _type: "areaGroup";
+    _key: string;
+  }>;
+};
+
+export type PracticeArea = {
+  _id: string;
+  _type: "practiceArea";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title: string;
+  slug: Slug;
+  label: string;
+  body: RichText;
+  faqs?: Array<{
+    question: string;
+    answer: AnswerText;
+    _type: "faq";
+    _key: string;
+  }>;
+  city:
+    | "denver"
+    | "aurora"
+    | "boulder"
+    | "highlands-ranch"
+    | "lakewood"
+    | "thornton"
+    | "greeley"
+    | "fort-collins"
+    | "grand-junction";
+  topic:
+    "motor-vehicle" | "premises" | "catastrophic" | "professional" | "other";
+  statewide?: boolean;
+  resource?: boolean;
+  seo?: Seo;
+  publishedAt: string;
+  modifiedAt?: string;
+  legacyId?: number;
+};
+
+export type Seo = {
+  _type: "seo";
+  metaTitle?: string;
+  metaDescription?: string;
+  canonicalUrl?: string;
+  noIndex?: boolean;
+  ogImage?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+  };
+};
+
+export type AnswerText = Array<{
+  children?: Array<{
+    marks?: Array<string>;
+    text?: string;
+    _type: "span";
+    _key: string;
+  }>;
+  style?: "normal";
+  listItem?: "bullet" | "number";
+  markDefs?: Array<
+    {
+      _key: string;
+    } & Link
+  >;
+  level?: number;
+  _type: "block";
+  _key: string;
+}>;
+
 export type HomePage = {
   _id: string;
   _type: "homePage";
   _createdAt: string;
   _updatedAt: string;
   _rev: string;
+  practiceAreaCards: Array<{
+    name: string;
+    iconKey: string;
+    blurb: string;
+    href: string;
+    image?: {
+      asset?: SanityImageAssetReference;
+      media?: unknown;
+      hotspot?: SanityImageHotspot;
+      crop?: SanityImageCrop;
+      _type: "image";
+    };
+    _type: "areaCard";
+    _key: string;
+  }>;
+  catastrophicAreas: Array<{
+    name: string;
+    iconKey: string;
+    insight: string;
+    href: string;
+    _type: "catastrophicArea";
+    _key: string;
+  }>;
   faqs: Array<{
     question: string;
     answer: string;
@@ -516,21 +714,6 @@ export type HomePage = {
     };
     _key: string;
   }>;
-};
-
-export type Seo = {
-  _type: "seo";
-  metaTitle?: string;
-  metaDescription?: string;
-  canonicalUrl?: string;
-  noIndex?: boolean;
-  ogImage?: {
-    asset?: SanityImageAssetReference;
-    media?: unknown;
-    hotspot?: SanityImageHotspot;
-    crop?: SanityImageCrop;
-    _type: "image";
-  };
 };
 
 export type InlineText = Array<{
@@ -670,13 +853,21 @@ export type AllSanitySchemaTypes =
   | CaseResult
   | Testimonial
   | VideoRef
+  | BlogCategory
+  | BlogCategoryReference
+  | TeamMemberReference
+  | BlogPost
   | TeamMember
   | RichText
   | SimpleText
   | CarAccidentsPage
   | CommunityPage
-  | HomePage
+  | PracticeAreaReference
+  | PracticeAreasPage
+  | PracticeArea
   | Seo
+  | AnswerText
+  | HomePage
   | InlineText
   | NavLink
   | Link
@@ -1073,6 +1264,199 @@ export type CITIES_QUERY_RESULT = Array<{
 }>;
 
 // Source: src/sanity/lib/queries.ts
+// Variable: BLOG_CATEGORIES_QUERY
+// Query: *[_type == "blogCategory"] | order(slug.current asc){    "_key": slug.current, title, "slug": slug.current,    "posts": count(*[_type == "blogPost" && categories[0]._ref == ^._id])  }
+export type BLOG_CATEGORIES_QUERY_RESULT = Array<{
+  _key: string;
+  title: string;
+  slug: string;
+  posts: number;
+}>;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: BLOG_POSTS_QUERY
+// Query: *[_type == "blogPost" && featured != true] | order(publishedAt desc){  "_key": slug.current,  "slug": slug.current,  title,  excerpt,  publishedAt,  "category": categories[0]->{ "_key": slug.current, title, "slug": slug.current },  image,  "reviewerKey": reviewer->key.current}
+export type BLOG_POSTS_QUERY_RESULT = Array<{
+  _key: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  publishedAt: string;
+  category: {
+    _key: string;
+    title: string;
+    slug: string;
+  } | null;
+  image: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: "image";
+  } | null;
+  reviewerKey: string;
+}>;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: FEATURED_POST_QUERY
+// Query: *[_type == "blogPost" && featured == true]{  "_key": slug.current,  "slug": slug.current,  title,  excerpt,  publishedAt,  "category": categories[0]->{ "_key": slug.current, title, "slug": slug.current },  image,  "reviewerKey": reviewer->key.current, "imageAlt": image.alt}
+export type FEATURED_POST_QUERY_RESULT = Array<{
+  _key: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  publishedAt: string;
+  category: {
+    _key: string;
+    title: string;
+    slug: string;
+  } | null;
+  image: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: "image";
+  } | null;
+  reviewerKey: string;
+  imageAlt: string | null;
+}>;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: HOME_PRACTICE_AREAS_QUERY
+// Query: *[_type == "homePage" && _id == "homePage"][0].practiceAreaCards[]{    _key, name, iconKey, blurb, href, image  }
+export type HOME_PRACTICE_AREAS_QUERY_RESULT = Array<{
+  _key: string;
+  name: string;
+  iconKey: string;
+  blurb: string;
+  href: string;
+  image: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+  } | null;
+}> | null;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: HOME_CATASTROPHIC_QUERY
+// Query: *[_type == "homePage" && _id == "homePage"][0].catastrophicAreas[]{    _key, name, iconKey, insight, href  }
+export type HOME_CATASTROPHIC_QUERY_RESULT = Array<{
+  _key: string;
+  name: string;
+  iconKey: string;
+  insight: string;
+  href: string;
+}> | null;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: PRACTICE_AREAS_PAGE_QUERY
+// Query: *[_type == "practiceAreasPage" && _id == "practiceAreasPage"][0]{    "featuredAreas": coalesce(featuredAreas[]{ _key, name, iconKey, blurb, href, image }, []),    "directory": coalesce(directory[]{      _key,      title,      "items": coalesce(items[]{        _key,        "label": coalesce(label, page->label),        "slug": page->slug.current,        href      }, [])    }, [])  }
+export type PRACTICE_AREAS_PAGE_QUERY_RESULT = {
+  featuredAreas: Array<{
+    _key: string;
+    name: string;
+    iconKey: string;
+    blurb: string;
+    href: string;
+    image: {
+      asset?: SanityImageAssetReference;
+      media?: unknown;
+      hotspot?: SanityImageHotspot;
+      crop?: SanityImageCrop;
+      _type: "image";
+    } | null;
+  }>;
+  directory: Array<{
+    _key: string;
+    title: string;
+    items: Array<
+      | {
+          _key: string;
+          label: string;
+          slug: string;
+          href: null;
+        }
+      | {
+          _key: string;
+          label: string;
+          slug: null;
+          href: string;
+        }
+    >;
+  }>;
+} | null;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: PRACTICE_AREA_PAGES_QUERY
+// Query: *[_type == "practiceArea"]{    "_key": slug.current,    "slug": slug.current,    title,    label,    city,    topic,    "resource": coalesce(resource, false)  }
+export type PRACTICE_AREA_PAGES_QUERY_RESULT = Array<{
+  _key: string;
+  slug: string;
+  title: string;
+  label: string;
+  city:
+    | "aurora"
+    | "boulder"
+    | "denver"
+    | "fort-collins"
+    | "grand-junction"
+    | "greeley"
+    | "highlands-ranch"
+    | "lakewood"
+    | "thornton";
+  topic:
+    "catastrophic" | "motor-vehicle" | "other" | "premises" | "professional";
+  resource: boolean | false;
+}>;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: PRACTICE_AREA_ARTICLES_QUERY
+// Query: *[_type == "practiceArea"]{    "_key": slug.current,    "slug": slug.current,    title,    city,    body,    "faqs": coalesce(faqs[]{ _key, question, answer }, []),    publishedAt,    "updatedAt": modifiedAt,    "metaTitle": seo.metaTitle,    "metaDescription": seo.metaDescription  }
+export type PRACTICE_AREA_ARTICLES_QUERY_RESULT = Array<{
+  _key: string;
+  slug: string;
+  title: string;
+  city:
+    | "aurora"
+    | "boulder"
+    | "denver"
+    | "fort-collins"
+    | "grand-junction"
+    | "greeley"
+    | "highlands-ranch"
+    | "lakewood"
+    | "thornton";
+  body: RichText;
+  faqs:
+    | Array<{
+        _key: string;
+        question: string;
+        answer: AnswerText;
+      }>
+    | Array<never>;
+  publishedAt: string;
+  updatedAt: string | null;
+  metaTitle: string | null;
+  metaDescription: string | null;
+}>;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: BLOG_ARTICLES_QUERY
+// Query: *[_type == "blogPost"]{    "_key": slug.current,    "slug": slug.current,    body,    "factCheck": coalesce(factCheck, []),    "reviewerKey": reviewer->key.current  }
+export type BLOG_ARTICLES_QUERY_RESULT = Array<{
+  _key: string;
+  slug: string;
+  body: RichText;
+  factCheck: Array<never> | RichText;
+  reviewerKey: string;
+}>;
+
+// Source: src/sanity/lib/queries.ts
 // Variable: PRESS_MENTIONS_QUERY
 // Query: *[_type == "homePage" && _id == "homePage"][0].pressMentions[]{  _key, outlet, logo, date, headline, href}
 export type PRESS_MENTIONS_QUERY_RESULT = Array<{
@@ -1205,6 +1589,15 @@ declare module "@sanity/client" {
     '*[_type == "teamMember"] | order(\n  select(\n    kind == "partner" => 1,\n    kind == "attorney" => 2,\n    kind == "staff" => 3,\n    kind == "dog" => 4,\n    5\n  ) asc,\n  orderRank asc\n){\n  "_key": key.current,\n  name,\n  role,\n  kind,\n  photo,\n  bio,\n  "memorial": coalesce(memorial, false),\n  "hasProfile": coalesce(hasProfile, false),\n  "awards": awards[]{ _key, image, alt }\n}': TEAM_QUERY_RESULT;
     '*[_type == "teamMember" && hasProfile == true] | order(\n  select(\n    kind == "partner" => 1,\n    kind == "attorney" => 2,\n    kind == "staff" => 3,\n    kind == "dog" => 4,\n    5\n  ) asc,\n  orderRank asc\n){\n  "slug": key.current,\n  category,\n  lede,\n  email,\n  "facts": facts[]{ _key, value, label },\n  body,\n  education,\n  "links": links[]{ _key, label, href },\n  videoId\n}': TEAM_PROFILES_QUERY_RESULT;
     '*[_type == "city"] | order(order asc){\n  "_key": key.current, name\n}': CITIES_QUERY_RESULT;
+    '*[_type == "blogCategory"] | order(slug.current asc){\n    "_key": slug.current, title, "slug": slug.current,\n    "posts": count(*[_type == "blogPost" && categories[0]._ref == ^._id])\n  }': BLOG_CATEGORIES_QUERY_RESULT;
+    '*[_type == "blogPost" && featured != true] | order(publishedAt desc){\n  "_key": slug.current,\n  "slug": slug.current,\n  title,\n  excerpt,\n  publishedAt,\n  "category": categories[0]->{ "_key": slug.current, title, "slug": slug.current },\n  image,\n  "reviewerKey": reviewer->key.current\n}': BLOG_POSTS_QUERY_RESULT;
+    '*[_type == "blogPost" && featured == true]{\n  "_key": slug.current,\n  "slug": slug.current,\n  title,\n  excerpt,\n  publishedAt,\n  "category": categories[0]->{ "_key": slug.current, title, "slug": slug.current },\n  image,\n  "reviewerKey": reviewer->key.current\n, "imageAlt": image.alt}': FEATURED_POST_QUERY_RESULT;
+    '*[_type == "homePage" && _id == "homePage"][0].practiceAreaCards[]{\n    _key, name, iconKey, blurb, href, image\n  }': HOME_PRACTICE_AREAS_QUERY_RESULT;
+    '*[_type == "homePage" && _id == "homePage"][0].catastrophicAreas[]{\n    _key, name, iconKey, insight, href\n  }': HOME_CATASTROPHIC_QUERY_RESULT;
+    '*[_type == "practiceAreasPage" && _id == "practiceAreasPage"][0]{\n    "featuredAreas": coalesce(featuredAreas[]{ _key, name, iconKey, blurb, href, image }, []),\n    "directory": coalesce(directory[]{\n      _key,\n      title,\n      "items": coalesce(items[]{\n        _key,\n        "label": coalesce(label, page->label),\n        "slug": page->slug.current,\n        href\n      }, [])\n    }, [])\n  }': PRACTICE_AREAS_PAGE_QUERY_RESULT;
+    '*[_type == "practiceArea"]{\n    "_key": slug.current,\n    "slug": slug.current,\n    title,\n    label,\n    city,\n    topic,\n    "resource": coalesce(resource, false)\n  }': PRACTICE_AREA_PAGES_QUERY_RESULT;
+    '*[_type == "practiceArea"]{\n    "_key": slug.current,\n    "slug": slug.current,\n    title,\n    city,\n    body,\n    "faqs": coalesce(faqs[]{ _key, question, answer }, []),\n    publishedAt,\n    "updatedAt": modifiedAt,\n    "metaTitle": seo.metaTitle,\n    "metaDescription": seo.metaDescription\n  }': PRACTICE_AREA_ARTICLES_QUERY_RESULT;
+    '*[_type == "blogPost"]{\n    "_key": slug.current,\n    "slug": slug.current,\n    body,\n    "factCheck": coalesce(factCheck, []),\n    "reviewerKey": reviewer->key.current\n  }': BLOG_ARTICLES_QUERY_RESULT;
     '*[_type == "homePage" && _id == "homePage"][0].pressMentions[]{\n  _key, outlet, logo, date, headline, href\n}': PRESS_MENTIONS_QUERY_RESULT;
     '*[_type == "homePage" && _id == "homePage"][0].insightTeasers[]{\n  _key, category, iconKey, readTime, title, href\n}': INSIGHT_TEASERS_QUERY_RESULT;
     '*[_type == "homePage" && _id == "homePage"][0].communityPhotos[]{\n  _key, image, org, caption, span\n}': COMMUNITY_PHOTOS_QUERY_RESULT;

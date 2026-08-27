@@ -1,12 +1,15 @@
 // The blog index at /news.
 //
-// SANITY SWAP POINT — and the one that introduces the site's first real
-// COLLECTION with its own detail pages. `blogPost` becomes a document type with
-// a slug, a datetime, a reference to the team member who reviewed it, and a
-// reference to a `blogCategory`; `getBlogPosts()` becomes one GROQ projection
-// ordered by `publishedAt desc`. The shapes below are already what that
-// projection returns: references arrive resolved and flattened to
-// `{ name, href }`, the category to `{ title, slug }`.
+// SANITY-BACKED SINCE PHASE 3 — 186 `blogPost` documents and 23 `blogCategory`
+// ones, the site's largest collection. Everything below is a projection over
+// them: references arrive resolved and flattened to `{ name, href }`, the
+// category to `{ title, slug }`.
+//
+// WHAT IS STILL CODE HERE, and why: the PAGE COPY (`getBlogPage()`,
+// `getBlogPostPage()`), which is Phase 4; `FIRM`, the one byline every post
+// shares; `reviewedBy()`, the fact-check sentence, which is derived per post
+// rather than stored 186 times; and `AREA_TO_BLOG_CATEGORY`, which is an
+// inferred lookup rather than content — see the note on it.
 //
 // Kept apart from `news.ts` deliberately, and for the reason that module
 // already states: press coverage points off-site and blog posts point in-site,
@@ -20,39 +23,45 @@
 // the homepage's; four of its records reappear here only because the designer
 // used the same placeholder articles in both comps.
 //
-// WHERE THIS CONTENT COMES FROM. The Blog comp's feed is not invented — its
-// featured post and first four cards are the real top of the live blog, with
-// the same titles, dates and reviewer as `/news` pages 1–2 in the scrape. Those
-// five carry their legacy slugs, so their links resolve. The remaining eight
-// the designer wrote: no post with those titles or dates exists anywhere in the
-// 167, so they have no destination and carry `href: null` — the same treatment
-// the Practice Areas directory gives the three entries with no page. See the
-// TODO(launch) on `getBlogPosts()`.
+// WHERE THIS CONTENT CAME FROM. The comp's feed was twelve transcribed cards of
+// which only four were real posts; the other eight were titles the designer
+// invented and shipped with `href: null` so they rendered unlinked rather than
+// dead. The WordPress import replaced all twelve, so every card leads somewhere
+// and the tab row filters a real archive. Nothing here carries a null href now.
 import type { ImageMetadata } from "astro";
-import { getCollection } from "astro:content";
-import { getTeam } from "./team";
-import { getFirmDetails } from "./site";
+import type { SanityImageSource } from "@sanity/image-url";
+import { sanityClient } from "sanity:client";
 import {
-  pt,
-  ptImage,
-  type PortableTextBlock,
-  type PortableTextNode,
-} from "./portableText";
+  BLOG_ARTICLES_QUERY,
+  BLOG_CATEGORIES_QUERY,
+  BLOG_POSTS_QUERY,
+  FEATURED_POST_QUERY,
+} from "../sanity/lib/queries";
+import { once, required } from "../sanity/lib/fetch";
+import { getTeam } from "./team";
+import { pt, type PortableTextBlock, type PortableTextNode } from "./portableText";
 import type { ContactBand } from "./contact";
 import { ROUTES, blogPath } from "../lib/routePaths";
 import { readTime } from "../lib/readTime";
-import consult from "../assets/blog/consult.jpg";
-import boardroom from "../assets/about/boardroom.jpg";
-import bicycle from "../assets/home/practice-bicycle.jpg";
-import brainInjury from "../assets/home/practice-brain-injury.jpg";
-import burns from "../assets/home/practice-burns.jpg";
-import carAccident from "../assets/home/practice-car-accident.jpg";
-import dogBite from "../assets/home/practice-dog-bite.jpg";
-import motorcycle from "../assets/home/practice-motorcycle.jpg";
-import personalInjury from "../assets/home/practice-personal-injury.jpg";
-import slipAndFall from "../assets/home/practice-slip-and-fall.jpg";
-import truck from "../assets/home/practice-truck.jpg";
-import wrongfulDeath from "../assets/home/practice-wrongful-death.jpg";
+
+/* THIRTEEN IMPORTS LEFT WITH PHASE 3b, and none of them was reported by
+   anything. Twelve were practice-area photographs feeding a per-category
+   fallback that had already been deleted — every post in a category got the
+   same picture, so the cards looked duplicated because they were — plus
+   `consult.jpg`, the featured panel's own art, which is a Sanity asset now.
+   `getCollection`, `getFirmDetails` and `ptImage` went with the two
+   hand-authored records that used them.
+
+   None of the FILES left `src/assets/`. Eleven are still practice-area card art
+   in `home.ts`, and `consult.jpg` is still a local import in `carAccidents.ts` —
+   it is a Sanity asset AND a local import, which is exactly what `Picture`'s
+   two branches are for. `npm run backup` is `--no-assets`, so git is the only
+   copy of these originals outside Sanity either way.
+
+   An unused module-level import is not an error, which is how this module once
+   carried 1,054 lines of orphaned bio data for four commits. Sweep after every
+   swap; `git grep` the symbol, and check the count is more than one — most of
+   these also appear as substrings in `AREA_TO_BLOG_CATEGORY` below. */
 
 /** A person or the firm, credited in a post's byline. Pre-resolved, because in
  *  Sanity these are references and the projection dereferences them. */
@@ -65,11 +74,14 @@ export interface BlogCategory {
   _key: string;
   title: string;
   /**
-   * The legacy WordPress category slug, read off the scrape's `/category/*`
-   * directories rather than derived from the title — `Auto Insurance` is
-   * `auto-insurance-accident-claims` there, and 186 posts' archive URLs depend
-   * on it. Nothing links to `/category/<slug>` yet (those pages are not built),
-   * but the tab filter keys off it and the CMS phase will.
+   * The legacy WordPress category slug — NOT derived from the title. "Auto
+   * Insurance & Accident Claims" is `auto-insurance-accident-claims` and "Jury
+   * Trial Wins" is `verdicts`, so it cannot be generated from either end.
+   *
+   * Nothing links to `/category/<slug>` (those pages are not built), but 24
+   * redirects in `redirects.ts` land on it and the tab filter matches on it.
+   * That is why the schema's field carries a description saying so and
+   * deliberately offers no "Generate from title" button.
    */
   slug: string;
 }
@@ -97,15 +109,19 @@ export interface BlogPost {
   /**
    * Card art — the post's own featured image, or `null`.
    *
-   * NULL FOR 125 OF THE 186 IMPORTED POSTS, which have no featured image on the
-   * legacy site at all. `PostThumb.astro` draws the branded placeholder for
-   * those. It used to fall back to a practice-area photograph chosen by
-   * category, which gave every post in a category the same picture — the cards
-   * looked duplicated because they were.
+   * NULL FOR 125 OF THE 186, which have no featured image on the legacy site at
+   * all. `PostThumb.astro` draws the branded placeholder for those. It used to
+   * fall back to a practice-area photograph chosen by category, which gave every
+   * post in a category the same picture — the cards looked duplicated because
+   * they were.
+   *
+   * A SANITY ASSET SINCE PHASE 3b. `ImageMetadata` stays in the union because
+   * `Picture` accepts either and a page-header photograph is still a local
+   * import; nothing in this module produces one any more.
    *
    * Decorative either way, so the cards render it with an empty `alt`.
    */
-  image: ImageMetadata | null;
+  image: ImageMetadata | SanityImageSource | null;
   author: PostByline;
   reviewer: PostByline;
   /** `null` for a post with no page. The card then renders without a link. */
@@ -114,8 +130,9 @@ export interface BlogPost {
 
 export interface FeaturedPost extends BlogPost {
   /** NARROWED from BlogPost's nullable: the featured panel is a photograph with
-   *  copy over it, so there is no version of it without art. */
-  image: ImageMetadata;
+   *  copy over it, so there is no version of it without art. `getFeaturedPost()`
+   *  throws rather than narrowing by cast. */
+  image: ImageMetadata | SanityImageSource;
   /** The featured block shows a real photograph, so this one is described. */
   imageAlt: string;
 }
@@ -163,80 +180,46 @@ export async function getBlogPage(): Promise<BlogPageCopy> {
  * scrolls rather than being capped or grouped.
  *
  * THE MISSING ONE IS `auto-insurance-accident-claims`, and it is structural
- * rather than a bug here. A post belongs to exactly ONE category — the first
- * its source record lists — so a category no post leads with has no posts to
- * filter to and can never be reached. Thirteen posts carry that one second and
- * none first. Rendering a tab for it would open an empty panel, so the count
- * follows the leading category, not the collection. Open question in
- * HANDOFF.md: whether those thirteen should lead with it instead.
+ * rather than a bug here. A post belongs to exactly ONE category — the first its
+ * record lists — so a category no post leads with has no posts to filter to and
+ * can never be reached. Thirteen posts carry that one second and none first.
+ * Rendering a tab for it would open an empty panel, so the count follows the
+ * leading category, not the collection. Give one of those 13 that category first
+ * and the tab returns on its own; nothing here needs editing.
  *
- * ORDERED BY POST COUNT, DESCENDING. In a row that scrolls, order decides what
- * a reader meets before they interact: Auto Accident (63) and Personal Injury
- * (35) sit where the eye lands, and the single-post categories are the ones you
+ * ORDERED BY POST COUNT, DESCENDING. In a row that scrolls, order decides what a
+ * reader meets before they interact: Auto Accident (63) and Personal Injury (34)
+ * sit where the eye lands, and the single-post categories are the ones you
  * scroll for. Alphabetical would lead with Awards and Bike Accidents and bury
  * the two covering half the archive.
  *
- * `all` is not here — it is the sentinel the component renders itself, and
- * there is no `/category/all` behind it.
+ * THE COUNT IS GROQ'S; THE DECISIONS ARE HERE. `count()` per category is one
+ * subquery in the same round trip and beats pulling 186 records back to length
+ * an array. Dropping the empties and choosing the order are judgements with
+ * their reasoning written above them, and a projection is the wrong home for a
+ * decision explained somewhere else.
+ *
+ * `all` is not here — it is the sentinel the component renders itself, and there
+ * is no `/category/all` behind it.
+ *
+ * `required()` cannot throw on a collection query: GROQ returns `[]` for a type
+ * with no documents, never null. Kept for the shape every other collection
+ * getter uses; the loud failure for a missing category is `getBlogPosts()`,
+ * whose projection would hand a card no category at all.
  */
 export async function getBlogCategories(): Promise<BlogCategory[]> {
-  const [categories, posts] = await Promise.all([
-    getCollection("blogCategories"),
-    getCollection("blog"),
-  ]);
+  const rows = await once("blogCategories", async () =>
+    required(await sanityClient.fetch(BLOG_CATEGORIES_QUERY), "Blog Categories", "Collections")
+  );
 
-  // PRIMARY ONLY, matching what a card carries and therefore what a tab can
-  // find. Counting a post under its secondaries would order the row by a
-  // number no tab can produce.
-  const counts = new Map<string, number>();
-  for (const post of posts) {
-    const primary = post.data.categories[0];
-    if (primary) counts.set(primary, (counts.get(primary) ?? 0) + 1);
-  }
-
-  return categories
-    // A TAB THAT FINDS NOTHING IS WORSE THAN NO TAB. With one category per
-    // post, any category no post LEADS with can never be reached — today that
-    // is "Auto Insurance & Accident Claims", which 13 posts carry second and
-    // none carry first. It is dropped from the row rather than shipped as an
-    // empty state. Give one of those 13 that category first and it returns on
-    // its own; nothing here needs editing.
-    .filter((entry) => (counts.get(entry.data.slug) ?? 0) > 0)
-    .map((entry) => ({ _key: entry.data.slug, title: entry.data.title, slug: entry.data.slug }))
-    .sort(
-      (a, b) =>
-        (counts.get(b.slug) ?? 0) - (counts.get(a.slug) ?? 0) ||
-        a.title.localeCompare(b.title)
-    );
+  return rows
+    .filter((row) => row.posts > 0)
+    .sort((a, b) => b.posts - a.posts || a.title.localeCompare(b.title))
+    // `posts` is a count for ordering, not something a tab renders. Dropped
+    // here rather than left on the object: a field that reaches a component
+    // gets used by one eventually.
+    .map(({ posts: _count, ...category }) => category);
 }
-
-const CATEGORIES: Record<string, BlogCategory> = {
-  autoAccident: { _key: "auto-accident", title: "Auto Accident", slug: "auto-accident" },
-  autoInsurance: {
-    _key: "auto-insurance",
-    title: "Auto Insurance",
-    slug: "auto-insurance-accident-claims",
-  },
-  bike: { _key: "bike-accidents", title: "Bike Accidents", slug: "bike-accidents" },
-  daycare: { _key: "daycare-injury", title: "Daycare Injury", slug: "daycare-injury" },
-  laws: { _key: "laws", title: "Laws", slug: "laws" },
-  personalInjury: {
-    _key: "personal-injury",
-    title: "Personal Injury",
-    slug: "personal-injury",
-  },
-  premises: {
-    _key: "premises-liability",
-    title: "Premises Liability",
-    slug: "premises-liability",
-  },
-  product: {
-    _key: "product-liability",
-    title: "Product Liability",
-    slug: "product-liability",
-  },
-  trials: { _key: "trials", title: "Trials", slug: "trials" },
-};
 
 /**
  * The byline. Both halves are references in the CMS, so both are resolved here
@@ -246,11 +229,27 @@ const CATEGORIES: Record<string, BlogCategory> = {
  * says "K.C. Harpring". The roster wins.
  */
 async function byline(memberKey: string): Promise<PostByline> {
-  const member = (await getTeam()).find((person) => person._key === memberKey);
-  if (!member?.href) {
-    throw new Error(`blog: no team member with a profile for "${memberKey}"`);
-  }
-  return { name: member.name, href: member.href };
+  return (await credits())(memberKey);
+}
+
+/**
+ * The roster as a lookup, read once and reused for every row of a projection.
+ *
+ * A Map rather than a `.find()` per post: `getBlogPosts()` resolves 185 bylines
+ * and is itself called 372 times building the site, so a linear scan of 26
+ * people is ~1.8 million comparisons for an answer that does not change.
+ */
+async function credits(): Promise<(memberKey: string) => PostByline> {
+  const roster = new Map(
+    (await getTeam())
+      .filter((person) => person.href)
+      .map((person) => [person._key, { name: person.name, href: person.href! }])
+  );
+  return (memberKey: string) => {
+    const found = roster.get(memberKey);
+    if (!found) throw new Error(`blog: no team member with a profile for "${memberKey}"`);
+    return found;
+  };
 }
 
 /** Every post is written by the firm and reviewed by an attorney — the live
@@ -303,455 +302,196 @@ export async function getReviewedBy(): Promise<PortableTextBlock[]> {
   return reviewedBy(await byline("k-c-harpring"));
 }
 
-export async function getFeaturedPost(): Promise<FeaturedPost> {
+/**
+ * One row of a card projection, turned into a `BlogPost`.
+ *
+ * The two things a projection deliberately does NOT return are resolved here:
+ * `href`, because `blogPath()` is the only thing allowed to build a URL and
+ * three layers already agree on the trailing slash; and the byline, because
+ * `credits()` is the one place a roster entry becomes `{ name, href }`.
+ *
+ * SYNCHRONOUS, AND IT TAKES ITS RESOLVER. It used to `await byline()` per row,
+ * which meant one roster lookup per post — 185 of them per call to
+ * `getBlogPosts()`, and that getter is called 372 times in one `getStaticPaths`
+ * run. `once()` collapses those to a single fetch, so it was never 185 REQUESTS,
+ * but it was 185 promise hops each time and it showed: dropping them took a dev
+ * request's blog branch from 13 seconds to under two.
+ */
+function toPost(
+  row: {
+    _key: string;
+    slug: string | null;
+    title: string | null;
+    excerpt: string | null;
+    publishedAt: string | null;
+    category: BlogCategory | null;
+    image: unknown;
+    reviewerKey: string | null;
+  },
+  credit: (memberKey: string) => PostByline
+): BlogPost {
+  const slug = row.slug;
+  if (!slug) throw new Error(`blog: a post has no slug — "${row.title ?? "untitled"}".`);
+  if (!row.category) {
+    throw new Error(
+      `blog: post "${slug}" has no category. Open it at /admin under Collections › ` +
+        `Blog Posts and choose one — the card and the tab row both need it.`
+    );
+  }
+  if (!row.reviewerKey) {
+    throw new Error(`blog: post "${slug}" has no reviewer. Every post names the attorney who approved it.`);
+  }
+
   return {
-    _key: "trampoline-waiver",
-    title: "Can you sue a trampoline park if you signed a waiver?",
-    excerpt:
-      "In Colorado a signed waiver does not close the door on every injury " +
-      "claim. Courts will not enforce a waiver that shields grossly negligent " +
-      "conduct, and one that is unclear or rushed at check-in may not hold up " +
-      "at all.",
-    publishedAt: "2026-06-23",
-    category: CATEGORIES.premises,
-    image: consult,
-    imageAlt: "Attorney meeting with a client",
+    _key: slug,
+    title: row.title ?? "",
+    excerpt: row.excerpt ?? "",
+    publishedAt: row.publishedAt ?? "",
+    category: row.category,
+    // A post with no card art gets the branded placeholder, drawn by
+    // PostThumb.astro — 125 of the 186 land here, so it is the common case.
+    image: (row.image as BlogPost["image"]) ?? null,
     author: FIRM,
-    reviewer: await byline("k-c-harpring"),
-    href: blogPath("can-you-sue-a-trampoline-park-if-you-signed-a-waiver"),
+    reviewer: credit(row.reviewerKey),
+    href: blogPath(slug),
   };
 }
 
 /**
- * The feed below the featured panel, newest first.
+ * The one post in the large panel at the top of /news.
  *
- * THIS IS THE IMPORTED ARCHIVE NOW. It used to be twelve cards transcribed from
- * the comp, of which only four were real posts — the other eight were titles
- * the designer invented, shipped with `href: null` so their cards rendered
- * unlinked rather than dead. All twelve are gone: the import brings the actual
- * 185 (186 less the featured post, which is hand-authored and shown above), so
- * every card leads somewhere and the tab row filters a real archive instead of
- * a placeholder.
+ * IT IS A DOCUMENT LIKE ANY OTHER, with a boolean. Until Phase 3b it was a
+ * literal here and its body a second one below — the last two hand-authored
+ * records in a module that otherwise read an archive of 185. Merging them
+ * settled a disagreement neither side could see: the file filed this post under
+ * Personal Injury while this panel had always printed Premises Liability, so the
+ * tab row was ordering by a category the card did not show. The document carries
+ * both, hand-authored first.
  *
- * That settles three of README's launch items at once — the eight cards with no
- * post behind them, the four pointing at legacy URLs this build did not serve,
- * and the index's dependence on the old site staying up.
+ * THE COUNT IS CHECKED HERE BECAUSE NOTHING ELSE CAN. A boolean on 186 documents
+ * cannot express "exactly one", and a Studio validator would have to query its
+ * siblings on every keystroke to answer a question this can answer once per
+ * build. Two featured posts is not a cosmetic problem: the feed excludes every
+ * one of them, so the second silently disappears from /news.
+ */
+export async function getFeaturedPost(): Promise<FeaturedPost> {
+  const [rows, credit] = await Promise.all([
+    once("featuredPost", async () => sanityClient.fetch(FEATURED_POST_QUERY)),
+    credits(),
+  ]);
+
+  if (rows.length !== 1) {
+    throw new Error(
+      `blog: ${rows.length} posts are marked "Feature this post", and exactly one must be.\n` +
+        (rows.length === 0
+          ? `Open a post at /admin under Collections › Blog Posts, tick it, and PUBLISH.`
+          : `These are: ${rows.map((row) => row.slug ?? "?").join(", ")}. ` +
+            `Untick all but one — the feed hides every featured post, so the others have ` +
+            `vanished from /news entirely.`)
+    );
+  }
+
+  const row = rows[0];
+  const post = toPost(row, credit);
+  if (!post.image) {
+    throw new Error(
+      `blog: the featured post "${post._key}" has no card image. The panel is a photograph ` +
+        `with copy over it, so there is no version of it without one.`
+    );
+  }
+
+  return {
+    ...post,
+    image: post.image,
+    // Described, unlike every other card's art: this one is large, above the
+    // fold and the page's own photograph rather than a thumbnail.
+    imageAlt: row.imageAlt ?? "",
+  };
+}
+
+/**
+ * The feed below the featured panel, newest first — 185 cards.
  *
- * The featured post is NOT here: `getImportedPosts()` drops any slug a
- * hand-authored article claims, and the trampoline post is the one that does,
- * so it cannot appear twice.
+ * THE WHOLE LEGACY ARCHIVE, not the comp's twelve. Those were transcribed cards
+ * of which only four were real posts; the other eight were titles the designer
+ * invented and shipped with `href: null` so they rendered unlinked rather than
+ * dead. The import replaced them, and every card now leads somewhere.
+ *
+ * The featured post is excluded by the query rather than filtered here — see
+ * `BLOG_POSTS_QUERY` on why the test is `featured != true` and not `!featured`.
  */
 export async function getBlogPosts(): Promise<BlogPost[]> {
-  return getImportedPosts();
+  const [rows, credit] = await Promise.all([
+    once("blogPosts", async () => sanityClient.fetch(BLOG_POSTS_QUERY)),
+    credits(),
+  ]);
+  return rows.map((row) => toPost(row, credit));
 }
 
 // ---------------------------------------------------------------------------
 // The post PAGE — /<slug>, one per article.
 //
 // Split from `BlogPost` rather than folded into it, the same way
-// `getTeamProfiles()` is split from `getTeam()`: the feed is thirteen card
-// records and the bodies are one long document each, and a card grid should not
-// be pulling 1,800 words per item into memory to render a title. In Sanity the
-// two are one document and this is two projections.
-//
-// ONE ARTICLE EXISTS. That is the scope decision, not an unfinished job: the
-// CMS phase imports all 167 legacy posts from the scrape by script, so
-// hand-transcribing the other four real ones buys four pages that the importer
-// replaces a phase later — and hand transcription cannot be diffed against the
-// source the way a script can. The four keep the treatment they already have on
-// the index: a legacy `href` that resolves against the live WordPress site
-// until it is cut over. See README.md's launch table.
+// `getTeamProfiles()` is split from `getTeam()`: the feed is 185 card records
+// and the bodies are 1,800 words each, and a card grid should not be pulling an
+// archive of prose into memory to render a title. One document type, two
+// projections.
 
 export interface BlogPostArticle {
   /** The `_key` of this post's record in the feed. The route joins on it. */
   _key: string;
   /** No leading slash — `blogPath()` adds it. */
   slug: string;
-  /**
-   * Portable Text. `pt()` and `ptImage()` are the authoring shims; the source
-   * is the live article's own markup, so the words on this page are the words
-   * that rank at this URL today.
-   */
+  /** Portable Text, straight from the document. */
   body: PortableTextNode[];
   /** "8 min read" — DERIVED from `body`, never typed. See lib/readTime.ts. */
   readTime: string;
   /**
-   * The band at the foot of the article. Per-post rather than a template
-   * singleton because it names a specific reviewer and makes a specific claim
-   * about them, and the next post's reviewer is a different person.
+   * The band at the foot of the article. Per-post rather than template chrome
+   * because it names a specific reviewer and makes a specific claim about them,
+   * and the next post's reviewer is a different person.
    */
   factCheck: PortableTextBlock[];
 }
 
 /**
- * The one built article, "Can you sue a trampoline park if you signed a
- * waiver?".
+ * Every article's body, for `getStaticPaths`.
  *
- * WHAT IS NOT HERE, and why. The comp writes its OWN ~600-word body for this
- * post — different headings, different copy, a pull quote. It was not adopted:
- * the comp and the live article share a URL, and serving the shorter one there
- * would drop roughly 1,200 words of copy that ranks today. The comp is still
- * the source for everything AROUND the body, which is what it was drawing.
- *
- * The legacy body also carries two theme-injected CTA widgets mid-article ("Get
- * In Touch With Us", "Get A Free Consultation"). Both are dropped — they are
- * the same thing as the comp's four in-body CTA blocks, and both become
- * Portable Text object types in the Sanity phase. See the note in
- * components/prose/components.ts.
+ * `factCheck` COALESCES RATHER THAN ALWAYS DERIVING, and that is the whole
+ * reason it is a field at all. WordPress has no equivalent, so all 186 arrive
+ * empty and the standard band is written from the reviewer here. A document that
+ * DOES carry one keeps it — which is the path an editor takes for an article
+ * reviewed differently, and the reason a seeded copy of the derived sentence
+ * would have been a mistake: it would have frozen the wording on 186 documents
+ * the moment `reviewedBy()` changed.
  */
 export async function getBlogPostArticles(): Promise<BlogPostArticle[]> {
-  const [kc, firm] = await Promise.all([byline("k-c-harpring"), getFirmDetails()]);
+  const [rows, credit] = await Promise.all([
+    once("blogArticles", async () => sanityClient.fetch(BLOG_ARTICLES_QUERY)),
+    credits(),
+  ]);
 
-  const body: PortableTextNode[] = [
-    ...pt(
-      "## Key Takeaways",
-      "- In Colorado, a signed waiver does not close the door on every injury claim.",
-      "- Colorado courts will not enforce waivers that shield operators from grossly negligent conduct.",
-      "- A waiver that is unclear, poorly worded, or rushed at check-in may not hold up in court.",
-      "- Operators, staff, equipment manufacturers, and property owners may each share fault for an injury.",
-      "- Colorado’s statute of limitations restricts how long an injured person has to file a claim.",
+  return rows.map((row) => {
+    const slug = row.slug;
+    if (!slug) throw new Error("blog: an article has no slug.");
+    if (!row.reviewerKey) {
+      throw new Error(`blog: article "${slug}" has no reviewer.`);
+    }
 
-      "Every weekend, Denver families fill trampoline parks looking for a few " +
-        "hours of fun. What they do not expect is a serious injury followed by a " +
-        "waiver form that staff insist strips them of all legal rights. If you or " +
-        "a family member was hurt at one of these facilities, a critical question " +
-        "follows: **Can you sue a trampoline park** in Colorado even after signing " +
-        "a waiver?",
-      // The live article's version of this sentence stops mid-clause — it ends
-      // "…understand what those waivers." with no object. Completed here rather
-      // than reproduced: a sentence that breaks off reads as our bug on our
-      // page. TODO(launch): confirm the intended wording with the firm.
-      "Signing a waiver does not mean you give up all your rights. Colorado " +
-        "courts generally uphold well-drafted liability waivers for ordinary " +
-        "negligence, but those waivers have limits. If an operator acted with " +
-        "gross negligence or reckless disregard for your safety, a waiver may not " +
-        "protect them from legal accountability. At **Dormer Harpring**, our " +
-        `[Denver Personal Injury Lawyers](${ROUTES.home}) help injured Denver ` +
-        "residents understand what those waivers do and do not cover.",
-
-      "## Causes of Trampoline Park Accidents",
-      "Many serious trampoline park accidents trace back to conditions the " +
-        "facility created or failed to correct, not to the ordinary risks of " +
-        "recreational activity. Common causes may include the following:",
-      "- **Inadequate Supervision:** Understaffed facilities or poorly trained " +
-        "attendants fail to enforce weight limits, age restrictions, or " +
-        "single-jumper rules.",
-      "- **Equipment Failure:** Worn padding, defective spring systems, or " +
-        "improperly maintained frames can cause sudden, severe falls.",
-      "- **Unsafe Facility Design:** Insufficient spacing between trampolines or " +
-        "unpadded landing surfaces directly leads to collision injuries.",
-      "- **Overcrowding:** Too many jumpers in one area increases the likelihood " +
-        "of mid-air collisions and falls onto other guests.",
-      "- **Failure to Warn:** When facilities do not clearly communicate hazards " +
-        "or restrictions, guests face risks they cannot anticipate or avoid.",
-      "Most of these failures do not happen in isolation. When worn padding or a " +
-        "defective spring system is to blame, the case may also involve a " +
-        `[product defect](${blogPath("what-are-common-types-of-product-defects")}) ` +
-        "claim against the equipment maker. They reflect a pattern of negligence, " +
-        "and that pattern carries significant weight when determining whether a " +
-        "waiver can protect the operator from accountability.",
-
-      "## Types of Injuries at Trampoline Parks",
-      "Because participants repeatedly land, collide, and fall from height, the " +
-        "body absorbs forces it was not designed to withstand in rapid " +
-        "succession. Those forces produce a wide range of injuries:",
-      "- **Fractures:** Broken wrists, ankles, and legs are among the most common " +
-        "outcomes, particularly when jumpers land off-center or collide with others.",
-      "- **Spinal Cord Injuries:** Landings on the neck or back can cause partial " +
-        "or complete paralysis with long-term consequences.",
-      "- **Traumatic Brain Injuries (TBI):** Falls and collisions can result in " +
-        "concussions or more severe brain trauma. According to the " +
-        "[National Institute of Neurological Disorders and Stroke]" +
-        "(https://www.ninds.nih.gov/health-information/disorders/traumatic-brain-injury-tbi), " +
-        "TBI symptoms range from brief disorientation to permanent cognitive " +
-        "impairment.",
-      "- **Soft Tissue Damage:** Torn ligaments, muscle strains, and joint " +
-        "injuries frequently accompany hard landings or collisions.",
-      "- **Neck Injuries:** Hyperextension and compression injuries affect both " +
-        "children and adults, sometimes with delayed symptom onset.",
-      "The severity of these injuries shapes the full scope of a legal claim, " +
-        "from immediate medical costs to long-term rehabilitation and lost " +
-        "earning capacity. Reviewing the " +
-        `[trampoline park injury stats](${blogPath("understanding-trampoline-park-injury-stats-and-liability")}) ` +
-        "and how liability is established gives families a clearer picture of " +
-        "what a case may involve. When a facility’s negligence contributed to " +
-        "harm of this magnitude, the waiver question carries real financial weight.",
-
-      "## What If I Signed a Trampoline Park Waiver?",
-      "Signing a waiver at a trampoline park does not mean you have given up your " +
-        "right to pursue a claim. These documents exist to protect the business, " +
-        "but Colorado law places real limits on what they can accomplish. A court " +
-        "will generally enforce a waiver when it is clearly written and presented " +
-        "in a way that gives the signer a fair opportunity to read it before " +
-        "agreeing.",
-      "Not every waiver withstands legal scrutiny, and the circumstances " +
-        "surrounding how it was presented matter as much as what it says. A form " +
-        "presented hurriedly at check-in, buried within unrelated terms, or " +
-        "drafted to obscure its true scope, may not hold up in court. More " +
-        "importantly, no waiver in Colorado can protect an operator from gross " +
-        "negligence or reckless disregard for the safety of guests on their " +
-        "premises.",
-      "If a waiver is a concern, an attorney can look at the document itself, the " +
-        "conditions under which it was signed, and whether it actually holds up " +
-        "under Colorado law."
-    ),
-
-    // The live article puts a photograph here, at the foot of this section.
-    // It is NOT that photograph: the file the live site serves is a stock shot
-    // of someone signing a contract beside a car, captioned "can you sue a
-    // trampoline park" — a car-accident image in a premises article, with a
-    // keyword string where the alt text should be. The comp puts its own image
-    // in the same slot and picks the premises-liability photo, which is this
-    // one; that is the choice worth keeping.
-    ptImage(
-      slipAndFall,
-      "A caution wet floor sign standing on a tiled walkway",
-      "premises-hazard"
-    ),
-
-    ...pt(
-      "## Can You Sue a Trampoline Park in Colorado Even After Signing a Waiver?",
-      "Yes, and a signed waiver carries less weight than most people assume. " +
-        "Colorado law distinguishes between ordinary negligence and " +
-        "[gross negligence](https://www.law.cornell.edu/wex/gross_negligence), and " +
-        "the distinction matters. When an operator’s conduct reflects a reckless " +
-        "disregard for others’ safety, no release form can bar a claim against them.",
-      "Whether **you can sue a trampoline park** after signing a release depends " +
-        "heavily on what caused the injury. If a mat was reported as torn days " +
-        "before your fall and management did nothing about it, this is not an " +
-        "oversight. If a facility routinely understaffed the floor and guests had " +
-        "been hurt before, the pattern tells a story. In both situations, a signed " +
-        "release may not protect the operator, and you may still have a valid claim.",
-      "The line between ordinary and gross negligence is not always visible from " +
-        "the outside. It lives in maintenance logs, staffing records, and incident " +
-        "reports. The strength of a waiver ultimately depends on what the evidence " +
-        "reveals.",
-
-      "## Are There Factors That Can Impact the Enforceability of a Signed Waiver?",
-      "Even when gross negligence is not at issue, several circumstances can " +
-        "weaken or invalidate a waiver under Colorado law:",
-      "- **Ambiguous or Unclear Language:** If the waiver uses vague terms that a " +
-        "reasonable person could interpret differently, a court may decline to " +
-        "enforce it.",
-      "- **Failure to Disclose Specific Hazards:** Waivers referencing only " +
-        "general recreational risks may not cover injuries caused by known " +
-        "defects at that specific facility.",
-      "- **Minors and Parental Signatures:** Colorado law permits parents to sign " +
-        "waivers on behalf of minor children, but those waivers cannot cover gross " +
-        "negligence or reckless conduct and must still meet the same clarity " +
-        "requirements as any adult waiver.",
-      "- **Procedural Defects:** A waiver presented after payment, buried in a " +
-        "stack of documents, or signed under time pressure may face serious " +
-        "challenges.",
-      "- **Unconscionability:** Courts have found waivers unenforceable when the " +
-        "imbalance of power between the operator and the guest renders the " +
-        "agreement effectively involuntary.",
-      "What voids a waiver in one situation may not apply in another. The document " +
-        "itself and the conditions under which you signed it both deserve careful " +
-        "review.",
-
-      "## Who Is Liable for a Trampoline Park Accident?",
-      "Liability rarely rests with a single party. Multiple defendants may share " +
-        "responsibility depending on how the injury occurred:",
-      "- **Facility Operators:** The company running the park owes a duty to " +
-        "maintain safe conditions, train staff, enforce safety rules, and respond " +
-        "to known hazards.",
-      "- **Individual Staff Members:** Employees who failed to enforce rules, " +
-        "intervene in unsafe situations, or report equipment problems may be held " +
-        "personally responsible.",
-      "- **Equipment Manufacturers:** When equipment was defective by design or " +
-        "manufacture, the product’s maker may face a product liability claim " +
-        "independent of the waiver.",
-      "- **Property Owners:** If the facility leases its space, the property " +
-        "owner’s maintenance obligations may create independent liability for " +
-        "certain hazards.",
-      "Colorado’s modified comparative fault rule means compensation may still be " +
-        "available even if an injured person is found partially at fault, as long " +
-        "as their share of fault does not exceed 50 percent. Identifying every " +
-        "responsible party is what makes a claim complete.",
-
-      "## Steps for Filing a Personal Injury Lawsuit Against Trampoline Parks",
-      "Acting quickly after a trampoline park injury protects both your health and " +
-        "your legal options:",
-      "- **Seek Immediate Medical Care:** Get a full evaluation even if injuries " +
-        "seem minor. Medical records establish the connection between the accident " +
-        "and your harm, and some conditions worsen without treatment.",
-      "- **Document the Scene:** Photograph the equipment and the area where the " +
-        "injury occurred. Collect witness names and contact information before " +
-        "they leave.",
-      "- **Request and Preserve Records:** Ask the facility for an incident report " +
-        "and keep your copy of any waiver you signed. Note the date, time, " +
-        "staffing conditions, and any employee statements.",
-      "- **Avoid Statements to the Facility’s Insurer:** Insurance adjusters may " +
-        "contact you quickly. Anything you say can be used to reduce or deny your " +
-        "claim.",
-      "- **Consult a Personal Injury Attorney Promptly:** An attorney can review " +
-        "the waiver, assess liability, and protect your ability to recover " +
-        "compensation before Colorado’s two-year filing window closes.",
-      "Evidence disappears, memories fade, and facilities may repair the very " +
-        "condition that caused your injury before it can be documented. What you " +
-        "do in the days following the accident often determines what is " +
-        "recoverable.",
-
-      "## Contact a Personal Injury Lawyer Today",
-      // The live article closes on (303) 747-4404, a different number from the
-      // (303) 756-3812 its own widgets use. The second one is the firm's, and
-      // is now what `site.ts` publishes — but this still reads from there
-      // rather than transcribing it, because site.ts is the only place a phone
-      // number may live and that does not change with which number wins.
-      "A signed waiver does not have to be the final word after a trampoline park " +
-        "injury in Denver. At **Dormer Harpring**, we can review the waiver, the " +
-        "facility’s conduct, and the facts of what happened to determine what " +
-        "claims remain available. If you are asking, “**Can you sue a trampoline " +
-        "park** after what happened?”, call " +
-        `[${firm.phone}](tel:${firm.phoneE164}) to schedule a ` +
-        `[free consultation](${ROUTES.contact}) and discuss your legal options.`
-    ),
-  ];
-
-  return [
-    {
-      _key: "trampoline-waiver",
-      slug: "can-you-sue-a-trampoline-park-if-you-signed-a-waiver",
+    const body = (row.body ?? []) as PortableTextNode[];
+    return {
+      _key: slug,
+      slug,
       body,
+      // DERIVED, never stored — a saved figure goes stale the moment a
+      // paragraph is added, silently.
       readTime: readTime(body),
-      // The TODO(launch) that sat here — "more than 20 years", the same
-      // unverified claim as the homepage's `20 Years` stat — went with the
-      // rewritten copy, which makes no numeric claim. The homepage stat is
-      // still unconfirmed; see README's table.
-      factCheck: reviewedBy(kc),
-    },
-  ];
-}
-
-/**
- * The posts to offer beside an article: same category first, then the rest,
- * each half already newest-first because the feed is.
- *
- * ONLY POSTS WITH A PAGE. The eight the designer invented carry `href: null`
- * and are filtered out — a "related articles" list is a list of links, and one
- * made of unlinked titles is worse than a shorter list. The comp's own five
- * are all among those eight, which is why none of them appear here.
- *
- * Serves both surfaces at different limits: the sidebar takes 5 (and gets the
- * four that exist), the band at the foot takes 3. They overlap, and will stop
- * overlapping as soon as the blog has more than five real posts in it.
- */
-/* ---------------------------------------------------------------------------
- * THE IMPORTED LEGACY BLOG.
- *
- * Everything above this line is hand-authored copy from the comps. Everything
- * below reads the `blog` content collection, which `scripts/import-blog-posts.mjs`
- * fills from the live WordPress site.
- *
- * THE TWO ARE DELIBERATELY NOT MERGED INTO THE INDEX YET. `getBlogPosts()` is
- * still the comp's twelve cards, because the index's tab row ships five
- * categories and the import brings twenty-three — how that row handles
- * twenty-three is an open design question, and answering it by quietly
- * lengthening the feed would decide it by accident. So imported posts get a
- * PAGE (the route unions them in) without yet getting a CARD. When the tab row
- * is settled, `getBlogPosts()` returns these too and this comment goes.
- * ------------------------------------------------------------------------- */
-
-
-/** The taxonomy, straight from the `blogCategories` collection rather than the
- *  hand-written CATEGORIES map above — the imported posts carry the live
- *  site's 23 slugs, and only the collection knows all of them. */
-async function importedCategories(): Promise<Map<string, BlogCategory>> {
-  const entries = await getCollection("blogCategories");
-  return new Map(
-    entries.map((entry) => [
-      entry.data.slug,
-      { _key: entry.data.slug, title: entry.data.title, slug: entry.data.slug },
-    ])
-  );
-}
-
-/**
- * Imported posts in the FEED shape, newest first.
- *
- * `_key` is the slug: the route joins an article to its feed entry on `_key`,
- * and for an imported post the slug is the only identifier that exists on both
- * sides. The hand-authored posts use short keys like `trampoline-waiver`, so
- * the two namespaces cannot collide unless a legacy slug is exactly that.
- */
-/**
- * Slugs a hand-authored article already claims.
- *
- * HAND-AUTHORED WINS. The import brings all 167 legacy posts including any that
- * were already transcribed by hand, and the hand-authored version is not merely
- * a duplicate — it is the legacy article WITH corrections: the live copy's
- * truncated sentence completed, the firm's real phone number in place of the
- * article's third one. Both are asserted in diff-comp-blog-post.py. Letting the
- * import win would silently revert them.
- *
- * The route's own collision check would throw on this rather than pick one,
- * which is how it surfaced. Filtering here keeps that check meaning what it
- * says: a genuine conflict, not an expected overlap.
- */
-async function handAuthoredSlugs(): Promise<Set<string>> {
-  return new Set((await getBlogPostArticles()).map((article) => article.slug));
-}
-
-export async function getImportedPosts(): Promise<BlogPost[]> {
-  const [entries, categories, kc, claimed] = await Promise.all([
-    getCollection("blog"),
-    importedCategories(),
-    byline("k-c-harpring"),
-    handAuthoredSlugs(),
-  ]);
-
-  return entries
-    .filter((entry) => !claimed.has(entry.data.slug))
-    .map((entry) => {
-      const primary = entry.data.categories[0];
-      const category = categories.get(primary);
-      if (!category) {
-        throw new Error(
-          `blog: imported post "${entry.data.slug}" has category "${primary}", ` +
-            `which is not in the blogCategories collection.`
-        );
-      }
-      return {
-        _key: entry.data.slug,
-        title: entry.data.title,
-        excerpt: entry.data.excerpt,
-        publishedAt: entry.data.publishedAt,
-        category,
-        // No fallback: a post without a featured image gets the placeholder,
-        // drawn by PostThumb.astro. Substituting a stock photograph here is
-        // what made every card in a category look identical.
-        image: entry.data.image ?? null,
-        author: FIRM,
-        reviewer: kc,
-        href: blogPath(entry.data.slug),
-      } satisfies BlogPost;
-    })
-    .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
-}
-
-/** Imported posts in the ARTICLE shape — the body the page renders. */
-export async function getImportedArticles(): Promise<BlogPostArticle[]> {
-  const [entries, kc, claimed] = await Promise.all([
-    getCollection("blog"),
-    byline("k-c-harpring"),
-    handAuthoredSlugs(),
-  ]);
-
-  return entries
-    .filter((entry) => !claimed.has(entry.data.slug))
-    .map((entry) => ({
-    _key: entry.data.slug,
-    slug: entry.data.slug,
-    body: entry.data.body,
-    // DERIVED, never stored — same rule the hand-authored article follows.
-    readTime: readTime(entry.data.body),
-    /* WordPress has no field for this, so the import leaves it empty and the
-       band is derived from the reviewer here. A post whose file DOES carry one
-       keeps it — that is the path an editor's override takes once these move
-       into Sanity, and it is why this coalesces rather than always deriving. */
-    factCheck: entry.data.factCheck.length > 0 ? entry.data.factCheck : reviewedBy(kc),
-  }));
+      factCheck:
+        row.factCheck.length > 0
+          ? (row.factCheck as PortableTextBlock[])
+          : reviewedBy(credit(row.reviewerKey)),
+    } satisfies BlogPostArticle;
+  });
 }
 
 export async function getRelatedPosts(key: string, limit: number): Promise<BlogPost[]> {
