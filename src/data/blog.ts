@@ -229,11 +229,27 @@ export async function getBlogCategories(): Promise<BlogCategory[]> {
  * says "K.C. Harpring". The roster wins.
  */
 async function byline(memberKey: string): Promise<PostByline> {
-  const member = (await getTeam()).find((person) => person._key === memberKey);
-  if (!member?.href) {
-    throw new Error(`blog: no team member with a profile for "${memberKey}"`);
-  }
-  return { name: member.name, href: member.href };
+  return (await credits())(memberKey);
+}
+
+/**
+ * The roster as a lookup, read once and reused for every row of a projection.
+ *
+ * A Map rather than a `.find()` per post: `getBlogPosts()` resolves 185 bylines
+ * and is itself called 372 times building the site, so a linear scan of 26
+ * people is ~1.8 million comparisons for an answer that does not change.
+ */
+async function credits(): Promise<(memberKey: string) => PostByline> {
+  const roster = new Map(
+    (await getTeam())
+      .filter((person) => person.href)
+      .map((person) => [person._key, { name: person.name, href: person.href! }])
+  );
+  return (memberKey: string) => {
+    const found = roster.get(memberKey);
+    if (!found) throw new Error(`blog: no team member with a profile for "${memberKey}"`);
+    return found;
+  };
 }
 
 /** Every post is written by the firm and reviewed by an attorney — the live
@@ -292,19 +308,28 @@ export async function getReviewedBy(): Promise<PortableTextBlock[]> {
  * The two things a projection deliberately does NOT return are resolved here:
  * `href`, because `blogPath()` is the only thing allowed to build a URL and
  * three layers already agree on the trailing slash; and the byline, because
- * `byline()` is the one place a roster entry becomes `{ name, href }` and it
- * reads a roster the header has already memoised.
+ * `credits()` is the one place a roster entry becomes `{ name, href }`.
+ *
+ * SYNCHRONOUS, AND IT TAKES ITS RESOLVER. It used to `await byline()` per row,
+ * which meant one roster lookup per post — 185 of them per call to
+ * `getBlogPosts()`, and that getter is called 372 times in one `getStaticPaths`
+ * run. `once()` collapses those to a single fetch, so it was never 185 REQUESTS,
+ * but it was 185 promise hops each time and it showed: dropping them took a dev
+ * request's blog branch from 13 seconds to under two.
  */
-async function toPost(row: {
-  _key: string;
-  slug: string | null;
-  title: string | null;
-  excerpt: string | null;
-  publishedAt: string | null;
-  category: BlogCategory | null;
-  image: unknown;
-  reviewerKey: string | null;
-}): Promise<BlogPost> {
+function toPost(
+  row: {
+    _key: string;
+    slug: string | null;
+    title: string | null;
+    excerpt: string | null;
+    publishedAt: string | null;
+    category: BlogCategory | null;
+    image: unknown;
+    reviewerKey: string | null;
+  },
+  credit: (memberKey: string) => PostByline
+): BlogPost {
   const slug = row.slug;
   if (!slug) throw new Error(`blog: a post has no slug — "${row.title ?? "untitled"}".`);
   if (!row.category) {
@@ -327,7 +352,7 @@ async function toPost(row: {
     // PostThumb.astro — 125 of the 186 land here, so it is the common case.
     image: (row.image as BlogPost["image"]) ?? null,
     author: FIRM,
-    reviewer: await byline(row.reviewerKey),
+    reviewer: credit(row.reviewerKey),
     href: blogPath(slug),
   };
 }
@@ -350,9 +375,10 @@ async function toPost(row: {
  * one of them, so the second silently disappears from /news.
  */
 export async function getFeaturedPost(): Promise<FeaturedPost> {
-  const rows = await once("featuredPost", async () =>
-    sanityClient.fetch(FEATURED_POST_QUERY)
-  );
+  const [rows, credit] = await Promise.all([
+    once("featuredPost", async () => sanityClient.fetch(FEATURED_POST_QUERY)),
+    credits(),
+  ]);
 
   if (rows.length !== 1) {
     throw new Error(
@@ -366,7 +392,7 @@ export async function getFeaturedPost(): Promise<FeaturedPost> {
   }
 
   const row = rows[0];
-  const post = await toPost(row);
+  const post = toPost(row, credit);
   if (!post.image) {
     throw new Error(
       `blog: the featured post "${post._key}" has no card image. The panel is a photograph ` +
@@ -395,8 +421,11 @@ export async function getFeaturedPost(): Promise<FeaturedPost> {
  * `BLOG_POSTS_QUERY` on why the test is `featured != true` and not `!featured`.
  */
 export async function getBlogPosts(): Promise<BlogPost[]> {
-  const rows = await once("blogPosts", async () => sanityClient.fetch(BLOG_POSTS_QUERY));
-  return Promise.all(rows.map(toPost));
+  const [rows, credit] = await Promise.all([
+    once("blogPosts", async () => sanityClient.fetch(BLOG_POSTS_QUERY)),
+    credits(),
+  ]);
+  return rows.map((row) => toPost(row, credit));
 }
 
 // ---------------------------------------------------------------------------
@@ -437,33 +466,32 @@ export interface BlogPostArticle {
  * the moment `reviewedBy()` changed.
  */
 export async function getBlogPostArticles(): Promise<BlogPostArticle[]> {
-  const rows = await once("blogArticles", async () =>
-    sanityClient.fetch(BLOG_ARTICLES_QUERY)
-  );
+  const [rows, credit] = await Promise.all([
+    once("blogArticles", async () => sanityClient.fetch(BLOG_ARTICLES_QUERY)),
+    credits(),
+  ]);
 
-  return Promise.all(
-    rows.map(async (row) => {
-      const slug = row.slug;
-      if (!slug) throw new Error("blog: an article has no slug.");
-      if (!row.reviewerKey) {
-        throw new Error(`blog: article "${slug}" has no reviewer.`);
-      }
+  return rows.map((row) => {
+    const slug = row.slug;
+    if (!slug) throw new Error("blog: an article has no slug.");
+    if (!row.reviewerKey) {
+      throw new Error(`blog: article "${slug}" has no reviewer.`);
+    }
 
-      const body = (row.body ?? []) as PortableTextNode[];
-      return {
-        _key: slug,
-        slug,
-        body,
-        // DERIVED, never stored — a saved figure goes stale the moment a
-        // paragraph is added, silently.
-        readTime: readTime(body),
-        factCheck:
-          row.factCheck.length > 0
-            ? (row.factCheck as PortableTextBlock[])
-            : reviewedBy(await byline(row.reviewerKey)),
-      } satisfies BlogPostArticle;
-    })
-  );
+    const body = (row.body ?? []) as PortableTextNode[];
+    return {
+      _key: slug,
+      slug,
+      body,
+      // DERIVED, never stored — a saved figure goes stale the moment a
+      // paragraph is added, silently.
+      readTime: readTime(body),
+      factCheck:
+        row.factCheck.length > 0
+          ? (row.factCheck as PortableTextBlock[])
+          : reviewedBy(credit(row.reviewerKey)),
+    } satisfies BlogPostArticle;
+  });
 }
 
 export async function getRelatedPosts(key: string, limit: number): Promise<BlogPost[]> {

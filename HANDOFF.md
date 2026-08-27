@@ -183,6 +183,31 @@ content change in the same bucket. The way through is to build BOTH trees, norma
 known-mechanical difference as well as the image URLs, and re-classify — anything left is the
 finding. That is how the category reorder and the sidebar sort regression were both isolated.
 
+### `astro dev` HUNG AFTER PHASE 3, AND THE BUILD LOOKED FINE
+
+Every URL timed out — not slow, hung, with nothing in the terminal saying why. The build was
+10 seconds throughout, which is exactly what made it invisible.
+
+**`once()` was production-only.** That was right while the site read local files: a build
+reads a dataset that cannot change under it, where an editor saving in the Studio expects the
+next reload to show it. Phase 3 broke the assumption underneath it — 290 of the 330 pages now
+route through one `[slug].astro`, whose `getStaticPaths` calls `getRelatedPosts()` **372
+times**, and each of those re-derives the whole feed. Measured with no cache: **nine minutes
+of network for one dev request**, blog branch alone.
+
+`once()` now caches for **five seconds in dev** and forever in a build. Everything inside one
+`getStaticPaths` run shares a fetch; a reload a few seconds later reads the dataset again, so
+a save still shows on the next reload. Warm dev requests went from timing out to **20ms**.
+
+**THE GENERAL SHAPE IS WORTH REMEMBERING: a getter that is cheap per page becomes O(pages)
+network reads the moment its source moves behind HTTP, and only dev shows it.** The build
+never did, because `once()` covered it there. Before Phase 4 adds more per-page getters, time
+a dev request as well as a build.
+
+`toPost()` also resolved a byline per row — 185 lookups per `getBlogPosts()`. `credits()`
+reads the roster once and returns a Map; a linear `.find()` over 26 people, 185 times, across
+372 calls is 1.8 million comparisons for an answer that does not change.
+
 ### A GREEN BUILD CAN LIE. Delete `dist/` first.
 
 Three builds in a row reported "332 page(s) built" and exited 0 while the data behind them
