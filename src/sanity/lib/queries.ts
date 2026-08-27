@@ -967,3 +967,47 @@ export const PRACTICE_AREA_TEMPLATE_QUERY = defineQuery(
   factCheckLabel
 }`
 );
+
+/*
+ * THE THREE UTILITY PAGES — Phase 4d.
+ *
+ * One type, three documents at fixed ids. Filtered on `_type` AND `_id` like
+ * every other singleton here, and for the same typegen reason — except that
+ * here the two genuinely differ, so both are spelled out rather than repeated.
+ *
+ * `updated` and `links` come back null on the documents that do not carry them.
+ * That is the shape, not a gap: only the privacy policy stamps a date and only
+ * the 404 offers routes.
+ */
+
+/** The privacy policy. The only one of the three with a last-updated stamp. */
+export const PRIVACY_PAGE_QUERY = defineQuery(
+  `*[_type == "sitePage" && _id == "privacy"][0]{
+  title,
+  lede,
+  "body": coalesce(body, []),
+  updated{ at, label }
+}`
+);
+
+/** The human sitemap. Its groups are composed from the getters that own each
+ *  collection — a second hand-maintained list of every page would go stale the
+ *  first time anything was added — so only the page's own copy is stored. */
+export const SITEMAP_PAGE_QUERY = defineQuery(
+  `*[_type == "sitePage" && _id == "sitemap"][0]{
+  title,
+  lede,
+  "body": coalesce(body, [])
+}`
+);
+
+/** The 404, and the four routes it offers instead of a search box. */
+export const NOT_FOUND_PAGE_QUERY = defineQuery(
+  `*[_type == "sitePage" && _id == "notFound"][0]{
+  title,
+  lede,
+  "body": coalesce(body, []),
+  linksTitle,
+  "links": coalesce(links[]{ _key, label, description, href }, [])
+}`
+);

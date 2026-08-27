@@ -487,6 +487,30 @@ export type SimpleText = Array<{
   _key: string;
 }>;
 
+export type SitePage = {
+  _id: string;
+  _type: "sitePage";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  kind: "privacy" | "sitemap" | "notFound";
+  title: string;
+  lede?: string;
+  body?: RichText;
+  updated?: {
+    at?: string;
+    label?: string;
+  };
+  linksTitle?: string;
+  links?: Array<{
+    label: string;
+    description: string;
+    href: string;
+    _type: "notFoundLink";
+    _key: string;
+  }>;
+};
+
 export type PracticeAreaTemplate = {
   _id: string;
   _type: "practiceAreaTemplate";
@@ -1233,6 +1257,7 @@ export type AllSanitySchemaTypes =
   | TeamMember
   | RichText
   | SimpleText
+  | SitePage
   | PracticeAreaTemplate
   | BlogPostTemplate
   | ThankYouPage
@@ -2325,6 +2350,46 @@ export type PRACTICE_AREA_TEMPLATE_QUERY_RESULT = {
   factCheckLabel: string;
 } | null;
 
+// Source: src/sanity/lib/queries.ts
+// Variable: PRIVACY_PAGE_QUERY
+// Query: *[_type == "sitePage" && _id == "privacy"][0]{  title,  lede,  "body": coalesce(body, []),  updated{ at, label }}
+export type PRIVACY_PAGE_QUERY_RESULT = {
+  title: string;
+  lede: string | null;
+  body: Array<never> | RichText;
+  updated: {
+    at: string | null;
+    label: string | null;
+  } | null;
+} | null;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: SITEMAP_PAGE_QUERY
+// Query: *[_type == "sitePage" && _id == "sitemap"][0]{  title,  lede,  "body": coalesce(body, [])}
+export type SITEMAP_PAGE_QUERY_RESULT = {
+  title: string;
+  lede: string | null;
+  body: Array<never> | RichText;
+} | null;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: NOT_FOUND_PAGE_QUERY
+// Query: *[_type == "sitePage" && _id == "notFound"][0]{  title,  lede,  "body": coalesce(body, []),  linksTitle,  "links": coalesce(links[]{ _key, label, description, href }, [])}
+export type NOT_FOUND_PAGE_QUERY_RESULT = {
+  title: string;
+  lede: string | null;
+  body: Array<never> | RichText;
+  linksTitle: string | null;
+  links:
+    | Array<{
+        _key: string;
+        label: string;
+        description: string;
+        href: string;
+      }>
+    | Array<never>;
+} | null;
+
 // Query TypeMap
 import "@sanity/client";
 declare module "@sanity/client" {
@@ -2378,5 +2443,8 @@ declare module "@sanity/client" {
     '*[_type == "blogIndexPage" && _id == "blogIndexPage"][0]{\n  eyebrow,\n  title,\n  lede,\n  categoryLabel,\n  allLabel,\n  featuredBadge,\n  readMoreLabel,\n  loadMoreLabel,\n  emptyLabel\n}': BLOG_INDEX_PAGE_QUERY_RESULT;
     '*[_type == "blogPostTemplate" && _id == "blogPostTemplate"][0]{\n  contentsLabel,\n  categoriesLabel,\n  relatedSidebarLabel,\n  relatedTitle,\n  factCheckLabel,\n  readMoreLabel\n}': BLOG_POST_TEMPLATE_QUERY_RESULT;
     '*[_type == "practiceAreaTemplate" && _id == "practiceAreaTemplate"][0]{\n  eyebrow,\n  meta{ writtenByLabel, updatedLabel, postedLabel },\n  contentsLabel,\n  relatedSidebarLabel,\n  faqsTitle,\n  factCheckLabel\n}': PRACTICE_AREA_TEMPLATE_QUERY_RESULT;
+    '*[_type == "sitePage" && _id == "privacy"][0]{\n  title,\n  lede,\n  "body": coalesce(body, []),\n  updated{ at, label }\n}': PRIVACY_PAGE_QUERY_RESULT;
+    '*[_type == "sitePage" && _id == "sitemap"][0]{\n  title,\n  lede,\n  "body": coalesce(body, [])\n}': SITEMAP_PAGE_QUERY_RESULT;
+    '*[_type == "sitePage" && _id == "notFound"][0]{\n  title,\n  lede,\n  "body": coalesce(body, []),\n  linksTitle,\n  "links": coalesce(links[]{ _key, label, description, href }, [])\n}': NOT_FOUND_PAGE_QUERY_RESULT;
   }
 }

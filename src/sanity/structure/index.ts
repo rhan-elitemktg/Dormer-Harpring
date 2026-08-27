@@ -67,6 +67,28 @@ function singleton(
 }
 
 /**
+ * ONE OF THREE DOCUMENTS THAT SHARE A TYPE.
+ *
+ * `singleton()` above pins a type to an id of the same name, which is right
+ * when the two are one thing. The utility pages are three documents of ONE type
+ * (`sitePage`), so the id and the type differ and the schema name cannot stand
+ * in for both.
+ */
+function fixedDocument(
+  S: StructureBuilder,
+  type: string,
+  id: string,
+  title: string,
+  icon?: ComponentType
+) {
+  return S.listItem()
+    .title(title)
+    .icon(icon)
+    .id(id)
+    .child(S.document().schemaType(type).documentId(id).title(title));
+}
+
+/**
  * PAGES — one per route.
  *
  * `[type, title, icon?]`.
@@ -106,6 +128,24 @@ const PAGES: [string, string, ComponentType?][] = [
   // they sit under the list rather than inside it.
   ["blogPostTemplate", "Blog post template", DocumentTextIcon],
   ["practiceAreaTemplate", "Practice area template", CaseIcon],
+];
+
+/**
+ * THE THREE UTILITY PAGES — one `sitePage` document each, at fixed ids.
+ *
+ * They open into a sub-list rather than sitting in `PAGES` beside the routes,
+ * because a client looking for "the About page" should not have to read past a
+ * 404 to find it. Same singleton machinery: each is pinned to its own id, so
+ * the type never appears as a generic list and a fourth cannot be created —
+ * there is no route that would serve one.
+ *
+ * `[id, title]`. The id is also the document's `kind`, which is what the form
+ * keys its two conditional fields on.
+ */
+const UTILITY_PAGES: [string, string][] = [
+  ["privacy", "Privacy Policy"],
+  ["sitemap", "Sitemap"],
+  ["notFound", "404"],
 ];
 
 /**
@@ -301,7 +341,14 @@ const SETTINGS: [string, string, ComponentType?][] = [
  * its fixed id and once as "all documents of this type", and edits to the
  * second one never reach the site.
  */
-export const SINGLETON_TYPES = [...PAGES, ...SETTINGS].map(([type]) => type);
+export const SINGLETON_TYPES = [
+  ...[...PAGES, ...SETTINGS].map(([type]) => type),
+  // `sitePage` is three fixed documents rather than one, but the reason it must
+  // stay out of a generic list is identical: an editor seeing "all utility
+  // pages" alongside the three pinned ones would edit a fourth copy that no
+  // route reads.
+  "sitePage",
+];
 
 export const structure: StructureResolver = (S, context) => {
   const placed = new Set([...PAGES, ...COLLECTIONS, ...SETTINGS].map(([type]) => type));
@@ -329,7 +376,22 @@ export const structure: StructureResolver = (S, context) => {
         .child(
           S.list()
             .title("Pages")
-            .items(PAGES.map(([type, title, icon]) => singleton(S, type, title, icon)))
+            .items([
+              ...PAGES.map(([type, title, icon]) => singleton(S, type, title, icon)),
+              S.listItem()
+                .title("Utility pages")
+                .icon(DocumentIcon)
+                .id("utility-pages")
+                .child(
+                  S.list()
+                    .title("Utility pages")
+                    .items(
+                      UTILITY_PAGES.map(([id, title]) =>
+                        fixedDocument(S, "sitePage", id, title, DocumentIcon)
+                      )
+                    )
+                ),
+            ])
         ),
 
       S.listItem()
