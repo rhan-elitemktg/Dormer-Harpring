@@ -1,20 +1,26 @@
-// The homepage's repeatable lists. A singleton.
+// The homepage. A singleton.
 //
-// SEVEN LISTS THAT EACH APPEAR ON EXACTLY ONE PAGE. Five were collections until
-// Phase 2f, which is the wrong group for them: a Collection exists for content
-// reused in more than one place — the six that stay reach 111, 104, 29, 27, 5
-// and 3 built pages — and every one of these reaches exactly this one. An
-// editor looking for the press cards was hunting a global list for something
-// that only ever renders here. Phase 3d added the two card rails at the foot of
-// this file for the same reason, out of `data/practiceAreas.ts`.
+// FIELDS ARE IN THE ORDER THE PAGE RENDERS THEM, top to bottom, so an editor
+// scrolling this form is walking down the page. The bands that come from
+// somewhere else are the gaps in that sequence: the results strip, the awards
+// bar and the testimonial rail are Collections; Why Us, the attorney rail and
+// the core values are on Shared Sections because a second page renders each of
+// them word for word; the consultation band is Site Settings.
 //
-// ARRAY POSITION IS THE ORDER, so the `order: number` each of these carried is
-// gone and editors drag instead. That is a real change for the mosaic — see the
-// note on `communityPhotos` below.
+// SEVEN OF THESE LISTS APPEAR ON EXACTLY ONE PAGE — this one. Five were
+// collections until Phase 2f, which is the wrong group for them: a Collection
+// exists for content reused in more than one place, and an editor looking for
+// the press cards was hunting a global list for something that only ever
+// renders here. Phase 3d added the two card rails out of `data/practiceAreas.ts`
+// for the same reason, and Phase 4 added this page's COPY around them.
 //
-// Phase 4 adds this page's COPY to this same document — the hero, the band
-// headings, the promise slides. Anything written here has to survive that, so
-// the migration script reads the document back and merges rather than replacing.
+// ARRAY POSITION IS THE ORDER, so the `order: number` each list carried is gone
+// and editors drag instead. That is a real change for the mosaic — see the note
+// on `communityPhotos`.
+//
+// TODO(sanity): this document is sixteen fields now and the form is a long
+// scroll. Sanity's field `groups` would tab it — that is an editor-UX decision
+// and belongs to the Studio polish pass, which audits a filled-out schema.
 import { defineField, defineType } from "sanity";
 // Subpath, not the barrel — see the note in sanity/structure/index.ts.
 import { HomeIcon } from "@sanity/icons/Home";
@@ -27,6 +33,262 @@ export const homePage = defineType({
   type: "document",
   icon: HomeIcon,
   fields: [
+    /*
+     * THE HERO. `headline` is an ARRAY OF LINES, not one string with breaks in
+     * it, because the comp hard-breaks after "All in." and a `<br>` typed into a
+     * content field is markup in a content field — the thing the data layer has
+     * refused since day one. One entry per rendered line.
+     */
+    defineField({
+      name: "hero",
+      title: "Hero",
+      type: "object",
+      description: "The first screen — everything above the results strip.",
+      fields: [
+        defineField({
+          name: "eyebrow",
+          type: "string",
+          description: "The small line above the headline.",
+          validation: (rule) => rule.required(),
+        }),
+        defineField({
+          name: "headline",
+          type: "array",
+          of: [{ type: "string" }],
+          description:
+            "ONE ENTRY PER RENDERED LINE — the design breaks the headline deliberately. Two " +
+            "entries draw two lines; one entry draws one.",
+          validation: (rule) => rule.required().min(1),
+        }),
+        defineField({ name: "lede", type: "text", rows: 3, validation: (rule) => rule.required() }),
+        defineField({
+          name: "primaryCta",
+          title: "Button",
+          type: "object",
+          options: { columns: 2 },
+          fields: [
+            defineField({ name: "label", type: "string", validation: (rule) => rule.required() }),
+            defineField({
+              name: "href",
+              title: "Destination",
+              type: "string",
+              validation: (rule) => rule.required().custom(validateHref),
+            }),
+          ],
+          validation: (rule) => rule.required(),
+        }),
+        defineField({
+          name: "videoCta",
+          title: "Video link",
+          type: "object",
+          description: "The play affordance beside the button. Opens the film in a popover.",
+          fields: [
+            defineField({ name: "label", type: "string", validation: (rule) => rule.required() }),
+            /*
+             * THE ONE VIDEO ON THIS PAGE THAT IS ALREADY REAL. Every other slot
+             * on the site carries the same stand-in id, waiting for the firm to
+             * re-host its films; this is "Dormer Harpring — Who We Are", the
+             * finished 3:20 film, which happens to share that id. Do not read it
+             * as a placeholder and do not grep the id to find placeholders.
+             */
+            defineField({ name: "video", type: "videoRef", validation: (rule) => rule.required() }),
+          ],
+          validation: (rule) => rule.required(),
+        }),
+      ],
+      validation: (rule) => rule.required(),
+    }),
+
+    /*
+     * THE HERO'S FOUR FIGURES, AND THEY ARE NOT THE "BY THE NUMBERS" BAND.
+     *
+     * Two of the four repeat a figure that also appears in Site Settings → Firm
+     * Stats ("$70M+" and "20 Years"). That is the one duplication in this schema
+     * that is deliberate rather than an oversight: the two bands carry different
+     * labels for those two, and one of these four ("We Come / To you") has no
+     * counterpart there at all. They are two lists, not one list read twice —
+     * the same call the practice-area cards make against the directory.
+     *
+     * The cost is real and is named here so nobody has to rediscover it:
+     * changing "$70M+" means changing it in BOTH places. README tracks whether
+     * the claim itself is one the firm can stand behind.
+     */
+    defineField({
+      name: "heroStats",
+      title: "Hero figures",
+      type: "array",
+      description:
+        "The four figures across the foot of the hero. NOT the dark by-the-numbers band — " +
+        "that is Site Settings → Firm Stats, and two of these figures also appear there. " +
+        "Change both.",
+      of: [
+        {
+          type: "object",
+          name: "heroStat",
+          options: { columns: 2 },
+          fields: [
+            defineField({
+              name: "big",
+              title: "Figure",
+              type: "string",
+              validation: (rule) => rule.required(),
+            }),
+            defineField({ name: "label", type: "string", validation: (rule) => rule.required() }),
+          ],
+          preview: { select: { title: "big", subtitle: "label" } },
+        },
+      ],
+      validation: (rule) => rule.required().min(1),
+    }),
+
+    /*
+     * THE FIRM INTRODUCTION — the long cream band under the results strip.
+     *
+     * `body` is the only rich-text field on this page. Everything else here is a
+     * label in a fixed design slot, and turning one of those into Portable Text
+     * would add a wrapper element to the markup in exchange for a link nobody
+     * wants inside a stat label.
+     */
+    defineField({
+      name: "firmIntro",
+      title: "Firm introduction",
+      type: "object",
+      fields: [
+        defineField({
+          name: "title",
+          type: "array",
+          of: [{ type: "string" }],
+          description: "One entry per rendered line, as in the hero.",
+          validation: (rule) => rule.required().min(1),
+        }),
+        defineField({
+          name: "tagline",
+          type: "string",
+          description: "The italic line carrying the hand-drawn underline.",
+          validation: (rule) => rule.required(),
+        }),
+        defineField({
+          name: "body",
+          type: "simpleText",
+          description: "Three paragraphs in the design. Bold and links render; nothing else does.",
+          validation: (rule) => rule.required(),
+        }),
+        defineField({ name: "helpTitle", type: "string", validation: (rule) => rule.required() }),
+        defineField({
+          name: "helpPoints",
+          title: "How we help",
+          type: "array",
+          description: "Each row renders its lead in bold, then the detail after it.",
+          of: [
+            {
+              type: "object",
+              name: "helpPoint",
+              fields: [
+                defineField({
+                  name: "lead",
+                  type: "string",
+                  description: "The bold opening — a full sentence, with its full stop.",
+                  validation: (rule) => rule.required(),
+                }),
+                defineField({
+                  name: "text",
+                  type: "text",
+                  rows: 2,
+                  validation: (rule) => rule.required(),
+                }),
+              ],
+              preview: { select: { title: "lead", subtitle: "text" } },
+            },
+          ],
+          validation: (rule) => rule.required().min(1),
+        }),
+        defineField({ name: "videoLabel", type: "string", validation: (rule) => rule.required() }),
+        // TODO(video): the firm film. One of the slots still carrying the
+        // stand-in id — the YouTube original it maps to is in YOUTUBE_ORIGINS
+        // in src/lib/video.ts, and five of those eight are unlisted.
+        defineField({
+          name: "video",
+          type: "videoRef",
+          description: "The film the band's play button opens.",
+          validation: (rule) => rule.required(),
+        }),
+        defineField({
+          name: "quote",
+          title: "Attorney quote card",
+          type: "object",
+          fields: [
+            defineField({ name: "text", type: "text", rows: 4, validation: (rule) => rule.required() }),
+            defineField({ name: "name", type: "string", validation: (rule) => rule.required() }),
+            defineField({ name: "role", type: "string", validation: (rule) => rule.required() }),
+          ],
+          validation: (rule) => rule.required(),
+        }),
+        defineField({
+          name: "aside",
+          title: "Consultation card",
+          type: "object",
+          fields: [
+            defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
+            defineField({ name: "text", type: "text", rows: 2, validation: (rule) => rule.required() }),
+            defineField({ name: "ctaLabel", type: "string", validation: (rule) => rule.required() }),
+          ],
+          validation: (rule) => rule.required(),
+        }),
+      ],
+      validation: (rule) => rule.required(),
+    }),
+
+    /* The heading and labels around the two lists below it. */
+    defineField({
+      name: "practiceSection",
+      title: "Practice areas band",
+      type: "object",
+      fields: [
+        defineField({ name: "eyebrow", type: "string", validation: (rule) => rule.required() }),
+        defineField({
+          name: "title",
+          type: "array",
+          of: [{ type: "string" }],
+          description: "One entry per rendered line.",
+          validation: (rule) => rule.required().min(1),
+        }),
+        defineField({ name: "lede", type: "text", rows: 3, validation: (rule) => rule.required() }),
+        defineField({
+          name: "tabsLabel",
+          title: "Tab row label",
+          type: "string",
+          description:
+            "Names the tab row above the cards. It is also what a screen reader announces for " +
+            "the row, so it has to read as a description of the row rather than as a heading.",
+          validation: (rule) => rule.required(),
+        }),
+        defineField({
+          name: "catastrophicTitle",
+          title: "Panels heading",
+          type: "string",
+          description: "Above the four catastrophic-injury panels.",
+          validation: (rule) => rule.required(),
+        }),
+        defineField({
+          name: "ask",
+          title: "Closing prompt",
+          type: "object",
+          options: { columns: 2 },
+          fields: [
+            defineField({ name: "text", type: "string", validation: (rule) => rule.required() }),
+            defineField({
+              name: "cta",
+              title: "Link text",
+              type: "string",
+              validation: (rule) => rule.required(),
+            }),
+          ],
+          validation: (rule) => rule.required(),
+        }),
+      ],
+      validation: (rule) => rule.required(),
+    }),
+
     /*
      * THE SIX PRACTICE-AREA CARDS, and they are COPY rather than pointers.
      *
@@ -93,6 +355,15 @@ export const homePage = defineType({
       validation: (rule) => rule.required().min(1),
     }),
 
+    defineField({
+      name: "practicePromise",
+      title: "Practice areas closing line",
+      type: "text",
+      rows: 3,
+      description: "The reassurance under the cards, above the panels.",
+      validation: (rule) => rule.required(),
+    }),
+
     /*
      * THE FOUR CATASTROPHIC-INJURY PANELS. Same shape one field short — these
      * carry no photograph, and their one line of copy is an `insight` rather
@@ -135,6 +406,109 @@ export const homePage = defineType({
       validation: (rule) => rule.required().min(1),
     }),
 
+    /*
+     * THE PROMISE CAROUSEL. The comp carries an `href` per slide and a derived
+     * "3 of 3" counter beside them; no markup renders either, so neither is a
+     * field. Labels are stored in sentence case — the design shouts them in CSS.
+     */
+    defineField({
+      name: "promise",
+      title: "Promise carousel",
+      type: "object",
+      fields: [
+        defineField({ name: "eyebrow", type: "string", validation: (rule) => rule.required() }),
+        defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
+        defineField({
+          name: "slides",
+          type: "array",
+          description: "One slide per dot. Drag to reorder — the first one shows on load.",
+          of: [
+            {
+              type: "object",
+              name: "promiseSlide",
+              fields: [
+                defineField({
+                  name: "label",
+                  type: "string",
+                  description: "Sentence case. The design capitalises it.",
+                  validation: (rule) => rule.required(),
+                }),
+                defineField({
+                  name: "body",
+                  type: "text",
+                  rows: 4,
+                  validation: (rule) => rule.required(),
+                }),
+              ],
+              preview: { select: { title: "label", subtitle: "body" } },
+            },
+          ],
+          validation: (rule) => rule.required().min(1),
+        }),
+        defineField({ name: "ctaLabel", type: "string", validation: (rule) => rule.required() }),
+      ],
+      validation: (rule) => rule.required(),
+    }),
+
+    /*
+     * THE FAQ BAND'S COPY. Its `ask` card is the one image this page's copy
+     * owns: a portrait inside a card, which is editor content by the same line
+     * that keeps page-header photographs and band backgrounds out of the CMS.
+     */
+    defineField({
+      name: "faqSection",
+      title: "FAQ band",
+      type: "object",
+      fields: [
+        defineField({ name: "eyebrow", type: "string", validation: (rule) => rule.required() }),
+        defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
+        defineField({ name: "lede", type: "text", rows: 3, validation: (rule) => rule.required() }),
+        defineField({
+          name: "answerCtaLabel",
+          title: "Button inside an open answer",
+          type: "string",
+          description: "Repeated on every expanded question.",
+          validation: (rule) => rule.required(),
+        }),
+        defineField({
+          name: "ask",
+          title: "Ask card",
+          type: "object",
+          description: "The card at the foot of the accordion, for a question that is not on it.",
+          fields: [
+            defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
+            defineField({ name: "body", type: "text", rows: 2, validation: (rule) => rule.required() }),
+            defineField({ name: "ctaLabel", type: "string", validation: (rule) => rule.required() }),
+            defineField({
+              name: "ctaHref",
+              title: "Destination",
+              type: "string",
+              // The Car Accidents page renders this same band with its own
+              // anchor, because that page carries a contact section of its own
+              // and the button should scroll rather than navigate away.
+              description: "Where the button goes.",
+              validation: (rule) => rule.required().custom(validateHref),
+            }),
+            defineField({
+              name: "portrait",
+              type: "image",
+              options: { hotspot: true },
+              validation: (rule) => rule.required(),
+            }),
+            defineField({
+              name: "portraitAlt",
+              title: "Portrait alt text",
+              type: "string",
+              description: "Who is in the photograph — a screen reader reads this instead of it.",
+              validation: (rule) => rule.required(),
+            }),
+          ],
+          validation: (rule) => rule.required(),
+        }),
+      ],
+      validation: (rule) => rule.required(),
+    }),
+
     defineField({
       name: "faqs",
       title: "FAQs",
@@ -142,6 +516,55 @@ export const homePage = defineType({
       description: "The accordion. Drag to reorder — the top question opens first.",
       of: [{ type: "object", fields: faqItemFields, preview: faqItemPreview }],
       validation: (rule) => rule.required().min(1),
+    }),
+
+    /*
+     * THE TWO-TAB FEED'S COPY. Two headings rather than one with a flag,
+     * matching the two lists below: press mentions point off-site at somebody
+     * else's publication, insight teasers point in-site at the firm's own.
+     */
+    defineField({
+      name: "feedSection",
+      title: "News & insights band",
+      type: "object",
+      fields: [
+        defineField({
+          name: "tabs",
+          title: "Tab labels",
+          type: "object",
+          options: { columns: 2 },
+          fields: [
+            defineField({ name: "news", type: "string", validation: (rule) => rule.required() }),
+            defineField({ name: "insights", type: "string", validation: (rule) => rule.required() }),
+          ],
+          validation: (rule) => rule.required(),
+        }),
+        defineField({
+          name: "news",
+          title: "In the news tab",
+          type: "object",
+          fields: [
+            defineField({ name: "eyebrow", type: "string", validation: (rule) => rule.required() }),
+            defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
+            defineField({ name: "lede", type: "text", rows: 3, validation: (rule) => rule.required() }),
+            defineField({ name: "ctaLabel", type: "string", validation: (rule) => rule.required() }),
+          ],
+          validation: (rule) => rule.required(),
+        }),
+        defineField({
+          name: "insights",
+          title: "Insights tab",
+          type: "object",
+          fields: [
+            defineField({ name: "eyebrow", type: "string", validation: (rule) => rule.required() }),
+            defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
+            defineField({ name: "lede", type: "text", rows: 3, validation: (rule) => rule.required() }),
+            defineField({ name: "ctaLabel", type: "string", validation: (rule) => rule.required() }),
+          ],
+          validation: (rule) => rule.required(),
+        }),
+      ],
+      validation: (rule) => rule.required(),
     }),
 
     defineField({
@@ -238,6 +661,22 @@ export const homePage = defineType({
         },
       ],
       validation: (rule) => rule.required().min(1),
+    }),
+
+    defineField({
+      name: "communitySection",
+      title: "Community band",
+      type: "object",
+      description:
+        "The heading above the photo mosaic. The Community Involvement PAGE has its own " +
+        "heading and its own partner cards — this is the homepage's summary of that work.",
+      fields: [
+        defineField({ name: "eyebrow", type: "string", validation: (rule) => rule.required() }),
+        defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
+        defineField({ name: "lede", type: "text", rows: 3, validation: (rule) => rule.required() }),
+        defineField({ name: "ctaLabel", type: "string", validation: (rule) => rule.required() }),
+      ],
+      validation: (rule) => rule.required(),
     }),
 
     defineField({

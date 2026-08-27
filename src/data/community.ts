@@ -10,7 +10,11 @@
 import type { ImageMetadata } from "astro";
 import type { SanityImageSource } from "@sanity/image-url";
 import { sanityClient } from "sanity:client";
-import { COMMUNITY_PHOTOS_QUERY, CHARITY_PARTNERS_QUERY } from "../sanity/lib/queries";
+import {
+  CHARITY_PARTNERS_QUERY,
+  COMMUNITY_PHOTOS_QUERY,
+  HOME_COMMUNITY_SECTION_QUERY,
+} from "../sanity/lib/queries";
 import { once, required } from "../sanity/lib/fetch";
 
 // THE ASSET IMPORTS THAT USED TO SIT HERE ARE GONE — the getters have read
@@ -42,14 +46,9 @@ export interface CommunitySection {
 }
 
 export async function getCommunitySection(): Promise<CommunitySection> {
-  return {
-    eyebrow: "Giving back",
-    title: "Rooted in Denver.",
-    lede:
-      "Denver is home. Beyond the courtroom, our team shows up — boots on the " +
-      "ground — for the local causes that support Colorado families.",
-    ctaLabel: "See all community work",
-  };
+  return once("homePage:communitySection", async () =>
+    required(await sanityClient.fetch(HOME_COMMUNITY_SECTION_QUERY), "Homepage", "Pages")
+  );
 }
 
 /**

@@ -55,6 +55,21 @@ export type SharedSections = {
     };
     ctaLabel: string;
   };
+  whyUs?: {
+    eyebrow: string;
+    title: {
+      lead: string;
+      accent: string;
+    };
+    lede: string;
+    points: Array<{
+      title: Array<string>;
+      body: string;
+      _type: "whyPoint";
+      _key: string;
+    }>;
+    ctaLabel: string;
+  };
 };
 
 export type SanityImageCrop = {
@@ -638,6 +653,60 @@ export type HomePage = {
   _createdAt: string;
   _updatedAt: string;
   _rev: string;
+  hero: {
+    eyebrow: string;
+    headline: Array<string>;
+    lede: string;
+    primaryCta: {
+      label: string;
+      href: string;
+    };
+    videoCta: {
+      label: string;
+      video: VideoRef;
+    };
+  };
+  heroStats: Array<{
+    big: string;
+    label: string;
+    _type: "heroStat";
+    _key: string;
+  }>;
+  firmIntro: {
+    title: Array<string>;
+    tagline: string;
+    body: SimpleText;
+    helpTitle: string;
+    helpPoints: Array<{
+      lead: string;
+      text: string;
+      _type: "helpPoint";
+      _key: string;
+    }>;
+    videoLabel: string;
+    video: VideoRef;
+    quote: {
+      text: string;
+      name: string;
+      role: string;
+    };
+    aside: {
+      title: string;
+      text: string;
+      ctaLabel: string;
+    };
+  };
+  practiceSection: {
+    eyebrow: string;
+    title: Array<string>;
+    lede: string;
+    tabsLabel: string;
+    catastrophicTitle: string;
+    ask: {
+      text: string;
+      cta: string;
+    };
+  };
   practiceAreaCards: Array<{
     name: string;
     iconKey: string;
@@ -653,6 +722,7 @@ export type HomePage = {
     _type: "areaCard";
     _key: string;
   }>;
+  practicePromise: string;
   catastrophicAreas: Array<{
     name: string;
     iconKey: string;
@@ -661,6 +731,37 @@ export type HomePage = {
     _type: "catastrophicArea";
     _key: string;
   }>;
+  promise: {
+    eyebrow: string;
+    title: string;
+    slides: Array<{
+      label: string;
+      body: string;
+      _type: "promiseSlide";
+      _key: string;
+    }>;
+    ctaLabel: string;
+  };
+  faqSection: {
+    eyebrow: string;
+    title: string;
+    lede: string;
+    answerCtaLabel: string;
+    ask: {
+      title: string;
+      body: string;
+      ctaLabel: string;
+      ctaHref: string;
+      portrait: {
+        asset?: SanityImageAssetReference;
+        media?: unknown;
+        hotspot?: SanityImageHotspot;
+        crop?: SanityImageCrop;
+        _type: "image";
+      };
+      portraitAlt: string;
+    };
+  };
   faqs: Array<{
     question: string;
     answer: string;
@@ -668,6 +769,24 @@ export type HomePage = {
     videoLength: string;
     _key: string;
   }>;
+  feedSection: {
+    tabs: {
+      news: string;
+      insights: string;
+    };
+    news: {
+      eyebrow: string;
+      title: string;
+      lede: string;
+      ctaLabel: string;
+    };
+    insights: {
+      eyebrow: string;
+      title: string;
+      lede: string;
+      ctaLabel: string;
+    };
+  };
   pressMentions: Array<{
     outlet: string;
     logo: {
@@ -690,6 +809,12 @@ export type HomePage = {
     href: string;
     _key: string;
   }>;
+  communitySection: {
+    eyebrow: string;
+    title: string;
+    lede: string;
+    ctaLabel: string;
+  };
   communityPhotos: Array<{
     image: {
       asset?: SanityImageAssetReference;
@@ -1031,7 +1156,7 @@ export type CORE_VALUES_QUERY_RESULT = Array<{
 
 // Source: src/sanity/lib/queries.ts
 // Variable: SHARED_SECTIONS_QUERY
-// Query: *[_type == "sharedSections" && _id == "sharedSections"][0]{  coreValues{ eyebrow, title },  reviewSummary{ count, rating, source },  attorneysBand{    eyebrow,    title,    quote,    ctaLabel,    signature{ name, role, attorneyKey, portrait }  }}
+// Query: *[_type == "sharedSections" && _id == "sharedSections"][0]{  coreValues{ eyebrow, title },  reviewSummary{ count, rating, source },  attorneysBand{    eyebrow,    title,    quote,    ctaLabel,    signature{ name, role, attorneyKey, portrait }  },  whyUs{    eyebrow,    title{ lead, accent },    lede,    "points": coalesce(points[]{ _key, title, body }, []),    ctaLabel  }}
 export type SHARED_SECTIONS_QUERY_RESULT = {
   coreValues: {
     eyebrow: string;
@@ -1059,6 +1184,20 @@ export type SHARED_SECTIONS_QUERY_RESULT = {
         _type: "image";
       };
     } | null;
+  } | null;
+  whyUs: {
+    eyebrow: string;
+    title: {
+      lead: string;
+      accent: string;
+    };
+    lede: string;
+    points: Array<{
+      _key: string;
+      title: Array<string>;
+      body: string;
+    }>;
+    ctaLabel: string;
   } | null;
 } | null;
 
@@ -1567,6 +1706,143 @@ export type ATTORNEY_RAIL_QUERY_RESULT = Array<{
   videoId: string | null;
 }>;
 
+// Source: src/sanity/lib/queries.ts
+// Variable: HOME_COPY_QUERY
+// Query: *[_type == "homePage" && _id == "homePage"][0]{  hero{    eyebrow,    headline,    lede,    primaryCta{ label, href },    videoCta{ label, video{ provider, id } }  },  "heroStats": coalesce(heroStats[]{ _key, big, label }, []),  firmIntro{    title,    tagline,    body,    helpTitle,    "helpPoints": coalesce(helpPoints[]{ _key, lead, text }, []),    videoLabel,    video{ provider, id },    quote{ text, name, role },    aside{ title, text, ctaLabel }  },  promise{    eyebrow,    title,    "slides": coalesce(slides[]{ _key, label, body }, []),    ctaLabel  }}
+export type HOME_COPY_QUERY_RESULT = {
+  hero: {
+    eyebrow: string;
+    headline: Array<string>;
+    lede: string;
+    primaryCta: {
+      label: string;
+      href: string;
+    };
+    videoCta: {
+      label: string;
+      video: {
+        provider: "wistia";
+        id: string;
+      };
+    };
+  };
+  heroStats: Array<{
+    _key: string;
+    big: string;
+    label: string;
+  }>;
+  firmIntro: {
+    title: Array<string>;
+    tagline: string;
+    body: SimpleText;
+    helpTitle: string;
+    helpPoints: Array<{
+      _key: string;
+      lead: string;
+      text: string;
+    }>;
+    videoLabel: string;
+    video: {
+      provider: "wistia";
+      id: string;
+    };
+    quote: {
+      text: string;
+      name: string;
+      role: string;
+    };
+    aside: {
+      title: string;
+      text: string;
+      ctaLabel: string;
+    };
+  };
+  promise: {
+    eyebrow: string;
+    title: string;
+    slides: Array<{
+      _key: string;
+      label: string;
+      body: string;
+    }>;
+    ctaLabel: string;
+  };
+} | null;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: HOME_PRACTICE_SECTION_QUERY
+// Query: *[_type == "homePage" && _id == "homePage"][0]{  practiceSection{    eyebrow,    title,    lede,    tabsLabel,    catastrophicTitle,    ask{ text, cta }  },  practicePromise}
+export type HOME_PRACTICE_SECTION_QUERY_RESULT = {
+  practiceSection: {
+    eyebrow: string;
+    title: Array<string>;
+    lede: string;
+    tabsLabel: string;
+    catastrophicTitle: string;
+    ask: {
+      text: string;
+      cta: string;
+    };
+  };
+  practicePromise: string;
+} | null;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: HOME_FAQ_SECTION_QUERY
+// Query: *[_type == "homePage" && _id == "homePage"][0].faqSection{  eyebrow,  title,  lede,  answerCtaLabel,  ask{ title, body, ctaLabel, ctaHref, portrait, portraitAlt }}
+export type HOME_FAQ_SECTION_QUERY_RESULT = {
+  eyebrow: string;
+  title: string;
+  lede: string;
+  answerCtaLabel: string;
+  ask: {
+    title: string;
+    body: string;
+    ctaLabel: string;
+    ctaHref: string;
+    portrait: {
+      asset?: SanityImageAssetReference;
+      media?: unknown;
+      hotspot?: SanityImageHotspot;
+      crop?: SanityImageCrop;
+      _type: "image";
+    };
+    portraitAlt: string;
+  };
+} | null;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: HOME_FEED_SECTION_QUERY
+// Query: *[_type == "homePage" && _id == "homePage"][0].feedSection{  tabs{ news, insights },  news{ eyebrow, title, lede, ctaLabel },  insights{ eyebrow, title, lede, ctaLabel }}
+export type HOME_FEED_SECTION_QUERY_RESULT = {
+  tabs: {
+    news: string;
+    insights: string;
+  };
+  news: {
+    eyebrow: string;
+    title: string;
+    lede: string;
+    ctaLabel: string;
+  };
+  insights: {
+    eyebrow: string;
+    title: string;
+    lede: string;
+    ctaLabel: string;
+  };
+} | null;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: HOME_COMMUNITY_SECTION_QUERY
+// Query: *[_type == "homePage" && _id == "homePage"][0].communitySection{  eyebrow, title, lede, ctaLabel}
+export type HOME_COMMUNITY_SECTION_QUERY_RESULT = {
+  eyebrow: string;
+  title: string;
+  lede: string;
+  ctaLabel: string;
+} | null;
+
 // Query TypeMap
 import "@sanity/client";
 declare module "@sanity/client" {
@@ -1577,7 +1853,7 @@ declare module "@sanity/client" {
     '*[_type == "firmStats" && _id == "firmStats"][0]{\n  "stats": coalesce(stats[]{ _key, big, label }, [])\n}': FIRM_STATS_QUERY_RESULT;
     '*[_type == "award"] | order(order asc){\n  "_key": key.current,\n  alt,\n  image,\n  height\n}': AWARDS_QUERY_RESULT;
     '*[_type == "coreValue"] | order(order asc){\n  "_key": _id,\n  title,\n  body,\n  iconKey\n}': CORE_VALUES_QUERY_RESULT;
-    '*[_type == "sharedSections" && _id == "sharedSections"][0]{\n  coreValues{ eyebrow, title },\n  reviewSummary{ count, rating, source },\n  attorneysBand{\n    eyebrow,\n    title,\n    quote,\n    ctaLabel,\n    signature{ name, role, attorneyKey, portrait }\n  }\n}': SHARED_SECTIONS_QUERY_RESULT;
+    '*[_type == "sharedSections" && _id == "sharedSections"][0]{\n  coreValues{ eyebrow, title },\n  reviewSummary{ count, rating, source },\n  attorneysBand{\n    eyebrow,\n    title,\n    quote,\n    ctaLabel,\n    signature{ name, role, attorneyKey, portrait }\n  },\n  whyUs{\n    eyebrow,\n    title{ lead, accent },\n    lede,\n    "points": coalesce(points[]{ _key, title, body }, []),\n    ctaLabel\n  }\n}': SHARED_SECTIONS_QUERY_RESULT;
     '*[_type == "homePage" && _id == "homePage"][0].faqs[]{\n  _key,\n  question,\n  answer,\n  videoLength,\n  video{ provider, id }\n}': HOME_FAQS_QUERY_RESULT;
     '*[_type == "carAccidentsPage" && _id == "carAccidentsPage"][0].faqs[]{\n  _key,\n  question,\n  answer,\n  videoLength,\n  video{ provider, id }\n}': CAR_ACCIDENT_FAQS_QUERY_RESULT;
     '*[_type == "caseResult" && shownOn == "results"] | order(order asc){\n  "_key": _id, tag, badge, "wonInCourt": coalesce(wonInCourt, false), offered, recovered, story\n}': CASE_RESULTS_QUERY_RESULT;
@@ -1605,5 +1881,10 @@ declare module "@sanity/client" {
     '*[_type == "communityPage" && _id == "communityPage"][0].partners[]{\n  _key, org, logo, photo, body\n}': COMMUNITY_PARTNERS_QUERY_RESULT;
     '*[_type == "communityPage" && _id == "communityPage"][0].sponsorships[]{\n  _key, name, body\n}': SPONSORSHIPS_QUERY_RESULT;
     '*[_type == "teamMember" && onAttorneyRail == true] | order(\n  select(\n    kind == "partner" => 1,\n    kind == "attorney" => 2,\n    kind == "staff" => 3,\n    kind == "dog" => 4,\n    5\n  ) asc,\n  orderRank asc\n){\n  "_key": key.current,\n  name,\n  role,\n  "portrait": photo,\n  videoId\n}': ATTORNEY_RAIL_QUERY_RESULT;
+    '*[_type == "homePage" && _id == "homePage"][0]{\n  hero{\n    eyebrow,\n    headline,\n    lede,\n    primaryCta{ label, href },\n    videoCta{ label, video{ provider, id } }\n  },\n  "heroStats": coalesce(heroStats[]{ _key, big, label }, []),\n  firmIntro{\n    title,\n    tagline,\n    body,\n    helpTitle,\n    "helpPoints": coalesce(helpPoints[]{ _key, lead, text }, []),\n    videoLabel,\n    video{ provider, id },\n    quote{ text, name, role },\n    aside{ title, text, ctaLabel }\n  },\n  promise{\n    eyebrow,\n    title,\n    "slides": coalesce(slides[]{ _key, label, body }, []),\n    ctaLabel\n  }\n}': HOME_COPY_QUERY_RESULT;
+    '*[_type == "homePage" && _id == "homePage"][0]{\n  practiceSection{\n    eyebrow,\n    title,\n    lede,\n    tabsLabel,\n    catastrophicTitle,\n    ask{ text, cta }\n  },\n  practicePromise\n}': HOME_PRACTICE_SECTION_QUERY_RESULT;
+    '*[_type == "homePage" && _id == "homePage"][0].faqSection{\n  eyebrow,\n  title,\n  lede,\n  answerCtaLabel,\n  ask{ title, body, ctaLabel, ctaHref, portrait, portraitAlt }\n}': HOME_FAQ_SECTION_QUERY_RESULT;
+    '*[_type == "homePage" && _id == "homePage"][0].feedSection{\n  tabs{ news, insights },\n  news{ eyebrow, title, lede, ctaLabel },\n  insights{ eyebrow, title, lede, ctaLabel }\n}': HOME_FEED_SECTION_QUERY_RESULT;
+    '*[_type == "homePage" && _id == "homePage"][0].communitySection{\n  eyebrow, title, lede, ctaLabel\n}': HOME_COMMUNITY_SECTION_QUERY_RESULT;
   }
 }

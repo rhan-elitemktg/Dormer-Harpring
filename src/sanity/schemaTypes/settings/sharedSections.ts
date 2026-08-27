@@ -13,23 +13,29 @@
 // repeated band is a singleton" is wrong as a rule and each band has to be
 // checked.
 //
-// Checked. Only TWO section-copy getters are used on more than one page:
+// Checked. THREE section getters are used on more than one page:
 //
 //   getCoreValuesSection   5 pages   about, co-counsel, index, attorneys, news
 //   getAttorneysSection    2 pages   index, practice-areas
+//   getHomeWhyUs           2 pages   index, practice-areas
 //
 // The other six — FAQ, feed, practice, practice promise, community, car-accident
 // FAQ — are each used on ONE page, so they belong to that page's document. Six
 // one-page sections filed in a document called "Shared" would be a lie the desk
 // tells, and the next person would then trust it.
 //
-// THREE OF THOSE DOCUMENTS NOW EXIST. Phase 2f created `homePage`,
-// `communityPage` and `carAccidentsPage` to hold the lists that were filed as
-// collections on the same mistaken reasoning. They carry no copy yet — that is
-// still Phase 4 — but five of the six one-page section getters above already
-// know where they are going.
+// THE THIRD ONE WAS MISSED FOR A PHASE, AND THE METHOD IS WHY. The sweep above
+// was `grep -roE '\bget[A-Z][A-Za-z]*Section\(' src/pages`, which only ever
+// finds getters whose NAME ends in "Section" — and Why Us is `getHomeWhyUs`.
+// Phase 4 found it by listing every copy getter against every page instead:
 //
-//   grep -roE '\bget[A-Z][A-Za-z]*Section\(' src/pages | sort | uniq -c | sort -rn
+//   for g in $(grep -hoE 'export async function (get\w+)' src/data/*.ts \
+//               | awk '{print $4}'); do
+//     printf '%-28s ' "$g"; grep -rl "\b$g(" src/pages | tr '\n' ' '; echo
+//   done
+//
+// Grep the CALL SITES, not the naming convention. A convention is not a fact
+// about the code and this one was two-thirds true.
 import { defineField, defineType } from "sanity";
 // Subpath, not the barrel — see the note in sanity/structure/index.ts.
 import { BlockElementIcon } from "@sanity/icons/BlockElement";
@@ -129,6 +135,93 @@ export const sharedSections = defineType({
               validation: (rule) => rule.required(),
             }),
           ],
+        }),
+        defineField({ name: "ctaLabel", type: "string", validation: (rule) => rule.required() }),
+      ],
+    }),
+
+    /*
+     * "WHY CHOOSE DORMER HARPRING?" — the four-card band.
+     *
+     * Shared for the same reason the attorney rail is: the Practice Areas comp
+     * carries this band WORD FOR WORD, so it is one piece of copy on two pages
+     * rather than two that happen to agree. If the two ever need to differ, the
+     * fix is a second field on the page that diverges, not a second copy of
+     * these strings — that is the whole point of this document.
+     */
+    defineField({
+      name: "whyUs",
+      title: "Why choose us band",
+      type: "object",
+      description:
+        "The four cards under the practice areas. Appears on the homepage and Practice " +
+        "Areas — two pages, one piece of copy.",
+      fields: [
+        defineField({ name: "eyebrow", type: "string", validation: (rule) => rule.required() }),
+        /*
+         * A TWO-PART HEADING, NOT ONE STRING, because the design renders the
+         * second half gold on its own line. Storing "Why choose Dormer
+         * Harpring?" as one string and splitting it in the component would put
+         * the split point in CSS's hands, which cannot see where the firm's
+         * name starts.
+         */
+        defineField({
+          name: "title",
+          type: "object",
+          options: { columns: 2 },
+          description: "Two halves. The second renders gold, beneath the first.",
+          fields: [
+            defineField({
+              name: "lead",
+              title: "First half",
+              type: "string",
+              validation: (rule) => rule.required(),
+            }),
+            defineField({
+              name: "accent",
+              title: "Gold half",
+              type: "string",
+              validation: (rule) => rule.required(),
+            }),
+          ],
+          validation: (rule) => rule.required(),
+        }),
+        defineField({ name: "lede", type: "text", rows: 3, validation: (rule) => rule.required() }),
+        defineField({
+          name: "points",
+          title: "Cards",
+          type: "array",
+          of: [
+            {
+              type: "object",
+              name: "whyPoint",
+              fields: [
+                defineField({
+                  name: "title",
+                  type: "array",
+                  of: [{ type: "string" }],
+                  description:
+                    "ONE ENTRY PER RENDERED LINE — every card title is hard-broken in the " +
+                    "design, and the break is part of how the four line up.",
+                  validation: (rule) => rule.required().min(1),
+                }),
+                defineField({
+                  name: "body",
+                  type: "text",
+                  rows: 3,
+                  validation: (rule) => rule.required(),
+                }),
+              ],
+              preview: {
+                select: { title: "title", subtitle: "body" },
+                prepare: ({ title, subtitle }) => ({
+                  title: Array.isArray(title) ? title.join(" ") : title,
+                  subtitle,
+                }),
+              },
+            },
+          ],
+          validation: (rule) => rule.required().min(1),
         }),
         defineField({ name: "ctaLabel", type: "string", validation: (rule) => rule.required() }),
       ],

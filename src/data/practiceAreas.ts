@@ -16,11 +16,12 @@ import { sanityClient } from "sanity:client";
 import {
   HOME_CATASTROPHIC_QUERY,
   HOME_PRACTICE_AREAS_QUERY,
+  HOME_PRACTICE_SECTION_QUERY,
   PRACTICE_AREAS_PAGE_QUERY,
 } from "../sanity/lib/queries";
 import { once, required } from "../sanity/lib/fetch";
 import { pt, type PortableTextBlock } from "./portableText";
-import { ROUTES, practiceAreaPath } from "../lib/routePaths";
+import { practiceAreaPath } from "../lib/routePaths";
 import heroPhoto from "../assets/team/skyline.jpg";
 import heroCrop from "../assets/team/skyline-crop.jpg";
 
@@ -56,21 +57,24 @@ export interface PracticeSection {
   ask: { text: string; cta: string };
 }
 
+/**
+ * The practice band's heading, and the reassurance under its cards.
+ *
+ * BOTH READ THE `homePage` DOCUMENT, not `practiceAreasPage`. The band is the
+ * homepage's; this module owns it because it owns the cards underneath it, and
+ * a heading filed away from its list is how the two drift. `homeSection()`
+ * fetches the pair once, the way `practiceAreasDocument()` below serves two
+ * getters off the other page.
+ */
+function homeSection() {
+  return once("homePage:practiceSection", async () =>
+    required(await sanityClient.fetch(HOME_PRACTICE_SECTION_QUERY), "Homepage", "Pages")
+  );
+}
+
 export async function getPracticeSection(): Promise<PracticeSection> {
-  return {
-    eyebrow: "When the stakes are highest",
-    title: ["Built for the cases that", "change a life."],
-    lede:
-      "Some injuries don't just heal and move on. For the most serious, complex " +
-      "cases, you need a firm that tries them — not one that settles cheap. This " +
-      "is where we go deepest.",
-    tabsLabel: "Common case types",
-    catastrophicTitle: "High-stakes cases we're built to take to verdict",
-    ask: {
-      text: "Not sure if your injury qualifies?",
-      cta: "We review every case for free",
-    },
-  };
+  const { practiceSection } = await homeSection();
+  return practiceSection;
 }
 
 export interface PracticeAreaSummary {
@@ -174,10 +178,8 @@ export async function getFeaturedPracticeAreas(): Promise<PracticeAreaSummary[]>
  * six copies an editor could let drift apart.
  */
 export async function getPracticePromise(): Promise<string> {
-  return (
-    "You'll work with an experienced trial lawyer, not just a settlement lawyer. " +
-    "We front the costs, handle every call and lien, and you owe nothing unless we win."
-  );
+  const { practicePromise } = await homeSection();
+  return practicePromise;
 }
 
 export interface CatastrophicArea {

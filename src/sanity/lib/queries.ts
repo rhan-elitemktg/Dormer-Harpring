@@ -140,6 +140,13 @@ export const SHARED_SECTIONS_QUERY = defineQuery(
     quote,
     ctaLabel,
     signature{ name, role, attorneyKey, portrait }
+  },
+  whyUs{
+    eyebrow,
+    title{ lead, accent },
+    lede,
+    "points": coalesce(points[]{ _key, title, body }, []),
+    ctaLabel
   }
 }`
 );
@@ -663,5 +670,120 @@ export const ATTORNEY_RAIL_QUERY = defineQuery(
   role,
   "portrait": photo,
   videoId
+}`
+);
+
+/*
+ * ─────────────────────────────────────────────────────────────────────────────
+ * PAGE COPY — Phase 4.
+ *
+ * The lists above moved in Phase 2f and 3d; these are the STRINGS around them.
+ * Every projection here returns exactly the shape its interface already had,
+ * because that is what makes the phase output-neutral: a field that is a
+ * `string` in the data layer stays a `string` here, and only the fields already
+ * typed as Portable Text are Portable Text. Widening one of those to rich text
+ * would add a wrapper element to the markup and cost the byte-diff its meaning.
+ * ─────────────────────────────────────────────────────────────────────────────
+ */
+
+/**
+ * The homepage's own copy — the four sections `data/home.ts` owns.
+ *
+ * ONE QUERY FOR FOUR GETTERS, the way `practiceAreasDocument()` already serves
+ * two. `once()` makes it one round trip per build either way; what this buys is
+ * one projection to keep in step with four interfaces instead of four.
+ *
+ * The homepage's OTHER copy is not in here, and deliberately so: the practice
+ * band belongs to `data/practiceAreas.ts`, the FAQ band to `data/faqs.ts`, the
+ * feed to `data/news.ts` and the mosaic heading to `data/community.ts`, because
+ * each of those modules already owns the list underneath its heading. A query
+ * that spanned all of them would have no owning module — which is the same
+ * reason Phase 2f kept one query per array.
+ */
+export const HOME_COPY_QUERY = defineQuery(
+  `*[_type == "homePage" && _id == "homePage"][0]{
+  hero{
+    eyebrow,
+    headline,
+    lede,
+    primaryCta{ label, href },
+    videoCta{ label, video{ provider, id } }
+  },
+  "heroStats": coalesce(heroStats[]{ _key, big, label }, []),
+  firmIntro{
+    title,
+    tagline,
+    body,
+    helpTitle,
+    "helpPoints": coalesce(helpPoints[]{ _key, lead, text }, []),
+    videoLabel,
+    video{ provider, id },
+    quote{ text, name, role },
+    aside{ title, text, ctaLabel }
+  },
+  promise{
+    eyebrow,
+    title,
+    "slides": coalesce(slides[]{ _key, label, body }, []),
+    ctaLabel
+  }
+}`
+);
+
+/**
+ * The practice band's heading, and the reassurance under its cards.
+ *
+ * Two getters, one projection, one round trip — `getPracticeSection()` and
+ * `getPracticePromise()` are read side by side on the one page that renders
+ * them.
+ */
+export const HOME_PRACTICE_SECTION_QUERY = defineQuery(
+  `*[_type == "homePage" && _id == "homePage"][0]{
+  practiceSection{
+    eyebrow,
+    title,
+    lede,
+    tabsLabel,
+    catastrophicTitle,
+    ask{ text, cta }
+  },
+  practicePromise
+}`
+);
+
+/**
+ * The FAQ band's copy.
+ *
+ * `ask.portrait` is an ASSET now rather than a local import — a portrait inside
+ * a card, which is the editor-content side of the line this project drew in
+ * Phase 2. Page-header photographs and band backgrounds stay local imports.
+ *
+ * The Car Accidents page renders this same band under its own heading and with
+ * its own anchor; `getCarAccidentFaqSection()` overrides three fields on top of
+ * this one rather than storing a second copy of the parts that do not change.
+ */
+export const HOME_FAQ_SECTION_QUERY = defineQuery(
+  `*[_type == "homePage" && _id == "homePage"][0].faqSection{
+  eyebrow,
+  title,
+  lede,
+  answerCtaLabel,
+  ask{ title, body, ctaLabel, ctaHref, portrait, portraitAlt }
+}`
+);
+
+/** The two-tab feed's headings — one per tab, matching the two lists below. */
+export const HOME_FEED_SECTION_QUERY = defineQuery(
+  `*[_type == "homePage" && _id == "homePage"][0].feedSection{
+  tabs{ news, insights },
+  news{ eyebrow, title, lede, ctaLabel },
+  insights{ eyebrow, title, lede, ctaLabel }
+}`
+);
+
+/** The heading above the community mosaic. */
+export const HOME_COMMUNITY_SECTION_QUERY = defineQuery(
+  `*[_type == "homePage" && _id == "homePage"][0].communitySection{
+  eyebrow, title, lede, ctaLabel
 }`
 );
