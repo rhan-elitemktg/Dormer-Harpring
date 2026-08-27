@@ -9,12 +9,16 @@
 // `{ name, href }`, the category to `{ title, slug }`.
 //
 // Kept apart from `news.ts` deliberately, and for the reason that module
-// already states: `newsMention` (press coverage, pointing off-site) and
-// `blogPost` (167 of them on the legacy site, pointing in-site) are two
-// collections, not one type with a flag. `getInsightPosts()` over there is the
-// homepage's four-card teaser and stays the homepage's; four of its records
-// reappear here only because the designer used the same placeholder articles in
-// both comps.
+// already states: press coverage points off-site and blog posts point in-site,
+// so they are two things rather than one type with a flag. They are not both
+// collections, though — Phase 2f made the press mentions and the insight
+// teasers arrays on the `homePage` document, because each renders on one page.
+// The blog is the half that really is a collection: 186 posts across `/news`,
+// every practice-area sidebar and every attorney bio. Phase 3.
+//
+// `getInsightTeasers()` over there is the homepage's four-card teaser and stays
+// the homepage's; four of its records reappear here only because the designer
+// used the same placeholder articles in both comps.
 //
 // WHERE THIS CONTENT COMES FROM. The Blog comp's feed is not invented — its
 // featured post and first four cards are the real top of the live blog, with

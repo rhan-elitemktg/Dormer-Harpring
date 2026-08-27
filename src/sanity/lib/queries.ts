@@ -370,14 +370,14 @@ export const CITIES_QUERY = defineQuery(`*[_type == "city"] | order(order asc){
  */
 
 /** Press mentions — the firm in someone else's publication. */
-export const NEWS_MENTIONS_QUERY = defineQuery(
+export const PRESS_MENTIONS_QUERY = defineQuery(
   `*[_type == "homePage" && _id == "homePage"][0].pressMentions[]{
   _key, outlet, logo, date, headline, href
 }`
 );
 
 /** Insight teaser cards. */
-export const INSIGHTS_QUERY = defineQuery(
+export const INSIGHT_TEASERS_QUERY = defineQuery(
   `*[_type == "homePage" && _id == "homePage"][0].insightTeasers[]{
   _key, category, iconKey, readTime, title, href
 }`
@@ -391,7 +391,7 @@ export const COMMUNITY_PHOTOS_QUERY = defineQuery(
 );
 
 /** Charity logos in the homepage strip. */
-export const NGO_PARTNERS_QUERY = defineQuery(
+export const CHARITY_PARTNERS_QUERY = defineQuery(
   `*[_type == "homePage" && _id == "homePage"][0].charityPartners[]{
   _key, name, logo
 }`

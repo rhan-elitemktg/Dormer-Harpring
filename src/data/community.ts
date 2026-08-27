@@ -10,7 +10,7 @@
 import type { ImageMetadata } from "astro";
 import type { SanityImageSource } from "@sanity/image-url";
 import { sanityClient } from "sanity:client";
-import { COMMUNITY_PHOTOS_QUERY, NGO_PARTNERS_QUERY } from "../sanity/lib/queries";
+import { COMMUNITY_PHOTOS_QUERY, CHARITY_PARTNERS_QUERY } from "../sanity/lib/queries";
 import { once, required } from "../sanity/lib/fetch";
 
 // THE ASSET IMPORTS THAT USED TO SIT HERE ARE GONE — the getters have read
@@ -28,7 +28,7 @@ export interface CommunityPhoto {
   span: 3 | 4 | 5 | 12;
 }
 
-export interface NgoPartner {
+export interface CharityPartner {
   _key: string;
   name: string;
   logo: ImageMetadata | SanityImageSource;
@@ -70,8 +70,8 @@ export async function getCommunityPhotos(): Promise<CommunityPhoto[]> {
   );
 }
 
-export async function getNgoPartners(): Promise<NgoPartner[]> {
-  return once("ngoPartners", async () =>
-    required(await sanityClient.fetch(NGO_PARTNERS_QUERY), "Homepage", "Pages")
+export async function getCharityPartners(): Promise<CharityPartner[]> {
+  return once("charityPartners", async () =>
+    required(await sanityClient.fetch(CHARITY_PARTNERS_QUERY), "Homepage", "Pages")
   );
 }

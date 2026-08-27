@@ -13,7 +13,7 @@
 //
 // IT ONLY STARTED DOING ANYTHING FOR THE EIGHT PAGE LISTS IN PHASE 2f. A GROQ
 // collection query returns `[]` when a type has no documents, never null, so
-// `required(fetch(NGO_PARTNERS_QUERY), …)` could not throw however empty the
+// `required(fetch(CHARITY_PARTNERS_QUERY), …)` could not throw however empty the
 // dataset got — the homepage would simply have rendered a strip with no logos.
 // Reading an array off a page document returns null when the document or the
 // field is absent, so the guard is real now. What keeps that failure in the

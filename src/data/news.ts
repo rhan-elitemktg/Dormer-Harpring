@@ -13,7 +13,7 @@
 import type { ImageMetadata } from "astro";
 import type { SanityImageSource } from "@sanity/image-url";
 import { sanityClient } from "sanity:client";
-import { INSIGHTS_QUERY, NEWS_MENTIONS_QUERY } from "../sanity/lib/queries";
+import { INSIGHT_TEASERS_QUERY, PRESS_MENTIONS_QUERY } from "../sanity/lib/queries";
 import { once, required } from "../sanity/lib/fetch";
 
 // THE ASSET IMPORTS THAT USED TO SIT HERE ARE GONE — the getters have read
@@ -22,7 +22,7 @@ import { once, required } from "../sanity/lib/fetch";
 // stay in `src/assets/`: `npm run backup` runs `--no-assets`, so git is the only
 // copy of those originals outside Sanity's asset store.
 
-export interface NewsMention {
+export interface PressMention {
   _key: string;
   outlet: string;
   logo: ImageMetadata | SanityImageSource;
@@ -32,7 +32,7 @@ export interface NewsMention {
   href: string;
 }
 
-export interface InsightPost {
+export interface InsightTeaser {
   _key: string;
   /** Category name; also picks the card's tint and icon. */
   category: string;
@@ -72,9 +72,9 @@ export async function getFeedSection(): Promise<FeedSection> {
 }
 
 /** TODO(content): every `href` is a placeholder — the comp points them all at #news. */
-export async function getNewsMentions(): Promise<NewsMention[]> {
-  return once("newsMentions", async () =>
-    required(await sanityClient.fetch(NEWS_MENTIONS_QUERY), "Homepage", "Pages")
+export async function getPressMentions(): Promise<PressMention[]> {
+  return once("pressMentions", async () =>
+    required(await sanityClient.fetch(PRESS_MENTIONS_QUERY), "Homepage", "Pages")
   );
 }
 
@@ -83,8 +83,8 @@ export async function getNewsMentions(): Promise<NewsMention[]> {
  * from the category, so only `iconKey` survives here — a hex is not a field an
  * editor can fill in, and the tint is picked in CSS off the same key.
  */
-export async function getInsightPosts(): Promise<InsightPost[]> {
-  return once("insights", async () =>
-    required(await sanityClient.fetch(INSIGHTS_QUERY), "Homepage", "Pages")
+export async function getInsightTeasers(): Promise<InsightTeaser[]> {
+  return once("insightTeasers", async () =>
+    required(await sanityClient.fetch(INSIGHT_TEASERS_QUERY), "Homepage", "Pages")
   );
 }
