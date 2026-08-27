@@ -271,13 +271,40 @@ export const WRITTEN_REVIEWS_QUERY = defineQuery(
  *
  * `awards[].image` and `photo` come back whole — `urlFor()` takes the object.
  *
- * ORDERED BY `orderRank`, the LexoRank string the drag-and-drop plugin rewrites
- * when a row moves. It replaced a `position` number that had to be edited on
- * four documents to reorder four people. There is no `photoLarge`: one portrait
- * now serves the team page, the bio and the rail, with the hotspot deriving
- * each crop.
+ * GROUP FIRST, THEN RANK — and the group half is what stops the desk fighting
+ * the page.
+ *
+ * The desk shows four filtered lists (Founding Partners, Attorneys, Staff,
+ * Office Dogs) but `orderRank` is ONE global sequence, and this page renders
+ * partners and then everyone else FLAT. So dragging a row inside Attorneys used
+ * to move it against the whole roster: attorneys landed ahead of partners and
+ * staff interleaved between attorneys. That looked like data corruption and was
+ * mistaken for it once.
+ *
+ * Sorting by group first makes it impossible rather than merely fixed. A drag
+ * inside a group can only reorder that group, whatever rank it writes.
+ *
+ * THE GROUP ORDER IS NOW WRITTEN DOWN IN THREE PLACES and they must agree: the
+ * `kind` option list in the schema, the GROUPED map in sanity/structure, and
+ * here. Adding a fifth kind means adding it to all three — this `select` sends
+ * anything it does not recognise to the end rather than dropping it, so a
+ * missed one appears after the dogs instead of vanishing.
+ *
+ * `orderRank` is the LexoRank string the drag plugin rewrites when a row moves;
+ * it replaced a `position` number that had to be edited on four documents to
+ * reorder four people. There is no `photoLarge`: one portrait now serves the
+ * team page, the bio and the rail, with the hotspot deriving each crop.
  */
-export const TEAM_QUERY = defineQuery(`*[_type == "teamMember"] | order(orderRank){
+export const TEAM_QUERY = defineQuery(`*[_type == "teamMember"] | order(
+  select(
+    kind == "partner" => 1,
+    kind == "attorney" => 2,
+    kind == "staff" => 3,
+    kind == "dog" => 4,
+    5
+  ) asc,
+  orderRank asc
+){
   "_key": key.current,
   name,
   role,
@@ -298,7 +325,16 @@ export const TEAM_QUERY = defineQuery(`*[_type == "teamMember"] | order(orderRan
  * `[slug].astro` still matches on.
  */
 export const TEAM_PROFILES_QUERY = defineQuery(
-  `*[_type == "teamMember" && hasProfile == true] | order(orderRank){
+  `*[_type == "teamMember" && hasProfile == true] | order(
+  select(
+    kind == "partner" => 1,
+    kind == "attorney" => 2,
+    kind == "staff" => 3,
+    kind == "dog" => 4,
+    5
+  ) asc,
+  orderRank asc
+){
   "slug": key.current,
   category,
   lede,

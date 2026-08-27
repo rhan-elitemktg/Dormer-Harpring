@@ -1042,7 +1042,7 @@ export type WRITTEN_REVIEWS_QUERY_RESULT = Array<{
 
 // Source: src/sanity/lib/queries.ts
 // Variable: TEAM_QUERY
-// Query: *[_type == "teamMember"] | order(orderRank){  "_key": key.current,  name,  role,  kind,  photo,  bio,  "memorial": coalesce(memorial, false),  "hasProfile": coalesce(hasProfile, false),  "awards": awards[]{ _key, image, alt }}
+// Query: *[_type == "teamMember"] | order(  select(    kind == "partner" => 1,    kind == "attorney" => 2,    kind == "staff" => 3,    kind == "dog" => 4,    5  ) asc,  orderRank asc){  "_key": key.current,  name,  role,  kind,  photo,  bio,  "memorial": coalesce(memorial, false),  "hasProfile": coalesce(hasProfile, false),  "awards": awards[]{ _key, image, alt }}
 export type TEAM_QUERY_RESULT = Array<{
   _key: string;
   name: string;
@@ -1073,7 +1073,7 @@ export type TEAM_QUERY_RESULT = Array<{
 
 // Source: src/sanity/lib/queries.ts
 // Variable: TEAM_PROFILES_QUERY
-// Query: *[_type == "teamMember" && hasProfile == true] | order(orderRank){  "slug": key.current,  category,  lede,  email,  "facts": facts[]{ _key, value, label },  body,  education,  "links": links[]{ _key, label, href },  video{ ref{ provider, id }, poster, alt }}
+// Query: *[_type == "teamMember" && hasProfile == true] | order(  select(    kind == "partner" => 1,    kind == "attorney" => 2,    kind == "staff" => 3,    kind == "dog" => 4,    5  ) asc,  orderRank asc){  "slug": key.current,  category,  lede,  email,  "facts": facts[]{ _key, value, label },  body,  education,  "links": links[]{ _key, label, href },  video{ ref{ provider, id }, poster, alt }}
 export type TEAM_PROFILES_QUERY_RESULT = Array<{
   slug: string;
   category: string | null;
@@ -1250,8 +1250,8 @@ declare module "@sanity/client" {
     '*[_type == "testimonial" && onHomeRail == true] | order(railOrder asc){\n  "_key": key.current,\n  "kind": select(format == "video" => "video", "quote"),\n  name,\n  video{ provider, id },\n  poster,\n  length,\n  "headline": railHeadline,\n  "body": railBody\n}': HOME_TESTIMONIALS_QUERY_RESULT;
     '*[_type == "testimonial" && onReviewsPage == true && format == "video"]\n  | order(reviewOrder asc){\n  "_key": key.current,\n  video{ provider, id },\n  name,\n  quote,\n  poster\n}': VIDEO_REVIEWS_QUERY_RESULT;
     '*[_type == "testimonial" && onReviewsPage == true && format == "written"]\n  | order(reviewOrder asc){\n  "_key": key.current,\n  name,\n  source,\n  quote,\n  body\n}': WRITTEN_REVIEWS_QUERY_RESULT;
-    '*[_type == "teamMember"] | order(orderRank){\n  "_key": key.current,\n  name,\n  role,\n  kind,\n  photo,\n  bio,\n  "memorial": coalesce(memorial, false),\n  "hasProfile": coalesce(hasProfile, false),\n  "awards": awards[]{ _key, image, alt }\n}': TEAM_QUERY_RESULT;
-    '*[_type == "teamMember" && hasProfile == true] | order(orderRank){\n  "slug": key.current,\n  category,\n  lede,\n  email,\n  "facts": facts[]{ _key, value, label },\n  body,\n  education,\n  "links": links[]{ _key, label, href },\n  video{ ref{ provider, id }, poster, alt }\n}': TEAM_PROFILES_QUERY_RESULT;
+    '*[_type == "teamMember"] | order(\n  select(\n    kind == "partner" => 1,\n    kind == "attorney" => 2,\n    kind == "staff" => 3,\n    kind == "dog" => 4,\n    5\n  ) asc,\n  orderRank asc\n){\n  "_key": key.current,\n  name,\n  role,\n  kind,\n  photo,\n  bio,\n  "memorial": coalesce(memorial, false),\n  "hasProfile": coalesce(hasProfile, false),\n  "awards": awards[]{ _key, image, alt }\n}': TEAM_QUERY_RESULT;
+    '*[_type == "teamMember" && hasProfile == true] | order(\n  select(\n    kind == "partner" => 1,\n    kind == "attorney" => 2,\n    kind == "staff" => 3,\n    kind == "dog" => 4,\n    5\n  ) asc,\n  orderRank asc\n){\n  "slug": key.current,\n  category,\n  lede,\n  email,\n  "facts": facts[]{ _key, value, label },\n  body,\n  education,\n  "links": links[]{ _key, label, href },\n  video{ ref{ provider, id }, poster, alt }\n}': TEAM_PROFILES_QUERY_RESULT;
     '*[_type == "city"] | order(order asc){\n  "_key": key.current, name\n}': CITIES_QUERY_RESULT;
     '*[_type == "newsMention"] | order(order asc){\n  "_key": _id, outlet, logo, date, headline, href\n}': NEWS_MENTIONS_QUERY_RESULT;
     '*[_type == "insight"] | order(order asc){\n  "_key": _id, category, iconKey, readTime, title, href\n}': INSIGHTS_QUERY_RESULT;
