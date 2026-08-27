@@ -21,15 +21,8 @@ import { homePage } from "./pages/homePage";
 
 import { award } from "./collections/award";
 import { city } from "./collections/city";
-import { communityPartner } from "./collections/communityPartner";
-import { communityPhoto } from "./collections/communityPhoto";
-import { insight } from "./collections/insight";
-import { newsMention } from "./collections/newsMention";
-import { ngoPartner } from "./collections/ngoPartner";
-import { sponsorship } from "./collections/sponsorship";
 import { caseResult } from "./collections/caseResult";
 import { coreValue } from "./collections/coreValue";
-import { faq } from "./collections/faq";
 import { teamMember } from "./collections/teamMember";
 import { testimonial } from "./collections/testimonial";
 
@@ -59,20 +52,24 @@ const objects: SchemaTypeDefinition[] = [
  */
 const pages: SchemaTypeDefinition[] = [homePage, communityPage, carAccidentsPage];
 
-/** Repeatable content. Phase 2 (hand-authored) and Phase 3 (imported). */
+/**
+ * Repeatable content. Phase 2 (hand-authored) and Phase 3 (imported).
+ *
+ * A COLLECTION IS FOR CONTENT REUSED IN MORE THAN ONE PLACE. That is the whole
+ * point of the group — one record, updated once, correct everywhere. Measured
+ * against the build, these six reach 111, 104, 29, 27, 5 and 3 distinct pages.
+ *
+ * Phase 2f removed seven that reached one page each — FAQs, press mentions,
+ * insight teasers, community photos, charity partners, community partners and
+ * sponsorships. They are arrays on the page documents above. Before adding a
+ * type here, count the pages: one page means a field, not a collection.
+ */
 const collections: SchemaTypeDefinition[] = [
   teamMember,
   testimonial,
   caseResult,
-  faq,
   award,
   coreValue,
-  newsMention,
-  insight,
-  communityPartner,
-  communityPhoto,
-  ngoPartner,
-  sponsorship,
   city,
 ];
 

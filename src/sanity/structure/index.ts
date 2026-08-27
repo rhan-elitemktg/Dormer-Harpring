@@ -32,12 +32,8 @@ import { BlockElementIcon } from "@sanity/icons/BlockElement";
 import { StarIcon } from "@sanity/icons/Star";
 import { HeartIcon } from "@sanity/icons/Heart";
 import { CaseIcon } from "@sanity/icons/Case";
-import { HelpCircleIcon } from "@sanity/icons/HelpCircle";
 import { CommentIcon } from "@sanity/icons/Comment";
 import { UsersIcon } from "@sanity/icons/Users";
-import { BookIcon } from "@sanity/icons/Book";
-import { BulbOutlineIcon } from "@sanity/icons/BulbOutline";
-import { ImageIcon } from "@sanity/icons/Image";
 import { PinIcon } from "@sanity/icons/Pin";
 import { HomeIcon } from "@sanity/icons/Home";
 import { HeartFilledIcon } from "@sanity/icons/HeartFilled";
@@ -166,20 +162,23 @@ function collection(
     );
 }
 
-/** COLLECTIONS — repeatable content. Phase 2 (hand-authored), Phase 3 (imported). */
+/**
+ * COLLECTIONS — repeatable content. Phase 2 (hand-authored), Phase 3 (imported).
+ *
+ * A COLLECTION IS FOR CONTENT REUSED IN MORE THAN ONE PLACE — which is what this
+ * group is FOR, from an editor's side: change the record once and every page
+ * that shows it follows. These six reach 111, 104, 29, 27, 5 and 3 built pages.
+ *
+ * Phase 2f took out seven that reached one page each. They are arrays on the
+ * Pages documents now, where an editor looking for the sponsorships finds them
+ * on the page that renders them rather than hunting a global list.
+ */
 const COLLECTIONS: [string, string, ComponentType?][] = [
   ["teamMember", "Team", UsersIcon],
   ["testimonial", "Testimonials", CommentIcon],
   ["caseResult", "Case Results", CaseIcon],
-  ["faq", "FAQs", HelpCircleIcon],
   ["award", "Awards", StarIcon],
   ["coreValue", "Core Values", HeartIcon],
-  ["newsMention", "Press Mentions", BookIcon],
-  ["insight", "Insight Teasers", BulbOutlineIcon],
-  ["communityPartner", "Community Partners", UsersIcon],
-  ["communityPhoto", "Community Photos", ImageIcon],
-  ["ngoPartner", "Charity Partners", HeartIcon],
-  ["sponsorship", "Sponsorships", StarIcon],
   ["city", "Cities", PinIcon],
 ];
 

@@ -216,112 +216,6 @@ export type Slug = {
   source?: string;
 };
 
-export type Sponsorship = {
-  _id: string;
-  _type: "sponsorship";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  name: string;
-  body: string;
-  order: number;
-};
-
-export type NgoPartner = {
-  _id: string;
-  _type: "ngoPartner";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  name: string;
-  logo: {
-    asset?: SanityImageAssetReference;
-    media?: unknown;
-    hotspot?: SanityImageHotspot;
-    crop?: SanityImageCrop;
-    _type: "image";
-  };
-  order: number;
-};
-
-export type CommunityPhoto = {
-  _id: string;
-  _type: "communityPhoto";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  image: {
-    asset?: SanityImageAssetReference;
-    media?: unknown;
-    hotspot?: SanityImageHotspot;
-    crop?: SanityImageCrop;
-    _type: "image";
-  };
-  org: string;
-  caption: string;
-  span: 3 | 4 | 5 | 12;
-  order: number;
-};
-
-export type CommunityPartner = {
-  _id: string;
-  _type: "communityPartner";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  org: string;
-  logo: {
-    asset?: SanityImageAssetReference;
-    media?: unknown;
-    hotspot?: SanityImageHotspot;
-    crop?: SanityImageCrop;
-    _type: "image";
-  };
-  photo?: {
-    asset?: SanityImageAssetReference;
-    media?: unknown;
-    hotspot?: SanityImageHotspot;
-    crop?: SanityImageCrop;
-    _type: "image";
-  };
-  body: string;
-  order: number;
-};
-
-export type Insight = {
-  _id: string;
-  _type: "insight";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  title: string;
-  category: string;
-  iconKey: string;
-  readTime: string;
-  href: string;
-  order: number;
-};
-
-export type NewsMention = {
-  _id: string;
-  _type: "newsMention";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  outlet: string;
-  logo: {
-    asset?: SanityImageAssetReference;
-    media?: unknown;
-    hotspot?: SanityImageHotspot;
-    crop?: SanityImageCrop;
-    _type: "image";
-  };
-  date: string;
-  headline: string;
-  href: string;
-  order: number;
-};
-
 export type CoreValue = {
   _id: string;
   _type: "coreValue";
@@ -357,26 +251,6 @@ export type Award = {
   };
   height: number;
   order: number;
-};
-
-export type Faq = {
-  _id: string;
-  _type: "faq";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  question: string;
-  answer: string;
-  shownOn: "home" | "car-accidents";
-  video: VideoRef;
-  videoLength: string;
-  order: number;
-};
-
-export type VideoRef = {
-  _type: "videoRef";
-  provider: "wistia";
-  id: string;
 };
 
 export type CaseResult = {
@@ -428,6 +302,12 @@ export type Testimonial = {
   railOrder?: number;
   railHeadline?: string;
   railBody?: string;
+};
+
+export type VideoRef = {
+  _type: "videoRef";
+  provider: "wistia";
+  id: string;
 };
 
 export type TeamMember = {
@@ -785,18 +665,11 @@ export type AllSanitySchemaTypes =
   | Geopoint
   | City
   | Slug
-  | Sponsorship
-  | NgoPartner
-  | CommunityPhoto
-  | CommunityPartner
-  | Insight
-  | NewsMention
   | CoreValue
   | Award
-  | Faq
-  | VideoRef
   | CaseResult
   | Testimonial
+  | VideoRef
   | TeamMember
   | RichText
   | SimpleText
