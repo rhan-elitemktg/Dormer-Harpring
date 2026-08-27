@@ -15,6 +15,10 @@ import { videoRef } from "./objects/videoRef";
 import { inlineText, richText, simpleText } from "./objects/richText";
 import { seo } from "./objects/seo";
 
+import { carAccidentsPage } from "./pages/carAccidentsPage";
+import { communityPage } from "./pages/communityPage";
+import { homePage } from "./pages/homePage";
+
 import { award } from "./collections/award";
 import { city } from "./collections/city";
 import { communityPartner } from "./collections/communityPartner";
@@ -46,8 +50,14 @@ const objects: SchemaTypeDefinition[] = [
   seo,
 ];
 
-/** One document per route. Phase 4. */
-const pages: SchemaTypeDefinition[] = [];
+/**
+ * One document per route.
+ *
+ * Phase 2f put the three below here early, holding only the lists that were
+ * wrongly filed as collections. Their COPY is still Phase 4 and lands on these
+ * same documents — so a Phase 4 seed must merge rather than replace.
+ */
+const pages: SchemaTypeDefinition[] = [homePage, communityPage, carAccidentsPage];
 
 /** Repeatable content. Phase 2 (hand-authored) and Phase 3 (imported). */
 const collections: SchemaTypeDefinition[] = [

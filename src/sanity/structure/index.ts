@@ -39,6 +39,9 @@ import { BookIcon } from "@sanity/icons/Book";
 import { BulbOutlineIcon } from "@sanity/icons/BulbOutline";
 import { ImageIcon } from "@sanity/icons/Image";
 import { PinIcon } from "@sanity/icons/Pin";
+import { HomeIcon } from "@sanity/icons/Home";
+import { HeartFilledIcon } from "@sanity/icons/HeartFilled";
+import { WarningOutlineIcon } from "@sanity/icons/WarningOutline";
 
 /**
  * SINGLETONS ARE ENFORCED HERE, NOT IN THE SCHEMA. There is no `singleton: true`
@@ -63,14 +66,22 @@ function singleton(
 }
 
 /**
- * PAGES — one per route. Phase 4.
+ * PAGES — one per route.
  *
  * `[type, title, icon?]`. The two template singletons (`blogPostTemplate`,
  * `practiceAreaTemplate`) belong here rather than in Settings: they hold the
  * chrome that appears ON a page — the fact-check band's wording, the sidebar
  * headings — which is exactly the copy the SEO team will want to reach.
+ *
+ * The three below arrived in Phase 2f holding only the lists that had been
+ * filed as collections without being shared by anything. Their copy is Phase 4,
+ * and the rest of the routes with it — this is three of an eventual sixteen.
  */
-const PAGES: [string, string, ComponentType?][] = [];
+const PAGES: [string, string, ComponentType?][] = [
+  ["homePage", "Homepage", HomeIcon],
+  ["communityPage", "Community Involvement", HeartFilledIcon],
+  ["carAccidentsPage", "Car Accidents", WarningOutlineIcon],
+];
 
 /**
  * COLLECTIONS THAT OPEN INTO SUB-LISTS RATHER THAN ONE LONG LIST.

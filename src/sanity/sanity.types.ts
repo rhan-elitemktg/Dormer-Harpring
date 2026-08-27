@@ -530,6 +530,114 @@ export type SimpleText = Array<{
   _key: string;
 }>;
 
+export type CarAccidentsPage = {
+  _id: string;
+  _type: "carAccidentsPage";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  faqs: Array<{
+    question: string;
+    answer: string;
+    video: VideoRef;
+    videoLength: string;
+    _key: string;
+  }>;
+};
+
+export type CommunityPage = {
+  _id: string;
+  _type: "communityPage";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  partners: Array<{
+    org: string;
+    logo: {
+      asset?: SanityImageAssetReference;
+      media?: unknown;
+      hotspot?: SanityImageHotspot;
+      crop?: SanityImageCrop;
+      _type: "image";
+    };
+    photo?: {
+      asset?: SanityImageAssetReference;
+      media?: unknown;
+      hotspot?: SanityImageHotspot;
+      crop?: SanityImageCrop;
+      _type: "image";
+    };
+    body: string;
+    _key: string;
+  }>;
+  sponsorships: Array<{
+    name: string;
+    body: string;
+    _key: string;
+  }>;
+};
+
+export type HomePage = {
+  _id: string;
+  _type: "homePage";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  faqs: Array<{
+    question: string;
+    answer: string;
+    video: VideoRef;
+    videoLength: string;
+    _key: string;
+  }>;
+  pressMentions: Array<{
+    outlet: string;
+    logo: {
+      asset?: SanityImageAssetReference;
+      media?: unknown;
+      hotspot?: SanityImageHotspot;
+      crop?: SanityImageCrop;
+      _type: "image";
+    };
+    date: string;
+    headline: string;
+    href: string;
+    _key: string;
+  }>;
+  insightTeasers: Array<{
+    title: string;
+    category: string;
+    iconKey: string;
+    readTime: string;
+    href: string;
+    _key: string;
+  }>;
+  communityPhotos: Array<{
+    image: {
+      asset?: SanityImageAssetReference;
+      media?: unknown;
+      hotspot?: SanityImageHotspot;
+      crop?: SanityImageCrop;
+      _type: "image";
+    };
+    org: string;
+    caption: string;
+    span: 3 | 4 | 5 | 12;
+    _key: string;
+  }>;
+  charityPartners: Array<{
+    name: string;
+    logo: {
+      asset?: SanityImageAssetReference;
+      media?: unknown;
+      hotspot?: SanityImageHotspot;
+      crop?: SanityImageCrop;
+      _type: "image";
+    };
+    _key: string;
+  }>;
+};
+
 export type Seo = {
   _type: "seo";
   metaTitle?: string;
@@ -692,6 +800,9 @@ export type AllSanitySchemaTypes =
   | TeamMember
   | RichText
   | SimpleText
+  | CarAccidentsPage
+  | CommunityPage
+  | HomePage
   | Seo
   | InlineText
   | NavLink
