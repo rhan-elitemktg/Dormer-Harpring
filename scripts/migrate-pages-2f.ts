@@ -65,6 +65,27 @@ function assert(condition: boolean, message: string): asserts condition {
 }
 
 /**
+ * Stringify with keys sorted, at every depth.
+ *
+ * A PLAIN `JSON.stringify` COMPARISON IS WRONG HERE, and it reported all eight
+ * groups as mismatched on the first run. Sanity returns a stored object's keys
+ * in its own order — alphabetical for what it wrote — while the assembled member
+ * carries them in the order the schema declares. Every value was identical and
+ * every comparison failed. Sorting the keys is what makes the deep-compare
+ * compare content rather than field order.
+ */
+function canon(value: unknown): string {
+  if (Array.isArray(value)) return `[${value.map(canon).join(",")}]`;
+  if (value && typeof value === "object") {
+    const entries = Object.entries(value as Record<string, unknown>).sort(([a], [b]) =>
+      a < b ? -1 : a > b ? 1 : 0
+    );
+    return `{${entries.map(([k, v]) => `${JSON.stringify(k)}:${canon(v)}`).join(",")}}`;
+  }
+  return JSON.stringify(value) ?? "null";
+}
+
+/**
  * One collection, and the array on the page document it becomes.
  *
  * `required` is checked field-by-field on every source document before a byte is
@@ -310,7 +331,7 @@ async function collect(): Promise<{ groups: [Group, Doc[]][]; members: Map<strin
     for (let i = 0; i < rows.length; i++) {
       for (const [field, image] of imagesOf(group, docs[i])) {
         assert(
-          JSON.stringify(rows[i][field]) === JSON.stringify(image),
+          canon(rows[i][field]) === canon(image),
           `${group.label}: ${docs[i]._id}.${field} changed shape in assembly.`
         );
         writtenRefs.add(String((image.asset as Doc)._ref));
@@ -400,7 +421,7 @@ async function verify() {
     const expected = source.map((doc) => member(group, doc));
     const same =
       live.length === expected.length &&
-      expected.every((row, i) => JSON.stringify(row) === JSON.stringify(live[i]));
+      expected.every((row, i) => canon(row) === canon(live[i]));
 
     if (same) {
       console.log(`  ✓ ${group.label.padEnd(24)} ${expected.length} rows, byte-identical and in order`);
@@ -408,8 +429,8 @@ async function verify() {
       failures++;
       console.log(`  ✗ ${group.label}: ${expected.length} expected, ${live.length} live`);
       for (let i = 0; i < Math.max(expected.length, live.length); i++) {
-        const a = JSON.stringify(expected[i]);
-        const b = JSON.stringify(live[i]);
+        const a = canon(expected[i]);
+        const b = canon(live[i]);
         if (a !== b) console.log(`      [${i}]\n        source: ${a}\n        live:   ${b}`);
       }
     }
