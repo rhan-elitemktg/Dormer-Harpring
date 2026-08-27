@@ -375,7 +375,7 @@ export type Faq = {
 
 export type VideoRef = {
   _type: "videoRef";
-  provider: "wistia" | "youtube";
+  provider: "wistia";
   id: string;
 };
 
@@ -910,7 +910,7 @@ export type HOME_FAQS_QUERY_RESULT = Array<{
   answer: string;
   videoLength: string;
   video: {
-    provider: "wistia" | "youtube";
+    provider: "wistia";
     id: string;
   };
 }>;
@@ -924,7 +924,7 @@ export type CAR_ACCIDENT_FAQS_QUERY_RESULT = Array<{
   answer: string;
   videoLength: string;
   video: {
-    provider: "wistia" | "youtube";
+    provider: "wistia";
     id: string;
   };
 }>;
@@ -994,7 +994,7 @@ export type HOME_TESTIMONIALS_QUERY_RESULT = Array<{
   kind: "quote" | "video";
   name: string;
   video: {
-    provider: "wistia" | "youtube";
+    provider: "wistia";
     id: string;
   } | null;
   poster: {
@@ -1015,7 +1015,7 @@ export type HOME_TESTIMONIALS_QUERY_RESULT = Array<{
 export type VIDEO_REVIEWS_QUERY_RESULT = Array<{
   _key: string;
   video: {
-    provider: "wistia" | "youtube";
+    provider: "wistia";
     id: string;
   } | null;
   name: string;
@@ -1093,7 +1093,7 @@ export type TEAM_PROFILES_QUERY_RESULT = Array<{
   }> | null;
   video: {
     ref: {
-      provider: "wistia" | "youtube";
+      provider: "wistia";
       id: string;
     } | null;
     poster: {
@@ -1225,7 +1225,7 @@ export type ATTORNEY_RAIL_QUERY_RESULT = Array<{
     _type: "image";
   } | null;
   video: {
-    provider: "wistia" | "youtube";
+    provider: "wistia";
     id: string;
   } | null;
   onHomeRail: boolean | false;

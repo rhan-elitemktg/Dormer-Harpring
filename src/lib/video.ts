@@ -31,8 +31,33 @@ export interface VideoRef {
  */
 const WISTIA_ACCOUNT = "";
 
+/**
+ * Fail loudly on a video record that is missing or half-filled.
+ *
+ * WHY THIS EXISTS. A `videoRef` that came back null from a projection produced
+ * `TypeError: Cannot destructure property 'provider' of 'object null'` from the
+ * line below — during a page render, naming no field, no document and no
+ * person. It took a dataset comparison to work out which of thirty team members
+ * had lost their film.
+ *
+ * Every play affordance on the site routes through this module, so one check
+ * here covers all nine of them.
+ */
+function assertVideo(ref: VideoRef | null | undefined): VideoRef {
+  if (!ref || !ref.id) {
+    throw new Error(
+      `A video record is missing its id, so no play link can be built for it.\n` +
+        `Every video is a { provider, id } pair — find the record with an empty ` +
+        `"Video ID" in the Studio at /admin and fill it in, or remove the field.\n` +
+        `Received: ${JSON.stringify(ref)}`
+    );
+  }
+  return ref;
+}
+
 /** Where a "play" affordance sends someone who is leaving the page. */
-export function videoWatchUrl({ provider, id }: VideoRef): string {
+export function videoWatchUrl(ref: VideoRef): string {
+  const { provider, id } = assertVideo(ref);
   if (provider === "wistia") {
     return WISTIA_ACCOUNT
       ? `https://${WISTIA_ACCOUNT}.wistia.com/medias/${id}`
@@ -48,7 +73,8 @@ export function videoWatchUrl({ provider, id }: VideoRef): string {
  * moment the iframe loads, which would put every page carrying a video into the
  * consent conversation. Wistia does not set cookies until playback begins.
  */
-export function videoEmbedUrl({ provider, id }: VideoRef): string {
+export function videoEmbedUrl(ref: VideoRef): string {
+  const { provider, id } = assertVideo(ref);
   if (provider === "wistia") {
     return `https://fast.wistia.net/embed/iframe/${id}`;
   }

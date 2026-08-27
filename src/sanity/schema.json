@@ -2091,10 +2091,6 @@
               {
                 "type": "string",
                 "value": "wistia"
-              },
-              {
-                "type": "string",
-                "value": "youtube"
               }
             ]
           },
