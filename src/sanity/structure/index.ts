@@ -103,15 +103,55 @@ const PAGES: [string, string, ComponentType?][] = [
  */
 const GROUPED: Record<
   string,
-  { field: string; groups: [string, string, ComponentType?][] }
+  {
+    field: string;
+    /**
+     * Whether the group's rows can be DRAGGED into order.
+     *
+     * True only where something actually reads that order. The team page renders
+     * `orderRank`, so Team is orderable. The practice areas are sorted by their
+     * short name in `getPracticeAreaPages()` and nothing stores a position —
+     * offering a drag handle there would be a control that appears to work,
+     * saves a field, and changes nothing on the site. That is worse than no
+     * control at all.
+     */
+    orderable: boolean;
+    groups: [string, string, ComponentType?][];
+  }
 > = {
   teamMember: {
     field: "kind",
+    orderable: true,
     groups: [
       ["partner", "Founding Partners", UsersIcon],
       ["attorney", "Attorneys", UsersIcon],
       ["staff", "Staff", UsersIcon],
       ["dog", "Office Dogs", HeartIcon],
+    ],
+  },
+  /*
+   * NINE CITIES, AND DENVER HOLDS HALF OF THEM. 104 pages in one alphabetical
+   * list is a list you scroll; grouped by city it is the same shape the sidebar
+   * card and the /practice-areas directory already have, so an editor looking
+   * for "the Thornton dog bite page" opens Thornton.
+   *
+   * The order is the directory's own, which leads with the firm's city. As with
+   * `kind`, these MUST cover every value the schema's list allows: a page whose
+   * city matches no group is invisible here.
+   */
+  practiceArea: {
+    field: "city",
+    orderable: false,
+    groups: [
+      ["denver", "Denver", PinIcon],
+      ["aurora", "Aurora", PinIcon],
+      ["boulder", "Boulder", PinIcon],
+      ["highlands-ranch", "Highlands Ranch", PinIcon],
+      ["lakewood", "Lakewood", PinIcon],
+      ["thornton", "Thornton", PinIcon],
+      ["greeley", "Greeley", PinIcon],
+      ["fort-collins", "Fort Collins", PinIcon],
+      ["grand-junction", "Grand Junction", PinIcon],
     ],
   },
 };
@@ -149,16 +189,38 @@ function collection(
         .title(title)
         .items(
           spec.groups.map(([value, groupTitle, groupIcon]) =>
-            orderableDocumentListDeskItem({
-              type,
-              id: `${type}-${value}`,
-              title: groupTitle,
-              icon: groupIcon,
-              filter: `${spec.field} == $value`,
-              params: { value },
-              S,
-              context,
-            })
+            spec.orderable
+              ? orderableDocumentListDeskItem({
+                  type,
+                  id: `${type}-${value}`,
+                  title: groupTitle,
+                  icon: groupIcon,
+                  filter: `${spec.field} == $value`,
+                  params: { value },
+                  S,
+                  context,
+                })
+              : /*
+                 * A PLAIN FILTERED LIST, and it has to set the group's field on
+                 * anything created inside it the way the orderable one does for
+                 * free. Without the initial value a page created inside Denver
+                 * would have no city, match none of the nine filters, and be
+                 * invisible in the desk — the same silent-failure shape the
+                 * four `check:` linters exist to catch.
+                 */
+                S.listItem()
+                  .title(groupTitle)
+                  .icon(groupIcon)
+                  .id(`${type}-${value}`)
+                  .child(
+                    S.documentTypeList(type)
+                      .title(groupTitle)
+                      .filter(`_type == $type && ${spec.field} == $value`)
+                      .params({ type, value })
+                      .initialValueTemplates([
+                        S.initialValueTemplateItem(`${type}-by-${spec.field}`, { value }),
+                      ])
+                  )
           )
         )
     );
@@ -169,8 +231,8 @@ function collection(
  *
  * A COLLECTION IS FOR CONTENT REUSED IN MORE THAN ONE PLACE — which is what this
  * group is FOR, from an editor's side: change the record once and every page
- * that shows it follows. These eight reach 294, 187, 111, 104, 29, 27, 5 and 3
- * built pages.
+ * that shows it follows. These nine reach 294, 187, 111, 107, 104, 29, 27, 5
+ * and 3 built pages.
  *
  * Phase 2f took out seven that reached one page each. They are arrays on the
  * Pages documents now, where an editor looking for the sponsorships finds them
@@ -181,6 +243,7 @@ function collection(
  * by other documents far more often than they are edited.
  */
 const COLLECTIONS: [string, string, ComponentType?][] = [
+  ["practiceArea", "Practice Areas", CaseIcon],
   ["blogPost", "Blog Posts", DocumentTextIcon],
   ["teamMember", "Team", UsersIcon],
   ["testimonial", "Testimonials", CommentIcon],

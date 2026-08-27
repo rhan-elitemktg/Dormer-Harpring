@@ -466,6 +466,76 @@ export type SimpleText = Array<{
   _key: string;
 }>;
 
+export type PracticeArea = {
+  _id: string;
+  _type: "practiceArea";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title: string;
+  slug: Slug;
+  label: string;
+  body: RichText;
+  faqs?: Array<{
+    question: string;
+    answer: AnswerText;
+    _type: "faq";
+    _key: string;
+  }>;
+  city:
+    | "denver"
+    | "aurora"
+    | "boulder"
+    | "highlands-ranch"
+    | "lakewood"
+    | "thornton"
+    | "greeley"
+    | "fort-collins"
+    | "grand-junction";
+  topic:
+    "motor-vehicle" | "premises" | "catastrophic" | "professional" | "other";
+  statewide?: boolean;
+  resource?: boolean;
+  seo?: Seo;
+  publishedAt: string;
+  modifiedAt?: string;
+  legacyId?: number;
+};
+
+export type Seo = {
+  _type: "seo";
+  metaTitle?: string;
+  metaDescription?: string;
+  canonicalUrl?: string;
+  noIndex?: boolean;
+  ogImage?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+  };
+};
+
+export type AnswerText = Array<{
+  children?: Array<{
+    marks?: Array<string>;
+    text?: string;
+    _type: "span";
+    _key: string;
+  }>;
+  style?: "normal";
+  listItem?: "bullet" | "number";
+  markDefs?: Array<
+    {
+      _key: string;
+    } & Link
+  >;
+  level?: number;
+  _type: "block";
+  _key: string;
+}>;
+
 export type CarAccidentsPage = {
   _id: string;
   _type: "carAccidentsPage";
@@ -572,21 +642,6 @@ export type HomePage = {
     };
     _key: string;
   }>;
-};
-
-export type Seo = {
-  _type: "seo";
-  metaTitle?: string;
-  metaDescription?: string;
-  canonicalUrl?: string;
-  noIndex?: boolean;
-  ogImage?: {
-    asset?: SanityImageAssetReference;
-    media?: unknown;
-    hotspot?: SanityImageHotspot;
-    crop?: SanityImageCrop;
-    _type: "image";
-  };
 };
 
 export type InlineText = Array<{
@@ -733,10 +788,12 @@ export type AllSanitySchemaTypes =
   | TeamMember
   | RichText
   | SimpleText
+  | PracticeArea
+  | Seo
+  | AnswerText
   | CarAccidentsPage
   | CommunityPage
   | HomePage
-  | Seo
   | InlineText
   | NavLink
   | Link
@@ -1194,6 +1251,60 @@ export type FEATURED_POST_QUERY_RESULT = Array<{
 }>;
 
 // Source: src/sanity/lib/queries.ts
+// Variable: PRACTICE_AREA_PAGES_QUERY
+// Query: *[_type == "practiceArea"]{    "_key": slug.current,    "slug": slug.current,    title,    label,    city,    topic,    "resource": coalesce(resource, false)  }
+export type PRACTICE_AREA_PAGES_QUERY_RESULT = Array<{
+  _key: string;
+  slug: string;
+  title: string;
+  label: string;
+  city:
+    | "aurora"
+    | "boulder"
+    | "denver"
+    | "fort-collins"
+    | "grand-junction"
+    | "greeley"
+    | "highlands-ranch"
+    | "lakewood"
+    | "thornton";
+  topic:
+    "catastrophic" | "motor-vehicle" | "other" | "premises" | "professional";
+  resource: boolean | false;
+}>;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: PRACTICE_AREA_ARTICLES_QUERY
+// Query: *[_type == "practiceArea"]{    "_key": slug.current,    "slug": slug.current,    title,    city,    body,    "faqs": coalesce(faqs[]{ _key, question, answer }, []),    publishedAt,    "updatedAt": modifiedAt,    "metaTitle": seo.metaTitle,    "metaDescription": seo.metaDescription  }
+export type PRACTICE_AREA_ARTICLES_QUERY_RESULT = Array<{
+  _key: string;
+  slug: string;
+  title: string;
+  city:
+    | "aurora"
+    | "boulder"
+    | "denver"
+    | "fort-collins"
+    | "grand-junction"
+    | "greeley"
+    | "highlands-ranch"
+    | "lakewood"
+    | "thornton";
+  body: RichText;
+  faqs:
+    | Array<{
+        _key: string;
+        question: string;
+        answer: AnswerText;
+      }>
+    | Array<never>;
+  publishedAt: string;
+  updatedAt: string | null;
+  metaTitle: string | null;
+  metaDescription: string | null;
+}>;
+
+// Source: src/sanity/lib/queries.ts
 // Variable: BLOG_ARTICLES_QUERY
 // Query: *[_type == "blogPost"]{    "_key": slug.current,    "slug": slug.current,    body,    "factCheck": coalesce(factCheck, []),    "reviewerKey": reviewer->key.current  }
 export type BLOG_ARTICLES_QUERY_RESULT = Array<{
@@ -1340,6 +1451,8 @@ declare module "@sanity/client" {
     '*[_type == "blogCategory"] | order(slug.current asc){\n    "_key": slug.current, title, "slug": slug.current,\n    "posts": count(*[_type == "blogPost" && categories[0]._ref == ^._id])\n  }': BLOG_CATEGORIES_QUERY_RESULT;
     '*[_type == "blogPost" && featured != true] | order(publishedAt desc){\n  "_key": slug.current,\n  "slug": slug.current,\n  title,\n  excerpt,\n  publishedAt,\n  "category": categories[0]->{ "_key": slug.current, title, "slug": slug.current },\n  image,\n  "reviewerKey": reviewer->key.current\n}': BLOG_POSTS_QUERY_RESULT;
     '*[_type == "blogPost" && featured == true]{\n  "_key": slug.current,\n  "slug": slug.current,\n  title,\n  excerpt,\n  publishedAt,\n  "category": categories[0]->{ "_key": slug.current, title, "slug": slug.current },\n  image,\n  "reviewerKey": reviewer->key.current\n, "imageAlt": image.alt}': FEATURED_POST_QUERY_RESULT;
+    '*[_type == "practiceArea"]{\n    "_key": slug.current,\n    "slug": slug.current,\n    title,\n    label,\n    city,\n    topic,\n    "resource": coalesce(resource, false)\n  }': PRACTICE_AREA_PAGES_QUERY_RESULT;
+    '*[_type == "practiceArea"]{\n    "_key": slug.current,\n    "slug": slug.current,\n    title,\n    city,\n    body,\n    "faqs": coalesce(faqs[]{ _key, question, answer }, []),\n    publishedAt,\n    "updatedAt": modifiedAt,\n    "metaTitle": seo.metaTitle,\n    "metaDescription": seo.metaDescription\n  }': PRACTICE_AREA_ARTICLES_QUERY_RESULT;
     '*[_type == "blogPost"]{\n    "_key": slug.current,\n    "slug": slug.current,\n    body,\n    "factCheck": coalesce(factCheck, []),\n    "reviewerKey": reviewer->key.current\n  }': BLOG_ARTICLES_QUERY_RESULT;
     '*[_type == "homePage" && _id == "homePage"][0].pressMentions[]{\n  _key, outlet, logo, date, headline, href\n}': PRESS_MENTIONS_QUERY_RESULT;
     '*[_type == "homePage" && _id == "homePage"][0].insightTeasers[]{\n  _key, category, iconKey, readTime, title, href\n}': INSIGHT_TEASERS_QUERY_RESULT;

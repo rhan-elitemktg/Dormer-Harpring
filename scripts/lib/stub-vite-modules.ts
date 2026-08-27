@@ -13,11 +13,14 @@
 //                    has been observed exiting 0. A seed that silently does
 //                    nothing and leaves a stale payload on disk.
 //   `astro:content`  the content-collection loader, virtual for the same
-//                    reason. Its `getCollection` THROWS here rather than
-//                    returning `[]`: a migration reads `src/content/**/*.json`
-//                    off disk directly — that is the whole reason Phase 3 needs
-//                    no build — so a script reaching for it has taken a wrong
-//                    turn, and an empty array would look like an empty archive.
+//                    reason. By default its `getCollection` THROWS rather than
+//                    returning `[]` — a migration reads `src/content/**/*.json`
+//                    off disk directly, so a script reaching for it has usually
+//                    taken a wrong turn and an empty array would look like an
+//                    empty archive. Pass `collections` to serve it instead: the
+//                    loader is a glob over JSON, which plain Node can do, and
+//                    3c needs it to re-derive a body THROUGH the getter and
+//                    compare that against what it is about to write.
 //
 // All three are answered through `node:module`'s `registerHooks`, which runs
 // in-thread and synchronously. Call `registerDataModuleHooks()` BEFORE the
@@ -68,17 +71,51 @@ const CLIENT_STUB = new URL("./sanity-client.virtual.mjs", import.meta.url).href
 const CONTENT = "astro:content";
 const CONTENT_STUB = new URL("./astro-content.virtual.mjs", import.meta.url).href;
 
-/** `getCollection` names the mistake rather than reporting an empty archive. */
-const CONTENT_SOURCE = `
+/**
+ * `getCollection`, over whatever directories the caller declared.
+ *
+ * ONE THING IT CANNOT DO, and callers have to know: Astro's loader resolves
+ * `image()` fields into `ImageMetadata`, and this returns the raw relative
+ * string the JSON holds. Everything else — `id`, `data`, the file order — is
+ * what Astro produces. A migration comparing bodies must therefore compare
+ * shapes and ignore the image `src`, which is what 3c's `sameBody` does.
+ *
+ * A collection the caller did NOT declare still throws, with its name, rather
+ * than returning `[]`. An empty array reads as an empty archive.
+ */
+function contentSource(collections: Record<string, string>): string {
+  return `
+import { readdirSync, readFileSync } from "node:fs";
+import { join, resolve } from "node:path";
+
+const DIRS = ${JSON.stringify(collections)};
+
 export function getCollection(name) {
-  throw new Error(
-    \`astro:content is not available outside an Astro build (getCollection("\${name}")).\n\` +
-    "A migration script reads src/content/**/*.json off disk instead — plain JSON, no loader, " +
-    "which is why Phase 3 needs no build at all."
-  );
+  const dir = DIRS[name];
+  if (!dir) {
+    throw new Error(
+      \`astro:content is not available outside an Astro build (getCollection("\${name}")).\n\` +
+      "A migration script reads src/content/**/*.json off disk instead — plain JSON, no loader, " +
+      "which is why Phase 3 needs no build at all. If this script genuinely needs the collection, " +
+      "declare it: registerDataModuleHooks({ collections: { '" + name + "': 'src/content/…' } })."
+    );
+  }
+  const base = resolve(process.cwd(), dir);
+  return readdirSync(base)
+    .filter((file) => file.endsWith(".json"))
+    .sort()
+    .map((file) => ({
+      id: file.replace(/\\.json$/, ""),
+      collection: name,
+      data: JSON.parse(readFileSync(join(base, file), "utf8")),
+    }));
 }
-export function getEntry(name) { return getCollection(name); }
+
+export function getEntry(name, id) {
+  return getCollection(name).find((entry) => entry.id === id);
+}
 `;
+}
 
 /** Read one variable from the environment or `.env`, or fail naming it. */
 function env(name: string): string {
@@ -131,7 +168,12 @@ export const sanityClient = createClient({
 let registered = false;
 
 export function registerDataModuleHooks(
-  options: { sanityClient?: "throw" | "live" } = {}
+  options: {
+    sanityClient?: "throw" | "live";
+    /** Collection name → the directory its JSON lives in, relative to the repo
+     *  root. Anything not listed here still throws by name. */
+    collections?: Record<string, string>;
+  } = {}
 ): void {
   // `registerHooks` stacks rather than replaces, so a second call would leave
   // two resolvers racing for the same specifier. One per process.
@@ -139,6 +181,7 @@ export function registerDataModuleHooks(
   registered = true;
 
   const clientSource = options.sanityClient === "live" ? liveClient() : THROWING_CLIENT;
+  const contentStub = contentSource(options.collections ?? {});
 
   registerHooks({
     resolve(specifier, context, nextResolve) {
@@ -158,7 +201,7 @@ export function registerDataModuleHooks(
         return { format: "module", shortCircuit: true, source: clientSource };
       }
       if (url === CONTENT_STUB) {
-        return { format: "module", shortCircuit: true, source: CONTENT_SOURCE };
+        return { format: "module", shortCircuit: true, source: contentStub };
       }
       if (!url.endsWith(STUB)) return nextLoad(url, context);
       const file = url.slice(0, -STUB.length);

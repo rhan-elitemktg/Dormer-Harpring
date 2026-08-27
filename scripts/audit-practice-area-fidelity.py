@@ -23,6 +23,7 @@ Requires a `dist/` built from the current content: run `npm run build` first.
 """
 
 import json
+import os
 import re
 import sys
 import time
@@ -32,10 +33,27 @@ from difflib import SequenceMatcher
 from html.parser import HTMLParser
 from pathlib import Path
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__))))
+from lib.sanity import groq  # noqa: E402
+
 API = "https://www.denvertrial.com/wp-json/wp/v2"
 SITE = "https://www.denvertrial.com"
 DIST = Path("dist")
-CONTENT = Path("src/content/practice-areas")
+
+# THE SLUGS COME FROM THE DATASET, NOT FROM A DIRECTORY.
+#
+# They used to be `src/content/practice-areas/*.json`. Phase 3c moved those 104
+# pages into Sanity and deleted the directory — and this script then audited ZERO
+# pages and printed "MATCHES SOURCE" with exit code 0. A check that cannot fail
+# is the exact failure mode four linters in this repo exist to catch, and this
+# one had it for one commit.
+#
+# Reading the dataset keeps ONE source of truth, the same fix `lib/firm.py` made
+# for the phone number. `assert_enumerable` below is the other half: an empty
+# list is now a hard failure rather than a vacuous pass, whatever the reason for
+# it.
+SLUG_QUERY = '*[_type == "practiceArea"]{"slug": slug.current}'
+
 
 # The importer's list, and it must stay the importer's list — a page whose
 # chrome this script does not know about reads as missing content.
@@ -55,12 +73,20 @@ THRESHOLD = 0.99
 # firm's own article list ("<City> <Area> Resources", which the sidebar already
 # carries). Removed by request.
 #
-# MUST STAY IDENTICAL TO `DROPPED_SECTIONS` in src/data/practiceAreaPages.ts,
-# which is where the removal actually happens; this is the source side of the
-# same fact. They are two lists rather than one because a .py script cannot
-# import a .ts module, and the getter is where the rule belongs. Drift shows up
-# here immediately: a section dropped there and not here reads as lost content,
-# and a section listed here and not dropped there reads as surplus.
+# MUST STAY IDENTICAL TO `DROPPED_SECTIONS` in
+# scripts/migrate-practice-areas-3c.ts, which is where the removal actually
+# happened. IT MOVED THERE IN PHASE 3c: the drop used to run in the getter on
+# every build, and the getter's copy is gone — the stored body in Sanity is
+# already trimmed, because a heading-boundary walk is not something GROQ can
+# express and leaving it in the getter would also have shown editors three
+# sections that never reach the page.
+#
+# They are two lists rather than one because a .py script cannot import a .ts
+# module. Drift shows up here immediately, and THIS side is still needed either
+# way: the audit compares the built page against the LIVE WordPress source,
+# which still carries every one of these sections. A section dropped there and
+# not here reads as lost content; one listed here and not dropped there reads as
+# surplus.
 #
 # `thornton-bicycle-accident-lawyer`'s "Bicycle Accident Resources in Thornton,
 # Colorado" is deliberately absent from both — it is Bike Thornton and Bicycle
@@ -72,7 +98,8 @@ THRESHOLD = 0.99
 # byte-identical on the 30 pages that have it — and `AwardsBar` now renders the
 # same six under the article, so the body copy was showing them twice.
 #
-# MUST STAY IDENTICAL TO `DROPPED_EVERYWHERE` in src/data/practiceAreaPages.ts.
+# MUST STAY IDENTICAL TO `DROPPED_EVERYWHERE` in
+# scripts/migrate-practice-areas-3c.ts.
 DROPPED_EVERYWHERE = ["Awards and Accolades"]
 
 DROPPED_SECTIONS = {
@@ -399,10 +426,22 @@ def main():
     if not DIST.exists():
         sys.exit("dist/ not found — run `npm run build` first.")
 
-    slugs = sorted(p.stem for p in CONTENT.glob("*.json"))
+    rows = groq(SLUG_QUERY, "the practice-area slugs") or []
+    slugs = sorted(row["slug"] for row in rows if row.get("slug"))
+
+    # AN EMPTY LIST IS A FAILURE, NOT A PASS. Zero pages audited against zero
+    # expectations succeeds trivially, which is how this script reported
+    # "MATCHES SOURCE" on the commit that deleted its source directory.
+    if not slugs:
+        sys.exit(
+            "Sanity holds no published practiceArea documents, so there is nothing to audit.\n"
+            "That is a failure rather than a pass: this check compares imported body copy "
+            "against the live WordPress site, and with no pages it would agree with anything."
+        )
+
     if only:
         if only not in slugs:
-            sys.exit(f'no imported practice area with slug "{only}"')
+            sys.exit(f'no practice area in Sanity with slug "{only}"')
         slugs = [only]
 
     print(f"auditing {len(slugs)} page(s) against the live source\n")

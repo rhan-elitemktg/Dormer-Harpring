@@ -438,6 +438,75 @@ export const FEATURED_POST_QUERY = defineQuery(
  * the standard band from the reviewer when it is absent. `readTime` is derived
  * from the body after this, never stored.
  */
+/*
+ * THE 104 IMPORTED PRACTICE-AREA PAGES — the light template's content.
+ *
+ * Same split as the blog's, for the same reason: the sidebar card lists a
+ * city's siblings on every one of these pages, and printing 50 labels should
+ * not pull 50 bodies of 1,500–3,000 words into memory.
+ *
+ * THE STORED BODY IS ALREADY TRIMMED. Three chrome sections were dropped at
+ * migration rather than at render, because dropping one means walking from an
+ * h2 to the next h2 and GROQ cannot express that. So there is no coalescing to
+ * do here — which is the point: the projection returns what the page shows.
+ * `scripts/migrate-practice-areas-3c.ts` carries the manifest and the reasoning.
+ *
+ * `href` is not projected. `practiceAreaPath(slug)` builds it, as everywhere.
+ */
+
+/**
+ * Every page as a link. UNORDERED, deliberately — the getter sorts.
+ *
+ * `| order(label asc)` was the obvious thing and it is WRONG for a list a human
+ * reads. GROQ orders by codepoint, so every capital sorts before every
+ * lowercase letter: "RTD Denver Accidents" lands before "Rideshare Accidents"
+ * and "UPS Truck Accident" before "Uninsured and Underinsured Motorcyclist
+ * Accidents". `localeCompare` — what this list has always used — compares
+ * letters first and case last, which is the order a reader scanning an
+ * alphabetical column expects. It moved two pairs across 22 of the 104 sidebar
+ * cards before the byte-diff caught it.
+ *
+ * So the sort stays in `getPracticeAreaPages()`, where the reason for it can be
+ * written down next to it.
+ */
+export const PRACTICE_AREA_PAGES_QUERY = defineQuery(
+  `*[_type == "practiceArea"]{
+    "_key": slug.current,
+    "slug": slug.current,
+    title,
+    label,
+    city,
+    topic,
+    "resource": coalesce(resource, false)
+  }`
+);
+
+/**
+ * The bodies, for `getStaticPaths`.
+ *
+ * `updatedAt` is `modifiedAt` renamed for the interface, which is what the meta
+ * line prints as "Updated" — all 104 have one, and `publishedAt` is the labelled
+ * "Posted" fallback for a page that does not.
+ *
+ * `readTime` and `factCheck` are both DERIVED in the getter — the first from
+ * this body's word count, the second from the fact-check sentence the blog and
+ * these pages share. Neither is stored on 104 documents.
+ */
+export const PRACTICE_AREA_ARTICLES_QUERY = defineQuery(
+  `*[_type == "practiceArea"]{
+    "_key": slug.current,
+    "slug": slug.current,
+    title,
+    city,
+    body,
+    "faqs": coalesce(faqs[]{ _key, question, answer }, []),
+    publishedAt,
+    "updatedAt": modifiedAt,
+    "metaTitle": seo.metaTitle,
+    "metaDescription": seo.metaDescription
+  }`
+);
+
 export const BLOG_ARTICLES_QUERY = defineQuery(
   `*[_type == "blogPost"]{
     "_key": slug.current,
