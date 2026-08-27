@@ -1000,7 +1000,7 @@ export type SHARED_SECTIONS_QUERY_RESULT = {
 
 // Source: src/sanity/lib/queries.ts
 // Variable: HOME_FAQS_QUERY
-// Query: *[_type == "faq" && shownOn == "home"]  | order(order asc){  "_key": _id,  question,  answer,  videoLength,  video{ provider, id }}
+// Query: *[_type == "homePage" && _id == "homePage"][0].faqs[]{  _key,  question,  answer,  videoLength,  video{ provider, id }}
 export type HOME_FAQS_QUERY_RESULT = Array<{
   _key: string;
   question: string;
@@ -1010,11 +1010,11 @@ export type HOME_FAQS_QUERY_RESULT = Array<{
     provider: "wistia";
     id: string;
   };
-}>;
+}> | null;
 
 // Source: src/sanity/lib/queries.ts
 // Variable: CAR_ACCIDENT_FAQS_QUERY
-// Query: *[_type == "faq" && shownOn == "car-accidents"] | order(order asc){  "_key": _id,  question,  answer,  videoLength,  video{ provider, id }}
+// Query: *[_type == "carAccidentsPage" && _id == "carAccidentsPage"][0].faqs[]{  _key,  question,  answer,  videoLength,  video{ provider, id }}
 export type CAR_ACCIDENT_FAQS_QUERY_RESULT = Array<{
   _key: string;
   question: string;
@@ -1024,7 +1024,7 @@ export type CAR_ACCIDENT_FAQS_QUERY_RESULT = Array<{
     provider: "wistia";
     id: string;
   };
-}>;
+}> | null;
 
 // Source: src/sanity/lib/queries.ts
 // Variable: CASE_RESULTS_QUERY
@@ -1201,7 +1201,7 @@ export type CITIES_QUERY_RESULT = Array<{
 
 // Source: src/sanity/lib/queries.ts
 // Variable: NEWS_MENTIONS_QUERY
-// Query: *[_type == "newsMention"] | order(order asc){  "_key": _id, outlet, logo, date, headline, href}
+// Query: *[_type == "homePage" && _id == "homePage"][0].pressMentions[]{  _key, outlet, logo, date, headline, href}
 export type NEWS_MENTIONS_QUERY_RESULT = Array<{
   _key: string;
   outlet: string;
@@ -1215,11 +1215,11 @@ export type NEWS_MENTIONS_QUERY_RESULT = Array<{
   date: string;
   headline: string;
   href: string;
-}>;
+}> | null;
 
 // Source: src/sanity/lib/queries.ts
 // Variable: INSIGHTS_QUERY
-// Query: *[_type == "insight"] | order(order asc){  "_key": _id, category, iconKey, readTime, title, href}
+// Query: *[_type == "homePage" && _id == "homePage"][0].insightTeasers[]{  _key, category, iconKey, readTime, title, href}
 export type INSIGHTS_QUERY_RESULT = Array<{
   _key: string;
   category: string;
@@ -1227,11 +1227,11 @@ export type INSIGHTS_QUERY_RESULT = Array<{
   readTime: string;
   title: string;
   href: string;
-}>;
+}> | null;
 
 // Source: src/sanity/lib/queries.ts
 // Variable: COMMUNITY_PHOTOS_QUERY
-// Query: *[_type == "communityPhoto"] | order(order asc){  "_key": _id, image, org, caption, span}
+// Query: *[_type == "homePage" && _id == "homePage"][0].communityPhotos[]{  _key, image, org, caption, span}
 export type COMMUNITY_PHOTOS_QUERY_RESULT = Array<{
   _key: string;
   image: {
@@ -1244,11 +1244,11 @@ export type COMMUNITY_PHOTOS_QUERY_RESULT = Array<{
   org: string;
   caption: string;
   span: 12 | 3 | 4 | 5;
-}>;
+}> | null;
 
 // Source: src/sanity/lib/queries.ts
 // Variable: NGO_PARTNERS_QUERY
-// Query: *[_type == "ngoPartner"] | order(order asc){  "_key": _id, name, logo}
+// Query: *[_type == "homePage" && _id == "homePage"][0].charityPartners[]{  _key, name, logo}
 export type NGO_PARTNERS_QUERY_RESULT = Array<{
   _key: string;
   name: string;
@@ -1259,11 +1259,11 @@ export type NGO_PARTNERS_QUERY_RESULT = Array<{
     crop?: SanityImageCrop;
     _type: "image";
   };
-}>;
+}> | null;
 
 // Source: src/sanity/lib/queries.ts
 // Variable: COMMUNITY_PARTNERS_QUERY
-// Query: *[_type == "communityPartner"] | order(order asc){  "_key": _id, org, logo, photo, body}
+// Query: *[_type == "communityPage" && _id == "communityPage"][0].partners[]{  _key, org, logo, photo, body}
 export type COMMUNITY_PARTNERS_QUERY_RESULT = Array<{
   _key: string;
   org: string;
@@ -1282,16 +1282,16 @@ export type COMMUNITY_PARTNERS_QUERY_RESULT = Array<{
     _type: "image";
   } | null;
   body: string;
-}>;
+}> | null;
 
 // Source: src/sanity/lib/queries.ts
 // Variable: SPONSORSHIPS_QUERY
-// Query: *[_type == "sponsorship"] | order(order asc){  "_key": _id, name, body}
+// Query: *[_type == "communityPage" && _id == "communityPage"][0].sponsorships[]{  _key, name, body}
 export type SPONSORSHIPS_QUERY_RESULT = Array<{
   _key: string;
   name: string;
   body: string;
-}>;
+}> | null;
 
 // Source: src/sanity/lib/queries.ts
 // Variable: ATTORNEY_RAIL_QUERY
@@ -1321,8 +1321,8 @@ declare module "@sanity/client" {
     '*[_type == "award"] | order(order asc){\n  "_key": key.current,\n  alt,\n  image,\n  height\n}': AWARDS_QUERY_RESULT;
     '*[_type == "coreValue"] | order(order asc){\n  "_key": _id,\n  title,\n  body,\n  iconKey\n}': CORE_VALUES_QUERY_RESULT;
     '*[_type == "sharedSections" && _id == "sharedSections"][0]{\n  coreValues{ eyebrow, title },\n  reviewSummary{ count, rating, source },\n  attorneysBand{\n    eyebrow,\n    title,\n    quote,\n    ctaLabel,\n    signature{ name, role, attorneyKey, portrait }\n  }\n}': SHARED_SECTIONS_QUERY_RESULT;
-    '*[_type == "faq" && shownOn == "home"]\n  | order(order asc){\n  "_key": _id,\n  question,\n  answer,\n  videoLength,\n  video{ provider, id }\n}': HOME_FAQS_QUERY_RESULT;
-    '*[_type == "faq" && shownOn == "car-accidents"] | order(order asc){\n  "_key": _id,\n  question,\n  answer,\n  videoLength,\n  video{ provider, id }\n}': CAR_ACCIDENT_FAQS_QUERY_RESULT;
+    '*[_type == "homePage" && _id == "homePage"][0].faqs[]{\n  _key,\n  question,\n  answer,\n  videoLength,\n  video{ provider, id }\n}': HOME_FAQS_QUERY_RESULT;
+    '*[_type == "carAccidentsPage" && _id == "carAccidentsPage"][0].faqs[]{\n  _key,\n  question,\n  answer,\n  videoLength,\n  video{ provider, id }\n}': CAR_ACCIDENT_FAQS_QUERY_RESULT;
     '*[_type == "caseResult" && shownOn == "results"] | order(order asc){\n  "_key": _id, tag, badge, "wonInCourt": coalesce(wonInCourt, false), offered, recovered, story\n}': CASE_RESULTS_QUERY_RESULT;
     '*[_type == "caseResult" && shownOn == "co-counsel"] | order(order asc){\n  "_key": _id, tag, badge, "wonInCourt": coalesce(wonInCourt, false), offered, recovered, story\n}': CO_COUNSEL_RESULTS_QUERY_RESULT;
     '*[_type == "caseResult" && shownOn == "home"] | order(order asc){\n  "_key": _id, tag, badge, "wonInCourt": coalesce(wonInCourt, false), offered, recovered, story\n}': HOME_RESULTS_QUERY_RESULT;
@@ -1332,12 +1332,12 @@ declare module "@sanity/client" {
     '*[_type == "teamMember"] | order(\n  select(\n    kind == "partner" => 1,\n    kind == "attorney" => 2,\n    kind == "staff" => 3,\n    kind == "dog" => 4,\n    5\n  ) asc,\n  orderRank asc\n){\n  "_key": key.current,\n  name,\n  role,\n  kind,\n  photo,\n  bio,\n  "memorial": coalesce(memorial, false),\n  "hasProfile": coalesce(hasProfile, false),\n  "awards": awards[]{ _key, image, alt }\n}': TEAM_QUERY_RESULT;
     '*[_type == "teamMember" && hasProfile == true] | order(\n  select(\n    kind == "partner" => 1,\n    kind == "attorney" => 2,\n    kind == "staff" => 3,\n    kind == "dog" => 4,\n    5\n  ) asc,\n  orderRank asc\n){\n  "slug": key.current,\n  category,\n  lede,\n  email,\n  "facts": facts[]{ _key, value, label },\n  body,\n  education,\n  "links": links[]{ _key, label, href },\n  videoId\n}': TEAM_PROFILES_QUERY_RESULT;
     '*[_type == "city"] | order(order asc){\n  "_key": key.current, name\n}': CITIES_QUERY_RESULT;
-    '*[_type == "newsMention"] | order(order asc){\n  "_key": _id, outlet, logo, date, headline, href\n}': NEWS_MENTIONS_QUERY_RESULT;
-    '*[_type == "insight"] | order(order asc){\n  "_key": _id, category, iconKey, readTime, title, href\n}': INSIGHTS_QUERY_RESULT;
-    '*[_type == "communityPhoto"] | order(order asc){\n  "_key": _id, image, org, caption, span\n}': COMMUNITY_PHOTOS_QUERY_RESULT;
-    '*[_type == "ngoPartner"] | order(order asc){\n  "_key": _id, name, logo\n}': NGO_PARTNERS_QUERY_RESULT;
-    '*[_type == "communityPartner"] | order(order asc){\n  "_key": _id, org, logo, photo, body\n}': COMMUNITY_PARTNERS_QUERY_RESULT;
-    '*[_type == "sponsorship"] | order(order asc){\n  "_key": _id, name, body\n}': SPONSORSHIPS_QUERY_RESULT;
+    '*[_type == "homePage" && _id == "homePage"][0].pressMentions[]{\n  _key, outlet, logo, date, headline, href\n}': NEWS_MENTIONS_QUERY_RESULT;
+    '*[_type == "homePage" && _id == "homePage"][0].insightTeasers[]{\n  _key, category, iconKey, readTime, title, href\n}': INSIGHTS_QUERY_RESULT;
+    '*[_type == "homePage" && _id == "homePage"][0].communityPhotos[]{\n  _key, image, org, caption, span\n}': COMMUNITY_PHOTOS_QUERY_RESULT;
+    '*[_type == "homePage" && _id == "homePage"][0].charityPartners[]{\n  _key, name, logo\n}': NGO_PARTNERS_QUERY_RESULT;
+    '*[_type == "communityPage" && _id == "communityPage"][0].partners[]{\n  _key, org, logo, photo, body\n}': COMMUNITY_PARTNERS_QUERY_RESULT;
+    '*[_type == "communityPage" && _id == "communityPage"][0].sponsorships[]{\n  _key, name, body\n}': SPONSORSHIPS_QUERY_RESULT;
     '*[_type == "teamMember" && onAttorneyRail == true] | order(\n  select(\n    kind == "partner" => 1,\n    kind == "attorney" => 2,\n    kind == "staff" => 3,\n    kind == "dog" => 4,\n    5\n  ) asc,\n  orderRank asc\n){\n  "_key": key.current,\n  name,\n  role,\n  "portrait": photo,\n  videoId\n}': ATTORNEY_RAIL_QUERY_RESULT;
   }
 }

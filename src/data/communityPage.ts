@@ -1,13 +1,19 @@
 // The /community-involvement page.
 //
-// SANITY SWAP POINT — `communityPartner` documents (11) plus a `sponsorship`
-// list and a `communityPage` singleton.
+// ITS TWO LISTS ARE ARRAYS ON THE `communityPage` DOCUMENT since Phase 2f, not
+// collections. Neither renders anywhere else — this page exists to render them
+// — and a Collection is for content reused in more than one place.
 //
-// The homepage's mosaic and NGO row stay in `community.ts`. They are the same
-// organisations, but they carry their own display labels ("Ronald McDonald
+// The homepage's mosaic and charity row stay in `community.ts`. They are the
+// same organisations, but they carry their own display labels ("Ronald McDonald
 // House", not "Ronald McDonald House Denver") and a different crop of six of
 // the logos — merging them would silently restyle an approved homepage. They
-// become one document set when an editor owns the assets.
+// become one set when an editor owns the assets.
+//
+// NOTE THE `CommunityPage` INTERFACE BELOW SHARES A NAME with the type typegen
+// emits for the document. Different modules, so nothing collides today — but
+// they mean different things, and Phase 4 merges the page's copy onto that same
+// document, which is when one of them has to give way.
 import type { ImageMetadata } from "astro";
 import type { SanityImageSource } from "@sanity/image-url";
 import { sanityClient } from "sanity:client";
@@ -87,13 +93,17 @@ export async function getCommunityPage(): Promise<CommunityPage> {
 
 export async function getCommunityPartners(): Promise<CommunityPartner[]> {
   const partners = await once("communityPartners", async () =>
-    required(await sanityClient.fetch(COMMUNITY_PARTNERS_QUERY), "Community Partners")
+    required(
+      await sanityClient.fetch(COMMUNITY_PARTNERS_QUERY),
+      "Community Involvement",
+      "Pages"
+    )
   );
   return partners.map((p) => ({ ...p, photo: p.photo ?? undefined })) as CommunityPartner[];
 }
 
 export async function getSponsorships(): Promise<Sponsorship[]> {
   return once("sponsorships", async () =>
-    required(await sanityClient.fetch(SPONSORSHIPS_QUERY), "Sponsorships")
+    required(await sanityClient.fetch(SPONSORSHIPS_QUERY), "Community Involvement", "Pages")
   );
 }

@@ -1,11 +1,15 @@
 // The homepage's two-tab feed.
 //
-// SANITY SWAP POINT — and deliberately TWO exports rather than one merged list,
-// because these become two separate collections: `newsMention` (press coverage,
-// pointing off-site) and `blogPost` (167 of them on the legacy site, pointing
-// in-site). The comp merges them behind one tab switch, which makes them look
-// like one type with a flag; they are not. Keeping them apart means the CMS
-// swap is two clean substitutions rather than an unpicking job.
+// DELIBERATELY TWO EXPORTS rather than one merged list. The comp merges them
+// behind one tab switch, which makes them look like one type with a flag; they
+// are not. Press mentions point off-site to somebody else's publication and
+// insight teasers point in-site at articles the firm writes.
+//
+// BOTH ARE ARRAYS ON THE `homePage` DOCUMENT since Phase 2f, not collections.
+// They render on one page, and a Collection is for content reused in more than
+// one place. The header here used to predict `newsMention` and `blogPost` as
+// two collections; the blog half of that still holds — those 186 posts are
+// genuinely reusable — and is Phase 3.
 import type { ImageMetadata } from "astro";
 import type { SanityImageSource } from "@sanity/image-url";
 import { sanityClient } from "sanity:client";
@@ -68,7 +72,7 @@ export async function getFeedSection(): Promise<FeedSection> {
 /** TODO(content): every `href` is a placeholder — the comp points them all at #news. */
 export async function getNewsMentions(): Promise<NewsMention[]> {
   return once("newsMentions", async () =>
-    required(await sanityClient.fetch(NEWS_MENTIONS_QUERY), "Press Mentions")
+    required(await sanityClient.fetch(NEWS_MENTIONS_QUERY), "Homepage", "Pages")
   );
 }
 
@@ -79,6 +83,6 @@ export async function getNewsMentions(): Promise<NewsMention[]> {
  */
 export async function getInsightPosts(): Promise<InsightPost[]> {
   return once("insights", async () =>
-    required(await sanityClient.fetch(INSIGHTS_QUERY), "Insight Teasers")
+    required(await sanityClient.fetch(INSIGHTS_QUERY), "Homepage", "Pages")
   );
 }

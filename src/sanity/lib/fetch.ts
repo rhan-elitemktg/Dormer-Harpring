@@ -11,6 +11,14 @@
 // silent failure of exactly the shape the four `check:` linters exist to catch
 // — and none of them would catch this one, because the markup would be valid.
 //
+// IT ONLY STARTED DOING ANYTHING FOR THE EIGHT PAGE LISTS IN PHASE 2f. A GROQ
+// collection query returns `[]` when a type has no documents, never null, so
+// `required(fetch(NGO_PARTNERS_QUERY), …)` could not throw however empty the
+// dataset got — the homepage would simply have rendered a strip with no logos.
+// Reading an array off a page document returns null when the document or the
+// field is absent, so the guard is real now. What keeps that failure in the
+// Studio rather than in a deploy is `required().min(1)` on each of those arrays.
+//
 // Kept as a plain assertion rather than a generic fetch wrapper on purpose:
 // `overloadClientMethods` types `sanityClient.fetch(QUERY)` from the query's
 // own text, and wrapping the call in a generic throws that away.
@@ -18,12 +26,17 @@
 /**
  * @param value  what the fetch returned
  * @param what   the document, named as an editor would see it in the Studio
+ * @param where  the desk group it lives under — the message tells them where to go
  */
-export function required<T>(value: T | null | undefined, what: string): NonNullable<T> {
+export function required<T>(
+  value: T | null | undefined,
+  what: string,
+  where = "Site Settings"
+): NonNullable<T> {
   if (value === null || value === undefined) {
     throw new Error(
       `Sanity has no "${what}" document, so the site cannot be built.\n` +
-        `Create it in the Studio at /admin under Site Settings, fill it in, and PUBLISH it — ` +
+        `Create it in the Studio at /admin under ${where}, fill it in, and PUBLISH it — ` +
         `the build reads the published version only, so a draft is invisible to it.`
     );
   }

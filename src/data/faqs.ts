@@ -1,11 +1,14 @@
-// Homepage FAQ.
+// The two hand-authored FAQ accordions — the homepage's eight and Car
+// Accidents' twelve.
 //
-// SANITY SWAP POINT — mirrors the future `src/sanity/lib/faqs.ts`. These become
-// `faq` documents; 28 of the 104 imported practice-area pages carry their own
-// accordion, so this is a collection rather than page-local copy. That figure
-// was "65 of 98" while it was an estimate off the scrape — the import counted
-// them: 28 pages, 153 items. The accordion is not in `content.rendered`, which
-// is why guessing was ever necessary; see scripts/import-practice-areas.mjs.
+// EACH IS AN ARRAY ON ITS OWN PAGE DOCUMENT, not a shared collection, since
+// Phase 2f. They were one `faq` collection split by a `shownOn` radio, and the
+// argument for that was the 28 imported practice-area accordions — 153 items,
+// counted by the import rather than estimated. Those are not `faq` documents:
+// they live in `src/content/practice-areas/`, arrive with the body copy (they
+// are not in `content.rendered` either — see scripts/import-practice-areas.mjs)
+// and are read through `practiceAreaPages.ts`. So nothing was shared, and a
+// Collection is for content reused in more than one place.
 //
 // The answers stay plain strings rather than Portable Text on purpose: they
 // also feed FAQPage structured data, which takes a string, and an answer with
@@ -79,14 +82,21 @@ export async function getFaqSection(): Promise<FaqSection> {
  * `FaqBand` and `FaqItem` render them unchanged, and `faqSchema` marks them up
  * for free. That answers the question HANDOFF.md left open.
  *
- * A collection rather than page copy for the reason the note at the top of this
- * file gives: 28 of the 104 imported practice-area pages carry their own
- * accordion, so a `faq` document belongs to a practice area, and the next
- * detail page adds a `getXFaqs()` here rather than a field on its own document.
+ * PAGE COPY, NOT A COLLECTION, WHICH REVERSES WHAT THIS COMMENT USED TO SAY. It
+ * argued that 28 of the 104 imported practice-area pages carry their own
+ * accordion, so an FAQ belongs to a practice area — but those 28 are not in
+ * Sanity at all: they arrive with the body copy in `src/content/practice-areas/`
+ * and are read through `practiceAreaPages.ts`. Nothing was ever shared, and the
+ * `shownOn` radio holding the collection together existed only to take it apart
+ * again. The next detail page gets a field on its own document.
  */
 export async function getCarAccidentFaqs(): Promise<Faq[]> {
   return once("faqs:car-accidents", async () =>
-    required(await sanityClient.fetch(CAR_ACCIDENT_FAQS_QUERY), "FAQs (Car Accidents)")
+    required(
+      await sanityClient.fetch(CAR_ACCIDENT_FAQS_QUERY),
+      "Car Accidents",
+      "Pages"
+    )
   );
 }
 
@@ -116,6 +126,6 @@ export async function getCarAccidentFaqSection(anchor: string): Promise<FaqSecti
 
 export async function getHomeFaqs(): Promise<Faq[]> {
   return once("faqs:home", async () =>
-    required(await sanityClient.fetch(HOME_FAQS_QUERY), "FAQs (Homepage)")
+    required(await sanityClient.fetch(HOME_FAQS_QUERY), "Homepage", "Pages")
   );
 }

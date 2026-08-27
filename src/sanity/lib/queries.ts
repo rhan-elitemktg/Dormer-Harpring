@@ -145,29 +145,33 @@ export const SHARED_SECTIONS_QUERY = defineQuery(
 );
 
 /**
- * FAQ accordions, one page's at a time.
+ * FAQ accordions — one array on the page that shows it.
  *
- * `shownOn` rather than a reference, for now: the homepage and the heavy Car
- * Accidents page are the only two hand-authored accordions, and the 28 imported
- * practice-area pages carry theirs inline on their own document. When those
- * move, an FAQ belongs to a practice area and this becomes a reference.
+ * THEY WERE ONE COLLECTION SPLIT BY A `shownOn` RADIO, and the radio was the
+ * tell: its only job was to undo the sharing. Eight questions belong to the
+ * homepage and twelve to Car Accidents, and the third caller the collection's
+ * header cited — the 28 imported practice-area accordions — is not in Sanity at
+ * all; those arrive with the body copy in `src/content/practice-areas/`.
+ *
+ * `order` went with it. Array position is the order now.
  *
  * The answer is a plain string, not Portable Text — it also feeds FAQPage
  * structured data, which takes a string.
  */
-export const HOME_FAQS_QUERY = defineQuery(`*[_type == "faq" && shownOn == "home"]
-  | order(order asc){
-  "_key": _id,
+export const HOME_FAQS_QUERY = defineQuery(
+  `*[_type == "homePage" && _id == "homePage"][0].faqs[]{
+  _key,
   question,
   answer,
   videoLength,
   video{ provider, id }
-}`);
+}`
+);
 
 /** The heavy Car Accidents page's twelve. Same shape, same components. */
 export const CAR_ACCIDENT_FAQS_QUERY = defineQuery(
-  `*[_type == "faq" && shownOn == "car-accidents"] | order(order asc){
-  "_key": _id,
+  `*[_type == "carAccidentsPage" && _id == "carAccidentsPage"][0].faqs[]{
+  _key,
   question,
   answer,
   videoLength,
@@ -352,37 +356,60 @@ export const CITIES_QUERY = defineQuery(`*[_type == "city"] | order(order asc){
   "_key": key.current, name
 }`);
 
+/*
+ * THE SIX BELOW READ ARRAYS ON A PAGE DOCUMENT, NOT COLLECTIONS.
+ *
+ * Each was its own collection until Phase 2f and each renders on exactly one
+ * page — a Collection is for content reused in more than one place, and none of
+ * these ever was. `_key` is the array member's own now rather than a projected
+ * `_id`, and `| order(order asc)` is gone with the field it sorted on.
+ *
+ * Both `_type` and `_id` are filtered, as everywhere else here: an `_id` alone
+ * tells typegen nothing about shape and the result comes back as a union across
+ * every document type.
+ */
+
 /** Press mentions — the firm in someone else's publication. */
-export const NEWS_MENTIONS_QUERY = defineQuery(`*[_type == "newsMention"] | order(order asc){
-  "_key": _id, outlet, logo, date, headline, href
-}`);
+export const NEWS_MENTIONS_QUERY = defineQuery(
+  `*[_type == "homePage" && _id == "homePage"][0].pressMentions[]{
+  _key, outlet, logo, date, headline, href
+}`
+);
 
 /** Insight teaser cards. */
-export const INSIGHTS_QUERY = defineQuery(`*[_type == "insight"] | order(order asc){
-  "_key": _id, category, iconKey, readTime, title, href
-}`);
+export const INSIGHTS_QUERY = defineQuery(
+  `*[_type == "homePage" && _id == "homePage"][0].insightTeasers[]{
+  _key, category, iconKey, readTime, title, href
+}`
+);
 
 /** The homepage's community mosaic. */
-export const COMMUNITY_PHOTOS_QUERY = defineQuery(`*[_type == "communityPhoto"] | order(order asc){
-  "_key": _id, image, org, caption, span
-}`);
+export const COMMUNITY_PHOTOS_QUERY = defineQuery(
+  `*[_type == "homePage" && _id == "homePage"][0].communityPhotos[]{
+  _key, image, org, caption, span
+}`
+);
 
 /** Charity logos in the homepage strip. */
-export const NGO_PARTNERS_QUERY = defineQuery(`*[_type == "ngoPartner"] | order(order asc){
-  "_key": _id, name, logo
-}`);
+export const NGO_PARTNERS_QUERY = defineQuery(
+  `*[_type == "homePage" && _id == "homePage"][0].charityPartners[]{
+  _key, name, logo
+}`
+);
 
-/** The Community page's partner cards. */
+/** The Community Involvement page's partner cards. */
 export const COMMUNITY_PARTNERS_QUERY = defineQuery(
-  `*[_type == "communityPartner"] | order(order asc){
-  "_key": _id, org, logo, photo, body
+  `*[_type == "communityPage" && _id == "communityPage"][0].partners[]{
+  _key, org, logo, photo, body
 }`
 );
 
 /** Teams, events and causes the firm sponsors. */
-export const SPONSORSHIPS_QUERY = defineQuery(`*[_type == "sponsorship"] | order(order asc){
-  "_key": _id, name, body
-}`);
+export const SPONSORSHIPS_QUERY = defineQuery(
+  `*[_type == "communityPage" && _id == "communityPage"][0].sponsorships[]{
+  _key, name, body
+}`
+);
 
 /**
  * The attorney rail — partners and attorneys with a card on the homepage and
