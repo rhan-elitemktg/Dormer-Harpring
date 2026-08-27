@@ -34,6 +34,7 @@ import { sanityClient } from "sanity:client";
 import {
   BLOG_ARTICLES_QUERY,
   BLOG_CATEGORIES_QUERY,
+  BLOG_INDEX_PAGE_QUERY,
   BLOG_POSTS_QUERY,
   FEATURED_POST_QUERY,
 } from "../sanity/lib/queries";
@@ -154,20 +155,10 @@ export interface BlogPageCopy {
 }
 
 export async function getBlogPage(): Promise<BlogPageCopy> {
-  return {
-    eyebrow: "News & insights",
-    title: "Our blog.",
-    lede: pt(
-      "Plain-English answers on insurance, injuries, and what actually happens " +
-        "after a crash in Colorado — written by the lawyers who try these cases."
-    ),
-    categoryLabel: "Select category",
-    allLabel: "All posts",
-    featuredBadge: "Featured post",
-    readMoreLabel: "Read more",
-    loadMoreLabel: "Load more posts",
-    emptyLabel: "No posts in this category yet.",
-  };
+  const copy = await once("blogIndexPage", async () =>
+    required(await sanityClient.fetch(BLOG_INDEX_PAGE_QUERY), "Blog index", "Pages")
+  );
+  return { ...copy, lede: copy.lede as PortableTextBlock[] };
 }
 
 /**

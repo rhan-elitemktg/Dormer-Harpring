@@ -38,6 +38,8 @@ import { PinIcon } from "@sanity/icons/Pin";
 import { HomeIcon } from "@sanity/icons/Home";
 import { HeartFilledIcon } from "@sanity/icons/HeartFilled";
 import { WarningOutlineIcon } from "@sanity/icons/WarningOutline";
+import { InfoOutlineIcon } from "@sanity/icons/InfoOutline";
+import { CheckmarkCircleIcon } from "@sanity/icons/CheckmarkCircle";
 import { TagIcon } from "@sanity/icons/Tag";
 import { DocumentTextIcon } from "@sanity/icons/DocumentText";
 import { ThLargeIcon } from "@sanity/icons/ThLarge";
@@ -67,21 +69,38 @@ function singleton(
 /**
  * PAGES — one per route.
  *
- * `[type, title, icon?]`. The two template singletons (`blogPostTemplate`,
- * `practiceAreaTemplate`) belong here rather than in Settings: they hold the
- * chrome that appears ON a page — the fact-check band's wording, the sidebar
- * headings — which is exactly the copy the SEO team will want to reach.
+ * `[type, title, icon?]`.
  *
  * Three arrived in Phase 2f holding only the lists that had been filed as
  * collections without being shared by anything; Phase 3d added Practice Areas
- * for the directory and the featured grid. Their copy is Phase 4, and the rest
- * of the routes with it — this is four of an eventual sixteen.
+ * for the directory and the featured grid. Phase 4 gave all four their COPY and
+ * added the rest of the routes.
+ *
+ * IN THE ORDER OF THE MAIN NAV, then the pages the nav does not reach. An
+ * editor looking for "the About page" reads down this list the way a visitor
+ * reads across the header; alphabetical would put Thank You between Results and
+ * Testimonials and Contact above everything.
+ *
+ * TWELVE OF AN EVENTUAL FIFTEEN. Still to come: the two TEMPLATE singletons —
+ * `blogPostTemplate` and `practiceAreaTemplate`, which hold the chrome that
+ * appears ON a post or a service page (the fact-check band's wording, the
+ * sidebar headings) and which belong here rather than in Settings for exactly
+ * that reason: it is copy on a page, which is what the SEO team reaches for —
+ * and the three utility pages, which arrive together as one `sitePage` group.
  */
 const PAGES: [string, string, ComponentType?][] = [
   ["homePage", "Homepage", HomeIcon],
+  ["aboutPage", "About", InfoOutlineIcon],
+  ["teamPage", "Meet Our Attorneys", UsersIcon],
   ["practiceAreasPage", "Practice Areas", ThLargeIcon],
-  ["communityPage", "Community Involvement", HeartFilledIcon],
   ["carAccidentsPage", "Car Accidents", WarningOutlineIcon],
+  ["resultsPage", "Results", CaseIcon],
+  ["testimonialsPage", "Testimonials", CommentIcon],
+  ["coCounselPage", "Co-Counsel", UsersIcon],
+  ["communityPage", "Community Involvement", HeartFilledIcon],
+  ["blogIndexPage", "Blog index", DocumentTextIcon],
+  ["contactPage", "Contact", EnvelopeIcon],
+  ["thankYouPage", "Thank You", CheckmarkCircleIcon],
 ];
 
 /**

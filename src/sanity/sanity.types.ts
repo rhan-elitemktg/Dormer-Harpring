@@ -481,19 +481,60 @@ export type SimpleText = Array<{
   _key: string;
 }>;
 
-export type CarAccidentsPage = {
+export type ThankYouPage = {
   _id: string;
-  _type: "carAccidentsPage";
+  _type: "thankYouPage";
   _createdAt: string;
   _updatedAt: string;
   _rev: string;
-  faqs: Array<{
-    question: string;
-    answer: string;
-    video: VideoRef;
-    videoLength: string;
-    _key: string;
-  }>;
+  eyebrow: string;
+  title: string;
+  lede: SimpleText;
+  panel: {
+    eyebrow: string;
+    title: Array<string>;
+    lede: string;
+    reassurances: Array<string>;
+    ctas: Array<{
+      label: string;
+      href: string;
+      _type: "thankYouCta";
+      _key: string;
+    }>;
+  };
+};
+
+export type ContactPage = {
+  _id: string;
+  _type: "contactPage";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  eyebrow: string;
+  title: string;
+  lede: SimpleText;
+  find: {
+    eyebrow: string;
+    title: string;
+    lede: string;
+  };
+};
+
+export type BlogIndexPage = {
+  _id: string;
+  _type: "blogIndexPage";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  eyebrow: string;
+  title: string;
+  lede: SimpleText;
+  categoryLabel: string;
+  allLabel: string;
+  featuredBadge: string;
+  readMoreLabel: string;
+  loadMoreLabel: string;
+  emptyLabel: string;
 };
 
 export type CommunityPage = {
@@ -524,6 +565,119 @@ export type CommunityPage = {
   sponsorships: Array<{
     name: string;
     body: string;
+    _key: string;
+  }>;
+};
+
+export type CoCounselPage = {
+  _id: string;
+  _type: "coCounselPage";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  eyebrow: string;
+  title: string;
+  lede: SimpleText;
+  ctaLabel: string;
+  ctaNote: string;
+  partnership: {
+    eyebrow: string;
+    title: string;
+    intro: SimpleText;
+    callout: InlineText;
+    terms: SimpleText;
+  };
+  results: {
+    eyebrow: string;
+    title: string;
+    lede: string;
+  };
+  areas: {
+    eyebrow: string;
+    title: string;
+    ctaLabel: string;
+    items: Array<{
+      label: string;
+      href: string;
+      _type: "coCounselArea";
+      _key: string;
+    }>;
+  };
+  form: {
+    title: string;
+    lede: string;
+    requiredNote: string;
+    submitLabel: string;
+    disclaimer: string;
+  };
+};
+
+export type InlineText = Array<{
+  children?: Array<{
+    marks?: Array<string>;
+    text?: string;
+    _type: "span";
+    _key: string;
+  }>;
+  style?: "normal";
+  listItem?: never;
+  markDefs?: Array<
+    {
+      _key: string;
+    } & Link
+  >;
+  level?: number;
+  _type: "block";
+  _key: string;
+}>;
+
+export type TestimonialsPage = {
+  _id: string;
+  _type: "testimonialsPage";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  eyebrow: string;
+  title: string;
+  lede: SimpleText;
+  ctaLabel: string;
+  ctaNote: string;
+  videos: {
+    eyebrow: string;
+    title: string;
+    lede: string;
+  };
+  written: {
+    eyebrow: string;
+    title: string;
+    lede: string;
+    moreLabel: string;
+  };
+};
+
+export type ResultsPage = {
+  _id: string;
+  _type: "resultsPage";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  eyebrow: string;
+  title: string;
+  lede: SimpleText;
+  moreLabel: string;
+};
+
+export type CarAccidentsPage = {
+  _id: string;
+  _type: "carAccidentsPage";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  faqs: Array<{
+    question: string;
+    answer: string;
+    video: VideoRef;
+    videoLength: string;
     _key: string;
   }>;
 };
@@ -646,6 +800,81 @@ export type AnswerText = Array<{
   _type: "block";
   _key: string;
 }>;
+
+export type TeamPage = {
+  _id: string;
+  _type: "teamPage";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  eyebrow: string;
+  title: string;
+  lede: SimpleText;
+  partners: {
+    eyebrow: string;
+    title: string;
+  };
+  team: {
+    eyebrow: string;
+    title: string;
+  };
+};
+
+export type AboutPage = {
+  _id: string;
+  _type: "aboutPage";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  eyebrow: string;
+  title: string;
+  lede: SimpleText;
+  ctaLabel: string;
+  ctaNote: string;
+  whoWeAre: {
+    eyebrow: string;
+    title: string;
+    body: SimpleText;
+    ctaLabel: string;
+    ctaHref: string;
+  };
+  quote: {
+    text: InlineText;
+    attribution: string;
+  };
+  team: {
+    eyebrow: string;
+    title: string;
+    ctaLabel: string;
+    ctaHref: string;
+  };
+  reviews: {
+    eyebrow: string;
+    title: string;
+  };
+  oneShot: {
+    eyebrow: string;
+    title: string;
+    body: SimpleText;
+  };
+  expect: {
+    title: string;
+    promises: Array<{
+      title: string;
+      body: string;
+      iconKey: string;
+      _type: "aboutPromise";
+      _key: string;
+    }>;
+    milestones: Array<{
+      tag: string;
+      title: string;
+      body: string;
+      _type: "aboutMilestone";
+      _key: string;
+    }>;
+  };
+};
 
 export type HomePage = {
   _id: string;
@@ -841,25 +1070,6 @@ export type HomePage = {
   }>;
 };
 
-export type InlineText = Array<{
-  children?: Array<{
-    marks?: Array<string>;
-    text?: string;
-    _type: "span";
-    _key: string;
-  }>;
-  style?: "normal";
-  listItem?: never;
-  markDefs?: Array<
-    {
-      _key: string;
-    } & Link
-  >;
-  level?: number;
-  _type: "block";
-  _key: string;
-}>;
-
 export type NavLink = {
   _type: "navLink";
   label: string;
@@ -985,15 +1195,23 @@ export type AllSanitySchemaTypes =
   | TeamMember
   | RichText
   | SimpleText
-  | CarAccidentsPage
+  | ThankYouPage
+  | ContactPage
+  | BlogIndexPage
   | CommunityPage
+  | CoCounselPage
+  | InlineText
+  | TestimonialsPage
+  | ResultsPage
+  | CarAccidentsPage
   | PracticeAreaReference
   | PracticeAreasPage
   | PracticeArea
   | Seo
   | AnswerText
+  | TeamPage
+  | AboutPage
   | HomePage
-  | InlineText
   | NavLink
   | Link
   | SanityImagePaletteSwatch
@@ -1843,6 +2061,196 @@ export type HOME_COMMUNITY_SECTION_QUERY_RESULT = {
   ctaLabel: string;
 } | null;
 
+// Source: src/sanity/lib/queries.ts
+// Variable: ABOUT_PAGE_QUERY
+// Query: *[_type == "aboutPage" && _id == "aboutPage"][0]{  eyebrow,  title,  lede,  ctaLabel,  ctaNote,  whoWeAre{ eyebrow, title, body, ctaLabel, ctaHref },  quote{ text, attribution },  team{ eyebrow, title, ctaLabel, ctaHref },  reviews{ eyebrow, title },  oneShot{ eyebrow, title, body },  expect{    title,    "promises": coalesce(promises[]{ _key, title, body, iconKey }, []),    "milestones": coalesce(milestones[]{ _key, tag, title, body }, [])  }}
+export type ABOUT_PAGE_QUERY_RESULT = {
+  eyebrow: string;
+  title: string;
+  lede: SimpleText;
+  ctaLabel: string;
+  ctaNote: string;
+  whoWeAre: {
+    eyebrow: string;
+    title: string;
+    body: SimpleText;
+    ctaLabel: string;
+    ctaHref: string;
+  };
+  quote: {
+    text: InlineText;
+    attribution: string;
+  };
+  team: {
+    eyebrow: string;
+    title: string;
+    ctaLabel: string;
+    ctaHref: string;
+  };
+  reviews: {
+    eyebrow: string;
+    title: string;
+  };
+  oneShot: {
+    eyebrow: string;
+    title: string;
+    body: SimpleText;
+  };
+  expect: {
+    title: string;
+    promises: Array<{
+      _key: string;
+      title: string;
+      body: string;
+      iconKey: string;
+    }>;
+    milestones: Array<{
+      _key: string;
+      tag: string;
+      title: string;
+      body: string;
+    }>;
+  };
+} | null;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: TEAM_PAGE_QUERY
+// Query: *[_type == "teamPage" && _id == "teamPage"][0]{  eyebrow,  title,  lede,  partners{ eyebrow, title },  team{ eyebrow, title }}
+export type TEAM_PAGE_QUERY_RESULT = {
+  eyebrow: string;
+  title: string;
+  lede: SimpleText;
+  partners: {
+    eyebrow: string;
+    title: string;
+  };
+  team: {
+    eyebrow: string;
+    title: string;
+  };
+} | null;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: CONTACT_PAGE_QUERY
+// Query: *[_type == "contactPage" && _id == "contactPage"][0]{  eyebrow,  title,  lede,  find{ eyebrow, title, lede }}
+export type CONTACT_PAGE_QUERY_RESULT = {
+  eyebrow: string;
+  title: string;
+  lede: SimpleText;
+  find: {
+    eyebrow: string;
+    title: string;
+    lede: string;
+  };
+} | null;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: THANK_YOU_PAGE_QUERY
+// Query: *[_type == "thankYouPage" && _id == "thankYouPage"][0]{  eyebrow,  title,  lede,  panel{    eyebrow,    title,    lede,    "reassurances": coalesce(reassurances, []),    "ctas": coalesce(ctas[]{ _key, label, href }, [])  }}
+export type THANK_YOU_PAGE_QUERY_RESULT = {
+  eyebrow: string;
+  title: string;
+  lede: SimpleText;
+  panel: {
+    eyebrow: string;
+    title: Array<string>;
+    lede: string;
+    reassurances: Array<string>;
+    ctas: Array<{
+      _key: string;
+      label: string;
+      href: string;
+    }>;
+  };
+} | null;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: TESTIMONIALS_PAGE_QUERY
+// Query: *[_type == "testimonialsPage" && _id == "testimonialsPage"][0]{  eyebrow,  title,  lede,  ctaLabel,  ctaNote,  videos{ eyebrow, title, lede },  written{ eyebrow, title, lede, moreLabel }}
+export type TESTIMONIALS_PAGE_QUERY_RESULT = {
+  eyebrow: string;
+  title: string;
+  lede: SimpleText;
+  ctaLabel: string;
+  ctaNote: string;
+  videos: {
+    eyebrow: string;
+    title: string;
+    lede: string;
+  };
+  written: {
+    eyebrow: string;
+    title: string;
+    lede: string;
+    moreLabel: string;
+  };
+} | null;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: RESULTS_PAGE_QUERY
+// Query: *[_type == "resultsPage" && _id == "resultsPage"][0]{  eyebrow, title, lede, moreLabel}
+export type RESULTS_PAGE_QUERY_RESULT = {
+  eyebrow: string;
+  title: string;
+  lede: SimpleText;
+  moreLabel: string;
+} | null;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: CO_COUNSEL_PAGE_QUERY
+// Query: *[_type == "coCounselPage" && _id == "coCounselPage"][0]{  eyebrow,  title,  lede,  ctaLabel,  ctaNote,  partnership{ eyebrow, title, intro, callout, terms },  results{ eyebrow, title, lede },  areas{    eyebrow,    title,    ctaLabel,    "items": coalesce(items[]{ _key, label, href }, [])  },  form{ title, lede, requiredNote, submitLabel, disclaimer }}
+export type CO_COUNSEL_PAGE_QUERY_RESULT = {
+  eyebrow: string;
+  title: string;
+  lede: SimpleText;
+  ctaLabel: string;
+  ctaNote: string;
+  partnership: {
+    eyebrow: string;
+    title: string;
+    intro: SimpleText;
+    callout: InlineText;
+    terms: SimpleText;
+  };
+  results: {
+    eyebrow: string;
+    title: string;
+    lede: string;
+  };
+  areas: {
+    eyebrow: string;
+    title: string;
+    ctaLabel: string;
+    items: Array<{
+      _key: string;
+      label: string;
+      href: string;
+    }>;
+  };
+  form: {
+    title: string;
+    lede: string;
+    requiredNote: string;
+    submitLabel: string;
+    disclaimer: string;
+  };
+} | null;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: BLOG_INDEX_PAGE_QUERY
+// Query: *[_type == "blogIndexPage" && _id == "blogIndexPage"][0]{  eyebrow,  title,  lede,  categoryLabel,  allLabel,  featuredBadge,  readMoreLabel,  loadMoreLabel,  emptyLabel}
+export type BLOG_INDEX_PAGE_QUERY_RESULT = {
+  eyebrow: string;
+  title: string;
+  lede: SimpleText;
+  categoryLabel: string;
+  allLabel: string;
+  featuredBadge: string;
+  readMoreLabel: string;
+  loadMoreLabel: string;
+  emptyLabel: string;
+} | null;
+
 // Query TypeMap
 import "@sanity/client";
 declare module "@sanity/client" {
@@ -1886,5 +2294,13 @@ declare module "@sanity/client" {
     '*[_type == "homePage" && _id == "homePage"][0].faqSection{\n  eyebrow,\n  title,\n  lede,\n  answerCtaLabel,\n  ask{ title, body, ctaLabel, ctaHref, portrait, portraitAlt }\n}': HOME_FAQ_SECTION_QUERY_RESULT;
     '*[_type == "homePage" && _id == "homePage"][0].feedSection{\n  tabs{ news, insights },\n  news{ eyebrow, title, lede, ctaLabel },\n  insights{ eyebrow, title, lede, ctaLabel }\n}': HOME_FEED_SECTION_QUERY_RESULT;
     '*[_type == "homePage" && _id == "homePage"][0].communitySection{\n  eyebrow, title, lede, ctaLabel\n}': HOME_COMMUNITY_SECTION_QUERY_RESULT;
+    '*[_type == "aboutPage" && _id == "aboutPage"][0]{\n  eyebrow,\n  title,\n  lede,\n  ctaLabel,\n  ctaNote,\n  whoWeAre{ eyebrow, title, body, ctaLabel, ctaHref },\n  quote{ text, attribution },\n  team{ eyebrow, title, ctaLabel, ctaHref },\n  reviews{ eyebrow, title },\n  oneShot{ eyebrow, title, body },\n  expect{\n    title,\n    "promises": coalesce(promises[]{ _key, title, body, iconKey }, []),\n    "milestones": coalesce(milestones[]{ _key, tag, title, body }, [])\n  }\n}': ABOUT_PAGE_QUERY_RESULT;
+    '*[_type == "teamPage" && _id == "teamPage"][0]{\n  eyebrow,\n  title,\n  lede,\n  partners{ eyebrow, title },\n  team{ eyebrow, title }\n}': TEAM_PAGE_QUERY_RESULT;
+    '*[_type == "contactPage" && _id == "contactPage"][0]{\n  eyebrow,\n  title,\n  lede,\n  find{ eyebrow, title, lede }\n}': CONTACT_PAGE_QUERY_RESULT;
+    '*[_type == "thankYouPage" && _id == "thankYouPage"][0]{\n  eyebrow,\n  title,\n  lede,\n  panel{\n    eyebrow,\n    title,\n    lede,\n    "reassurances": coalesce(reassurances, []),\n    "ctas": coalesce(ctas[]{ _key, label, href }, [])\n  }\n}': THANK_YOU_PAGE_QUERY_RESULT;
+    '*[_type == "testimonialsPage" && _id == "testimonialsPage"][0]{\n  eyebrow,\n  title,\n  lede,\n  ctaLabel,\n  ctaNote,\n  videos{ eyebrow, title, lede },\n  written{ eyebrow, title, lede, moreLabel }\n}': TESTIMONIALS_PAGE_QUERY_RESULT;
+    '*[_type == "resultsPage" && _id == "resultsPage"][0]{\n  eyebrow, title, lede, moreLabel\n}': RESULTS_PAGE_QUERY_RESULT;
+    '*[_type == "coCounselPage" && _id == "coCounselPage"][0]{\n  eyebrow,\n  title,\n  lede,\n  ctaLabel,\n  ctaNote,\n  partnership{ eyebrow, title, intro, callout, terms },\n  results{ eyebrow, title, lede },\n  areas{\n    eyebrow,\n    title,\n    ctaLabel,\n    "items": coalesce(items[]{ _key, label, href }, [])\n  },\n  form{ title, lede, requiredNote, submitLabel, disclaimer }\n}': CO_COUNSEL_PAGE_QUERY_RESULT;
+    '*[_type == "blogIndexPage" && _id == "blogIndexPage"][0]{\n  eyebrow,\n  title,\n  lede,\n  categoryLabel,\n  allLabel,\n  featuredBadge,\n  readMoreLabel,\n  loadMoreLabel,\n  emptyLabel\n}': BLOG_INDEX_PAGE_QUERY_RESULT;
   }
 }

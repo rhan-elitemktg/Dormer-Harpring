@@ -15,10 +15,18 @@ import { videoRef } from "./objects/videoRef";
 import { answerText, inlineText, richText, simpleText } from "./objects/richText";
 import { seo } from "./objects/seo";
 
+import { aboutPage } from "./pages/aboutPage";
+import { blogIndexPage } from "./pages/blogIndexPage";
 import { carAccidentsPage } from "./pages/carAccidentsPage";
+import { coCounselPage } from "./pages/coCounselPage";
 import { communityPage } from "./pages/communityPage";
+import { contactPage } from "./pages/contactPage";
 import { homePage } from "./pages/homePage";
 import { practiceAreasPage } from "./pages/practiceAreasPage";
+import { resultsPage } from "./pages/resultsPage";
+import { teamPage } from "./pages/teamPage";
+import { testimonialsPage } from "./pages/testimonialsPage";
+import { thankYouPage } from "./pages/thankYouPage";
 
 import { award } from "./collections/award";
 import { blogCategory } from "./collections/blogCategory";
@@ -53,14 +61,26 @@ const objects: SchemaTypeDefinition[] = [
  *
  * Phase 2f put three of these here early, holding only the lists that were
  * wrongly filed as collections, and Phase 3d added `practiceAreasPage` for the
- * directory and the featured grid. Their COPY is still Phase 4 and lands on
- * these same documents — so a Phase 4 seed must merge rather than replace.
+ * directory and the featured grid. Phase 4 added their COPY to those same four
+ * documents — which is why every Phase 4 seed reads a document back and merges
+ * rather than replacing it — and the rest of the routes with it.
+ *
+ * IN DESK ORDER, not alphabetical, so this list and `sanity/structure/index.ts`
+ * read side by side.
  */
 const pages: SchemaTypeDefinition[] = [
   homePage,
+  aboutPage,
+  teamPage,
   practiceAreasPage,
-  communityPage,
   carAccidentsPage,
+  resultsPage,
+  testimonialsPage,
+  coCounselPage,
+  communityPage,
+  blogIndexPage,
+  contactPage,
+  thankYouPage,
 ];
 
 /**

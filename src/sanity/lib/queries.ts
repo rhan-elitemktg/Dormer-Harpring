@@ -127,8 +127,9 @@ export const CORE_VALUES_QUERY = defineQuery(`*[_type == "coreValue"] | order(or
 /**
  * Headings for bands that appear on more than one page.
  *
- * Only two qualify — see the note on the schema type. A band whose heading
- * differs per page is that page's content, not this document's.
+ * Only THREE qualify — see the note on the schema type, and note the sweep that
+ * found the third, which a naming-convention grep had been missing. A band whose
+ * heading differs per page is that page's content, not this document's.
  */
 export const SHARED_SECTIONS_QUERY = defineQuery(
   `*[_type == "sharedSections" && _id == "sharedSections"][0]{
@@ -785,5 +786,141 @@ export const HOME_FEED_SECTION_QUERY = defineQuery(
 export const HOME_COMMUNITY_SECTION_QUERY = defineQuery(
   `*[_type == "homePage" && _id == "homePage"][0].communitySection{
   eyebrow, title, lede, ctaLabel
+}`
+);
+
+/*
+ * THE EIGHT ROUTE SINGLETONS — Phase 4b.
+ *
+ * One query per page, and each returns its interface's shape exactly. Three
+ * things are DELIBERATELY ABSENT from every one of them, and all three are the
+ * same call made three times:
+ *
+ *   the page-header photograph and its alt   still a local import — `PageHeader`
+ *                                            art-directs through a hand-built
+ *                                            <picture>, so making it editable is
+ *                                            a component change
+ *   the office address, phone, map           read from `firmDetails` at render
+ *                                            time; copy moves, values stay derived
+ *   the consultation form's copy             `contactSettings`, on twelve of the
+ *                                            fourteen comps
+ */
+
+/** /about — nine bands' worth of copy, minus the six it borrows from elsewhere. */
+export const ABOUT_PAGE_QUERY = defineQuery(
+  `*[_type == "aboutPage" && _id == "aboutPage"][0]{
+  eyebrow,
+  title,
+  lede,
+  ctaLabel,
+  ctaNote,
+  whoWeAre{ eyebrow, title, body, ctaLabel, ctaHref },
+  quote{ text, attribution },
+  team{ eyebrow, title, ctaLabel, ctaHref },
+  reviews{ eyebrow, title },
+  oneShot{ eyebrow, title, body },
+  expect{
+    title,
+    "promises": coalesce(promises[]{ _key, title, body, iconKey }, []),
+    "milestones": coalesce(milestones[]{ _key, tag, title, body }, [])
+  }
+}`
+);
+
+/** /meet-our-attorneys — the page's copy. The roster is `TEAM_QUERY`. */
+export const TEAM_PAGE_QUERY = defineQuery(
+  `*[_type == "teamPage" && _id == "teamPage"][0]{
+  eyebrow,
+  title,
+  lede,
+  partners{ eyebrow, title },
+  team{ eyebrow, title }
+}`
+);
+
+/**
+ * /contact.
+ *
+ * `find.lede` is the part AFTER the address, not the whole line — the address
+ * is prepended in the getter, from `firmDetails`. Storing the rendered sentence
+ * would publish the address twice from two documents.
+ */
+export const CONTACT_PAGE_QUERY = defineQuery(
+  `*[_type == "contactPage" && _id == "contactPage"][0]{
+  eyebrow,
+  title,
+  lede,
+  find{ eyebrow, title, lede }
+}`
+);
+
+/** /thank-you. `noIndex`, and reachable only by submitting the form. */
+export const THANK_YOU_PAGE_QUERY = defineQuery(
+  `*[_type == "thankYouPage" && _id == "thankYouPage"][0]{
+  eyebrow,
+  title,
+  lede,
+  panel{
+    eyebrow,
+    title,
+    lede,
+    "reassurances": coalesce(reassurances, []),
+    "ctas": coalesce(ctas[]{ _key, label, href }, [])
+  }
+}`
+);
+
+/** /testimonials — two band headings over records the homepage also renders. */
+export const TESTIMONIALS_PAGE_QUERY = defineQuery(
+  `*[_type == "testimonialsPage" && _id == "testimonialsPage"][0]{
+  eyebrow,
+  title,
+  lede,
+  ctaLabel,
+  ctaNote,
+  videos{ eyebrow, title, lede },
+  written{ eyebrow, title, lede, moreLabel }
+}`
+);
+
+/** /results — the copy around the case-result grid. */
+export const RESULTS_PAGE_QUERY = defineQuery(
+  `*[_type == "resultsPage" && _id == "resultsPage"][0]{
+  eyebrow, title, lede, moreLabel
+}`
+);
+
+/** /co-counsel — the pitch to other lawyers, and its own referral form's copy. */
+export const CO_COUNSEL_PAGE_QUERY = defineQuery(
+  `*[_type == "coCounselPage" && _id == "coCounselPage"][0]{
+  eyebrow,
+  title,
+  lede,
+  ctaLabel,
+  ctaNote,
+  partnership{ eyebrow, title, intro, callout, terms },
+  results{ eyebrow, title, lede },
+  areas{
+    eyebrow,
+    title,
+    ctaLabel,
+    "items": coalesce(items[]{ _key, label, href }, [])
+  },
+  form{ title, lede, requiredNote, submitLabel, disclaimer }
+}`
+);
+
+/** /news — the blog index's copy. Six of the eight fields are button labels. */
+export const BLOG_INDEX_PAGE_QUERY = defineQuery(
+  `*[_type == "blogIndexPage" && _id == "blogIndexPage"][0]{
+  eyebrow,
+  title,
+  lede,
+  categoryLabel,
+  allLabel,
+  featuredBadge,
+  readMoreLabel,
+  loadMoreLabel,
+  emptyLabel
 }`
 );
