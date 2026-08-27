@@ -343,7 +343,8 @@ export const TEAM_PROFILES_QUERY = defineQuery(
   body,
   education,
   "links": links[]{ _key, label, href },
-  video{ ref{ provider, id }, poster, alt }
+  video{ id, poster, alt },
+  "portrait": photo
 }`
 );
 
@@ -385,35 +386,25 @@ export const SPONSORSHIPS_QUERY = defineQuery(`*[_type == "sponsorship"] | order
 }`);
 
 /**
- * The attorney rail — a third presentation of people who are already team
- * members, with a wider crop and a film on the portrait.
+ * The attorney rail — partners and attorneys with a card on the homepage and
+ * About.
  *
- * ONE QUERY FOR BOTH RAILS. About shows all four and the homepage a subset, so
- * the getters filter on `onHomeRail` rather than running two near-identical
- * queries — and `once()` then makes it one request for both pages.
+ * ORDERED THE SAME WAY THE TEAM PAGE IS, and that is the simplification. There
+ * was a separate `railOrder` number because the two sequences differed in the
+ * comps; keeping both meant two orders that silently disagree and a field to
+ * type into when the desk already has drag-and-drop. One order, dragged in one
+ * place.
  *
  * `href` is built by `attorneyPath()` in the getter, not here: three layers
  * already agree on the trailing slash and a projection must not become a
  * fourth.
  *
- * THE PORTRAIT IS THE PERSON'S ONE PORTRAIT. There used to be a separate rail
- * crop — and for two of the four it was a different photograph entirely, which
- * is how Sean Dormer appeared on the site as two different people. One image,
- * hotspot-cropped per surface.
- *
- * Ordered by `railOrder`, NOT `orderRank`: the rail's sequence genuinely
- * differs from the team page's — it leads with the other partner.
- *
- * A MISSING `railOrder` SORTS LAST, NOT ARBITRARILY. Adding someone to the rail
- * is a checkbox, so an unpositioned card is the normal state right after one is
- * added; without the coalesce they land wherever null happens to sort and the
- * rail reshuffles. Ties fall back to the team page's own group-then-rank order,
- * so two unpositioned attorneys still come out in a sensible sequence rather
- * than at random.
+ * The card's portrait IS the person's portrait — there is no separate rail
+ * crop, and for two of the four there used to be a different photograph
+ * entirely. The film is the profile film; there is no second id.
  */
 export const ATTORNEY_RAIL_QUERY = defineQuery(
   `*[_type == "teamMember" && onAttorneyRail == true] | order(
-  coalesce(railOrder, 9999) asc,
   select(
     kind == "partner" => 1,
     kind == "attorney" => 2,
@@ -426,9 +417,7 @@ export const ATTORNEY_RAIL_QUERY = defineQuery(
   "_key": key.current,
   name,
   role,
-  location,
   "portrait": photo,
-  "video": railVideo{ provider, id },
-  "placement": coalesce(railPlacement, "both")
+  "videoId": video.id
 }`
 );

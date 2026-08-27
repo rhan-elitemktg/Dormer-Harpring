@@ -85,11 +85,9 @@ const sizes =
 
   <a class="acard__link" href={attorney.href}>
     <span class="acard__name">{attorney.name}</span>
-    {/* The city is optional: without one the role stands alone rather than
-        trailing a separator with nothing after it. */}
-    <span class="acard__role">
-      {attorney.location ? `${attorney.role} \u00b7 ${attorney.location}` : attorney.role}
-    </span>
+    {/* The role alone. The card carried a city after it — dropped by request,
+        and with it the separator that dangled whenever the city was empty. */}
+    <span class="acard__role">{attorney.role}</span>
   </a>
 </div>
 

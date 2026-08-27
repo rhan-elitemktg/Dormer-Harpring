@@ -28,13 +28,14 @@ export interface AttorneyCardData {
   /** Split from `location` — the comp stores one "Role · City" string, but the
    *  separator is presentation and an editor should not have to type it. */
   role: string;
-  /** The city after the role. Optional — the card drops the separator with it. */
-  location?: string;
   href: string;
   portrait: ImageMetadata | SanityImageSource;
   /**
    * The card's portrait opens this in a popover; the name below it goes to
    * `href`. Two controls, deliberately — see AttorneyCard.astro.
+   *
+   * THE PERSON'S PROFILE FILM. There was a second id for the rail card; one
+   * person's one video does not want two places to keep in step.
    *
    * OPTIONAL. Not every attorney has been filmed, and the first one an editor
    * added without a film threw at render. Without one the portrait keeps its
@@ -101,7 +102,7 @@ export async function getAttorneysSection(): Promise<AttorneysSection> {
  * both getters read the same query and filter — and `once()` makes that one
  * request however many pages ask.
  */
-async function attorneyRail(): Promise<(AttorneyCardData & { placement: string })[]> {
+async function attorneyRail(): Promise<AttorneyCardData[]> {
   const rows = await once("attorneyRail", async () =>
     required(await sanityClient.fetch(ATTORNEY_RAIL_QUERY), "Team (attorney rail)")
   );
@@ -111,22 +112,18 @@ async function attorneyRail(): Promise<(AttorneyCardData & { placement: string }
     role: row.role!,
     href: attorneyPath(row._key!),
     portrait: row.portrait as SanityImageSource,
-    placement: row.placement,
-    // Both optional, and left UNDEFINED rather than coerced to a blank string:
-    // the card branches on their presence, and "" would render an empty
-    // separator and an empty popover instead of dropping them.
-    ...(row.location ? { location: row.location } : {}),
-    ...(row.video?.id ? { video: row.video as VideoRef } : {}),
+    // Left UNDEFINED rather than coerced: the card branches on its presence,
+    // and an empty id would render a play glyph over an empty popover.
+    ...(row.videoId ? { video: { provider: "wistia", id: row.videoId } as VideoRef } : {}),
   }));
 }
 
+/**
+ * BOTH PAGES SHOW THE SAME RAIL. There was a per-person homepage/About choice;
+ * it is one rail, and a card that is on it is on both.
+ */
 export async function getHomeAttorneys(): Promise<AttorneyCardData[]> {
-  // "about-only" is the ONLY thing that keeps someone off the homepage. An
-  // unset placement means both, because every attorney already exists as a
-  // document and ticking "add to the rail" on one cannot trigger an initial
-  // value — so an opt-OUT is the only default that behaves the way adding
-  // someone looks like it should.
-  return (await attorneyRail()).filter((card) => card.placement !== "about-only");
+  return attorneyRail();
 }
 
 /**

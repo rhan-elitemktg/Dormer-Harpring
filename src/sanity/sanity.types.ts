@@ -461,6 +461,7 @@ export type TeamMember = {
     alt: string;
     _key: string;
   }>;
+  onAttorneyRail?: boolean;
   hasProfile?: boolean;
   category?: string;
   lede?: string;
@@ -478,7 +479,7 @@ export type TeamMember = {
     } & NavLink
   >;
   video?: {
-    ref?: VideoRef;
+    id?: string;
     poster?: {
       asset?: SanityImageAssetReference;
       media?: unknown;
@@ -488,11 +489,6 @@ export type TeamMember = {
     };
     alt?: string;
   };
-  onAttorneyRail?: boolean;
-  railOrder?: number;
-  railPlacement?: "both" | "about-only";
-  location?: string;
-  railVideo?: VideoRef;
 };
 
 export type RichText = Array<
@@ -1073,7 +1069,7 @@ export type TEAM_QUERY_RESULT = Array<{
 
 // Source: src/sanity/lib/queries.ts
 // Variable: TEAM_PROFILES_QUERY
-// Query: *[_type == "teamMember" && hasProfile == true] | order(  select(    kind == "partner" => 1,    kind == "attorney" => 2,    kind == "staff" => 3,    kind == "dog" => 4,    5  ) asc,  orderRank asc){  "slug": key.current,  category,  lede,  email,  "facts": facts[]{ _key, value, label },  body,  education,  "links": links[]{ _key, label, href },  video{ ref{ provider, id }, poster, alt }}
+// Query: *[_type == "teamMember" && hasProfile == true] | order(  select(    kind == "partner" => 1,    kind == "attorney" => 2,    kind == "staff" => 3,    kind == "dog" => 4,    5  ) asc,  orderRank asc){  "slug": key.current,  category,  lede,  email,  "facts": facts[]{ _key, value, label },  body,  education,  "links": links[]{ _key, label, href },  video{ id, poster, alt },  "portrait": photo}
 export type TEAM_PROFILES_QUERY_RESULT = Array<{
   slug: string;
   category: string | null;
@@ -1092,10 +1088,7 @@ export type TEAM_PROFILES_QUERY_RESULT = Array<{
     href: string;
   }> | null;
   video: {
-    ref: {
-      provider: "wistia";
-      id: string;
-    } | null;
+    id: string | null;
     poster: {
       asset?: SanityImageAssetReference;
       media?: unknown;
@@ -1104,6 +1097,13 @@ export type TEAM_PROFILES_QUERY_RESULT = Array<{
       _type: "image";
     } | null;
     alt: string | null;
+  } | null;
+  portrait: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
   } | null;
 }>;
 
@@ -1211,12 +1211,11 @@ export type SPONSORSHIPS_QUERY_RESULT = Array<{
 
 // Source: src/sanity/lib/queries.ts
 // Variable: ATTORNEY_RAIL_QUERY
-// Query: *[_type == "teamMember" && onAttorneyRail == true] | order(  coalesce(railOrder, 9999) asc,  select(    kind == "partner" => 1,    kind == "attorney" => 2,    kind == "staff" => 3,    kind == "dog" => 4,    5  ) asc,  orderRank asc){  "_key": key.current,  name,  role,  location,  "portrait": photo,  "video": railVideo{ provider, id },  "placement": coalesce(railPlacement, "both")}
+// Query: *[_type == "teamMember" && onAttorneyRail == true] | order(  select(    kind == "partner" => 1,    kind == "attorney" => 2,    kind == "staff" => 3,    kind == "dog" => 4,    5  ) asc,  orderRank asc){  "_key": key.current,  name,  role,  "portrait": photo,  "videoId": video.id}
 export type ATTORNEY_RAIL_QUERY_RESULT = Array<{
   _key: string;
   name: string;
   role: string;
-  location: string | null;
   portrait: {
     asset?: SanityImageAssetReference;
     media?: unknown;
@@ -1224,11 +1223,7 @@ export type ATTORNEY_RAIL_QUERY_RESULT = Array<{
     crop?: SanityImageCrop;
     _type: "image";
   } | null;
-  video: {
-    provider: "wistia";
-    id: string;
-  } | null;
-  placement: "about-only" | "both";
+  videoId: string | null;
 }>;
 
 // Query TypeMap
@@ -1251,7 +1246,7 @@ declare module "@sanity/client" {
     '*[_type == "testimonial" && onReviewsPage == true && format == "video"]\n  | order(reviewOrder asc){\n  "_key": key.current,\n  video{ provider, id },\n  name,\n  quote,\n  poster\n}': VIDEO_REVIEWS_QUERY_RESULT;
     '*[_type == "testimonial" && onReviewsPage == true && format == "written"]\n  | order(reviewOrder asc){\n  "_key": key.current,\n  name,\n  source,\n  quote,\n  body\n}': WRITTEN_REVIEWS_QUERY_RESULT;
     '*[_type == "teamMember"] | order(\n  select(\n    kind == "partner" => 1,\n    kind == "attorney" => 2,\n    kind == "staff" => 3,\n    kind == "dog" => 4,\n    5\n  ) asc,\n  orderRank asc\n){\n  "_key": key.current,\n  name,\n  role,\n  kind,\n  photo,\n  bio,\n  "memorial": coalesce(memorial, false),\n  "hasProfile": coalesce(hasProfile, false),\n  "awards": awards[]{ _key, image, alt }\n}': TEAM_QUERY_RESULT;
-    '*[_type == "teamMember" && hasProfile == true] | order(\n  select(\n    kind == "partner" => 1,\n    kind == "attorney" => 2,\n    kind == "staff" => 3,\n    kind == "dog" => 4,\n    5\n  ) asc,\n  orderRank asc\n){\n  "slug": key.current,\n  category,\n  lede,\n  email,\n  "facts": facts[]{ _key, value, label },\n  body,\n  education,\n  "links": links[]{ _key, label, href },\n  video{ ref{ provider, id }, poster, alt }\n}': TEAM_PROFILES_QUERY_RESULT;
+    '*[_type == "teamMember" && hasProfile == true] | order(\n  select(\n    kind == "partner" => 1,\n    kind == "attorney" => 2,\n    kind == "staff" => 3,\n    kind == "dog" => 4,\n    5\n  ) asc,\n  orderRank asc\n){\n  "slug": key.current,\n  category,\n  lede,\n  email,\n  "facts": facts[]{ _key, value, label },\n  body,\n  education,\n  "links": links[]{ _key, label, href },\n  video{ id, poster, alt },\n  "portrait": photo\n}': TEAM_PROFILES_QUERY_RESULT;
     '*[_type == "city"] | order(order asc){\n  "_key": key.current, name\n}': CITIES_QUERY_RESULT;
     '*[_type == "newsMention"] | order(order asc){\n  "_key": _id, outlet, logo, date, headline, href\n}': NEWS_MENTIONS_QUERY_RESULT;
     '*[_type == "insight"] | order(order asc){\n  "_key": _id, category, iconKey, readTime, title, href\n}': INSIGHTS_QUERY_RESULT;
@@ -1259,6 +1254,6 @@ declare module "@sanity/client" {
     '*[_type == "ngoPartner"] | order(order asc){\n  "_key": _id, name, logo\n}': NGO_PARTNERS_QUERY_RESULT;
     '*[_type == "communityPartner"] | order(order asc){\n  "_key": _id, org, logo, photo, body\n}': COMMUNITY_PARTNERS_QUERY_RESULT;
     '*[_type == "sponsorship"] | order(order asc){\n  "_key": _id, name, body\n}': SPONSORSHIPS_QUERY_RESULT;
-    '*[_type == "teamMember" && onAttorneyRail == true] | order(\n  coalesce(railOrder, 9999) asc,\n  select(\n    kind == "partner" => 1,\n    kind == "attorney" => 2,\n    kind == "staff" => 3,\n    kind == "dog" => 4,\n    5\n  ) asc,\n  orderRank asc\n){\n  "_key": key.current,\n  name,\n  role,\n  location,\n  "portrait": photo,\n  "video": railVideo{ provider, id },\n  "placement": coalesce(railPlacement, "both")\n}': ATTORNEY_RAIL_QUERY_RESULT;
+    '*[_type == "teamMember" && onAttorneyRail == true] | order(\n  select(\n    kind == "partner" => 1,\n    kind == "attorney" => 2,\n    kind == "staff" => 3,\n    kind == "dog" => 4,\n    5\n  ) asc,\n  orderRank asc\n){\n  "_key": key.current,\n  name,\n  role,\n  "portrait": photo,\n  "videoId": video.id\n}': ATTORNEY_RAIL_QUERY_RESULT;
   }
 }

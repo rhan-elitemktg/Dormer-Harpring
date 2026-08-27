@@ -128,11 +128,16 @@ const quoteText = hasQuote
         profile.video && (
           <VideoPopover video={profile.video.ref}>
             <a class="bio__video" href={videoWatchUrl(profile.video.ref)}>
+            {/* `posterSize` is set only when the poster is a REMOTE Wistia
+                thumbnail standing in for one nobody uploaded — Picture needs
+                the dimensions to reserve the box, because it cannot read them
+                off a URL the way it does off a local or Sanity asset. */}
             <Picture
               src={profile.video.poster}
               alt={profile.video.alt}
               widths={[640, 900, 1280]}
               sizes="(max-width: 980px) 100vw, 60vw"
+              remoteSize={profile.video.posterSize}
               class="bio__poster"
             />
             <span class="bio__play" aria-hidden="true">

@@ -16,6 +16,12 @@
 //                      applies the hotspot and crop the editor set and picks
 //                      the format by content negotiation. See lib/image.ts for
 //                      why these do NOT go through Astro's build pipeline.
+//   string             a URL on a host we do not control — today only a Wistia
+//                      poster frame, stood in when an editor uploads none. No
+//                      srcset: we cannot ask that host for other sizes. The
+//                      dimensions come from the caller because Wistia's
+//                      thumbnail URL names them, and omitting them would shift
+//                      the layout as the image lands.
 //
 // The props are identical either way. A caller does not know or care which kind
 // of image it was handed, which is what makes moving one from src/assets into
@@ -35,13 +41,16 @@ import { isSanityImage, imageDimensions, srcFor, srcSetFor } from "../../sanity/
 // diff cannot see it.
 
 interface Props {
-  src: ImageMetadata | SanityImageSource;
+  src: ImageMetadata | SanityImageSource | string;
   alt: string;
   widths?: number[];
   sizes?: string;
   /** Above the fold. Loads eagerly at high priority; skips the fade-in. */
   eager?: boolean;
   class?: string;
+  /** Intrinsic size of a `string` src. Ignored for the other two branches,
+   *  which read it from the asset. */
+  remoteSize?: { width: number; height: number };
 }
 
 const {
@@ -51,6 +60,7 @@ const {
   sizes,
   eager = false,
   class: className,
+  remoteSize,
 } = Astro.props;
 
 // Shared by both branches, so the two cannot drift on the thing that is most
@@ -60,7 +70,8 @@ const loading = eager ? "eager" : "lazy";
 const fetchpriority = eager ? "high" : undefined;
 const decoding = eager ? "sync" : "async";
 
-const sanity = isSanityImage(src);
+const remote = typeof src === "string";
+const sanity = !remote && isSanityImage(src);
 // Read from the asset reference, not from a network call — 290 images is 290
 // round trips otherwise. Null when the ref is not in Sanity's documented
 // `image-<hash>-<w>x<h>-<fmt>` shape, and null means the attributes are omitted
@@ -70,7 +81,20 @@ const dims = sanity ? imageDimensions(src as SanityImageSource) : null;
 ---
 
 {
-  sanity ? (
+  remote ? (
+    /* Same attribute order as the other two branches — see the note below. */
+    <img
+      src={src as string}
+      alt={alt}
+      sizes={sizes}
+      loading={loading}
+      fetchpriority={fetchpriority}
+      decoding={decoding}
+      width={remoteSize?.width}
+      height={remoteSize?.height}
+      class:list={classList}
+    />
+  ) : sanity ? (
     /*
        ATTRIBUTE ORDER MATCHES ASTRO'S `<Image>` EXACTLY, and it is not
        cosmetic. HTML does not care, but the migration's strongest check is a

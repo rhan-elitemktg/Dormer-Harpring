@@ -2667,6 +2667,13 @@
         },
         "optional": true
       },
+      "onAttorneyRail": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "boolean"
+        },
+        "optional": true
+      },
       "hasProfile": {
         "type": "objectAttribute",
         "value": {
@@ -2777,11 +2784,10 @@
         "value": {
           "type": "object",
           "attributes": {
-            "ref": {
+            "id": {
               "type": "objectAttribute",
               "value": {
-                "type": "inline",
-                "name": "videoRef"
+                "type": "string"
               },
               "optional": true
             },
@@ -2840,52 +2846,6 @@
               "optional": true
             }
           }
-        },
-        "optional": true
-      },
-      "onAttorneyRail": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "boolean"
-        },
-        "optional": true
-      },
-      "railOrder": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "number"
-        },
-        "optional": true
-      },
-      "railPlacement": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "union",
-          "of": [
-            {
-              "type": "string",
-              "value": "both"
-            },
-            {
-              "type": "string",
-              "value": "about-only"
-            }
-          ]
-        },
-        "optional": true
-      },
-      "location": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "string"
-        },
-        "optional": true
-      },
-      "railVideo": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "inline",
-          "name": "videoRef"
         },
         "optional": true
       }

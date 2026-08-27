@@ -44,9 +44,6 @@ const except =
 const noProfile: ConditionalPropertyCallback = ({ document }) =>
   !(document as { hasProfile?: boolean } | undefined)?.hasProfile;
 
-const notOnRail: ConditionalPropertyCallback = ({ document }) =>
-  !(document as { onAttorneyRail?: boolean } | undefined)?.onAttorneyRail;
-
 export const teamMember = defineType({
   name: "teamMember",
   title: "Team Member",
@@ -55,7 +52,6 @@ export const teamMember = defineType({
   groups: [
     { name: "card", title: "Card", default: true },
     { name: "profile", title: "Bio page" },
-    { name: "rail", title: "Attorney rail" },
   ],
   fields: [
     /*
@@ -194,6 +190,34 @@ export const teamMember = defineType({
       ],
     }),
 
+    /*
+     * THE RAIL IS ATTORNEYS AND PARTNERS ONLY — the short "meet our attorneys"
+     * band on the homepage and About. No staff member or dog has ever been on
+     * it.
+     *
+     * ONE CHECKBOX IS THE WHOLE RAIL NOW. It used to carry four more fields —
+     * a position, a homepage/About choice, a city and a second video — and
+     * every one of them was either duplicating something or a decision nobody
+     * needed to make:
+     *
+     *   position   the rail follows the team page's drag order. One order to
+     *              keep, not two that silently disagree.
+     *   placement  the rail is the rail; both pages show it.
+     *   city       dropped from the card entirely.
+     *   film       the profile film below serves the card too.
+     */
+    defineField({
+      name: "onAttorneyRail",
+      title: "Show in the attorney rail",
+      type: "boolean",
+      group: "card",
+      initialValue: false,
+      description:
+        "The short rail on the homepage and About. It follows the same order as the team " +
+        "page, so drag them there to reorder it.",
+      hidden: only("partner", "attorney"),
+    }),
+
     defineField({
       name: "hasProfile",
       title: "Has a bio page",
@@ -290,103 +314,58 @@ export const teamMember = defineType({
       description: "Real destinations only — press mentions and directory listings.",
       hidden: only("partner", "attorney"),
     }),
+    /*
+     * ONE FILM PER PERSON, and it is FLAT.
+     *
+     * It used to be an object holding a `videoRef` object holding one visible
+     * string — three levels of box for a single id, which is what made this
+     * corner of the form look broken. The provider is always Wistia, so the id
+     * sits here directly and `data/team.ts` rebuilds the { provider, id } pair
+     * that `lib/video.ts` wants. That indirection still lives in the code where
+     * it belongs; it was never something an editor should have been looking at.
+     *
+     * The same film now serves the BIO PAGE and the attorney rail card. There
+     * was a second "Rail card film" field; two ids for one person's one video
+     * is two things to keep in step.
+     *
+     * NOT gated on `hasProfile`, deliberately: someone can be on the rail
+     * without a written bio, and their card still wants a film.
+     */
     defineField({
       name: "video",
-      title: "Profile film",
+      title: "Film",
       type: "object",
       group: "profile",
+      description:
+        "Shown on the bio page, and opened by the portrait on the attorney rail card.",
       hidden: only("partner", "attorney"),
+      options: { collapsible: true, collapsed: false },
       fields: [
-        defineField({ name: "ref", title: "Video", type: "videoRef" }),
+        defineField({
+          name: "id",
+          title: "Wistia video ID",
+          type: "string",
+          description:
+            "The id ONLY, not the whole URL — the last part of the media's address in " +
+            "Wistia, like b4n3r4pchd.",
+        }),
         defineField({
           name: "poster",
+          title: "Poster frame",
           type: "image",
           options: { hotspot: true },
-          title: "Poster frame",
+          description:
+            "OPTIONAL. Left empty, the film's own thumbnail from Wistia is used instead.",
         }),
-        defineField({ name: "alt", title: "Poster alt text", type: "string" }),
+        defineField({
+          name: "alt",
+          title: "Poster alt text",
+          type: "string",
+          description: "What a screen reader says in place of the poster.",
+        }),
       ],
     }),
 
-    /*
-     * THE RAIL IS ATTORNEYS AND PARTNERS ONLY. It is the short "meet our
-     * attorneys" band on the homepage and About, and no staff member or dog has
-     * ever been on it.
-     *
-     * There is no rail PORTRAIT any more — the card uses the one portrait above
-     * like every other surface.
-     */
-    defineField({
-      name: "onAttorneyRail",
-      title: "Show in the attorney rail",
-      type: "boolean",
-      group: "rail",
-      initialValue: false,
-      description: "The short rail on the homepage and About. Four people today.",
-      hidden: only("partner", "attorney"),
-    }),
-    defineField({
-      name: "railOrder",
-      title: "Position in the rail",
-      type: "number",
-      group: "rail",
-      description:
-        "A separate sequence from the team page's — the rail leads with a different partner. " +
-        "Low numbers first.",
-      hidden: notOnRail,
-    }),
-    /*
-     * WHERE THE CARD APPEARS — a choice, not an "also on the homepage" tickbox.
-     *
-     * It was that tickbox, defaulting to off, and it was wrong in a way
-     * `initialValue` cannot fix: every attorney ALREADY EXISTS as a document,
-     * so ticking "add to the rail" on one never triggers an initial value. The
-     * card went to About and silently not to the homepage, which is exactly
-     * what Rhan hit on the first person he added.
-     *
-     * A string with a coalesced default fixes what a boolean could not: unset
-     * reads as "both", so adding someone to the rail puts them on both pages
-     * and keeping them off the homepage is a deliberate choice. See
-     * ATTORNEY_RAIL_QUERY, which does the coalescing.
-     */
-    defineField({
-      name: "railPlacement",
-      title: "Where the card appears",
-      type: "string",
-      group: "rail",
-      initialValue: "both",
-      description:
-        "About shows the whole rail. The homepage can show a shorter version of it — pick " +
-        "\"About only\" to keep someone off the homepage.",
-      options: {
-        list: [
-          { title: "Homepage and About", value: "both" },
-          { title: "About only", value: "about-only" },
-        ],
-        layout: "radio",
-      },
-      hidden: notOnRail,
-    }),
-    defineField({
-      name: "location",
-      title: "City",
-      type: "string",
-      group: "rail",
-      description:
-        'Shown after the role on the rail card. Stored apart from the role because the ' +
-        'separator ("·") is presentation and an editor should not have to type it.',
-      hidden: notOnRail,
-    }),
-    defineField({
-      name: "railVideo",
-      title: "Rail card film",
-      type: "videoRef",
-      group: "rail",
-      description:
-        "The card's portrait opens this; the name below it goes to the bio. Two controls, " +
-        "deliberately — an <a> may not contain another <a>, which is why the card was split.",
-      hidden: notOnRail,
-    }),
   ],
   preview: {
     select: { title: "name", role: "role", kind: "kind", media: "photo" },

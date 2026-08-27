@@ -175,7 +175,9 @@ async function main() {
       railOrder: rank(i),
       onHomeRail: railHome.some((h) => h.href === card.href),
       railPortrait: asset(card.portrait as unknown as { src: string }),
-      location: card.location,
+      // `location` and `railOrder` were seeded here. Both were later dropped by
+      // request — the city left the card, and the rail follows the team page's
+      // drag order rather than a second sequence. See scripts/simplify-rail.ts.
       // Optional since the card gained a no-film branch. Every one of the four
       // this seed ran against had a stand-in id, so this never fired — it is
       // here because the TYPE is now honest about it.

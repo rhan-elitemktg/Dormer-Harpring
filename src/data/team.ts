@@ -56,6 +56,7 @@ import type { SanityImageSource } from "@sanity/image-url";
 import { sanityClient } from "sanity:client";
 import { TEAM_PROFILES_QUERY, TEAM_QUERY } from "../sanity/lib/queries";
 import { once, required } from "../sanity/lib/fetch";
+import { WISTIA_POSTER_SIZE, wistiaPosterUrl } from "../lib/video";
 
 export type TeamKind = "partner" | "attorney" | "staff" | "dog";
 
@@ -184,8 +185,22 @@ export interface TeamProfile {
    * firm's own posts, which arrive with Phase 3j and 404 until then.
    */
   links?: ProfileLink[];
-  /** A profile film, where one exists. */
-  video?: { ref: VideoRef; poster: ImageMetadata | SanityImageSource; alt: string };
+  /**
+   * A profile film, where one exists. The SAME film the attorney rail card
+   * opens — there was a second id for that, and one person's one video does not
+   * want two places to keep in step.
+   *
+   * `poster` may be a plain URL: left empty in the Studio, the film's own
+   * thumbnail from Wistia stands in, and the person's portrait stands in for
+   * that if Wistia cannot be reached. There is always something to render.
+   */
+  video?: {
+    ref: VideoRef;
+    poster: ImageMetadata | SanityImageSource | string;
+    /** Set only for a REMOTE poster — `Picture` needs it to reserve the box. */
+    posterSize?: { width: number; height: number };
+    alt: string;
+  };
 }
 
 const PROFILES: TeamProfile[] = [
@@ -1253,8 +1268,31 @@ export async function getTeamProfile(slug: string): Promise<TeamProfile | undefi
 }
 
 export async function getTeamProfiles(): Promise<TeamProfile[]> {
-  const profiles = await once("teamProfiles", async () =>
+  const rows = await once("teamProfiles", async () =>
     required(await sanityClient.fetch(TEAM_PROFILES_QUERY), "Team (bio pages)")
   );
-  return profiles as TeamProfile[];
+
+  return Promise.all(
+    rows.map(async ({ video, portrait, ...profile }) => {
+      if (!video?.id) return profile as TeamProfile;
+
+      // POSTER, IN THREE FALLS. What the editor uploaded; failing that the
+      // film's own thumbnail from Wistia; failing THAT the person's portrait,
+      // so a Wistia outage degrades to a still of the right human rather than
+      // to an empty frame or a missing block.
+      const remote = video.poster ? null : await wistiaPosterUrl(video.id);
+      const poster = video.poster ?? remote ?? portrait;
+      if (!poster) return profile as TeamProfile;
+
+      return {
+        ...profile,
+        video: {
+          ref: { provider: "wistia", id: video.id },
+          poster: poster as ImageMetadata | SanityImageSource | string,
+          ...(remote && !video.poster ? { posterSize: WISTIA_POSTER_SIZE } : {}),
+          alt: video.alt ?? "",
+        },
+      } as TeamProfile;
+    })
+  );
 }

@@ -135,3 +135,65 @@ export function wistiaPopoverClass(id: string): string {
  * one is known.
  */
 export const PLACEHOLDER_VIDEO: VideoRef = { provider: "wistia", id: "b4n3r4pchd" };
+
+
+/* -------------------------------------------------------------------------
+ * Poster frames, when nobody uploaded one
+ * ---------------------------------------------------------------------- */
+
+/** What a Wistia poster is asked for at. 16:9, and big enough for the widest
+ *  slot that renders one (the bio page's film, at 1280). */
+const POSTER = { width: 1280, height: 720 };
+
+/**
+ * One request per video id, however many pages ask.
+ *
+ * All 44 un-migrated slots point at the SAME stand-in id today, so this is one
+ * request for the whole build rather than 44 — the same reasoning as `once()`
+ * in sanity/lib/fetch.ts, and it matters for the same reason.
+ */
+const posters = new Map<string, Promise<string | null>>();
+
+/**
+ * The film's own thumbnail, for when an editor uploads no poster frame.
+ *
+ * WHY oEMBED AND NOT A PREDICTABLE URL. Wistia's thumbnails live under a
+ * per-delivery hash that cannot be derived from the media id — the obvious
+ * guess, `embed-ssl.wistia.com/deliveries/<id>.jpg`, is a 404. oEmbed is the
+ * documented way to turn an id into a thumbnail and it needs no account or key.
+ *
+ * Returns null rather than throwing when Wistia cannot be reached: a poster is
+ * a fallback for a fallback, and taking the whole build down because a third
+ * party is slow would be the wrong trade. Callers fall back again, to the
+ * person's own portrait, so there is always something to render.
+ */
+export function wistiaPosterUrl(id: string): Promise<string | null> {
+  const cached = posters.get(id);
+  if (cached) return cached;
+
+  const request = (async () => {
+    try {
+      const response = await fetch(
+        `https://fast.wistia.com/oembed?url=${encodeURIComponent(
+          `https://home.wistia.com/medias/${id}`
+        )}`
+      );
+      if (!response.ok) return null;
+      const url: unknown = (await response.json())?.thumbnail_url;
+      if (typeof url !== "string" || url === "") return null;
+      // The URL carries the crop it was rendered at; ask for ours instead.
+      return url.replace(
+        /image_crop_resized=\d+x\d+/,
+        `image_crop_resized=${POSTER.width}x${POSTER.height}`
+      );
+    } catch {
+      return null;
+    }
+  })();
+
+  posters.set(id, request);
+  return request;
+}
+
+/** The dimensions `wistiaPosterUrl` renders at, for `Picture`'s `remoteSize`. */
+export const WISTIA_POSTER_SIZE = POSTER;

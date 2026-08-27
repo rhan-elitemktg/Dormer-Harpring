@@ -63,32 +63,6 @@ def cmp(label, a, b):
             print(f"          built: {y!r}")
 
 
-def cmp_subsequence(label, comp, built, why):
-    """Every comp entry present, in the comp's order — extras allowed.
-
-    NOT A LOOSENED `cmp`. It still fails when a comp entry DISAPPEARS or when
-    two of them swap places; what it tolerates is an entry the comp never had.
-
-    That distinction is the whole reason it exists. This page's attorney grid is
-    CMS-backed now — an editor ticks "add to the rail" and a card appears — so
-    pinning it to a four-name snapshot means the check goes red every time
-    someone does their job, which is how a check gets ignored. The comp's four
-    are still the guarantee.
-    """
-    global ok
-    it = iter(built)
-    missing = [name for name in comp if not any(b == name for b in it)]
-    if not missing:
-        extra = [b for b in built if b not in comp]
-        note = f" (+{len(extra)} added since: {', '.join(extra)})" if extra else ""
-        print(f"  ✓ {label}{note}")
-        return
-    ok = False
-    print(f"  ✗ {label} — {why}")
-    for name in missing:
-        print(f"      comp entry missing from the built page, or out of order: {name!r}")
-
-
 def present(label, needles):
     """Each string must appear in the built page."""
     global ok
@@ -167,23 +141,26 @@ COMP_PARTNER = "KC Harpring"
 SITE_PARTNER = "K.C. Harpring"
 comp_team_names = [SITE_PARTNER if n == COMP_PARTNER else n for n, _ in comp_team]
 
-# THE ATTORNEY GRID IS EDITOR-CONTROLLED, so this compares as a SUBSEQUENCE.
-# The comp draws four cards; the rail is a checkbox on a team member in Sanity
-# now, and adding one is an ordinary editorial act rather than a departure from
-# the design. Removing or reordering one of the comp's four still fails.
+# THE ATTORNEY GRID IS EDITOR-CONTROLLED — WHO IS ON IT AND IN WHAT ORDER.
+#
+# The rail is a checkbox on a team member in Sanity, and its order is the team
+# page's drag order. Both adding a card and reordering the rail are ordinary
+# editorial acts now, so neither can be asserted against a four-name snapshot
+# without the check going red every time someone does their job.
+#
+# What IS still asserted: all four of the comp's attorneys are on the page. One
+# of them disappearing is a regression whoever caused it should hear about.
+#
+# The rail no longer leads with K.C. Harpring as the comp draws it — dropping
+# the separate rail position means it follows the team page, which leads with
+# Sean Dormer. Declared in EXPECTED below.
 print("\nMEET THE TEAM")
-cmp_subsequence(
-    "names / order",
-    comp_team_names,
-    built_team_names,
-    "one of the comp's four attorneys is gone from the rail, or they have been reordered",
-)
-cmp_subsequence(
-    "role lines / order",
-    [r.replace("·", "·") for _, r in comp_team],
-    built_team_roles,
-    "a comp attorney's role line changed",
-)
+present("the comp's four attorneys are all on the rail", comp_team_names)
+# The city left the card, so the comp's "Attorney · Denver" is now "Attorney".
+# Compared on the ROLE ALONE rather than dropped: a role changing is still a
+# difference worth seeing, and only the city half stopped being rendered.
+comp_team_roles = [r.split("·")[0].strip() for _, r in comp_team]
+present("the comp's four role lines, without the city", comp_team_roles)
 
 
 # ---------------------------------------------------------------- expect cards
@@ -278,6 +255,25 @@ EXPECTED = [
         "inside commented-out markup. Both retired, neither kept as a fallback. The firmDetails "
         "singleton in Sanity is the "
         "only place a phone number may live, so this reads from there",
+    ),
+    (
+        "the attorney rail carries no city",
+        # Scoped to the CARDS' own role lines. A bare `" · Denver" not in
+        # built_text` also matches the pull quote's attribution, "Dormer
+        # Harpring · Denver, Colorado", which is unrelated and staying.
+        all("·" not in role for role in built_team_roles),
+        "the comp's cards read \"Attorney · Denver\"; the city was dropped from the card by "
+        "request. It was a per-person field that every rail member had to be given, and the "
+        "separator dangled with nothing after it on anyone who was not",
+    ),
+    (
+        "the rail follows the team page's order, not the comp's",
+        built_team_names[:2] == ["Sean Dormer", "K.C. Harpring"],
+        "the comp leads with K.C. Harpring and the built rail leads with Sean Dormer. The "
+        "rail had its own position field; it was dropped by request so that one drag order "
+        "serves both the team page and the rail, rather than two sequences that silently "
+        "disagree. The team page has always led with Sean. Dragging the two partners in the "
+        "Studio changes both together",
     ),
     (
         "the founding partner's name is spelled the site's way, not the comp's",
