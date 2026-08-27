@@ -346,6 +346,21 @@ EXPECTED = [
         # The body is otherwise verbatim — every paragraph, list item and
         # heading matches the live article word for word, including its Title
         # Case bullet labels. These are the only two departures.
+        #
+        # TODO(launch): confirm the intended wording with the firm.
+        #
+        # THIS MARKER LIVES HERE BECAUSE ITS SUBJECT MOVED TO SANITY. It was a
+        # comment beside the sentence in `data/blog.ts`, and Phase 3b took the
+        # sentence into a `blogPost` document — deleting the comment with it,
+        # silently, because an unreferenced comment is not a test failure. That
+        # is the exact failure HANDOFF predicted for this phase, and the marker
+        # count is what caught it: 41 launch items before, 40 after, with
+        # nothing closed.
+        #
+        # A CHECK IS THE RIGHT HOME FOR IT NOW. The content is editable, so no
+        # file in `src/` owns that sentence any more; this assertion is the
+        # thing that still runs, still names the departure, and goes red if
+        # anyone reverts it. README.md carries the long form.
         "the live article's truncated sentence is completed",
         "understand what those waivers do and do not cover" in built_text,
         "the live copy stops mid-clause at '…understand what those waivers.' — reproduced, it "
