@@ -22,6 +22,20 @@ export type SanityImageAssetReference = {
   [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
 };
 
+export type Video = {
+  poster: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+  };
+  alt?: string;
+  title: string;
+  length: string;
+  film: VideoRef;
+};
+
 export type SharedSections = {
   _id: string;
   _type: "sharedSections";
@@ -296,41 +310,6 @@ export type CaseResult = {
   order: number;
 };
 
-export type Testimonial = {
-  _id: string;
-  _type: "testimonial";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  key: Slug;
-  name: string;
-  format: "video" | "written";
-  video?: VideoRef;
-  poster?: {
-    asset?: SanityImageAssetReference;
-    media?: unknown;
-    hotspot?: SanityImageHotspot;
-    crop?: SanityImageCrop;
-    _type: "image";
-  };
-  length?: string;
-  quote: string;
-  body?: string;
-  source?: "google";
-  onReviewsPage?: boolean;
-  reviewOrder?: number;
-  onHomeRail?: boolean;
-  railOrder?: number;
-  railHeadline?: string;
-  railBody?: string;
-};
-
-export type VideoRef = {
-  _type: "videoRef";
-  provider: "wistia";
-  id: string;
-};
-
 export type BlogCategory = {
   _id: string;
   _type: "blogCategory";
@@ -387,57 +366,6 @@ export type BlogPost = {
   legacyId?: number;
 };
 
-export type TeamMember = {
-  _id: string;
-  _type: "teamMember";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  kind: "partner" | "attorney" | "staff" | "dog";
-  orderRank?: string;
-  key: Slug;
-  name: string;
-  role: string;
-  photo?: {
-    asset?: SanityImageAssetReference;
-    media?: unknown;
-    hotspot?: SanityImageHotspot;
-    crop?: SanityImageCrop;
-    _type: "image";
-  };
-  memorial?: boolean;
-  bio?: SimpleText;
-  awards?: Array<{
-    image: {
-      asset?: SanityImageAssetReference;
-      media?: unknown;
-      hotspot?: SanityImageHotspot;
-      crop?: SanityImageCrop;
-      _type: "image";
-    };
-    alt: string;
-    _key: string;
-  }>;
-  onAttorneyRail?: boolean;
-  hasProfile?: boolean;
-  category?: string;
-  lede?: string;
-  email?: string;
-  facts?: Array<{
-    value: string;
-    label: string;
-    _key: string;
-  }>;
-  body?: RichText;
-  education?: Array<string>;
-  links?: Array<
-    {
-      _key: string;
-    } & NavLink
-  >;
-  videoId?: string;
-};
-
 export type RichText = Array<
   | {
       children?: Array<{
@@ -467,25 +395,6 @@ export type RichText = Array<
       _key: string;
     }
 >;
-
-export type SimpleText = Array<{
-  children?: Array<{
-    marks?: Array<string>;
-    text?: string;
-    _type: "span";
-    _key: string;
-  }>;
-  style?: "normal";
-  listItem?: never;
-  markDefs?: Array<
-    {
-      _key: string;
-    } & Link
-  >;
-  level?: number;
-  _type: "block";
-  _key: string;
-}>;
 
 export type SitePage = {
   _id: string;
@@ -565,6 +474,25 @@ export type ThankYouPage = {
     }>;
   };
 };
+
+export type SimpleText = Array<{
+  children?: Array<{
+    marks?: Array<string>;
+    text?: string;
+    _type: "span";
+    _key: string;
+  }>;
+  style?: "normal";
+  listItem?: never;
+  markDefs?: Array<
+    {
+      _key: string;
+    } & Link
+  >;
+  level?: number;
+  _type: "block";
+  _key: string;
+}>;
 
 export type ContactPage = {
   _id: string;
@@ -742,12 +670,296 @@ export type ResultsPage = {
   moreLabel: string;
 };
 
+export type AwardReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "award";
+};
+
+export type TestimonialReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "testimonial";
+};
+
 export type CarAccidentsPage = {
   _id: string;
   _type: "carAccidentsPage";
   _createdAt: string;
   _updatedAt: string;
   _rev: string;
+  seo?: Seo;
+  hero: {
+    trail: Array<{
+      label: string;
+      href?: string;
+      _type: "crumb";
+      _key: string;
+    }>;
+    title: string;
+    lede: string;
+    proof: Array<{
+      big: string;
+      label: string;
+      href?: string;
+      google?: boolean;
+      _type: "heroProof";
+      _key: string;
+    }>;
+    ctaLabel: string;
+    telLabel: string;
+    photoAlt: string;
+    reviewer: {
+      member: TeamMemberReference;
+      portrait: {
+        asset?: SanityImageAssetReference;
+        media?: unknown;
+        hotspot?: SanityImageHotspot;
+        crop?: SanityImageCrop;
+        _type: "image";
+      };
+      updated: string;
+    };
+  };
+  nav: {
+    items: Array<{
+      section: string;
+      label: string;
+      _type: "navItem";
+      _key: string;
+    }>;
+    ctaLabel: string;
+  };
+  triage: {
+    title: string;
+    lede: string;
+    video: Video;
+    help: {
+      text: string;
+    };
+    rows: Array<{
+      tone?: "money" | "deadline" | "warn";
+      tag?: string;
+      question: string;
+      body: string;
+      ctaLabel: string;
+      ctaHref: string;
+      stat: {
+        big: string;
+        label: string;
+      };
+      _type: "triageRow";
+      _key: string;
+    }>;
+    sources?: {
+      label: string;
+      items: Array<{
+        label: string;
+        note?: string;
+        href?: string;
+        _type: "statuteSource";
+        _key: string;
+      }>;
+    };
+  };
+  takeaways: {
+    eyebrow: string;
+    title: string;
+    lede: string;
+    items: Array<{
+      title: string;
+      body: string;
+      _type: "takeaway";
+      _key: string;
+    }>;
+  };
+  criteria: {
+    title: string;
+    lede: string;
+    video: Video;
+    items: Array<{
+      title: string;
+      body: string;
+      _type: "criterion";
+      _key: string;
+    }>;
+    note: string;
+  };
+  lawyers: {
+    title: string;
+    lede: string;
+    attorneys: Array<{
+      member: TeamMemberReference;
+      cred: string;
+      _type: "crashLawyer";
+      _key: string;
+    }>;
+    moreLabel: string;
+    moreHref: string;
+  };
+  credentials: {
+    eyebrow: string;
+    badges: Array<
+      {
+        _key: string;
+      } & AwardReference
+    >;
+    disclaimer: string;
+  };
+  whyFirm: {
+    eyebrow: string;
+    title: string;
+    stats: Array<{
+      big: string;
+      label: string;
+      _type: "firmStat";
+      _key: string;
+    }>;
+    disclaimer: string;
+    columns: Array<{
+      n: string;
+      title: string;
+      body: string;
+      _type: "whyColumn";
+      _key: string;
+    }>;
+    ctaLabel: string;
+    ctaHref: string;
+    photoAlt: string;
+  };
+  results: {
+    eyebrow: string;
+    title: string;
+    offeredLabel: string;
+    recoveredLabel: string;
+    stories: Array<{
+      offered: string;
+      recovered: string;
+      title: string;
+      story?: string;
+      changed?: string;
+      review?: TestimonialReference;
+      _type: "resultStory";
+      _key: string;
+    }>;
+    disclaimer: string;
+  };
+  timeline: {
+    title: string;
+    lede: string;
+    steps: Array<{
+      n: string;
+      title: string;
+      body: string;
+      _type: "timelineStep";
+      _key: string;
+    }>;
+    phases: Array<{
+      title: string;
+      when: string;
+      body: string;
+      _type: "timelinePhase";
+      _key: string;
+    }>;
+    photoAlt: string;
+    points: Array<string>;
+  };
+  crashTypes: {
+    title: string;
+    lede: string;
+    tiles: Array<{
+      name: string;
+      body: string;
+      linkLabel: string;
+      href?: string;
+      _type: "crashTile";
+      _key: string;
+    }>;
+  };
+  denver: {
+    title: string;
+    lede: string;
+    stats: Array<{
+      big: string;
+      label: string;
+      body: string;
+      _type: "denverStat";
+      _key: string;
+    }>;
+    corridors: Array<{
+      name: string;
+      body: string;
+      _type: "corridor";
+      _key: string;
+    }>;
+  };
+  checklistTeaser: {
+    title: string;
+    body: string;
+    ctaLabel: string;
+    ctaHref?: string;
+    steps?: Array<{
+      iconKey: string;
+      label: string;
+      _type: "checklistStep";
+      _key: string;
+    }>;
+  };
+  faultTeaser: {
+    title: string;
+    body: string;
+    ctaLabel: string;
+    ctaHref?: string;
+    scale?: {
+      start: string;
+      middle: string;
+      end: string;
+    };
+    source?: {
+      label: string;
+      items: Array<{
+        label: string;
+        note?: string;
+        href?: string;
+        _type: "statuteSource";
+        _key: string;
+      }>;
+    };
+  };
+  more: {
+    title: string;
+    features: Array<{
+      title: string;
+      body: string;
+      length: string;
+      poster: {
+        asset?: SanityImageAssetReference;
+        media?: unknown;
+        hotspot?: SanityImageHotspot;
+        crop?: SanityImageCrop;
+        _type: "image";
+      };
+      ctaLabel: string;
+      href?: string;
+      _type: "moreFeature";
+      _key: string;
+    }>;
+    cards: Array<{
+      title: string;
+      body: string;
+      ctaLabel: string;
+      href?: string;
+      _type: "moreCard";
+      _key: string;
+    }>;
+  };
+  closing: {
+    title: string;
+    lede: string;
+    officeLabel: string;
+  };
   faqs: Array<{
     question: string;
     answer: string;
@@ -755,6 +967,112 @@ export type CarAccidentsPage = {
     videoLength: string;
     _key: string;
   }>;
+  faqSection: {
+    eyebrow: string;
+    title: string;
+    lede: string;
+  };
+};
+
+export type Testimonial = {
+  _id: string;
+  _type: "testimonial";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  key: Slug;
+  name: string;
+  format: "video" | "written";
+  video?: VideoRef;
+  poster?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+  };
+  length?: string;
+  quote: string;
+  body?: string;
+  source?: "google";
+  onReviewsPage?: boolean;
+  reviewOrder?: number;
+  onHomeRail?: boolean;
+  railOrder?: number;
+  railHeadline?: string;
+  railBody?: string;
+};
+
+export type VideoRef = {
+  _type: "videoRef";
+  provider: "wistia";
+  id: string;
+};
+
+export type TeamMember = {
+  _id: string;
+  _type: "teamMember";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  kind: "partner" | "attorney" | "staff" | "dog";
+  orderRank?: string;
+  key: Slug;
+  name: string;
+  role: string;
+  photo?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+  };
+  memorial?: boolean;
+  bio?: SimpleText;
+  awards?: Array<{
+    image: {
+      asset?: SanityImageAssetReference;
+      media?: unknown;
+      hotspot?: SanityImageHotspot;
+      crop?: SanityImageCrop;
+      _type: "image";
+    };
+    alt: string;
+    _key: string;
+  }>;
+  onAttorneyRail?: boolean;
+  hasProfile?: boolean;
+  category?: string;
+  lede?: string;
+  email?: string;
+  facts?: Array<{
+    value: string;
+    label: string;
+    _key: string;
+  }>;
+  body?: RichText;
+  education?: Array<string>;
+  links?: Array<
+    {
+      _key: string;
+    } & NavLink
+  >;
+  videoId?: string;
+};
+
+export type Seo = {
+  _type: "seo";
+  metaTitle?: string;
+  metaDescription?: string;
+  canonicalUrl?: string;
+  noIndex?: boolean;
+  ogImage?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+  };
 };
 
 export type PracticeAreaReference = {
@@ -854,21 +1172,6 @@ export type PracticeArea = {
   publishedAt: string;
   modifiedAt?: string;
   legacyId?: number;
-};
-
-export type Seo = {
-  _type: "seo";
-  metaTitle?: string;
-  metaDescription?: string;
-  canonicalUrl?: string;
-  noIndex?: boolean;
-  ogImage?: {
-    asset?: SanityImageAssetReference;
-    media?: unknown;
-    hotspot?: SanityImageHotspot;
-    crop?: SanityImageCrop;
-    _type: "image";
-  };
 };
 
 export type AnswerText = Array<{
@@ -1262,6 +1565,7 @@ export type SanityImageAsset = {
 
 export type AllSanitySchemaTypes =
   | SanityImageAssetReference
+  | Video
   | SharedSections
   | SanityImageCrop
   | SanityImageHotspot
@@ -1275,19 +1579,16 @@ export type AllSanitySchemaTypes =
   | CoreValue
   | Award
   | CaseResult
-  | Testimonial
-  | VideoRef
   | BlogCategory
   | BlogCategoryReference
   | TeamMemberReference
   | BlogPost
-  | TeamMember
   | RichText
-  | SimpleText
   | SitePage
   | PracticeAreaTemplate
   | BlogPostTemplate
   | ThankYouPage
+  | SimpleText
   | ContactPage
   | BlogIndexPage
   | CommunityPage
@@ -1295,11 +1596,16 @@ export type AllSanitySchemaTypes =
   | InlineText
   | TestimonialsPage
   | ResultsPage
+  | AwardReference
+  | TestimonialReference
   | CarAccidentsPage
+  | Testimonial
+  | VideoRef
+  | TeamMember
+  | Seo
   | PracticeAreaReference
   | PracticeAreasPage
   | PracticeArea
-  | Seo
   | AnswerText
   | TeamPage
   | AboutPage
@@ -2458,6 +2764,307 @@ export type COMMUNITY_PAGE_COPY_QUERY_RESULT = {
   };
 } | null;
 
+// Source: src/sanity/lib/queries.ts
+// Variable: CAR_ACCIDENTS_PAGE_QUERY
+// Query: *[_type == "carAccidentsPage" && _id == "carAccidentsPage"][0]{  seo{ metaTitle, metaDescription },  hero{    "trail": coalesce(trail[]{ _key, label, href }, []),    title,    lede,    "proof": coalesce(proof[]{ _key, big, label, href, google }, []),    ctaLabel,    telLabel,    photoAlt,    reviewer{      "name": member->name,      "role": member->role,      "memberKey": member->key.current,      portrait,      updated    }  },  nav{    "items": coalesce(items[]{ _key, section, label }, []),    ctaLabel  },  triage{    title,    lede,    video{ poster, alt, title, length, "video": film{ provider, id } },    help{ text },    "rows": coalesce(rows[]{ _key, tone, tag, question, body, ctaLabel, ctaHref, stat{ big, label } }, []),    sources{ label, "items": coalesce(items[]{ _key, label, note, href }, []) }  },  takeaways{    eyebrow,    title,    lede,    "items": coalesce(items[]{ _key, title, body }, [])  },  criteria{    title,    lede,    video{ poster, alt, title, length, "video": film{ provider, id } },    "items": coalesce(items[]{ _key, title, body }, []),    note  },  lawyers{    title,    lede,    "attorneys": coalesce(attorneys[]{ _key, "key": member->key.current, cred }, []),    moreLabel,    moreHref  },  credentials{    "badges": coalesce(badges[]{ "_key": _key, "awardKey": @->key.current }, []),    eyebrow,    disclaimer  },  whyFirm{    eyebrow,    title,    "stats": coalesce(stats[]{ _key, big, label }, []),    disclaimer,    "columns": coalesce(columns[]{ _key, n, title, body }, []),    ctaLabel,    ctaHref,    photoAlt  },  results{    eyebrow,    title,    offeredLabel,    recoveredLabel,    "stories": coalesce(stories[]{      _key, offered, recovered, title, story, changed,      "reviewKey": review->key.current    }, []),    disclaimer  },  timeline{    title,    lede,    "steps": coalesce(steps[]{ _key, n, title, body }, []),    "phases": coalesce(phases[]{ _key, title, when, body }, []),    photoAlt,    "points": coalesce(points, [])  },  crashTypes{    title,    lede,    "tiles": coalesce(tiles[]{ _key, name, body, linkLabel, href }, [])  },  denver{    title,    lede,    "stats": coalesce(stats[]{ _key, big, label, body }, []),    "corridors": coalesce(corridors[]{ _key, name, body }, [])  },  checklistTeaser{    title,    body,    ctaLabel,    ctaHref,    "steps": coalesce(steps[]{ _key, iconKey, label }, [])  },  faultTeaser{    title,    body,    ctaLabel,    ctaHref,    scale{ start, middle, end },    source{ label, "items": coalesce(items[]{ _key, label, note, href }, []) }  },  more{    title,    "features": coalesce(features[]{ _key, title, body, length, poster, ctaLabel, href }, []),    "cards": coalesce(cards[]{ _key, title, body, ctaLabel, href }, [])  },  closing{ title, lede, officeLabel }}
+export type CAR_ACCIDENTS_PAGE_QUERY_RESULT = {
+  seo: {
+    metaTitle: string | null;
+    metaDescription: string | null;
+  } | null;
+  hero: {
+    trail: Array<{
+      _key: string;
+      label: string;
+      href: string | null;
+    }>;
+    title: string;
+    lede: string;
+    proof: Array<{
+      _key: string;
+      big: string;
+      label: string;
+      href: string | null;
+      google: boolean | null;
+    }>;
+    ctaLabel: string;
+    telLabel: string;
+    photoAlt: string;
+    reviewer: {
+      name: string;
+      role: string;
+      memberKey: string;
+      portrait: {
+        asset?: SanityImageAssetReference;
+        media?: unknown;
+        hotspot?: SanityImageHotspot;
+        crop?: SanityImageCrop;
+        _type: "image";
+      };
+      updated: string;
+    };
+  };
+  nav: {
+    items: Array<{
+      _key: string;
+      section: string;
+      label: string;
+    }>;
+    ctaLabel: string;
+  };
+  triage: {
+    title: string;
+    lede: string;
+    video: {
+      poster: {
+        asset?: SanityImageAssetReference;
+        media?: unknown;
+        hotspot?: SanityImageHotspot;
+        crop?: SanityImageCrop;
+        _type: "image";
+      };
+      alt: string | null;
+      title: string;
+      length: string;
+      video: {
+        provider: "wistia";
+        id: string;
+      };
+    };
+    help: {
+      text: string;
+    };
+    rows: Array<{
+      _key: string;
+      tone: "deadline" | "money" | "warn" | null;
+      tag: string | null;
+      question: string;
+      body: string;
+      ctaLabel: string;
+      ctaHref: string;
+      stat: {
+        big: string;
+        label: string;
+      };
+    }>;
+    sources: {
+      label: string;
+      items: Array<{
+        _key: string;
+        label: string;
+        note: string | null;
+        href: string | null;
+      }>;
+    } | null;
+  };
+  takeaways: {
+    eyebrow: string;
+    title: string;
+    lede: string;
+    items: Array<{
+      _key: string;
+      title: string;
+      body: string;
+    }>;
+  };
+  criteria: {
+    title: string;
+    lede: string;
+    video: {
+      poster: {
+        asset?: SanityImageAssetReference;
+        media?: unknown;
+        hotspot?: SanityImageHotspot;
+        crop?: SanityImageCrop;
+        _type: "image";
+      };
+      alt: string | null;
+      title: string;
+      length: string;
+      video: {
+        provider: "wistia";
+        id: string;
+      };
+    };
+    items: Array<{
+      _key: string;
+      title: string;
+      body: string;
+    }>;
+    note: string;
+  };
+  lawyers: {
+    title: string;
+    lede: string;
+    attorneys: Array<{
+      _key: string;
+      key: string;
+      cred: string;
+    }>;
+    moreLabel: string;
+    moreHref: string;
+  };
+  credentials: {
+    badges: Array<{
+      _key: string;
+      awardKey: string;
+    }>;
+    eyebrow: string;
+    disclaimer: string;
+  };
+  whyFirm: {
+    eyebrow: string;
+    title: string;
+    stats: Array<{
+      _key: string;
+      big: string;
+      label: string;
+    }>;
+    disclaimer: string;
+    columns: Array<{
+      _key: string;
+      n: string;
+      title: string;
+      body: string;
+    }>;
+    ctaLabel: string;
+    ctaHref: string;
+    photoAlt: string;
+  };
+  results: {
+    eyebrow: string;
+    title: string;
+    offeredLabel: string;
+    recoveredLabel: string;
+    stories: Array<{
+      _key: string;
+      offered: string;
+      recovered: string;
+      title: string;
+      story: string | null;
+      changed: string | null;
+      reviewKey: string | null;
+    }>;
+    disclaimer: string;
+  };
+  timeline: {
+    title: string;
+    lede: string;
+    steps: Array<{
+      _key: string;
+      n: string;
+      title: string;
+      body: string;
+    }>;
+    phases: Array<{
+      _key: string;
+      title: string;
+      when: string;
+      body: string;
+    }>;
+    photoAlt: string;
+    points: Array<string>;
+  };
+  crashTypes: {
+    title: string;
+    lede: string;
+    tiles: Array<{
+      _key: string;
+      name: string;
+      body: string;
+      linkLabel: string;
+      href: string | null;
+    }>;
+  };
+  denver: {
+    title: string;
+    lede: string;
+    stats: Array<{
+      _key: string;
+      big: string;
+      label: string;
+      body: string;
+    }>;
+    corridors: Array<{
+      _key: string;
+      name: string;
+      body: string;
+    }>;
+  };
+  checklistTeaser: {
+    title: string;
+    body: string;
+    ctaLabel: string;
+    ctaHref: string | null;
+    steps:
+      | Array<{
+          _key: string;
+          iconKey: string;
+          label: string;
+        }>
+      | Array<never>;
+  };
+  faultTeaser: {
+    title: string;
+    body: string;
+    ctaLabel: string;
+    ctaHref: string | null;
+    scale: {
+      start: string;
+      middle: string;
+      end: string;
+    } | null;
+    source: {
+      label: string;
+      items: Array<{
+        _key: string;
+        label: string;
+        note: string | null;
+        href: string | null;
+      }>;
+    } | null;
+  };
+  more: {
+    title: string;
+    features: Array<{
+      _key: string;
+      title: string;
+      body: string;
+      length: string;
+      poster: {
+        asset?: SanityImageAssetReference;
+        media?: unknown;
+        hotspot?: SanityImageHotspot;
+        crop?: SanityImageCrop;
+        _type: "image";
+      };
+      ctaLabel: string;
+      href: string | null;
+    }>;
+    cards: Array<{
+      _key: string;
+      title: string;
+      body: string;
+      ctaLabel: string;
+      href: string | null;
+    }>;
+  };
+  closing: {
+    title: string;
+    lede: string;
+    officeLabel: string;
+  };
+} | null;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: CAR_ACCIDENT_FAQ_SECTION_QUERY
+// Query: *[_type == "carAccidentsPage" && _id == "carAccidentsPage"][0].faqSection{  eyebrow, title, lede}
+export type CAR_ACCIDENT_FAQ_SECTION_QUERY_RESULT = {
+  eyebrow: string;
+  title: string;
+  lede: string;
+} | null;
+
 // Query TypeMap
 import "@sanity/client";
 declare module "@sanity/client" {
@@ -2516,5 +3123,7 @@ declare module "@sanity/client" {
     '*[_type == "sitePage" && _id == "notFound"][0]{\n  title,\n  lede,\n  "body": coalesce(body, []),\n  linksTitle,\n  "links": coalesce(links[]{ _key, label, description, href }, [])\n}': NOT_FOUND_PAGE_QUERY_RESULT;
     '*[_type == "practiceAreasPage" && _id == "practiceAreasPage"][0]{\n  eyebrow,\n  title,\n  lede,\n  ctaLabel,\n  ctaNote,\n  "featured": featuredHeading{ eyebrow, title, lede },\n  "directory": directoryHeading{ eyebrow, title }\n}': PRACTICE_AREAS_COPY_QUERY_RESULT;
     '*[_type == "communityPage" && _id == "communityPage"][0]{\n  eyebrow,\n  title,\n  lede,\n  volunteer{ eyebrow, title, ctaLabel },\n  "sponsorships": sponsorshipsHeading{ eyebrow, title },\n  "partners": { "label": partnersLabel }\n}': COMMUNITY_PAGE_COPY_QUERY_RESULT;
+    '*[_type == "carAccidentsPage" && _id == "carAccidentsPage"][0]{\n  seo{ metaTitle, metaDescription },\n  hero{\n    "trail": coalesce(trail[]{ _key, label, href }, []),\n    title,\n    lede,\n    "proof": coalesce(proof[]{ _key, big, label, href, google }, []),\n    ctaLabel,\n    telLabel,\n    photoAlt,\n    reviewer{\n      "name": member->name,\n      "role": member->role,\n      "memberKey": member->key.current,\n      portrait,\n      updated\n    }\n  },\n  nav{\n    "items": coalesce(items[]{ _key, section, label }, []),\n    ctaLabel\n  },\n  triage{\n    title,\n    lede,\n    video{ poster, alt, title, length, "video": film{ provider, id } },\n    help{ text },\n    "rows": coalesce(rows[]{ _key, tone, tag, question, body, ctaLabel, ctaHref, stat{ big, label } }, []),\n    sources{ label, "items": coalesce(items[]{ _key, label, note, href }, []) }\n  },\n  takeaways{\n    eyebrow,\n    title,\n    lede,\n    "items": coalesce(items[]{ _key, title, body }, [])\n  },\n  criteria{\n    title,\n    lede,\n    video{ poster, alt, title, length, "video": film{ provider, id } },\n    "items": coalesce(items[]{ _key, title, body }, []),\n    note\n  },\n  lawyers{\n    title,\n    lede,\n    "attorneys": coalesce(attorneys[]{ _key, "key": member->key.current, cred }, []),\n    moreLabel,\n    moreHref\n  },\n  credentials{\n    "badges": coalesce(badges[]{ "_key": _key, "awardKey": @->key.current }, []),\n    eyebrow,\n    disclaimer\n  },\n  whyFirm{\n    eyebrow,\n    title,\n    "stats": coalesce(stats[]{ _key, big, label }, []),\n    disclaimer,\n    "columns": coalesce(columns[]{ _key, n, title, body }, []),\n    ctaLabel,\n    ctaHref,\n    photoAlt\n  },\n  results{\n    eyebrow,\n    title,\n    offeredLabel,\n    recoveredLabel,\n    "stories": coalesce(stories[]{\n      _key, offered, recovered, title, story, changed,\n      "reviewKey": review->key.current\n    }, []),\n    disclaimer\n  },\n  timeline{\n    title,\n    lede,\n    "steps": coalesce(steps[]{ _key, n, title, body }, []),\n    "phases": coalesce(phases[]{ _key, title, when, body }, []),\n    photoAlt,\n    "points": coalesce(points, [])\n  },\n  crashTypes{\n    title,\n    lede,\n    "tiles": coalesce(tiles[]{ _key, name, body, linkLabel, href }, [])\n  },\n  denver{\n    title,\n    lede,\n    "stats": coalesce(stats[]{ _key, big, label, body }, []),\n    "corridors": coalesce(corridors[]{ _key, name, body }, [])\n  },\n  checklistTeaser{\n    title,\n    body,\n    ctaLabel,\n    ctaHref,\n    "steps": coalesce(steps[]{ _key, iconKey, label }, [])\n  },\n  faultTeaser{\n    title,\n    body,\n    ctaLabel,\n    ctaHref,\n    scale{ start, middle, end },\n    source{ label, "items": coalesce(items[]{ _key, label, note, href }, []) }\n  },\n  more{\n    title,\n    "features": coalesce(features[]{ _key, title, body, length, poster, ctaLabel, href }, []),\n    "cards": coalesce(cards[]{ _key, title, body, ctaLabel, href }, [])\n  },\n  closing{ title, lede, officeLabel }\n}': CAR_ACCIDENTS_PAGE_QUERY_RESULT;
+    '*[_type == "carAccidentsPage" && _id == "carAccidentsPage"][0].faqSection{\n  eyebrow, title, lede\n}': CAR_ACCIDENT_FAQ_SECTION_QUERY_RESULT;
   }
 }

@@ -18,6 +18,7 @@ import type { ImageMetadata } from "astro";
 import type { SanityImageSource } from "@sanity/image-url";
 import { sanityClient } from "sanity:client";
 import {
+  CAR_ACCIDENT_FAQ_SECTION_QUERY,
   CAR_ACCIDENT_FAQS_QUERY,
   HOME_FAQ_SECTION_QUERY,
   HOME_FAQS_QUERY,
@@ -107,16 +108,13 @@ export async function getCarAccidentFaqs(): Promise<Faq[]> {
  * navigating away mid-page.
  */
 export async function getCarAccidentFaqSection(anchor: string): Promise<FaqSection> {
-  const home = await getFaqSection();
-  return {
-    ...home,
-    eyebrow: "What you should know",
-    title: "Other questions people ask us",
-    lede:
-      "Expand any question to read the answer and watch a short video from the attorney " +
-      "who would handle your case.",
-    ask: { ...home.ask, ctaHref: anchor },
-  };
+  const [home, own] = await Promise.all([
+    getFaqSection(),
+    once("carAccidentsPage:faqSection", async () =>
+      required(await sanityClient.fetch(CAR_ACCIDENT_FAQ_SECTION_QUERY), "Car Accidents", "Pages")
+    ),
+  ]);
+  return { ...home, ...own, ask: { ...home.ask, ctaHref: anchor } };
 }
 
 export async function getHomeFaqs(): Promise<Faq[]> {

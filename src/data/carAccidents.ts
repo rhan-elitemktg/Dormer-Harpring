@@ -1,10 +1,9 @@
 // The practice-area DETAIL page — Car Accidents.
 //
-// SANITY SWAP POINT — mirrors the future `src/sanity/lib/practiceAreaDetails.ts`.
-// These become `practiceAreaDetail` documents. `getPracticeAreaDetails()`
-// returns an ARRAY of one because the future GROQ query is
-// `*[_type == "practiceAreaDetail"]` and `src/pages/[slug].astro` walks it to
-// build paths — the same contract `getBlogPostArticles()` holds.
+// SANITY: reads the `carAccidentsPage` singleton, fifteen named sections of it.
+// `getPracticeAreaDetails()` returns an ARRAY of one because `[slug].astro`
+// walks it to build paths — the same contract `getBlogPostArticles()` holds, and
+// the shape a second detail page would slot into.
 //
 // BUILT FROM THE SECOND DESIGN OF THIS PAGE. The first was 31 sections, 23
 // `sc-for` loops and 105 placeholders; this one is 17 sections, 10 loops and 75.
@@ -13,7 +12,7 @@
 // answers, the evidence band, the venue list), three were replaced by teasers
 // pointing at articles, and two are new.
 //
-// ITS `renderVals()` STILL DEFINES FIFTEEN ARRAYS THE MARKUP NO LONGER USES —
+// ITS `renderVals()` STILL DEFINES FIFTEEN ARRAYS THE MARKUP NEVER USED —
 // `keyPoints`, `crashSteps`, `leadAttorneys`, `otherAttorneys`, `processSteps`,
 // `injuries`, `damageCols`, `faultBranches`, `denverData`, `corridors`,
 // `courts`, `relatedAreas`, `relatedArticles`, `firmData`, `lawCtas`. They are
@@ -34,16 +33,40 @@
 // own modules: the testimonials rail (`testimonials.ts`), the awards row
 // (`awards.ts`), the FAQ accordion (`faqs.ts`), and the contact form and info
 // cards (`contact.ts` / `site.ts`), plus the header and footer.
+//
+// WHAT THIS MODULE STILL OWNS AFTER PHASE 4, and why each one is here rather
+// than in the Studio:
+//
+//   CA_SECTION_IDS       the in-page anchors. Read by the nav's hrefs AND by the
+//                        sections' own `id` attributes — two things that must
+//                        agree get one source, so the Studio stores which
+//                        SECTION a nav item jumps to and this turns it into a
+//                        href.
+//   the slug and _key    routing. `routePaths.ts` owns URLs on this site, and a
+//                        slug an editor could change is ~300 legacy redirects
+//                        pointing at nothing.
+//   four photographs     the hero, the art-directed "why us" pair and the
+//                        timeline's backdrop. Band art, like every other page's
+//                        — see the note in `aboutPage.ts`. The photographs that
+//                        belong to CARDS (the two video posters, the two
+//                        feature posters, the reviewer's portrait) did move.
+//   the map's title      built from the firm's name. The literal carried a
+//                        second copy of it, which is how a site ends up
+//                        publishing two.
 import type { ImageMetadata } from "astro";
-import { ROUTES, attorneyPath, practiceAreaPath } from "../lib/routePaths";
+import type { SanityImageSource } from "@sanity/image-url";
+import { sanityClient } from "sanity:client";
+import { CAR_ACCIDENTS_PAGE_QUERY } from "../sanity/lib/queries";
+import { once, required } from "../sanity/lib/fetch";
+import { attorneyPath } from "../lib/routePaths";
+import { getFirmDetails } from "./site";
+import type { VideoRef } from "../lib/video";
+// FOUR PHOTOGRAPHS THAT DID NOT MOVE — band art and an art-directed pair. The
+// five that belong to cards are Sanity assets; see the header.
 import heroPhoto from "../assets/practice/car-accident-hero.jpg";
-import crashVideoCover from "../assets/practice/crash-video-cover.jpg";
-import caseVideoCover from "../assets/practice/case-video-cover.jpg";
 import whyPhoto from "../assets/practice/why-attorneys-desktop.jpg";
 import whyPhotoMobile from "../assets/practice/why-attorneys-mobile.jpg";
 import consultPhoto from "../assets/blog/consult.jpg";
-import kcHarpring from "../assets/team/kc-harpring-lg.jpg";
-import { PLACEHOLDER_VIDEO, type VideoRef } from "../lib/video";
 
 /**
  * In-page anchor ids, in one place because two things must agree about them:
@@ -94,9 +117,9 @@ export interface SourceNote {
   items: StatuteSource[];
 }
 
-/** An inert video poster. Nothing on this page has a real id yet. */
+/** A video panel. Its poster is a card image and so a Sanity asset. */
 export interface VideoPanel {
-  poster: ImageMetadata;
+  poster: ImageMetadata | SanityImageSource;
   alt: string;
   title: string;
   length: string;
@@ -138,7 +161,8 @@ export interface DetailHero {
   reviewer: {
     name: string;
     role: string;
-    photo: ImageMetadata;
+    /** A larger crop than the roster's, so it is this page's own asset. */
+    photo: ImageMetadata | SanityImageSource;
     updated: string;
     bioHref: string;
   };
@@ -322,7 +346,7 @@ export interface MoreSection {
     title: string;
     body: string;
     length: string;
-    poster: ImageMetadata;
+    poster: ImageMetadata | SanityImageSource;
     ctaLabel: string;
     href: string | null;
   }[];
@@ -368,854 +392,197 @@ export interface PracticeAreaDetail {
 const anchor = (id: string) => `#${id}`;
 
 /**
- * Where every statute citation on this page points.
+ * The one detail page there is.
  *
- * TODO(launch): the comp sends all five to the Justia index for the Colorado
- * code rather than to the section each one names, so they all land in the same
- * place. The firm should confirm the deep links — and whether Justia is the
- * source it wants cited at all, against Casetext or the state's own site.
+ * ITS SLUG AND ITS JOIN KEY ARE HERE, NOT IN SANITY. `[slug].astro` builds this
+ * page's path from the slug and joins the two halves of the page on the key —
+ * both are routing rather than content, and `routePaths.ts` owns URLs on this
+ * site. A slug an editor could edit is ~300 legacy redirects pointing at
+ * nothing, with a green build.
  */
-const STATUTE_INDEX = "https://law.justia.com/codes/colorado/";
-
-const carAccidents: PracticeAreaDetail = {
-  _key: "car-accidents",
+const PAGE = {
+  key: "car-accidents",
   // The live URL. `practiceAreaPath()` is `/${slug}` — see `routePaths.ts` on
   // why the flat WordPress shape is preserved.
   slug: "denver-car-accident-lawyer",
-  // The live page's own <title> is "Denver Car Accident Lawyer | Start Your
-  // Claim | Available 24/7" — a WordPress SEO plugin string. `lib/seo.ts`
-  // appends the firm name, so the suffix here would be a third clause.
-  metaTitle: "Denver Car Accident Lawyer",
-  metaDescription:
-    "Injured in a car accident? A Denver Car Accident Lawyer can help you get the " +
-    "compensation you deserve. Call now for a free consultation!",
+} as const;
 
-  hero: {
-    trail: [
-      { _key: "home", label: "Home", href: ROUTES.home },
-      { _key: "practice", label: "Practice Areas", href: ROUTES.practiceAreas },
-      { _key: "self", label: "Car Accidents", href: null },
-    ],
-    title: "Denver Car Accident Lawyers",
-    lede:
-      "Insurance companies offer more when they know your lawyer will take it to a " +
-      "jury. We take fewer cases so we can do exactly that.",
-    proof: [
-      {
-        _key: "google",
-        big: "5.0",
-        label: "300+ Google reviews",
-        href: "https://www.google.com/search?q=Dormer+Harpring+Denver",
-        google: true,
-      },
-      // TODO(launch): the same unverified claim `stats.ts` carries.
-      { _key: "recovered", big: "$70M+", label: "Recovered for clients", href: null },
-      { _key: "fee", big: "$0", label: "Unless we win", href: null },
-    ],
-    ctaLabel: "Speak with a lawyer",
-    telLabel: "Or call or text",
-    photo: heroPhoto,
-    photoAlt: "Aftermath of a car accident on a Denver street",
-    reviewer: {
-      name: "K.C. Harpring",
-      role: "Founding Partner",
-      photo: kcHarpring,
-      updated: "Updated July 2026",
-      // `k-c-harpring`, not `kc-harpring` — the slug the live site indexes.
-      bioHref: attorneyPath("k-c-harpring"),
-    },
-  },
-
-  /**
-   * IN DOCUMENT ORDER, and that is the whole point of this object.
-   *
-   * The comp's bar lists five links in an order unrelated to the page: "Colorado
-   * car accident laws" is fourth of five and its section is the FIRST of the
-   * five in the document, "Types of crashes" is third and eleventh. A bar that
-   * disagrees with the page is a bar that misdescribes it — and it also broke
-   * the scroll highlight, which marks "the last section whose top you have
-   * passed" and can only walk in one direction.
-   *
-   * `diff-comp-car-accidents.py` asserts the order structurally, by resolving
-   * each href to its position in the built page. Reorder the page and that
-   * check fails until this list follows.
-   *
-   * SIX, NOT MORE: the bar's width is spent on the phone number and the CTA
-   * before any link gets a look in. Labels are shortened for the same reason.
-   * `#reviews` is deliberately absent — it sits directly under Results, so
-   * jumping to Results lands beside it — but keeps its id, which the comp's own
-   * footer links.
-   */
-  nav: {
-    items: [
-      { _key: "know", label: "Colorado law", href: anchor(CA_SECTION_IDS.know) },
-      { _key: "case", label: "Do I have a case?", href: anchor(CA_SECTION_IDS.case) },
-      { _key: "lawyers", label: "Our lawyers", href: anchor(CA_SECTION_IDS.lawyers) },
-      { _key: "results", label: "Results", href: anchor(CA_SECTION_IDS.results) },
-      { _key: "types", label: "Crash types", href: anchor(CA_SECTION_IDS.types) },
-      { _key: "next", label: "Next steps", href: anchor(CA_SECTION_IDS.next) },
-    ],
-    ctaLabel: "Speak with a lawyer",
-  },
-
-  triage: {
-    title: "Recently injured in a Denver car accident?",
-    lede:
-      "You’re probably in pain and already getting phone calls. Here are the things " +
-      "that actually matter this week — in plain English.",
-    video: {
-      poster: crashVideoCover,
-      alt: "",
-      title: "What to do after a car accident",
-      length: "1:14",
-      video: PLACEHOLDER_VIDEO,
-    },
-    help: {
-      text:
-        "Not sure what applies to you? Call and ask. We’ll tell you in five minutes, " +
-        "free, and you don’t have to hire us.",
-    },
-    // Five rows, all visible. The first design hid the last two behind a "More
-    // things to know" disclosure; this one does not, and the 182-day notice is
-    // the shortest deadline on the page, so showing it is the better call
-    // anyway.
-    rows: [
-      {
-        _key: "medpay",
-        tone: "money",
-        tag: "Do this first",
-        question: "Who pays my medical bills right now?",
-        body:
-          "You may already have $5,000 in your own car policy set aside for medical " +
-          "bills. It pays no matter who caused the crash. Most people don’t know they " +
-          "have it.",
-        ctaLabel: "How to check my policy",
-        ctaHref: anchor(CA_SECTION_IDS.know),
-        stat: { big: "$5,000", label: "Often already yours" },
-      },
-      {
-        _key: "statement",
-        question: "Do I have to talk to the insurance company?",
-        body:
-          "No. You do not have to give the other driver’s insurer a recorded statement " +
-          "— not today, not ever. You can say “I’m not ready to talk yet” and hang up.",
-        ctaLabel: "What to say instead",
-        ctaHref: anchor(CA_SECTION_IDS.know),
-        stat: { big: "No", label: "You can say no" },
-      },
-      {
-        _key: "time",
-        question: "How much time do I have to decide?",
-        body:
-          "For most Denver car crashes, you have 3 years from the day of the crash. You " +
-          "do not have to make any decisions this week.",
-        ctaLabel: "Check my deadline",
-        ctaHref: anchor(CA_SECTION_IDS.know),
-        stat: { big: "3 years", label: "From the crash date" },
-      },
-      {
-        _key: "government",
-        question: "Was a bus or a city vehicle involved?",
-        body:
-          "This one is different. You have to send written notice to the government " +
-          "within 182 days, or the claim goes away. If a bus, police car, or city truck " +
-          "was involved, call someone now.",
-        ctaLabel: "What notice means",
-        ctaHref: anchor(CA_SECTION_IDS.know),
-        stat: { big: "182 days", label: "Much shorter deadline" },
-      },
-      {
-        _key: "fault",
-        question: "What if part of it was my fault?",
-        body:
-          "You can still recover money. Being partly at fault just reduces the amount. " +
-          "You only lose the claim if you were more than half responsible — and that is " +
-          "usually argued, not obvious.",
-        ctaLabel: "How fault is decided",
-        ctaHref: anchor(CA_SECTION_IDS.know),
-        stat: { big: "Still yes", label: "Partly at fault is okay" },
-      },
-    ],
-    sources: {
-      label: "Sources:",
-      items: [
-        { _key: "medpay", label: "C.R.S. 10-4-635", href: STATUTE_INDEX },
-        { _key: "sol", label: "13-80-101", href: STATUTE_INDEX },
-        { _key: "cgia", label: "24-10-109", href: STATUTE_INDEX },
-        { _key: "comparative", label: "13-21-111", href: STATUTE_INDEX },
-      ],
-    },
-  },
-
-  takeaways: {
-    eyebrow: "The short version",
-    title: "If you read nothing else on this page",
-    lede: "Four things worth knowing about a Colorado crash before you talk to any adjuster.",
-    items: [
-      {
-        _key: "at-fault",
-        title: "Colorado is an at-fault state",
-        body:
-          "There is no no-fault system here. The driver who caused the crash is " +
-          "responsible for your injuries — but their insurer pays once, at the end, in " +
-          "a single check. Nothing arrives while you are still treating.",
-      },
-      {
-        _key: "own-policy",
-        title: "Your own policy is what pays right now",
-        body:
-          "Medical payments coverage — usually $5,000 — is on your policy unless you " +
-          "rejected it in writing. It pays your treatment regardless of who caused the " +
-          "crash, and it pays fast.",
-      },
-      {
-        _key: "public-entity",
-        title: "The clock is shorter for public entities",
-        body:
-          "Only 182 days to notify a government entity if an RTD bus, a city vehicle, " +
-          "or a road defect was involved.",
-      },
-      {
-        _key: "partly",
-        title: "Partly at fault is still a case",
-        body:
-          "Colorado reduces what you recover by your share of the blame instead of " +
-          "erasing it. Being told it was your fault is not the final word.",
-      },
-    ],
-  },
-
-  criteria: {
-    title: "Do I have a case?",
-    lede:
-      "Three things have to be true. You can usually tell in a couple of minutes — and " +
-      "if one is missing, we'll say so.",
-    video: {
-      poster: caseVideoCover,
-      alt: "",
-      title: "The three things a case needs",
-      length: "1:30",
-      video: PLACEHOLDER_VIDEO,
-    },
-    items: [
-      {
-        _key: "hurt",
-        title: "You got hurt, and a doctor saw you",
-        body:
-          "If you were treated, there's a record of it. Without any record, there's very " +
-          "little to prove. Seeing a doctor now still counts.",
-      },
-      {
-        _key: "blame",
-        title: "Someone else was at least partly to blame",
-        body:
-          "It does not have to be all their fault. Partly is enough. You can still " +
-          "recover money even if some of it was on you.",
-      },
-      {
-        _key: "insurance",
-        title: "There's insurance to pay it",
-        body:
-          "Their policy, your own coverage, or the medical coverage on your policy. If " +
-          "nobody has insurance, there is usually nothing to collect — and we'd rather " +
-          "tell you that early.",
-      },
-    ],
-    note:
-      "If there isn't a case here, we'll tell you that " +
-      "instead of selling you one.",
-  },
-
-  lawyers: {
-    title: "Meet our car accident lawyers",
-    lede:
-      "The attorneys below handle our Denver car accident cases from investigation " +
-      "through trial.",
-    attorneys: [
-      {
-        _key: "kc",
-        key: "k-c-harpring",
-        cred:
-          "Tried the $10,000,000 crash verdict in Colorado state court. Named to the " +
-          "National Trial Lawyers Top 40 Under 40.",
-      },
-      {
-        _key: "sean",
-        key: "sean-dormer",
-        cred:
-          "Handles uninsured and underinsured motorist claims, including Hartkopp v. " +
-          "State Farm. Listed in Top 20 Colorado Jury Verdicts.",
-      },
-      {
-        _key: "tim",
-        key: "tim-garvey",
-        cred:
-          "Litigates auto injury cases in Denver District Court, from filing through " +
-          "trial setting.",
-      },
-      {
-        _key: "laura",
-        key: "laura-browne",
-        cred:
-          "Litigates MedPay and first-party coverage disputes arising out of Colorado " +
-          "crashes.",
-      },
-      // The fifth, and not one of the comp's four. Added at Rhan's request —
-      // the band is a rail rather than a four-across grid precisely so the
-      // roster can grow without the section reflowing.
-      //
-      // The line is drawn from his own bio in `team.ts`, so both claims are
-      // already published elsewhere on this site and neither is a TODO(launch).
-      {
-        _key: "greg",
-        key: "greg-bentley",
-        cred:
-          "Handles commercial trucking and catastrophic-injury crashes. Obtained an " +
-          "$8,260,000 verdict for a client with traumatic brain and spinal injuries.",
-      },
-    ],
-    moreLabel: "See the full team",
-    moreHref: ROUTES.attorneys,
-  },
-
-  credentials: {
-    eyebrow: "Recognized & awarded",
-    // The badges are `awards.ts`'s six, in the comp's order — and the order is
-    // now the only thing this page contributes, the caption and the link having
-    // been dropped. See `CredentialsSection`.
-    //
-    // `awardKey` IS MATCHED TO THE COMP'S CAPTION, NOT TO ITS FILENAME. Every
-    // comp captions badge-1 as Avvo, badge-2 as TopVerdict, badge-3 as Million
-    // Dollar and badge-4 as Multi-Million, and all four files are something
-    // else — the labels were shifted against the artwork upstream, and
-    // `getAwards()` documents the correction. This comp repeats the shift. So
-    // "Multi-Million Dollar Advocates Forum" here resolves to `mmdaf`, which is
-    // the badge that actually SAYS Multi-Million, rather than to whatever the
-    // comp's <img> src happened to be.
-    badges: [
-      { _key: "multi-million", awardKey: "mmdaf" },
-      { _key: "top-20-verdicts", awardKey: "topverdict" },
-      { _key: "top-100", awardKey: "ntl-100" },
-      { _key: "top-40", awardKey: "ntl-40" },
-      { _key: "avvo", awardKey: "avvo" },
-      { _key: "million", awardKey: "mdaf" },
-    ],
-    disclaimer:
-      "Awarding organizations are not certifying authorities. Selection criteria vary " +
-      "by organization.",
-  },
-
-  whyFirm: {
-    eyebrow: "Why Dormer Harpring?",
-    title: "We are built to try cases, not to settle them cheaply.",
-    // TODO(launch): three claims about the firm's own closed files, and the
-    // comp's own disclaimer marks the period "[date range]". The third label is
-    // the MARKUP's wording; the dead `firmData` array in the same file says
-    // "Share of calls we tell to skip hiring a lawyer" instead.
-    stats: [
-      {
-        _key: "increase",
-        big: "3.4x",
-        label: "Average increase over the insurer's first offer",
-      },
-      { _key: "verdicts", big: "41", label: "Car accident cases taken to verdict" },
-      {
-        _key: "declined",
-        big: "1 in 5",
-        label: "Of callers we tell they don't need a lawyer",
-      },
-    ],
-    disclaimer:
-      "Based on Dormer Harpring's closed car accident matters, [date range]. Past " +
-      "results do not guarantee future outcomes. Every case is different.",
-    columns: [
-      {
-        _key: "price",
-        n: "01",
-        title: "Insurers price cases by who is across the table",
-        body:
-          "Carriers keep records of which firms file suit and which firms take a " +
-          "verdict. That history is part of how an adjuster values your claim.",
-      },
-      {
-        _key: "caseload",
-        n: "02",
-        title: "Fewer cases means more hours on yours",
-        body:
-          "We keep the caseload per attorney small on purpose. The lawyer who answers " +
-          "your call is the lawyer who works the file.",
-      },
-      {
-        _key: "trial-date",
-        n: "03",
-        title: "What changes when a case is set for trial",
-        body:
-          "Setting a trial date starts discovery, depositions and expert disclosures. " +
-          "The carrier has to price the case against a real courtroom deadline.",
-      },
-    ],
-    ctaLabel: "See the case results",
-    ctaHref: anchor(CA_SECTION_IDS.results),
-    photo: whyPhoto,
-    photoMobile: whyPhotoMobile,
-    photoAlt: "Three Dormer Harpring attorneys standing in a courthouse colonnade",
-  },
-
-  results: {
-    eyebrow: "Car accident results",
-    title: "What we were offered, and what we recovered.",
-    offeredLabel: "Offered",
-    recoveredLabel: "Recovered",
-    stories: [
-      {
-        _key: "hartkopp",
-        offered: "$60,000",
-        recovered: "$2.4 Million",
-        title: "Trial win: breach of insurance contract",
-        reviewKey: "evelyn",
-      },
-      {
-        _key: "low-speed",
-        offered: "$2,543.62",
-        recovered: "$750,000",
-        title: "Rear-end crash, no visible damage",
-        story:
-          "Our clients hurt their neck and back after another vehicle struck their " +
-          "trailer hitch.",
-        changed: "We proved the injuries with treatment records, not photos of bumpers.",
-      },
-      {
-        _key: "pileup",
-        offered: "$50,000",
-        recovered: "$2.5 Million",
-        title: "Trial win: five-car highway pileup",
-        story: "Our client was injured in a five-car pileup on a Denver-area highway.",
-        changed: "Liability across five vehicles had to be untangled and proven.",
-      },
-      // A FOURTH, WHERE THE COMP DRAWS THREE. Added at Rhan's request so the
-      // rail actually overflows and its arrows have something to do — three
-      // cards fit the container exactly and never scrolled.
-      //
-      // NOT INVENTED. This is `trucking-crash` from `caseResults.ts`, already
-      // published on /results, restated in this rail's voice: the figures are
-      // written long the way the other three are ("$200K" -> "$200,000") and
-      // the one sentence is split into what happened and what was at issue.
-      // Nothing is claimed here that the case results page does not already
-      // claim — which matters, because Colorado's Rule 7.1 governs how these
-      // are described.
-      {
-        _key: "semi-brakes",
-        offered: "$200,000",
-        recovered: "$1.15 Million",
-        title: "Semi-truck that could not stop",
-        story:
-          "Our client, a former marine, was hit and injured by a semi-truck near " +
-          "Colorado Springs whose brakes were poorly maintained.",
-        changed: "He had pre-existing injuries, which is the argument insurers reach for.",
-      },
-    ],
-    disclaimer: "Past results do not guarantee future outcomes. Every case is different.",
-  },
-
-  timeline: {
-    title: "What the next few months look like",
-    lede:
-      "Most of our clients never set foot in a courtroom — but the case has to be built " +
-      "as if it will be tried.",
-    steps: [
-      {
-        _key: "same-day",
-        n: "1",
-        title: "Same day, with a lawyer",
-        body: "Not an intake screener.",
-      },
-      {
-        _key: "deadlines",
-        n: "2",
-        title: "We check deadlines and coverage",
-        body: "Before anything else.",
-      },
-      {
-        _key: "no-case",
-        n: "3",
-        title: "If it isn't a case, we say so",
-        body: "And point you somewhere useful.",
-      },
-      {
-        _key: "take-it",
-        n: "4",
-        title: "If it is, we take the insurers",
-        body: "You handle getting better.",
-      },
-    ],
-    phases: [
-      {
-        _key: "treating",
-        title: "While you're treating",
-        when: "weeks to months",
-        body:
-          "Your job is appointments and getting better. We collect the records and bills " +
-          "as they come in, and we deal with the adjusters.",
-      },
-      {
-        _key: "demand",
-        title: "The demand",
-        when: "after treatment",
-        body:
-          "Once your treatment settles, we put the whole picture in front of the insurer " +
-          "— the injuries, the costs, and what the crash actually changed for you.",
-      },
-      {
-        _key: "file",
-        title: "If they won't pay, we file",
-        when: "months",
-        body:
-          "Filing puts the case on a court schedule the insurer cannot ignore. Discovery " +
-          "starts: written questions, records, depositions, and expert opinions on both " +
-          "sides.",
-      },
-      {
-        _key: "mediation",
-        title: "Mediation",
-        when: "a day",
-        body:
-          "A neutral mediator works between both sides in one sitting. Many cases resolve " +
-          "here, and nothing is agreed to without you.",
-      },
-      {
-        _key: "trial",
-        title: "Trial",
-        when: "if it gets here",
-        body:
-          "A jury hears the evidence and decides. Most cases never reach this point — but " +
-          "every case we take is built as though it will.",
-      },
-    ],
-    photo: consultPhoto,
-    photoAlt: "An attorney meeting with a client at a conference table",
-    points: [
-      "You will not be chasing us. One person knows your case.",
-      "Most cases run several months to a year or more.",
-      "No offer is accepted unless you say yes.",
-    ],
-  },
-
-  crashTypes: {
-    title: "Types of car accidents we handle",
-    lede: "How the crash happened changes what has to be proven, and who ends up paying.",
-    // The comp points all eight at `DH - Practice Areas.html` — its way of
-    // saying "somewhere else", not a destination. Six of the eight match a live
-    // legacy URL and take it; two do not exist anywhere on the legacy site and
-    // carry `href: null`, rendering as plain text rather than a dead link.
-    // Same convention as `getPracticeAreaGroups()` and `navigation.ts`.
-    tiles: [
-      {
-        _key: "rear-end",
-        name: "Rear-end",
-        body:
-          "Liability is usually conceded, so the fight moves to injury severity. Low " +
-          "visible damage is the standard argument against you.",
-        linkLabel: "Rear-end collisions",
-        // TODO(launch): no legacy page. `/denver-whiplash-injury-attorney` is the
-        // nearest, and is a different subject.
-        href: null,
-      },
-      {
-        _key: "t-bone",
-        name: "T-bone and intersection",
-        body:
-          "Right-of-way is contested and often decided by cameras, signal timing, or a " +
-          "witness. Evidence disappears within days.",
-        linkLabel: "Intersection crashes",
-        href: practiceAreaPath("denver-side-impact-accident-lawyer"),
-      },
-      {
-        _key: "head-on",
-        name: "Head-on",
-        body:
-          "Catastrophic injuries against limits that are frequently too low. Finding " +
-          "additional coverage matters more than liability.",
-        linkLabel: "Head-on crashes",
-        // TODO(launch): no legacy page.
-        href: null,
-      },
-      {
-        _key: "rollover",
-        name: "Rollover",
-        body:
-          "Vehicle design and roof strength can put a manufacturer in the case alongside " +
-          "the driver. Preserve the vehicle.",
-        linkLabel: "Rollover crashes",
-        href: practiceAreaPath("denver-product-liability-lawyer"),
-      },
-      {
-        _key: "multi-vehicle",
-        name: "Multi-vehicle",
-        body:
-          "Several insurers each pointing at the others, and limits shared among " +
-          "claimants. Sequence and speed matter.",
-        linkLabel: "Multi-vehicle pileups",
-        href: practiceAreaPath("denver-distracted-driver-accident-lawyer"),
-      },
-      {
-        _key: "hit-and-run",
-        name: "Hit-and-run",
-        body:
-          "Your own uninsured motorist coverage becomes the claim. Prompt reporting is " +
-          "usually a policy condition.",
-        linkLabel: "Hit-and-run",
-        href: practiceAreaPath("denver-uninsured-and-underinsured-motorcyclist-accident-lawyer"),
-      },
-      {
-        _key: "rideshare",
-        name: "Rideshare",
-        body:
-          "Coverage depends on what the app was doing at that moment — offline, waiting, " +
-          "en route, or carrying a passenger.",
-        linkLabel: "Uber and Lyft crashes",
-        href: practiceAreaPath("denver-uber-accident-lawyer"),
-      },
-      {
-        _key: "commercial",
-        name: "Commercial vehicle",
-        body:
-          "Federal rules, driver logs, and telematics apply, and a spoliation letter has " +
-          "to go out before data is overwritten.",
-        linkLabel: "Commercial vehicles",
-        href: practiceAreaPath("denver-truck-accident-lawyer"),
-      },
-    ],
-  },
-
-  denver: {
-    title: "Car accidents in Denver",
-    lede:
-      "Where and how a crash happens changes what the case looks like — which insurer is " +
-      "involved, what evidence exists, and how fast it disappears.",
-    // THREE figures, each with a sentence about what it means for a claim. The
-    // dead `denverData` array in the same comp still lists FOUR bare figures
-    // from the first design; the markup is the source here.
-    // TODO(launch): NONE OF THESE THREE FIGURES IS SOURCED. The comp dated
-    // them "[year]" and credited "[CDOT / DRCOG / Denver Open Data]", and that
-    // line was drawn under the band until Rhan removed it — so this comment is
-    // now the ONLY record that they are placeholders. Nothing on the rendered
-    // page says so any more. Either verify all three against a published table
-    // before launch or drop the band; a city statistic with no provenance is
-    // the kind of claim Rule 7.1 covers.
-    stats: [
-      {
-        _key: "hit-and-run",
-        big: "1 in 4",
-        label: "Crashes here is a hit-and-run [year]",
-        body: "Which means your own uninsured motorist coverage becomes the claim.",
-      },
-      {
-        _key: "injury",
-        big: "5,900",
-        label: "Injury crashes a year in Denver [year]",
-        body:
-          "Roughly sixteen a day. Most people involved have never dealt with an insurer " +
-          "before.",
-      },
-      {
-        _key: "fatal",
-        big: "84",
-        label: "Fatal crashes a year [year]",
-        body: "Wrongful death claims run on a different deadline than injury claims.",
-      },
-    ],
-    // Five roads, numbered against the schematic map. Every sentence here is
-    // NEW — the dead `corridors` array carries a different one per road.
-    corridors: [
-      {
-        _key: "i25",
-        name: "I-25",
-        body:
-          "High speeds, multi-vehicle impacts, and commercial traffic. Coverage limits get " +
-          "tested here more than anywhere else in the metro.",
-      },
-      {
-        _key: "colfax",
-        name: "Colfax Avenue",
-        body:
-          "Constant turning movements, pedestrians, and buses. Right-of-way is the usual " +
-          "fight, and camera footage is the usual answer.",
-      },
-      {
-        _key: "federal",
-        name: "Federal Boulevard",
-        body:
-          "Wide lanes, frequent uninsured drivers, and a high hit-and-run rate. Your own " +
-          "policy often carries the claim.",
-      },
-      {
-        _key: "colorado",
-        name: "Colorado Boulevard",
-        body:
-          "Heavy commuter volume through signalized intersections. Rear-end and left-turn " +
-          "collisions dominate.",
-      },
-      {
-        _key: "speer",
-        name: "Speer Boulevard",
-        body:
-          "Angled intersections and merging traffic along Cherry Creek. Fault is rarely " +
-          "obvious from the police report alone.",
-      },
-    ],
-  },
-
-  /**
-   * The eight-step checklist that used to be a section on this page. The second
-   * design turns it into a teaser pointing at `DH - Blog - What to do after a
-   * car accident.html`, a comp that arrived with this revision and that this
-   * build does not serve.
-   *
-   * `ctaHref: null` by Rhan's decision: the label stays, the affordance goes,
-   * and nothing points at a page that does not exist. The four cards in the
-   * illustration are the comp's own — a sample of the eight, not all of them.
-   * TODO(launch): build the article, then set the href.
-   */
-  checklistTeaser: {
-    title: "8 things to do after a car accident",
-    body: "From the scene to the first adjuster call — the steps that protect your claim.",
-    ctaLabel: "See all 8 steps",
-    // TODO(launch): A PLACEHOLDER, AND `#` MUST NOT SHIP. The comp points this
-    // at `DH - Blog - What to do after a car accident.html`, a post comp that
-    // arrived with this revision and that this build does not serve. It shipped
-    // unlinked for that reason; Rhan's call is now to draw the affordance and
-    // fill the destination in when the article exists. Until then the link
-    // scrolls to the top of the page, which is the whole reason this is a
-    // TODO rather than a decision.
-    ctaHref: "#",
-    steps: [
-      { _key: "police", iconKey: "police", label: "Call the police" },
-      { _key: "photos", iconKey: "camera", label: "Photograph the scene" },
-      { _key: "witnesses", iconKey: "witnesses", label: "Get witness names" },
-      { _key: "doctor", iconKey: "stethoscope", label: "See a doctor" },
-      { _key: "insurer", iconKey: "none", label: "Tell your insurer" },
-    ],
-  },
-
-  /**
-   * The comparative-fault section, likewise reduced to a teaser. The comp links
-   * it at `DH - Blog.html` — the blog index, which this build serves — so
-   * unlike the checklist it has a real destination.
-   */
-  faultTeaser: {
-    title: "What if part of it was my fault?",
-    body:
-      "Colorado reduces what you recover by your share of the blame instead of erasing " +
-      "it. Being told it was your fault is not the final word.",
-    ctaLabel: "How fault gets decided",
-    ctaHref: ROUTES.blog,
-    scale: {
-      start: "None of it your fault",
-      middle: "Over half — you get nothing",
-      end: "All your fault",
-    },
-    source: {
-      label: "Source:",
-      items: [{ _key: "comparative", label: "C.R.S. 13-21-111", href: STATUTE_INDEX }],
-    },
-  },
-
-  /**
-   * Eight article stubs, all of which the comp points at `DH - Blog.html`.
-   * Their subjects are the first design's cut sections — the insurance Q&As,
-   * the damages grid, the adjuster tactics, the venue list — turned into
-   * promised articles.
-   *
-   * They keep the comp's destination, the blog index, which this build serves
-   * at `/news`. That is not a dead href, and it is what the comp specifies; but
-   * "Read the answer" landing on an index with no such answer is a launch
-   * problem either way.
-   * TODO(launch): write the eight, or cut the section back to what exists.
-   */
-  more: {
-    title: "More on car accident claims",
-    features: [
-      {
-        _key: "fault",
-        title: "Who was at fault?",
-        body: "What happens if part of it was your fault, and how fault actually gets decided.",
-        length: "2:05",
-        poster: consultPhoto,
-        ctaLabel: "Read the answer",
-        href: ROUTES.blog,
-      },
-      {
-        _key: "medical",
-        title: "Who pays my medical bills right now?",
-        body: "Your own policy usually pays first — most people don’t know they have it.",
-        length: "1:14",
-        poster: crashVideoCover,
-        ctaLabel: "Read the answer",
-        href: ROUTES.blog,
-      },
-    ],
-    cards: [
-      {
-        _key: "limits",
-        title: "What if their insurance isn’t enough?",
-        body: "Colorado minimums are low. Your own coverage is often the larger source.",
-        ctaLabel: "Read the answer",
-        href: ROUTES.blog,
-      },
-      {
-        _key: "offer",
-        title: "Should I take the first offer?",
-        body: "Sometimes yes. Here’s how to tell which kind of offer you have.",
-        ctaLabel: "Read the answer",
-        href: ROUTES.blog,
-      },
-      {
-        _key: "adjusters",
-        title: "How adjusters actually work",
-        body: "What the friendly early call is really for.",
-        ctaLabel: "Read the answer",
-        href: ROUTES.blog,
-      },
-      {
-        _key: "damages",
-        title: "What money can I actually get?",
-        body: "The categories Colorado recognizes, and what each one requires.",
-        ctaLabel: "Read the answer",
-        href: ROUTES.blog,
-      },
-      {
-        _key: "government",
-        title: "Suing a government entity",
-        body: "RTD buses, city vehicles, and the 182-day deadline that catches people out.",
-        ctaLabel: "Read the answer",
-        href: ROUTES.blog,
-      },
-      {
-        _key: "venue",
-        title: "Where your case gets filed",
-        body: "Venue, timelines, and what the local courts are like.",
-        ctaLabel: "Read the answer",
-        href: ROUTES.blog,
-      },
-    ],
-  },
-
-  closing: {
-    title: "Talk to a lawyer about your crash",
-    lede:
-      "Free, confidential, and no obligation. If there isn't a case here, we'll tell you " +
-      "that instead of selling you one.",
-    officeLabel: "Our office",
-    mapTitle: "Dormer Harpring — Denver office",
-  },
-};
-
-/**
- * Every practice-area detail page. One today; the array shape is what
- * `src/pages/[slug].astro` walks and what the GROQ query will return.
- */
 export async function getPracticeAreaDetails(): Promise<PracticeAreaDetail[]> {
-  return [carAccidents];
+  const [page, firm] = await Promise.all([
+    once("carAccidentsPage", async () =>
+      required(await sanityClient.fetch(CAR_ACCIDENTS_PAGE_QUERY), "Car Accidents", "Pages")
+    ),
+    getFirmDetails(),
+  ]);
+
+  const seo = required(page.seo, "Car Accidents → Search listing");
+  const reviewer = page.hero.reviewer;
+  const reviewerKey = required(reviewer.memberKey, "the Car Accidents reviewer's team member");
+
+  return [
+    {
+      _key: PAGE.key,
+      slug: PAGE.slug,
+      // The live page's own <title> is "Denver Car Accident Lawyer | Start Your
+      // Claim | Available 24/7" — a WordPress SEO plugin string. `lib/seo.ts`
+      // appends the firm name, so the suffix there would be a third clause.
+      metaTitle: required(seo.metaTitle, "Car Accidents → meta title"),
+      metaDescription: required(seo.metaDescription, "Car Accidents → meta description"),
+
+      hero: {
+        ...page.hero,
+        trail: page.hero.trail.map((crumb) => ({ ...crumb, href: crumb.href ?? null })),
+        proof: page.hero.proof.map(({ google, ...row }) => ({
+          ...row,
+          href: row.href ?? null,
+          // Destructured out and re-added only when true: `google` is optional
+          // on the interface and the projection returns null, and `{google &&
+          // …}` in the component treats those two differently.
+          ...(google ? { google: true } : {}),
+        })),
+        photo: heroPhoto,
+        reviewer: {
+          name: required(reviewer.name, "the Car Accidents reviewer's name"),
+          role: required(reviewer.role, "the Car Accidents reviewer's role"),
+          photo: reviewer.portrait,
+          updated: reviewer.updated,
+          // `k-c-harpring`, not `kc-harpring` — the slug the live site indexes,
+          // and it comes off the roster rather than being typed twice.
+          bioHref: attorneyPath(reviewerKey),
+        },
+      },
+
+      /* THE NAV'S HREFS ARE BUILT HERE, from the section each item names. Both
+         this and the sections' own `id` attributes read `CA_SECTION_IDS`, which
+         is the whole reason the anchors are not stored: a projection must not
+         become a second source for something two things have to agree about. */
+      nav: {
+        items: page.nav.items.map((item) => {
+          const id = CA_SECTION_IDS[item.section as keyof typeof CA_SECTION_IDS];
+          if (!id) {
+            throw new Error(
+              `carAccidents: the section nav has an item pointing at "${item.section}", which is ` +
+                `not one of this page's sections. Known: ${Object.keys(CA_SECTION_IDS).join(", ")}.`
+            );
+          }
+          return { _key: item._key, label: item.label, href: anchor(id) };
+        }),
+        ctaLabel: page.nav.ctaLabel,
+      },
+
+      triage: {
+        ...page.triage,
+        video: videoPanel(page.triage.video),
+        rows: page.triage.rows.map((row) => ({
+          ...row,
+          tone: row.tone ?? undefined,
+          tag: row.tag ?? undefined,
+        })),
+        sources: sourceNote(
+          required(page.triage.sources, "the Recently-injured band's citations")
+        ),
+      },
+      takeaways: page.takeaways,
+      criteria: {
+        ...page.criteria,
+        video: videoPanel(page.criteria.video),
+      },
+      lawyers: {
+        ...page.lawyers,
+        attorneys: page.lawyers.attorneys.map((row) => ({
+          _key: row._key,
+          key: required(row.key, `the crash-lawyer card "${row._key}"'s team member`),
+          cred: row.cred,
+        })),
+      },
+      credentials: {
+        ...page.credentials,
+        badges: page.credentials.badges.map((badge) => ({
+          _key: badge._key,
+          awardKey: required(badge.awardKey, `the award badge "${badge._key}"`),
+        })),
+      },
+      whyFirm: {
+        ...page.whyFirm,
+        photo: whyPhoto,
+        photoMobile: whyPhotoMobile,
+      },
+      results: {
+        ...page.results,
+        stories: page.results.stories.map((story) => ({
+          ...story,
+          story: story.story ?? undefined,
+          changed: story.changed ?? undefined,
+          reviewKey: story.reviewKey ?? undefined,
+        })),
+      },
+      timeline: {
+        ...page.timeline,
+        photo: consultPhoto,
+      },
+      crashTypes: {
+        ...page.crashTypes,
+        tiles: page.crashTypes.tiles.map((tile) => ({ ...tile, href: tile.href ?? null })),
+      },
+      denver: page.denver,
+      checklistTeaser: {
+        ...page.checklistTeaser,
+        ctaHref: page.checklistTeaser.ctaHref ?? null,
+      },
+      faultTeaser: {
+        ...page.faultTeaser,
+        ctaHref: page.faultTeaser.ctaHref ?? null,
+        scale: page.faultTeaser.scale ?? undefined,
+        source: page.faultTeaser.source ? sourceNote(page.faultTeaser.source) : undefined,
+      },
+      more: {
+        ...page.more,
+        features: page.more.features.map((f) => ({ ...f, href: f.href ?? null })),
+        cards: page.more.cards.map((c) => ({ ...c, href: c.href ?? null })),
+      },
+      closing: {
+        ...page.closing,
+        // Built from the firm's name, not stored. The literal carried a second
+        // copy of it, which is how a site ends up publishing two.
+        mapTitle: `${firm.name} — Denver office`,
+      },
+    },
+  ];
+}
+
+/** Coalesce the optional halves of a citation on their own lines — a cast over
+ *  the whole object would hide a projection returning null where the interface
+ *  says undefined, and the two are not the same to `{note && …}`. */
+function sourceNote(note: {
+  label: string;
+  items: { _key: string; label: string; note: string | null; href: string | null }[];
+}): SourceNote {
+  return {
+    label: note.label,
+    items: note.items.map((item) => ({
+      _key: item._key,
+      label: item.label,
+      note: item.note ?? undefined,
+      href: item.href ?? undefined,
+    })),
+  };
+}
+
+/** The projection nests the film one level deeper than the interface does. */
+function videoPanel(panel: {
+  poster: unknown;
+  alt: string | null;
+  title: string;
+  length: string;
+  video: { provider: "wistia"; id: string };
+}): VideoPanel {
+  return {
+    poster: panel.poster as SanityImageSource,
+    alt: panel.alt ?? "",
+    title: panel.title,
+    length: panel.length,
+    video: panel.video,
+  };
 }
 
 /** One page by slug, for a caller that already knows which it wants. */

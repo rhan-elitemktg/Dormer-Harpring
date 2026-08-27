@@ -1050,3 +1050,150 @@ export const COMMUNITY_PAGE_COPY_QUERY = defineQuery(
   "partners": { "label": partnersLabel }
 }`
 );
+
+/*
+ * THE HEAVY CAR ACCIDENTS PAGE — Phase 4f. Fifteen named sections.
+ *
+ * THREE CROSS-REFERENCES RESOLVE TO KEYS HERE, and that is the point of making
+ * them references: `data/carAccidents.ts`'s interfaces name an award, a
+ * testimonial and five attorneys by KEY, and until this phase those keys were
+ * typed strings that could silently name nothing. A `reference` cannot dangle,
+ * and the projection hands the getter the same key shape it always had, so no
+ * component moved.
+ *
+ * `href` IS NOT PROJECTED FOR THE SECTION NAV. Each item carries the `section`
+ * it jumps to and the getter turns that into an anchor, because `CA_SECTION_IDS`
+ * is read by both the nav's hrefs and the sections' own `id` attributes — two
+ * things that must agree get one source, and a GROQ string concat must not
+ * become a second.
+ *
+ * Nor is the reviewer's `bioHref`: `attorneyPath()` builds it from the referenced
+ * member's key, the way every other profile link on this site is built.
+ */
+export const CAR_ACCIDENTS_PAGE_QUERY = defineQuery(
+  `*[_type == "carAccidentsPage" && _id == "carAccidentsPage"][0]{
+  seo{ metaTitle, metaDescription },
+  hero{
+    "trail": coalesce(trail[]{ _key, label, href }, []),
+    title,
+    lede,
+    "proof": coalesce(proof[]{ _key, big, label, href, google }, []),
+    ctaLabel,
+    telLabel,
+    photoAlt,
+    reviewer{
+      "name": member->name,
+      "role": member->role,
+      "memberKey": member->key.current,
+      portrait,
+      updated
+    }
+  },
+  nav{
+    "items": coalesce(items[]{ _key, section, label }, []),
+    ctaLabel
+  },
+  triage{
+    title,
+    lede,
+    video{ poster, alt, title, length, "video": film{ provider, id } },
+    help{ text },
+    "rows": coalesce(rows[]{ _key, tone, tag, question, body, ctaLabel, ctaHref, stat{ big, label } }, []),
+    sources{ label, "items": coalesce(items[]{ _key, label, note, href }, []) }
+  },
+  takeaways{
+    eyebrow,
+    title,
+    lede,
+    "items": coalesce(items[]{ _key, title, body }, [])
+  },
+  criteria{
+    title,
+    lede,
+    video{ poster, alt, title, length, "video": film{ provider, id } },
+    "items": coalesce(items[]{ _key, title, body }, []),
+    note
+  },
+  lawyers{
+    title,
+    lede,
+    "attorneys": coalesce(attorneys[]{ _key, "key": member->key.current, cred }, []),
+    moreLabel,
+    moreHref
+  },
+  credentials{
+    "badges": coalesce(badges[]{ "_key": _key, "awardKey": @->key.current }, []),
+    eyebrow,
+    disclaimer
+  },
+  whyFirm{
+    eyebrow,
+    title,
+    "stats": coalesce(stats[]{ _key, big, label }, []),
+    disclaimer,
+    "columns": coalesce(columns[]{ _key, n, title, body }, []),
+    ctaLabel,
+    ctaHref,
+    photoAlt
+  },
+  results{
+    eyebrow,
+    title,
+    offeredLabel,
+    recoveredLabel,
+    "stories": coalesce(stories[]{
+      _key, offered, recovered, title, story, changed,
+      "reviewKey": review->key.current
+    }, []),
+    disclaimer
+  },
+  timeline{
+    title,
+    lede,
+    "steps": coalesce(steps[]{ _key, n, title, body }, []),
+    "phases": coalesce(phases[]{ _key, title, when, body }, []),
+    photoAlt,
+    "points": coalesce(points, [])
+  },
+  crashTypes{
+    title,
+    lede,
+    "tiles": coalesce(tiles[]{ _key, name, body, linkLabel, href }, [])
+  },
+  denver{
+    title,
+    lede,
+    "stats": coalesce(stats[]{ _key, big, label, body }, []),
+    "corridors": coalesce(corridors[]{ _key, name, body }, [])
+  },
+  checklistTeaser{
+    title,
+    body,
+    ctaLabel,
+    ctaHref,
+    "steps": coalesce(steps[]{ _key, iconKey, label }, [])
+  },
+  faultTeaser{
+    title,
+    body,
+    ctaLabel,
+    ctaHref,
+    scale{ start, middle, end },
+    source{ label, "items": coalesce(items[]{ _key, label, note, href }, []) }
+  },
+  more{
+    title,
+    "features": coalesce(features[]{ _key, title, body, length, poster, ctaLabel, href }, []),
+    "cards": coalesce(cards[]{ _key, title, body, ctaLabel, href }, [])
+  },
+  closing{ title, lede, officeLabel }
+}`
+);
+
+/** The Car Accidents accordion's own heading. The rest of that band's copy —
+ *  the button inside an answer, the ask card — is the homepage's. */
+export const CAR_ACCIDENT_FAQ_SECTION_QUERY = defineQuery(
+  `*[_type == "carAccidentsPage" && _id == "carAccidentsPage"][0].faqSection{
+  eyebrow, title, lede
+}`
+);
