@@ -89,23 +89,6 @@ const portableTextBody = (image: SchemaContext["image"]) =>
     ])
   );
 
-const blogCategories = defineCollection({
-  loader: glob({ pattern: "**/*.json", base: "./src/content/blog-categories" }),
-  schema: z.object({
-    /** Decoded — WordPress returns `Auto Insurance &amp; Accident Claims`. */
-    title: z.string(),
-    /**
-     * The legacy WordPress slug, which is NOT derivable from the title:
-     * `Auto Insurance & Accident Claims` is `auto-insurance-accident-claims`.
-     * 167 posts' archive URLs depend on it.
-     */
-    slug: z.string(),
-    /** The WordPress term id. Kept so a re-import can match on identity rather
-     *  than on a title someone has since edited. */
-    legacyId: z.number().int().optional(),
-  }),
-});
-
 const blog = defineCollection({
   loader: glob({ pattern: "**/*.json", base: "./src/content/blog" }),
   schema: ({ image }) =>
@@ -260,4 +243,7 @@ const practiceAreas = defineCollection({
     }),
 });
 
-export const collections = { blog, blogCategories, practiceAreas };
+/* `blogCategories` IS GONE — Phase 3a moved the 23 records into Sanity as
+   `blogCategory` documents and `src/content/blog-categories/` was deleted with
+   it. The two below follow in 3b and 3c, and then this file retires. */
+export const collections = { blog, practiceAreas };

@@ -30,6 +30,9 @@
 // TODO(launch) on `getBlogPosts()`.
 import type { ImageMetadata } from "astro";
 import { getCollection } from "astro:content";
+import { sanityClient } from "sanity:client";
+import { BLOG_CATEGORIES_QUERY } from "../sanity/lib/queries";
+import { once, required } from "../sanity/lib/fetch";
 import { getTeam } from "./team";
 import { getFirmDetails } from "./site";
 import {
@@ -65,11 +68,14 @@ export interface BlogCategory {
   _key: string;
   title: string;
   /**
-   * The legacy WordPress category slug, read off the scrape's `/category/*`
-   * directories rather than derived from the title — `Auto Insurance` is
-   * `auto-insurance-accident-claims` there, and 186 posts' archive URLs depend
-   * on it. Nothing links to `/category/<slug>` yet (those pages are not built),
-   * but the tab filter keys off it and the CMS phase will.
+   * The legacy WordPress category slug — NOT derived from the title. "Auto
+   * Insurance & Accident Claims" is `auto-insurance-accident-claims` and "Jury
+   * Trial Wins" is `verdicts`, so it cannot be generated from either end.
+   *
+   * Nothing links to `/category/<slug>` (those pages are not built), but 24
+   * redirects in `redirects.ts` land on it and the tab filter matches on it.
+   * That is why the schema's field carries a description saying so and
+   * deliberately offers no "Generate from title" button.
    */
   slug: string;
 }
@@ -154,6 +160,31 @@ export async function getBlogPage(): Promise<BlogPageCopy> {
 }
 
 /**
+ * The taxonomy, from Sanity — all 23, in slug order and unfiltered.
+ *
+ * The one read of the collection. `once()` is not optional here: the tab row,
+ * the featured post and all 186 imported posts ask for it, and `[slug].astro`
+ * builds a page each, so without it the build makes one round trip per page for
+ * a 23-row table that cannot change under it.
+ *
+ * `required()` CANNOT ACTUALLY THROW on this one — a GROQ collection query
+ * returns `[]` when the type has no documents, never null. The real guard is
+ * `category()` below, which throws by name on the first slug it cannot resolve,
+ * so an empty collection fails loudly rather than shipping a blank tab row.
+ * Kept for the shape every other collection getter uses.
+ */
+async function allCategories(): Promise<BlogCategory[]> {
+  return once("blogCategories", async () =>
+    required(await sanityClient.fetch(BLOG_CATEGORIES_QUERY), "Blog Categories", "Collections")
+  );
+}
+
+/** The same 23, by slug — for resolving the category string a post carries. */
+async function categoriesBySlug(): Promise<Map<string, BlogCategory>> {
+  return new Map((await allCategories()).map((entry) => [entry.slug, entry]));
+}
+
+/**
  * The tab row: every category a post actually LEADS with, ordered by how many
  * posts each holds.
  *
@@ -180,10 +211,7 @@ export async function getBlogPage(): Promise<BlogPageCopy> {
  * there is no `/category/all` behind it.
  */
 export async function getBlogCategories(): Promise<BlogCategory[]> {
-  const [categories, posts] = await Promise.all([
-    getCollection("blogCategories"),
-    getCollection("blog"),
-  ]);
+  const [categories, posts] = await Promise.all([allCategories(), getCollection("blog")]);
 
   // PRIMARY ONLY, matching what a card carries and therefore what a tab can
   // find. Counting a post under its secondaries would order the row by a
@@ -201,8 +229,7 @@ export async function getBlogCategories(): Promise<BlogCategory[]> {
     // none carry first. It is dropped from the row rather than shipped as an
     // empty state. Give one of those 13 that category first and it returns on
     // its own; nothing here needs editing.
-    .filter((entry) => (counts.get(entry.data.slug) ?? 0) > 0)
-    .map((entry) => ({ _key: entry.data.slug, title: entry.data.title, slug: entry.data.slug }))
+    .filter((entry) => (counts.get(entry.slug) ?? 0) > 0)
     .sort(
       (a, b) =>
         (counts.get(b.slug) ?? 0) - (counts.get(a.slug) ?? 0) ||
@@ -210,33 +237,31 @@ export async function getBlogCategories(): Promise<BlogCategory[]> {
     );
 }
 
-const CATEGORIES: Record<string, BlogCategory> = {
-  autoAccident: { _key: "auto-accident", title: "Auto Accident", slug: "auto-accident" },
-  autoInsurance: {
-    _key: "auto-insurance",
-    title: "Auto Insurance",
-    slug: "auto-insurance-accident-claims",
-  },
-  bike: { _key: "bike-accidents", title: "Bike Accidents", slug: "bike-accidents" },
-  daycare: { _key: "daycare-injury", title: "Daycare Injury", slug: "daycare-injury" },
-  laws: { _key: "laws", title: "Laws", slug: "laws" },
-  personalInjury: {
-    _key: "personal-injury",
-    title: "Personal Injury",
-    slug: "personal-injury",
-  },
-  premises: {
-    _key: "premises-liability",
-    title: "Premises Liability",
-    slug: "premises-liability",
-  },
-  product: {
-    _key: "product-liability",
-    title: "Product Liability",
-    slug: "product-liability",
-  },
-  trials: { _key: "trials", title: "Trials", slug: "trials" },
-};
+/**
+ * One category by its slug, or a failure that names it.
+ *
+ * THIS REPLACED A NINE-ENTRY LITERAL, AND EIGHT OF THE NINE WERE ALREADY DEAD.
+ * `CATEGORIES` was written when the feed was the comp's twelve transcribed
+ * cards; the import replaced those, and only `CATEGORIES.premises` — the
+ * hand-authored featured post's — still had a reader. Nothing reported the
+ * other eight, because an unused module-level const is not an error. One of
+ * them had also drifted: `autoInsurance` carried `_key: "auto-insurance"`
+ * against a slug of `auto-insurance-accident-claims`, which would have been a
+ * tab that matched no card if anything had ever rendered it.
+ *
+ * So the taxonomy has exactly one source now, for the hand-authored post as
+ * well as the imported ones.
+ */
+async function category(slug: string): Promise<BlogCategory> {
+  const found = (await categoriesBySlug()).get(slug);
+  if (!found) {
+    throw new Error(
+      `blog: no blogCategory in Sanity with slug "${slug}". Create it in the ` +
+        `Studio at /admin under Collections › Blog Categories and PUBLISH it.`
+    );
+  }
+  return found;
+}
 
 /**
  * The byline. Both halves are references in the CMS, so both are resolved here
@@ -304,6 +329,11 @@ export async function getReviewedBy(): Promise<PortableTextBlock[]> {
 }
 
 export async function getFeaturedPost(): Promise<FeaturedPost> {
+  const [premises, reviewer] = await Promise.all([
+    category("premises-liability"),
+    byline("k-c-harpring"),
+  ]);
+
   return {
     _key: "trampoline-waiver",
     title: "Can you sue a trampoline park if you signed a waiver?",
@@ -313,11 +343,11 @@ export async function getFeaturedPost(): Promise<FeaturedPost> {
       "conduct, and one that is unclear or rushed at check-in may not hold up " +
       "at all.",
     publishedAt: "2026-06-23",
-    category: CATEGORIES.premises,
+    category: premises,
     image: consult,
     imageAlt: "Attorney meeting with a client",
     author: FIRM,
-    reviewer: await byline("k-c-harpring"),
+    reviewer,
     href: blogPath("can-you-sue-a-trampoline-park-if-you-signed-a-waiver"),
   };
 }
@@ -654,19 +684,6 @@ export async function getBlogPostArticles(): Promise<BlogPostArticle[]> {
  * ------------------------------------------------------------------------- */
 
 
-/** The taxonomy, straight from the `blogCategories` collection rather than the
- *  hand-written CATEGORIES map above — the imported posts carry the live
- *  site's 23 slugs, and only the collection knows all of them. */
-async function importedCategories(): Promise<Map<string, BlogCategory>> {
-  const entries = await getCollection("blogCategories");
-  return new Map(
-    entries.map((entry) => [
-      entry.data.slug,
-      { _key: entry.data.slug, title: entry.data.title, slug: entry.data.slug },
-    ])
-  );
-}
-
 /**
  * Imported posts in the FEED shape, newest first.
  *
@@ -696,7 +713,7 @@ async function handAuthoredSlugs(): Promise<Set<string>> {
 export async function getImportedPosts(): Promise<BlogPost[]> {
   const [entries, categories, kc, claimed] = await Promise.all([
     getCollection("blog"),
-    importedCategories(),
+    categoriesBySlug(),
     byline("k-c-harpring"),
     handAuthoredSlugs(),
   ]);
@@ -709,7 +726,8 @@ export async function getImportedPosts(): Promise<BlogPost[]> {
       if (!category) {
         throw new Error(
           `blog: imported post "${entry.data.slug}" has category "${primary}", ` +
-            `which is not in the blogCategories collection.`
+            `which is not a Blog Category in Sanity. Create it at /admin under ` +
+            `Collections › Blog Categories and PUBLISH it.`
         );
       }
       return {

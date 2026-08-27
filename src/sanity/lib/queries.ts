@@ -356,6 +356,27 @@ export const CITIES_QUERY = defineQuery(`*[_type == "city"] | order(order asc){
   "_key": key.current, name
 }`);
 
+/**
+ * The blog taxonomy — all 23, unfiltered and unordered by anything meaningful.
+ *
+ * NEITHER THE FILTER NOR THE ORDER IS IN HERE, and both could have been. The row
+ * is ordered by how many posts LEAD with each category and drops any that no
+ * post leads with, which GROQ can express — but both are decisions with reasons
+ * written beside them in `getBlogCategories()` ("a tab that finds nothing is
+ * worse than no tab"), and a projection is the wrong place for a decision whose
+ * explanation lives somewhere else. The sort by slug is only so the result is
+ * stable between builds.
+ *
+ * `_key` IS THE SLUG, not the projected `_id`. The card's `data-category`
+ * attribute and 24 legacy `/category/<slug>/` redirects are keyed on it, so it
+ * is content — see the field's own description in the schema.
+ */
+export const BLOG_CATEGORIES_QUERY = defineQuery(
+  `*[_type == "blogCategory"] | order(slug.current asc){
+    "_key": slug.current, title, "slug": slug.current
+  }`
+);
+
 /*
  * THE SIX BELOW READ ARRAYS ON A PAGE DOCUMENT, NOT COLLECTIONS.
  *

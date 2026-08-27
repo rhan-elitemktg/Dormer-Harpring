@@ -410,6 +410,17 @@ export type SimpleText = Array<{
   _key: string;
 }>;
 
+export type BlogCategory = {
+  _id: string;
+  _type: "blogCategory";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title: string;
+  slug: Slug;
+  legacyId?: number;
+};
+
 export type CarAccidentsPage = {
   _id: string;
   _type: "carAccidentsPage";
@@ -673,6 +684,7 @@ export type AllSanitySchemaTypes =
   | TeamMember
   | RichText
   | SimpleText
+  | BlogCategory
   | CarAccidentsPage
   | CommunityPage
   | HomePage

@@ -38,6 +38,7 @@ import { PinIcon } from "@sanity/icons/Pin";
 import { HomeIcon } from "@sanity/icons/Home";
 import { HeartFilledIcon } from "@sanity/icons/HeartFilled";
 import { WarningOutlineIcon } from "@sanity/icons/WarningOutline";
+import { TagIcon } from "@sanity/icons/Tag";
 
 /**
  * SINGLETONS ARE ENFORCED HERE, NOT IN THE SCHEMA. There is no `singleton: true`
@@ -167,11 +168,16 @@ function collection(
  *
  * A COLLECTION IS FOR CONTENT REUSED IN MORE THAN ONE PLACE — which is what this
  * group is FOR, from an editor's side: change the record once and every page
- * that shows it follows. These six reach 111, 104, 29, 27, 5 and 3 built pages.
+ * that shows it follows. These seven reach 187, 111, 104, 29, 27, 5 and 3 built
+ * pages.
  *
  * Phase 2f took out seven that reached one page each. They are arrays on the
  * Pages documents now, where an editor looking for the sponsorships finds them
  * on the page that renders them rather than hunting a global list.
+ *
+ * ORDERED BY HOW OFTEN AN EDITOR REACHES FOR IT, not alphabetically. The two
+ * lookup tables — Cities and Blog Categories — sit at the bottom: they are read
+ * by other documents far more often than they are edited.
  */
 const COLLECTIONS: [string, string, ComponentType?][] = [
   ["teamMember", "Team", UsersIcon],
@@ -180,6 +186,7 @@ const COLLECTIONS: [string, string, ComponentType?][] = [
   ["award", "Awards", StarIcon],
   ["coreValue", "Core Values", HeartIcon],
   ["city", "Cities", PinIcon],
+  ["blogCategory", "Blog Categories", TagIcon],
 ];
 
 /**

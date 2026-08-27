@@ -1,5 +1,15 @@
-// Pulls the blog taxonomy from the legacy WordPress site and writes the
-// `blogCategories` content collection.
+// Pulls the blog taxonomy from the legacy WordPress site.
+//
+// THE STORE IT WRITES INTO NO LONGER EXISTS. Phase 3a moved the 23 records into
+// Sanity as `blogCategory` documents and deleted `src/content/blog-categories/`
+// with the collection that read it. Re-running this re-creates that directory,
+// which nothing loads — so its output is now an INPUT to a migration, not a live
+// store: run this, then `scripts/migrate-blog-3a.ts`, then import, then delete
+// the directory again.
+//
+// It is kept rather than deleted because it is the only record of how to
+// re-derive the taxonomy from WordPress, and the three rules below are editorial
+// decisions that would otherwise have to be re-made from scratch.
 //
 // RERUNNABLE AND AUTHORITATIVE. The category set is the live site's, not ours —
 // run this again and the collection is rebuilt from source. Anything hand-typed
