@@ -127,13 +127,68 @@ export function wistiaPopoverClass(id: string): string {
  * IT IS ALSO THE HOMEPAGE HERO'S GENUINE VIDEO, and that collision is the one
  * thing to know here. `home.ts` writes its id as a LITERAL rather than
  * importing this, deliberately: the hero is correct and finished, the others
- * are placeholders that happen to share an id today. Grep for
- * `PLACEHOLDER_VIDEO` to get exactly the slots still waiting on a real one —
- * grepping for the id itself would wrongly include the hero.
+ * are placeholders that happen to share an id today.
  *
- * TODO(video): 39 slots. Each carries the YouTube id it should map to, where
- * one is known.
+ * GREPPING `PLACEHOLDER_VIDEO` NO LONGER FINDS THEM ALL, and that changed
+ * quietly when the content moved. Most slots are FIELDS in Sanity now, holding
+ * the stand-in id as data. Today it is:
+ *
+ *   3   in code      carAccidents.ts (two panels), home.ts (the FAQ band)
+ *   30  in Sanity    20 faq.video.id, 6 testimonial.video.id, 4 teamMember.videoId
+ *
+ * So the full sweep is a grep AND a query:
+ *
+ *   git grep -n PLACEHOLDER_VIDEO -- src
+ *   *[video.id == "b4n3r4pchd" || videoId == "b4n3r4pchd"]{_type, name, question}
+ *
+ * Do NOT grep the id in code to find them: `home.ts` writes it as a literal for
+ * the hero, whose video is correct and finished, and that would wrongly include
+ * it.
+ *
+ * TODO(video): 33 slots. `YOUTUBE_ORIGINS` below carries the id each maps to,
+ * where one is known.
  */
+/**
+ * THE YOUTUBE MAPPING, AND WHY IT LIVES HERE NOW.
+ *
+ * Every record used to carry a `TODO(video): was YouTube <id>` comment beside
+ * it, which was the ONLY record of which film belonged in which slot. Moving
+ * those records into Sanity deleted their comments with them — six in the
+ * testimonials slice and two more with the attorney bios — and nobody noticed
+ * for four commits, because a comment disappearing is not a test failure.
+ *
+ * FIVE OF THESE EIGHT ARE UNLISTED. Nothing public can enumerate an unlisted
+ * video: yt-dlp, the RSS feed and the channel page all return only the 15
+ * public ones. These five were found by working backwards from ids in the
+ * codebase, so losing this table means losing them for good — a re-derivation
+ * is not available. Only YouTube Studio's Content list holds the true total,
+ * and nobody has checked whether there are more than five.
+ *
+ * A code comment beside a literal cannot survive that literal moving to a CMS.
+ * A table in the module that owns video URLs can, which is the whole point of
+ * putting it here rather than beside the records again.
+ *
+ * Keyed by the record's own key in Sanity. TODO(video): as each film is
+ * re-hosted, set the Wistia id on that record and strike its row.
+ */
+export const YOUTUBE_ORIGINS: Record<string, { id: string; title: string; listed: boolean }> = {
+  // testimonial
+  evelyn: { id: "kFdrOgblr6A", title: "Client Testimonial - Evelyn", listed: false },
+  ben: { id: "sMGtyzxGaxY", title: "Client Testimonial - Ben", listed: true },
+  joel: { id: "AhfhEBczLcY", title: "Client Testimonial: Joel", listed: false },
+  elijah: { id: "aqX7B7vu1ZI", title: "Client Testimonial - Elijah", listed: false },
+  kelly: { id: "B3-hJPujs0U", title: "Client Testimonial", listed: false },
+  "sean-client": { id: "-cSgLpR2TfA", title: "DORMER HARPRING TESTIMONIAL", listed: true },
+  // teamMember — Sean's profile film
+  "sean-dormer": { id: "LT-oU3yqtmA", title: "Sean Dormer 2024 Profile", listed: false },
+  // a LINK on Sean's bio, not an embed — the "About Dormer Harpring" row
+  "sean-dormer:about-film": {
+    id: "OUGOMAWgrmc",
+    title: "About Dormer Harpring",
+    listed: true,
+  },
+};
+
 export const PLACEHOLDER_VIDEO: VideoRef = { provider: "wistia", id: "b4n3r4pchd" };
 
 
@@ -148,8 +203,8 @@ const POSTER = { width: 1280, height: 720 };
 /**
  * One request per video id, however many pages ask.
  *
- * All 44 un-migrated slots point at the SAME stand-in id today, so this is one
- * request for the whole build rather than 44 — the same reasoning as `once()`
+ * The 33 un-migrated slots all point at the SAME stand-in id today, so this is
+ * one request for the whole build rather than 33 — the same reasoning as `once()`
  * in sanity/lib/fetch.ts, and it matters for the same reason.
  */
 const posters = new Map<string, Promise<string | null>>();
