@@ -123,7 +123,9 @@ export interface VideoPanel {
   alt: string;
   title: string;
   length: string;
-  /** TODO(video): PLACEHOLDER_VIDEO until these two panels have real ids. */
+  /** Both panels still carry the stand-in id. The marker for that lives on the
+   *  field in `schemaTypes/pages/carAccidentsPage.ts`, where it is edited — a
+   *  second copy here is how closing one leaves the other behind. */
   video: VideoRef;
 }
 
@@ -155,8 +157,10 @@ export interface DetailHero {
    * instead, and every one of those five facts is already on that bio. Carrying
    * them here as well would put the same claims in two places to verify.
    *
-   * TODO(launch): "Updated July 2026" is the comp's date and has to move when
-   * the copy is actually reviewed.
+   * The "last reviewed" date is a field on the page document now, and its
+   * `TODO(launch)` went with it — a marker belongs where the thing it marks is
+   * edited, and carrying a second copy here is how closing one leaves the other
+   * behind.
    */
   reviewer: {
     name: string;

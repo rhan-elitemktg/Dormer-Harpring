@@ -222,6 +222,10 @@ export const carAccidentsPage = defineType({
         }),
         defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
         defineField({ name: "lede", type: "text", rows: 3, validation: (rule) => rule.required() }),
+        // TODO(launch): the same unverified claim `stats.ts` carries. Kept as a
+        // marker on BOTH surfaces deliberately — the figure is published here
+        // and in the by-the-numbers band, so closing one does not close the
+        // other.
         defineField({
           name: "proof",
           title: "Proof figures",
@@ -610,6 +614,10 @@ export const carAccidentsPage = defineType({
           ],
           validation: (rule) => rule.required().min(1),
         }),
+        // TODO(launch): the three figures above are claims about the firm's own
+        // closed car-accident files — an average multiple, a trial rate and a
+        // turn-down rate. Nobody outside the firm can check them, and this
+        // sentence is what they rest on. The firm has to confirm all three.
         defineField({
           name: "disclaimer",
           type: "text",
@@ -840,6 +848,10 @@ export const carAccidentsPage = defineType({
                   name: "href",
                   title: "Destination",
                   type: "string",
+                  // TODO(launch): two tiles have no legacy page and so no
+                  // destination — rear-end and head-on. Either those pages get
+                  // written or the two tiles come out; an unlinked tile beside
+                  // six linked ones reads as a broken control.
                   description:
                     "Leave EMPTY where no page exists yet — the tile then renders unlinked " +
                     "rather than dead. Two of these are waiting on pages.",
@@ -922,6 +934,11 @@ export const carAccidentsPage = defineType({
      * share a shape and differ in one optional part each: the checklist draws
      * five illustrative steps, the fault band draws a labelled scale.
      */
+    /*
+     * TODO(launch): WRITE THE EIGHT, OR CUT THE SECTION BACK TO WHAT EXISTS.
+     * The band promises "8 things to do after a car accident" and links at a
+     * placeholder; the five steps below it are illustrative, not the eight.
+     */
     defineField({
       name: "checklistTeaser",
       title: "Checklist teaser",
@@ -935,9 +952,11 @@ export const carAccidentsPage = defineType({
           name: "ctaHref",
           title: "Destination",
           type: "string",
-          // TODO(content): a bare "#" today — the article does not exist. It is
-          // the ninth and last placeholder link on this site, declared by count
-          // in check-links.py.
+          // TODO(launch): a bare "#" today, and the ninth and last placeholder
+          // link on this site — declared by count in check-links.py. A LAUNCH
+          // item rather than a content one, unlike the homepage's eight: those
+          // teaser articles nobody has written, where this promises "8 things
+          // to do after a car accident" to a reader who has just been in one.
           description:
             "A bare # is a PLACEHOLDER and must not ship. The link checker counts them and " +
             "fails when the count changes without being declared.",
@@ -1001,6 +1020,12 @@ export const carAccidentsPage = defineType({
       ],
       validation: (rule) => rule.required(),
     }),
+    /*
+     * TODO(launch): BUILD THE ARTICLES, THEN SET THE HREFS. Several of these
+     * cards point at the blog index rather than at the answer they promise,
+     * because the answer has not been written. A card that says "Read the
+     * answer" and lands on a feed is worse than no card.
+     */
     defineField({
       name: "more",
       title: "More on claims band",

@@ -156,9 +156,9 @@ export interface HomeFirmIntro {
   helpTitle: string;
   helpPoints: HelpPoint[];
   videoLabel: string;
-  /** TODO(video): the firm film. Still the stand-in id — but it is a FIELD in
-   *  the Studio now, so replacing it is an editor's job rather than a code
-   *  change. `YOUTUBE_ORIGINS` in `lib/video.ts` names the original. */
+  /** The firm film. Still the stand-in id — but it is a FIELD in the Studio
+   *  now, so replacing it is an editor's job rather than a code change. The
+   *  marker for it lives on that field, in `schemaTypes/pages/homePage.ts`. */
   video: VideoRef;
   quote: { text: string; name: string; role: string };
   aside: { title: string; text: string; ctaLabel: string };
