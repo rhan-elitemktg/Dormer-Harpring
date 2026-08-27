@@ -1,6 +1,6 @@
 import { defineConfig } from "sanity";
 import { structureTool } from "sanity/structure";
-import { structure } from "./src/sanity/structure";
+import { SINGLETON_TYPES, structure } from "./src/sanity/structure";
 import { schemaTypes } from "./src/sanity/schemaTypes/index";
 import { eliteTheme } from "./src/sanity/theme";
 import { EliteMark } from "./src/sanity/components/EliteMark";
@@ -71,17 +71,32 @@ export default defineConfig({
 
   document: {
     /*
-     * TAKE `teamMember` OUT OF THE GLOBAL "CREATE NEW" MENU.
+     * WHAT THE GLOBAL "CREATE NEW" MENU MUST NOT OFFER.
      *
-     * Team opens into four sub-lists filtered on `kind`, and `kind` is hidden
-     * in the form by request — so the ONLY thing that sets it is creating a
-     * person inside one of those lists. The navbar's global create button
-     * bypasses that: it would make a team member with no group, matching none
-     * of the four filters, invisible in the desk and unreachable in the Studio.
+     * `teamMember`, because Team opens into four sub-lists filtered on `kind`,
+     * and `kind` is hidden in the form by request — so the ONLY thing that sets
+     * it is creating a person inside one of those lists. The navbar's global
+     * create button bypasses that: it would make a team member with no group,
+     * matching none of the four filters, invisible in the desk and unreachable
+     * in the Studio. Removing it leaves exactly one creation path, and it is the
+     * one that sets the field.
      *
-     * Removing it here leaves exactly one creation path, which is the one that
-     * sets the field. Every other type is untouched.
+     * EVERY SINGLETON, because a singleton is a singleton only by convention
+     * here — `documentId()` in the desk pins one to a fixed id, and nothing
+     * stopped the ＋ menu making a SECOND one at a generated id. That second
+     * copy opens, saves and publishes; the site never reads it, because every
+     * query filters on the fixed `_id`. Editing content that silently goes
+     * nowhere is worse than not finding the field.
+     *
+     * `SINGLETON_TYPES` is the desk's own list — Pages plus Site Settings — so
+     * a singleton added there is covered here without a second edit. It was
+     * exported and imported by nothing until Phase 2f added three page
+     * documents and made the hole three wider.
      */
-    newDocumentOptions: (prev) => prev.filter((item) => item.templateId !== "teamMember"),
+    newDocumentOptions: (prev) =>
+      prev.filter(
+        (item) =>
+          item.templateId !== "teamMember" && !SINGLETON_TYPES.includes(item.templateId)
+      ),
   },
 });
