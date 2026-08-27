@@ -258,7 +258,17 @@ document would be a lie the desk tells.
 
 ## State
 
-Build is green: **332 pages** — 330 that render a site header and footer, plus `404.html` and
+**The team is 26 people, not 30, and two live URLs will 404 at cutover.** Alexandra Petroff,
+Dinorah Gutierrez, Ella Nelson and Morgan Jewel no longer work at the firm and were deleted
+from the dataset by Rhan. Ella Nelson and Morgan Jewel had bio pages that the LIVE WordPress
+site still serves at `/meet-our-attorneys/<slug>/`; **no redirect was added, by request** — the
+two URLs simply stop existing. The other two never appeared on the live site at all (comp only,
+no photograph, no bio page).
+
+Nothing internal points at them: the team page and `/sitemap/` both read the collection, so
+their links went with them. `check:links` is clean at 33,610 links across 328 pages.
+
+Build is green: **330 pages** — 328 that render a site header and footer, plus `404.html` and
 `/admin`. `npm run check` passes and the fidelity audit reports 104 of 104 pages at ≥99% against
 the live source.
 
