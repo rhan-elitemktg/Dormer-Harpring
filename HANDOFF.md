@@ -208,6 +208,25 @@ a dev request as well as a build.
 reads the roster once and returns a Map; a linear `.find()` over 26 people, 185 times, across
 372 calls is 1.8 million comparisons for an answer that does not change.
 
+### A STUDIO EDIT DOES NOT SHOW IN DEV ON THE TWO DYNAMIC ROUTES
+
+Publish a change and 290 of the 330 pages keep serving the old value until a
+source file is touched. **`npm run dev:refresh`**, or restart the dev server.
+
+`astro dev` caches what `getStaticPaths` returns and re-runs it only when the module graph
+changes. That was invisible while the content lived in `src/content/` — the content-collection
+loader has its own invalidation, so saving a JSON file triggered it. Phase 3 moved the content
+behind HTTP, where nothing tells Astro anything happened.
+
+**The static pages are fine**: they re-run their frontmatter per request, so `once()`'s
+five-second dev window is all that stands between a publish and a reload showing it. **A BUILD
+IS NEVER AFFECTED** — it runs `getStaticPaths` once, from cold, which is why this can be true
+while `npm run build` shows the change immediately.
+
+Diagnosed the long way once already: check the DATASET first (a draft is invisible — the client
+reads `perspective: "published"`), then a fresh build, then dev. If the build shows it and dev
+does not, it is this. The real fix is Sanity's live content / Visual Editing, which is Phase 5.
+
 ### A GREEN BUILD CAN LIE. Delete `dist/` first.
 
 Three builds in a row reported "332 page(s) built" and exited 0 while the data behind them
