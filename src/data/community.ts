@@ -12,21 +12,12 @@ import type { SanityImageSource } from "@sanity/image-url";
 import { sanityClient } from "sanity:client";
 import { COMMUNITY_PHOTOS_QUERY, NGO_PARTNERS_QUERY } from "../sanity/lib/queries";
 import { once, required } from "../sanity/lib/fetch";
-import angelHeart from "../assets/community/angel-heart.jpg";
-import clothesToKids from "../assets/community/clothes-to-kids.jpg";
-import fridge from "../assets/community/fridge.jpg";
-import pikesPeak from "../assets/community/pikes-peak.jpg";
-import projectCure from "../assets/community/project-cure.jpg";
-import rmhc from "../assets/community/rmhc.jpg";
-import shelter from "../assets/community/shelter.jpg";
 
-import ngoClothesToKids from "../assets/ngos/clothes-to-kids.jpg";
-import ngoHumane from "../assets/ngos/humane-colorado.webp";
-import ngoMetroCaring from "../assets/ngos/metro-caring.webp";
-import ngoAngelHeart from "../assets/ngos/project-angel-heart.webp";
-import ngoRmhc from "../assets/ngos/rmhc.webp";
-import ngoTrueCompanions from "../assets/ngos/true-companions.jpg";
-import ngoWeDontWaste from "../assets/ngos/we-dont-waste.webp";
+// THE ASSET IMPORTS THAT USED TO SIT HERE ARE GONE — the getters have read
+// Sanity since Phase 2e and nothing referenced them; an unused module-level
+// import is not an error, so nothing reported them for four commits. The FILES
+// stay in `src/assets/`: `npm run backup` runs `--no-assets`, so git is the only
+// copy of those originals outside Sanity's asset store.
 
 export interface CommunityPhoto {
   _key: string;

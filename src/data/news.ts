@@ -15,10 +15,12 @@ import type { SanityImageSource } from "@sanity/image-url";
 import { sanityClient } from "sanity:client";
 import { INSIGHTS_QUERY, NEWS_MENTIONS_QUERY } from "../sanity/lib/queries";
 import { once, required } from "../sanity/lib/fetch";
-import denver7 from "../assets/news/denver7.webp";
-import fox31 from "../assets/news/fox31-cw2.webp";
-import mountainMail from "../assets/news/mountain-mail.webp";
-import outthere from "../assets/news/outthere.webp";
+
+// THE ASSET IMPORTS THAT USED TO SIT HERE ARE GONE — the getters have read
+// Sanity since Phase 2e and nothing referenced them; an unused module-level
+// import is not an error, so nothing reported them for four commits. The FILES
+// stay in `src/assets/`: `npm run backup` runs `--no-assets`, so git is the only
+// copy of those originals outside Sanity's asset store.
 
 export interface NewsMention {
   _key: string;

@@ -20,25 +20,13 @@ import { sanityClient } from "sanity:client";
 import { COMMUNITY_PARTNERS_QUERY, SPONSORSHIPS_QUERY } from "../sanity/lib/queries";
 import { once, required } from "../sanity/lib/fetch";
 import { pt, type PortableTextBlock } from "./portableText";
-import clothesToKids from "../assets/partners/clothes-to-kids.webp";
-import craigHospital from "../assets/partners/craig-hospital.jpg";
-import humaneColorado from "../assets/partners/humane-colorado.webp";
-import metroCaring from "../assets/partners/metro-caring.webp";
-import pikesPeakLogo from "../assets/partners/pikes-peak-challenge.jpg";
-import angelHeartLogo from "../assets/partners/project-angel-heart.webp";
-import projectCureLogo from "../assets/partners/project-cure.jpg";
-import rmhcDenver from "../assets/partners/rmhc-denver.webp";
-import theParkPeople from "../assets/partners/the-park-people.webp";
-import trueCompanions from "../assets/partners/true-companions.webp";
-import weDontWaste from "../assets/partners/we-dont-waste.webp";
 
-import angelHeartPhoto from "../assets/community/angel-heart.jpg";
-import clothesToKidsPhoto from "../assets/community/clothes-to-kids.jpg";
-import fridgePhoto from "../assets/community/fridge.jpg";
-import pikesPeakPhoto from "../assets/community/pikes-peak.jpg";
-import projectCurePhoto from "../assets/community/project-cure.jpg";
-import rmhcPhoto from "../assets/community/rmhc.jpg";
-import shelterPhoto from "../assets/community/shelter.jpg";
+// THE ASSET IMPORTS THAT USED TO SIT HERE ARE GONE — the getters have read
+// Sanity since Phase 2e and nothing referenced them; an unused module-level
+// import is not an error, so nothing reported them for four commits. The FILES
+// stay in `src/assets/`: `npm run backup` runs `--no-assets`, so git is the only
+// copy of those originals outside Sanity's asset store, and `scripts/prep-assets.mjs`
+// still re-derives the eleven partner logos from the comps.
 
 export interface CommunityPartner {
   _key: string;
