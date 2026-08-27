@@ -343,8 +343,7 @@ export const TEAM_PROFILES_QUERY = defineQuery(
   body,
   education,
   "links": links[]{ _key, label, href },
-  video{ id, poster, alt },
-  "portrait": photo
+  videoId
 }`
 );
 
@@ -418,6 +417,6 @@ export const ATTORNEY_RAIL_QUERY = defineQuery(
   name,
   role,
   "portrait": photo,
-  "videoId": video.id
+  videoId
 }`
 );

@@ -478,17 +478,7 @@ export type TeamMember = {
       _key: string;
     } & NavLink
   >;
-  video?: {
-    id?: string;
-    poster?: {
-      asset?: SanityImageAssetReference;
-      media?: unknown;
-      hotspot?: SanityImageHotspot;
-      crop?: SanityImageCrop;
-      _type: "image";
-    };
-    alt?: string;
-  };
+  videoId?: string;
 };
 
 export type RichText = Array<
@@ -1069,7 +1059,7 @@ export type TEAM_QUERY_RESULT = Array<{
 
 // Source: src/sanity/lib/queries.ts
 // Variable: TEAM_PROFILES_QUERY
-// Query: *[_type == "teamMember" && hasProfile == true] | order(  select(    kind == "partner" => 1,    kind == "attorney" => 2,    kind == "staff" => 3,    kind == "dog" => 4,    5  ) asc,  orderRank asc){  "slug": key.current,  category,  lede,  email,  "facts": facts[]{ _key, value, label },  body,  education,  "links": links[]{ _key, label, href },  video{ id, poster, alt },  "portrait": photo}
+// Query: *[_type == "teamMember" && hasProfile == true] | order(  select(    kind == "partner" => 1,    kind == "attorney" => 2,    kind == "staff" => 3,    kind == "dog" => 4,    5  ) asc,  orderRank asc){  "slug": key.current,  category,  lede,  email,  "facts": facts[]{ _key, value, label },  body,  education,  "links": links[]{ _key, label, href },  videoId}
 export type TEAM_PROFILES_QUERY_RESULT = Array<{
   slug: string;
   category: string | null;
@@ -1087,24 +1077,7 @@ export type TEAM_PROFILES_QUERY_RESULT = Array<{
     label: string;
     href: string;
   }> | null;
-  video: {
-    id: string | null;
-    poster: {
-      asset?: SanityImageAssetReference;
-      media?: unknown;
-      hotspot?: SanityImageHotspot;
-      crop?: SanityImageCrop;
-      _type: "image";
-    } | null;
-    alt: string | null;
-  } | null;
-  portrait: {
-    asset?: SanityImageAssetReference;
-    media?: unknown;
-    hotspot?: SanityImageHotspot;
-    crop?: SanityImageCrop;
-    _type: "image";
-  } | null;
+  videoId: string | null;
 }>;
 
 // Source: src/sanity/lib/queries.ts
@@ -1211,7 +1184,7 @@ export type SPONSORSHIPS_QUERY_RESULT = Array<{
 
 // Source: src/sanity/lib/queries.ts
 // Variable: ATTORNEY_RAIL_QUERY
-// Query: *[_type == "teamMember" && onAttorneyRail == true] | order(  select(    kind == "partner" => 1,    kind == "attorney" => 2,    kind == "staff" => 3,    kind == "dog" => 4,    5  ) asc,  orderRank asc){  "_key": key.current,  name,  role,  "portrait": photo,  "videoId": video.id}
+// Query: *[_type == "teamMember" && onAttorneyRail == true] | order(  select(    kind == "partner" => 1,    kind == "attorney" => 2,    kind == "staff" => 3,    kind == "dog" => 4,    5  ) asc,  orderRank asc){  "_key": key.current,  name,  role,  "portrait": photo,  videoId}
 export type ATTORNEY_RAIL_QUERY_RESULT = Array<{
   _key: string;
   name: string;
@@ -1246,7 +1219,7 @@ declare module "@sanity/client" {
     '*[_type == "testimonial" && onReviewsPage == true && format == "video"]\n  | order(reviewOrder asc){\n  "_key": key.current,\n  video{ provider, id },\n  name,\n  quote,\n  poster\n}': VIDEO_REVIEWS_QUERY_RESULT;
     '*[_type == "testimonial" && onReviewsPage == true && format == "written"]\n  | order(reviewOrder asc){\n  "_key": key.current,\n  name,\n  source,\n  quote,\n  body\n}': WRITTEN_REVIEWS_QUERY_RESULT;
     '*[_type == "teamMember"] | order(\n  select(\n    kind == "partner" => 1,\n    kind == "attorney" => 2,\n    kind == "staff" => 3,\n    kind == "dog" => 4,\n    5\n  ) asc,\n  orderRank asc\n){\n  "_key": key.current,\n  name,\n  role,\n  kind,\n  photo,\n  bio,\n  "memorial": coalesce(memorial, false),\n  "hasProfile": coalesce(hasProfile, false),\n  "awards": awards[]{ _key, image, alt }\n}': TEAM_QUERY_RESULT;
-    '*[_type == "teamMember" && hasProfile == true] | order(\n  select(\n    kind == "partner" => 1,\n    kind == "attorney" => 2,\n    kind == "staff" => 3,\n    kind == "dog" => 4,\n    5\n  ) asc,\n  orderRank asc\n){\n  "slug": key.current,\n  category,\n  lede,\n  email,\n  "facts": facts[]{ _key, value, label },\n  body,\n  education,\n  "links": links[]{ _key, label, href },\n  video{ id, poster, alt },\n  "portrait": photo\n}': TEAM_PROFILES_QUERY_RESULT;
+    '*[_type == "teamMember" && hasProfile == true] | order(\n  select(\n    kind == "partner" => 1,\n    kind == "attorney" => 2,\n    kind == "staff" => 3,\n    kind == "dog" => 4,\n    5\n  ) asc,\n  orderRank asc\n){\n  "slug": key.current,\n  category,\n  lede,\n  email,\n  "facts": facts[]{ _key, value, label },\n  body,\n  education,\n  "links": links[]{ _key, label, href },\n  videoId\n}': TEAM_PROFILES_QUERY_RESULT;
     '*[_type == "city"] | order(order asc){\n  "_key": key.current, name\n}': CITIES_QUERY_RESULT;
     '*[_type == "newsMention"] | order(order asc){\n  "_key": _id, outlet, logo, date, headline, href\n}': NEWS_MENTIONS_QUERY_RESULT;
     '*[_type == "insight"] | order(order asc){\n  "_key": _id, category, iconKey, readTime, title, href\n}': INSIGHTS_QUERY_RESULT;
@@ -1254,6 +1227,6 @@ declare module "@sanity/client" {
     '*[_type == "ngoPartner"] | order(order asc){\n  "_key": _id, name, logo\n}': NGO_PARTNERS_QUERY_RESULT;
     '*[_type == "communityPartner"] | order(order asc){\n  "_key": _id, org, logo, photo, body\n}': COMMUNITY_PARTNERS_QUERY_RESULT;
     '*[_type == "sponsorship"] | order(order asc){\n  "_key": _id, name, body\n}': SPONSORSHIPS_QUERY_RESULT;
-    '*[_type == "teamMember" && onAttorneyRail == true] | order(\n  select(\n    kind == "partner" => 1,\n    kind == "attorney" => 2,\n    kind == "staff" => 3,\n    kind == "dog" => 4,\n    5\n  ) asc,\n  orderRank asc\n){\n  "_key": key.current,\n  name,\n  role,\n  "portrait": photo,\n  "videoId": video.id\n}': ATTORNEY_RAIL_QUERY_RESULT;
+    '*[_type == "teamMember" && onAttorneyRail == true] | order(\n  select(\n    kind == "partner" => 1,\n    kind == "attorney" => 2,\n    kind == "staff" => 3,\n    kind == "dog" => 4,\n    5\n  ) asc,\n  orderRank asc\n){\n  "_key": key.current,\n  name,\n  role,\n  "portrait": photo,\n  videoId\n}': ATTORNEY_RAIL_QUERY_RESULT;
   }
 }

@@ -23,6 +23,7 @@ const { review } = Astro.props;
   <div class="vcard__thumb">
     <Picture
       src={review.poster}
+      remoteSize={review.posterSize}
       alt=""
       widths={[400, 640, 900]}
       sizes="(max-width: 700px) 100vw, (max-width: 1080px) 50vw, 33vw"

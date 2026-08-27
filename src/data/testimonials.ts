@@ -18,6 +18,7 @@ import {
   WRITTEN_REVIEWS_QUERY,
 } from "../sanity/lib/queries";
 import { once, required } from "../sanity/lib/fetch";
+import { WISTIA_POSTER_SIZE, wistiaPosterUrl } from "../lib/video";
 // PLACEHOLDER_VIDEO is no longer imported: the stand-in id is DATA in the
 // Studio now, so grepping the constant still finds exactly the slots that need
 // a real one — and this module is no longer one of them.
@@ -31,6 +32,28 @@ import elijah from "../assets/testimonials/elijah.jpg";
 import kelly from "../assets/testimonials/kelly.jpg";
 import videoCover1 from "../assets/testimonials/video-cover-1.jpg";
 
+/**
+ * A filmed card's poster, falling back to the film's own Wistia thumbnail.
+ *
+ * The poster field is optional in the Studio and every filmed testimonial has
+ * one today — but "has one today" is not a guarantee, and the card renders it
+ * unconditionally. The attorney rail hit exactly this: a video field that was
+ * always filled while it was written down in code, and the first record an
+ * editor added without it threw at render.
+ *
+ * Requiring a poster instead would have been one line, and was rejected for
+ * the reason Rhan gave for the bio: nobody should have to upload a still that
+ * Wistia already has.
+ */
+async function posterFor(
+  poster: unknown,
+  video: { id?: string | null } | null | undefined
+): Promise<{ poster: unknown; posterSize?: { width: number; height: number } }> {
+  if (poster) return { poster };
+  const remote = video?.id ? await wistiaPosterUrl(video.id) : null;
+  return remote ? { poster: remote, posterSize: WISTIA_POSTER_SIZE } : { poster };
+}
+
 export interface VideoTestimonial {
   _key: string;
   kind: "video";
@@ -39,7 +62,10 @@ export interface VideoTestimonial {
   name: string;
   /** Runtime, shown on the poster. */
   length: string;
-  poster: ImageMetadata | SanityImageSource;
+  /** May be a plain URL — see `posterSize`. */
+  poster: ImageMetadata | SanityImageSource | string;
+  /** Set only for a REMOTE poster, which `Picture` cannot measure. */
+  posterSize?: { width: number; height: number };
 }
 
 export interface QuoteTestimonial {
@@ -81,23 +107,28 @@ export async function getHomeTestimonials(): Promise<Testimonial[]> {
   // than at every call site. `kind` is the CARD's shape; `format` in the Studio
   // is the review's medium. They agree, and the names differ because the
   // component prop predates the field.
-  return rows.map((row): Testimonial =>
-    row.kind === "video"
-      ? {
-          _key: row._key!,
-          kind: "video",
-          name: row.name!,
-          length: row.length ?? "",
-          video: row.video as VideoRef,
-          poster: row.poster as SanityImageSource,
-        }
-      : {
-          _key: row._key!,
-          kind: "quote",
-          name: row.name!,
-          headline: row.headline ?? "",
-          body: row.body ?? "",
-        }
+  return Promise.all(
+    rows.map(async (row): Promise<Testimonial> =>
+      row.kind === "video"
+        ? {
+            _key: row._key!,
+            kind: "video",
+            name: row.name!,
+            length: row.length ?? "",
+            video: row.video as VideoRef,
+            ...((await posterFor(row.poster, row.video)) as {
+              poster: SanityImageSource | string;
+              posterSize?: { width: number; height: number };
+            }),
+          }
+          : {
+            _key: row._key!,
+            kind: "quote",
+            name: row.name!,
+            headline: row.headline ?? "",
+            body: row.body ?? "",
+          }
+    )
   );
 }
 
@@ -114,7 +145,10 @@ export interface VideoReview {
   video: VideoRef;
   name: string;
   quote: string;
-  poster: ImageMetadata | SanityImageSource;
+  /** May be a plain URL — see `posterSize`. */
+  poster: ImageMetadata | SanityImageSource | string;
+  /** Set only for a REMOTE poster, which `Picture` cannot measure. */
+  posterSize?: { width: number; height: number };
 }
 
 export interface WrittenReview {
@@ -188,7 +222,12 @@ export async function getVideoReviews(): Promise<VideoReview[]> {
   const rows = await once("testimonials:video", async () =>
     required(await sanityClient.fetch(VIDEO_REVIEWS_QUERY), "Testimonials (filmed)")
   );
-  return rows as VideoReview[];
+  return Promise.all(
+    rows.map(async (row) => ({
+      ...row,
+      ...(await posterFor(row.poster, row.video)),
+    }))
+  ) as Promise<VideoReview[]>;
 }
 
 /**

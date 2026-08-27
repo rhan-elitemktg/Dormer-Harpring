@@ -315,57 +315,37 @@ export const teamMember = defineType({
       hidden: only("partner", "attorney"),
     }),
     /*
-     * ONE FILM PER PERSON, and it is FLAT.
+     * ONE FILM PER PERSON, AND IT IS ONE FIELD.
      *
-     * It used to be an object holding a `videoRef` object holding one visible
-     * string — three levels of box for a single id, which is what made this
-     * corner of the form look broken. The provider is always Wistia, so the id
-     * sits here directly and `data/team.ts` rebuilds the { provider, id } pair
-     * that `lib/video.ts` wants. That indirection still lives in the code where
-     * it belongs; it was never something an editor should have been looking at.
+     * It was an object holding a `videoRef` object holding one visible string —
+     * three levels of box for a single id, which is what made this corner of
+     * the form look broken. Then it was a flat object with a poster frame and
+     * poster alt text beside the id.
      *
-     * The same film now serves the BIO PAGE and the attorney rail card. There
-     * was a second "Rail card film" field; two ids for one person's one video
-     * is two things to keep in step.
+     * Both of those went with the block they served. The film used to render as
+     * a 16:9 poster in the body of the bio, which needed a second image
+     * uploaded and described for a video the person's own portrait already
+     * illustrates. The portrait IS the play affordance now, so the poster
+     * fields had nothing left to do.
+     *
+     * The provider is always Wistia, so the id sits here directly and
+     * `data/team.ts` rebuilds the { provider, id } pair `lib/video.ts` wants.
+     * That indirection still lives in the code, where it belongs.
      *
      * NOT gated on `hasProfile`, deliberately: someone can be on the rail
      * without a written bio, and their card still wants a film.
      */
     defineField({
-      name: "video",
-      title: "Film",
-      type: "object",
+      name: "videoId",
+      title: "Profile film",
+      type: "string",
       group: "profile",
       description:
-        "Shown on the bio page, and opened by the portrait on the attorney rail card.",
+        "Wistia's video ID — the id ONLY, not the whole URL. It is the last part of the " +
+        "media's address in Wistia, like b4n3r4pchd. Leave it empty and the portrait is just " +
+        "a portrait; fill it in and the portrait gains a play button.",
       hidden: only("partner", "attorney"),
-      options: { collapsible: true, collapsed: false },
-      fields: [
-        defineField({
-          name: "id",
-          title: "Wistia video ID",
-          type: "string",
-          description:
-            "The id ONLY, not the whole URL — the last part of the media's address in " +
-            "Wistia, like b4n3r4pchd.",
-        }),
-        defineField({
-          name: "poster",
-          title: "Poster frame",
-          type: "image",
-          options: { hotspot: true },
-          description:
-            "OPTIONAL. Left empty, the film's own thumbnail from Wistia is used instead.",
-        }),
-        defineField({
-          name: "alt",
-          title: "Poster alt text",
-          type: "string",
-          description: "What a screen reader says in place of the poster.",
-        }),
-      ],
     }),
-
   ],
   preview: {
     select: { title: "name", role: "role", kind: "kind", media: "photo" },

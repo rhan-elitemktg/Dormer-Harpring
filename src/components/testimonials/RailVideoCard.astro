@@ -20,6 +20,7 @@ const initial = testimonial.name.trim().charAt(0).toUpperCase();
   <a class="vcard" href={videoWatchUrl(testimonial.video)}>
   <Picture
     src={testimonial.poster}
+    remoteSize={testimonial.posterSize}
     alt={`${testimonial.name}, client testimonial video`}
     class="vcard__poster"
   />
