@@ -156,11 +156,64 @@ export const practiceAreasPage = defineType({
   title: "Practice Areas",
   type: "document",
   icon: ThLargeIcon,
+  // THREE TABS, and the first one is new. The two lists below are long enough
+  // that the page's own header copy would otherwise sit above a 102-entry
+  // directory and be scrolled past — which is what happened to the copy on this
+  // document before Phase 4 put it here.
   groups: [
-    { name: "featured", title: "Featured grid", default: true },
+    { name: "page", title: "Page", default: true },
+    { name: "featured", title: "Featured grid" },
     { name: "directory", title: "Browse all" },
   ],
   fields: [
+    defineField({
+      name: "eyebrow",
+      type: "string",
+      group: "page",
+      description: "The small line above the page title.",
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: "title",
+      type: "string",
+      group: "page",
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: "lede",
+      type: "simpleText",
+      group: "page",
+      description: "The sentence under the title.",
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: "ctaLabel",
+      title: "Header button",
+      type: "string",
+      group: "page",
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: "ctaNote",
+      title: "Note beside the button",
+      type: "string",
+      group: "page",
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: "featuredHeading",
+      title: "Featured grid heading",
+      type: "object",
+      group: "featured",
+      description: "Above the nine cards.",
+      fields: [
+        defineField({ name: "eyebrow", type: "string", validation: (rule) => rule.required() }),
+        defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
+        defineField({ name: "lede", type: "text", rows: 2, validation: (rule) => rule.required() }),
+      ],
+      validation: (rule) => rule.required(),
+    }),
+
     defineField({
       name: "featuredAreas",
       title: "Featured practice areas",
@@ -178,6 +231,20 @@ export const practiceAreasPage = defineType({
      * legacy hub carries were folded into Denver: every one of their entries
      * pointed at a Denver page, so the heading is now true of the whole section.
      */
+    defineField({
+      name: "directoryHeading",
+      title: "Directory heading",
+      type: "object",
+      group: "directory",
+      options: { columns: 2 },
+      description: "Above the by-location list.",
+      fields: [
+        defineField({ name: "eyebrow", type: "string", validation: (rule) => rule.required() }),
+        defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
+      ],
+      validation: (rule) => rule.required(),
+    }),
+
     defineField({
       name: "directory",
       title: "Browse all practice areas",

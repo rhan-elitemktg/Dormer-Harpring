@@ -605,6 +605,19 @@ export type CommunityPage = {
   _createdAt: string;
   _updatedAt: string;
   _rev: string;
+  eyebrow: string;
+  title: string;
+  lede: SimpleText;
+  volunteer: {
+    eyebrow: string;
+    title: string;
+    ctaLabel: string;
+  };
+  sponsorshipsHeading: {
+    eyebrow: string;
+    title: string;
+  };
+  partnersLabel: string;
   partners: Array<{
     org: string;
     logo: {
@@ -757,6 +770,16 @@ export type PracticeAreasPage = {
   _createdAt: string;
   _updatedAt: string;
   _rev: string;
+  eyebrow: string;
+  title: string;
+  lede: SimpleText;
+  ctaLabel: string;
+  ctaNote: string;
+  featuredHeading: {
+    eyebrow: string;
+    title: string;
+    lede: string;
+  };
   featuredAreas: Array<{
     name: string;
     iconKey: string;
@@ -772,6 +795,10 @@ export type PracticeAreasPage = {
     _type: "areaCard";
     _key: string;
   }>;
+  directoryHeading: {
+    eyebrow: string;
+    title: string;
+  };
   directory: Array<{
     title: string;
     items: Array<
@@ -2390,6 +2417,47 @@ export type NOT_FOUND_PAGE_QUERY_RESULT = {
     | Array<never>;
 } | null;
 
+// Source: src/sanity/lib/queries.ts
+// Variable: PRACTICE_AREAS_COPY_QUERY
+// Query: *[_type == "practiceAreasPage" && _id == "practiceAreasPage"][0]{  eyebrow,  title,  lede,  ctaLabel,  ctaNote,  "featured": featuredHeading{ eyebrow, title, lede },  "directory": directoryHeading{ eyebrow, title }}
+export type PRACTICE_AREAS_COPY_QUERY_RESULT = {
+  eyebrow: string;
+  title: string;
+  lede: SimpleText;
+  ctaLabel: string;
+  ctaNote: string;
+  featured: {
+    eyebrow: string;
+    title: string;
+    lede: string;
+  };
+  directory: {
+    eyebrow: string;
+    title: string;
+  };
+} | null;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: COMMUNITY_PAGE_COPY_QUERY
+// Query: *[_type == "communityPage" && _id == "communityPage"][0]{  eyebrow,  title,  lede,  volunteer{ eyebrow, title, ctaLabel },  "sponsorships": sponsorshipsHeading{ eyebrow, title },  "partners": { "label": partnersLabel }}
+export type COMMUNITY_PAGE_COPY_QUERY_RESULT = {
+  eyebrow: string;
+  title: string;
+  lede: SimpleText;
+  volunteer: {
+    eyebrow: string;
+    title: string;
+    ctaLabel: string;
+  };
+  sponsorships: {
+    eyebrow: string;
+    title: string;
+  };
+  partners: {
+    label: string;
+  };
+} | null;
+
 // Query TypeMap
 import "@sanity/client";
 declare module "@sanity/client" {
@@ -2446,5 +2514,7 @@ declare module "@sanity/client" {
     '*[_type == "sitePage" && _id == "privacy"][0]{\n  title,\n  lede,\n  "body": coalesce(body, []),\n  updated{ at, label }\n}': PRIVACY_PAGE_QUERY_RESULT;
     '*[_type == "sitePage" && _id == "sitemap"][0]{\n  title,\n  lede,\n  "body": coalesce(body, [])\n}': SITEMAP_PAGE_QUERY_RESULT;
     '*[_type == "sitePage" && _id == "notFound"][0]{\n  title,\n  lede,\n  "body": coalesce(body, []),\n  linksTitle,\n  "links": coalesce(links[]{ _key, label, description, href }, [])\n}': NOT_FOUND_PAGE_QUERY_RESULT;
+    '*[_type == "practiceAreasPage" && _id == "practiceAreasPage"][0]{\n  eyebrow,\n  title,\n  lede,\n  ctaLabel,\n  ctaNote,\n  "featured": featuredHeading{ eyebrow, title, lede },\n  "directory": directoryHeading{ eyebrow, title }\n}': PRACTICE_AREAS_COPY_QUERY_RESULT;
+    '*[_type == "communityPage" && _id == "communityPage"][0]{\n  eyebrow,\n  title,\n  lede,\n  volunteer{ eyebrow, title, ctaLabel },\n  "sponsorships": sponsorshipsHeading{ eyebrow, title },\n  "partners": { "label": partnersLabel }\n}': COMMUNITY_PAGE_COPY_QUERY_RESULT;
   }
 }

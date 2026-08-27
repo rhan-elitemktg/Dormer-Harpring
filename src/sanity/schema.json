@@ -3563,6 +3563,88 @@
           "type": "string"
         }
       },
+      "eyebrow": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": false
+      },
+      "title": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": false
+      },
+      "lede": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "inline",
+          "name": "simpleText"
+        },
+        "optional": false
+      },
+      "volunteer": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "object",
+          "attributes": {
+            "eyebrow": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": false
+            },
+            "title": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": false
+            },
+            "ctaLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": false
+            }
+          }
+        },
+        "optional": false
+      },
+      "sponsorshipsHeading": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "object",
+          "attributes": {
+            "eyebrow": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": false
+            },
+            "title": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": false
+            }
+          }
+        },
+        "optional": false
+      },
+      "partnersLabel": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": false
+      },
       "partners": {
         "type": "objectAttribute",
         "value": {
@@ -4488,6 +4570,72 @@
           "type": "string"
         }
       },
+      "eyebrow": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": false
+      },
+      "title": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": false
+      },
+      "lede": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "inline",
+          "name": "simpleText"
+        },
+        "optional": false
+      },
+      "ctaLabel": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": false
+      },
+      "ctaNote": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": false
+      },
+      "featuredHeading": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "object",
+          "attributes": {
+            "eyebrow": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": false
+            },
+            "title": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": false
+            },
+            "lede": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": false
+            }
+          }
+        },
+        "optional": false
+      },
       "featuredAreas": {
         "type": "objectAttribute",
         "value": {
@@ -4588,6 +4736,29 @@
                   }
                 }
               }
+            }
+          }
+        },
+        "optional": false
+      },
+      "directoryHeading": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "object",
+          "attributes": {
+            "eyebrow": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": false
+            },
+            "title": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": false
             }
           }
         },

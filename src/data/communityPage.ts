@@ -10,16 +10,23 @@
 // the logos — merging them would silently restyle an approved homepage. They
 // become one set when an editor owns the assets.
 //
-// NOTE THE `CommunityPage` INTERFACE BELOW SHARES A NAME with the type typegen
-// emits for the document. Different modules, so nothing collides today — but
-// they mean different things, and Phase 4 merges the page's copy onto that same
-// document, which is when one of them has to give way.
+// THE `CommunityPage` INTERFACE BELOW SHARES A NAME with the type typegen emits
+// for the document, and Phase 4 put the page's copy on that same document
+// without either having to give way. Nothing collides because they live in
+// different modules and the getter reads a QUERY type
+// (`COMMUNITY_PAGE_COPY_QUERY_RESULT`) rather than the document type — typegen
+// names a result after the query, not after the schema. Worth knowing before
+// renaming either.
 import type { ImageMetadata } from "astro";
 import type { SanityImageSource } from "@sanity/image-url";
 import { sanityClient } from "sanity:client";
-import { COMMUNITY_PARTNERS_QUERY, SPONSORSHIPS_QUERY } from "../sanity/lib/queries";
+import {
+  COMMUNITY_PAGE_COPY_QUERY,
+  COMMUNITY_PARTNERS_QUERY,
+  SPONSORSHIPS_QUERY,
+} from "../sanity/lib/queries";
 import { once, required } from "../sanity/lib/fetch";
-import { pt, type PortableTextBlock } from "./portableText";
+import type { PortableTextBlock } from "./portableText";
 
 // THE ASSET IMPORTS THAT USED TO SIT HERE ARE GONE — the getters have read
 // Sanity since Phase 2e and nothing referenced them; an unused module-level
@@ -58,25 +65,14 @@ export interface CommunityPage {
 }
 
 export async function getCommunityPage(): Promise<CommunityPage> {
-  return {
-    eyebrow: "Community involvement",
-    title: "Showing up for Colorado.",
-    lede: pt(
-      "We take the same approach to our neighborhood that we take to our cases " +
-        "— show up, do the work, and stay. Here is where our team spends its time " +
-        "outside the courtroom."
-    ),
-    volunteer: {
-      eyebrow: "Where we volunteer",
-      title: "The organizations we stand behind.",
-      ctaLabel: "Read our stories",
-    },
-    sponsorships: {
-      eyebrow: "Sponsorships",
-      title: "Events we're proud to back.",
-    },
-    partners: { label: "Organizations we support" },
-  };
+  const copy = await once("communityPage:copy", async () =>
+    required(
+      await sanityClient.fetch(COMMUNITY_PAGE_COPY_QUERY),
+      "Community Involvement",
+      "Pages"
+    )
+  );
+  return { ...copy, lede: copy.lede as PortableTextBlock[] };
 }
 
 export async function getCommunityPartners(): Promise<CommunityPartner[]> {

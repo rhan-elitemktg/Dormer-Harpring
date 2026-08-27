@@ -1011,3 +1011,42 @@ export const NOT_FOUND_PAGE_QUERY = defineQuery(
   "links": coalesce(links[]{ _key, label, description, href }, [])
 }`
 );
+
+/*
+ * THE LAST TWO PAGE DOCUMENTS' COPY — Phase 4e.
+ *
+ * Both documents already existed, holding only their lists; these projections
+ * return the strings around them. Their page-header photographs are still local
+ * imports, like every other page's.
+ *
+ * TWO PROJECTIONS ALIAS A FIELD. `featuredHeading` and `directoryHeading` are
+ * named as a matched pair in the Studio, where an editor meets them beside the
+ * lists they head; the interfaces have called them `featured` and `directory`
+ * since before Sanity existed, and renaming a field an editor sees to match a
+ * component's prop is the wrong way round. Same for `sponsorshipsHeading`.
+ */
+
+/** /practice-areas — its own copy. The two lists are `PRACTICE_AREAS_PAGE_QUERY`. */
+export const PRACTICE_AREAS_COPY_QUERY = defineQuery(
+  `*[_type == "practiceAreasPage" && _id == "practiceAreasPage"][0]{
+  eyebrow,
+  title,
+  lede,
+  ctaLabel,
+  ctaNote,
+  "featured": featuredHeading{ eyebrow, title, lede },
+  "directory": directoryHeading{ eyebrow, title }
+}`
+);
+
+/** /community-involvement — its own copy. The two lists are separate queries. */
+export const COMMUNITY_PAGE_COPY_QUERY = defineQuery(
+  `*[_type == "communityPage" && _id == "communityPage"][0]{
+  eyebrow,
+  title,
+  lede,
+  volunteer{ eyebrow, title, ctaLabel },
+  "sponsorships": sponsorshipsHeading{ eyebrow, title },
+  "partners": { "label": partnersLabel }
+}`
+);
