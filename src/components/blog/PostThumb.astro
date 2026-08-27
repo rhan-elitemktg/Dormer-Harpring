@@ -18,12 +18,21 @@
 // SAME photograph — the duplication that prompted this. A placeholder that
 // looks deliberate beats one that looks like a mistake.
 import type { ImageMetadata } from "astro";
+import type { SanityImageSource } from "@sanity/image-url";
 import Picture from "../media/Picture.astro";
 import logo from "../../assets/logo-white.webp";
 
 interface Props {
-  /** `null` for a post with no featured image — 107 of the imported 167. */
-  image: ImageMetadata | null;
+  /**
+   * `null` for a post with no card art — 125 of the 186, so the placeholder
+   * below is the common case rather than the exception.
+   *
+   * The same union `Picture` takes, and it has to be: a post's art is a Sanity
+   * asset since Phase 3b, and `ImageMetadata` stays because a local import is
+   * still a valid thing to hand this. Narrowing to one of them here would make
+   * the caller do the widening instead.
+   */
+  image: ImageMetadata | SanityImageSource | null;
   /** Card art is decorative, so this is empty unless the caller describes it. */
   alt?: string;
   widths: number[];

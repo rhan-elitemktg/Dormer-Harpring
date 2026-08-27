@@ -54,7 +54,6 @@ import {
   getBlogPostPage,
   getBlogPosts,
   getFeaturedPost,
-  getImportedArticles,
   getRelatedPosts,
   getRelatedPostsForArea,
 } from "../data/blog";
@@ -76,20 +75,23 @@ import {
 } from "../data/testimonials";
 
 export const getStaticPaths = (async () => {
-  const [handAuthored, imported, featured, posts, details, areaPages] = await Promise.all([
+  const [articles, featured, posts, details, areaPages] = await Promise.all([
     getBlogPostArticles(),
-    getImportedArticles(),
     getFeaturedPost(),
     getBlogPosts(),
     getPracticeAreaDetails(),
     getPracticeAreaArticles(),
   ]);
 
-  // ONE FEED AGAIN. `getBlogPosts()` IS the imported archive now, so the third
-  // list this used to union in would have duplicated every card. Articles still
-  // come from two places — the hand-authored one and the import — because a
-  // post's BODY can be curated even when its card is not.
-  const articles = [...handAuthored, ...imported];
+  // ONE LIST OF ARTICLES, ONE FEED. Both used to be unions: the articles were
+  // the hand-authored one plus the import, and the feed had been three lists
+  // before that. Phase 3b made every post a document, so `getBlogPostArticles()`
+  // is all 186 and `getBlogPosts()` is the 185 the panel does not already show.
+  //
+  // The feed still has the featured post PREPENDED rather than queried in — it
+  // is excluded from `getBlogPosts()` on purpose, because /news renders it in
+  // its own panel above the grid, and the join below needs every article to
+  // find its card.
   const feed = [featured, ...posts];
 
   // Walk the ARTICLES, not the feed — the same contract

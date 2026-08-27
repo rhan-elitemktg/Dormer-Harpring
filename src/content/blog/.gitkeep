@@ -1,2 +1,0 @@
-Extraction target for the 167 legacy posts. Kept so the glob loader's base
-directory exists before the first import runs; delete once posts land here.

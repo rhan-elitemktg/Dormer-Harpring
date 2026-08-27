@@ -21,6 +21,7 @@ import { homePage } from "./pages/homePage";
 
 import { award } from "./collections/award";
 import { blogCategory } from "./collections/blogCategory";
+import { blogPost } from "./collections/blogPost";
 import { city } from "./collections/city";
 import { caseResult } from "./collections/caseResult";
 import { coreValue } from "./collections/coreValue";
@@ -58,8 +59,8 @@ const pages: SchemaTypeDefinition[] = [homePage, communityPage, carAccidentsPage
  *
  * A COLLECTION IS FOR CONTENT REUSED IN MORE THAN ONE PLACE. That is the whole
  * point of the group — one record, updated once, correct everywhere. Measured
- * against the build, these seven reach 187, 111, 104, 29, 27, 5 and 3 distinct
- * pages.
+ * against the build, these eight reach 294, 187, 111, 104, 29, 27, 5 and 3
+ * distinct pages.
  *
  * Phase 2f removed seven that reached one page each — FAQs, press mentions,
  * insight teasers, community photos, charity partners, community partners and
@@ -67,6 +68,7 @@ const pages: SchemaTypeDefinition[] = [homePage, communityPage, carAccidentsPage
  * type here, count the pages: one page means a field, not a collection.
  */
 const collections: SchemaTypeDefinition[] = [
+  blogPost,
   blogCategory,
   teamMember,
   testimonial,

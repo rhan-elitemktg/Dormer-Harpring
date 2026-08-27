@@ -39,6 +39,7 @@ import { HomeIcon } from "@sanity/icons/Home";
 import { HeartFilledIcon } from "@sanity/icons/HeartFilled";
 import { WarningOutlineIcon } from "@sanity/icons/WarningOutline";
 import { TagIcon } from "@sanity/icons/Tag";
+import { DocumentTextIcon } from "@sanity/icons/DocumentText";
 
 /**
  * SINGLETONS ARE ENFORCED HERE, NOT IN THE SCHEMA. There is no `singleton: true`
@@ -168,8 +169,8 @@ function collection(
  *
  * A COLLECTION IS FOR CONTENT REUSED IN MORE THAN ONE PLACE — which is what this
  * group is FOR, from an editor's side: change the record once and every page
- * that shows it follows. These seven reach 187, 111, 104, 29, 27, 5 and 3 built
- * pages.
+ * that shows it follows. These eight reach 294, 187, 111, 104, 29, 27, 5 and 3
+ * built pages.
  *
  * Phase 2f took out seven that reached one page each. They are arrays on the
  * Pages documents now, where an editor looking for the sponsorships finds them
@@ -180,6 +181,7 @@ function collection(
  * by other documents far more often than they are edited.
  */
 const COLLECTIONS: [string, string, ComponentType?][] = [
+  ["blogPost", "Blog Posts", DocumentTextIcon],
   ["teamMember", "Team", UsersIcon],
   ["testimonial", "Testimonials", CommentIcon],
   ["caseResult", "Case Results", CaseIcon],

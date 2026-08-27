@@ -373,7 +373,78 @@ export const CITIES_QUERY = defineQuery(`*[_type == "city"] | order(order asc){
  */
 export const BLOG_CATEGORIES_QUERY = defineQuery(
   `*[_type == "blogCategory"] | order(slug.current asc){
-    "_key": slug.current, title, "slug": slug.current
+    "_key": slug.current, title, "slug": slug.current,
+    "posts": count(*[_type == "blogPost" && categories[0]._ref == ^._id])
+  }`
+);
+
+/*
+ * THE BLOG — three projections over one document type.
+ *
+ * The split is `getBlogPosts()` vs `getBlogPostArticles()`, which predates
+ * Sanity and is why it survives it: the feed is 185 card records and the bodies
+ * are 1,800 words each, so a card grid should not be pulling a whole archive of
+ * prose into memory to print a title.
+ *
+ * `href` IS NOT PROJECTED, on any of them. `blogPath(slug)` builds it, and three
+ * layers already agree on the trailing slash — a projection must not become a
+ * fourth. Same reason `TEAM_QUERY` returns no href.
+ *
+ * `reviewerKey` RATHER THAN A RESOLVED BYLINE, for the same reason: a byline is
+ * `{ name, href }`, and the href is `attorneyPath()`'s to build. `byline()` in
+ * `data/blog.ts` is the one place a team member becomes a credit, and it reads
+ * the roster that is already memoised for the header.
+ */
+
+/** One post as a card. Spread into the three below so they cannot drift. */
+const POST_CARD = `
+  "_key": slug.current,
+  "slug": slug.current,
+  title,
+  excerpt,
+  publishedAt,
+  "category": categories[0]->{ "_key": slug.current, title, "slug": slug.current },
+  image,
+  "reviewerKey": reviewer->key.current
+`;
+
+/**
+ * The feed, newest first — everything EXCEPT the featured post.
+ *
+ * `featured != true` rather than `!featured`: the field is absent on a document
+ * created before it existed, and GROQ's `!` on a null is null, not true, so the
+ * negation would drop every post that has never been near the toggle.
+ */
+export const BLOG_POSTS_QUERY = defineQuery(
+  `*[_type == "blogPost" && featured != true] | order(publishedAt desc){${POST_CARD}}`
+);
+
+/**
+ * The featured post — ALL of them, not `[0]`.
+ *
+ * Nothing in the schema can enforce "exactly one boolean among 186 documents",
+ * so the getter counts and throws. `[0]` here would silently pick one of two and
+ * quietly drop a post out of the feed as well, since the feed excludes them all.
+ */
+export const FEATURED_POST_QUERY = defineQuery(
+  `*[_type == "blogPost" && featured == true]{${POST_CARD}, "imageAlt": image.alt}`
+);
+
+/**
+ * The bodies, for `getStaticPaths`. Every post, featured included — it has a
+ * page like any other.
+ *
+ * `factCheck` is an editor's OVERRIDE and empty on all 186; the getter derives
+ * the standard band from the reviewer when it is absent. `readTime` is derived
+ * from the body after this, never stored.
+ */
+export const BLOG_ARTICLES_QUERY = defineQuery(
+  `*[_type == "blogPost"]{
+    "_key": slug.current,
+    "slug": slug.current,
+    body,
+    "factCheck": coalesce(factCheck, []),
+    "reviewerKey": reviewer->key.current
   }`
 );
 

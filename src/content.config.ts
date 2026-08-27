@@ -1,18 +1,26 @@
-// CONTENT COLLECTIONS — the imported legacy blog.
+// CONTENT COLLECTIONS — the 104 imported practice-area pages, and only those.
+//
+// THE LAST OF THREE. This file held the blog's 186 posts and its 23 categories
+// as well; Phase 3 moved both into Sanity and deleted them here in the same
+// commits, because a content collection nothing reads is a dead literal and
+// nothing reports one. `practiceAreas` follows in 3c and then this file goes.
 //
 // SANITY SWAP POINT, one step earlier than the rest. `src/data/*.ts` holds the
-// getters; this file holds the SHAPE of the 167 imported posts they read from.
-// The collection is an interim store, by request: the import lands here rather
-// than in Sanity so the content can be reviewed, corrected and version
-// controlled before any of it is pushed to a CMS. Nothing about the getters'
-// contract changes when it moves — see `data/blog.ts`.
+// getters; this file holds the SHAPE of what they read from. The collection is
+// an interim store, by request: the import lands here rather than in Sanity so
+// the content can be reviewed, corrected and version controlled before any of
+// it is pushed to a CMS. Nothing about the getters' contract changed when the
+// blog moved, and nothing will when this does — see `data/blog.ts` for what
+// that swap actually looked like.
 //
 // WHY PORTABLE TEXT JSON AND NOT MARKDOWN. The site already renders Portable
 // Text: `Prose.astro` → astro-portabletext, with `pt()` / `ptImage()` in
 // `data/portableText.ts` as the authoring shims. Markdown here would mean a
 // second renderer now AND a re-conversion at the Sanity swap, with two chances
 // to lose formatting. Portable Text stored as-is renders through the existing
-// path today and uploads to Sanity unchanged later.
+// path today and uploads to Sanity unchanged later. That bet paid: the blog's
+// 17,494 blocks uploaded with every `_key` intact and not one byte of prose
+// changed on any of the 186 pages.
 //
 // FAITHFUL TO THE SOURCE, NOT TO THE CARD. Where the live WordPress data and
 // the built site's shape disagree, these files keep WordPress's version and the
@@ -63,10 +71,11 @@ const byline = z.object({
  *
  * A factory rather than a const because `image()` exists ONLY inside a
  * `schema: ({ image }) => …` callback — it is the loader's asset resolver, not
- * a free function. Two collections need the same union, so it takes `image` as
- * an argument instead of each declaring its own copy.
+ * a free function. It served two collections until the blog left; kept as a
+ * factory for the one remaining because the constraint that forced it has not
+ * changed, and un-factoring it would be churn on a file that retires in 3c.
  *
- * A union, because both collections carry photographs mid-body. `z.union`
+ * A union, because these pages carry photographs mid-body. `z.union`
  * discriminates on `_type` well enough here — the two members share no shape —
  * and an entry matching neither fails the build rather than being dropped,
  * which is the behaviour that matters: a silently skipped block is a paragraph
@@ -89,71 +98,13 @@ const portableTextBody = (image: SchemaContext["image"]) =>
     ])
   );
 
-const blog = defineCollection({
-  loader: glob({ pattern: "**/*.json", base: "./src/content/blog" }),
-  schema: ({ image }) =>
-    z.object({
-      /** No leading slash — `blogPath()` adds it. The file's id matches. */
-      slug: z.string(),
-      title: z.string(),
-      excerpt: z.string(),
-      /** ISO. Orders the feed; JSON-LD and the sitemap both need it machine
-       *  readable. Formatted for display by `formatPostDate`. */
-      publishedAt: z.string().datetime({ offset: true }).or(z.string()),
-      /** Last edit on the legacy site. Not rendered — it is how a re-import
-       *  tells a changed post from an untouched one. */
-      modifiedAt: z.string().optional(),
-
-      /**
-       * ALL of the post's categories, in the live site's own order.
-       *
-       * `BlogPost.category` on the card is SINGULAR, and 29 of the 167 posts
-       * carry more than one — up to four. Storing only the first here would
-       * throw away data the CMS phase wants and make the choice unreviewable.
-       * So the file keeps every one and `getBlogPosts()` picks the primary,
-       * which is the first that is not `uncategorized`.
-       *
-       * One post has NO category at all
-       * (`news-pedestrian-seriously-hurt-after-hit-and-run-collision-in-glendale`),
-       * so this may be empty and the getter falls back.
-       */
-      categories: z.array(z.string()).default([]),
-
-      /** Portable Text. The article body, chrome already stripped. 116 of the
-       *  167 carry photographs mid-article — see `portableTextBody`. */
-      body: portableTextBody(image),
-      /** The reviewed-by band at the foot. Per-post: it names a specific
-       *  person and makes a specific claim about them. */
-      factCheck: z.array(portableTextBlock).default([]),
-
-      author: byline,
-      reviewer: byline,
-
-      /**
-       * Card art. OPTIONAL because 107 of the 167 legacy posts have no
-       * featured image at all — WordPress `featured_media` is 0. The design
-       * already treats card art as decorative and renders it with an empty
-       * `alt`, so the getter falls back to the practice-area photograph that
-       * matches the primary category rather than the import inventing one.
-       */
-      image: image().optional(),
-      /** Set only when the image is a real photograph rather than decorative
-       *  card art — the featured block describes its own. */
-      imageAlt: z.string().optional(),
-
-      /** The WordPress post id. Identity for a re-import, and the only way to
-       *  trace a record back to the source after a slug is corrected. */
-      legacyId: z.number().int().optional(),
-    }),
-});
-
 /**
  * THE IMPORTED PRACTICE-AREA PAGES — 109 of them, across nine cities.
  *
  * The lightweight template's content, distinct from the heavy hand-authored
  * `PracticeAreaDetail` in `data/carAccidents.ts`, which stays reserved for
- * special cases. Same interim-store reasoning as `blog` above: this lands here
- * rather than in Sanity so it can be reviewed before it is pushed to a CMS.
+ * special cases. Interim store, as the header says: this landed here rather
+ * than in Sanity so it could be reviewed before being pushed to a CMS.
  *
  * `denver-car-accident-lawyer` is DELIBERATELY ABSENT — the heavy template
  * already serves that slug, and importing it would collide in `[slug].astro`.
@@ -243,7 +194,9 @@ const practiceAreas = defineCollection({
     }),
 });
 
-/* `blogCategories` IS GONE — Phase 3a moved the 23 records into Sanity as
-   `blogCategory` documents and `src/content/blog-categories/` was deleted with
-   it. The two below follow in 3b and 3c, and then this file retires. */
-export const collections = { blog, practiceAreas };
+/* TWO OF THE THREE ARE GONE. Phase 3a moved the 23 categories into Sanity as
+   `blogCategory` documents and 3b moved the 186 posts as `blogPost` ones; both
+   directories were deleted with the collections that read them, because a
+   content collection nothing reads is a dead literal and nothing reports one.
+   `practiceAreas` follows in 3c, and then this file retires entirely. */
+export const collections = { practiceAreas };

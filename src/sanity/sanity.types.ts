@@ -310,6 +310,62 @@ export type VideoRef = {
   id: string;
 };
 
+export type BlogCategory = {
+  _id: string;
+  _type: "blogCategory";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title: string;
+  slug: Slug;
+  legacyId?: number;
+};
+
+export type BlogCategoryReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "blogCategory";
+};
+
+export type TeamMemberReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "teamMember";
+};
+
+export type BlogPost = {
+  _id: string;
+  _type: "blogPost";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title: string;
+  slug: Slug;
+  excerpt: string;
+  categories: Array<
+    {
+      _key: string;
+    } & BlogCategoryReference
+  >;
+  body: RichText;
+  factCheck?: RichText;
+  reviewer: TeamMemberReference;
+  image?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: "image";
+  };
+  featured?: boolean;
+  publishedAt: string;
+  modifiedAt?: string;
+  legacyId?: number;
+};
+
 export type TeamMember = {
   _id: string;
   _type: "teamMember";
@@ -409,17 +465,6 @@ export type SimpleText = Array<{
   _type: "block";
   _key: string;
 }>;
-
-export type BlogCategory = {
-  _id: string;
-  _type: "blogCategory";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  title: string;
-  slug: Slug;
-  legacyId?: number;
-};
 
 export type CarAccidentsPage = {
   _id: string;
@@ -681,10 +726,13 @@ export type AllSanitySchemaTypes =
   | CaseResult
   | Testimonial
   | VideoRef
+  | BlogCategory
+  | BlogCategoryReference
+  | TeamMemberReference
+  | BlogPost
   | TeamMember
   | RichText
   | SimpleText
-  | BlogCategory
   | CarAccidentsPage
   | CommunityPage
   | HomePage
@@ -1085,6 +1133,78 @@ export type CITIES_QUERY_RESULT = Array<{
 }>;
 
 // Source: src/sanity/lib/queries.ts
+// Variable: BLOG_CATEGORIES_QUERY
+// Query: *[_type == "blogCategory"] | order(slug.current asc){    "_key": slug.current, title, "slug": slug.current,    "posts": count(*[_type == "blogPost" && categories[0]._ref == ^._id])  }
+export type BLOG_CATEGORIES_QUERY_RESULT = Array<{
+  _key: string;
+  title: string;
+  slug: string;
+  posts: number;
+}>;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: BLOG_POSTS_QUERY
+// Query: *[_type == "blogPost" && featured != true] | order(publishedAt desc){  "_key": slug.current,  "slug": slug.current,  title,  excerpt,  publishedAt,  "category": categories[0]->{ "_key": slug.current, title, "slug": slug.current },  image,  "reviewerKey": reviewer->key.current}
+export type BLOG_POSTS_QUERY_RESULT = Array<{
+  _key: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  publishedAt: string;
+  category: {
+    _key: string;
+    title: string;
+    slug: string;
+  } | null;
+  image: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: "image";
+  } | null;
+  reviewerKey: string;
+}>;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: FEATURED_POST_QUERY
+// Query: *[_type == "blogPost" && featured == true]{  "_key": slug.current,  "slug": slug.current,  title,  excerpt,  publishedAt,  "category": categories[0]->{ "_key": slug.current, title, "slug": slug.current },  image,  "reviewerKey": reviewer->key.current, "imageAlt": image.alt}
+export type FEATURED_POST_QUERY_RESULT = Array<{
+  _key: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  publishedAt: string;
+  category: {
+    _key: string;
+    title: string;
+    slug: string;
+  } | null;
+  image: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: "image";
+  } | null;
+  reviewerKey: string;
+  imageAlt: string | null;
+}>;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: BLOG_ARTICLES_QUERY
+// Query: *[_type == "blogPost"]{    "_key": slug.current,    "slug": slug.current,    body,    "factCheck": coalesce(factCheck, []),    "reviewerKey": reviewer->key.current  }
+export type BLOG_ARTICLES_QUERY_RESULT = Array<{
+  _key: string;
+  slug: string;
+  body: RichText;
+  factCheck: Array<never> | RichText;
+  reviewerKey: string;
+}>;
+
+// Source: src/sanity/lib/queries.ts
 // Variable: PRESS_MENTIONS_QUERY
 // Query: *[_type == "homePage" && _id == "homePage"][0].pressMentions[]{  _key, outlet, logo, date, headline, href}
 export type PRESS_MENTIONS_QUERY_RESULT = Array<{
@@ -1217,6 +1337,10 @@ declare module "@sanity/client" {
     '*[_type == "teamMember"] | order(\n  select(\n    kind == "partner" => 1,\n    kind == "attorney" => 2,\n    kind == "staff" => 3,\n    kind == "dog" => 4,\n    5\n  ) asc,\n  orderRank asc\n){\n  "_key": key.current,\n  name,\n  role,\n  kind,\n  photo,\n  bio,\n  "memorial": coalesce(memorial, false),\n  "hasProfile": coalesce(hasProfile, false),\n  "awards": awards[]{ _key, image, alt }\n}': TEAM_QUERY_RESULT;
     '*[_type == "teamMember" && hasProfile == true] | order(\n  select(\n    kind == "partner" => 1,\n    kind == "attorney" => 2,\n    kind == "staff" => 3,\n    kind == "dog" => 4,\n    5\n  ) asc,\n  orderRank asc\n){\n  "slug": key.current,\n  category,\n  lede,\n  email,\n  "facts": facts[]{ _key, value, label },\n  body,\n  education,\n  "links": links[]{ _key, label, href },\n  videoId\n}': TEAM_PROFILES_QUERY_RESULT;
     '*[_type == "city"] | order(order asc){\n  "_key": key.current, name\n}': CITIES_QUERY_RESULT;
+    '*[_type == "blogCategory"] | order(slug.current asc){\n    "_key": slug.current, title, "slug": slug.current,\n    "posts": count(*[_type == "blogPost" && categories[0]._ref == ^._id])\n  }': BLOG_CATEGORIES_QUERY_RESULT;
+    '*[_type == "blogPost" && featured != true] | order(publishedAt desc){\n  "_key": slug.current,\n  "slug": slug.current,\n  title,\n  excerpt,\n  publishedAt,\n  "category": categories[0]->{ "_key": slug.current, title, "slug": slug.current },\n  image,\n  "reviewerKey": reviewer->key.current\n}': BLOG_POSTS_QUERY_RESULT;
+    '*[_type == "blogPost" && featured == true]{\n  "_key": slug.current,\n  "slug": slug.current,\n  title,\n  excerpt,\n  publishedAt,\n  "category": categories[0]->{ "_key": slug.current, title, "slug": slug.current },\n  image,\n  "reviewerKey": reviewer->key.current\n, "imageAlt": image.alt}': FEATURED_POST_QUERY_RESULT;
+    '*[_type == "blogPost"]{\n    "_key": slug.current,\n    "slug": slug.current,\n    body,\n    "factCheck": coalesce(factCheck, []),\n    "reviewerKey": reviewer->key.current\n  }': BLOG_ARTICLES_QUERY_RESULT;
     '*[_type == "homePage" && _id == "homePage"][0].pressMentions[]{\n  _key, outlet, logo, date, headline, href\n}': PRESS_MENTIONS_QUERY_RESULT;
     '*[_type == "homePage" && _id == "homePage"][0].insightTeasers[]{\n  _key, category, iconKey, readTime, title, href\n}': INSIGHT_TEASERS_QUERY_RESULT;
     '*[_type == "homePage" && _id == "homePage"][0].communityPhotos[]{\n  _key, image, org, caption, span\n}': COMMUNITY_PHOTOS_QUERY_RESULT;

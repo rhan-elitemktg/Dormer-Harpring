@@ -263,7 +263,21 @@ EXPECTED = [
     ),
     (
         "the body image is the comp's premises photo, not the live post's",
-        "practice-slip-and-fall" in built,
+        # MATCHED ON THE ALT TEXT, NOT ON A FILENAME, since Phase 3b. This used
+        # to read `"practice-slip-and-fall" in built`, which worked only while
+        # the image was a local import and Astro emitted its source filename
+        # into /_astro/. It is a Sanity asset now and the URL carries a content
+        # hash, so that assertion went red on a change that did not alter the
+        # picture at all. The alt text is the thing that actually distinguishes
+        # the two candidates, it is content rather than a build artifact, and it
+        # still fails in both directions — swapping in the live post's image
+        # changes it. Read from `built`, not `built_text`: unesc() strips tags,
+        # so an attribute is invisible to the text form. Matched on the FIGURE'S
+        # OWN alt rather than anywhere on the page: the live post's alt is the
+        # article's title, which appears in the URL and in half a dozen links.
+        (lambda m: m is not None
+         and m.group(1) == "A caution wet floor sign standing on a tiled walkway"
+        )(re.search(r'<figure class="prose__figure">.*?\salt="([^"]*)"', built, re.S)),
         "the live post's own image is a stock shot of a contract being signed beside a car, "
         "alt-texted 'can you sue a trampoline park'",
     ),
