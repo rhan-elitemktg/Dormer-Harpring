@@ -107,7 +107,13 @@ KNOWN_DEAD: dict[str, str] = {}
 
 # page path -> how many href="#" that page is still allowed to carry
 KNOWN_PLACEHOLDER: dict[str, int] = {
-    "/": 8,  # data/news.ts — 4 news mentions + 4 insight teasers, all TODO(content)
+    # 4 press mentions + 4 insight teasers on homePage, read through data/news.ts.
+    # Both carry a TODO(content) marker in the schema — the press articles are
+    # real and findable, the teasers point at articles nobody has written. The
+    # marker is named WITHOUT its colon here on purpose: the pre-launch grep
+    # matches the colon form, and a comment that only mentions a marker would be
+    # counted as one.
+    "/": 8,
     "/denver-car-accident-lawyer": 1,  # carAccidents.ts ctaHref: the unbuilt checklist article
 }
 

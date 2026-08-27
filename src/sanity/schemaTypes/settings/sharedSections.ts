@@ -23,6 +23,12 @@
 // one-page sections filed in a document called "Shared" would be a lie the desk
 // tells, and the next person would then trust it.
 //
+// THREE OF THOSE DOCUMENTS NOW EXIST. Phase 2f created `homePage`,
+// `communityPage` and `carAccidentsPage` to hold the lists that were filed as
+// collections on the same mistaken reasoning. They carry no copy yet — that is
+// still Phase 4 — but five of the six one-page section getters above already
+// know where they are going.
+//
 //   grep -roE '\bget[A-Z][A-Za-z]*Section\(' src/pages | sort | uniq -c | sort -rn
 import { defineField, defineType } from "sanity";
 // Subpath, not the barrel — see the note in sanity/structure/index.ts.

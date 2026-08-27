@@ -134,12 +134,21 @@ export function wistiaPopoverClass(id: string): string {
  * the stand-in id as data. Today it is:
  *
  *   3   in code      carAccidents.ts (two panels), home.ts (the FAQ band)
- *   30  in Sanity    20 faq.video.id, 6 testimonial.video.id, 4 teamMember.videoId
+ *   30  in Sanity    20 in faqs[].video.id — 8 on homePage, 12 on carAccidentsPage
+ *                    6 testimonial.video.id, 4 teamMember.videoId
  *
  * So the full sweep is a grep AND a query:
  *
  *   git grep -n PLACEHOLDER_VIDEO -- src
- *   *[video.id == "b4n3r4pchd" || videoId == "b4n3r4pchd"]{_type, name, question}
+ *   *[video.id == "b4n3r4pchd" || videoId == "b4n3r4pchd"
+ *     || count(faqs[video.id == "b4n3r4pchd"]) > 0]{
+ *     _type, "name": coalesce(name, _id), "faqSlots": count(faqs[video.id == "b4n3r4pchd"])
+ *   }
+ *
+ * THE `faqs[]` CLAUSE IS NOT OPTIONAL and was added in Phase 2f. The FAQs used
+ * to be documents with their own `video.id`, which the first two clauses found;
+ * they are array members on two page documents now, so a query without the third
+ * clause returns 10 slots and looks complete. It should total 30.
  *
  * Do NOT grep the id in code to find them: `home.ts` writes it as a literal for
  * the hero, whose video is correct and finished, and that would wrongly include

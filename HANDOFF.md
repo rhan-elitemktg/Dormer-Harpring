@@ -8,10 +8,14 @@ either here, and don't record anything `git log` already knows.
 
 _Last updated: 2026-08-27._
 
-## The Sanity integration — Phases 0, 1 and 2 are in
+## The Sanity integration — Phases 0, 1, 2 and 2f are in
 
-**312 content documents in Sanity; 17 of 28 data modules read from it.** The eleven still
+**255 content documents in Sanity; 17 of 28 data modules read from it.** The eleven still
 holding literals are Phase 3/4 material — page copy, the blog, the practice areas, redirects.
+
+It was 312 until 2f moved sixty documents off seven collections and onto three page
+documents. Nothing was deleted that the site reads: the build is byte-identical across the
+whole change.
 
 Build is **330 pages** (was 332: two attorney bio pages went with four departed staff, below).
 
@@ -25,8 +29,87 @@ Build is **330 pages** (was 332: two attorney bio pages went with four departed 
   host we do not control. The third takes a `remoteSize` because dimensions cannot be read
   off a URL, and omitting them shifts the layout as the image lands.
 - Field types: `richText`, `simpleText`, `inlineText`, `link`, `navLink`, `videoRef`, `seo`.
-- Twelve collection types and five singletons, in a desk of Pages / Collections / Site
-  Settings.
+- Six collection types and eight singletons — three Pages, five Site Settings — in a desk of
+  Pages / Collections / Site Settings.
+
+### A COLLECTION IS FOR CONTENT REUSED IN MORE THAN ONE PLACE
+
+That is the rule Phase 2f set, and it is the client's: the Collections group exists so a
+record is changed once and every page that shows it follows. A type that renders on one page
+is a field on that page's document, and filing it as a collection makes an editor hunt a
+global list for something that only ever appears in one spot.
+
+Counted against the build, not argued:
+
+| Staying | Pages | | Moved to a page document | Pages |
+|---|---|---|---|---|
+| Awards | 111 | | Press Mentions | 1 |
+| Cities | 104 | | Insight Teasers | 1 |
+| Team | 29 | | Community Photos | 1 |
+| Testimonials | 27 | | Charity Partners | 1 |
+| Core Values | 5 | | Community Partners | 1 |
+| Case Results | 3 | | Sponsorships | 1 |
+| | | | FAQs | 2 |
+
+Sixty documents moved onto `homePage` (5 arrays), `communityPage` (2) and `carAccidentsPage`
+(1). **Before adding a collection, count the pages it renders on.**
+
+**`faq`'s `shownOn` RADIO WAS THE TELL.** It existed only to split one collection back into
+the two page-local lists it always was — 8 homepage, 12 Car Accidents. The third caller its
+header cited, the 28 imported practice-area accordions (153 items), is not in Sanity at all:
+those arrive with the body copy in `src/content/practice-areas/`. `caseResult.shownOn` and
+`testimonial.onHomeRail` / `onReviewsPage` are NOT the same shape and stay — those types
+really do serve three and twenty-seven pages.
+
+**Every array member is an ANONYMOUS inline object**, following `teamMember.awards[]`. Checked
+in two places rather than assumed: `@sanity/schema` builds its duplicate-name set from the
+top-level types array only, so array members are never registered globally; and the live
+`awards[]` rows carry no `_type` at all. That is what let the three page documents exist
+BESIDE the seven collections instead of replacing them atomically — every step was
+independently revertible.
+
+`faqItemFields` is a shared fields ARRAY spread into both accordions, not a named object type:
+two callers is under the four-caller extraction threshold, and a top-level `faq` object would
+have collided with the `faq` document type while both existed. Phase 3's 28 practice-area
+accordions are when a named type earns itself.
+
+**`order` IS GONE FROM ALL SEVEN — array position is the order, and editors drag.** One real
+consequence: the community mosaic's widths have to add up row by row (5+3+4, 4+5+3, 12). That
+constraint lived in a comment in `data/community.ts`, which was safe while reordering meant
+typing a number into a form. It is the array field's `description` now, because **the person
+dragging never opens that file.** Any ordering constraint on a dragged array needs the same.
+
+**`required()` STOPPED BEING A NO-OP for these eight, and that is the upgrade.** A GROQ
+collection query returns `[]` when a type has no documents, never null, so
+`required(fetch(CHARITY_PARTNERS_QUERY), …)` could not throw however empty the dataset got —
+the homepage would have rendered a logo strip with no logos. Reading an array off a page
+document returns null. `required()` now takes a `where` (defaulting to "Site Settings") so the
+message names the right desk group, and `required().min(1)` on each array keeps the failure in
+the Studio at publish rather than in a deploy.
+
+**A PLAIN `JSON.stringify` DEEP-COMPARE IS WRONG AGAINST SANITY.** The migration's `--verify`
+reported all eight groups as mismatched with every value identical: Sanity returns a stored
+object's keys in its own order, alphabetically, where an assembled member carries them in
+schema order. `canon()` in `scripts/migrate-pages-2f.ts` sorts keys at every depth. Reach for
+it before writing another one of these.
+
+**The ＋ menu could create a second singleton, and had been able to since Phase 1.**
+`SINGLETON_TYPES` was exported from `sanity/structure` and imported by nothing;
+`newDocumentOptions` filtered `teamMember` alone. A second `firmDetails` at a generated id
+opens, saves and publishes, and the site never reads it — every query filters the fixed `_id`.
+Closed, for the five settings singletons as well as the three new pages.
+
+**Three names were made one each**: `ngoPartner`/`NgoPartner`/`getNgoPartners`/
+`NGO_PARTNERS_QUERY` → charity partner throughout, and the same for press mentions and insight
+teasers. Type-only, hash-verified inert.
+
+**36 dead image imports went** — 4 in `news.ts`, 14 in `community.ts`, 18 in
+`communityPage.ts`, unreferenced since Phase 2e's swap and reported by nothing. The 29 FILES
+stay in `src/assets/`: `npm run backup` is `--no-assets`, so git is the only copy of those
+originals outside Sanity, and `prep-assets.mjs` still re-derives the partner logos.
+
+`scripts/migrate-pages-2f.ts` is kept rather than deleted — its `--verify` no longer works
+(the sources are purged) but its assertion list is the template for the next one of these.
 
 ### `scripts/compare-builds.py` is the check the whole migration rests on
 
@@ -124,11 +207,16 @@ grep -rnoE '\b[a-z]+Key\b' src/data/*.ts | awk -F: '{print $1": "$3}' | sort | u
 
 ### Repeated bands split THREE ways, and you have to check which
 
-| Part of a repeated band | Goes to |
+| Part of a REPEATED band | Goes to |
 |---|---|
 | Its **items** — the six values, the awards, the testimonial records | a Collection |
 | Its **heading, identical on every page it appears on** | the `sharedSections` singleton |
 | Its **heading, different per page** | that page's own singleton |
+
+**A band that is NOT repeated splits none of these ways — all of it belongs to its page.**
+That is what Phase 2f corrected: the community mosaic, the press feed and the two FAQ
+accordions each render once, and their items were in Collections anyway. Check the first
+column before the table applies at all.
 
 The third row is not hypothetical: `TestimonialRail` and `about/InTheirWords` render the SAME
 records under DIFFERENT headings. Only two section-copy getters are shared at all — core
@@ -253,7 +341,8 @@ A script reads the literals → NDJSON → `sanity dataset import --replace`. Im
 - **Nothing is wired for Visual Editing**, so array projections omit `_key` where the interface
   has none.
 - **FAQs and testimonials still nest their video field** in a `videoRef` object showing one
-  input. The attorney film was flattened to a bare id; these were left alone.
+  input. The attorney film was flattened to a bare id; these were left alone. The FAQ half is
+  now `faqItemFields` in `schemaTypes/pages/`, so it is one edit for both accordions.
 
 ## State
 
@@ -349,13 +438,24 @@ last handoff and it moves the project's biggest dependency off the critical path
 **The blog archive is 186 posts, not 167.** WordPress has two post types and the article-shaped
 content is spread across both — see below.
 
-Marker inventory: **41 `TODO(launch)`, 6 `TODO(video)`, 11 `TODO(sanity)`, 3 `TODO(content)`.**
+Marker inventory: **41 `TODO(launch)`, 8 `TODO(video)`, 11 `TODO(sanity)`, 3 `TODO(content)`.**
+Phase 2f moved four markers between files and added none.
 
-`TODO(video)` fell from 8 to 6 because two of them were DELETED WITH THE LITERAL they annotated
-— see "The YouTube mapping was almost lost" above. A falling marker count is not automatically
-progress; check what closed it.
+**THE VIDEO FIGURE WAS WRONG, AND IT IS A FOURTH REASON FOR THIS LINE TO BE WRONG.** It read 6
+here, with a note saying it "fell from 8 to 6 because two were DELETED WITH THE LITERAL they
+annotated". The deletion was real — see "The YouTube mapping was almost lost" — but the count
+was never re-measured after the recovery: `YOUTUBE_ORIGINS` brought the ids back and the
+comment ABOVE it quotes the deleted marker's own wording, so the grep sees it again. Measured
+at the commit that made the claim, `git grep` already returned 8.
 
-**USE `git grep`, AND THE METHOD IS PART OF THE NUMBER.** This line has now been wrong three
+So the failure was not the method this time; it was reasoning about a delta instead of
+re-running the count. **Re-measure, do not subtract.** One of the eight is a discussion rather
+than a marker (`src/lib/video.ts`, the sentence quoting the deleted comments), which the colon
+cannot filter because it quotes the colon form too — seven are real.
+
+A falling marker count is still not automatically progress; check what closed it.
+
+**USE `git grep`, AND THE METHOD IS PART OF THE NUMBER.** This line has now been wrong four
 times, each for a different reason. It read 43 when the grep counted eleven comments that
 DISCUSS a marker rather than being one — the colon fixed that. It read 38 against a count
 silently scoped to `src/` and `scripts/`. And a `grep -rn … .` with `grep -v '^./HANDOFF.md'`
@@ -998,9 +1098,10 @@ constant was always waiting for.**
 
 **GREPPING `PLACEHOLDER_VIDEO` NO LONGER FINDS THEM ALL**, and that changed quietly when the
 content moved. Only 3 slots are still code-side — two panels in `carAccidents.ts` and the FAQ
-band in `home.ts`. The other 30 are FIELDS holding the stand-in id as data: 20 FAQs, 6
-testimonials, 4 team films. The full sweep is a grep AND a query, both written at the top of
-`lib/video.ts`.
+band in `home.ts`. The other 30 are FIELDS holding the stand-in id as data: 20 FAQs (8 in
+`homePage.faqs[]`, 12 in `carAccidentsPage.faqs[]` — no longer a collection), 6 testimonials,
+4 team films. The full sweep is a grep AND a query, both written at the top of `lib/video.ts`;
+**the FAQ half of that query changed in Phase 2f** and now reads the two page documents.
 
 **`home.ts` writes the hero's id as a LITERAL, deliberately.** The hero's video is correct and
 finished; the placeholders only happen to share an id. So do not grep the id itself in code —
@@ -1253,16 +1354,20 @@ entry and both files to fix.
 ## Next
 
 1. **The 9 remaining dead links on the homepage** — the ONLY dead links left on the site.
-   `KNOWN_DEAD` in `check-links.py` is empty. Eight are `data/news.ts`, every `href` a literal
-   `"#"`, marked `TODO(content)` rather than `TODO(launch)` — which is how they stayed off the
-   launch list. The ninth is the Car Accidents checklist teaser. `#` must not reach production.
+   `KNOWN_DEAD` in `check-links.py` is empty. Eight are `homePage.pressMentions[]` and
+   `homePage.insightTeasers[]`, read through `data/news.ts`, every `href` a literal `"#"`,
+   marked `TODO(content)` rather than `TODO(launch)` — which is how they stayed off the launch
+   list. **They are editable in the Studio now**, on the Homepage document, so filling one in
+   is an editor's job rather than a code change — lower the `KNOWN_PLACEHOLDER` count in the
+   same change or `check:links` fails. The ninth is the Car Accidents checklist teaser. `#` must not reach production.
    All nine are declared in `KNOWN_PLACEHOLDER` **by count**, so removing one without lowering
    the number fails the check. The four news mentions are real published articles (FOX31,
    Denver7, OutThere Colorado, The Mountain Mail) and their URLs are findable; the four insight
    teasers and the checklist point at articles nobody has written.
 2. **Real Wistia ids.** 33 slots still point at one stand-in, which is the whole site's video
    layer resting on a single film — 3 in code (`carAccidents.ts`, `home.ts`) and 30 as FIELDS
-   in Sanity (20 FAQs, 6 testimonials, 4 team films). **The YouTube ids they map to are in
+   in Sanity (20 FAQs — 8 on the Homepage document and 12 on Car Accidents since Phase 2f,
+   no longer a collection — 6 testimonials, 4 team films). **The YouTube ids they map to are in
    `YOUTUBE_ORIGINS` in `src/lib/video.ts`** — no longer in comments beside their records,
    because those records moved to Sanity and took the comments with them. Five of the eight
    are unlisted and cannot be re-derived. Blocked on the firm re-hosting the videos, and on
@@ -1276,6 +1381,10 @@ entry and both files to fix.
 4. ~~**Sanity Phase 2 — Collections, hand-authored.**~~ **DONE** — 312 documents across
    twelve collection types and five singletons, plus an editor-facing pass over the Team
    collection. See the section at the top of this file.
+4b. ~~**Sanity Phase 2f — the seven that were not collections.**~~ **DONE** — 60 documents
+   moved onto `homePage`, `communityPage` and `carAccidentsPage`; six collections and eight
+   singletons remain, 255 documents, build byte-identical throughout. The rule it set is at
+   the top of this file and in `schemaTypes/index.ts` and `structure/index.ts`.
 5. **Sanity Phase 3 — Collections, imported. NEXT.** 313 documents, 203 body images,
    script-driven. Before starting, read "Dead literals survive a getter swap" and "The YouTube
    mapping was almost lost" above — both bit during Phase 2 and both scale with this phase's
@@ -1300,6 +1409,16 @@ entry and both files to fix.
    the largest (26 getters in one `Promise.all`). The two template-chrome singletons —
    `blogPostTemplate` and `practiceAreaTemplate` — sit under **Pages**, not Settings: they hold
    copy that appears ON a page, which is exactly what the SEO team will reach for.
+   **THREE OF THE SIXTEEN ALREADY EXIST** — Phase 2f created `homePage`, `communityPage` and
+   `carAccidentsPage` to hold the moved lists. So this phase ADDS fields to live documents, and
+   any seed for them must READ EACH ONE BACK AND MERGE: `dataset import --replace` replaces a
+   document whole, and emitting only the copy fields would delete sixty array members.
+   `scripts/migrate-pages-2f.ts` already does the read-back-and-merge and is the model.
+   Five of the six one-page section getters named on `sharedSections` now have a document to
+   go to — `getFaqSection`, `getCarAccidentFaqSection`, `getFeedSection`, `getCommunitySection`,
+   `getCommunityPage`. Consolidating the per-array queries into one query per page belongs
+   here too, not before: 2f kept one query per array deliberately, since `once()` already makes
+   the whole build cost 8 round trips and a shared fetcher would have had no owning module.
 7. **Sanity Phase 5** — the webhook, CORS, then `/studio-polish ux`, which audits the
    filled-out schema and so waits until there is one.
 8. `/new-seo-setup` — per-page meta, a Global SEO Settings singleton, JSON-LD, `sitemap.xml`,
@@ -1673,8 +1792,9 @@ Elite brand theme applied at scaffold time: light-locked palette, ELITE emblem a
 upgrades.
 
 **The desk is no longer empty.** `structureTool({ structure })` draws three groups — Pages,
-Collections, Site Settings — from `src/sanity/structure/index.ts`. Pages and Collections are
-empty lists today; Site Settings holds four singletons. A document type added to `schemaTypes`
+Collections, Site Settings — from `src/sanity/structure/index.ts`. Pages holds three
+singletons (Homepage, Community Involvement, Car Accidents), Collections holds six types, and
+Site Settings holds five singletons. A document type added to `schemaTypes`
 but not placed in one of the three arrays shows up under a divider at the bottom rather than
 becoming invisible, which is the same silent-failure shape the four linters exist to catch.
 
