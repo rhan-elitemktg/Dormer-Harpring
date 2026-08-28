@@ -8,10 +8,10 @@ either here, and don't record anything `git log` already knows.
 
 _Last updated: 2026-08-28._
 
-## The Sanity integration — Phases 0 through 5 are in
+## The Sanity integration — Phases 0 through 6 are in
 
-**499 content documents in Sanity, and `src/data/` no longer holds page copy.** Every route's
-strings are a field on a page singleton; the data layer is 5,724 lines down to 4,724, and
+**775 documents in Sanity, and `src/data/` no longer holds page copy.** Every route's strings
+are a field on a page document; the data layer is 5,724 lines down to 4,724, and
 `carAccidents.ts` alone went from 1,227 to 598. Only `portableText.ts` (an authoring shim) and
 `redirects.ts` (the redirect table, which becomes editor-managed in `/new-seo-setup`) do not
 read Sanity.
@@ -71,8 +71,9 @@ from the group definitions and from `SINGLETON_TYPES`.
 **ANYTHING MOVED OUT OF `PAGES` OR `SETTINGS` NEEDS ADDING BACK BY HAND.** `SINGLETON_TYPES` is
 built from those two arrays, so a singleton placed anywhere else drops out of it silently —
 which shows the editor a generic list beside the pinned document, with edits to the second copy
-going nowhere. Two are hand-placed today: `carAccidentsPage` under Practice Areas and
-`sharedSections`, which is a top-level row of its own below Collections.
+going nowhere. Two are hand-placed today: `sharedSections`, a top-level row of its own below
+Collections, and `sitePage`, which is the three utility documents. `carAccidentsPage` was a
+third until 6d made it a collection member — see the note at the top of this file.
 
 ### THERE WERE TWO SETS OF FIRM FIGURES AND THEY NEARLY AGREED
 
@@ -265,12 +266,21 @@ SENTENCE is still derived from the roster.
 would import documents of a type that no longer exists — but the third thing it did, seeding
 `sharedSections.sidebarForm`, still stands.
 
-### `videoRef` IS FULLY UNWOUND — NO NESTED VIDEO FIELD IS LEFT
+### `videoRef` IS ALMOST UNWOUND — ONE NESTED FIELD IS LEFT, AND THIS SAID NONE
 
-The hero, the firm intro and both FAQ accordions went in 6a; the six filmed testimonials were
-the last, in 6b. Every one is a bare `videoId` string and **every projection reassembles
+The hero, the firm intro and both FAQ accordions went in 6a; the six filmed testimonials
+followed in 6b. Every one is a bare `videoId` string and **every projection reassembles
 `{provider, id}`**, so `lib/video.ts` still sees the pair, the `youtube` branch still has
 somewhere to land, and the rule that nothing may store a video URL is untouched.
+
+**THE CLAIM THAT NONE WAS LEFT WAS WRONG.** The Car Accidents page's two video panels still
+nest one, and it was missed because **it is called `film`, not `video`**, and it sits inside a
+`videoPanel` object rather than at the top level of a document — so neither the sweep for the
+field name nor a scan of the page's eighteen sections surfaced it. `git grep videoRef` finds it
+in one line; the sweep that produced the list was not that.
+
+Flattening it is the same three-step change as the others (schema, projection, one migration)
+and is deliberately still open rather than quietly done.
 
 **Only six of the eighteen testimonials carry a film**, because `video` is conditional on
 `format == "video"`. The migration emits those six alone — writing the written twelve would be
@@ -467,9 +477,9 @@ remaining rows are ordered as they are, which still holds.
 the list the way a visitor reads across the header. Alphabetical would put Thank You between
 Results and Testimonials and Contact above everything.
 
-The two templates — `blogPostTemplate`, `practiceAreaTemplate` — hold the chrome that appears
-ON a post or a service page, and sit under Pages rather than Settings for exactly that reason:
-it is copy on a page, which is what the SEO team reaches for.
+**The two TEMPLATES that used to sit here are deleted** — their twelve interface labels are
+`TEMPLATE` constants in `blog.ts` and `practiceAreaPages.ts` now. See the note at the top of
+this file for what that traded away.
 
 **The three utility pages are three documents of ONE type.** They are the same document in
 every way that matters — a title, an optional lede, a body, no taxonomy above and no collection
@@ -599,9 +609,10 @@ being is the only thing standing between a rename and the wrong badge.
 of four card records matched the roster on a key and the fourth did not, and the href was the
 authoritative half. Every join in 4f is asserted before anything is written.
 
-### FIFTEEN NAMED SECTIONS, NOT A PAGE BUILDER
+### EIGHTEEN NAMED SECTIONS, NOT A PAGE BUILDER
 
-`carAccidentsPage` is the largest document in the dataset and every section on it is a named
+The Car Accidents page is the largest document in the dataset — a `featuredPracticeArea` since
+6d, `carAccidentsPage` before it — and every section on it is a named
 field bound to a component that draws it one way — the triage rows are a coloured-pill list,
 the timeline a numbered rail over a phase table, the results cards put an "offered" figure
 beside a "recovered" one. An array of interchangeable blocks would let an editor reorder or
@@ -1170,18 +1181,29 @@ them go the way the other two were meant to.
 `data/redirects.ts`.
 
 Nothing internal points at them: the team page and `/sitemap/` both read the collection, so
-their links went with them. `check:links` is clean at 33,630 links across 328 pages.
+their links went with them. `check:links` is clean at **33,619 links across 328 pages, 162
+redirect rules** — the count fell by eleven when the community cards stopped being links, and
+the rules rose from 68 with the 24 community write-ups and 23 attorney bios, each in both slash
+forms.
 
 Build is green: **330 pages in 10 seconds** — 328 that render a site header and footer, plus
 `404.html` and `/admin`. It was 47s before Phase 3; Astro no longer optimises 202 body and card
 images, because they come off Sanity's CDN. Phase 4 did not slow it: it added 22 `once()` keys,
-so a build now makes **56 HTTP round trips total** rather than per page. `npm run check` passes,
-`check-phone.py` passes, all five comp diffs are green, and the fidelity audit reports 104 of
-104 pages at ≥99% against the live source — last run after Phase 3c, and Phase 4 cannot have
-affected it (it touches no practice-area body copy).
+so a build now makes **56 HTTP round trips total** rather than per page. `npm run check` passes
+(five linters — `check:desk` is the newest) and `check-phone.py` passes.
 
-**Every string on this site is editable now, and the comp diffs are the thing that still
-holds it to a design.** All five are green. Three carry DECLARED DEPARTURES for things an
+**THE FIVE COMP DIFFS CANNOT RUN RIGHT NOW.** macOS Downloads access is refusing the design
+folder again — see below; the tell is that plain `head` fails too. They were green when last
+runnable and nothing since has touched comp content, but that is an argument, not a result.
+**Re-run them when access returns.**
+
+The fidelity audit reports 104 of 104 pages at ≥99% against the live source — last run after
+Phase 3c, and nothing since has touched practice-area body copy.
+
+**Almost every string on this site is editable, and the comp diffs are the thing that still
+holds it to a design.** The exception is deliberate and recent: the two article templates' twelve
+interface labels went back into code by request — see the note at the top of this file, including
+the one of them that is marketing copy. Three of the five diffs carry DECLARED DEPARTURES for things an
 editor legitimately controls. `diff-comp-about.py` no longer pins the attorney grid to the
 comp's four names in order — who is on the rail and in what order are both editorial acts
 now, so it asserts the comp's four are PRESENT and reports extras. It still fails when one of
@@ -1192,10 +1214,12 @@ founding partner's name spelling, the missing city, and the rail leading with Se
 is the line to hold as more content becomes editable — loosen what an editor legitimately
 changes, keep what would be a regression.
 
-The `Operation not permitted`
-on everything under `~/Downloads/Dormer Harpring/` is gone — it was macOS Downloads access, it
-came back on its own, and nothing in the repo ever had to change for it. If it returns, the tell
-is that plain `head` fails too, not just the scripts.
+**`Operation not permitted` ON EVERYTHING UNDER `~/Downloads/Dormer Harpring/` IS BACK.** It is
+macOS Downloads access, not the scripts — **the tell is that plain `head` fails too**, and it
+does. It cleared on its own once before and nothing in the repo ever had to change for it.
+
+While it holds, the five comp diffs cannot run at all: they read the design folder, which is
+why they are not in `npm run check`. Do not read their absence as a pass.
 
 **One of the five had gone stale while it could not run, and it failed in the right direction.**
 `diff-comp-car-accidents.py` declared "the result video card links to the real testimonial",
@@ -1239,8 +1263,8 @@ does not reference, a typo'd type name, a renamed not-a-group, a lost hand-place
 a reformat that must NOT fail because it changes nothing. `npm run check` itself was run red and
 green to prove the chain carries the exit code.
 
-`scripts/check-links.py` is the new one — 33,754 internal links across 330 pages, every target
-resolved against what `dist/` actually serves plus `vercel.json`. (The count fell from 39,484
+`scripts/check-links.py` — 33,619 internal links across 328 pages today, every target
+resolved against what `dist/` actually serves plus `vercel.json`. (It read 33,754 when written; the count fell from 39,484
 when the eighteen footer city chips stopped being links — 5,904 of them — and Editorial
 Guidelines left the footer.) The link sweep is no longer
 ad hoc: the "42,599 links, four dead targets" figure in the last version of this file came from
@@ -2221,11 +2245,13 @@ entry and both files to fix.
 
    **Grepping `PLACEHOLDER_VIDEO` no longer finds them** — the full sweep is a grep AND a
    query, both written down at the top of `src/lib/video.ts`, and the query half needs
-   updating for the two Car Accidents panels Phase 4f moved.
+   updating twice over: for the two Car Accidents panels Phase 4f moved, and because every
+   record it reads has changed shape — `video{provider,id}` is a bare `videoId` string
+   everywhere except those same two panels, whose field is called `film`.
 3. **One Wistia player per popover, initialised eagerly** — 15 on the homepage, 20 on
    `/denver-car-accident-lawyer/`. Inherent to the class-based embed; wants a pass before launch.
-4. ~~**Sanity Phases 2, 2f, 3 and 4.**~~ **ALL DONE.** 499 content documents across nine
-   collection types, thirteen page types and three settings singletons, 279 image assets,
+4. ~~**Sanity Phases 2, 2f, 3 and 4.**~~ **ALL DONE.** 775 documents across **ten** collection
+   types, **twelve** page types and **four** settings singletons, 279 image assets,
    and no page copy left in `src/data/`. Every slice ended byte-identical or with every changed
    page explained. The findings that will matter next are at the top of this file; the ones
    most likely to bite are `pt()`'s duplicate keys, GROQ's codepoint `order()`, and that a
@@ -2241,7 +2267,17 @@ entry and both files to fix.
    page document with more than one band is an accordion of sections, which is what the
    Homepage's sixteen loose fields wanted and what took the tabs off the other two. See the top
    of this file.
-7. `/new-seo-setup` — per-page meta, a Global SEO Settings singleton, JSON-LD, `sitemap.xml`,
+7. **A CUTOVER URL AUDIT — every live path against what this site serves.** Two sessions have
+   each turned up a batch by hand: 24 community write-ups and 23 root-slug attorney bios, 47
+   would-be 404s, both found by reading denvertrial.com rather than by anything in this build.
+   **Nothing here can see a URL the old site has and this one does not** — `check:links` only
+   validates links this site EMITS. Enumerate the live site's paths (its REST API lists posts
+   and pages; the sitesucker scrape is the other half) and resolve each against `dist/` plus
+   `vercel.json`. Four are already known and unruled: Alexandra Petroff's and Dinorah
+   Gutierrez's bios, live in both URL forms, belonging to staff the roster no longer carries.
+8. **Flatten the last nested `videoRef`.** The Car Accidents video panels' `film` field is the
+   only one left; see the note at the top of this file for why it survived two sweeps.
+9. `/new-seo-setup` — per-page meta, a Global SEO Settings singleton, JSON-LD, `sitemap.xml`,
    `robots.txt`, editor-managed redirects. **The practice-area pages already carry real
    `metaTitle` / `metaDescription` from the live site's own meta** on all 104 `practiceArea`
    documents, and Phase 4f put the Car Accidents page's on a `seo` object too — so this layer
@@ -2249,11 +2285,13 @@ entry and both files to fix.
    `BlogPosting` JSON-LD belongs here, and so does `sitemap.xml` — **which nothing links any
    more**: the footer points at the human `/sitemap/`. The XML file's every URL is absolute off
    `site:`, so it cannot be written before the www-vs-apex call.
-8. **`redirects.ts` is the last data module holding content**, and it is deliberate: the
-   redirect table becomes editor-managed in `/new-seo-setup`. `portableText.ts` is the only
-   other non-Sanity module and it is an authoring shim rather than content — **`blog.ts` is now
-   the only file in `src/` that CALLS `pt()` at all**, for the one fact-check sentence, so the
-   shim is one caller away from being types only. Its TYPES are still load-bearing everywhere.
+10. **`redirects.ts` is the last data module holding content**, and it is deliberate: the
+    redirect table becomes editor-managed in `/new-seo-setup`. It is **162 rules now**, up from
+    68, and two thirds of that growth is cutover work rather than legacy URL shapes.
+    `portableText.ts` is the only other non-Sanity module and it is an authoring shim rather
+    than content — **`blog.ts` is now the only file in `src/` that CALLS `pt()` at all**, for
+    the one fact-check sentence, so the shim is one caller away from being types only. Its
+    TYPES are still load-bearing everywhere.
 
 No comp exists for **privacy / disclaimer**, **sitemap** or **404**. All three are built on the
 light template's shell anyway — see below.
@@ -2448,6 +2486,21 @@ none first. Already an open question below; now recorded where the code is.
 - **`src/assets` holds twelve images nothing references.** Eleven practice-area photographs and
   `consult.jpg`, all now Sanity assets. Kept because git is the only copy of the originals
   outside Sanity; delete them only alongside a decision about asset backup.
+- **Two former staff have live bio pages the roster no longer carries** — Alexandra Petroff and
+  Dinorah Gutierrez, 200 at both `/<slug>/` and `/meet-our-attorneys/<slug>/`. The "no redirect,
+  by request" decision on record was taken about Ella Nelson and Morgan Jewel, whose pages
+  WordPress has since removed, so it cannot be read as covering these two. Redirect them to
+  `/meet-our-attorneys/`, or let them 404 the way the other pair was meant to.
+- **The two article templates' twelve labels are code now**, and one of them is marketing copy:
+  the practice-area eyebrow, "Tough lawyers for tough cases", on all 104 pages, already changed
+  four times by request. Changing it a fifth time is a deploy. If that happens, it belongs on
+  `sharedSections` beside the awards bar's label — the constant's own comment says so.
+- **Three Phase 4 migrations have broken the type gate**, each when a later phase removed a
+  getter they read: `migrate-home-4a.ts` twice and `migrate-car-accidents-4f.ts` once, the last
+  cascading one root error into 32. They are spent and cannot run — their documents no longer
+  exist — but `check:types` gates the whole repo. Decide whether they are documentation (delete
+  them; git and the per-slice commits are the real record) or code, rather than patching a
+  fourth time.
 - ~~**`check:links` validates a `tel:` href's FORMAT but not its VALUE.**~~ **CLOSED in Phase
   4** — `scripts/check-phone.py`, and Phase 4 is what made it necessary rather than merely
   worth doing: two page documents now store the firm's number as CONTENT. See the note above.
@@ -2632,15 +2685,17 @@ Elite brand theme applied at scaffold time: light-locked palette, ELITE emblem a
 `icon`, centred login card. Cosmetic only and fails gracefully — worth a glance after major Sanity
 upgrades.
 
-**The desk is no longer empty.** `structureTool({ structure })` draws three groups — Pages,
-Practice Areas, Blog, Collections and Site Settings — from `src/sanity/structure/index.ts`.
+**The desk is no longer empty.** `structureTool({ structure })` draws five groups and one loose
+document — Pages, Practice Areas, Blog, Collections, Shared Sections, Site Settings — from
+`src/sanity/structure/index.ts`.
 Pages holds **twelve rows**: eleven routes in NAV ORDER, then a "Utility pages" sub-list. **That
-is thirteen page TYPES and fifteen documents** — `sitePage` is three pinned documents behind that
-one row, and `carAccidentsPage` is a page type that sits under Practice Areas rather than here.
-See "THE DESK IS FIVE GROUPS" at the top for what moved and why. Collections holds **six** types,
-Practice Areas and Blog one and two, and Shared Sections is one pinned document on its own row. A document type added to `schemaTypes`
-but not placed in one of the three arrays shows up under a divider at the bottom rather than
-becoming invisible, which is the same silent-failure shape the four linters exist to catch.
+is twelve page TYPES and fourteen documents** — `sitePage` is three pinned documents behind that
+one row. See "THE DESK IS FIVE GROUPS" at the top for what moved and why. Collections holds
+**six** types, Blog two, Practice Areas **two** (the imported default and the featured one), and
+Shared Sections is one pinned document on its own row. A document type added to `schemaTypes`
+but not placed in one of those arrays shows up under a divider at the bottom rather than
+becoming invisible. **That catch-all is blind to the opposite case** — a type placed TWICE looks
+identical to it — which is why `check:desk` exists; see the note at the top of this file.
 
 Singletons are enforced by `documentId()` in the structure, not by a schema option — there is
 no `singleton: true`. `SINGLETON_TYPES` is what keeps them out of the catch-all, so a
