@@ -11,9 +11,20 @@ PUBLIC_SANITY_PROJECT_ID="74nyy5mh"
 PUBLIC_SANITY_DATASET="production"
 ```
 
+The form endpoint needs three more, and only on a **deployment** — the build and
+the dev server both run fine without them, and a submission returns a 500 naming
+whichever is missing rather than failing quietly:
+
+```sh
+RESEND_API_KEY="…"                        # set by the Vercel/Resend integration
+CONSULT_TO_EMAIL="…@dormerharpring.com"   # where consultation requests go
+COCOUNSEL_TO_EMAIL="…@dormerharpring.com" # optional; falls back to CONSULT_TO
+CONSULT_FROM_EMAIL="…@dormerharpring.com" # must be a Resend-verified domain
+```
+
 ## Checks
 
-`npm run build` catches compile errors. Three things it can't catch, all silent
+`npm run build` catches compile errors. Five things it can't catch, all silent
 by construction — run them on every commit:
 
 ```sh
@@ -64,9 +75,9 @@ Everything below is deliberately unfinished, not overlooked.
 
 | Item | State |
 |---|---|
-| **Forms** | `ContactForm.astro` and `CoCounselForm.astro` both post to `/api/consult`, which **does not exist**. Needs a server adapter plus a mail provider, then a 303 to `/thank-you`. Until then they 404 on submit. One endpoint, not two: a hidden `kind` field (`consultation` / `co-counsel`) tells them apart, so the handler branches rather than the infrastructure doubling — the payloads differ and probably want different inboxes. The comps' fake success panels were deliberately not ported; they told every visitor their case had been received while discarding it. |
-| **Video** | **Solved structurally, blocked on content.** Every play affordance on the site is a Wistia popover — nine of them, 178 triggers across 30 pages — and no record says `youtube` any more. But **44 slots point at one stand-in** (`PLACEHOLDER_VIDEO` in `lib/video.ts`), so the whole video layer is currently one film. Each record names the YouTube id it should map to. Needs the firm's re-hosted ids. |
-| **Wistia migration** | Done for the wiring. `lib/video.ts` still owns every URL and each record still carries `{ provider, id }`, so swapping an id stays a data change. `WISTIA_ACCOUNT` is **still empty** — the media JSON exposes only account ids (154783 / yrknbv2cuk), never the vanity subdomain, so it has to come from the dashboard. Until then the no-JS fallback href is Wistia's own hosted player: works, unbranded. The `youtube` branch is unused but kept, since the provider swap is the point of the shape. |
+| **Forms** | **BUILT.** `src/pages/api/consult.ts` — one endpoint, both forms, hosted by `@astrojs/vercel` while the other 328 pages stay static (`prerender = false` on that route only). It re-validates every field the markup does, checks **both** honeypot names (`company` on the consultation form, `website` on the co-counsel one — they differ), answers a trapped bot with the same 303 a person gets, refuses an open redirect, and 303s to `/thank-you/`. Astro's `checkOrigin` gives it CSRF cover for free. **What is left is configuration, not code:** run `vercel link` and `vercel integration add resend/resend-email`, then set the four variables above. Until then a submission returns a plain-text 500 naming the firm's phone number — deliberately blunt, and still the right failure: visibly broken beats invisibly broken. **A designed error page is the one open piece** (`TODO(launch)` in the route). |
+| **Video** | **Solved structurally, blocked on content.** Every play affordance on the site is a Wistia popover — nine of them, 178 triggers across 30 pages — and no record says `youtube` any more. But **33 slots point at one stand-in** (`PLACEHOLDER_VIDEO` in `lib/video.ts`), so the whole video layer is currently one film. Only three are still in code; the other 30 are Sanity fields, so **grepping the constant no longer finds them all**. The YouTube ids they map to are in `YOUTUBE_ORIGINS` in `lib/video.ts` — no longer in comments beside the records, which moved to Sanity and took the comments with them. Needs the firm's re-hosted ids. |
+| **Wistia migration** | Done for the wiring. `lib/video.ts` still owns every URL. No document stores a provider any more — Phase 6 flattened every field to a bare `videoId` and each PROJECTION emits `{provider: "wistia", id: videoId}` as a literal — so swapping an id stays a data change and swapping the provider is one edit per projection. `WISTIA_ACCOUNT` is **still empty** — the media JSON exposes only account ids (154783 / yrknbv2cuk), never the vanity subdomain, so it has to come from the dashboard. Until then the no-JS fallback href is Wistia's own hosted player: works, unbranded. The `youtube` branch is unused but kept, since the provider swap is the point of the shape. |
 | **Video posters** | The cards use the design package's own client portraits, which is still the right call — a still lifted from each film would beat them. Re-hosting is the moment to do it, since the files are in hand. Separately, `faq-video-cover.jpg` is 607×609 — square — in a 16/10 box, so `object-fit: cover` crops roughly its bottom 40%. |
 | **Nav submenus** | About and Practice Areas use the current site's IA; Locations is proposed and needs sign-off. "Locations" has no hub page, so its parent renders as plain text. The team sits inside About as "Our Team"; the comps' top-level "Attorneys" item is gone, and "Testimonials" takes the slot. |
 | **"En Español"** | Renders in the header (every comp shows it) with no target. |
@@ -111,7 +122,7 @@ the things this rebuild fixes.
 | `npm install` | Install dependencies |
 | `npm run dev` | Site and Studio together on `localhost:4321` |
 | `npm run build` | Build to `./dist/` |
-| `npm run check` | The three silent-failure linters above — run after a build |
+| `npm run check` | The five silent-failure linters above — run after a build |
 | `npm run preview` | Preview the build locally |
 | `npm run prep:assets` | One-off: pull and downsample comp images into `src/assets/` |
 

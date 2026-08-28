@@ -8,6 +8,77 @@ either here, and don't record anything `git log` already knows.
 
 _Last updated: 2026-08-28._
 
+## `/api/consult` IS BUILT, AND THE SITE IS STILL STATIC
+
+**The first launch blocker is closed in code.** `src/pages/api/consult.ts` serves both forms —
+326 call sites across 327 of the 329 pages — and what is left is configuration, not work.
+
+**`@astrojs/vercel` is installed and `output` is UNTOUCHED.** The endpoint sets
+`export const prerender = false`; every other page still prerenders. That was the reason for
+choosing an Astro route over a root `api/consult.ts` Vercel function: a root function lands
+outside `src/`, where **`astro check` would never see it** — a hole in the type gate at exactly
+the one place the site runs server code. `check:types` now reads 264 files, up from 263.
+
+**PROVEN OUTPUT-NEUTRAL, and the number that matters is not the one `compare-builds.py`
+prints.** Adding the adapter moves every page from `dist/<path>` to `dist/client/<path>`, so a
+naive compare reports 329 removed and 330 added. Re-rooted and re-hashed, the truth is:
+
+  2 byte-identical · 327 identical once one string is undone · 0 changed · 0 added · 0 missing
+
+That one string is the form `action` gaining a trailing slash. Which is the second finding:
+
+### THE FORM ACTION NEEDED THE TRAILING SLASH, AND IT IS NOT COSMETIC
+
+`vercel.json` sets `trailingSlash: true`, so a POST to a bare `/api/consult` earns a **308 that
+re-sends the entire body**. The action is `ROUTES.consult` — `/api/consult/` — so the form posts
+straight to the function. It is in `ROUTES` rather than a literal because the convention says no
+internal URL is ever a literal in a component; it is deliberately NOT in `RESERVED_PATHS`, which
+guards the ROOT slug namespace, and this path is nested.
+
+### THE ADAPTER MOVED `dist/`, AND FOUR SCRIPTS READ IT
+
+`check-links.py`, `compare-builds.py`, `check-scoped-styles.py` and the `check:styles` npm script
+all pointed at `dist/`. Left alone, `check:links` derives every served path with a `/client`
+prefix and `check:styles` loses its `dist/admin/*` exclusion — so it would start scanning the
+Studio's 56KB minified bundle. All four now point at `dist/client`. **The full gate is green with
+identical numbers**: 33,619 links, 328 pages, 329 served paths, 162 redirects.
+
+### THE TWO FORMS' HONEYPOTS HAVE DIFFERENT NAMES
+
+`company` on the consultation form, `website` on the co-counsel one. **Nothing in either file
+says so**, and checking only one would accept every bot on the other. The endpoint checks both
+for both kinds — a real submission fills neither, so there is no reason to be precise. A trapped
+bot gets the **same 303 a person gets**: telling it apart is how a spammer learns.
+
+### `curl -X POST` GETS A 403, AND IT IS NOT A BUG IN THE ROUTE
+
+Astro's `security.checkOrigin` defaults ON and rejects a POST whose `Origin` does not match,
+**before the module is reached** — so a bare curl gets `403 Cross-site POST form submissions are
+forbidden` and none of the handler runs. Browsers always send `Origin` on a form submit, so real
+traffic is unaffected and this is free CSRF cover. Test with
+`-H "Origin: http://localhost:4321"`. This is recorded in the route's own header comment too,
+because it will otherwise read as a broken endpoint.
+
+**Every branch was exercised against a running dev server**, not reasoned about: 405 on GET, 303
+on each honeypot, 400 on a missing field / a bad phone format / an unknown `kind`, 303 to
+`/thank-you/` on an open-redirect attempt (`redirectTo` is validated against `ROUTES`, not
+trusted), and a 500 whose log names exactly which variables are unset.
+
+### WHAT IS LEFT ON IT
+
+- **Provision Resend** — `vercel link`, then `vercel integration add resend/resend-email`. The
+  repo is not linked to a Vercel project yet, and this needs the account holder. Resend is the
+  only `messaging` product in the Marketplace, so it is the pick by default rather than by
+  preference.
+- **Four variables**: `RESEND_API_KEY`, `CONSULT_TO_EMAIL`, `CONSULT_FROM_EMAIL`, and optionally
+  `COCOUNSEL_TO_EMAIL` (falls back to `CONSULT_TO_EMAIL`). The From domain must be verified in
+  Resend or the send is refused. **The firm has to name the inboxes** — they are environment
+  variables and not content precisely so that naming them is not a deploy.
+- **A designed error page.** The failure is a plain-text 500 naming the firm's phone number.
+  Deliberately blunt — visibly broken beats invisibly broken, the same argument that kept the
+  comps' fake success panel out — but it wants the light template's shell like the other three
+  utility pages. `TODO(launch)` in the route.
+
 ## The Sanity integration — Phases 0 through 6 are in
 
 **775 documents in Sanity, and `src/data/` no longer holds page copy.** Every route's strings
@@ -2552,10 +2623,10 @@ still open is only the display vs CallRail tracking split, if dynamic insertion 
 
 **Blockers for launch, not for building**
 
-- `/api/consult` does not exist. Two form components are rendered from **six** call sites and
-  reach **326 of the 329 built pages** — the light template put one on 104 more through
-  `AreaSidebar` — and every one of them 404s on submit. One endpoint, not two: a hidden `kind`
-  field tells the payloads apart.
+- ~~`/api/consult` does not exist.~~ **BUILT — see the top of this file.** Two form components
+  from **six** call sites reach **327 of the 329 built pages** (counted from the build, not
+  estimated; the earlier 326 was one short). What remains is provisioning Resend and setting
+  four variables — configuration, not code.
 - The production URL is not yet a Sanity CORS origin, so the deployed `/admin` loads but fails
   sign-in. `http://localhost:4321` is registered — don't move dev off 4321.
 

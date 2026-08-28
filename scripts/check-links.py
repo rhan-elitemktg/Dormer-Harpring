@@ -66,7 +66,13 @@ from pathlib import Path
 from urllib.parse import urljoin, urlsplit
 
 ROOT = Path(__file__).resolve().parent.parent
-DIST = ROOT / "dist"
+# THE ADAPTER MOVED THIS. `@astrojs/vercel` splits `outDir` into `client/` and
+# `server/`, so every built page is at `dist/client/<path>/index.html` — one
+# level deeper than before. The pages themselves did not change; only where they
+# land did. Pointing at plain `dist/` here finds the HTML anyway (the walk
+# recurses) but derives every served path with a `/client` prefix, which reads
+# as 329 moved pages rather than a directory rename.
+DIST = ROOT / "dist" / "client"
 
 # The site's own hostnames. An absolute href at one of these is an internal
 # link wearing a costume, and must resolve like any other. Both forms, because
@@ -151,7 +157,7 @@ for file in DIST.rglob("*"):
         served.add(comparison_form(rel[: -len("index.html")]))
 
 if not served:
-    sys.exit("  ✗ dist/ holds no pages — run `npm run build` first.")
+    sys.exit(f"  ✗ {DIST}/ holds no pages — run `npm run build` first.")
 
 redirects: dict[str, str] = {}
 redirect_rules = 0

@@ -28,3 +28,7 @@ __pycache__/
 
 # one-off migration payloads (the SCRIPT is the record, not its output)
 scratch/
+
+# Build output from @astrojs/vercel — the deploy artifact, regenerated every
+# build. Sibling of `dist/`, ignored above.
+.vercel/

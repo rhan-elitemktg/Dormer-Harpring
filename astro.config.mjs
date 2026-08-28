@@ -3,6 +3,7 @@ import { defineConfig, fontProviders } from "astro/config";
 import { loadEnv } from "vite";
 import sanity from "@sanity/astro";
 import react from "@astrojs/react";
+import vercel from "@astrojs/vercel";
 
 const env = loadEnv(process.env.NODE_ENV ?? "development", process.cwd(), "");
 
@@ -40,6 +41,16 @@ const PUBLIC_SANITY_DATASET = required("PUBLIC_SANITY_DATASET");
 
 // https://astro.build/config
 export default defineConfig({
+  /* THE SITE IS STILL STATIC. `output` is deliberately left at its default, so
+     all 328 pages prerender exactly as before and the adapter only exists to
+     host the ONE route that opts out: `src/pages/api/consult.ts`, which sets
+     `export const prerender = false`.
+     Verified rather than assumed — `scripts/compare-builds.py` reports every
+     page byte-identical across adding this. If a future route needs a server,
+     it opts out the same way; do NOT switch `output` to "server", which would
+     turn all 328 back into runtime renders. */
+  adapter: vercel(),
+
   // The canonical origin. Every canonical tag, og:url and sitemap entry is
   // built from this, so it must match the domain Vercel serves as primary.
   // TODO(launch): confirm www vs apex before the first production deploy.
