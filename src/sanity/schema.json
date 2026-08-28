@@ -4640,6 +4640,10 @@
             },
             {
               "type": "string",
+              "value": "editorial"
+            },
+            {
+              "type": "string",
               "value": "sitemap"
             },
             {

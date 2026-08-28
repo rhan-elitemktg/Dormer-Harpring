@@ -1,10 +1,10 @@
-// The three utility pages: privacy policy, sitemap, 404.
+// The four utility pages: privacy policy, editorial guidelines, sitemap, 404.
 //
-// SANITY: three `sitePage` documents at fixed ids — `privacy`, `sitemap`,
-// `notFound`. One type, three singletons; the note on the schema type has why
-// it is one type and why they are still pinned rather than a collection.
+// SANITY: four `sitePage` documents at fixed ids — `privacy`, `editorial`,
+// `sitemap`, `notFound`. One type, four singletons; the note on the schema type
+// has why it is one type and why they are still pinned rather than a collection.
 //
-// WHY ONE MODULE FOR THREE PAGES. They are the same document in every way that
+// WHY ONE MODULE FOR FOUR PAGES. They are the same document in every way that
 // matters — a title, a lede, a body, no taxonomy above them and no collection
 // beneath — and each is a singleton. Splitting them into three files would put
 // three one-export modules beside each other.
@@ -15,6 +15,7 @@
 // stapled to a legal notice, and on a 404 it would be noise above an apology.
 import { sanityClient } from "sanity:client";
 import {
+  EDITORIAL_PAGE_QUERY,
   NOT_FOUND_PAGE_QUERY,
   PRIVACY_PAGE_QUERY,
   SITEMAP_PAGE_QUERY,
@@ -85,6 +86,52 @@ export async function getPrivacyPolicyPage(): Promise<LegalPage> {
     // than one that fails the build.
     updatedAt: required(updated.at, "Privacy Policy's last-updated date"),
     updatedLabel: required(updated.label, "Privacy Policy's last-updated label"),
+  };
+}
+
+/**
+ * The editorial guidelines, transcribed from the live page at
+ * `https://www.denvertrial.com/editorial-guidelines/` (WordPress page id 14093).
+ *
+ * WHY THIS PAGE EXISTS AT ALL, given it was on nobody's list: the cutover URL
+ * audit found it. It is live, in the live sitemap, and 106 blocks of real
+ * editorial standards — and after the audit's other seventeen findings were
+ * redirected it was the ONLY would-be 404 left. `ROUTES.editorialGuidelines` and `RESERVED_PATHS` had reserved its path
+ * all along, so something always intended it to exist; nothing had built it.
+ *
+ * NO DEPARTURES FROM THE SOURCE, unlike the privacy policy's three. The
+ * converter reported zero warnings, the page carries no links and no phone
+ * number, and its 66 bullets came through as list items rather than flattening
+ * to paragraphs. Nothing needed correcting, so nothing was.
+ *
+ * `updated.at` is WordPress's `modified`, which for this page equals its `date`
+ * — it has not been revised since publication. The label is "Last reviewed"
+ * rather than the privacy policy's "Last updated": a set of standards is
+ * something a firm re-affirms rather than edits, and the wording is the
+ * editor's to change.
+ *
+ * NOT LINKED FROM THE FOOTER, which matches the site being replaced — the live
+ * footer does not link it either. It is listed on `/sitemap/`, the page whose
+ * whole job is to list every URL this site serves.
+ */
+export async function getEditorialGuidelinesPage(): Promise<LegalPage> {
+  const page = await once("sitePage:editorial", async () =>
+    required(
+      await sanityClient.fetch(EDITORIAL_PAGE_QUERY),
+      "Editorial Guidelines",
+      "Pages → Utility pages"
+    )
+  );
+
+  const updated = required(page.updated, "Editorial Guidelines' last-reviewed stamp");
+  return {
+    title: page.title,
+    body: page.body as PortableTextBlock[],
+    // Coalesced on their own lines rather than in a cast, for the reason
+    // `getPrivacyPolicyPage` gives: the schema leaves both optional because the
+    // sitemap and the 404 have no stamp.
+    updatedAt: required(updated.at, "Editorial Guidelines' last-reviewed date"),
+    updatedLabel: required(updated.label, "Editorial Guidelines' last-reviewed label"),
   };
 }
 

@@ -115,7 +115,7 @@ function fixedDocument(
  *                         one — so it leads the Practice Areas group rather than
  *                         sitting among the routes.
  *
- * The three utility pages are a sub-list at the foot; see `UTILITY_PAGES`.
+ * The four utility pages are a sub-list at the foot; see `UTILITY_PAGES`.
  */
 const PAGES: [string, string, ComponentType?][] = [
   ["homePage", "Homepage", HomeIcon],
@@ -145,6 +145,7 @@ const PAGES: [string, string, ComponentType?][] = [
  */
 const UTILITY_PAGES: [string, string][] = [
   ["privacy", "Privacy Policy"],
+  ["editorial", "Editorial Guidelines"],
   ["sitemap", "Sitemap"],
   ["notFound", "404"],
 ];

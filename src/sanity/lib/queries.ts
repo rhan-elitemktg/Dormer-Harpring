@@ -976,6 +976,18 @@ export const PRIVACY_PAGE_QUERY = defineQuery(
 }`
 );
 
+/** The editorial guidelines. Same projection as the privacy policy, because it
+ *  is the same shape of document: a written page that stamps when it was last
+ *  reviewed. Kept as its own named query rather than parameterised by id — the
+ *  other five singletons on this type are written out too, and a query whose id
+ *  is an argument reads as though a sixth could exist. */
+export const EDITORIAL_PAGE_QUERY = defineQuery(
+  `*[_type == "sitePage" && _id == "editorial"][0]{
+  ...content{ title, lede, "body": coalesce(body, []) },
+  updated{ at, label }
+}`
+);
+
 /** The human sitemap. Its groups are composed from the getters that own each
  *  collection — a second hand-maintained list of every page would go stale the
  *  first time anything was added — so only the page's own copy is stored. */

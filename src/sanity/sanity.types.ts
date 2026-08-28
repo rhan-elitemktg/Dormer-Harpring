@@ -764,7 +764,7 @@ export type SitePage = {
   _createdAt: string;
   _updatedAt: string;
   _rev: string;
-  kind: "privacy" | "sitemap" | "notFound";
+  kind: "privacy" | "editorial" | "sitemap" | "notFound";
   content: {
     title: string;
     lede?: string;
@@ -2687,6 +2687,19 @@ export type PRIVACY_PAGE_QUERY_RESULT = {
 } | null;
 
 // Source: src/sanity/lib/queries.ts
+// Variable: EDITORIAL_PAGE_QUERY
+// Query: *[_type == "sitePage" && _id == "editorial"][0]{  ...content{ title, lede, "body": coalesce(body, []) },  updated{ at, label }}
+export type EDITORIAL_PAGE_QUERY_RESULT = {
+  title: string;
+  lede: string | null;
+  body: Array<never> | RichText;
+  updated: {
+    at: string | null;
+    label: string | null;
+  } | null;
+} | null;
+
+// Source: src/sanity/lib/queries.ts
 // Variable: SITEMAP_PAGE_QUERY
 // Query: *[_type == "sitePage" && _id == "sitemap"][0]{  ...content{ title, lede, "body": coalesce(body, []) }}
 export type SITEMAP_PAGE_QUERY_RESULT = {
@@ -3108,6 +3121,7 @@ declare module "@sanity/client" {
     '*[_type == "coCounselPage" && _id == "coCounselPage"][0]{\n  ...header{ eyebrow, title, lede, ctaLabel, ctaNote },\n  partnership{ eyebrow, title, intro, callout, terms },\n  results{ eyebrow, title, lede },\n  areas{\n    eyebrow,\n    title,\n    ctaLabel,\n    "items": coalesce(items[]{ _key, label, href }, [])\n  },\n  form{ title, lede, requiredNote, submitLabel, disclaimer }\n}': CO_COUNSEL_PAGE_QUERY_RESULT;
     '*[_type == "blogIndexPage" && _id == "blogIndexPage"][0]{\n  ...header{ eyebrow, title, lede },\n  ...feed{ categoryLabel, allLabel, featuredBadge, readMoreLabel, loadMoreLabel, emptyLabel }\n}': BLOG_INDEX_PAGE_QUERY_RESULT;
     '*[_type == "sitePage" && _id == "privacy"][0]{\n  ...content{ title, lede, "body": coalesce(body, []) },\n  updated{ at, label }\n}': PRIVACY_PAGE_QUERY_RESULT;
+    '*[_type == "sitePage" && _id == "editorial"][0]{\n  ...content{ title, lede, "body": coalesce(body, []) },\n  updated{ at, label }\n}': EDITORIAL_PAGE_QUERY_RESULT;
     '*[_type == "sitePage" && _id == "sitemap"][0]{\n  ...content{ title, lede, "body": coalesce(body, []) }\n}': SITEMAP_PAGE_QUERY_RESULT;
     '*[_type == "sitePage" && _id == "notFound"][0]{\n  ...content{ title, lede, "body": coalesce(body, []) },\n  "linksTitle": links.title,\n  "links": coalesce(links.items[]{ _key, label, description, href }, [])\n}': NOT_FOUND_PAGE_QUERY_RESULT;
     '*[_type == "practiceAreasPage" && _id == "practiceAreasPage"][0]{\n  ...header{ eyebrow, title, lede, ctaLabel, ctaNote },\n  featured{ eyebrow, title, lede },\n  directory{ eyebrow, title }\n}': PRACTICE_AREAS_COPY_QUERY_RESULT;

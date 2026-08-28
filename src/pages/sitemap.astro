@@ -18,9 +18,16 @@
 // The one hand-written list is `SITE_PAGES`, because there is no getter that
 // returns "the fixed routes a visitor should see". `ROUTES` is close but is not
 // it: it also holds `thankYou` (noIndex, and arriving there directly tells a
-// stranger their case was received) and `editorialGuidelines` (reserved, never
-// built). Both are excluded below by name rather than by filter, so adding a
-// route does not silently add it here.
+// stranger their case was received) and `consult` (an endpoint, not a page).
+// Both are excluded below by name rather than by filter, so adding a route does
+// not silently add it here.
+//
+// `editorialGuidelines` USED TO BE EXCLUDED TOO, as "reserved, never built".
+// The cutover URL audit found the live page and it is built now, and this is
+// the only page that links it — the live site's own footer does not, so ours
+// does not either. Which makes this list load-bearing rather than a courtesy:
+// drop the entry and the page becomes an orphan that only a crawler with the
+// old URL can reach.
 //
 // SURFACE ORDER: cream `.spage` → sunk `.awards` → cream `.ct`. See
 // privacy-policy.astro.
@@ -62,7 +69,7 @@ const [page, awards, awardsBar, details, band, areaGroups, areaPages, areaDetail
   ]);
 
 /* The fixed routes, in the order the nav presents them. `thankYou` and
-   `editorialGuidelines` are deliberately absent — see the note above. */
+   `consult` are deliberately absent — see the note above. */
 const SITE_PAGES: { label: string; href: string }[] = [
   { label: "Home", href: ROUTES.home },
   { label: "About", href: ROUTES.about },
@@ -75,6 +82,7 @@ const SITE_PAGES: { label: string; href: string }[] = [
   { label: "Articles & Insights", href: ROUTES.blog },
   { label: "Contact", href: ROUTES.contact },
   { label: "Privacy Policy", href: ROUTES.privacy },
+  { label: "Editorial Guidelines", href: ROUTES.editorialGuidelines },
   { label: "Sitemap", href: ROUTES.sitemap },
 ];
 

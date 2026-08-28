@@ -8,6 +8,83 @@ either here, and don't record anything `git log` already knows.
 
 _Last updated: 2026-08-28._
 
+## THE CUTOVER URL AUDIT IS DONE: 18 WOULD-BE 404s, NOW ZERO
+
+**369 live URLs checked against what this build serves. 323 served directly, 46 redirected,
+0 that would 404, 0 redirects pointing at an unbuilt page.** The audit that two earlier
+sessions did by hand is now a repeatable method, and the method is the part worth keeping.
+
+### THREE SOURCES, AND THE THIRD IS THE ONE THAT MATTERS
+
+- **Yoast's `sitemap_index.xml`** → `post-sitemap.xml` (168) + `page-sitemap.xml` (186).
+- **The WordPress REST API** → 362 paths. **It lists nine pages the sitemap does not**, because
+  Yoast omits noindexed ones. `/reviews/`, `/demo/` and `/landing-page/` are all in this gap.
+- **The sitesucker scrape** → 317, after dropping `/wp-content`, `/wp-includes`, `/wp-json` and
+  `/category/` (which is 404 on the live site — a scrape artifact, not a URL).
+
+**NONE OF THE THREE LISTS A REDIRECT SOURCE, AND THAT IS A HOLE THE SIZE OF THE PROBLEM.** A
+sitemap and a REST index both enumerate canonical DESTINATIONS. A URL that 301s appears in
+neither — so an audit built on those two looks complete while being blind to exactly the class
+of URL that most needs a rule. Six were found only by **deriving candidates and probing**: for
+every path the other sources DO list, take its root-slug form and each of its parent forms, drop
+anything already served or redirected, and request the rest. That returned
+`/personal-injury-attorney/`, `/car-accident/`, `/traffic-collision-lawyer/`,
+`/client-review-testimonial/` and both former attorneys' root slugs — every one a live 301.
+
+It is the same method that found the 23 attorney bios, run as a sweep instead of by hand.
+**Re-run it before launch**: the live site is still being published to, which is how the 2026
+Big Little Gala write-up was missed by the sweep that found the other 24.
+
+### WHAT THE 18 WERE, AND HOW EACH WAS CLOSED
+
+**Replicated — WordPress already answers these, and the chain was followed to its END** rather
+than copied a hop at a time, so `/car-accident/` goes straight to `/denver-car-accident-lawyer/`
+instead of through two 301s: `/announcements/`, `/new-homepage/`, `/client-review-testimonial/`,
+`/personal-injury-attorney/`, `/practice-areas/personal-injury-attorney/`, `/car-accident/`,
+`/practice-areas/traffic-collision-lawyer/car-accident/`. Plus the 2026 gala, into
+`COMMUNITY_WRITE_UPS` beside the 2025 one.
+
+**Ruled on — the live site serves a 200 and this build chooses not to.** Each carries its reason
+in `redirects.ts`:
+
+| URL(s) | Ruling |
+|---|---|
+| Petroff and Gutierrez, both forms each | → `/meet-our-attorneys/`. The "no redirect, by request" call on record was about Nelson and Jewel, whose pages WordPress has since REMOVED — it never covered these two, whose pages are live and indexed. |
+| `/reviews/` | → `/testimonials/`, **not rebuilt**. The live page carries `AggregateRating` and `ratingValue` — the exact Product-with-stars violation this rebuild exists to fix. Rebuilding it is the one path that risks recreating it. |
+| `/traffic-collision-lawyer/` + `/practice-areas/` form | → `/denver-car-accident-lawyer/`. Its CHILD already 301s there on WordPress, so the parent matching it makes the branch coherent instead of half-redirected. |
+| `/demo/`, `/landing-page/` | → home. Theme scaffolding titled "Millions+ Recovered", in no sitemap, never linked. |
+
+**Built — `/editorial-guidelines/`**, the only one of the 18 that became a page. See below.
+
+`redirects.ts` is **196 rules** now, up from 162.
+
+### `/editorial-guidelines/` IS BUILT, AND IT COST ONE LINE IN `KINDS`
+
+Live, indexed, and **`ROUTES.editorialGuidelines` plus `RESERVED_PATHS` had reserved its path
+from the beginning** — something always intended it to exist and nothing built it. It was the
+last would-be 404 on the list.
+
+**It is a FOURTH `sitePage` document, not a fourth page type.** Adding it cost one entry in
+`KINDS`, one in `UTILITY_PAGES`, one query, one getter and one route — no schema file, no
+projection shape, no desk group. That is the argument for that type's one-type-many-singletons
+shape, made after the fact rather than in the abstract.
+
+`updated{}` used to be `hidden: isNot("privacy")` and is now `isNotOneOf("privacy",
+"editorial")`: the two WRITTEN documents stamp a date, the two GENERATED ones do not. Its label
+is **"Last reviewed"**, not the policy's "Last updated" — a set of standards is re-affirmed
+rather than edited.
+
+**Converted through `scripts/lib/wp-portable-text.mjs`, the same path both imports used**: 106
+blocks, zero converter warnings, zero duplicate `_key`s, and **66 bullets that stayed list items
+instead of flattening to paragraphs**. No links and no phone number in the source, so unlike the
+privacy policy there are **no departures** — nothing needed correcting.
+
+**NOT IN THE FOOTER, and that is deliberate: the live site does not link it either.** `/sitemap/`
+is the only page that links it, which makes that list load-bearing rather than a courtesy —
+drop the entry and the page is an orphan only a crawler with the old URL can reach. The comment
+in `sitemap.astro` that called it "reserved, never built" is corrected, and `consult` takes its
+place in the excluded-by-name pair.
+
 ## `/api/consult` IS BUILT, AND THE SITE IS STILL STATIC
 
 **The first launch blocker is closed in code.** `src/pages/api/consult.ts` serves both forms —
@@ -2541,10 +2618,9 @@ none first. Already an open question below; now recorded where the code is.
   `object-position: center top` crops roughly the bottom 40%. Not a layout bug; a 16:10 crop
   would use the frame better.
 - **`MobileNav` has no current-page highlight**, where the desktop nav now does.
-- **Three live Denver pages were excluded as duplicates** and want a ruling:
-  `personal-injury-attorney` (duplicates the homepage), `car-accident` and
-  `traffic-collision-lawyer` (both overlap `denver-car-accident-lawyer`, which the heavy template
-  serves).
+- ~~**Three live Denver pages were excluded as duplicates** and want a ruling.~~ **RULED —
+  all three redirect.** `personal-injury-attorney` → home and the other two →
+  `denver-car-accident-lawyer`, in both URL forms each. See the audit section at the top.
 - **The `AREA_TO_BLOG_CATEGORY` map in `blog.ts` is inferred, not authored.** It decides which
   posts a practice area's sidebar shows. Keyed on the area slug rather than its topic, because
   topic is five buckets and would put car-accident posts on the motorcycle page — which is what
@@ -2566,11 +2642,8 @@ none first. Already an open question below; now recorded where the code is.
 - **`src/assets` holds twelve images nothing references.** Eleven practice-area photographs and
   `consult.jpg`, all now Sanity assets. Kept because git is the only copy of the originals
   outside Sanity; delete them only alongside a decision about asset backup.
-- **Two former staff have live bio pages the roster no longer carries** — Alexandra Petroff and
-  Dinorah Gutierrez, 200 at both `/<slug>/` and `/meet-our-attorneys/<slug>/`. The "no redirect,
-  by request" decision on record was taken about Ella Nelson and Morgan Jewel, whose pages
-  WordPress has since removed, so it cannot be read as covering these two. Redirect them to
-  `/meet-our-attorneys/`, or let them 404 the way the other pair was meant to.
+- ~~**Two former staff have live bio pages the roster no longer carries.**~~ **RULED — all four
+  URLs redirect to `/meet-our-attorneys/`.** See the audit section at the top.
 - **The two article templates' twelve labels are code now**, and one of them is marketing copy:
   the practice-area eyebrow, "Tough lawyers for tough cases", on all 104 pages, already changed
   four times by request. Changing it a fifth time is a deploy. If that happens, it belongs on
