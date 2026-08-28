@@ -1085,7 +1085,7 @@ export const FEATURED_PRACTICE_AREAS_QUERY = defineQuery(
   triage{
     title,
     lede,
-    video{ poster, alt, title, length, "video": film{ provider, id } },
+    video{ poster, alt, title, length, "video": { "provider": "wistia", "id": videoId } },
     help{ text },
     "rows": coalesce(rows[]{ _key, tone, tag, question, body, ctaLabel, ctaHref, stat{ big, label } }, []),
     sources{ label, "items": coalesce(items[]{ _key, label, note, href }, []) }
@@ -1099,7 +1099,7 @@ export const FEATURED_PRACTICE_AREAS_QUERY = defineQuery(
   criteria{
     title,
     lede,
-    video{ poster, alt, title, length, "video": film{ provider, id } },
+    video{ poster, alt, title, length, "video": { "provider": "wistia", "id": videoId } },
     "items": coalesce(items[]{ _key, title, body }, []),
     note
   },

@@ -165,7 +165,24 @@ const videoPanel = defineField({
       description: 'Runtime, as shown — "1:14".',
       validation: (rule) => rule.required(),
     }),
-    defineField({ name: "film", type: "videoRef", validation: (rule) => rule.required() }),
+    /*
+     * A BARE ID, NOT A `videoRef` OBJECT — the last one on the site.
+     *
+     * IT OUTLASTED TWO SWEEPS BECAUSE IT IS CALLED `film`. Every other was
+     * `video`, and this sits inside a panel object rather than at a document's
+     * top level, so neither the field-name sweep nor a read of this page's
+     * eighteen sections found it. The projection reassembles `{provider, id}`,
+     * so `lib/video.ts` is untouched and nothing stores a URL.
+     */
+    defineField({
+      name: "videoId",
+      title: "Video ID",
+      type: "string",
+      description:
+        "Wistia's hashed id — the id ONLY, not the whole URL. Still the stand-in film; see " +
+        "YOUTUBE_ORIGINS in src/lib/video.ts for the original this maps to.",
+      validation: (rule) => rule.required(),
+    }),
   ],
   validation: (rule) => rule.required(),
 });

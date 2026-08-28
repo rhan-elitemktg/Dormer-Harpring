@@ -44,8 +44,8 @@ against the code, swept for dead literals, swapped, built and diffed on its own.
   host we do not control. The third takes a `remoteSize` because dimensions cannot be read
   off a URL, and omitting them shifts the layout as the image lands.
 - Field types: `richText`, `answerText`, `simpleText`, `inlineText`, `link`, `navLink`,
-  `videoRef`, `seo`.
-- **Ten** collection types, **twelve page types** (fifteen documents — `sitePage` is three) and
+  `seo`. (`videoRef` was an eighth and is deleted — see below.)
+- **Ten** collection types, **twelve page types** (fourteen documents — `sitePage` is three) and
   **three** Site Settings singletons, in a desk of five groups plus one loose document: Pages /
   Practice Areas / Blog / Collections / Shared Sections / Site Settings. Every page type with more than one band holds its fields in
   collapsible SECTIONS — see below.
@@ -266,21 +266,25 @@ SENTENCE is still derived from the roster.
 would import documents of a type that no longer exists — but the third thing it did, seeding
 `sharedSections.sidebarForm`, still stands.
 
-### `videoRef` IS ALMOST UNWOUND — ONE NESTED FIELD IS LEFT, AND THIS SAID NONE
+### `videoRef` IS UNWOUND, AND THE TYPE IS DELETED
 
-The hero, the firm intro and both FAQ accordions went in 6a; the six filmed testimonials
-followed in 6b. Every one is a bare `videoId` string and **every projection reassembles
-`{provider, id}`**, so `lib/video.ts` still sees the pair, the `youtube` branch still has
-somewhere to land, and the rule that nothing may store a video URL is untouched.
+The hero, the firm intro and both FAQ accordions went in 6a; the six filmed testimonials in 6b;
+the Car Accidents page's two video panels in 6e. Every video field is a bare `videoId` string
+and **every projection reassembles `{provider, id}` as a literal**, so `lib/video.ts` still
+receives the pair and is still the only place one becomes a URL.
 
-**THE CLAIM THAT NONE WAS LEFT WAS WRONG.** The Car Accidents page's two video panels still
-nest one, and it was missed because **it is called `film`, not `video`**, and it sits inside a
-`videoPanel` object rather than at the top level of a document — so neither the sweep for the
-field name nor a scan of the page's eighteen sections surfaced it. `git grep videoRef` finds it
-in one line; the sweep that produced the list was not that.
+**THE LAST ONE OUTLASTED TWO SWEEPS BECAUSE IT IS CALLED `film`**, not `video`, and it sits
+inside a `videoPanel` object rather than at a document's top level — so neither the field-name
+sweep nor a read of that page's eighteen sections surfaced it, and this file carried a claim
+that none was left. **`git grep videoRef` finds it in one line.** When a sweep's result is going
+into a claim, run the sweep that cannot miss.
 
-Flattening it is the same three-step change as the others (schema, projection, one migration)
-and is deliberately still open rather than quietly done.
+**The `videoRef` object type is deleted**, since nothing declared a field of it — a registered
+type drawing nothing is the dead-literal shape this file warns about elsewhere. **Its reasoning
+moved to `lib/video.ts` rather than going with it**: why the `youtube` branch is deliberately
+kept unused, and that a per-record swap means a stored `provider` beside `videoId`, never a URL
+in a field. A comment beside a thing does not survive the thing, and this project has lost that
+argument three times.
 
 **Only six of the eighteen testimonials carry a film**, because `video` is conditional on
 `format == "video"`. The migration emits those six alone — writing the written twelve would be
@@ -2244,10 +2248,10 @@ entry and both files to fix.
    videos, and on someone checking YouTube Studio for unlisted ones beyond those five.
 
    **Grepping `PLACEHOLDER_VIDEO` no longer finds them** — the full sweep is a grep AND a
-   query, both written down at the top of `src/lib/video.ts`, and the query half needs
-   updating twice over: for the two Car Accidents panels Phase 4f moved, and because every
-   record it reads has changed shape — `video{provider,id}` is a bare `videoId` string
-   everywhere except those same two panels, whose field is called `film`.
+   query, both written down at the top of `src/lib/video.ts`, and **the query half is stale**:
+   every record it reads has changed shape, from a `video{provider,id}` object to a bare
+   `videoId` string. Rewrite it before trusting it — a GROQ filter on a field that no longer
+   exists returns nothing and reads as "no placeholders left".
 3. **One Wistia player per popover, initialised eagerly** — 15 on the homepage, 20 on
    `/denver-car-accident-lawyer/`. Inherent to the class-based embed; wants a pass before launch.
 4. ~~**Sanity Phases 2, 2f, 3 and 4.**~~ **ALL DONE.** 775 documents across **ten** collection
@@ -2275,9 +2279,7 @@ entry and both files to fix.
    and pages; the sitesucker scrape is the other half) and resolve each against `dist/` plus
    `vercel.json`. Four are already known and unruled: Alexandra Petroff's and Dinorah
    Gutierrez's bios, live in both URL forms, belonging to staff the roster no longer carries.
-8. **Flatten the last nested `videoRef`.** The Car Accidents video panels' `film` field is the
-   only one left; see the note at the top of this file for why it survived two sweeps.
-9. `/new-seo-setup` — per-page meta, a Global SEO Settings singleton, JSON-LD, `sitemap.xml`,
+8. `/new-seo-setup` — per-page meta, a Global SEO Settings singleton, JSON-LD, `sitemap.xml`,
    `robots.txt`, editor-managed redirects. **The practice-area pages already carry real
    `metaTitle` / `metaDescription` from the live site's own meta** on all 104 `practiceArea`
    documents, and Phase 4f put the Car Accidents page's on a `seo` object too — so this layer
@@ -2285,8 +2287,8 @@ entry and both files to fix.
    `BlogPosting` JSON-LD belongs here, and so does `sitemap.xml` — **which nothing links any
    more**: the footer points at the human `/sitemap/`. The XML file's every URL is absolute off
    `site:`, so it cannot be written before the www-vs-apex call.
-10. **`redirects.ts` is the last data module holding content**, and it is deliberate: the
-    redirect table becomes editor-managed in `/new-seo-setup`. It is **162 rules now**, up from
+9. **`redirects.ts` is the last data module holding content**, and it is deliberate: the
+   redirect table becomes editor-managed in `/new-seo-setup`. It is **162 rules now**, up from
     68, and two thirds of that growth is cutover work rather than legacy URL shapes.
     `portableText.ts` is the only other non-Sanity module and it is an authoring shim rather
     than content — **`blog.ts` is now the only file in `src/` that CALLS `pt()` at all**, for

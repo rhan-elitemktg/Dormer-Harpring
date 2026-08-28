@@ -11,7 +11,6 @@ import type { SchemaTypeDefinition } from "sanity";
 
 import { link } from "./objects/link";
 import { navLink } from "./objects/navLink";
-import { videoRef } from "./objects/videoRef";
 import { answerText, inlineText, richText, simpleText } from "./objects/richText";
 import { seo } from "./objects/seo";
 
@@ -48,7 +47,6 @@ import { sharedSections } from "./settings/sharedSections";
 const objects: SchemaTypeDefinition[] = [
   link,
   navLink,
-  videoRef,
   richText,
   answerText,
   simpleText,

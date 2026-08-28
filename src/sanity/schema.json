@@ -103,11 +103,10 @@
           },
           "optional": false
         },
-        "film": {
+        "videoId": {
           "type": "objectAttribute",
           "value": {
-            "type": "inline",
-            "name": "videoRef"
+            "type": "string"
           },
           "optional": false
         }
@@ -4501,42 +4500,6 @@
           "type": "string"
         },
         "optional": true
-      }
-    }
-  },
-  {
-    "name": "videoRef",
-    "type": "type",
-    "value": {
-      "type": "object",
-      "attributes": {
-        "_type": {
-          "type": "objectAttribute",
-          "value": {
-            "type": "string",
-            "value": "videoRef"
-          }
-        },
-        "provider": {
-          "type": "objectAttribute",
-          "value": {
-            "type": "union",
-            "of": [
-              {
-                "type": "string",
-                "value": "wistia"
-              }
-            ]
-          },
-          "optional": false
-        },
-        "id": {
-          "type": "objectAttribute",
-          "value": {
-            "type": "string"
-          },
-          "optional": false
-        }
       }
     }
   },
