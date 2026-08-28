@@ -53,7 +53,17 @@ export default defineConfig({
 
   // The canonical origin. Every canonical tag, og:url and sitemap entry is
   // built from this, so it must match the domain Vercel serves as primary.
-  // TODO(launch): confirm www vs apex before the first production deploy.
+  //
+  // SETTLED: www, not the apex. This is the shape the legacy site serves and
+  // therefore the shape Google already holds for ~300 indexed URLs, so keeping
+  // it means the cutover changes no canonical that is already ranking. The apex
+  // is the cleaner brand URL and was declined for exactly that reason: it would
+  // have made every indexed URL a redirect on day one, on top of the 162
+  // redirects the cutover already carries.
+  //
+  // Vercel must serve www as the PRIMARY domain, with the apex redirecting to
+  // it. If that is ever reversed, this line has to move with it or every
+  // canonical tag points at a redirect.
   site: "https://www.denvertrial.com",
 
   // ONE URL PER PAGE. Without this Astro builds `/about/index.html` and Vercel

@@ -2226,8 +2226,8 @@ law firm's privacy policy is the firm's call. README has the row.
 
 The footer linked `/sitemap.xml` and nothing built it. An XML sitemap is a crawler file
 referenced from `robots.txt`, not from a footer, and every URL in it is absolute off `site:` —
-the open www-vs-apex `TODO(launch)`. Writing it now bakes that guess into ~330 URLs, so it stays
-with `/new-seo-setup`. The footer points at the human page instead.
+now SETTLED on www, so those ~330 URLs are no longer a guess and this is unblocked work. It
+stays with `/new-seo-setup` because that is where robots.txt and the canonical layer land. The footer points at the human page instead.
 
 **328 links, every built page except `/thank-you/` (noIndex) and `/tokens/` (the throwaway).
 Zero duplicates.** Verified by differencing the rendered hrefs against `dist/`.
@@ -2357,7 +2357,7 @@ entry and both files to fix.
    has something true to start from and the field type is already proven on two shapes.
    `BlogPosting` JSON-LD belongs here, and so does `sitemap.xml` — **which nothing links any
    more**: the footer points at the human `/sitemap/`. The XML file's every URL is absolute off
-   `site:`, so it cannot be written before the www-vs-apex call.
+   `site:` — settled on www, so it is unblocked work rather than a blocked decision.
 9. **`redirects.ts` is the last data module holding content**, and it is deliberate: the
    redirect table becomes editor-managed in `/new-seo-setup`. It is **162 rules now**, up from
     68, and two thirds of that growth is cutover work rather than legacy URL shapes.
@@ -2553,7 +2553,14 @@ none first. Already an open question below; now recorded where the code is.
   so the shape is settled. What is left is a content decision for the firm — which five articles
   belong on each of 104 pages — not a migration step.
 - **Auto Insurance & Accident Claims has no tab** — 13 posts carry it second, none first.
-- **`site:` in `astro.config.mjs`** — www vs apex, still unsettled.
+- ~~**`site:` in `astro.config.mjs`** — www vs apex.~~ **SETTLED: www**, and every comment
+  that called it open has been corrected — there were TEN, across `astro.config.mjs`,
+  `check-links.py` (twice), `Footer.astro`, `sitePages.ts`, `routePaths.ts`, `sitemap.astro`,
+  `AGENTS.md`, `README.md` and this file. The reason is cutover risk, not taste: www is the
+  shape the legacy site serves and therefore the shape Google holds for ~300 indexed URLs, so
+  keeping it changes no canonical that is already ranking. **Vercel must serve www as the
+  PRIMARY domain**, apex redirecting to it; reversing that without moving `site:` points every
+  canonical tag at a redirect.
 - **Two crash types on the heavy detail page** — rear-end and head-on.
 - **The three Denver crash figures are unsourced**, and `[year]` renders live in all three labels.
 - **`src/assets` holds twelve images nothing references.** Eleven practice-area photographs and

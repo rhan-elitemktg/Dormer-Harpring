@@ -138,8 +138,10 @@ const directionsUrl = firm.mapUrl;
         <li><a href={ROUTES.privacy}>Privacy Policy</a></li>
         {/* The HUMAN sitemap. This was `/sitemap.xml` — a crawler file, linked
             from a footer, and never built: 328 dead links. The XML one belongs
-            to /new-seo-setup with robots.txt, because every URL in it is
-            absolute off `site:`, which is still an open www-vs-apex call. */}
+            to /new-seo-setup with robots.txt. Its URLs are absolute off `site:`,
+            which is now settled on www, so that file is unblocked work rather
+            than a pending decision. This link stays pointed here either way:
+            a footer is for people. */}
         <li><a href={ROUTES.sitemap}>Sitemap</a></li>
         {/* The agency mark, last in the row so it sits bottom-right. External,
             so `rel="noopener" target="_blank"` — the same pair the socials and

@@ -75,9 +75,10 @@ ROOT = Path(__file__).resolve().parent.parent
 DIST = ROOT / "dist" / "client"
 
 # The site's own hostnames. An absolute href at one of these is an internal
-# link wearing a costume, and must resolve like any other. Both forms, because
-# `site:` in astro.config.mjs is an open www-vs-apex decision and this check
-# should not have an opinion about which way it lands.
+# link wearing a costume, and must resolve like any other. BOTH forms stay
+# listed even though `site:` is settled on www: the apex still resolves (it
+# redirects), and imported body copy carries whichever form its author typed.
+# An absolute link to either is internal and has to be checked as one.
 SITE_HOSTS = {"www.denvertrial.com", "denvertrial.com"}
 
 # Schemes that address something other than a page on this site.
@@ -107,8 +108,9 @@ ANCHOR = re.compile(r"<a\b[^>]*?\bhref\s*=\s*([\"'])(.*?)\1", re.I | re.S)
 # shrink instead of grow.
 #
 # /sitemap.xml is not "still dead" — nothing links it any more. It is also not
-# built: it belongs to /new-seo-setup, because every URL in it is absolute off
-# `site:` in astro.config.mjs, which is an open www-vs-apex TODO(launch).
+# built: it belongs to /new-seo-setup with robots.txt. It is no longer BLOCKED,
+# though — `site:` is settled on www — so what is left there is the work, not a
+# decision.
 KNOWN_DEAD: dict[str, str] = {}
 
 # page path -> how many href="#" that page is still allowed to carry

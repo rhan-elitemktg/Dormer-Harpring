@@ -93,10 +93,10 @@ export async function getPrivacyPolicyPage(): Promise<LegalPage> {
  *
  * NOT `sitemap.xml`, and the difference is the point. An XML sitemap is a
  * crawler file, referenced from robots.txt rather than from a footer, and every
- * URL in it is built from `site:` in astro.config.mjs — which is still an open
- * www-vs-apex decision. Generating one now would bake that guess into ~330
- * absolute URLs. It belongs to `/new-seo-setup` with robots.txt and the
- * canonical layer, which is where HANDOFF.md already files it.
+ * URL in it is built from `site:` in astro.config.mjs — now settled on www, so
+ * the ~330 absolute URLs it would generate are no longer a guess. It still
+ * belongs to `/new-seo-setup` with robots.txt and the canonical layer, which is
+ * where HANDOFF.md files it; what is left there is the work, not a decision.
  *
  * What the footer wants, and what this is, is the human page: every URL the
  * site serves, grouped, on one page a visitor can actually read.

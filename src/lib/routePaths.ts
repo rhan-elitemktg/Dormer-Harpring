@@ -55,8 +55,8 @@ export const ROUTES = {
   editorialGuidelines: "/editorial-guidelines/",
   /* The HUMAN sitemap, not `/sitemap.xml`. The footer used to link the XML file
      and nothing built it — 328 dead links. The XML one is a crawler file whose
-     every URL is absolute off `site:`, still an open www-vs-apex decision, and
-     it belongs to /new-seo-setup with robots.txt. */
+     every URL is absolute off `site:` — settled on www — and it belongs to
+     /new-seo-setup with robots.txt. */
   sitemap: "/sitemap/",
 
   /* THE ONE ENDPOINT, not a page — no HTML is served here and nothing links to
