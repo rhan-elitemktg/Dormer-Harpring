@@ -8,9 +8,12 @@
 // $2.1M" here and "Slip & Fall / $250K offered / $2.1M" there. They are the
 // same cases and belong in one document each; which wording is right is the
 // firm's call, so nothing is reconciled yet.
-import { pt, type PortableTextBlock } from "./portableText";
+import type { PortableTextBlock } from "./portableText";
 import { sanityClient } from "sanity:client";
-import { CASE_RESULTS_QUERY } from "../sanity/lib/queries";
+import {
+  CASE_RESULTS_QUERY,
+  RESULTS_PAGE_QUERY,
+} from "../sanity/lib/queries";
 import { once, required } from "../sanity/lib/fetch";
 
 export interface CaseResult {
@@ -55,14 +58,8 @@ export interface CaseResultsPage {
 }
 
 export async function getCaseResultsPage(): Promise<CaseResultsPage> {
-  return {
-    eyebrow: "Case results",
-    title: "Outstanding results.",
-    lede: pt(
-      "Verdicts and settlements our team has obtained for injured Coloradans — " +
-        "including cases other firms turned down or dropped. Prior results do not " +
-        "guarantee a similar outcome."
-    ),
-    moreLabel: "Load more results",
-  };
+  const copy = await once("resultsPage", async () =>
+    required(await sanityClient.fetch(RESULTS_PAGE_QUERY), "Results", "Pages")
+  );
+  return { ...copy, lede: copy.lede as PortableTextBlock[] };
 }

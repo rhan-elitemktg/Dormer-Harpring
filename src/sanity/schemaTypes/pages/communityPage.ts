@@ -22,6 +22,59 @@ export const communityPage = defineType({
   icon: HeartFilledIcon,
   fields: [
     defineField({
+      name: "eyebrow",
+      type: "string",
+      description: "The small line above the page title.",
+      validation: (rule) => rule.required(),
+    }),
+    defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
+    defineField({
+      name: "lede",
+      type: "simpleText",
+      description: "The sentence under the title.",
+      validation: (rule) => rule.required(),
+    }),
+    /*
+     * THE PARTNER CARDS ARE RENDERED TWICE ON THIS PAGE, under two headings —
+     * once as the volunteer grid and once as the logo strip at the foot. So the
+     * list is one array and the two headings are two fields, which is the same
+     * split `sharedSections` makes across pages, applied within one.
+     */
+    defineField({
+      name: "volunteer",
+      title: "Volunteer grid heading",
+      type: "object",
+      description: "Above the partner cards.",
+      fields: [
+        defineField({ name: "eyebrow", type: "string", validation: (rule) => rule.required() }),
+        defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
+        defineField({ name: "ctaLabel", type: "string", validation: (rule) => rule.required() }),
+      ],
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: "sponsorshipsHeading",
+      title: "Sponsorships heading",
+      type: "object",
+      options: { columns: 2 },
+      description: "Above the sponsorship list.",
+      fields: [
+        defineField({ name: "eyebrow", type: "string", validation: (rule) => rule.required() }),
+        defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
+      ],
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: "partnersLabel",
+      title: "Logo strip label",
+      type: "string",
+      description:
+        "The line above the logos at the foot of the page — the SAME organisations as the " +
+        "volunteer grid above, shown as marks rather than cards.",
+      validation: (rule) => rule.required(),
+    }),
+
+    defineField({
       name: "partners",
       title: "Community Partners",
       type: "array",

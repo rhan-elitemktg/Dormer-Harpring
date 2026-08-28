@@ -1,24 +1,26 @@
-// SANITY SWAP POINT — the three utility pages: privacy policy, sitemap, 404.
+// The three utility pages: privacy policy, sitemap, 404.
 //
-// `src/sanity/lib/sitePages.ts` will be: three async functions, each returning
-// the projection of a page singleton. Bodies become `sanityClient.fetch(...)`
-// and no call site moves.
+// SANITY: three `sitePage` documents at fixed ids — `privacy`, `sitemap`,
+// `notFound`. One type, three singletons; the note on the schema type has why
+// it is one type and why they are still pinned rather than a collection.
 //
-// WHY ONE MODULE FOR THREE PAGES. They are the same document type in every way
-// that matters — a title, a lede, a body, no taxonomy above them and no
-// collection beneath them — and each is a singleton. Splitting them into three
-// files would put three one-export modules beside each other. In Sanity this is
-// one `sitePage` type with three documents, or three singletons in one desk
-// group; either way they arrive together.
+// WHY ONE MODULE FOR THREE PAGES. They are the same document in every way that
+// matters — a title, a lede, a body, no taxonomy above them and no collection
+// beneath — and each is a singleton. Splitting them into three files would put
+// three one-export modules beside each other.
 //
 // NOTE none of these carries an `eyebrow` the way `PracticeAreaPageCopy` does.
 // The practice-area template's eyebrow is the firm's tagline, marketing copy
 // standing in for a taxonomy. On a privacy policy it would read as a slogan
 // stapled to a legal notice, and on a 404 it would be noise above an apology.
-import { pt } from "./portableText";
+import { sanityClient } from "sanity:client";
+import {
+  NOT_FOUND_PAGE_QUERY,
+  PRIVACY_PAGE_QUERY,
+  SITEMAP_PAGE_QUERY,
+} from "../sanity/lib/queries";
+import { once, required } from "../sanity/lib/fetch";
 import type { PortableTextBlock } from "./portableText";
-import { getFirmDetails } from "./site";
-import { ROUTES } from "../lib/routePaths";
 
 export interface SitePage {
   title: string;
@@ -39,20 +41,23 @@ export interface LegalPage extends SitePage {
  * `https://www.denvertrial.com/privacy-policy/` (WordPress page id 1061).
  *
  * THREE DELIBERATE DEPARTURES FROM THE SOURCE, all of them structural or
- * factual rather than editorial — the wording is the firm's own throughout:
+ * factual rather than editorial — the wording is the firm's own throughout.
+ * They are recorded here rather than in the Studio because they are facts about
+ * the MIGRATION, not instructions to an editor; the stored document is the
+ * corrected text, and re-transcribing from the live page would undo all three:
  *
- *  1. THE PHONE NUMBER IS READ FROM `firmDetails`, NOT TRANSCRIBED. The live
- *     page closes on "(303) 747-4404", which is not the number the firm
- *     publishes — the same third number the trampoline-waiver article carries,
- *     and one of the six the imported bodies were normalised off. site.ts is
- *     the only place a phone number may live.
+ *  1. THE PHONE NUMBER IS THE FIRM'S CURRENT ONE. The live page closes on
+ *     "(303) 747-4404", which is not the number the firm publishes — the same
+ *     third number the trampoline-waiver article carries, and one of the six
+ *     the imported bodies were normalised off. `scripts/check-phone.py` fails
+ *     the build if any retired number reappears anywhere, including here.
  *  2. THE SOURCE'S OWN <h2> IS DROPPED and its three <h3>s promoted to <h2>.
  *     The live body opens on "Privacy Policy for Personal Injury Law Firm
  *     Dormer Harpring", which is the page title said twice — WordPress renders
  *     no H1 from `content.rendered`, so on the live page that h2 IS the
  *     heading. Here the template renders the title as the H1, so keeping it
  *     would print the same sentence twice and start the document at h3.
- *  3. `updatedAt` is WordPress's `modified` (2026-01-20), not its `date`
+ *  3. `updated.at` is WordPress's `modified` (2026-01-20), not its `date`
  *     (2019-01-17). Same call the practice-area template makes and for the same
  *     reason: a 2019 stamp on a policy revised this year reads as stale rather
  *     than settled.
@@ -61,56 +66,25 @@ export interface LegalPage extends SitePage {
  * standards — no CCPA/GDPR section, no cookie disclosure, no retention period,
  * no contact route for a data request. The site also loads third-party tags
  * (README's row) and embeds a Google Map that sets cookies on load, neither of
- * which this text mentions. Transcribed as-is because rewriting a law firm's
+ * which this text mentions. Shipped as-is because rewriting a law firm's
  * privacy policy is the firm's call, not this build's — but it should be
  * reviewed before launch rather than shipped because it was already there.
  */
 export async function getPrivacyPolicyPage(): Promise<LegalPage> {
-  const firm = await getFirmDetails();
+  const page = await once("sitePage:privacy", async () =>
+    required(await sanityClient.fetch(PRIVACY_PAGE_QUERY), "Privacy Policy", "Pages → Utility pages")
+  );
 
+  const updated = required(page.updated, "Privacy Policy's last-updated stamp");
   return {
-    title: "Privacy Policy",
-    updatedAt: "2026-01-20",
-    updatedLabel: "Last updated",
-    body: pt(
-      "This page explains the privacy policy and practices for Dormer Harpring, a " +
-        "personal injury law firm located in Denver, Colorado. We do not sell, distribute " +
-        "or share personally identifiable information with third parties unless the law " +
-        "requires us to do so. We always work diligently to ensure and prevent the " +
-        "unauthorized sale or use of your personal information.",
-
-      "## Personal Information Collection",
-      "We may use this website to collect certain personally identifiable information. " +
-        "This may include your name, contact information, and other data. We may also " +
-        "collect additional personal or non-personal information about you in the future " +
-        "or collect certain information about other visitors.",
-      "We may record your location, IP address, the URLs of the website that directed you " +
-        "to our site, the URLs of the pages you visit on our website, the dates and times " +
-        "of each visit, and/or information about the computer hardware and software you " +
-        "use, as well as other information that may be available. Dormer Harpring uses " +
-        "this information only for the operation and maintenance of our website and also " +
-        "to provide general statistics regarding the use of our services.",
-
-      "## Details About the Use of Collected Information",
-      "Dormer Harpring may collect and use your personal information as part of the " +
-        "operation of our website. We also use this information to deliver the information " +
-        "or service that you request. We also use it to improve your browsing experience " +
-        "and the experience of other visitors by personalizing the site. We may use " +
-        "information about the content you visit and services you use alone or in " +
-        "conjunction with information collected from other users. This helps us tailor our " +
-        "services to better suit the needs and interests of our users.",
-      "At Dormer Harpring, we do not sell, rent, or lease any of our customer lists or " +
-        "information to third parties. However, we reserve the right to disclose any " +
-        "information that we obtain through our website to appropriate authorities, " +
-        "without notice, if required by law or any governmental agency.",
-
-      "## Security Disclaimer for Our Website",
-      "Information sent through contact forms and emails to Dormer Harpring may not be " +
-        "secure. Therefore, you choose to share this information at your own risk if you " +
-        "submit anything via our website. If you would like to schedule an appointment, " +
-        `you can always call us at [${firm.phone}](tel:${firm.phoneE164}) for immediate ` +
-        "assistance."
-    ),
+    title: page.title,
+    body: page.body as PortableTextBlock[],
+    // Coalesced on their own lines rather than in a cast: the schema leaves both
+    // optional because the other two `sitePage` documents have no stamp, and a
+    // policy that silently printed "Last updated " with no date would be worse
+    // than one that fails the build.
+    updatedAt: required(updated.at, "Privacy Policy's last-updated date"),
+    updatedLabel: required(updated.label, "Privacy Policy's last-updated label"),
   };
 }
 
@@ -127,21 +101,17 @@ export async function getPrivacyPolicyPage(): Promise<LegalPage> {
  * What the footer wants, and what this is, is the human page: every URL the
  * site serves, grouped, on one page a visitor can actually read.
  *
- * The GROUPS are not stored here. They are composed in `src/pages/sitemap.astro`
+ * THE GROUPS ARE NOT STORED. They are composed in `src/pages/sitemap.astro`
  * from the getters that already own each collection — the practice-area
  * directory, the blog feed, the footer nav — because a second hand-maintained
  * list of every page on the site is a list that goes stale the first time
- * anything is added. Only the page's own copy lives here.
+ * anything is added. Only the page's own copy is a field.
  */
 export async function getSitemapPage(): Promise<SitePage> {
-  return {
-    title: "Sitemap",
-    lede:
-      "Every page on this site, in one place. If you are looking for something " +
-      "specific and cannot find it here, call us — we would rather point you at it " +
-      "than have you keep hunting.",
-    body: [],
-  };
+  const page = await once("sitePage:sitemap", async () =>
+    required(await sanityClient.fetch(SITEMAP_PAGE_QUERY), "Sitemap", "Pages → Utility pages")
+  );
+  return { title: page.title, lede: page.lede ?? undefined, body: page.body as PortableTextBlock[] };
 }
 
 export interface NotFoundPage extends SitePage {
@@ -169,38 +139,14 @@ export interface NotFoundPage extends SitePage {
  * posts, in that order.
  */
 export async function getNotFoundPage(): Promise<NotFoundPage> {
+  const page = await once("sitePage:notFound", async () =>
+    required(await sanityClient.fetch(NOT_FOUND_PAGE_QUERY), "404", "Pages → Utility pages")
+  );
   return {
-    title: "We couldn't find that page",
-    lede:
-      "The link may be out of date, or the address may have a typo in it. Nothing " +
-      "is lost — here is where most people were heading.",
-    body: [],
-    linksTitle: "Try one of these",
-    links: [
-      {
-        _key: "practice-areas",
-        label: "Practice areas",
-        description: "Every case type we handle, by city.",
-        href: ROUTES.practiceAreas,
-      },
-      {
-        _key: "blog",
-        label: "Articles & insights",
-        description: "Plain-English answers to the questions we get asked most.",
-        href: ROUTES.blog,
-      },
-      {
-        _key: "attorneys",
-        label: "Meet our attorneys",
-        description: "The people who would handle your case.",
-        href: ROUTES.attorneys,
-      },
-      {
-        _key: "contact",
-        label: "Free consultation",
-        description: "Tell us what happened. No obligation.",
-        href: ROUTES.contact,
-      },
-    ],
+    title: page.title,
+    lede: page.lede ?? undefined,
+    body: page.body as PortableTextBlock[],
+    linksTitle: required(page.linksTitle, "the 404's heading above its links"),
+    links: page.links,
   };
 }

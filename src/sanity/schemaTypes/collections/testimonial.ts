@@ -39,7 +39,9 @@ export const testimonial = defineType({
      * of its result stories into a video review by this. Same shape as the
      * award key — see that type for what happened when it was dropped.
      *
-     * TODO(sanity): becomes a real `reference` when carAccidents.ts moves.
+     * PHASE 4f MADE IT A REAL `reference`. The key survives — the projection
+     * resolves the reference back to it, because the card reads a key — but a
+     * rename can no longer leave that card pointing at nothing.
      */
     defineField({
       name: "key",

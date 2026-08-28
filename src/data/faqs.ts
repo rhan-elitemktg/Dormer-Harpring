@@ -15,11 +15,15 @@
 // headings or lists inside it would not be valid there. If they ever need rich
 // text, `lib/portableText.ts` gets a toPlainText() for the JSON-LD side.
 import type { ImageMetadata } from "astro";
+import type { SanityImageSource } from "@sanity/image-url";
 import { sanityClient } from "sanity:client";
-import { CAR_ACCIDENT_FAQS_QUERY, HOME_FAQS_QUERY } from "../sanity/lib/queries";
+import {
+  CAR_ACCIDENT_FAQ_SECTION_QUERY,
+  CAR_ACCIDENT_FAQS_QUERY,
+  HOME_FAQ_SECTION_QUERY,
+  HOME_FAQS_QUERY,
+} from "../sanity/lib/queries";
 import { once, required } from "../sanity/lib/fetch";
-import seanDormer from "../assets/attorneys/attorney-2.jpg";
-import { ROUTES } from "../lib/routePaths";
 // PLACEHOLDER_VIDEO is no longer imported here: the ids are fields in the
 // Studio now, and every FAQ still carries the stand-in one as DATA rather
 // than as a constant. Grep PLACEHOLDER_VIDEO to find the slots that still
@@ -48,28 +52,20 @@ export interface FaqSection {
     body: string;
     ctaLabel: string;
     ctaHref: string;
-    portrait: ImageMetadata;
+    /** A Sanity asset since Phase 4 — a portrait inside a card is editor
+     *  content, where a page-header photograph or a band background is not.
+     *  `ImageMetadata` stays in the union because a local import is still a
+     *  valid thing to hand `Picture`, and narrowing here would push the
+     *  widening onto the component instead. */
+    portrait: ImageMetadata | SanityImageSource;
     portraitAlt: string;
   };
 }
 
 export async function getFaqSection(): Promise<FaqSection> {
-  return {
-    eyebrow: "What you should know",
-    title: "Answers, straight from your attorney.",
-    lede:
-      "The questions we hear most — expand any one to read the answer and watch a " +
-      "short video from the attorney who would handle your case.",
-    answerCtaLabel: "Speak with a lawyer",
-    ask: {
-      title: "Have a question you don't see?",
-      body: "We're happy to help. Reach out and Sean will point you in the right direction.",
-      ctaLabel: "Get in touch",
-      ctaHref: ROUTES.contact,
-      portrait: seanDormer,
-      portraitAlt: "Sean Dormer, Founding Partner",
-    },
-  };
+  return once("homePage:faqSection", async () =>
+    required(await sanityClient.fetch(HOME_FAQ_SECTION_QUERY), "Homepage", "Pages")
+  );
 }
 
 /**
@@ -112,16 +108,13 @@ export async function getCarAccidentFaqs(): Promise<Faq[]> {
  * navigating away mid-page.
  */
 export async function getCarAccidentFaqSection(anchor: string): Promise<FaqSection> {
-  const home = await getFaqSection();
-  return {
-    ...home,
-    eyebrow: "What you should know",
-    title: "Other questions people ask us",
-    lede:
-      "Expand any question to read the answer and watch a short video from the attorney " +
-      "who would handle your case.",
-    ask: { ...home.ask, ctaHref: anchor },
-  };
+  const [home, own] = await Promise.all([
+    getFaqSection(),
+    once("carAccidentsPage:faqSection", async () =>
+      required(await sanityClient.fetch(CAR_ACCIDENT_FAQ_SECTION_QUERY), "Car Accidents", "Pages")
+    ),
+  ]);
+  return { ...home, ...own, ask: { ...home.ask, ctaHref: anchor } };
 }
 
 export async function getHomeFaqs(): Promise<Faq[]> {

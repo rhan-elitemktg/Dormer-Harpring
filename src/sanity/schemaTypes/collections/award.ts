@@ -29,8 +29,12 @@ export const award = defineType({
      * A `slug` rather than a plain string for the character set and the
      * uniqueness control; it is not a URL and nothing routes on it.
      *
-     * TODO(sanity): when `carAccidents.ts` moves, `badges[].awardKey` becomes a
-     * real `reference` to this document and this field stops being the join.
+     * PHASE 4f MADE THE CROSS-REFERENCE A REAL `reference`, so the Car Accidents
+     * page can no longer name an award that is not there. The key survives that
+     * change and is still content: the PROJECTION resolves the reference back
+     * to `key.current`, because the components read a key and the whole
+     * migration rests on no call site moving. What it stops being is the only
+     * thing standing between a rename and the wrong badge.
      */
     defineField({
       name: "key",

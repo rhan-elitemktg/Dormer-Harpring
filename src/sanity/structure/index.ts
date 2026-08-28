@@ -38,6 +38,8 @@ import { PinIcon } from "@sanity/icons/Pin";
 import { HomeIcon } from "@sanity/icons/Home";
 import { HeartFilledIcon } from "@sanity/icons/HeartFilled";
 import { WarningOutlineIcon } from "@sanity/icons/WarningOutline";
+import { InfoOutlineIcon } from "@sanity/icons/InfoOutline";
+import { CheckmarkCircleIcon } from "@sanity/icons/CheckmarkCircle";
 import { TagIcon } from "@sanity/icons/Tag";
 import { DocumentTextIcon } from "@sanity/icons/DocumentText";
 import { ThLargeIcon } from "@sanity/icons/ThLarge";
@@ -65,23 +67,85 @@ function singleton(
 }
 
 /**
+ * ONE OF THREE DOCUMENTS THAT SHARE A TYPE.
+ *
+ * `singleton()` above pins a type to an id of the same name, which is right
+ * when the two are one thing. The utility pages are three documents of ONE type
+ * (`sitePage`), so the id and the type differ and the schema name cannot stand
+ * in for both.
+ */
+function fixedDocument(
+  S: StructureBuilder,
+  type: string,
+  id: string,
+  title: string,
+  icon?: ComponentType
+) {
+  return S.listItem()
+    .title(title)
+    .icon(icon)
+    .id(id)
+    .child(S.document().schemaType(type).documentId(id).title(title));
+}
+
+/**
  * PAGES — one per route.
  *
- * `[type, title, icon?]`. The two template singletons (`blogPostTemplate`,
- * `practiceAreaTemplate`) belong here rather than in Settings: they hold the
- * chrome that appears ON a page — the fact-check band's wording, the sidebar
- * headings — which is exactly the copy the SEO team will want to reach.
+ * `[type, title, icon?]`.
  *
  * Three arrived in Phase 2f holding only the lists that had been filed as
  * collections without being shared by anything; Phase 3d added Practice Areas
- * for the directory and the featured grid. Their copy is Phase 4, and the rest
- * of the routes with it — this is four of an eventual sixteen.
+ * for the directory and the featured grid. Phase 4 gave all four their COPY and
+ * added the rest of the routes.
+ *
+ * IN THE ORDER OF THE MAIN NAV, then the pages the nav does not reach. An
+ * editor looking for "the About page" reads down this list the way a visitor
+ * reads across the header; alphabetical would put Thank You between Results and
+ * Testimonials and Contact above everything.
+ *
+ * FOURTEEN OF AN EVENTUAL FIFTEEN. The two TEMPLATE singletons at the foot hold
+ * the chrome every post and every service page renders — the contents box's
+ * heading, the byline's labels, the fact-check tag — and they belong here rather
+ * than in Settings for exactly that reason: it is copy on a page, which is what
+ * the SEO team reaches for. Still to come: the three utility pages (privacy,
+ * sitemap, 404), which arrive together as one `sitePage` group.
  */
 const PAGES: [string, string, ComponentType?][] = [
   ["homePage", "Homepage", HomeIcon],
+  ["aboutPage", "About", InfoOutlineIcon],
+  ["teamPage", "Meet Our Attorneys", UsersIcon],
   ["practiceAreasPage", "Practice Areas", ThLargeIcon],
-  ["communityPage", "Community Involvement", HeartFilledIcon],
   ["carAccidentsPage", "Car Accidents", WarningOutlineIcon],
+  ["resultsPage", "Results", CaseIcon],
+  ["testimonialsPage", "Testimonials", CommentIcon],
+  ["coCounselPage", "Co-Counsel", UsersIcon],
+  ["communityPage", "Community Involvement", HeartFilledIcon],
+  ["blogIndexPage", "Blog index", DocumentTextIcon],
+  ["contactPage", "Contact", EnvelopeIcon],
+  ["thankYouPage", "Thank You", CheckmarkCircleIcon],
+  // The two TEMPLATES last, after the routes. They are not pages an editor can
+  // visit — they are the chrome every post and every service page renders — so
+  // they sit under the list rather than inside it.
+  ["blogPostTemplate", "Blog post template", DocumentTextIcon],
+  ["practiceAreaTemplate", "Practice area template", CaseIcon],
+];
+
+/**
+ * THE THREE UTILITY PAGES — one `sitePage` document each, at fixed ids.
+ *
+ * They open into a sub-list rather than sitting in `PAGES` beside the routes,
+ * because a client looking for "the About page" should not have to read past a
+ * 404 to find it. Same singleton machinery: each is pinned to its own id, so
+ * the type never appears as a generic list and a fourth cannot be created —
+ * there is no route that would serve one.
+ *
+ * `[id, title]`. The id is also the document's `kind`, which is what the form
+ * keys its two conditional fields on.
+ */
+const UTILITY_PAGES: [string, string][] = [
+  ["privacy", "Privacy Policy"],
+  ["sitemap", "Sitemap"],
+  ["notFound", "404"],
 ];
 
 /**
@@ -277,7 +341,14 @@ const SETTINGS: [string, string, ComponentType?][] = [
  * its fixed id and once as "all documents of this type", and edits to the
  * second one never reach the site.
  */
-export const SINGLETON_TYPES = [...PAGES, ...SETTINGS].map(([type]) => type);
+export const SINGLETON_TYPES = [
+  ...[...PAGES, ...SETTINGS].map(([type]) => type),
+  // `sitePage` is three fixed documents rather than one, but the reason it must
+  // stay out of a generic list is identical: an editor seeing "all utility
+  // pages" alongside the three pinned ones would edit a fourth copy that no
+  // route reads.
+  "sitePage",
+];
 
 export const structure: StructureResolver = (S, context) => {
   const placed = new Set([...PAGES, ...COLLECTIONS, ...SETTINGS].map(([type]) => type));
@@ -305,7 +376,22 @@ export const structure: StructureResolver = (S, context) => {
         .child(
           S.list()
             .title("Pages")
-            .items(PAGES.map(([type, title, icon]) => singleton(S, type, title, icon)))
+            .items([
+              ...PAGES.map(([type, title, icon]) => singleton(S, type, title, icon)),
+              S.listItem()
+                .title("Utility pages")
+                .icon(DocumentIcon)
+                .id("utility-pages")
+                .child(
+                  S.list()
+                    .title("Utility pages")
+                    .items(
+                      UTILITY_PAGES.map(([id, title]) =>
+                        fixedDocument(S, "sitePage", id, title, DocumentIcon)
+                      )
+                    )
+                ),
+            ])
         ),
 
       S.listItem()

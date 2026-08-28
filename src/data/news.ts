@@ -13,7 +13,11 @@
 import type { ImageMetadata } from "astro";
 import type { SanityImageSource } from "@sanity/image-url";
 import { sanityClient } from "sanity:client";
-import { INSIGHT_TEASERS_QUERY, PRESS_MENTIONS_QUERY } from "../sanity/lib/queries";
+import {
+  HOME_FEED_SECTION_QUERY,
+  INSIGHT_TEASERS_QUERY,
+  PRESS_MENTIONS_QUERY,
+} from "../sanity/lib/queries";
 import { once, required } from "../sanity/lib/fetch";
 
 // THE ASSET IMPORTS THAT USED TO SIT HERE ARE GONE — the getters have read
@@ -50,25 +54,9 @@ export interface FeedSection {
 }
 
 export async function getFeedSection(): Promise<FeedSection> {
-  return {
-    tabs: { news: "In the News", insights: "Insights & Resources" },
-    news: {
-      eyebrow: "Press & recognition",
-      title: "In the news.",
-      lede:
-        "Recent press coverage and recognition of our attorneys and the results we " +
-        "win for Denver families.",
-      ctaLabel: "View all news",
-    },
-    insights: {
-      eyebrow: "Learn your rights",
-      title: "Insights & resources.",
-      lede:
-        "Plain-English articles to guide you through your options and help you make " +
-        "informed decisions after an accident.",
-      ctaLabel: "View more helpful articles",
-    },
-  };
+  return once("homePage:feedSection", async () =>
+    required(await sanityClient.fetch(HOME_FEED_SECTION_QUERY), "Homepage", "Pages")
+  );
 }
 
 /** TODO(content): every `href` is a placeholder — the comp points them all at #news. */

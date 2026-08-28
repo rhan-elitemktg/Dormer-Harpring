@@ -127,8 +127,9 @@ export const CORE_VALUES_QUERY = defineQuery(`*[_type == "coreValue"] | order(or
 /**
  * Headings for bands that appear on more than one page.
  *
- * Only two qualify — see the note on the schema type. A band whose heading
- * differs per page is that page's content, not this document's.
+ * Only THREE qualify — see the note on the schema type, and note the sweep that
+ * found the third, which a naming-convention grep had been missing. A band whose
+ * heading differs per page is that page's content, not this document's.
  */
 export const SHARED_SECTIONS_QUERY = defineQuery(
   `*[_type == "sharedSections" && _id == "sharedSections"][0]{
@@ -140,7 +141,15 @@ export const SHARED_SECTIONS_QUERY = defineQuery(
     quote,
     ctaLabel,
     signature{ name, role, attorneyKey, portrait }
-  }
+  },
+  whyUs{
+    eyebrow,
+    title{ lead, accent },
+    lede,
+    "points": coalesce(points[]{ _key, title, body }, []),
+    ctaLabel
+  },
+  sidebarForm{ title, lede, submitLabel, disclaimer }
 }`
 );
 
@@ -663,5 +672,528 @@ export const ATTORNEY_RAIL_QUERY = defineQuery(
   role,
   "portrait": photo,
   videoId
+}`
+);
+
+/*
+ * ─────────────────────────────────────────────────────────────────────────────
+ * PAGE COPY — Phase 4.
+ *
+ * The lists above moved in Phase 2f and 3d; these are the STRINGS around them.
+ * Every projection here returns exactly the shape its interface already had,
+ * because that is what makes the phase output-neutral: a field that is a
+ * `string` in the data layer stays a `string` here, and only the fields already
+ * typed as Portable Text are Portable Text. Widening one of those to rich text
+ * would add a wrapper element to the markup and cost the byte-diff its meaning.
+ * ─────────────────────────────────────────────────────────────────────────────
+ */
+
+/**
+ * The homepage's own copy — the four sections `data/home.ts` owns.
+ *
+ * ONE QUERY FOR FOUR GETTERS, the way `practiceAreasDocument()` already serves
+ * two. `once()` makes it one round trip per build either way; what this buys is
+ * one projection to keep in step with four interfaces instead of four.
+ *
+ * The homepage's OTHER copy is not in here, and deliberately so: the practice
+ * band belongs to `data/practiceAreas.ts`, the FAQ band to `data/faqs.ts`, the
+ * feed to `data/news.ts` and the mosaic heading to `data/community.ts`, because
+ * each of those modules already owns the list underneath its heading. A query
+ * that spanned all of them would have no owning module — which is the same
+ * reason Phase 2f kept one query per array.
+ */
+export const HOME_COPY_QUERY = defineQuery(
+  `*[_type == "homePage" && _id == "homePage"][0]{
+  hero{
+    eyebrow,
+    headline,
+    lede,
+    primaryCta{ label, href },
+    videoCta{ label, video{ provider, id } }
+  },
+  "heroStats": coalesce(heroStats[]{ _key, big, label }, []),
+  firmIntro{
+    title,
+    tagline,
+    body,
+    helpTitle,
+    "helpPoints": coalesce(helpPoints[]{ _key, lead, text }, []),
+    videoLabel,
+    video{ provider, id },
+    quote{ text, name, role },
+    aside{ title, text, ctaLabel }
+  },
+  promise{
+    eyebrow,
+    title,
+    "slides": coalesce(slides[]{ _key, label, body }, []),
+    ctaLabel
+  }
+}`
+);
+
+/**
+ * The practice band's heading, and the reassurance under its cards.
+ *
+ * Two getters, one projection, one round trip — `getPracticeSection()` and
+ * `getPracticePromise()` are read side by side on the one page that renders
+ * them.
+ */
+export const HOME_PRACTICE_SECTION_QUERY = defineQuery(
+  `*[_type == "homePage" && _id == "homePage"][0]{
+  practiceSection{
+    eyebrow,
+    title,
+    lede,
+    tabsLabel,
+    catastrophicTitle,
+    ask{ text, cta }
+  },
+  practicePromise
+}`
+);
+
+/**
+ * The FAQ band's copy.
+ *
+ * `ask.portrait` is an ASSET now rather than a local import — a portrait inside
+ * a card, which is the editor-content side of the line this project drew in
+ * Phase 2. Page-header photographs and band backgrounds stay local imports.
+ *
+ * The Car Accidents page renders this same band under its own heading and with
+ * its own anchor; `getCarAccidentFaqSection()` overrides three fields on top of
+ * this one rather than storing a second copy of the parts that do not change.
+ */
+export const HOME_FAQ_SECTION_QUERY = defineQuery(
+  `*[_type == "homePage" && _id == "homePage"][0].faqSection{
+  eyebrow,
+  title,
+  lede,
+  answerCtaLabel,
+  ask{ title, body, ctaLabel, ctaHref, portrait, portraitAlt }
+}`
+);
+
+/** The two-tab feed's headings — one per tab, matching the two lists below. */
+export const HOME_FEED_SECTION_QUERY = defineQuery(
+  `*[_type == "homePage" && _id == "homePage"][0].feedSection{
+  tabs{ news, insights },
+  news{ eyebrow, title, lede, ctaLabel },
+  insights{ eyebrow, title, lede, ctaLabel }
+}`
+);
+
+/** The heading above the community mosaic. */
+export const HOME_COMMUNITY_SECTION_QUERY = defineQuery(
+  `*[_type == "homePage" && _id == "homePage"][0].communitySection{
+  eyebrow, title, lede, ctaLabel
+}`
+);
+
+/*
+ * THE EIGHT ROUTE SINGLETONS — Phase 4b.
+ *
+ * One query per page, and each returns its interface's shape exactly. Three
+ * things are DELIBERATELY ABSENT from every one of them, and all three are the
+ * same call made three times:
+ *
+ *   the page-header photograph and its alt   still a local import — `PageHeader`
+ *                                            art-directs through a hand-built
+ *                                            <picture>, so making it editable is
+ *                                            a component change
+ *   the office address, phone, map           read from `firmDetails` at render
+ *                                            time; copy moves, values stay derived
+ *   the consultation form's copy             `contactSettings`, on twelve of the
+ *                                            fourteen comps
+ */
+
+/** /about — nine bands' worth of copy, minus the six it borrows from elsewhere. */
+export const ABOUT_PAGE_QUERY = defineQuery(
+  `*[_type == "aboutPage" && _id == "aboutPage"][0]{
+  eyebrow,
+  title,
+  lede,
+  ctaLabel,
+  ctaNote,
+  whoWeAre{ eyebrow, title, body, ctaLabel, ctaHref },
+  quote{ text, attribution },
+  team{ eyebrow, title, ctaLabel, ctaHref },
+  reviews{ eyebrow, title },
+  oneShot{ eyebrow, title, body },
+  expect{
+    title,
+    "promises": coalesce(promises[]{ _key, title, body, iconKey }, []),
+    "milestones": coalesce(milestones[]{ _key, tag, title, body }, [])
+  }
+}`
+);
+
+/** /meet-our-attorneys — the page's copy. The roster is `TEAM_QUERY`. */
+export const TEAM_PAGE_QUERY = defineQuery(
+  `*[_type == "teamPage" && _id == "teamPage"][0]{
+  eyebrow,
+  title,
+  lede,
+  partners{ eyebrow, title },
+  team{ eyebrow, title }
+}`
+);
+
+/**
+ * /contact.
+ *
+ * `find.lede` is the part AFTER the address, not the whole line — the address
+ * is prepended in the getter, from `firmDetails`. Storing the rendered sentence
+ * would publish the address twice from two documents.
+ */
+export const CONTACT_PAGE_QUERY = defineQuery(
+  `*[_type == "contactPage" && _id == "contactPage"][0]{
+  eyebrow,
+  title,
+  lede,
+  find{ eyebrow, title, lede }
+}`
+);
+
+/** /thank-you. `noIndex`, and reachable only by submitting the form. */
+export const THANK_YOU_PAGE_QUERY = defineQuery(
+  `*[_type == "thankYouPage" && _id == "thankYouPage"][0]{
+  eyebrow,
+  title,
+  lede,
+  panel{
+    eyebrow,
+    title,
+    lede,
+    "reassurances": coalesce(reassurances, []),
+    "ctas": coalesce(ctas[]{ _key, label, href }, [])
+  }
+}`
+);
+
+/** /testimonials — two band headings over records the homepage also renders. */
+export const TESTIMONIALS_PAGE_QUERY = defineQuery(
+  `*[_type == "testimonialsPage" && _id == "testimonialsPage"][0]{
+  eyebrow,
+  title,
+  lede,
+  ctaLabel,
+  ctaNote,
+  videos{ eyebrow, title, lede },
+  written{ eyebrow, title, lede, moreLabel }
+}`
+);
+
+/** /results — the copy around the case-result grid. */
+export const RESULTS_PAGE_QUERY = defineQuery(
+  `*[_type == "resultsPage" && _id == "resultsPage"][0]{
+  eyebrow, title, lede, moreLabel
+}`
+);
+
+/** /co-counsel — the pitch to other lawyers, and its own referral form's copy. */
+export const CO_COUNSEL_PAGE_QUERY = defineQuery(
+  `*[_type == "coCounselPage" && _id == "coCounselPage"][0]{
+  eyebrow,
+  title,
+  lede,
+  ctaLabel,
+  ctaNote,
+  partnership{ eyebrow, title, intro, callout, terms },
+  results{ eyebrow, title, lede },
+  areas{
+    eyebrow,
+    title,
+    ctaLabel,
+    "items": coalesce(items[]{ _key, label, href }, [])
+  },
+  form{ title, lede, requiredNote, submitLabel, disclaimer }
+}`
+);
+
+/** /news — the blog index's copy. Six of the eight fields are button labels. */
+export const BLOG_INDEX_PAGE_QUERY = defineQuery(
+  `*[_type == "blogIndexPage" && _id == "blogIndexPage"][0]{
+  eyebrow,
+  title,
+  lede,
+  categoryLabel,
+  allLabel,
+  featuredBadge,
+  readMoreLabel,
+  loadMoreLabel,
+  emptyLabel
+}`
+);
+
+/*
+ * THE TWO ARTICLE TEMPLATES — Phase 4c.
+ *
+ * The chrome around a post and around a service page: 186 pages and 104, plus
+ * the three utility pages that borrow the second template's shell.
+ *
+ * NEITHER RETURNS ITS SIDEBAR FORM. That copy is identical on all 290 and lives
+ * once on `sharedSections`; both getters read it from there. Neither returns the
+ * fact-check SENTENCE either — that names the reviewing attorney and links to
+ * their bio, so it stays derived from the roster. See the note on the
+ * `blogPostTemplate` schema type.
+ */
+
+/** Every blog post's labels. */
+export const BLOG_POST_TEMPLATE_QUERY = defineQuery(
+  `*[_type == "blogPostTemplate" && _id == "blogPostTemplate"][0]{
+  contentsLabel,
+  categoriesLabel,
+  relatedSidebarLabel,
+  relatedTitle,
+  factCheckLabel,
+  readMoreLabel
+}`
+);
+
+/**
+ * Every practice-area page's labels.
+ *
+ * No `author` in the meta row: the firm writes all 104 and its name and link
+ * come from Firm Details, so only the LABELS are stored.
+ */
+export const PRACTICE_AREA_TEMPLATE_QUERY = defineQuery(
+  `*[_type == "practiceAreaTemplate" && _id == "practiceAreaTemplate"][0]{
+  eyebrow,
+  meta{ writtenByLabel, updatedLabel, postedLabel },
+  contentsLabel,
+  relatedSidebarLabel,
+  faqsTitle,
+  factCheckLabel
+}`
+);
+
+/*
+ * THE THREE UTILITY PAGES — Phase 4d.
+ *
+ * One type, three documents at fixed ids. Filtered on `_type` AND `_id` like
+ * every other singleton here, and for the same typegen reason — except that
+ * here the two genuinely differ, so both are spelled out rather than repeated.
+ *
+ * `updated` and `links` come back null on the documents that do not carry them.
+ * That is the shape, not a gap: only the privacy policy stamps a date and only
+ * the 404 offers routes.
+ */
+
+/** The privacy policy. The only one of the three with a last-updated stamp. */
+export const PRIVACY_PAGE_QUERY = defineQuery(
+  `*[_type == "sitePage" && _id == "privacy"][0]{
+  title,
+  lede,
+  "body": coalesce(body, []),
+  updated{ at, label }
+}`
+);
+
+/** The human sitemap. Its groups are composed from the getters that own each
+ *  collection — a second hand-maintained list of every page would go stale the
+ *  first time anything was added — so only the page's own copy is stored. */
+export const SITEMAP_PAGE_QUERY = defineQuery(
+  `*[_type == "sitePage" && _id == "sitemap"][0]{
+  title,
+  lede,
+  "body": coalesce(body, [])
+}`
+);
+
+/** The 404, and the four routes it offers instead of a search box. */
+export const NOT_FOUND_PAGE_QUERY = defineQuery(
+  `*[_type == "sitePage" && _id == "notFound"][0]{
+  title,
+  lede,
+  "body": coalesce(body, []),
+  linksTitle,
+  "links": coalesce(links[]{ _key, label, description, href }, [])
+}`
+);
+
+/*
+ * THE LAST TWO PAGE DOCUMENTS' COPY — Phase 4e.
+ *
+ * Both documents already existed, holding only their lists; these projections
+ * return the strings around them. Their page-header photographs are still local
+ * imports, like every other page's.
+ *
+ * TWO PROJECTIONS ALIAS A FIELD. `featuredHeading` and `directoryHeading` are
+ * named as a matched pair in the Studio, where an editor meets them beside the
+ * lists they head; the interfaces have called them `featured` and `directory`
+ * since before Sanity existed, and renaming a field an editor sees to match a
+ * component's prop is the wrong way round. Same for `sponsorshipsHeading`.
+ */
+
+/** /practice-areas — its own copy. The two lists are `PRACTICE_AREAS_PAGE_QUERY`. */
+export const PRACTICE_AREAS_COPY_QUERY = defineQuery(
+  `*[_type == "practiceAreasPage" && _id == "practiceAreasPage"][0]{
+  eyebrow,
+  title,
+  lede,
+  ctaLabel,
+  ctaNote,
+  "featured": featuredHeading{ eyebrow, title, lede },
+  "directory": directoryHeading{ eyebrow, title }
+}`
+);
+
+/** /community-involvement — its own copy. The two lists are separate queries. */
+export const COMMUNITY_PAGE_COPY_QUERY = defineQuery(
+  `*[_type == "communityPage" && _id == "communityPage"][0]{
+  eyebrow,
+  title,
+  lede,
+  volunteer{ eyebrow, title, ctaLabel },
+  "sponsorships": sponsorshipsHeading{ eyebrow, title },
+  "partners": { "label": partnersLabel }
+}`
+);
+
+/*
+ * THE HEAVY CAR ACCIDENTS PAGE — Phase 4f. Fifteen named sections.
+ *
+ * THREE CROSS-REFERENCES RESOLVE TO KEYS HERE, and that is the point of making
+ * them references: `data/carAccidents.ts`'s interfaces name an award, a
+ * testimonial and five attorneys by KEY, and until this phase those keys were
+ * typed strings that could silently name nothing. A `reference` cannot dangle,
+ * and the projection hands the getter the same key shape it always had, so no
+ * component moved.
+ *
+ * `href` IS NOT PROJECTED FOR THE SECTION NAV. Each item carries the `section`
+ * it jumps to and the getter turns that into an anchor, because `CA_SECTION_IDS`
+ * is read by both the nav's hrefs and the sections' own `id` attributes — two
+ * things that must agree get one source, and a GROQ string concat must not
+ * become a second.
+ *
+ * Nor is the reviewer's `bioHref`: `attorneyPath()` builds it from the referenced
+ * member's key, the way every other profile link on this site is built.
+ */
+export const CAR_ACCIDENTS_PAGE_QUERY = defineQuery(
+  `*[_type == "carAccidentsPage" && _id == "carAccidentsPage"][0]{
+  seo{ metaTitle, metaDescription },
+  hero{
+    "trail": coalesce(trail[]{ _key, label, href }, []),
+    title,
+    lede,
+    "proof": coalesce(proof[]{ _key, big, label, href, google }, []),
+    ctaLabel,
+    telLabel,
+    photoAlt,
+    reviewer{
+      "name": member->name,
+      "role": member->role,
+      "memberKey": member->key.current,
+      portrait,
+      updated
+    }
+  },
+  nav{
+    "items": coalesce(items[]{ _key, section, label }, []),
+    ctaLabel
+  },
+  triage{
+    title,
+    lede,
+    video{ poster, alt, title, length, "video": film{ provider, id } },
+    help{ text },
+    "rows": coalesce(rows[]{ _key, tone, tag, question, body, ctaLabel, ctaHref, stat{ big, label } }, []),
+    sources{ label, "items": coalesce(items[]{ _key, label, note, href }, []) }
+  },
+  takeaways{
+    eyebrow,
+    title,
+    lede,
+    "items": coalesce(items[]{ _key, title, body }, [])
+  },
+  criteria{
+    title,
+    lede,
+    video{ poster, alt, title, length, "video": film{ provider, id } },
+    "items": coalesce(items[]{ _key, title, body }, []),
+    note
+  },
+  lawyers{
+    title,
+    lede,
+    "attorneys": coalesce(attorneys[]{ _key, "key": member->key.current, cred }, []),
+    moreLabel,
+    moreHref
+  },
+  credentials{
+    "badges": coalesce(badges[]{ "_key": _key, "awardKey": @->key.current }, []),
+    eyebrow,
+    disclaimer
+  },
+  whyFirm{
+    eyebrow,
+    title,
+    "stats": coalesce(stats[]{ _key, big, label }, []),
+    disclaimer,
+    "columns": coalesce(columns[]{ _key, n, title, body }, []),
+    ctaLabel,
+    ctaHref,
+    photoAlt
+  },
+  results{
+    eyebrow,
+    title,
+    offeredLabel,
+    recoveredLabel,
+    "stories": coalesce(stories[]{
+      _key, offered, recovered, title, story, changed,
+      "reviewKey": review->key.current
+    }, []),
+    disclaimer
+  },
+  timeline{
+    title,
+    lede,
+    "steps": coalesce(steps[]{ _key, n, title, body }, []),
+    "phases": coalesce(phases[]{ _key, title, when, body }, []),
+    photoAlt,
+    "points": coalesce(points, [])
+  },
+  crashTypes{
+    title,
+    lede,
+    "tiles": coalesce(tiles[]{ _key, name, body, linkLabel, href }, [])
+  },
+  denver{
+    title,
+    lede,
+    "stats": coalesce(stats[]{ _key, big, label, body }, []),
+    "corridors": coalesce(corridors[]{ _key, name, body }, [])
+  },
+  checklistTeaser{
+    title,
+    body,
+    ctaLabel,
+    ctaHref,
+    "steps": coalesce(steps[]{ _key, iconKey, label }, [])
+  },
+  faultTeaser{
+    title,
+    body,
+    ctaLabel,
+    ctaHref,
+    scale{ start, middle, end },
+    source{ label, "items": coalesce(items[]{ _key, label, note, href }, []) }
+  },
+  more{
+    title,
+    "features": coalesce(features[]{ _key, title, body, length, poster, ctaLabel, href }, []),
+    "cards": coalesce(cards[]{ _key, title, body, ctaLabel, href }, [])
+  },
+  closing{ title, lede, officeLabel }
+}`
+);
+
+/** The Car Accidents accordion's own heading. The rest of that band's copy —
+ *  the button inside an answer, the ask card — is the homepage's. */
+export const CAR_ACCIDENT_FAQ_SECTION_QUERY = defineQuery(
+  `*[_type == "carAccidentsPage" && _id == "carAccidentsPage"][0].faqSection{
+  eyebrow, title, lede
 }`
 );

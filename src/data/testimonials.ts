@@ -8,12 +8,13 @@
 // of booleans can express states that don't exist (both true, neither true),
 // and the rail's order is content, not code.
 import type { ImageMetadata } from "astro";
-import { pt, type PortableTextBlock } from "./portableText";
+import type { PortableTextBlock } from "./portableText";
 import type { SanityImageSource } from "@sanity/image-url";
 import { sanityClient } from "sanity:client";
 import {
   HOME_TESTIMONIALS_QUERY,
   SHARED_SECTIONS_QUERY,
+  TESTIMONIALS_PAGE_QUERY,
   VIDEO_REVIEWS_QUERY,
   WRITTEN_REVIEWS_QUERY,
 } from "../sanity/lib/queries";
@@ -25,12 +26,11 @@ import { WISTIA_POSTER_SIZE, wistiaPosterUrl } from "../lib/video";
 import type { VideoRef } from "../lib/video";
 import teamPhoto from "../assets/team/skyline.jpg";
 import teamCrop from "../assets/team/skyline-crop.jpg";
-import evelyn from "../assets/testimonials/evelyn.jpg";
-import ben from "../assets/testimonials/ben.jpg";
-import joel from "../assets/testimonials/joel.jpg";
-import elijah from "../assets/testimonials/elijah.jpg";
-import kelly from "../assets/testimonials/kelly.jpg";
-import videoCover1 from "../assets/testimonials/video-cover-1.jpg";
+// SIX TESTIMONIAL PHOTOGRAPHS LEFT WITH PHASE 2 and nothing reported it — an
+// unused module-level import is not an error. The records they fed are
+// `testimonial` documents and their portraits are Sanity assets; the FILES stay
+// in `src/assets/testimonials/`, because `npm run backup` runs `--no-assets` and
+// git is the only copy of the originals outside Sanity's asset store.
 
 /**
  * A filmed card's poster, falling back to the film's own Wistia thumbnail.
@@ -176,29 +176,17 @@ export interface TestimonialsPage {
 }
 
 export async function getTestimonialsPage(): Promise<TestimonialsPage> {
+  const copy = await once("testimonialsPage", async () =>
+    required(await sanityClient.fetch(TESTIMONIALS_PAGE_QUERY), "Testimonials", "Pages")
+  );
   return {
-    eyebrow: "Client testimonials",
-    title: "In our clients' own words.",
-    lede: pt(
-      "Our clients love our personalized, caring approach to personal injury " +
-        "law. Don't take our word for it — hear it from the people we've represented."
-    ),
+    ...copy,
+    lede: copy.lede as PortableTextBlock[],
+    // The page header's art is a local import, like every other page's — see the
+    // note in `aboutPage.ts`.
     photo: teamPhoto,
     photoMobile: teamCrop,
     photoAlt: "The Dormer Harpring attorneys in Denver",
-    ctaLabel: "Talk to a lawyer",
-    ctaNote: "No win, no fee",
-    videos: {
-      eyebrow: "Video reviews",
-      title: "Hear it from our clients.",
-      lede: "Real people, real cases — no scripts and no actors.",
-    },
-    written: {
-      eyebrow: "Written reviews",
-      title: "What clients say about working with us.",
-      lede: "Reviews collected from Google. Prior results do not guarantee a similar outcome.",
-      moreLabel: "Load more reviews",
-    },
   };
 }
 

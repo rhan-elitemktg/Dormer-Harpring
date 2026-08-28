@@ -34,8 +34,11 @@ import { sanityClient } from "sanity:client";
 import {
   BLOG_ARTICLES_QUERY,
   BLOG_CATEGORIES_QUERY,
+  BLOG_INDEX_PAGE_QUERY,
   BLOG_POSTS_QUERY,
+  BLOG_POST_TEMPLATE_QUERY,
   FEATURED_POST_QUERY,
+  SHARED_SECTIONS_QUERY,
 } from "../sanity/lib/queries";
 import { once, required } from "../sanity/lib/fetch";
 import { getTeam } from "./team";
@@ -154,20 +157,10 @@ export interface BlogPageCopy {
 }
 
 export async function getBlogPage(): Promise<BlogPageCopy> {
-  return {
-    eyebrow: "News & insights",
-    title: "Our blog.",
-    lede: pt(
-      "Plain-English answers on insurance, injuries, and what actually happens " +
-        "after a crash in Colorado — written by the lawyers who try these cases."
-    ),
-    categoryLabel: "Select category",
-    allLabel: "All posts",
-    featuredBadge: "Featured post",
-    readMoreLabel: "Read more",
-    loadMoreLabel: "Load more posts",
-    emptyLabel: "No posts in this category yet.",
-  };
+  const copy = await once("blogIndexPage", async () =>
+    required(await sanityClient.fetch(BLOG_INDEX_PAGE_QUERY), "Blog index", "Pages")
+  );
+  return { ...copy, lede: copy.lede as PortableTextBlock[] };
 }
 
 /**
@@ -579,24 +572,20 @@ export interface BlogPostPageCopy {
 }
 
 export async function getBlogPostPage(): Promise<BlogPostPageCopy> {
+  const [copy, shared] = await Promise.all([
+    once("blogPostTemplate", async () =>
+      required(await sanityClient.fetch(BLOG_POST_TEMPLATE_QUERY), "Blog post template", "Pages")
+    ),
+    once("sharedSections", async () =>
+      required(await sanityClient.fetch(SHARED_SECTIONS_QUERY), "Shared Sections")
+    ),
+  ]);
+
   return {
-    contentsLabel: "In this article",
-    categoriesLabel: "Categories",
-    relatedSidebarLabel: "Related articles",
-    relatedTitle: "Related blog posts",
-    factCheckLabel: "Fact-checked",
-    readMoreLabel: "Read more",
-    form: {
-      title: "Get a free case review",
-      lede: "Tell us what happened. An attorney reviews every request personally.",
-      // Shortened from the comp's "Request my case review" at Rhan's request.
-      // Sentence case like its two siblings in contact.ts / coCounsel.ts; `.btn`
-      // uppercases it, so the case here is the data's convention, not the design.
-      submitLabel: "Review my case",
-      // The comp draws this as a small gold note under the button rather than
-      // the sentence the page-foot form carries. Same field, same slot; the
-      // sidebar variant styles it as the label it is.
-      disclaimer: "Free & confidential",
-    },
+    ...copy,
+    // THE SIDEBAR FORM IS SHARED WITH THE PRACTICE-AREA TEMPLATE, on Shared
+    // Sections — one piece of copy across the 290 pages the two templates
+    // serve. Two copies would be two places to update and one to forget.
+    form: required(shared.sidebarForm, "Shared Sections → Sidebar consultation form"),
   };
 }
