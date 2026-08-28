@@ -1,10 +1,16 @@
 // The Studio desk — what an editor sees when they open /admin.
 //
-// THREE GROUPS, IN THIS ORDER, BY REQUEST:
+// FIVE GROUPS, IN THIS ORDER, BY REQUEST:
 //
-//   Pages          one document per route, plus the two template singletons
-//   Collections    repeatable content — posts, attorneys, results, testimonials
-//   Site Settings  firm-wide facts that appear on every page
+//   Pages           one document per route, plus a utility sub-list
+//   Practice Areas  the hand-built Car Accidents page, then 104 by city
+//   Blog            186 posts and the 23 categories above them
+//   Collections     everything else reused across pages — team, awards, results
+//   Site Settings   firm-wide facts that appear on every page
+//
+// PRACTICE AREAS AND BLOG WERE ROWS INSIDE COLLECTIONS until the client asked
+// for this. Between them they are the great majority of the site's content, and
+// they sat two clicks down a list beside five-record lookup tables.
 //
 // This is the CLIENT'S order and it is not the build order. Page singletons
 // reference collection documents, so the build fills Settings, then Collections,
@@ -380,8 +386,35 @@ export const SINGLETON_TYPES = [
   "sitePage",
 ];
 
+/**
+ * EVERY TYPE THIS DESK PLACES — the one list the catch-all measures against.
+ *
+ * DERIVED FROM THE GROUP DEFINITIONS, NOT MAINTAINED BESIDE THEM. It read
+ * `[...PAGES, ...COLLECTIONS, ...SETTINGS]` while those were the only three
+ * groups. Splitting Practice Areas and Blog out left FOUR types placed on
+ * screen and missing from here — `practiceArea`, `blogPost`, `blogCategory`
+ * and `carAccidentsPage` — so the Studio drew each of them twice: once in its
+ * group and once under the catch-all divider at the foot.
+ *
+ * `sitePage` had been doing exactly that since the utility pages arrived, and
+ * nobody noticed until the other four joined it.
+ *
+ * A CATCH-ALL CANNOT CATCH THIS. It exists so a type placed NOWHERE is still
+ * reachable, and a type placed TWICE is indistinguishable to it — both are
+ * simply "not in the set". So this is written to be un-forgettable rather than
+ * guarded by a check that would have to be remembered too.
+ */
+const PLACED = new Set<string>([
+  // Every Pages row and every Site Settings row, plus the two placed by hand:
+  // `carAccidentsPage`, which leads Practice Areas, and `sitePage`, which is
+  // the three utility documents.
+  ...SINGLETON_TYPES,
+  PRACTICE_AREAS[0],
+  ...BLOG.map(([type]) => type),
+  ...COLLECTIONS.map(([type]) => type),
+]);
+
 export const structure: StructureResolver = (S, context) => {
-  const placed = new Set([...PAGES, ...COLLECTIONS, ...SETTINGS].map(([type]) => type));
 
   /**
    * ANYTHING NOT PLACED IN A GROUP, so a new document type is never invisible.
@@ -390,10 +423,10 @@ export const structure: StructureResolver = (S, context) => {
    * otherwise leave it with no way in — the Studio would be missing content
    * with nothing reporting it, which is the same silent-failure shape the four
    * `check:` linters exist to catch. Once every type is placed this renders
-   * nothing and the desk shows exactly the three groups asked for.
+   * nothing and the desk shows exactly the five groups asked for.
    */
   const unplaced = S.documentTypeListItems().filter(
-    (item) => !placed.has(item.getId() as string)
+    (item) => !PLACED.has(item.getId() as string)
   );
 
   return S.list()
