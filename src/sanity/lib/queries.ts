@@ -250,7 +250,7 @@ export const HOME_TESTIMONIALS_QUERY = defineQuery(
   "_key": key.current,
   "kind": select(format == "video" => "video", "quote"),
   name,
-  video{ provider, id },
+  "video": { "provider": "wistia", "id": videoId },
   poster,
   length,
   "headline": railHeadline,
@@ -263,7 +263,7 @@ export const VIDEO_REVIEWS_QUERY = defineQuery(
   `*[_type == "testimonial" && onReviewsPage == true && format == "video"]
   | order(reviewOrder asc){
   "_key": key.current,
-  video{ provider, id },
+  "video": { "provider": "wistia", "id": videoId },
   name,
   quote,
   poster
@@ -927,29 +927,19 @@ export const BLOG_INDEX_PAGE_QUERY = defineQuery(
 );
 
 /*
- * THE TWO ARTICLE TEMPLATES — Phase 4c.
+ * THE TWO ARTICLE TEMPLATES ARE GONE — Phase 6b, reversing 4c.
  *
- * The chrome around a post and around a service page: 186 pages and 104, plus
- * the three utility pages that borrow the second template's shell.
+ * Their chrome is a `TEMPLATE` constant in `blog.ts` and `practiceAreaPages.ts`
+ * now. Twelve interface labels ("In this article", "Posted", "Read more") that
+ * no editor was going to open a document to change, against two permanent rows
+ * in the Pages list. The sidebar form they both borrow is still on
+ * `sharedSections` and still editable; only the labels became code.
  *
- * NEITHER RETURNS ITS SIDEBAR FORM. That copy is identical on all 290 and lives
- * once on `sharedSections`; both getters read it from there. Neither returns the
- * fact-check SENTENCE either — that names the reviewing attorney and links to
- * their bio, so it stays derived from the roster. See the note on the
- * `blogPostTemplate` schema type.
+ * The fact-check SENTENCE was never here either — it names the reviewing
+ * attorney and links to their bio, so it stays derived from the roster.
  */
 
 /** Every blog post's labels. */
-export const BLOG_POST_TEMPLATE_QUERY = defineQuery(
-  `*[_type == "blogPostTemplate" && _id == "blogPostTemplate"][0]{
-  contentsLabel,
-  categoriesLabel,
-  relatedSidebarLabel,
-  relatedTitle,
-  factCheckLabel,
-  readMoreLabel
-}`
-);
 
 /**
  * Every practice-area page's labels.
@@ -957,16 +947,6 @@ export const BLOG_POST_TEMPLATE_QUERY = defineQuery(
  * No `author` in the meta row: the firm writes all 104 and its name and link
  * come from Firm Details, so only the LABELS are stored.
  */
-export const PRACTICE_AREA_TEMPLATE_QUERY = defineQuery(
-  `*[_type == "practiceAreaTemplate" && _id == "practiceAreaTemplate"][0]{
-  eyebrow,
-  meta{ writtenByLabel, updatedLabel, postedLabel },
-  contentsLabel,
-  relatedSidebarLabel,
-  faqsTitle,
-  factCheckLabel
-}`
-);
 
 /*
  * THE THREE UTILITY PAGES — Phase 4d.

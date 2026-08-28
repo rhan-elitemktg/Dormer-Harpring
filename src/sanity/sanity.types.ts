@@ -432,38 +432,6 @@ export type SitePage = {
   };
 };
 
-export type PracticeAreaTemplate = {
-  _id: string;
-  _type: "practiceAreaTemplate";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  eyebrow: string;
-  meta: {
-    writtenByLabel: string;
-    updatedLabel: string;
-    postedLabel: string;
-  };
-  contentsLabel: string;
-  relatedSidebarLabel: string;
-  faqsTitle: string;
-  factCheckLabel: string;
-};
-
-export type BlogPostTemplate = {
-  _id: string;
-  _type: "blogPostTemplate";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  contentsLabel: string;
-  categoriesLabel: string;
-  relatedSidebarLabel: string;
-  relatedTitle: string;
-  factCheckLabel: string;
-  readMoreLabel: string;
-};
-
 export type ThankYouPage = {
   _id: string;
   _type: "thankYouPage";
@@ -1009,7 +977,7 @@ export type Testimonial = {
   key: Slug;
   name: string;
   format: "video" | "written";
-  video?: VideoRef;
+  videoId?: string;
   poster?: {
     asset?: SanityImageAssetReference;
     media?: unknown;
@@ -1629,8 +1597,6 @@ export type AllSanitySchemaTypes =
   | BlogPost
   | RichText
   | SitePage
-  | PracticeAreaTemplate
-  | BlogPostTemplate
   | ThankYouPage
   | SimpleText
   | ContactPage
@@ -1962,15 +1928,15 @@ export type HOME_RESULTS_QUERY_RESULT = Array<{
 
 // Source: src/sanity/lib/queries.ts
 // Variable: HOME_TESTIMONIALS_QUERY
-// Query: *[_type == "testimonial" && onHomeRail == true] | order(railOrder asc){  "_key": key.current,  "kind": select(format == "video" => "video", "quote"),  name,  video{ provider, id },  poster,  length,  "headline": railHeadline,  "body": railBody}
+// Query: *[_type == "testimonial" && onHomeRail == true] | order(railOrder asc){  "_key": key.current,  "kind": select(format == "video" => "video", "quote"),  name,  "video": { "provider": "wistia", "id": videoId },  poster,  length,  "headline": railHeadline,  "body": railBody}
 export type HOME_TESTIMONIALS_QUERY_RESULT = Array<{
   _key: string;
   kind: "quote" | "video";
   name: string;
   video: {
     provider: "wistia";
-    id: string;
-  } | null;
+    id: string | null;
+  };
   poster: {
     asset?: SanityImageAssetReference;
     media?: unknown;
@@ -1985,13 +1951,13 @@ export type HOME_TESTIMONIALS_QUERY_RESULT = Array<{
 
 // Source: src/sanity/lib/queries.ts
 // Variable: VIDEO_REVIEWS_QUERY
-// Query: *[_type == "testimonial" && onReviewsPage == true && format == "video"]  | order(reviewOrder asc){  "_key": key.current,  video{ provider, id },  name,  quote,  poster}
+// Query: *[_type == "testimonial" && onReviewsPage == true && format == "video"]  | order(reviewOrder asc){  "_key": key.current,  "video": { "provider": "wistia", "id": videoId },  name,  quote,  poster}
 export type VIDEO_REVIEWS_QUERY_RESULT = Array<{
   _key: string;
   video: {
     provider: "wistia";
-    id: string;
-  } | null;
+    id: string | null;
+  };
   name: string;
   quote: string;
   poster: {
@@ -2721,34 +2687,6 @@ export type BLOG_INDEX_PAGE_QUERY_RESULT = {
 } | null;
 
 // Source: src/sanity/lib/queries.ts
-// Variable: BLOG_POST_TEMPLATE_QUERY
-// Query: *[_type == "blogPostTemplate" && _id == "blogPostTemplate"][0]{  contentsLabel,  categoriesLabel,  relatedSidebarLabel,  relatedTitle,  factCheckLabel,  readMoreLabel}
-export type BLOG_POST_TEMPLATE_QUERY_RESULT = {
-  contentsLabel: string;
-  categoriesLabel: string;
-  relatedSidebarLabel: string;
-  relatedTitle: string;
-  factCheckLabel: string;
-  readMoreLabel: string;
-} | null;
-
-// Source: src/sanity/lib/queries.ts
-// Variable: PRACTICE_AREA_TEMPLATE_QUERY
-// Query: *[_type == "practiceAreaTemplate" && _id == "practiceAreaTemplate"][0]{  eyebrow,  meta{ writtenByLabel, updatedLabel, postedLabel },  contentsLabel,  relatedSidebarLabel,  faqsTitle,  factCheckLabel}
-export type PRACTICE_AREA_TEMPLATE_QUERY_RESULT = {
-  eyebrow: string;
-  meta: {
-    writtenByLabel: string;
-    updatedLabel: string;
-    postedLabel: string;
-  };
-  contentsLabel: string;
-  relatedSidebarLabel: string;
-  faqsTitle: string;
-  factCheckLabel: string;
-} | null;
-
-// Source: src/sanity/lib/queries.ts
 // Variable: PRIVACY_PAGE_QUERY
 // Query: *[_type == "sitePage" && _id == "privacy"][0]{  ...content{ title, lede, "body": coalesce(body, []) },  updated{ at, label }}
 export type PRIVACY_PAGE_QUERY_RESULT = {
@@ -3146,8 +3084,8 @@ declare module "@sanity/client" {
     '*[_type == "caseResult" && shownOn == "results"] | order(order asc){\n  "_key": _id, tag, badge, "wonInCourt": coalesce(wonInCourt, false), offered, recovered, story\n}': CASE_RESULTS_QUERY_RESULT;
     '*[_type == "caseResult" && shownOn == "co-counsel"] | order(order asc){\n  "_key": _id, tag, badge, "wonInCourt": coalesce(wonInCourt, false), offered, recovered, story\n}': CO_COUNSEL_RESULTS_QUERY_RESULT;
     '*[_type == "caseResult" && shownOn == "home"] | order(order asc){\n  "_key": _id, tag, badge, "wonInCourt": coalesce(wonInCourt, false), offered, recovered, story\n}': HOME_RESULTS_QUERY_RESULT;
-    '*[_type == "testimonial" && onHomeRail == true] | order(railOrder asc){\n  "_key": key.current,\n  "kind": select(format == "video" => "video", "quote"),\n  name,\n  video{ provider, id },\n  poster,\n  length,\n  "headline": railHeadline,\n  "body": railBody\n}': HOME_TESTIMONIALS_QUERY_RESULT;
-    '*[_type == "testimonial" && onReviewsPage == true && format == "video"]\n  | order(reviewOrder asc){\n  "_key": key.current,\n  video{ provider, id },\n  name,\n  quote,\n  poster\n}': VIDEO_REVIEWS_QUERY_RESULT;
+    '*[_type == "testimonial" && onHomeRail == true] | order(railOrder asc){\n  "_key": key.current,\n  "kind": select(format == "video" => "video", "quote"),\n  name,\n  "video": { "provider": "wistia", "id": videoId },\n  poster,\n  length,\n  "headline": railHeadline,\n  "body": railBody\n}': HOME_TESTIMONIALS_QUERY_RESULT;
+    '*[_type == "testimonial" && onReviewsPage == true && format == "video"]\n  | order(reviewOrder asc){\n  "_key": key.current,\n  "video": { "provider": "wistia", "id": videoId },\n  name,\n  quote,\n  poster\n}': VIDEO_REVIEWS_QUERY_RESULT;
     '*[_type == "testimonial" && onReviewsPage == true && format == "written"]\n  | order(reviewOrder asc){\n  "_key": key.current,\n  name,\n  source,\n  quote,\n  body\n}': WRITTEN_REVIEWS_QUERY_RESULT;
     '*[_type == "teamMember"] | order(\n  select(\n    kind == "partner" => 1,\n    kind == "attorney" => 2,\n    kind == "staff" => 3,\n    kind == "dog" => 4,\n    5\n  ) asc,\n  orderRank asc\n){\n  "_key": key.current,\n  name,\n  role,\n  kind,\n  photo,\n  bio,\n  "memorial": coalesce(memorial, false),\n  "hasProfile": coalesce(hasProfile, false),\n  "awards": awards[]{ _key, image, alt }\n}': TEAM_QUERY_RESULT;
     '*[_type == "teamMember" && hasProfile == true] | order(\n  select(\n    kind == "partner" => 1,\n    kind == "attorney" => 2,\n    kind == "staff" => 3,\n    kind == "dog" => 4,\n    5\n  ) asc,\n  orderRank asc\n){\n  "slug": key.current,\n  category,\n  lede,\n  email,\n  "facts": facts[]{ _key, value, label },\n  body,\n  education,\n  "links": links[]{ _key, label, href },\n  videoId\n}': TEAM_PROFILES_QUERY_RESULT;
@@ -3181,8 +3119,6 @@ declare module "@sanity/client" {
     '*[_type == "resultsPage" && _id == "resultsPage"][0]{\n  eyebrow, title, lede, moreLabel\n}': RESULTS_PAGE_QUERY_RESULT;
     '*[_type == "coCounselPage" && _id == "coCounselPage"][0]{\n  ...header{ eyebrow, title, lede, ctaLabel, ctaNote },\n  partnership{ eyebrow, title, intro, callout, terms },\n  results{ eyebrow, title, lede },\n  areas{\n    eyebrow,\n    title,\n    ctaLabel,\n    "items": coalesce(items[]{ _key, label, href }, [])\n  },\n  form{ title, lede, requiredNote, submitLabel, disclaimer }\n}': CO_COUNSEL_PAGE_QUERY_RESULT;
     '*[_type == "blogIndexPage" && _id == "blogIndexPage"][0]{\n  ...header{ eyebrow, title, lede },\n  ...feed{ categoryLabel, allLabel, featuredBadge, readMoreLabel, loadMoreLabel, emptyLabel }\n}': BLOG_INDEX_PAGE_QUERY_RESULT;
-    '*[_type == "blogPostTemplate" && _id == "blogPostTemplate"][0]{\n  contentsLabel,\n  categoriesLabel,\n  relatedSidebarLabel,\n  relatedTitle,\n  factCheckLabel,\n  readMoreLabel\n}': BLOG_POST_TEMPLATE_QUERY_RESULT;
-    '*[_type == "practiceAreaTemplate" && _id == "practiceAreaTemplate"][0]{\n  eyebrow,\n  meta{ writtenByLabel, updatedLabel, postedLabel },\n  contentsLabel,\n  relatedSidebarLabel,\n  faqsTitle,\n  factCheckLabel\n}': PRACTICE_AREA_TEMPLATE_QUERY_RESULT;
     '*[_type == "sitePage" && _id == "privacy"][0]{\n  ...content{ title, lede, "body": coalesce(body, []) },\n  updated{ at, label }\n}': PRIVACY_PAGE_QUERY_RESULT;
     '*[_type == "sitePage" && _id == "sitemap"][0]{\n  ...content{ title, lede, "body": coalesce(body, []) }\n}': SITEMAP_PAGE_QUERY_RESULT;
     '*[_type == "sitePage" && _id == "notFound"][0]{\n  ...content{ title, lede, "body": coalesce(body, []) },\n  "linksTitle": links.title,\n  "links": coalesce(links.items[]{ _key, label, description, href }, [])\n}': NOT_FOUND_PAGE_QUERY_RESULT;

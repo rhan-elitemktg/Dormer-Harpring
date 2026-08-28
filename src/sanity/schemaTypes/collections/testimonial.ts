@@ -77,10 +77,18 @@ export const testimonial = defineType({
       validation: (rule) => rule.required(),
     }),
 
+    /*
+     * A BARE ID, NOT A `videoRef` OBJECT — the last of them. The object hid its
+     * provider and drew an accordion around one input; the projection puts
+     * `{provider, id}` back together, so `lib/video.ts` is untouched and nothing
+     * stores a URL.
+     */
     defineField({
-      name: "video",
-      title: "The film",
-      type: "videoRef",
+      name: "videoId",
+      title: "Video ID",
+      type: "string",
+      description:
+        "Wistia's hashed id — the id ONLY, not the whole URL. Only filmed reviews have one.",
       group: "review",
       hidden: isVideo,
     }),

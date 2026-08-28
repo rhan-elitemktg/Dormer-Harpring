@@ -17,13 +17,11 @@ import { seo } from "./objects/seo";
 
 import { aboutPage } from "./pages/aboutPage";
 import { blogIndexPage } from "./pages/blogIndexPage";
-import { blogPostTemplate } from "./pages/blogPostTemplate";
 import { carAccidentsPage } from "./pages/carAccidentsPage";
 import { coCounselPage } from "./pages/coCounselPage";
 import { communityPage } from "./pages/communityPage";
 import { contactPage } from "./pages/contactPage";
 import { homePage } from "./pages/homePage";
-import { practiceAreaTemplate } from "./pages/practiceAreaTemplate";
 import { practiceAreasPage } from "./pages/practiceAreasPage";
 import { resultsPage } from "./pages/resultsPage";
 import { sitePage } from "./pages/sitePage";
@@ -84,8 +82,6 @@ const pages: SchemaTypeDefinition[] = [
   blogIndexPage,
   contactPage,
   thankYouPage,
-  blogPostTemplate,
-  practiceAreaTemplate,
   // Three documents of ONE type — privacy policy, sitemap, 404. See the note on
   // the type for why one type and why still three fixed singletons.
   sitePage,

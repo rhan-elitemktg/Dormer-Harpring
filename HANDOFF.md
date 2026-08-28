@@ -45,11 +45,79 @@ against the code, swept for dead literals, swapped, built and diffed on its own.
   off a URL, and omitting them shifts the layout as the image lands.
 - Field types: `richText`, `answerText`, `simpleText`, `inlineText`, `link`, `navLink`,
   `videoRef`, `seo`.
-- Nine collection types, **fifteen page types** (seventeen documents — `sitePage` is three) and
-  five Site Settings singletons, in a desk of Pages / Collections / Site Settings. Twelve of the
-  fifteen hold their fields in collapsible SECTIONS — see below.
+- Nine collection types, **thirteen page types** (fifteen documents — `sitePage` is three) and
+  five Site Settings singletons, in a desk of **five** groups: Pages / Practice Areas / Blog /
+  Collections / Site Settings. Every page type with more than one band holds its fields in
+  collapsible SECTIONS — see below.
 - `scripts/lib/sanity.py` — one GROQ reader for every Python check. `lib/firm.py` is one
   query on top of it.
+
+### THE DESK IS FIVE GROUPS, AND TWO PAGE TYPES ARE GONE
+
+Pages / **Practice Areas** / **Blog** / Collections / Site Settings, by request.
+
+**The two biggest collections left Collections.** Practice Areas is 104 documents across nine
+cities and the blog is 186 posts plus 23 categories — between them the great majority of the
+site's content, and both sat two clicks down a list beside five-record lookup tables. They are
+top-level groups now. Collections is the six an editor reaches for occasionally: Team,
+Testimonials, Case Results, Awards, Core Values, Cities.
+
+**Blog Posts and Blog Categories are one group because they are one editorial job.** A post
+belongs to exactly one category and the category list exists to serve the posts.
+
+**CAR ACCIDENTS LEADS PRACTICE AREAS, ABOVE A DIVIDER.** It is a practice-area page that is not
+a `practiceArea` DOCUMENT — its content is eighteen typed sections on its own singleton, because
+it is the one page served by the heavy hand-authored template. The divider is load-bearing: what
+is above it is a page singleton and what is below is a collection, which are two different kinds
+of thing in one list.
+
+**It also had to stay in `SINGLETON_TYPES` by hand.** That list is built from `PAGES` and
+`SETTINGS`, and moving the type out of `PAGES` silently dropped it — which would show an editor
+"Car Accidents" twice, once pinned and once as a generic list, with edits to the second going
+nowhere. Anything moved OUT of those two arrays needs adding back explicitly.
+
+**`groupItems()` exists because the alternative was reaching into a built list item.** Practice
+Areas needs its nine city lists placed beside the Car Accidents singleton rather than nested a
+level deeper, and the first attempt got them by calling `collection()` and pulling
+`.serialize().child.items` back out — which depends on the shape Sanity's builder happens to
+serialise to. Both callers share the helper now.
+
+### THE TWO ARTICLE TEMPLATES ARE DELETED, REVERSING PHASE 4c
+
+`blogPostTemplate` and `practiceAreaTemplate` held twelve strings between them and are gone —
+schema types, documents and desk rows. Their chrome is a `TEMPLATE` constant in `blog.ts` and
+`practiceAreaPages.ts`.
+
+**Eleven of the twelve are interface labels** — "In this article", "Categories", "Read more",
+"Posted", "Updated", "Written by" — that no editor was ever going to open a document to change,
+against two permanent rows in the Pages list.
+
+**THE TWELFTH IS MARKETING COPY AND WENT INTO CODE ANYWAY, KNOWINGLY.** The practice-area
+eyebrow is "Tough lawyers for tough cases", on all 104 pages, and this file records that it has
+already been four different things by request — the city, then "Practice Area", then the city
+again, then this. Changing it is a code change and a deploy now. **If it is changed a fifth
+time, it belongs on `sharedSections`** beside the awards bar's label, for exactly the reason
+that one is there; the constant's own comment says so.
+
+**The sidebar form both templates borrow is still editable.** It is on `sharedSections`, was
+never part of either template document, and only the labels became constants. The fact-check
+SENTENCE is still derived from the roster.
+
+`scripts/migrate-templates-4c.ts` records the reversal in its header. It cannot run again — it
+would import documents of a type that no longer exists — but the third thing it did, seeding
+`sharedSections.sidebarForm`, still stands.
+
+### `videoRef` IS FULLY UNWOUND — NO NESTED VIDEO FIELD IS LEFT
+
+The hero, the firm intro and both FAQ accordions went in 6a; the six filmed testimonials were
+the last, in 6b. Every one is a bare `videoId` string and **every projection reassembles
+`{provider, id}`**, so `lib/video.ts` still sees the pair, the `youtube` branch still has
+somewhere to land, and the rule that nothing may store a video URL is untouched.
+
+**Only six of the eighteen testimonials carry a film**, because `video` is conditional on
+`format == "video"`. The migration emits those six alone — writing the written twelve would be
+twelve no-op rewrites, and any bug in the script would then reach every record rather than the
+six it means to.
 
 ### THREE BANDS OWNED THEIR OWN COPY, AND THE READINESS SWEEP COULD NOT SEE THEM
 
@@ -155,7 +223,7 @@ will do the same thing again.
 
 ### EVERY PAGE DOCUMENT IS AN ACCORDION OF SECTIONS
 
-**Twelve of the fifteen page types now hold their fields in collapsible section objects**, one
+**Every page type with more than one band holds its fields in collapsible section objects**, one
 per rendered band, collapsed by default. A form opens as a list of band NAMES rather than a
 scroll of every field on the page. `SECTION` in `schemaTypes/pages/section.ts` is the one
 constant they all spread — whether these default to open or closed is one decision and it
@@ -231,9 +299,11 @@ section is that same mistake one step softer. `links` became ONE conditional sec
 two conditional fields, so the two documents that never show it get no row at all — a collapsed
 row that opens onto nothing is worse than no row.
 
-### THE DESK IS FIFTEEN PAGES NOW, IN NAV ORDER
+### THE PAGES GROUP IS ELEVEN ROUTES AND A UTILITY SUB-LIST
 
-Twelve routes, then the two TEMPLATES, then a "Utility pages" sub-list holding three.
+**Superseded in part — read "THE DESK IS FIVE GROUPS" at the top of this file first.** The two
+TEMPLATES are deleted and Car Accidents leads the Practice Areas group; what follows is why the
+remaining rows are ordered as they are, which still holds.
 
 **In the order of the main nav, then the pages the nav does not reach** — an editor reads down
 the list the way a visitor reads across the header. Alphabetical would put Thank You between
@@ -910,11 +980,8 @@ assertion: an image that is already a reference means the getter has moved.
 - **No webhook.** Publishing changes nothing on the live site until someone redeploys. Phase 5.
 - **Nothing is wired for Visual Editing**, so array projections omit `_key` where the interface
   has none.
-- **Testimonials still nest their video field** in a `videoRef` object showing one input. The
-  attorney film, the hero, the firm intro and both FAQ accordions are flat `videoId` strings
-  now — the projection reassembles `{provider, id}`, so `lib/video.ts` never sees a bare id and
-  the rule that nothing may store a video URL is untouched. Testimonials were not in the sweep's
-  scope and are the last nested one.
+- ~~**Testimonials still nest their video field.**~~ **CLOSED in 6b.** Nothing nests a video
+  field any more — see the note at the top of this file.
 - **`routePaths.ts` exports `locationPath` and nothing calls it.** One of five identical
   helpers that name the kinds of URL this site has; whether that set should shrink is a
   routing question, not a migration one.
@@ -1980,7 +2047,7 @@ entry and both files to fix.
 3. **One Wistia player per popover, initialised eagerly** — 15 on the homepage, 20 on
    `/denver-car-accident-lawyer/`. Inherent to the class-based embed; wants a pass before launch.
 4. ~~**Sanity Phases 2, 2f, 3 and 4.**~~ **ALL DONE.** 499 content documents across nine
-   collection types, fifteen page documents and five settings singletons, 279 image assets,
+   collection types, thirteen page types and five settings singletons, 279 image assets,
    and no page copy left in `src/data/`. Every slice ended byte-identical or with every changed
    page explained. The findings that will matter next are at the top of this file; the ones
    most likely to bite are `pt()`'s duplicate keys, GROQ's codepoint `order()`, and that a
@@ -2387,13 +2454,12 @@ Elite brand theme applied at scaffold time: light-locked palette, ELITE emblem a
 upgrades.
 
 **The desk is no longer empty.** `structureTool({ structure })` draws three groups — Pages,
-Collections, Site Settings — from `src/sanity/structure/index.ts`. Pages holds **fifteen rows**:
-twelve routes in NAV ORDER, then the two templates, then a "Utility pages" sub-list. **That is
-fifteen page TYPES and SEVENTEEN documents** — the fifteenth type, `sitePage`, is three pinned
-documents behind that one row, which is why the two counts differ and why this file's "fifteen
-page documents" elsewhere means types. See "THE DESK IS FIFTEEN PAGES NOW" at the top for why
-that order and why the three are one type. Collections holds **nine** types and Site Settings
-**five** singletons. A document type added to `schemaTypes`
+Practice Areas, Blog, Collections and Site Settings — from `src/sanity/structure/index.ts`.
+Pages holds **twelve rows**: eleven routes in NAV ORDER, then a "Utility pages" sub-list. **That
+is thirteen page TYPES and fifteen documents** — `sitePage` is three pinned documents behind that
+one row, and `carAccidentsPage` is a page type that sits under Practice Areas rather than here.
+See "THE DESK IS FIVE GROUPS" at the top for what moved and why. Collections holds **six** types,
+Practice Areas and Blog one and two. A document type added to `schemaTypes`
 but not placed in one of the three arrays shows up under a divider at the bottom rather than
 becoming invisible, which is the same silent-failure shape the four linters exist to catch.
 

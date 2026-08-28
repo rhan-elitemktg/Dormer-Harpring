@@ -89,37 +89,33 @@ function fixedDocument(
 }
 
 /**
- * PAGES — one per route.
+ * PAGES — one per route, in the order of the main nav.
  *
  * `[type, title, icon?]`.
  *
- * Three arrived in Phase 2f holding only the lists that had been filed as
- * collections without being shared by anything; Phase 3d added Practice Areas
- * for the directory and the featured grid. Phase 4 gave all four their COPY and
- * added the rest of the routes.
+ * AN EDITOR READS DOWN THIS LIST THE WAY A VISITOR READS ACROSS THE HEADER,
+ * then the pages the nav does not reach. Alphabetical would put Thank You
+ * between Results and Testimonials and Contact above everything.
  *
- * IN THE ORDER OF THE MAIN NAV, then the pages the nav does not reach. An
- * editor looking for "the About page" reads down this list the way a visitor
- * reads across the header; alphabetical would put Thank You between Results and
- * Testimonials and Contact above everything.
+ * TWO THINGS THAT WERE HERE ARE NOT ANY MORE, both by request:
  *
- * FOURTEEN HERE, FIFTEEN ROWS IN THE DESK. The two TEMPLATE singletons at the
- * foot hold the chrome every post and every service page renders — the contents
- * box's heading, the byline's labels, the fact-check tag — and they belong here
- * rather than in Settings for exactly that reason: it is copy on a page, which
- * is what the SEO team reaches for.
+ *   the two TEMPLATES     their chrome is twelve interface labels ("In this
+ *                         article", "Posted", "Read more") that no editor was
+ *                         going to open a document to change. Constants in
+ *                         `blog.ts` and `practiceAreaPages.ts` now, and the
+ *                         documents are deleted.
+ *   Car Accidents         it is a practice-area page — the one served by the
+ *                         heavy hand-authored template rather than the imported
+ *                         one — so it leads the Practice Areas group rather than
+ *                         sitting among the routes.
  *
- * The fifteenth row is `UTILITY_PAGES` below — one `sitePage` type at three
- * fixed ids, in a sub-list rather than in this array. So the Pages group is
- * fifteen TYPES and seventeen DOCUMENTS; the two counts differ by exactly that
- * one row.
+ * The three utility pages are a sub-list at the foot; see `UTILITY_PAGES`.
  */
 const PAGES: [string, string, ComponentType?][] = [
   ["homePage", "Homepage", HomeIcon],
   ["aboutPage", "About", InfoOutlineIcon],
   ["teamPage", "Meet Our Attorneys", UsersIcon],
-  ["practiceAreasPage", "Practice Areas", ThLargeIcon],
-  ["carAccidentsPage", "Car Accidents", WarningOutlineIcon],
+  ["practiceAreasPage", "Practice areas index", ThLargeIcon],
   ["resultsPage", "Results", CaseIcon],
   ["testimonialsPage", "Testimonials", CommentIcon],
   ["coCounselPage", "Co-Counsel", UsersIcon],
@@ -127,11 +123,6 @@ const PAGES: [string, string, ComponentType?][] = [
   ["blogIndexPage", "Blog index", DocumentTextIcon],
   ["contactPage", "Contact", EnvelopeIcon],
   ["thankYouPage", "Thank You", CheckmarkCircleIcon],
-  // The two TEMPLATES last, after the routes. They are not pages an editor can
-  // visit — they are the chrome every post and every service page renders — so
-  // they sit under the list rather than inside it.
-  ["blogPostTemplate", "Blog post template", DocumentTextIcon],
-  ["practiceAreaTemplate", "Practice area template", CaseIcon],
 ];
 
 /**
@@ -241,6 +232,54 @@ const GROUPED: Record<
  * reached — so every creation path has to set it. `sanity.config.ts` closes the
  * other one by taking this type out of the global "create new" menu.
  */
+/**
+ * One grouped type's sub-lists, as an array.
+ *
+ * SEPARATE FROM `collection()` SO TWO CALLERS CAN SHARE THEM. Practice Areas is
+ * its own top-level group now and needs these nine city lists placed BESIDE the
+ * Car Accidents singleton rather than nested one level further down — reaching
+ * into a built list item to get them back out is the alternative, and it
+ * depends on the shape the builder happens to serialise to.
+ */
+function groupItems(S: StructureBuilder, context: ConfigContext, type: string) {
+  const spec = GROUPED[type];
+  if (!spec) return [];
+  return spec.groups.map(([value, groupTitle, groupIcon]) =>
+    spec.orderable
+      ? orderableDocumentListDeskItem({
+          type,
+          id: `${type}-${value}`,
+          title: groupTitle,
+          icon: groupIcon,
+          filter: `${spec.field} == $value`,
+          params: { value },
+          S,
+          context,
+        })
+      : /*
+         * A PLAIN FILTERED LIST, and it has to set the group's field on
+         * anything created inside it the way the orderable one does for
+         * free. Without the initial value a page created inside Denver
+         * would have no city, match none of the nine filters, and be
+         * invisible in the desk — the same silent-failure shape the
+         * four `check:` linters exist to catch.
+         */
+        S.listItem()
+          .title(groupTitle)
+          .icon(groupIcon)
+          .id(`${type}-${value}`)
+          .child(
+            S.documentTypeList(type)
+              .title(groupTitle)
+              .filter(`_type == $type && ${spec.field} == $value`)
+              .params({ type, value })
+              .initialValueTemplates([
+                S.initialValueTemplateItem(`${type}-by-${spec.field}`, { value }),
+              ])
+          )
+  );
+}
+
 function collection(
   S: StructureBuilder,
   context: ConfigContext,
@@ -248,80 +287,62 @@ function collection(
   title: string,
   icon?: ComponentType
 ) {
-  const spec = GROUPED[type];
-  if (!spec) return S.documentTypeListItem(type).title(title).icon(icon);
-
+  if (!GROUPED[type]) return S.documentTypeListItem(type).title(title).icon(icon);
   return S.listItem()
     .title(title)
     .icon(icon)
     .id(type)
-    .child(
-      S.list()
-        .title(title)
-        .items(
-          spec.groups.map(([value, groupTitle, groupIcon]) =>
-            spec.orderable
-              ? orderableDocumentListDeskItem({
-                  type,
-                  id: `${type}-${value}`,
-                  title: groupTitle,
-                  icon: groupIcon,
-                  filter: `${spec.field} == $value`,
-                  params: { value },
-                  S,
-                  context,
-                })
-              : /*
-                 * A PLAIN FILTERED LIST, and it has to set the group's field on
-                 * anything created inside it the way the orderable one does for
-                 * free. Without the initial value a page created inside Denver
-                 * would have no city, match none of the nine filters, and be
-                 * invisible in the desk — the same silent-failure shape the
-                 * four `check:` linters exist to catch.
-                 */
-                S.listItem()
-                  .title(groupTitle)
-                  .icon(groupIcon)
-                  .id(`${type}-${value}`)
-                  .child(
-                    S.documentTypeList(type)
-                      .title(groupTitle)
-                      .filter(`_type == $type && ${spec.field} == $value`)
-                      .params({ type, value })
-                      .initialValueTemplates([
-                        S.initialValueTemplateItem(`${type}-by-${spec.field}`, { value }),
-                      ])
-                  )
-          )
-        )
-    );
+    .child(S.list().title(title).items(groupItems(S, context, type)));
 }
 
 /**
- * COLLECTIONS — repeatable content. Phase 2 (hand-authored), Phase 3 (imported).
+ * COLLECTIONS — repeatable content that is not a practice area or a blog post.
  *
- * A COLLECTION IS FOR CONTENT REUSED IN MORE THAN ONE PLACE — which is what this
- * group is FOR, from an editor's side: change the record once and every page
- * that shows it follows. These nine reach 294, 187, 111, 107, 104, 29, 27, 5
- * and 3 built pages.
+ * A COLLECTION IS FOR CONTENT REUSED IN MORE THAN ONE PLACE, which is what this
+ * group is FOR from an editor's side: change the record once and every page that
+ * shows it follows. Phase 2f took out seven that reached one page each; they are
+ * arrays on the Pages documents now.
  *
- * Phase 2f took out seven that reached one page each. They are arrays on the
- * Pages documents now, where an editor looking for the sponsorships finds them
- * on the page that renders them rather than hunting a global list.
- *
- * ORDERED BY HOW OFTEN AN EDITOR REACHES FOR IT, not alphabetically. The two
- * lookup tables — Cities and Blog Categories — sit at the bottom: they are read
- * by other documents far more often than they are edited.
+ * THE TWO BIGGEST LEFT THIS LIST IN PHASE 6b. Practice Areas (104 documents) and
+ * the blog (186 posts, 23 categories) are top-level groups of their own — see
+ * above. What remains is the six an editor reaches for occasionally, ordered by
+ * how often: the roster first, the two lookup tables last.
  */
 const COLLECTIONS: [string, string, ComponentType?][] = [
-  ["practiceArea", "Practice Areas", CaseIcon],
-  ["blogPost", "Blog Posts", DocumentTextIcon],
   ["teamMember", "Team", UsersIcon],
   ["testimonial", "Testimonials", CommentIcon],
   ["caseResult", "Case Results", CaseIcon],
   ["award", "Awards", StarIcon],
   ["coreValue", "Core Values", HeartIcon],
   ["city", "Cities", PinIcon],
+];
+
+/**
+ * PRACTICE AREAS — its own top-level group, not a row inside Collections.
+ *
+ * 104 documents across nine cities, the largest thing on the site after the
+ * blog and the one an editor reaches for most. Burying it under Collections put
+ * the firm's core content two clicks from the front door, beside five-record
+ * lookup lists.
+ *
+ * CAR ACCIDENTS LEADS IT, above a divider. It is a practice-area page that is
+ * not a `practiceArea` DOCUMENT — its content is eighteen typed sections on its
+ * own singleton, because it is the one page served by the heavy hand-authored
+ * template. An editor looking for the car accident page looks here, which is
+ * the whole argument for the placement.
+ */
+const PRACTICE_AREAS: [string, string, ComponentType?] = ["practiceArea", "Practice Areas", CaseIcon];
+
+/**
+ * BLOG — the posts and the taxonomy above them, together.
+ *
+ * They are one editorial job: a post belongs to exactly one category, and the
+ * category list exists to serve the posts. Splitting them across a Collections
+ * list meant scrolling past Case Results to find the categories that the thing
+ * two rows up depends on.
+ */
+const BLOG: [string, string, ComponentType?][] = [
+  ["blogPost", "Blog Posts", DocumentTextIcon],
   ["blogCategory", "Blog Categories", TagIcon],
 ];
 
@@ -347,6 +368,11 @@ const SETTINGS: [string, string, ComponentType?][] = [
  */
 export const SINGLETON_TYPES = [
   ...[...PAGES, ...SETTINGS].map(([type]) => type),
+  // Car Accidents leads the Practice Areas group rather than sitting in PAGES,
+  // and it is still a singleton pinned to a fixed id — leaving it out here
+  // would put a generic "Car Accidents" list beside the pinned one, with edits
+  // to the second copy going nowhere.
+  "carAccidentsPage",
   // `sitePage` is three fixed documents rather than one, but the reason it must
   // stay out of a generic list is identical: an editor seeing "all utility
   // pages" alongside the three pinned ones would edit a fourth copy that no
@@ -396,6 +422,37 @@ export const structure: StructureResolver = (S, context) => {
                     )
                 ),
             ])
+        ),
+
+      /*
+       * PRACTICE AREAS — the hand-built page, then the nine cities.
+       *
+       * The divider is doing real work: Car Accidents is a page singleton and
+       * everything under it is a `practiceArea` document, which are two
+       * different kinds of thing that happen to belong in one list.
+       */
+      S.listItem()
+        .title("Practice Areas")
+        .icon(CaseIcon)
+        .id("practice-areas")
+        .child(
+          S.list()
+            .title("Practice Areas")
+            .items([
+              singleton(S, "carAccidentsPage", "Car Accidents", WarningOutlineIcon),
+              S.divider(),
+              ...groupItems(S, context, PRACTICE_AREAS[0]),
+            ])
+        ),
+
+      S.listItem()
+        .title("Blog")
+        .icon(DocumentTextIcon)
+        .id("blog")
+        .child(
+          S.list()
+            .title("Blog")
+            .items(BLOG.map(([type, title, icon]) => collection(S, context, type, title, icon)))
         ),
 
       S.listItem()
