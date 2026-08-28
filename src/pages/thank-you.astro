@@ -6,8 +6,13 @@ import WhileYouWait from "../components/thankyou/WhileYouWait.astro";
 import AwardsBar from "../components/AwardsBar.astro";
 import { getThankYouPage } from "../data/thankYou";
 import { getAwards } from "../data/awards";
+import { getAwardsBar } from "../data/home";
 
-const [page, awards] = await Promise.all([getThankYouPage(), getAwards()]);
+const [page, awards, awardsBar] = await Promise.all([
+  getThankYouPage(),
+  getAwards(),
+  getAwardsBar(),
+]);
 ---
 
 <Layout
@@ -22,5 +27,5 @@ const [page, awards] = await Promise.all([getThankYouPage(), getAwards()]);
   }
   <PageHeader eyebrow={page.eyebrow} title={page.title} lede={page.lede} />
   <WhileYouWait panel={page.panel} />
-  <AwardsBar awards={awards} />
+  <AwardsBar awards={awards} eyebrow={awardsBar.eyebrow} />
 </Layout>

@@ -51,6 +51,108 @@ against the code, swept for dead literals, swapped, built and diffed on its own.
 - `scripts/lib/sanity.py` — one GROQ reader for every Python check. `lib/firm.py` is one
   query on top of it.
 
+### THREE BANDS OWNED THEIR OWN COPY, AND THE READINESS SWEEP COULD NOT SEE THEM
+
+Found by eye, in a page-by-page Studio review — not by any check. `RecentResults`
+hardcoded "Outstanding results." and its link label in markup, `AwardsBar` declared
+`eyebrow = "Recognized & awarded"` as a PROP DEFAULT that no caller overrode, and
+`TestimonialRail` carried its eyebrow, heading and button the same way.
+
+**This file claimed the opposite and was not wrong so much as narrow**: "No component owns
+content. All 127 checked — not one declares a content array in its frontmatter." That sweep
+looked for content ARRAYS in FRONTMATTER. A bare string in markup, and a default in a props
+destructure, are neither — so three bands walked straight past the check whose whole job was
+this rule. **A sweep is only as good as the shape it looks for**, and the shape here was
+narrower than the rule it was testing.
+
+Where each landed follows the existing rule rather than where they were noticed:
+
+- **The results strip is on `homePage`.** It renders nowhere else.
+- **The awards bar and the testimonial rail are on `sharedSections`**, now five bands rather
+  than three. The bar renders on nearly every page of the site and the rail on thirty — the
+  homepage, all 26 attorney bios and Car Accidents. Putting either on the Homepage would mean
+  editing the homepage to change 330 pages. **About keeps its own heading** over the same
+  testimonials, from its own document, which is exactly the case this split exists to serve.
+
+### A FIELD MOVING FROM A BAND TO ITS ITEMS IS A CONTENT DECISION, NOT A TIDY-UP
+
+Three did in 6a, and each was one string doing a job that wanted many:
+
+| Was | Now | Why |
+|---|---|---|
+| `practiceSection.closing` | each card's `closing` | one reassurance was handed to all six panels |
+| `faqSection.answerCtaLabel` | each question's `ctaLabel` | twenty open answers offered the same words |
+| each FAQ's typed `videoLength` | derived from Wistia | nothing checked the typed value against the film |
+
+**The first two are seeded from the value they replaced**, so the page is byte-identical until
+someone edits one. **`getHomePracticeAreas()` now throws by name when a card has no closing
+line** — it used to be impossible to be missing, and an empty one would render a panel that
+just stops.
+
+**CAR ACCIDENTS FOLLOWED THE FAQ CHANGES WITHOUT BEING ASKED**, because `faqItemFields` is one
+array shared by both accordions. Its twelve questions had no button label of their own — they
+read the homepage's — so the migration seeded them from there. Worth knowing before editing
+that file: it is not homepage-only.
+
+### THE DURATION COMES OFF THE SAME oEMBED CALL AS THE POSTER
+
+`wistiaDuration()` in `lib/video.ts`, beside `wistiaPosterUrl()`. Both now read one memoised
+`wistiaOembed(id)` rather than fetching separately — one request per distinct id for the whole
+build, which today is ONE, because all twenty FAQs point at the same stand-in.
+
+**That is the only content change 6a made**: the rows read "3 min" where the typed value said
+"2 min", because the placeholder film is three minutes long. 327 of 329 pages byte-identical,
+2 changed, both explained.
+
+`diff-comp-car-accidents.py` went red on it, which is the check working. **The departure is
+declared and matched STRUCTURALLY** — every row carries a duration, and the set is NOT the
+comp's — never pinned to "3 min". Pinning it would assert the placeholder is correct and go
+red on the change that fixes it, which is the same reasoning that file already applies to
+`PLACEHOLDER_VIDEO`.
+
+### A CSS ONE-LINER MOVED 315 PAGES AND CHANGED NOTHING
+
+Adding `height: 100%` to `RailVideoCard` rehashed `TestimonialRail.*.css` — and **blog posts
+link that chunk**, because `[slug].astro` imports the component for its Car Accidents branch,
+so the bundle is shared across every page that route serves.
+
+**Both trees were built, the bundle hash normalised alongside the image URLs, and the pages
+re-classified: 329 of 329 identical.** That is the Phase 3b procedure and it is the only way
+through this class of result — a mechanical difference across 315 pages will bury a real one
+in the same bucket. **Do not read a large CHANGED count as a finding until the known
+mechanical difference is normalised out.**
+
+The fix itself is worth keeping: `.vcard` had `min-height` and no `height`, and **Wistia moves
+the card into a div of its own**, so the flex item that stretches is that div and the card
+inside stayed at 440px beside a taller quote. Fourth instance of the pattern this file already
+warns about under "the one thing to read before touching a popover".
+
+### HIDING A REQUIRED FIELD IS A TRAP
+
+`iconKey` came off the practice card's form by request, with the icons still drawing. A hidden
+`required()` field with no initial value would fail validation on a NEW card while showing an
+error for a field that is not on screen — unresolvable in the Studio.
+
+So it is a **closed list with an initial value** now rather than a free-text key. Same shape
+as `videoRef`'s hidden `provider`, and the same reason: hide a field only once it cannot be
+the thing blocking a save.
+
+### A COMMENT WITH A BACKTICK CANNOT GO INSIDE A GROQ TEMPLATE LITERAL
+
+It closes the string. `queries.ts` then failed to parse and `astro check` reported **192 errors
+across the repo**, none of them where the problem was. Comments about a projection go ABOVE
+`defineQuery(`, which is where every other one in that file already is.
+
+### A SPENT MIGRATION MUST NOT BE WHAT TURNS THE TYPE GATE RED
+
+`migrate-home-4a.ts` read `getPracticePromise()` and `faqSection.answerCtaLabel`, both of which
+6a removed. Its swap happened long ago and it refuses to re-run, but `check:types` is wired
+into `npm run check` for the whole repo — so a script that can no longer typecheck breaks a
+gate everyone shares. The dangling references were deleted and its header records why.
+
+**Every Phase 4 migration is in this position.** One that reads a getter a later phase removes
+will do the same thing again.
+
 ### EVERY PAGE DOCUMENT IS AN ACCORDION OF SECTIONS
 
 **Twelve of the fifteen page types now hold their fields in collapsible section objects**, one
@@ -808,8 +910,11 @@ assertion: an image that is already a reference means the getter has moved.
 - **No webhook.** Publishing changes nothing on the live site until someone redeploys. Phase 5.
 - **Nothing is wired for Visual Editing**, so array projections omit `_key` where the interface
   has none.
-- **FAQs and testimonials still nest their video field** in a `videoRef` object showing one
-  input. The attorney film was flattened to a bare id; these were left alone.
+- **Testimonials still nest their video field** in a `videoRef` object showing one input. The
+  attorney film, the hero, the firm intro and both FAQ accordions are flat `videoId` strings
+  now — the projection reassembles `{provider, id}`, so `lib/video.ts` never sees a bare id and
+  the rule that nothing may store a video URL is untouched. Testimonials were not in the sweep's
+  scope and are the last nested one.
 - **`routePaths.ts` exports `locationPath` and nothing calls it.** One of five identical
   helpers that name the kinds of URL this site has; whether that set should shrink is a
   routing question, not a migration one.
@@ -1927,8 +2032,11 @@ light was re-checked at upload.**
   share `[slug].astro` at the root, so a collision is a page that cannot be served.
 - **80 async getters, and the data layer is clean**: no hex codes, no SVG markup, no style
   strings. The convention held.
-- **No component owns content.** All 127 checked — not one declares a content array in its
-  frontmatter.
+- **No component owns content** — but read the note at the top of this file before trusting
+  that line. All 127 were checked for a content ARRAY in their FRONTMATTER, and three bands
+  were owning bare strings in MARKUP and a prop DEFAULT, which that sweep could not see. Those
+  three are fields now; the sweep has still never been re-run in a shape that would find a
+  fourth.
 
 **The blockers, in the order they bite:**
 

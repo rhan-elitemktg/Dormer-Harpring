@@ -84,6 +84,14 @@ export type SharedSections = {
     }>;
     ctaLabel: string;
   };
+  awardsBar: {
+    eyebrow: string;
+  };
+  testimonialRail: {
+    eyebrow: string;
+    title: string;
+    ctaLabel: string;
+  };
   sidebarForm?: {
     title: string;
     lede: string;
@@ -985,8 +993,8 @@ export type CarAccidentsPage = {
     items: Array<{
       question: string;
       answer: string;
-      video: VideoRef;
-      videoLength: string;
+      videoId: string;
+      ctaLabel: string;
       _key: string;
     }>;
   };
@@ -1025,57 +1033,6 @@ export type VideoRef = {
   _type: "videoRef";
   provider: "wistia";
   id: string;
-};
-
-export type TeamMember = {
-  _id: string;
-  _type: "teamMember";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  kind: "partner" | "attorney" | "staff" | "dog";
-  orderRank?: string;
-  key: Slug;
-  name: string;
-  role: string;
-  photo?: {
-    asset?: SanityImageAssetReference;
-    media?: unknown;
-    hotspot?: SanityImageHotspot;
-    crop?: SanityImageCrop;
-    _type: "image";
-  };
-  memorial?: boolean;
-  bio?: SimpleText;
-  awards?: Array<{
-    image: {
-      asset?: SanityImageAssetReference;
-      media?: unknown;
-      hotspot?: SanityImageHotspot;
-      crop?: SanityImageCrop;
-      _type: "image";
-    };
-    alt: string;
-    _key: string;
-  }>;
-  onAttorneyRail?: boolean;
-  hasProfile?: boolean;
-  category?: string;
-  lede?: string;
-  email?: string;
-  facts?: Array<{
-    value: string;
-    label: string;
-    _key: string;
-  }>;
-  body?: RichText;
-  education?: Array<string>;
-  links?: Array<
-    {
-      _key: string;
-    } & NavLink
-  >;
-  videoId?: string;
 };
 
 export type Seo = {
@@ -1308,7 +1265,7 @@ export type HomePage = {
     };
     videoCta: {
       label: string;
-      video: VideoRef;
+      videoId: string;
     };
     stats: Array<{
       big: string;
@@ -1316,6 +1273,10 @@ export type HomePage = {
       _type: "heroStat";
       _key: string;
     }>;
+  };
+  resultsStrip: {
+    title: string;
+    ctaLabel: string;
   };
   firmIntro: {
     title: Array<string>;
@@ -1329,11 +1290,10 @@ export type HomePage = {
       _key: string;
     }>;
     videoLabel: string;
-    video: VideoRef;
+    videoId: string;
     quote: {
       text: string;
-      name: string;
-      role: string;
+      attorney: TeamMemberReference;
     };
     aside: {
       title: string;
@@ -1346,15 +1306,21 @@ export type HomePage = {
     title: Array<string>;
     lede: string;
     tabsLabel: string;
-    catastrophicTitle: string;
-    ask: {
-      text: string;
-      cta: string;
-    };
     cards: Array<{
       name: string;
-      iconKey: string;
+      iconKey:
+        | "car-accident"
+        | "truck-accident"
+        | "motorcycle-accident"
+        | "bicycle-accident"
+        | "slip-and-fall"
+        | "brain-injury"
+        | "wrongful-death"
+        | "dog-bite"
+        | "pedestrian-accident"
+        | "spinal-cord";
       blurb: string;
+      closing: string;
       href: string;
       image?: {
         asset?: SanityImageAssetReference;
@@ -1366,7 +1332,7 @@ export type HomePage = {
       _type: "areaCard";
       _key: string;
     }>;
-    closing: string;
+    catastrophicTitle: string;
     catastrophic: Array<{
       name: string;
       iconKey: string;
@@ -1375,6 +1341,10 @@ export type HomePage = {
       _type: "catastrophicArea";
       _key: string;
     }>;
+    ask: {
+      text: string;
+      cta: string;
+    };
   };
   promise: {
     eyebrow: string;
@@ -1391,7 +1361,13 @@ export type HomePage = {
     eyebrow: string;
     title: string;
     lede: string;
-    answerCtaLabel: string;
+    items: Array<{
+      question: string;
+      answer: string;
+      videoId: string;
+      ctaLabel: string;
+      _key: string;
+    }>;
     ask: {
       title: string;
       body: string;
@@ -1406,13 +1382,6 @@ export type HomePage = {
       };
       portraitAlt: string;
     };
-    items: Array<{
-      question: string;
-      answer: string;
-      video: VideoRef;
-      videoLength: string;
-      _key: string;
-    }>;
   };
   feedSection: {
     tabs: {
@@ -1484,6 +1453,57 @@ export type HomePage = {
       _key: string;
     }>;
   };
+};
+
+export type TeamMember = {
+  _id: string;
+  _type: "teamMember";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  kind: "partner" | "attorney" | "staff" | "dog";
+  orderRank?: string;
+  key: Slug;
+  name: string;
+  role: string;
+  photo?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+  };
+  memorial?: boolean;
+  bio?: SimpleText;
+  awards?: Array<{
+    image: {
+      asset?: SanityImageAssetReference;
+      media?: unknown;
+      hotspot?: SanityImageHotspot;
+      crop?: SanityImageCrop;
+      _type: "image";
+    };
+    alt: string;
+    _key: string;
+  }>;
+  onAttorneyRail?: boolean;
+  hasProfile?: boolean;
+  category?: string;
+  lede?: string;
+  email?: string;
+  facts?: Array<{
+    value: string;
+    label: string;
+    _key: string;
+  }>;
+  body?: RichText;
+  education?: Array<string>;
+  links?: Array<
+    {
+      _key: string;
+    } & NavLink
+  >;
+  videoId?: string;
 };
 
 export type NavLink = {
@@ -1625,7 +1645,6 @@ export type AllSanitySchemaTypes =
   | CarAccidentsPage
   | Testimonial
   | VideoRef
-  | TeamMember
   | Seo
   | PracticeAreaReference
   | PracticeAreasPage
@@ -1634,6 +1653,7 @@ export type AllSanitySchemaTypes =
   | TeamPage
   | AboutPage
   | HomePage
+  | TeamMember
   | NavLink
   | Link
   | SanityImagePaletteSwatch
@@ -1796,7 +1816,7 @@ export type CORE_VALUES_QUERY_RESULT = Array<{
 
 // Source: src/sanity/lib/queries.ts
 // Variable: SHARED_SECTIONS_QUERY
-// Query: *[_type == "sharedSections" && _id == "sharedSections"][0]{  coreValues{ eyebrow, title },  reviewSummary{ count, rating, source },  attorneysBand{    eyebrow,    title,    quote,    ctaLabel,    signature{ name, role, attorneyKey, portrait }  },  whyUs{    eyebrow,    title{ lead, accent },    lede,    "points": coalesce(points[]{ _key, title, body }, []),    ctaLabel  },  sidebarForm{ title, lede, submitLabel, disclaimer }}
+// Query: *[_type == "sharedSections" && _id == "sharedSections"][0]{  coreValues{ eyebrow, title },  reviewSummary{ count, rating, source },  attorneysBand{    eyebrow,    title,    quote,    ctaLabel,    signature{ name, role, attorneyKey, portrait }  },  whyUs{    eyebrow,    title{ lead, accent },    lede,    "points": coalesce(points[]{ _key, title, body }, []),    ctaLabel  },  sidebarForm{ title, lede, submitLabel, disclaimer },  awardsBar{ eyebrow },  testimonialRail{ eyebrow, title, ctaLabel }}
 export type SHARED_SECTIONS_QUERY_RESULT = {
   coreValues: {
     eyebrow: string;
@@ -1845,16 +1865,24 @@ export type SHARED_SECTIONS_QUERY_RESULT = {
     submitLabel: string;
     disclaimer: string;
   } | null;
+  awardsBar: {
+    eyebrow: string;
+  };
+  testimonialRail: {
+    eyebrow: string;
+    title: string;
+    ctaLabel: string;
+  };
 } | null;
 
 // Source: src/sanity/lib/queries.ts
 // Variable: HOME_FAQS_QUERY
-// Query: *[_type == "homePage" && _id == "homePage"][0].faqSection.items[]{  _key,  question,  answer,  videoLength,  video{ provider, id }}
+// Query: *[_type == "homePage" && _id == "homePage"][0].faqSection.items[]{  _key,  question,  answer,  ctaLabel,  "video": { "provider": "wistia", "id": videoId }}
 export type HOME_FAQS_QUERY_RESULT = Array<{
   _key: string;
   question: string;
   answer: string;
-  videoLength: string;
+  ctaLabel: string;
   video: {
     provider: "wistia";
     id: string;
@@ -1863,12 +1891,12 @@ export type HOME_FAQS_QUERY_RESULT = Array<{
 
 // Source: src/sanity/lib/queries.ts
 // Variable: CAR_ACCIDENT_FAQS_QUERY
-// Query: *[_type == "carAccidentsPage" && _id == "carAccidentsPage"][0].faqSection.items[]{  _key,  question,  answer,  videoLength,  video{ provider, id }}
+// Query: *[_type == "carAccidentsPage" && _id == "carAccidentsPage"][0].faqSection.items[]{  _key,  question,  answer,  ctaLabel,  "video": { "provider": "wistia", "id": videoId }}
 export type CAR_ACCIDENT_FAQS_QUERY_RESULT = Array<{
   _key: string;
   question: string;
   answer: string;
-  videoLength: string;
+  ctaLabel: string;
   video: {
     provider: "wistia";
     id: string;
@@ -2111,12 +2139,23 @@ export type FEATURED_POST_QUERY_RESULT = Array<{
 
 // Source: src/sanity/lib/queries.ts
 // Variable: HOME_PRACTICE_AREAS_QUERY
-// Query: *[_type == "homePage" && _id == "homePage"][0].practiceSection.cards[]{    _key, name, iconKey, blurb, href, image  }
+// Query: *[_type == "homePage" && _id == "homePage"][0].practiceSection.cards[]{    _key, name, iconKey, blurb, closing, href, image  }
 export type HOME_PRACTICE_AREAS_QUERY_RESULT = Array<{
   _key: string;
   name: string;
-  iconKey: string;
+  iconKey:
+    | "bicycle-accident"
+    | "brain-injury"
+    | "car-accident"
+    | "dog-bite"
+    | "motorcycle-accident"
+    | "pedestrian-accident"
+    | "slip-and-fall"
+    | "spinal-cord"
+    | "truck-accident"
+    | "wrongful-death";
   blurb: string;
+  closing: string;
   href: string;
   image: {
     asset?: SanityImageAssetReference;
@@ -2354,7 +2393,7 @@ export type ATTORNEY_RAIL_QUERY_RESULT = Array<{
 
 // Source: src/sanity/lib/queries.ts
 // Variable: HOME_COPY_QUERY
-// Query: *[_type == "homePage" && _id == "homePage"][0]{  hero{    eyebrow,    headline,    lede,    primaryCta{ label, href },    videoCta{ label, video{ provider, id } }  },  "heroStats": coalesce(hero.stats[]{ _key, big, label }, []),  firmIntro{    title,    tagline,    body,    helpTitle,    "helpPoints": coalesce(helpPoints[]{ _key, lead, text }, []),    videoLabel,    video{ provider, id },    quote{ text, name, role },    aside{ title, text, ctaLabel }  },  promise{    eyebrow,    title,    "slides": coalesce(slides[]{ _key, label, body }, []),    ctaLabel  }}
+// Query: *[_type == "homePage" && _id == "homePage"][0]{  hero{    eyebrow,    headline,    lede,    primaryCta{ label, href },    videoCta{ label, "video": { "provider": "wistia", "id": videoId } }  },  "heroStats": coalesce(hero.stats[]{ _key, big, label }, []),  "resultsStrip": resultsStrip{ title, ctaLabel },  firmIntro{    title,    tagline,    body,    helpTitle,    "helpPoints": coalesce(helpPoints[]{ _key, lead, text }, []),    videoLabel,    "video": { "provider": "wistia", "id": videoId },    quote{ text, "name": attorney->name, "role": attorney->role },    aside{ title, text, ctaLabel }  },  promise{    eyebrow,    title,    "slides": coalesce(slides[]{ _key, label, body }, []),    ctaLabel  }}
 export type HOME_COPY_QUERY_RESULT = {
   hero: {
     eyebrow: string;
@@ -2377,6 +2416,10 @@ export type HOME_COPY_QUERY_RESULT = {
     big: string;
     label: string;
   }>;
+  resultsStrip: {
+    title: string;
+    ctaLabel: string;
+  };
   firmIntro: {
     title: Array<string>;
     tagline: string;
@@ -2417,7 +2460,7 @@ export type HOME_COPY_QUERY_RESULT = {
 
 // Source: src/sanity/lib/queries.ts
 // Variable: HOME_PRACTICE_SECTION_QUERY
-// Query: *[_type == "homePage" && _id == "homePage"][0]{  practiceSection{    eyebrow,    title,    lede,    tabsLabel,    catastrophicTitle,    ask{ text, cta }  },  "practicePromise": practiceSection.closing}
+// Query: *[_type == "homePage" && _id == "homePage"][0]{  practiceSection{    eyebrow,    title,    lede,    tabsLabel,    catastrophicTitle,    ask{ text, cta }  }}
 export type HOME_PRACTICE_SECTION_QUERY_RESULT = {
   practiceSection: {
     eyebrow: string;
@@ -2430,17 +2473,15 @@ export type HOME_PRACTICE_SECTION_QUERY_RESULT = {
       cta: string;
     };
   };
-  practicePromise: string;
 } | null;
 
 // Source: src/sanity/lib/queries.ts
 // Variable: HOME_FAQ_SECTION_QUERY
-// Query: *[_type == "homePage" && _id == "homePage"][0].faqSection{  eyebrow,  title,  lede,  answerCtaLabel,  ask{ title, body, ctaLabel, ctaHref, portrait, portraitAlt }}
+// Query: *[_type == "homePage" && _id == "homePage"][0].faqSection{  eyebrow,  title,  lede,  ask{ title, body, ctaLabel, ctaHref, portrait, portraitAlt }}
 export type HOME_FAQ_SECTION_QUERY_RESULT = {
   eyebrow: string;
   title: string;
   lede: string;
-  answerCtaLabel: string;
   ask: {
     title: string;
     body: string;
@@ -3099,9 +3140,9 @@ declare module "@sanity/client" {
     '*[_type == "firmStats" && _id == "firmStats"][0]{\n  "stats": coalesce(stats[]{ _key, big, label }, [])\n}': FIRM_STATS_QUERY_RESULT;
     '*[_type == "award"] | order(order asc){\n  "_key": key.current,\n  alt,\n  image,\n  height\n}': AWARDS_QUERY_RESULT;
     '*[_type == "coreValue"] | order(order asc){\n  "_key": _id,\n  title,\n  body,\n  iconKey\n}': CORE_VALUES_QUERY_RESULT;
-    '*[_type == "sharedSections" && _id == "sharedSections"][0]{\n  coreValues{ eyebrow, title },\n  reviewSummary{ count, rating, source },\n  attorneysBand{\n    eyebrow,\n    title,\n    quote,\n    ctaLabel,\n    signature{ name, role, attorneyKey, portrait }\n  },\n  whyUs{\n    eyebrow,\n    title{ lead, accent },\n    lede,\n    "points": coalesce(points[]{ _key, title, body }, []),\n    ctaLabel\n  },\n  sidebarForm{ title, lede, submitLabel, disclaimer }\n}': SHARED_SECTIONS_QUERY_RESULT;
-    '*[_type == "homePage" && _id == "homePage"][0].faqSection.items[]{\n  _key,\n  question,\n  answer,\n  videoLength,\n  video{ provider, id }\n}': HOME_FAQS_QUERY_RESULT;
-    '*[_type == "carAccidentsPage" && _id == "carAccidentsPage"][0].faqSection.items[]{\n  _key,\n  question,\n  answer,\n  videoLength,\n  video{ provider, id }\n}': CAR_ACCIDENT_FAQS_QUERY_RESULT;
+    '*[_type == "sharedSections" && _id == "sharedSections"][0]{\n  coreValues{ eyebrow, title },\n  reviewSummary{ count, rating, source },\n  attorneysBand{\n    eyebrow,\n    title,\n    quote,\n    ctaLabel,\n    signature{ name, role, attorneyKey, portrait }\n  },\n  whyUs{\n    eyebrow,\n    title{ lead, accent },\n    lede,\n    "points": coalesce(points[]{ _key, title, body }, []),\n    ctaLabel\n  },\n  sidebarForm{ title, lede, submitLabel, disclaimer },\n  awardsBar{ eyebrow },\n  testimonialRail{ eyebrow, title, ctaLabel }\n}': SHARED_SECTIONS_QUERY_RESULT;
+    '*[_type == "homePage" && _id == "homePage"][0].faqSection.items[]{\n  _key,\n  question,\n  answer,\n  ctaLabel,\n  "video": { "provider": "wistia", "id": videoId }\n}': HOME_FAQS_QUERY_RESULT;
+    '*[_type == "carAccidentsPage" && _id == "carAccidentsPage"][0].faqSection.items[]{\n  _key,\n  question,\n  answer,\n  ctaLabel,\n  "video": { "provider": "wistia", "id": videoId }\n}': CAR_ACCIDENT_FAQS_QUERY_RESULT;
     '*[_type == "caseResult" && shownOn == "results"] | order(order asc){\n  "_key": _id, tag, badge, "wonInCourt": coalesce(wonInCourt, false), offered, recovered, story\n}': CASE_RESULTS_QUERY_RESULT;
     '*[_type == "caseResult" && shownOn == "co-counsel"] | order(order asc){\n  "_key": _id, tag, badge, "wonInCourt": coalesce(wonInCourt, false), offered, recovered, story\n}': CO_COUNSEL_RESULTS_QUERY_RESULT;
     '*[_type == "caseResult" && shownOn == "home"] | order(order asc){\n  "_key": _id, tag, badge, "wonInCourt": coalesce(wonInCourt, false), offered, recovered, story\n}': HOME_RESULTS_QUERY_RESULT;
@@ -3114,7 +3155,7 @@ declare module "@sanity/client" {
     '*[_type == "blogCategory"] | order(slug.current asc){\n    "_key": slug.current, title, "slug": slug.current,\n    "posts": count(*[_type == "blogPost" && categories[0]._ref == ^._id])\n  }': BLOG_CATEGORIES_QUERY_RESULT;
     '*[_type == "blogPost" && featured != true] | order(publishedAt desc){\n  "_key": slug.current,\n  "slug": slug.current,\n  title,\n  excerpt,\n  publishedAt,\n  "category": categories[0]->{ "_key": slug.current, title, "slug": slug.current },\n  image,\n  "reviewerKey": reviewer->key.current\n}': BLOG_POSTS_QUERY_RESULT;
     '*[_type == "blogPost" && featured == true]{\n  "_key": slug.current,\n  "slug": slug.current,\n  title,\n  excerpt,\n  publishedAt,\n  "category": categories[0]->{ "_key": slug.current, title, "slug": slug.current },\n  image,\n  "reviewerKey": reviewer->key.current\n, "imageAlt": image.alt}': FEATURED_POST_QUERY_RESULT;
-    '*[_type == "homePage" && _id == "homePage"][0].practiceSection.cards[]{\n    _key, name, iconKey, blurb, href, image\n  }': HOME_PRACTICE_AREAS_QUERY_RESULT;
+    '*[_type == "homePage" && _id == "homePage"][0].practiceSection.cards[]{\n    _key, name, iconKey, blurb, closing, href, image\n  }': HOME_PRACTICE_AREAS_QUERY_RESULT;
     '*[_type == "homePage" && _id == "homePage"][0].practiceSection.catastrophic[]{\n    _key, name, iconKey, insight, href\n  }': HOME_CATASTROPHIC_QUERY_RESULT;
     '*[_type == "practiceAreasPage" && _id == "practiceAreasPage"][0]{\n    "featuredAreas": coalesce(featured.areas[]{ _key, name, iconKey, blurb, href, image }, []),\n    "directory": coalesce(directory.entries[]{\n      _key,\n      title,\n      "items": coalesce(items[]{\n        _key,\n        "label": coalesce(label, page->label),\n        "slug": page->slug.current,\n        href\n      }, [])\n    }, [])\n  }': PRACTICE_AREAS_PAGE_QUERY_RESULT;
     '*[_type == "practiceArea"]{\n    "_key": slug.current,\n    "slug": slug.current,\n    title,\n    label,\n    city,\n    topic,\n    "resource": coalesce(resource, false)\n  }': PRACTICE_AREA_PAGES_QUERY_RESULT;
@@ -3127,9 +3168,9 @@ declare module "@sanity/client" {
     '*[_type == "communityPage" && _id == "communityPage"][0].partners.items[]{\n  _key, org, logo, photo, body\n}': COMMUNITY_PARTNERS_QUERY_RESULT;
     '*[_type == "communityPage" && _id == "communityPage"][0].sponsorships.items[]{\n  _key, name, body\n}': SPONSORSHIPS_QUERY_RESULT;
     '*[_type == "teamMember" && onAttorneyRail == true] | order(\n  select(\n    kind == "partner" => 1,\n    kind == "attorney" => 2,\n    kind == "staff" => 3,\n    kind == "dog" => 4,\n    5\n  ) asc,\n  orderRank asc\n){\n  "_key": key.current,\n  name,\n  role,\n  "portrait": photo,\n  videoId\n}': ATTORNEY_RAIL_QUERY_RESULT;
-    '*[_type == "homePage" && _id == "homePage"][0]{\n  hero{\n    eyebrow,\n    headline,\n    lede,\n    primaryCta{ label, href },\n    videoCta{ label, video{ provider, id } }\n  },\n  "heroStats": coalesce(hero.stats[]{ _key, big, label }, []),\n  firmIntro{\n    title,\n    tagline,\n    body,\n    helpTitle,\n    "helpPoints": coalesce(helpPoints[]{ _key, lead, text }, []),\n    videoLabel,\n    video{ provider, id },\n    quote{ text, name, role },\n    aside{ title, text, ctaLabel }\n  },\n  promise{\n    eyebrow,\n    title,\n    "slides": coalesce(slides[]{ _key, label, body }, []),\n    ctaLabel\n  }\n}': HOME_COPY_QUERY_RESULT;
-    '*[_type == "homePage" && _id == "homePage"][0]{\n  practiceSection{\n    eyebrow,\n    title,\n    lede,\n    tabsLabel,\n    catastrophicTitle,\n    ask{ text, cta }\n  },\n  "practicePromise": practiceSection.closing\n}': HOME_PRACTICE_SECTION_QUERY_RESULT;
-    '*[_type == "homePage" && _id == "homePage"][0].faqSection{\n  eyebrow,\n  title,\n  lede,\n  answerCtaLabel,\n  ask{ title, body, ctaLabel, ctaHref, portrait, portraitAlt }\n}': HOME_FAQ_SECTION_QUERY_RESULT;
+    '*[_type == "homePage" && _id == "homePage"][0]{\n  hero{\n    eyebrow,\n    headline,\n    lede,\n    primaryCta{ label, href },\n    videoCta{ label, "video": { "provider": "wistia", "id": videoId } }\n  },\n  "heroStats": coalesce(hero.stats[]{ _key, big, label }, []),\n  "resultsStrip": resultsStrip{ title, ctaLabel },\n  firmIntro{\n    title,\n    tagline,\n    body,\n    helpTitle,\n    "helpPoints": coalesce(helpPoints[]{ _key, lead, text }, []),\n    videoLabel,\n    "video": { "provider": "wistia", "id": videoId },\n    quote{ text, "name": attorney->name, "role": attorney->role },\n    aside{ title, text, ctaLabel }\n  },\n  promise{\n    eyebrow,\n    title,\n    "slides": coalesce(slides[]{ _key, label, body }, []),\n    ctaLabel\n  }\n}': HOME_COPY_QUERY_RESULT;
+    '*[_type == "homePage" && _id == "homePage"][0]{\n  practiceSection{\n    eyebrow,\n    title,\n    lede,\n    tabsLabel,\n    catastrophicTitle,\n    ask{ text, cta }\n  }\n}': HOME_PRACTICE_SECTION_QUERY_RESULT;
+    '*[_type == "homePage" && _id == "homePage"][0].faqSection{\n  eyebrow,\n  title,\n  lede,\n  ask{ title, body, ctaLabel, ctaHref, portrait, portraitAlt }\n}': HOME_FAQ_SECTION_QUERY_RESULT;
     '*[_type == "homePage" && _id == "homePage"][0].feedSection{\n  tabs{ news, insights },\n  news{ eyebrow, title, lede, ctaLabel },\n  insights{ eyebrow, title, lede, ctaLabel }\n}': HOME_FEED_SECTION_QUERY_RESULT;
     '*[_type == "homePage" && _id == "homePage"][0].communitySection{\n  eyebrow, title, lede, ctaLabel\n}': HOME_COMMUNITY_SECTION_QUERY_RESULT;
     '*[_type == "aboutPage" && _id == "aboutPage"][0]{\n  ...header{ eyebrow, title, lede, ctaLabel, ctaNote },\n  whoWeAre{ eyebrow, title, body, ctaLabel, ctaHref },\n  quote{ text, attribution },\n  team{ eyebrow, title, ctaLabel, ctaHref },\n  reviews{ eyebrow, title },\n  oneShot{ eyebrow, title, body },\n  expect{\n    title,\n    "promises": coalesce(promises[]{ _key, title, body, iconKey }, []),\n    "milestones": coalesce(milestones[]{ _key, tag, title, body }, [])\n  }\n}': ABOUT_PAGE_QUERY_RESULT;

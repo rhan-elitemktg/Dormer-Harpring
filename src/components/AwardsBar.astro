@@ -13,7 +13,7 @@ import type { Award } from "../data/awards";
 
 interface Props {
   awards: Award[];
-  eyebrow?: string;
+  eyebrow: string;
   /**
    * How far the band sits below the section above it.
    *
@@ -27,7 +27,7 @@ interface Props {
   tone?: "lifted" | "sunk";
 }
 
-const { awards, eyebrow = "Recognized & awarded", tone = "lifted" } = Astro.props;
+const { awards, eyebrow, tone = "lifted" } = Astro.props;
 ---
 
 <section class:list={["awards", `awards--${tone}`]}>

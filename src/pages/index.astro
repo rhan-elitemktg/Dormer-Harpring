@@ -14,6 +14,9 @@ import {
   getHomeFirmIntro,
   getHomeWhyUs,
   getHomePromise,
+  getResultsStrip,
+  getAwardsBar,
+  getTestimonialRail,
 } from "../data/home";
 import PracticeSelector from "../components/home/PracticeSelector.astro";
 import WhyUs from "../components/home/WhyUs.astro";
@@ -39,7 +42,6 @@ import { getHomeTestimonials, getReviewSummary } from "../data/testimonials";
 import {
   getPracticeSection,
   getHomePracticeAreas,
-  getPracticePromise,
   getCatastrophicAreas,
 } from "../data/practiceAreas";
 
@@ -47,13 +49,15 @@ const [
   hero,
   stats,
   results,
+  resultsStrip,
   intro,
   awards,
+  awardsBar,
   testimonials,
   reviews,
+  railCopy,
   practiceSection,
   areas,
-  practicePromise,
   catastrophic,
   why,
   attorneysSection,
@@ -74,13 +78,15 @@ const [
   getHomeHero(),
   getHomeStats(),
   getRecentResults(),
+  getResultsStrip(),
   getHomeFirmIntro(),
   getAwards(),
+  getAwardsBar(),
   getHomeTestimonials(),
   getReviewSummary(),
+  getTestimonialRail(),
   getPracticeSection(),
   getHomePracticeAreas(),
-  getPracticePromise(),
   getCatastrophicAreas(),
   getHomeWhyUs(),
   getAttorneysSection(),
@@ -106,14 +112,13 @@ const [
   headerVariant="transparent"
 >
   <Hero hero={hero} stats={stats} />
-  <RecentResults results={results} />
+  <RecentResults results={results} copy={resultsStrip} />
   <FirmIntro intro={intro} />
-  <AwardsBar awards={awards} />
-  <TestimonialRail testimonials={testimonials} reviews={reviews} />
+  <AwardsBar awards={awards} eyebrow={awardsBar.eyebrow} />
+  <TestimonialRail testimonials={testimonials} reviews={reviews} copy={railCopy} />
   <PracticeSelector
     section={practiceSection}
     areas={areas}
-    promise={practicePromise}
     catastrophic={catastrophic}
   />
   <WhyUs why={why} />

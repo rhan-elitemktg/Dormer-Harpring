@@ -43,6 +43,7 @@
 import { defineField, defineType } from "sanity";
 // Subpath, not the barrel — see the note in sanity/structure/index.ts.
 import { BlockElementIcon } from "@sanity/icons/BlockElement";
+import { SECTION } from "../pages/section";
 
 export const sharedSections = defineType({
   name: "sharedSections",
@@ -57,7 +58,7 @@ export const sharedSections = defineType({
       description:
         "The heading above the six value cards. Appears on About, Co-Counsel, the homepage, " +
         "Meet Our Attorneys and News — changing it changes all five.",
-      options: { columns: 2 },
+      options: { ...SECTION, columns: 2 },
       fields: [
         defineField({
           name: "eyebrow",
@@ -75,7 +76,7 @@ export const sharedSections = defineType({
       description:
         "The rating shown beside a testimonials heading. Appears on the homepage, About, the " +
         "attorney bios and the Car Accidents page — four places, one figure.",
-      options: { columns: 3 },
+      options: { ...SECTION, columns: 3 },
       fields: [
         defineField({
           name: "count",
@@ -101,6 +102,7 @@ export const sharedSections = defineType({
       name: "attorneysBand",
       title: "Attorney rail",
       type: "object",
+      options: SECTION,
       description:
         "The heading and pull quote above the attorney cards. Appears on the homepage and " +
         "Practice Areas — two pages, one piece of copy.",
@@ -157,6 +159,7 @@ export const sharedSections = defineType({
       name: "whyUs",
       title: "Why choose us band",
       type: "object",
+      options: SECTION,
       description:
         "The four cards under the practice areas. Appears on the homepage and Practice " +
         "Areas — two pages, one piece of copy.",
@@ -246,10 +249,77 @@ export const sharedSections = defineType({
      * variant, deliberately different copy: the sidebar's is short because it
      * sits beside an article someone is reading.
      */
+    /*
+     * THE AWARDS BAR'S LABEL, and it is here rather than on the Homepage
+     * because the bar renders on ROUGHLY EVERY PAGE — the homepage, About,
+     * Thank You, the three utility pages and all 290 pages `[slug].astro`
+     * serves. One record, changed once, which is what this document is for.
+     *
+     * It was a COMPONENT DEFAULT until now: `AwardsBar.astro` declared
+     * `eyebrow = "Recognized & awarded"` in its own props and no caller ever
+     * overrode it. That is a component owning content, which this codebase's
+     * first rule forbids — and it survived the Sanity readiness sweep because
+     * that sweep looked for content ARRAYS in component frontmatter, and a bare
+     * string default is neither an array nor in the frontmatter it checked.
+     */
+    defineField({
+      name: "awardsBar",
+      title: "Awards bar",
+      type: "object",
+      options: SECTION,
+      description:
+        "The trust bar of award badges. It renders on nearly every page of the site, so this " +
+        "line changes everywhere at once.",
+      fields: [
+        defineField({
+          name: "eyebrow",
+          title: "Label above the badges",
+          type: "string",
+          description:
+            "Not the shared section eyebrow — this is a bar label, which is why it carries no " +
+            "gold rule above it.",
+          validation: (rule) => rule.required(),
+        }),
+      ],
+      validation: (rule) => rule.required(),
+    }),
+
+    /*
+     * THE TESTIMONIAL RAIL'S HEADING. Three callers — the homepage, all 26
+     * attorney bios and the Car Accidents page — render the same records under
+     * the same heading, so it splits the way every repeated band on this site
+     * splits: the RECORDS are a collection, the HEADING is here.
+     *
+     * NOT THE ABOUT PAGE'S. `about/InTheirWords` renders the same testimonials
+     * under its own heading, from `aboutPage`, and that stays true: two
+     * headings over one list is the case this split exists to serve.
+     */
+    defineField({
+      name: "testimonialRail",
+      title: "Testimonial rail",
+      type: "object",
+      options: SECTION,
+      description:
+        "The scrolling band of client videos and quotes, on the homepage, every attorney bio " +
+        "and the Car Accidents page. The About page has its own heading over the same records.",
+      fields: [
+        defineField({ name: "eyebrow", type: "string", validation: (rule) => rule.required() }),
+        defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
+        defineField({
+          name: "ctaLabel",
+          title: "Button",
+          type: "string",
+          validation: (rule) => rule.required(),
+        }),
+      ],
+      validation: (rule) => rule.required(),
+    }),
+
     defineField({
       name: "sidebarForm",
       title: "Sidebar consultation form",
       type: "object",
+      options: SECTION,
       description:
         "The short form in the sidebar of every blog post and every practice-area page — 290 " +
         "of them. The longer form at the foot of a page is separate, on Contact & Consultation.",

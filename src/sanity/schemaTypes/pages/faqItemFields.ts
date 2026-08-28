@@ -39,25 +39,47 @@ export const faqItemFields = [
       "has to make sense on its own — no headings, no lists, no links.",
     validation: (rule) => rule.required(),
   }),
+  /*
+   * A BARE ID, NOT A `videoRef` OBJECT — the object hid its provider and drew
+   * an accordion around one input. The projection reassembles `{provider, id}`,
+   * so `lib/video.ts` is untouched and nothing stores a URL.
+   */
   defineField({
-    name: "video",
-    title: "Attorney's filmed answer",
-    type: "videoRef",
+    name: "videoId",
+    title: "Video ID",
+    type: "string",
     description:
-      "The short video beside the answer. Every FAQ currently points at the same stand-in " +
-      "film — replacing these with real ids is what this field is for.",
+      "The short video beside the answer. Wistia's hashed id — the id ONLY, not the whole " +
+      "URL. Every FAQ currently points at the same stand-in film; replacing these with real " +
+      "ids is what this field is for.",
     validation: (rule) => rule.required(),
   }),
+  /*
+   * THE BUTTON INSIDE THIS ANSWER, per question rather than per band.
+   *
+   * It was one `answerCtaLabel` on the FAQ section, so twenty open answers
+   * offered the same words. A question about filing deadlines and one about
+   * medical bills do not want the same call to action.
+   *
+   * CAR ACCIDENTS FOLLOWS, because this array is shared by both accordions.
+   * That page used to read the homepage's label; each of its twelve questions
+   * now carries its own.
+   */
   defineField({
-    name: "videoLength",
-    title: "Video length",
+    name: "ctaLabel",
+    title: "Button inside the open answer",
     type: "string",
-    description: 'As shown on the row — "2 min". Not read from the video; type what it says.',
     validation: (rule) => rule.required(),
   }),
 ];
 
-/** The row's label in the array list. `shownOn` and `order` are both gone. */
+/*
+ * THE ROW'S LABEL IN THE ARRAY LIST.
+ *
+ * `videoLength` was the subtitle and the field is gone — the duration comes off
+ * Wistia now, so there is nothing typed to show. The answer stands in: it is
+ * the half of the row an editor is scanning for.
+ */
 export const faqItemPreview = {
-  select: { title: "question", subtitle: "videoLength" },
+  select: { title: "question", subtitle: "answer" },
 };

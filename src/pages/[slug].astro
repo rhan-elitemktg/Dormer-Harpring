@@ -66,6 +66,7 @@ import { CA_SECTION_IDS, getPracticeAreaDetails } from "../data/carAccidents";
 import { getContactBand, getContactDetails } from "../data/contact";
 import { getCarAccidentFaqSection, getCarAccidentFaqs } from "../data/faqs";
 import { getAwards } from "../data/awards";
+import { getAwardsBar, getTestimonialRail } from "../data/home";
 import { getFirmDetails } from "../data/site";
 import { getTeam } from "../data/team";
 import {
@@ -219,6 +220,7 @@ const area =
           awardList,
           testimonials,
           reviewSummary,
+          railCopy,
           faqs,
           faqSection,
           contact,
@@ -230,6 +232,7 @@ const area =
           getAwards(),
           getHomeTestimonials(),
           getReviewSummary(),
+          getTestimonialRail(),
           getCarAccidentFaqs(),
           getCarAccidentFaqSection(`#${CA_SECTION_IDS.contact}`),
           getContactDetails(),
@@ -291,6 +294,7 @@ const area =
           reviews,
           testimonials,
           reviewSummary,
+          railCopy,
           faqs,
           faqSection,
           contact,
@@ -302,13 +306,14 @@ const area =
 const areaPage =
   props.kind === "area-page"
     ? await (async () => {
-        const [page, awards, contact, band] = await Promise.all([
+        const [page, awards, awardsBar, contact, band] = await Promise.all([
           getPracticeAreaPageCopy(),
           getAwards(),
+          getAwardsBar(),
           getContactDetails(),
           getContactBand(),
         ]);
-        return { page, awards, contact, form: band.form };
+        return { page, awards, awardsBar, contact, form: band.form };
       })()
     : null;
 
@@ -365,6 +370,7 @@ const siteUrl = (Astro.site?.href ?? "https://www.denvertrial.com/").replace(/\/
         reviews={area.reviews}
         testimonials={area.testimonials}
         reviewSummary={area.reviewSummary}
+        railCopy={area.railCopy}
         faqs={area.faqs}
         faqSection={area.faqSection}
         contact={area.contact}
@@ -390,7 +396,7 @@ const siteUrl = (Astro.site?.href ?? "https://www.denvertrial.com/").replace(/\/
             Practice Areas card answers the same question. The homepage's
             awards bar takes the slot; `sunk`, not the default `lifted`, or it
             would be invisible against the cream above it. */}
-        <AwardsBar awards={areaPage.awards} tone="sunk" />
+        <AwardsBar awards={areaPage.awards} eyebrow={areaPage.awardsBar.eyebrow} tone="sunk" />
 
         {/* The same contact block /news and every interior page already close on. */}
         <ContactDetails details={areaPage.contact} form={areaPage.form} />

@@ -3,21 +3,23 @@
 // cards.
 import ResultCard from "../ResultCard.astro";
 import type { CaseResult } from "../../data/caseResults";
+import type { HomeResultsStrip } from "../../data/home";
 import { ROUTES } from "../../lib/routePaths";
 
 interface Props {
   results: CaseResult[];
+  copy: HomeResultsStrip;
 }
 
-const { results } = Astro.props;
+const { results, copy } = Astro.props;
 ---
 
 <section class="section section--forest results">
   <div class="container">
     <header class="results__head">
-      <h2 class="results__title">Outstanding results.</h2>
+      <h2 class="results__title">{copy.title}</h2>
       <a class="results__all arrow-link" href={ROUTES.results}>
-        See all results <span class="arrow" aria-hidden="true">&rarr;</span>
+        {copy.ctaLabel} <span class="arrow" aria-hidden="true">&rarr;</span>
       </a>
     </header>
 

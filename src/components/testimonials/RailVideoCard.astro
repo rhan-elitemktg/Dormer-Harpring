@@ -44,6 +44,16 @@ const initial = testimonial.name.trim().charAt(0).toUpperCase();
     flex: none;
     width: 320px;
     min-height: 440px;
+    /* FULL HEIGHT SO THE RAIL'S CARDS AGREE, and `min-height` alone could not
+       do it. Wistia moves this <a> into a div of its own, so the flex item in
+       `.tmv__track` is that div rather than this card: the div stretches to the
+       tallest card in the row and this stayed at 440, leaving a video card
+       visibly short beside a long quote. The div's height is definite because
+       stretching resolved it, so this percentage resolves against it.
+
+       Harmless before Wistia initialises, when this IS the flex item and
+       `align-items: stretch` has already done the same job. */
+    height: 100%;
     padding: 0;
     border: 0;
     border-radius: var(--radius-media);

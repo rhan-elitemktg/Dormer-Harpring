@@ -127,9 +127,16 @@ export const CORE_VALUES_QUERY = defineQuery(`*[_type == "coreValue"] | order(or
 /**
  * Headings for bands that appear on more than one page.
  *
- * Only THREE qualify — see the note on the schema type, and note the sweep that
- * found the third, which a naming-convention grep had been missing. A band whose
- * heading differs per page is that page's content, not this document's.
+ * FIVE QUALIFY NOW. Three were found by the sweep the schema type describes —
+ * the one a naming-convention grep had been missing among them. The other two
+ * arrived in Phase 6a and were never editable at all: the awards bar's label
+ * was a prop DEFAULT in `AwardsBar.astro` and the testimonial rail's heading
+ * and button were markup in `TestimonialRail.astro`. Both render on far more
+ * than one page — the bar on nearly every page of the site — so both land here
+ * rather than on the Homepage.
+ *
+ * A band whose heading differs per page is that page's content, not this
+ * document's. The About page keeps its own heading over the same testimonials.
  */
 export const SHARED_SECTIONS_QUERY = defineQuery(
   `*[_type == "sharedSections" && _id == "sharedSections"][0]{
@@ -149,7 +156,9 @@ export const SHARED_SECTIONS_QUERY = defineQuery(
     "points": coalesce(points[]{ _key, title, body }, []),
     ctaLabel
   },
-  sidebarForm{ title, lede, submitLabel, disclaimer }
+  sidebarForm{ title, lede, submitLabel, disclaimer },
+  awardsBar{ eyebrow },
+  testimonialRail{ eyebrow, title, ctaLabel }
 }`
 );
 
@@ -172,8 +181,8 @@ export const HOME_FAQS_QUERY = defineQuery(
   _key,
   question,
   answer,
-  videoLength,
-  video{ provider, id }
+  ctaLabel,
+  "video": { "provider": "wistia", "id": videoId }
 }`
 );
 
@@ -183,8 +192,8 @@ export const CAR_ACCIDENT_FAQS_QUERY = defineQuery(
   _key,
   question,
   answer,
-  videoLength,
-  video{ provider, id }
+  ctaLabel,
+  "video": { "provider": "wistia", "id": videoId }
 }`
 );
 
@@ -465,7 +474,7 @@ export const FEATURED_POST_QUERY = defineQuery(
 /** The homepage's six-card rail. */
 export const HOME_PRACTICE_AREAS_QUERY = defineQuery(
   `*[_type == "homePage" && _id == "homePage"][0].practiceSection.cards[]{
-    _key, name, iconKey, blurb, href, image
+    _key, name, iconKey, blurb, closing, href, image
   }`
 );
 
@@ -702,6 +711,17 @@ export const ATTORNEY_RAIL_QUERY = defineQuery(
  * that spanned all of them would have no owning module — which is the same
  * reason Phase 2f kept one query per array.
  */
+/*
+ * THE QUOTE CARD'S NAME AND ROLE COME OFF THE ROSTER. They are one reference
+ * now, resolved straight back to the two strings `AttorneyQuoteCard` already
+ * read, so the card cannot disagree with Collections → Team about a spelling —
+ * which this project has already had happen with a name and with the
+ * fact-check byline.
+ *
+ * A COMMENT MUST NOT GO INSIDE THE TEMPLATE LITERAL BELOW. A backtick in one
+ * closes the string, and the file then fails to parse in a way that reads as
+ * 192 unrelated type errors.
+ */
 export const HOME_COPY_QUERY = defineQuery(
   `*[_type == "homePage" && _id == "homePage"][0]{
   hero{
@@ -709,9 +729,10 @@ export const HOME_COPY_QUERY = defineQuery(
     headline,
     lede,
     primaryCta{ label, href },
-    videoCta{ label, video{ provider, id } }
+    videoCta{ label, "video": { "provider": "wistia", "id": videoId } }
   },
   "heroStats": coalesce(hero.stats[]{ _key, big, label }, []),
+  "resultsStrip": resultsStrip{ title, ctaLabel },
   firmIntro{
     title,
     tagline,
@@ -719,8 +740,8 @@ export const HOME_COPY_QUERY = defineQuery(
     helpTitle,
     "helpPoints": coalesce(helpPoints[]{ _key, lead, text }, []),
     videoLabel,
-    video{ provider, id },
-    quote{ text, name, role },
+    "video": { "provider": "wistia", "id": videoId },
+    quote{ text, "name": attorney->name, "role": attorney->role },
     aside{ title, text, ctaLabel }
   },
   promise{
@@ -733,11 +754,12 @@ export const HOME_COPY_QUERY = defineQuery(
 );
 
 /**
- * The practice band's heading, and the reassurance under its cards.
+ * The practice band's heading.
  *
- * Two getters, one projection, one round trip — `getPracticeSection()` and
- * `getPracticePromise()` are read side by side on the one page that renders
- * them.
+ * THE REASSURANCE UNDER EACH PANEL LEFT THIS PROJECTION. It was one string on
+ * the band, handed to all six panels, so every practice area made the reader
+ * the same promise; it is a field on each CARD now and comes back with them in
+ * `HOME_PRACTICE_AREAS_QUERY`.
  */
 export const HOME_PRACTICE_SECTION_QUERY = defineQuery(
   `*[_type == "homePage" && _id == "homePage"][0]{
@@ -748,8 +770,7 @@ export const HOME_PRACTICE_SECTION_QUERY = defineQuery(
     tabsLabel,
     catastrophicTitle,
     ask{ text, cta }
-  },
-  "practicePromise": practiceSection.closing
+  }
 }`
 );
 
@@ -763,13 +784,17 @@ export const HOME_PRACTICE_SECTION_QUERY = defineQuery(
  * The Car Accidents page renders this same band under its own heading and with
  * its own anchor; `getCarAccidentFaqSection()` overrides three fields on top of
  * this one rather than storing a second copy of the parts that do not change.
+ *
+ * `answerCtaLabel` IS GONE FROM HERE. One label on the band meant twenty open
+ * answers offering the same words; each question carries its own now, so it
+ * comes back with the questions rather than with the heading — which is also
+ * what stopped Car Accidents borrowing this page's.
  */
 export const HOME_FAQ_SECTION_QUERY = defineQuery(
   `*[_type == "homePage" && _id == "homePage"][0].faqSection{
   eyebrow,
   title,
   lede,
-  answerCtaLabel,
   ask{ title, body, ctaLabel, ctaHref, portrait, portraitAlt }
 }`
 );

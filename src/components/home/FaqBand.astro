@@ -32,7 +32,7 @@ const schema = faqSchema(faqs.map((f) => ({ question: f.question, answer: f.answ
     <div class="faqs__list">
       {
         faqs.map((faq, i) => (
-          <FaqItem faq={faq} ctaLabel={section.answerCtaLabel} open={i === 0} />
+          <FaqItem faq={faq} open={i === 0} />
         ))
       }
     </div>

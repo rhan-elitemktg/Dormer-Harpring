@@ -94,7 +94,25 @@ export const homePage = defineType({
              * finished 3:20 film, which happens to share that id. Do not read it
              * as a placeholder and do not grep the id to find placeholders.
              */
-            defineField({ name: "video", type: "videoRef", validation: (rule) => rule.required() }),
+            /*
+             * A BARE ID, NOT A `videoRef` OBJECT. The object carries
+             * `{provider, id}` and hides the provider, so the Studio drew an
+             * accordion around a single input. The projection puts the pair
+             * back together, so `lib/video.ts` still sees `{provider, id}` and
+             * the rule that nothing may store a video URL is untouched.
+             *
+             * The attorney film was flattened this way already; this is the
+             * same call applied to the slots Phase 2 left alone.
+             */
+            defineField({
+              name: "videoId",
+              title: "Video ID",
+              type: "string",
+              description:
+                "Wistia's hashed id — b4n3r4pchd. The id ONLY, not the whole URL: it is the " +
+                "last part of the media's address in Wistia.",
+              validation: (rule) => rule.required(),
+            }),
           ],
           validation: (rule) => rule.required(),
         }),
@@ -152,6 +170,39 @@ export const homePage = defineType({
      * would add a wrapper element to the markup in exchange for a link nobody
      * wants inside a stat label.
      */
+    /*
+     * THE RESULTS STRIP — three case-result cards on forest, under the hero.
+     *
+     * ONLY THE COPY IS HERE. The three figures are `caseResult` documents in
+     * Collections, because they render on /results as well; this is the band's
+     * own heading and the link out of it, which render nowhere else.
+     *
+     * Both strings were HARDCODED IN `home/RecentResults.astro` until now — a
+     * component owning content, which this codebase's first rule forbids. It
+     * survived the Sanity readiness sweep because that sweep looked for content
+     * ARRAYS in component frontmatter, and these are two bare strings in markup.
+     */
+    defineField({
+      name: "resultsStrip",
+      title: "Results strip",
+      type: "object",
+      options: SECTION,
+      description:
+        "The band under the hero. The three figures themselves are Case Results, in " +
+        "Collections — they appear on the Results page too.",
+      fields: [
+        defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
+        defineField({
+          name: "ctaLabel",
+          title: "Link to all results",
+          type: "string",
+          description: "The destination is /results/ and is not editable — routing owns URLs.",
+          validation: (rule) => rule.required(),
+        }),
+      ],
+      validation: (rule) => rule.required(),
+    }),
+
     defineField({
       name: "firmIntro",
       title: "Firm introduction",
@@ -211,9 +262,12 @@ export const homePage = defineType({
         // stand-in id — the YouTube original it maps to is in YOUTUBE_ORIGINS
         // in src/lib/video.ts, and five of those eight are unlisted.
         defineField({
-          name: "video",
-          type: "videoRef",
-          description: "The film the band's play button opens.",
+          name: "videoId",
+          title: "Video ID",
+          type: "string",
+          description:
+            "The film the band's play button opens. Wistia's hashed id — the id ONLY, not " +
+            "the whole URL.",
           validation: (rule) => rule.required(),
         }),
         defineField({
@@ -222,8 +276,31 @@ export const homePage = defineType({
           type: "object",
           fields: [
             defineField({ name: "text", type: "text", rows: 4, validation: (rule) => rule.required() }),
-            defineField({ name: "name", type: "string", validation: (rule) => rule.required() }),
-            defineField({ name: "role", type: "string", validation: (rule) => rule.required() }),
+            /*
+             * THE PERSON IS A REFERENCE; THE NAME AND ROLE COME OFF THE ROSTER.
+             *
+             * They were two typed strings, which is two places the firm's own
+             * roster could be contradicted — the exact failure this project has
+             * already had with a name spelling ("KC Harpring" in the comps,
+             * "KC Harping" on the live site) and with the fact-check byline.
+             * A reference cannot dangle and cannot disagree.
+             *
+             * The projection resolves it straight back to `{name, role}`, so
+             * `AttorneyQuoteCard` reads exactly what it always did. Same
+             * pattern Phase 4f used for the award, the testimonial and the five
+             * attorneys the Car Accidents rail names.
+             */
+            defineField({
+              name: "attorney",
+              title: "Who said it",
+              type: "reference",
+              to: [{ type: "teamMember" }],
+              options: { filter: 'kind in ["partner", "attorney"]' },
+              description:
+                "Their name and title are printed from Collections → Team, so this card cannot " +
+                "disagree with the roster.",
+              validation: (rule) => rule.required(),
+            }),
           ],
           validation: (rule) => rule.required(),
         }),
@@ -267,29 +344,6 @@ export const homePage = defineType({
             "the row, so it has to read as a description of the row rather than as a heading.",
           validation: (rule) => rule.required(),
         }),
-        defineField({
-          name: "catastrophicTitle",
-          title: "Panels heading",
-          type: "string",
-          description: "Above the four catastrophic-injury panels.",
-          validation: (rule) => rule.required(),
-        }),
-        defineField({
-          name: "ask",
-          title: "Closing prompt",
-          type: "object",
-          options: { columns: 2 },
-          fields: [
-            defineField({ name: "text", type: "string", validation: (rule) => rule.required() }),
-            defineField({
-              name: "cta",
-              title: "Link text",
-              type: "string",
-              validation: (rule) => rule.required(),
-            }),
-          ],
-          validation: (rule) => rule.required(),
-        }),
 
       /*
        * THE SIX PRACTICE-AREA CARDS, and they are COPY rather than pointers.
@@ -322,13 +376,41 @@ export const homePage = defineType({
               name: "areaCard",
               fields: [
                 defineField({ name: "name", type: "string", validation: (rule) => rule.required() }),
+                /*
+                 * HIDDEN, BY REQUEST — and the icon still draws. The tab keeps
+                 * its glyph; what came off is a free-text developer key that an
+                 * editor had no way to get right and no reason to touch.
+                 *
+                 * IT IS A CLOSED LIST RATHER THAN A FREE STRING NOW, which is
+                 * what makes hiding it safe. A hidden `required()` field with no
+                 * initial value is a trap: a new card would fail validation
+                 * showing an error for a field that is not on screen. Every new
+                 * card gets a real glyph instead, and changing which one is a
+                 * developer's job the same way adding a glyph already was.
+                 */
                 defineField({
                   name: "iconKey",
                   title: "Icon",
                   type: "string",
+                  hidden: true,
+                  initialValue: "car-accident",
+                  options: {
+                    list: [
+                      "car-accident",
+                      "truck-accident",
+                      "motorcycle-accident",
+                      "bicycle-accident",
+                      "slip-and-fall",
+                      "brain-injury",
+                      "wrongful-death",
+                      "dog-bite",
+                      "pedestrian-accident",
+                      "spinal-cord",
+                    ],
+                  },
                   description:
-                    "Must match an icon in components/icons/PracticeIcon.astro — car-accident, " +
-                    "truck-accident, slip-and-fall. An unknown key draws nothing.",
+                    "The tab's glyph, from components/icons/PracticeIcon.astro. Hidden because " +
+                    "it is not editorial — a key with no glyph draws nothing.",
                   validation: (rule) => rule.required(),
                 }),
                 defineField({
@@ -336,6 +418,22 @@ export const homePage = defineType({
                   type: "text",
                   rows: 2,
                   description: "One line. The Practice Areas page's version of the same card is longer.",
+                  validation: (rule) => rule.required(),
+                }),
+                /*
+                 * THE PANEL'S CLOSING LINE, per card rather than per band.
+                 *
+                 * It was one `practicePromise` string passed to all nine
+                 * panels, so every practice area made the reader the same
+                 * promise. A car-accident panel and a wrongful-death panel are
+                 * not reassuring someone about the same thing.
+                 */
+                defineField({
+                  name: "closing",
+                  title: "Closing line",
+                  type: "text",
+                  rows: 2,
+                  description: "The reassurance under this panel's copy.",
                   validation: (rule) => rule.required(),
                 }),
                 defineField({
@@ -357,11 +455,10 @@ export const homePage = defineType({
           validation: (rule) => rule.required().min(1),
         }),
         defineField({
-          name: "closing",
-          title: "Closing line",
-          type: "text",
-          rows: 3,
-          description: "The reassurance under the cards, above the panels.",
+          name: "catastrophicTitle",
+          title: "Panels heading",
+          type: "string",
+          description: "Above the four catastrophic-injury panels.",
           validation: (rule) => rule.required(),
         }),
 
@@ -406,7 +503,23 @@ export const homePage = defineType({
           ],
           validation: (rule) => rule.required().min(1),
         }),
-      ],
+        defineField({
+          name: "ask",
+          title: "Closing prompt",
+          type: "object",
+          options: { columns: 2 },
+          fields: [
+            defineField({ name: "text", type: "string", validation: (rule) => rule.required() }),
+            defineField({
+              name: "cta",
+              title: "Link text",
+              type: "string",
+              validation: (rule) => rule.required(),
+            }),
+          ],
+          validation: (rule) => rule.required(),
+        }),
+],
       validation: (rule) => rule.required(),
     }),
 
@@ -470,11 +583,12 @@ export const homePage = defineType({
         defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
         defineField({ name: "lede", type: "text", rows: 3, validation: (rule) => rule.required() }),
         defineField({
-          name: "answerCtaLabel",
-          title: "Button inside an open answer",
-          type: "string",
-          description: "Repeated on every expanded question.",
-          validation: (rule) => rule.required(),
+          name: "items",
+          title: "Questions",
+          type: "array",
+          description: "The accordion. Drag to reorder — the top question opens first.",
+          of: [{ type: "object", fields: faqItemFields, preview: faqItemPreview }],
+          validation: (rule) => rule.required().min(1),
         }),
         defineField({
           name: "ask",
@@ -511,15 +625,7 @@ export const homePage = defineType({
           ],
           validation: (rule) => rule.required(),
         }),
-        defineField({
-          name: "items",
-          title: "Questions",
-          type: "array",
-          description: "The accordion. Drag to reorder — the top question opens first.",
-          of: [{ type: "object", fields: faqItemFields, preview: faqItemPreview }],
-          validation: (rule) => rule.required().min(1),
-        }),
-      ],
+],
       validation: (rule) => rule.required(),
     }),
 

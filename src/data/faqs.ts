@@ -28,14 +28,19 @@ import { once, required } from "../sanity/lib/fetch";
 // Studio now, and every FAQ still carries the stand-in one as DATA rather
 // than as a constant. Grep PLACEHOLDER_VIDEO to find the slots that still
 // need a real id — this module is no longer one of them.
-import type { VideoRef } from "../lib/video";
+import { wistiaDuration, type VideoRef } from "../lib/video";
 
 export interface Faq {
   _key: string;
   question: string;
   answer: string;
-  /** Runtime of the attorney video that answers it. */
-  videoLength: string;
+  /** Runtime of the attorney video that answers it, read from Wistia rather
+   *  than typed — see `wistiaDuration` in lib/video.ts. Null when Wistia
+   *  cannot be reached, and the row then prints "Watch" with no duration. */
+  videoLength: string | null;
+  /** The button inside this answer. Per question since Phase 6a: one label on
+   *  the band meant twenty open answers offering the same words. */
+  ctaLabel: string;
   /** TODO(video): the attorney's filmed answer. Every FAQ still carries the
    *  same stand-in id — but it is a FIELD in the Studio now, so replacing them
    *  is an editor's job rather than a code change. */
@@ -46,7 +51,6 @@ export interface FaqSection {
   eyebrow: string;
   title: string;
   lede: string;
-  answerCtaLabel: string;
   ask: {
     title: string;
     body: string;
@@ -88,10 +92,8 @@ export async function getFaqSection(): Promise<FaqSection> {
  */
 export async function getCarAccidentFaqs(): Promise<Faq[]> {
   return once("faqs:car-accidents", async () =>
-    required(
-      await sanityClient.fetch(CAR_ACCIDENT_FAQS_QUERY),
-      "Car Accidents",
-      "Pages"
+    withDurations(
+      required(await sanityClient.fetch(CAR_ACCIDENT_FAQS_QUERY), "Car Accidents", "Pages")
     )
   );
 }
@@ -117,8 +119,24 @@ export async function getCarAccidentFaqSection(anchor: string): Promise<FaqSecti
   return { ...home, ...own, ask: { ...home.ask, ctaHref: anchor } };
 }
 
+/**
+ * Attach each row's runtime, read from Wistia rather than typed.
+ *
+ * ONE REQUEST FOR THE WHOLE BUILD TODAY, because all twenty rows point at the
+ * same stand-in id and `wistiaOembed` memoises per id. When real ids land it
+ * becomes one request per distinct film, still shared with the poster frame.
+ *
+ * `Promise.all` rather than a loop: these are independent network reads and
+ * serialising twenty of them would put the latency on the build for no reason.
+ */
+async function withDurations(rows: Omit<Faq, "videoLength">[]): Promise<Faq[]> {
+  return Promise.all(
+    rows.map(async (row) => ({ ...row, videoLength: await wistiaDuration(row.video.id) }))
+  );
+}
+
 export async function getHomeFaqs(): Promise<Faq[]> {
   return once("faqs:home", async () =>
-    required(await sanityClient.fetch(HOME_FAQS_QUERY), "Homepage", "Pages")
+    withDurations(required(await sanityClient.fetch(HOME_FAQS_QUERY), "Homepage", "Pages"))
   );
 }

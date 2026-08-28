@@ -18,6 +18,7 @@ import { getTeamProfiles, getTeam } from "../../data/team";
 import { getFirmDetails } from "../../data/site";
 import { getContactBand, getContactDetails } from "../../data/contact";
 import { getHomeTestimonials, getReviewSummary } from "../../data/testimonials";
+import { getTestimonialRail } from "../../data/home";
 
 /* A Studio edit does not show here until the module is invalidated — `astro dev`
    caches `getStaticPaths`. `npm run dev:refresh`, or restart. Builds are never
@@ -35,12 +36,13 @@ export const getStaticPaths = (async () => {
 }) satisfies GetStaticPaths;
 
 const { profile, member } = Astro.props;
-const [firm, band, details, testimonials, reviews] = await Promise.all([
+const [firm, band, details, testimonials, reviews, railCopy] = await Promise.all([
   getFirmDetails(),
   getContactBand(),
   getContactDetails(),
   getHomeTestimonials(),
   getReviewSummary(),
+  getTestimonialRail(),
 ]);
 
 const isAttorney = member.kind === "partner" || member.kind === "attorney";
@@ -64,6 +66,6 @@ const isAttorney = member.kind === "partner" || member.kind === "attorney";
        attributed to them: the heading speaks for the firm and every card names
        its own client. */
   }
-  <TestimonialRail testimonials={testimonials} reviews={reviews} />
+  <TestimonialRail testimonials={testimonials} reviews={reviews} copy={railCopy} />
   <ContactDetails details={details} form={band.form} />
 </Layout>

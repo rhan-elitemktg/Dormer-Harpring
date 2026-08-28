@@ -216,7 +216,60 @@ const POSTER = { width: 1280, height: 720 };
  * one request for the whole build rather than 33 — the same reasoning as `once()`
  * in sanity/lib/fetch.ts, and it matters for the same reason.
  */
-const posters = new Map<string, Promise<string | null>>();
+const oembeds = new Map<string, Promise<Record<string, unknown> | null>>();
+
+/**
+ * ONE oEMBED REQUEST PER ID, shared by everything that needs something from it.
+ *
+ * The poster frame and the runtime both come out of the same payload, so asking
+ * twice would double the build's network for one answer. Memoised per id, which
+ * for the 33 un-migrated slots pointing at one stand-in is a single request for
+ * the whole build.
+ *
+ * Returns null rather than throwing when Wistia cannot be reached. Everything
+ * built on it is a fallback or an embellishment, and taking the build down
+ * because a third party is slow would be the wrong trade.
+ */
+function wistiaOembed(id: string): Promise<Record<string, unknown> | null> {
+  const cached = oembeds.get(id);
+  if (cached) return cached;
+
+  const request = (async () => {
+    try {
+      const response = await fetch(
+        `https://fast.wistia.com/oembed?url=${encodeURIComponent(
+          `https://home.wistia.com/medias/${id}`
+        )}`
+      );
+      if (!response.ok) return null;
+      return (await response.json()) as Record<string, unknown>;
+    } catch {
+      return null;
+    }
+  })();
+
+  oembeds.set(id, request);
+  return request;
+}
+
+/**
+ * The film's runtime, as the FAQ row prints it — "2 min".
+ *
+ * IT WAS A TYPED FIELD AND IS NOT ANY MORE. Every FAQ carried a hand-entered
+ * `videoLength` that nothing checked against the film it labelled, so the two
+ * could disagree and only a viewer would notice. oEmbed already tells us, on a
+ * request the poster frame is making anyway.
+ *
+ * Null when Wistia cannot be reached or reports nothing useful; the row then
+ * prints "Watch" with no duration, which is the honest degradation — a made-up
+ * runtime is worse than none.
+ */
+export async function wistiaDuration(id: string): Promise<string | null> {
+  const seconds = (await wistiaOembed(id))?.duration;
+  if (typeof seconds !== "number" || !Number.isFinite(seconds) || seconds <= 0) return null;
+  // Rounded to the minute, never to zero: a 40-second answer still reads "1 min".
+  return `${Math.max(1, Math.round(seconds / 60))} min`;
+}
 
 /**
  * The film's own thumbnail, for when an editor uploads no poster frame.
@@ -231,32 +284,14 @@ const posters = new Map<string, Promise<string | null>>();
  * party is slow would be the wrong trade. Callers fall back again, to the
  * person's own portrait, so there is always something to render.
  */
-export function wistiaPosterUrl(id: string): Promise<string | null> {
-  const cached = posters.get(id);
-  if (cached) return cached;
-
-  const request = (async () => {
-    try {
-      const response = await fetch(
-        `https://fast.wistia.com/oembed?url=${encodeURIComponent(
-          `https://home.wistia.com/medias/${id}`
-        )}`
-      );
-      if (!response.ok) return null;
-      const url: unknown = (await response.json())?.thumbnail_url;
-      if (typeof url !== "string" || url === "") return null;
-      // The URL carries the crop it was rendered at; ask for ours instead.
-      return url.replace(
-        /image_crop_resized=\d+x\d+/,
-        `image_crop_resized=${POSTER.width}x${POSTER.height}`
-      );
-    } catch {
-      return null;
-    }
-  })();
-
-  posters.set(id, request);
-  return request;
+export async function wistiaPosterUrl(id: string): Promise<string | null> {
+  const url: unknown = (await wistiaOembed(id))?.thumbnail_url;
+  if (typeof url !== "string" || url === "") return null;
+  // The URL carries the crop it was rendered at; ask for ours instead.
+  return url.replace(
+    /image_crop_resized=\d+x\d+/,
+    `image_crop_resized=${POSTER.width}x${POSTER.height}`
+  );
 }
 
 /** The dimensions `wistiaPosterUrl` renders at, for `Picture`'s `remoteSize`. */

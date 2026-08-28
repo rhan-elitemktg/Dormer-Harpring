@@ -20,6 +20,7 @@ import AwardsBar from "../components/AwardsBar.astro";
 import ContactDetails from "../components/contact/ContactDetails.astro";
 import { getPrivacyPolicyPage } from "../data/sitePages";
 import { getAwards } from "../data/awards";
+import { getAwardsBar } from "../data/home";
 import { getContactBand, getContactDetails } from "../data/contact";
 import {
   getPracticeAreaPageCopy,
@@ -27,9 +28,10 @@ import {
 } from "../data/practiceAreaPages";
 import { getBlogPosts } from "../data/blog";
 
-const [page, awards, details, band, areaCopy, sidebarAreas, posts] = await Promise.all([
+const [page, awards, awardsBar, details, band, areaCopy, sidebarAreas, posts] = await Promise.all([
   getPrivacyPolicyPage(),
   getAwards(),
+  getAwardsBar(),
   getContactDetails(),
   getContactBand(),
   getPracticeAreaPageCopy(),
@@ -74,6 +76,6 @@ const latest = posts.filter((post) => post.href).slice(0, 5);
     />
   </PageArticle>
 
-  <AwardsBar awards={awards} tone="sunk" />
+  <AwardsBar awards={awards} eyebrow={awardsBar.eyebrow} tone="sunk" />
   <ContactDetails details={details} form={band.form} />
 </Layout>
