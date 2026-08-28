@@ -35,6 +35,14 @@ npm run build && npm run check
   that isn't E.164. Known-broken links are **declared with a reason** in the
   tables at the top of `scripts/check-links.py`, and a declaration that stops
   being true fails too — so closing an item can't leave the table stale.
+- **`check:desk`** — a document type the Studio desk draws twice, or not at all.
+  The desk ends with a catch-all: anything unplaced renders under a divider, so
+  a type added to `schemaTypes` and forgotten is never invisible. That guard is
+  structurally blind to the opposite case — to it a type placed TWICE and a type
+  placed NOWHERE are both "not in the set", and it answers both by drawing
+  another row. Splitting two groups out of Collections put five types in exactly
+  that state, and nothing found them until someone opened the Studio and looked.
+  It reads source, not `dist/`, so it needs no build.
 
 `check:styles` has one known blind spot: it catches a passed-in class used as
 the **target** of a scoped rule, but not one used as its **ancestor**.

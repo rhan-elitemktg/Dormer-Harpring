@@ -1108,7 +1108,16 @@ and background it when you do. It reads its slugs from the DATASET now — see "
 audited zero pages reported success" above for what it did on the commit that deleted the
 directory it used to read.
 
-**`npm run check` is FOUR linters now, and one of them could never fail.**
+**`npm run check` is FIVE linters now, and one of them could never fail.**
+`scripts/check-desk.py` is the newest — a document type the Studio desk draws TWICE, or not at
+all. It was written after five duplicate rows were found BY EYE in the Studio, past everything
+else here; the note at the top of this file has what happened. **It reads source rather than
+`dist/`**, so it runs second, beside `check:types`, and needs no build. **Tested in seven
+directions before being trusted** — a type in no group, a type in two, a group the `PLACED` set
+does not reference, a typo'd type name, a renamed not-a-group, a lost hand-placed singleton, and
+a reformat that must NOT fail because it changes nothing. `npm run check` itself was run red and
+green to prove the chain carries the exit code.
+
 `scripts/check-links.py` is the new one — 33,754 internal links across 330 pages, every target
 resolved against what `dist/` actually serves plus `vercel.json`. (The count fell from 39,484
 when the eighteen footer city chips stopped being links — 5,904 of them — and Editorial
