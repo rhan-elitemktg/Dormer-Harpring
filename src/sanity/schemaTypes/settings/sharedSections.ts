@@ -315,6 +315,59 @@ export const sharedSections = defineType({
       validation: (rule) => rule.required(),
     }),
 
+    /*
+     * THE FIRM'S FOUR FIGURES — the dark band on seven pages AND the homepage
+     * hero's row, which were two near-identical records until 6c.
+     *
+     * Here rather than in Site Settings because this document is content shown
+     * on more than one page and changed once. `firmDetails` stays in Settings
+     * for the opposite reason: it is data the site DERIVES from, where this is
+     * a band it DISPLAYS.
+     */
+    defineField({
+      name: "firmStats",
+      title: "Firm figures",
+      type: "object",
+      options: SECTION,
+      description:
+        "The four figures in the dark band on seven pages, and in the homepage hero. One set " +
+        "serves both — editing a label here changes it everywhere.",
+      fields: [
+        defineField({
+          name: "stats",
+          title: "Statistics",
+          type: "array",
+          of: [
+            {
+              type: "object",
+              fields: [
+                defineField({
+                  name: "big",
+                  title: "Figure",
+                  type: "string",
+                  description: 'The number itself — "$70M+", "No Fee".',
+                  validation: (rule) => rule.required(),
+                }),
+                defineField({
+                  name: "label",
+                  title: "Label under it",
+                  type: "string",
+                  description:
+                    "Kept SHORT — it sits under the figure in a four-up row and in the " +
+                    "hero, where a long label wraps.",
+                  validation: (rule) => rule.required(),
+                }),
+              ],
+              preview: { select: { title: "big", subtitle: "label" } },
+            },
+          ],
+          // FOUR, because both the band and the hero draw a four-column grid.
+          validation: (rule) => rule.required().length(4),
+        }),
+      ],
+      validation: (rule) => rule.required(),
+    }),
+
     defineField({
       name: "sidebarForm",
       title: "Sidebar consultation form",

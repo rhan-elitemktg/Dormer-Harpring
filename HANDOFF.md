@@ -46,11 +46,59 @@ against the code, swept for dead literals, swapped, built and diffed on its own.
 - Field types: `richText`, `answerText`, `simpleText`, `inlineText`, `link`, `navLink`,
   `videoRef`, `seo`.
 - Nine collection types, **thirteen page types** (fifteen documents — `sitePage` is three) and
-  five Site Settings singletons, in a desk of **five** groups: Pages / Practice Areas / Blog /
-  Collections / Site Settings. Every page type with more than one band holds its fields in
+  **three** Site Settings singletons, in a desk of five groups plus one loose document: Pages /
+  Practice Areas / Blog / Collections / Shared Sections / Site Settings. Every page type with more than one band holds its fields in
   collapsible SECTIONS — see below.
 - `scripts/lib/sanity.py` — one GROQ reader for every Python check. `lib/firm.py` is one
   query on top of it.
+
+### A CATCH-ALL CANNOT SEE A TYPE PLACED TWICE
+
+The desk renders anything not in a group under a divider at the foot, so a new document type is
+never invisible. It measured against `[...PAGES, ...COLLECTIONS, ...SETTINGS]`. Splitting
+Practice Areas and Blog out of Collections moved four types off that list while leaving them on
+screen — `practiceArea`, `blogPost`, `blogCategory`, `carAccidentsPage` — so the Studio drew
+**each of them twice**, once in its group and once under the divider.
+
+**`sitePage` had been doing it since the utility pages were built** and nobody noticed until
+four more joined it. Found by eye, in the Studio, not by any check.
+
+**THE GUARD COULD NOT HAVE CAUGHT THIS.** It exists so a type placed NOWHERE stays reachable,
+and to it a type placed TWICE is identical — both are simply "not in the set". So the fix is
+that the list cannot be forgotten rather than a second check that could be: `PLACED` derives
+from the group definitions and from `SINGLETON_TYPES`.
+
+**ANYTHING MOVED OUT OF `PAGES` OR `SETTINGS` NEEDS ADDING BACK BY HAND.** `SINGLETON_TYPES` is
+built from those two arrays, so a singleton placed anywhere else drops out of it silently —
+which shows the editor a generic list beside the pinned document, with edits to the second copy
+going nowhere. Two are hand-placed today: `carAccidentsPage` under Practice Areas and
+`sharedSections`, which is a top-level row of its own below Collections.
+
+### THERE WERE TWO SETS OF FIRM FIGURES AND THEY NEARLY AGREED
+
+`firmStats` drew the dark band on seven pages; `homePage.hero.stats` drew the homepage hero.
+Three of four matched on the number and differed only in label — "Recovered for clients"
+against "Recovered" — and the fourth was a different claim: "Small · Caseload by design"
+against "We Come · To you".
+
+**Two records meant "$70M+" had two homes, and it is one of README's unverified claims** — so
+confirming it before launch meant editing both, or editing one and shipping a contradiction.
+
+One record now, on `sharedSections`, **in the hero's shorter wording by request**. So the
+homepage did not move and the SEVEN BAND PAGES DID, which is the opposite of what the direction
+of the move suggests — worth knowing when reading that byte-diff. `getHomeStats()` and
+`HomeStat` are gone; both surfaces read `getFirmStats()`.
+
+**IT WENT TO SHARED SECTIONS RATHER THAN SITE SETTINGS, and the line is worth keeping.**
+`firmDetails` is data the site DERIVES from — the phone becomes a `tel:` href and JSON-LD, the
+address becomes the footer and the map pin. `firmStats` is a band the site DISPLAYS. Settings
+holds the first kind. That leaves Site Settings three documents.
+
+**The About comp diff went red on it and the departure is declared — but not by pinning the new
+labels.** Those are editable, so pinning them means the check goes red every time an editor does
+their job. It asserts the INVARIANT the change created instead: the About band and the homepage
+hero render the same four figures. True whatever anyone types; fails the moment someone
+re-splits them.
 
 ### THE DESK IS FIVE GROUPS, AND TWO PAGE TYPES ARE GONE
 
@@ -2047,7 +2095,7 @@ entry and both files to fix.
 3. **One Wistia player per popover, initialised eagerly** — 15 on the homepage, 20 on
    `/denver-car-accident-lawyer/`. Inherent to the class-based embed; wants a pass before launch.
 4. ~~**Sanity Phases 2, 2f, 3 and 4.**~~ **ALL DONE.** 499 content documents across nine
-   collection types, thirteen page types and five settings singletons, 279 image assets,
+   collection types, thirteen page types and three settings singletons, 279 image assets,
    and no page copy left in `src/data/`. Every slice ended byte-identical or with every changed
    page explained. The findings that will matter next are at the top of this file; the ones
    most likely to bite are `pt()`'s duplicate keys, GROQ's codepoint `order()`, and that a
@@ -2275,7 +2323,8 @@ none first. Already an open question below; now recorded where the code is.
   worth doing: two page documents now store the firm's number as CONTENT. See the note above.
 
 **Waiting on the firm** — content, not code. `README.md` has the full table. Unchanged: the seven
-attorney emails, the office address and hours, the `$70M+ / 20 Years` stat claims.
+attorney emails, the office address and hours, the `$70M+ / 20 Years` stat claims — **which are
+now one record rather than two**, at Shared Sections → Firm figures.
 
 **Settled this session, so stop asking**: both phone numbers (call `(303) 756-3812`, text
 `(720) 730-7997` — the comps were wrong about both), and the privacy policy, which is now built
@@ -2459,7 +2508,7 @@ Pages holds **twelve rows**: eleven routes in NAV ORDER, then a "Utility pages" 
 is thirteen page TYPES and fifteen documents** — `sitePage` is three pinned documents behind that
 one row, and `carAccidentsPage` is a page type that sits under Practice Areas rather than here.
 See "THE DESK IS FIVE GROUPS" at the top for what moved and why. Collections holds **six** types,
-Practice Areas and Blog one and two. A document type added to `schemaTypes`
+Practice Areas and Blog one and two, and Shared Sections is one pinned document on its own row. A document type added to `schemaTypes`
 but not placed in one of the three arrays shows up under a divider at the bottom rather than
 becoming invisible, which is the same silent-failure shape the four linters exist to catch.
 

@@ -41,7 +41,6 @@ import { testimonial } from "./collections/testimonial";
 
 import { contactSettings } from "./settings/contactSettings";
 import { firmDetails } from "./settings/firmDetails";
-import { firmStats } from "./settings/firmStats";
 import { navigation } from "./settings/navigation";
 import { sharedSections } from "./settings/sharedSections";
 
@@ -117,7 +116,6 @@ const settings: SchemaTypeDefinition[] = [
   firmDetails,
   navigation,
   contactSettings,
-  firmStats,
   sharedSections,
 ];
 

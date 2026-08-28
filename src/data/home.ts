@@ -44,12 +44,6 @@ export interface HomeHero {
   videoCta: { label: string; video: VideoRef };
 }
 
-export interface HomeStat {
-  _key: string;
-  big: string;
-  label: string;
-}
-
 /** The `homePage` singleton's own copy, read once per build for three getters. */
 function homeCopy() {
   return once("homePage:copy", async () =>
@@ -108,11 +102,6 @@ export async function getTestimonialRail(): Promise<TestimonialRailCopy> {
 export async function getHomeHero(): Promise<HomeHero> {
   const { hero } = await homeCopy();
   return hero;
-}
-
-export async function getHomeStats(): Promise<HomeStat[]> {
-  const { heroStats } = await homeCopy();
-  return heroStats;
 }
 
 /**

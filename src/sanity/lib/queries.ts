@@ -92,9 +92,11 @@ export const CONTACT_SETTINGS_QUERY = defineQuery(`*[_type == "contactSettings" 
 }`);
 
 /** The dark "by the numbers" band. */
-export const FIRM_STATS_QUERY = defineQuery(`*[_type == "firmStats" && _id == "firmStats"][0]{
-  "stats": coalesce(stats[]{ _key, big, label }, [])
-}`);
+export const FIRM_STATS_QUERY = defineQuery(
+  `*[_type == "sharedSections" && _id == "sharedSections"][0]{
+  "stats": coalesce(firmStats.stats[]{ _key, big, label }, [])
+}`
+);
 
 /**
  * Award badges for the trust bar, in the order they are drawn.
@@ -731,7 +733,6 @@ export const HOME_COPY_QUERY = defineQuery(
     primaryCta{ label, href },
     videoCta{ label, "video": { "provider": "wistia", "id": videoId } }
   },
-  "heroStats": coalesce(hero.stats[]{ _key, big, label }, []),
   "resultsStrip": resultsStrip{ title, ctaLabel },
   firmIntro{
     title,

@@ -1,11 +1,13 @@
 // The Studio desk — what an editor sees when they open /admin.
 //
-// FIVE GROUPS, IN THIS ORDER, BY REQUEST:
+// FIVE GROUPS AND ONE LOOSE DOCUMENT, IN THIS ORDER, BY REQUEST:
 //
 //   Pages           one document per route, plus a utility sub-list
 //   Practice Areas  the hand-built Car Accidents page, then 104 by city
 //   Blog            186 posts and the 23 categories above them
 //   Collections     everything else reused across pages — team, awards, results
+//   Shared Sections a single document, not a group: the headings for bands that
+//                   appear on more than one page
 //   Site Settings   firm-wide facts that appear on every page
 //
 // PRACTICE AREAS AND BLOG WERE ROWS INSIDE COLLECTIONS until the client asked
@@ -33,7 +35,6 @@ import { DocumentsIcon } from "@sanity/icons/Documents";
 import { EarthGlobeIcon } from "@sanity/icons/EarthGlobe";
 import { EnvelopeIcon } from "@sanity/icons/Envelope";
 import { MenuIcon } from "@sanity/icons/Menu";
-import { BarChartIcon } from "@sanity/icons/BarChart";
 import { BlockElementIcon } from "@sanity/icons/BlockElement";
 import { StarIcon } from "@sanity/icons/Star";
 import { HeartIcon } from "@sanity/icons/Heart";
@@ -312,7 +313,11 @@ function collection(
  * THE TWO BIGGEST LEFT THIS LIST IN PHASE 6b. Practice Areas (104 documents) and
  * the blog (186 posts, 23 categories) are top-level groups of their own — see
  * above. What remains is the six an editor reaches for occasionally, ordered by
- * how often: the roster first, the two lookup tables last.
+ * how often: the roster first, Cities last.
+ *
+ * SHARED SECTIONS IS NOT IN THIS ARRAY and is not inside this group — it is a
+ * top-level row of its own, directly below Collections. A singleton rather than
+ * a collection, sitting beside the lists whose bands it heads.
  */
 const COLLECTIONS: [string, string, ComponentType?][] = [
   ["teamMember", "Team", UsersIcon],
@@ -357,13 +362,16 @@ const BLOG: [string, string, ComponentType?][] = [
  *
  * Firm Details first: it is the one every other document borrows from, and the
  * one a client is most likely to have come here to change.
+ *
+ * SHARED SECTIONS LEFT THIS GROUP, by request — it is a top-level row below
+ * Collections now, beside the lists whose bands it heads. FIRM STATS went with
+ * it, into that document: the four figures are a band the site DISPLAYS on
+ * eight pages, where what is left here is data the site DERIVES from.
  */
 const SETTINGS: [string, string, ComponentType?][] = [
   ["firmDetails", "Firm Details", EarthGlobeIcon],
   ["navigation", "Navigation", MenuIcon],
   ["contactSettings", "Contact & Consultation", EnvelopeIcon],
-  ["firmStats", "Firm Stats", BarChartIcon],
-  ["sharedSections", "Shared Sections", BlockElementIcon],
 ];
 
 /**
@@ -374,11 +382,14 @@ const SETTINGS: [string, string, ComponentType?][] = [
  */
 export const SINGLETON_TYPES = [
   ...[...PAGES, ...SETTINGS].map(([type]) => type),
-  // Car Accidents leads the Practice Areas group rather than sitting in PAGES,
-  // and it is still a singleton pinned to a fixed id — leaving it out here
-  // would put a generic "Car Accidents" list beside the pinned one, with edits
-  // to the second copy going nowhere.
+  // TWO SINGLETONS ARE PLACED BY HAND AND SO MUST BE NAMED HERE. This list is
+  // built from PAGES and SETTINGS, so a type moved OUT of either drops out of
+  // it silently — which puts a generic list beside the pinned document, with
+  // edits to the second copy going nowhere, AND makes the type read as
+  // unplaced to the catch-all below. Car Accidents leads Practice Areas;
+  // Shared Sections sits under Collections.
   "carAccidentsPage",
+  "sharedSections",
   // `sitePage` is three fixed documents rather than one, but the reason it must
   // stay out of a generic list is identical: an editor seeing "all utility
   // pages" alongside the three pinned ones would edit a fourth copy that no
@@ -499,6 +510,22 @@ export const structure: StructureResolver = (S, context) => {
               COLLECTIONS.map(([type, title, icon]) => collection(S, context, type, title, icon))
             )
         ),
+
+      /*
+       * SHARED SECTIONS — A TOP-LEVEL ROW, NOT A GROUP, by request.
+       *
+       * It opens the document directly rather than a list, because it is one
+       * pinned singleton: the headings for the bands that appear on more than
+       * one page. It sits below Collections and above Site Settings because
+       * every band it heads draws its items from a list in that group — an
+       * editor changing the testimonials finds the rail's heading on the next
+       * row down, not two clicks into Settings, which is where it used to be.
+       *
+       * IT IS STILL A SINGLETON AND STILL NEEDS ITS ENTRY IN `SINGLETON_TYPES`.
+       * That list is built from PAGES and SETTINGS, so leaving SETTINGS dropped
+       * it out — see the note there.
+       */
+      singleton(S, "sharedSections", "Shared Sections", BlockElementIcon),
 
       S.listItem()
         .title("Site Settings")

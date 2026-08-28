@@ -131,33 +131,6 @@ export const homePage = defineType({
        * changing "$70M+" means changing it in BOTH places. README tracks whether
        * the claim itself is one the firm can stand behind.
        */
-        defineField({
-          name: "stats",
-          title: "Hero figures",
-          type: "array",
-          description:
-            "The four figures across the foot of the hero. NOT the dark by-the-numbers band — " +
-            "that is Site Settings → Firm Stats, and two of these figures also appear there. " +
-            "Change both.",
-          of: [
-            {
-              type: "object",
-              name: "heroStat",
-              options: { columns: 2 },
-              fields: [
-                defineField({
-                  name: "big",
-                  title: "Figure",
-                  type: "string",
-                  validation: (rule) => rule.required(),
-                }),
-                defineField({ name: "label", type: "string", validation: (rule) => rule.required() }),
-              ],
-              preview: { select: { title: "big", subtitle: "label" } },
-            },
-          ],
-          validation: (rule) => rule.required().min(1),
-        }),
       ],
       validation: (rule) => rule.required(),
     }),

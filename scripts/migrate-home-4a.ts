@@ -20,6 +20,10 @@
 //
 //   data/home.ts            getHomeHero          → homePage.hero
 //                           getHomeStats         → homePage.heroStats
+//                                                (GONE — 6c made the hero read the
+//                                                one shared set of firm figures, so
+//                                                neither the getter nor the field
+//                                                exists)
 //                           getHomeFirmIntro     → homePage.firmIntro
 //                           getHomePromise       → homePage.promise
 //                           getHomeWhyUs         → sharedSections.whyUs
@@ -255,10 +259,9 @@ async function build(): Promise<void> {
   const news = await import("../src/data/news.ts");
   const community = await import("../src/data/community.ts");
 
-  const [hero, heroStats, firmIntro, promise, whyUs, practiceSection, faqSection, feedSection, communitySection] =
+  const [hero, firmIntro, promise, whyUs, practiceSection, faqSection, feedSection, communitySection] =
     await Promise.all([
       home.getHomeHero(),
-      home.getHomeStats(),
       home.getHomeFirmIntro(),
       home.getHomePromise(),
       home.getHomeWhyUs(),
@@ -276,7 +279,6 @@ async function build(): Promise<void> {
       primaryCta: { label: hero.primaryCta.label, href: hero.primaryCta.href },
       videoCta: { label: hero.videoCta.label, video: video(hero.videoCta.video) },
     },
-    heroStats: heroStats.map((stat) => ({ _key: stat._key, big: stat.big, label: stat.label })),
     firmIntro: {
       title: firmIntro.title,
       tagline: firmIntro.tagline,
@@ -402,10 +404,9 @@ async function verify(): Promise<void> {
   const news = await import("../src/data/news.ts");
   const community = await import("../src/data/community.ts");
 
-  const [hero, heroStats, firmIntro, promise, whyUs, practiceSection, faqSection, feedSection, communitySection] =
+  const [hero, firmIntro, promise, whyUs, practiceSection, faqSection, feedSection, communitySection] =
     await Promise.all([
       home.getHomeHero(),
-      home.getHomeStats(),
       home.getHomeFirmIntro(),
       home.getHomePromise(),
       home.getHomeWhyUs(),
@@ -418,7 +419,6 @@ async function verify(): Promise<void> {
   const live = await query<Json | null>(`{
     "home": *[_type == "homePage" && _id == "homePage"][0]{
       hero{ eyebrow, headline, lede, primaryCta{ label, href }, videoCta{ label, video{ provider, id } } },
-      "heroStats": heroStats[]{ _key, big, label },
       firmIntro{
         title, tagline, body, helpTitle,
         "helpPoints": helpPoints[]{ _key, lead, text },
@@ -459,7 +459,6 @@ async function verify(): Promise<void> {
     primaryCta: hero.primaryCta,
     videoCta: { label: hero.videoCta.label, video: hero.videoCta.video },
   });
-  compare("heroStats", liveHome.heroStats, heroStats);
   compare("firmIntro", liveHome.firmIntro, {
     title: firmIntro.title,
     tagline: firmIntro.tagline,

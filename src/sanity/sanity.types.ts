@@ -92,6 +92,13 @@ export type SharedSections = {
     title: string;
     ctaLabel: string;
   };
+  firmStats: {
+    stats: Array<{
+      big: string;
+      label: string;
+      _key: string;
+    }>;
+  };
   sidebarForm?: {
     title: string;
     lede: string;
@@ -114,19 +121,6 @@ export type SanityImageHotspot = {
   y: number;
   height: number;
   width: number;
-};
-
-export type FirmStats = {
-  _id: string;
-  _type: "firmStats";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  stats: Array<{
-    big: string;
-    label: string;
-    _key: string;
-  }>;
 };
 
 export type ContactSettings = {
@@ -1235,12 +1229,6 @@ export type HomePage = {
       label: string;
       videoId: string;
     };
-    stats: Array<{
-      big: string;
-      label: string;
-      _type: "heroStat";
-      _key: string;
-    }>;
   };
   resultsStrip: {
     title: string;
@@ -1581,7 +1569,6 @@ export type AllSanitySchemaTypes =
   | SharedSections
   | SanityImageCrop
   | SanityImageHotspot
-  | FirmStats
   | ContactSettings
   | Navigation
   | FirmDetails
@@ -1739,7 +1726,7 @@ export type CONTACT_SETTINGS_QUERY_RESULT = {
 
 // Source: src/sanity/lib/queries.ts
 // Variable: FIRM_STATS_QUERY
-// Query: *[_type == "firmStats" && _id == "firmStats"][0]{  "stats": coalesce(stats[]{ _key, big, label }, [])}
+// Query: *[_type == "sharedSections" && _id == "sharedSections"][0]{  "stats": coalesce(firmStats.stats[]{ _key, big, label }, [])}
 export type FIRM_STATS_QUERY_RESULT = {
   stats: Array<{
     _key: string;
@@ -2359,7 +2346,7 @@ export type ATTORNEY_RAIL_QUERY_RESULT = Array<{
 
 // Source: src/sanity/lib/queries.ts
 // Variable: HOME_COPY_QUERY
-// Query: *[_type == "homePage" && _id == "homePage"][0]{  hero{    eyebrow,    headline,    lede,    primaryCta{ label, href },    videoCta{ label, "video": { "provider": "wistia", "id": videoId } }  },  "heroStats": coalesce(hero.stats[]{ _key, big, label }, []),  "resultsStrip": resultsStrip{ title, ctaLabel },  firmIntro{    title,    tagline,    body,    helpTitle,    "helpPoints": coalesce(helpPoints[]{ _key, lead, text }, []),    videoLabel,    "video": { "provider": "wistia", "id": videoId },    quote{ text, "name": attorney->name, "role": attorney->role },    aside{ title, text, ctaLabel }  },  promise{    eyebrow,    title,    "slides": coalesce(slides[]{ _key, label, body }, []),    ctaLabel  }}
+// Query: *[_type == "homePage" && _id == "homePage"][0]{  hero{    eyebrow,    headline,    lede,    primaryCta{ label, href },    videoCta{ label, "video": { "provider": "wistia", "id": videoId } }  },  "resultsStrip": resultsStrip{ title, ctaLabel },  firmIntro{    title,    tagline,    body,    helpTitle,    "helpPoints": coalesce(helpPoints[]{ _key, lead, text }, []),    videoLabel,    "video": { "provider": "wistia", "id": videoId },    quote{ text, "name": attorney->name, "role": attorney->role },    aside{ title, text, ctaLabel }  },  promise{    eyebrow,    title,    "slides": coalesce(slides[]{ _key, label, body }, []),    ctaLabel  }}
 export type HOME_COPY_QUERY_RESULT = {
   hero: {
     eyebrow: string;
@@ -2377,11 +2364,6 @@ export type HOME_COPY_QUERY_RESULT = {
       };
     };
   };
-  heroStats: Array<{
-    _key: string;
-    big: string;
-    label: string;
-  }>;
   resultsStrip: {
     title: string;
     ctaLabel: string;
@@ -3075,7 +3057,7 @@ declare module "@sanity/client" {
     '*[_type == "firmDetails" && _id == "firmDetails"][0]{\n  name,\n  legalName,\n  phone,\n  sms,\n  email,\n  address{ street, unit, city, region, postalCode, country },\n  "geo": { "lat": geo.lat, "lng": geo.lng },\n  mapUrl,\n  mapPlaceCid,\n  hours,\n  hoursDisplay,\n  socials[]{ name, href },\n  "directoryProfiles": coalesce(directoryProfiles, [])\n}': FIRM_DETAILS_QUERY_RESULT;
     '*[_type == "navigation" && _id == "navigation"][0]{\n  "aboutMenu": coalesce(aboutMenu[]{ label, href }, []),\n  "practiceAreasMenu": coalesce(practiceAreasMenu[]{ label, href }, []),\n  "locationsMenu": coalesce(locationsMenu[]{ label, href }, []),\n  "footerPracticeAreas": coalesce(footerPracticeAreas[]{ label, href }, []),\n  "footerNav": coalesce(footerNav[]{ label, href }, []),\n  "serviceAreas": coalesce(serviceAreas, [])\n}': NAVIGATION_QUERY_RESULT;
     '*[_type == "contactSettings" && _id == "contactSettings"][0]{\n  eyebrow,\n  title,\n  "reassurances": coalesce(reassurances, []),\n  callPrompt,\n  callBadge,\n  form{ title, lede, submitLabel, disclaimer },\n  photoAlt,\n  callCard{ label, note },\n  textCard{ label, note },\n  emailCard{ label, note },\n  officeCard{ label, note },\n  hours{ label, note }\n}': CONTACT_SETTINGS_QUERY_RESULT;
-    '*[_type == "firmStats" && _id == "firmStats"][0]{\n  "stats": coalesce(stats[]{ _key, big, label }, [])\n}': FIRM_STATS_QUERY_RESULT;
+    '*[_type == "sharedSections" && _id == "sharedSections"][0]{\n  "stats": coalesce(firmStats.stats[]{ _key, big, label }, [])\n}': FIRM_STATS_QUERY_RESULT;
     '*[_type == "award"] | order(order asc){\n  "_key": key.current,\n  alt,\n  image,\n  height\n}': AWARDS_QUERY_RESULT;
     '*[_type == "coreValue"] | order(order asc){\n  "_key": _id,\n  title,\n  body,\n  iconKey\n}': CORE_VALUES_QUERY_RESULT;
     '*[_type == "sharedSections" && _id == "sharedSections"][0]{\n  coreValues{ eyebrow, title },\n  reviewSummary{ count, rating, source },\n  attorneysBand{\n    eyebrow,\n    title,\n    quote,\n    ctaLabel,\n    signature{ name, role, attorneyKey, portrait }\n  },\n  whyUs{\n    eyebrow,\n    title{ lead, accent },\n    lede,\n    "points": coalesce(points[]{ _key, title, body }, []),\n    ctaLabel\n  },\n  sidebarForm{ title, lede, submitLabel, disclaimer },\n  awardsBar{ eyebrow },\n  testimonialRail{ eyebrow, title, ctaLabel }\n}': SHARED_SECTIONS_QUERY_RESULT;
@@ -3106,7 +3088,7 @@ declare module "@sanity/client" {
     '*[_type == "communityPage" && _id == "communityPage"][0].partners.items[]{\n  _key, org, logo, photo, body\n}': COMMUNITY_PARTNERS_QUERY_RESULT;
     '*[_type == "communityPage" && _id == "communityPage"][0].sponsorships.items[]{\n  _key, name, body\n}': SPONSORSHIPS_QUERY_RESULT;
     '*[_type == "teamMember" && onAttorneyRail == true] | order(\n  select(\n    kind == "partner" => 1,\n    kind == "attorney" => 2,\n    kind == "staff" => 3,\n    kind == "dog" => 4,\n    5\n  ) asc,\n  orderRank asc\n){\n  "_key": key.current,\n  name,\n  role,\n  "portrait": photo,\n  videoId\n}': ATTORNEY_RAIL_QUERY_RESULT;
-    '*[_type == "homePage" && _id == "homePage"][0]{\n  hero{\n    eyebrow,\n    headline,\n    lede,\n    primaryCta{ label, href },\n    videoCta{ label, "video": { "provider": "wistia", "id": videoId } }\n  },\n  "heroStats": coalesce(hero.stats[]{ _key, big, label }, []),\n  "resultsStrip": resultsStrip{ title, ctaLabel },\n  firmIntro{\n    title,\n    tagline,\n    body,\n    helpTitle,\n    "helpPoints": coalesce(helpPoints[]{ _key, lead, text }, []),\n    videoLabel,\n    "video": { "provider": "wistia", "id": videoId },\n    quote{ text, "name": attorney->name, "role": attorney->role },\n    aside{ title, text, ctaLabel }\n  },\n  promise{\n    eyebrow,\n    title,\n    "slides": coalesce(slides[]{ _key, label, body }, []),\n    ctaLabel\n  }\n}': HOME_COPY_QUERY_RESULT;
+    '*[_type == "homePage" && _id == "homePage"][0]{\n  hero{\n    eyebrow,\n    headline,\n    lede,\n    primaryCta{ label, href },\n    videoCta{ label, "video": { "provider": "wistia", "id": videoId } }\n  },\n  "resultsStrip": resultsStrip{ title, ctaLabel },\n  firmIntro{\n    title,\n    tagline,\n    body,\n    helpTitle,\n    "helpPoints": coalesce(helpPoints[]{ _key, lead, text }, []),\n    videoLabel,\n    "video": { "provider": "wistia", "id": videoId },\n    quote{ text, "name": attorney->name, "role": attorney->role },\n    aside{ title, text, ctaLabel }\n  },\n  promise{\n    eyebrow,\n    title,\n    "slides": coalesce(slides[]{ _key, label, body }, []),\n    ctaLabel\n  }\n}': HOME_COPY_QUERY_RESULT;
     '*[_type == "homePage" && _id == "homePage"][0]{\n  practiceSection{\n    eyebrow,\n    title,\n    lede,\n    tabsLabel,\n    catastrophicTitle,\n    ask{ text, cta }\n  }\n}': HOME_PRACTICE_SECTION_QUERY_RESULT;
     '*[_type == "homePage" && _id == "homePage"][0].faqSection{\n  eyebrow,\n  title,\n  lede,\n  ask{ title, body, ctaLabel, ctaHref, portrait, portraitAlt }\n}': HOME_FAQ_SECTION_QUERY_RESULT;
     '*[_type == "homePage" && _id == "homePage"][0].feedSection{\n  tabs{ news, insights },\n  news{ eyebrow, title, lede, ctaLabel },\n  insights{ eyebrow, title, lede, ctaLabel }\n}': HOME_FEED_SECTION_QUERY_RESULT;
