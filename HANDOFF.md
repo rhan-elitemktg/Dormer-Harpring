@@ -133,16 +133,23 @@ on a map whose entire job is to say why a page was skipped. Relabelled.
 **Nothing checks a reason against reality**, and that is still true. This was found by auditing
 what the live community page links, not by the build.
 
-### THE ROOT-SLUG ATTORNEY BIOS ARE A SECOND CUTOVER 404, STILL OPEN
+### THE ROOT-SLUG ATTORNEY BIOS WERE A SECOND CUTOVER 404 — CLOSED
 
-The live site serves every bio at the ROOT as well — `/sean-dormer/`, `/k-c-harpring/`,
-`/tim-garvey/` and twenty more all return 200 — and this site serves them only under
-`/meet-our-attorneys/<slug>/`. **None is redirected.** Checked seven; all seven are live and
-unhandled.
+The live site serves every bio at the ROOT as well as under `/meet-our-attorneys/`, and this
+site served only the nested form: **23 URLs carrying the firm's own attorneys' names, all
+returning 200, none redirected.**
 
-Same shape as the write-ups and higher value, since these are the pages with names attached.
-A one-to-one redirect to the `/meet-our-attorneys/` form is the obvious answer; it wants
-confirming that the root page is the same content and not a second, different bio.
+**Both forms are the SAME PAGE — verified, all 23, at 100% content similarity** rather than
+assumed from the URL shape. That is what made a one-to-one redirect unambiguous instead of a
+guess about which bio WordPress considers canonical.
+
+`attorneyPath()` builds the destination rather than 23 hand-typed paths, which would be 23
+chances to disagree with the trailing slash three layers already settle.
+
+**Found by reading the live site, not by anything here** — the same way the community write-ups
+were. Nothing in this build can see a URL the old site has and this one does not, and that gap
+has now produced 47 would-be 404s across two sessions. **A cutover URL audit belongs on the
+launch list**: every live path, against what this site serves plus `vercel.json`.
 
 ### A CITY HAS TWO KINDS OF PRACTICE-AREA PAGE
 
@@ -1144,12 +1151,23 @@ assertion: an image that is already a reference means the getter has moved.
 
 ## State
 
-**The team is 26 people, not 30, and two live URLs will 404 at cutover.** Alexandra Petroff,
-Dinorah Gutierrez, Ella Nelson and Morgan Jewel no longer work at the firm and were deleted
-from the dataset by Rhan. Ella Nelson and Morgan Jewel had bio pages that the LIVE WordPress
-site still serves at `/meet-our-attorneys/<slug>/`; **no redirect was added, by request** — the
-two URLs simply stop existing. The other two never appeared on the live site at all (comp only,
-no photograph, no bio page).
+**The team is 26 people, not 30.** Alexandra Petroff, Dinorah Gutierrez, Ella Nelson and Morgan
+Jewel no longer work at the firm and were deleted from the dataset by Rhan.
+
+**THIS PARAGRAPH SAID THE WRONG TWO, IN BOTH DIRECTIONS — re-checked against the live site:**
+
+| | Live at `/<slug>/` and `/meet-our-attorneys/<slug>/` | This file used to say |
+|---|---|---|
+| Ella Nelson, Morgan Jewel | **404 on both** — WordPress has removed them | "the LIVE site still serves" them |
+| Alexandra Petroff, Dinorah Gutierrez | **200 on both** | "never appeared on the live site at all" |
+
+So the "no redirect, by request" decision was taken about two pages that no longer exist, and
+the two that DO exist were believed not to. **Four live URLs 404 at cutover, not two**, and they
+belong to the pair nobody has ruled on. Open: redirect them to `/meet-our-attorneys/`, or let
+them go the way the other two were meant to.
+
+**The 23 CURRENT bios are handled**, in both forms — see `ATTORNEY_ROOT_SLUGS` in
+`data/redirects.ts`.
 
 Nothing internal points at them: the team page and `/sitemap/` both read the collection, so
 their links went with them. `check:links` is clean at 33,630 links across 328 pages.

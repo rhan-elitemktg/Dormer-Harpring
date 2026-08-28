@@ -581,6 +581,236 @@
       "source": "/we-dont-waste/",
       "destination": "/community-involvement/",
       "permanent": true
+    },
+    {
+      "source": "/abby-houk",
+      "destination": "/meet-our-attorneys/abby-houk/",
+      "permanent": true
+    },
+    {
+      "source": "/abby-houk/",
+      "destination": "/meet-our-attorneys/abby-houk/",
+      "permanent": true
+    },
+    {
+      "source": "/amy-rogers",
+      "destination": "/meet-our-attorneys/amy-rogers/",
+      "permanent": true
+    },
+    {
+      "source": "/amy-rogers/",
+      "destination": "/meet-our-attorneys/amy-rogers/",
+      "permanent": true
+    },
+    {
+      "source": "/ashley-reisman",
+      "destination": "/meet-our-attorneys/ashley-reisman/",
+      "permanent": true
+    },
+    {
+      "source": "/ashley-reisman/",
+      "destination": "/meet-our-attorneys/ashley-reisman/",
+      "permanent": true
+    },
+    {
+      "source": "/brittany-freeman",
+      "destination": "/meet-our-attorneys/brittany-freeman/",
+      "permanent": true
+    },
+    {
+      "source": "/brittany-freeman/",
+      "destination": "/meet-our-attorneys/brittany-freeman/",
+      "permanent": true
+    },
+    {
+      "source": "/brittany-lesmeister",
+      "destination": "/meet-our-attorneys/brittany-lesmeister/",
+      "permanent": true
+    },
+    {
+      "source": "/brittany-lesmeister/",
+      "destination": "/meet-our-attorneys/brittany-lesmeister/",
+      "permanent": true
+    },
+    {
+      "source": "/cindy-waller",
+      "destination": "/meet-our-attorneys/cindy-waller/",
+      "permanent": true
+    },
+    {
+      "source": "/cindy-waller/",
+      "destination": "/meet-our-attorneys/cindy-waller/",
+      "permanent": true
+    },
+    {
+      "source": "/david-garber",
+      "destination": "/meet-our-attorneys/david-garber/",
+      "permanent": true
+    },
+    {
+      "source": "/david-garber/",
+      "destination": "/meet-our-attorneys/david-garber/",
+      "permanent": true
+    },
+    {
+      "source": "/greg-bentley",
+      "destination": "/meet-our-attorneys/greg-bentley/",
+      "permanent": true
+    },
+    {
+      "source": "/greg-bentley/",
+      "destination": "/meet-our-attorneys/greg-bentley/",
+      "permanent": true
+    },
+    {
+      "source": "/jessica-ayala",
+      "destination": "/meet-our-attorneys/jessica-ayala/",
+      "permanent": true
+    },
+    {
+      "source": "/jessica-ayala/",
+      "destination": "/meet-our-attorneys/jessica-ayala/",
+      "permanent": true
+    },
+    {
+      "source": "/jessica-mauser",
+      "destination": "/meet-our-attorneys/jessica-mauser/",
+      "permanent": true
+    },
+    {
+      "source": "/jessica-mauser/",
+      "destination": "/meet-our-attorneys/jessica-mauser/",
+      "permanent": true
+    },
+    {
+      "source": "/julie-altenhofen",
+      "destination": "/meet-our-attorneys/julie-altenhofen/",
+      "permanent": true
+    },
+    {
+      "source": "/julie-altenhofen/",
+      "destination": "/meet-our-attorneys/julie-altenhofen/",
+      "permanent": true
+    },
+    {
+      "source": "/k-c-harpring",
+      "destination": "/meet-our-attorneys/k-c-harpring/",
+      "permanent": true
+    },
+    {
+      "source": "/k-c-harpring/",
+      "destination": "/meet-our-attorneys/k-c-harpring/",
+      "permanent": true
+    },
+    {
+      "source": "/kassandra-burival",
+      "destination": "/meet-our-attorneys/kassandra-burival/",
+      "permanent": true
+    },
+    {
+      "source": "/kassandra-burival/",
+      "destination": "/meet-our-attorneys/kassandra-burival/",
+      "permanent": true
+    },
+    {
+      "source": "/laura-browne",
+      "destination": "/meet-our-attorneys/laura-browne/",
+      "permanent": true
+    },
+    {
+      "source": "/laura-browne/",
+      "destination": "/meet-our-attorneys/laura-browne/",
+      "permanent": true
+    },
+    {
+      "source": "/leana-kim",
+      "destination": "/meet-our-attorneys/leana-kim/",
+      "permanent": true
+    },
+    {
+      "source": "/leana-kim/",
+      "destination": "/meet-our-attorneys/leana-kim/",
+      "permanent": true
+    },
+    {
+      "source": "/livi-lesch",
+      "destination": "/meet-our-attorneys/livi-lesch/",
+      "permanent": true
+    },
+    {
+      "source": "/livi-lesch/",
+      "destination": "/meet-our-attorneys/livi-lesch/",
+      "permanent": true
+    },
+    {
+      "source": "/maddy-ricciardi",
+      "destination": "/meet-our-attorneys/maddy-ricciardi/",
+      "permanent": true
+    },
+    {
+      "source": "/maddy-ricciardi/",
+      "destination": "/meet-our-attorneys/maddy-ricciardi/",
+      "permanent": true
+    },
+    {
+      "source": "/marcie-emch",
+      "destination": "/meet-our-attorneys/marcie-emch/",
+      "permanent": true
+    },
+    {
+      "source": "/marcie-emch/",
+      "destination": "/meet-our-attorneys/marcie-emch/",
+      "permanent": true
+    },
+    {
+      "source": "/marilyn-morales",
+      "destination": "/meet-our-attorneys/marilyn-morales/",
+      "permanent": true
+    },
+    {
+      "source": "/marilyn-morales/",
+      "destination": "/meet-our-attorneys/marilyn-morales/",
+      "permanent": true
+    },
+    {
+      "source": "/michael-greer",
+      "destination": "/meet-our-attorneys/michael-greer/",
+      "permanent": true
+    },
+    {
+      "source": "/michael-greer/",
+      "destination": "/meet-our-attorneys/michael-greer/",
+      "permanent": true
+    },
+    {
+      "source": "/rachel-pavelko",
+      "destination": "/meet-our-attorneys/rachel-pavelko/",
+      "permanent": true
+    },
+    {
+      "source": "/rachel-pavelko/",
+      "destination": "/meet-our-attorneys/rachel-pavelko/",
+      "permanent": true
+    },
+    {
+      "source": "/sean-dormer",
+      "destination": "/meet-our-attorneys/sean-dormer/",
+      "permanent": true
+    },
+    {
+      "source": "/sean-dormer/",
+      "destination": "/meet-our-attorneys/sean-dormer/",
+      "permanent": true
+    },
+    {
+      "source": "/tim-garvey",
+      "destination": "/meet-our-attorneys/tim-garvey/",
+      "permanent": true
+    },
+    {
+      "source": "/tim-garvey/",
+      "destination": "/meet-our-attorneys/tim-garvey/",
+      "permanent": true
     }
   ]
 }

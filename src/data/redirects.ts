@@ -23,7 +23,14 @@
  * back at us. If that subdomain is ever retired, this is where the replacement
  * goes.
  */
-import { ROUTES, blogCategoryPath, blogFilterUrl, isReservedPath, normalizePath } from "../lib/routePaths";
+import {
+  ROUTES,
+  attorneyPath,
+  blogCategoryPath,
+  blogFilterUrl,
+  isReservedPath,
+  normalizePath,
+} from "../lib/routePaths";
 
 export interface Redirect {
   _key: string;
@@ -181,6 +188,53 @@ const COMMUNITY_WRITE_UPS: readonly string[] = [
   "/we-dont-waste/",
 ];
 
+/**
+ * EVERY BIO IS LIVE AT THE ROOT AS WELL, and this site serves only the nested
+ * form. `/sean-dormer/` and `/meet-our-attorneys/sean-dormer/` both return 200
+ * on WordPress and are THE SAME PAGE — checked, all 23, at 100% content
+ * similarity — so without these, 23 URLs carrying the firm's own attorneys'
+ * names would 404 at cutover.
+ *
+ * Found the same way the community write-ups were: by reading what the live
+ * site serves, not from anything in this build. Nothing here can see a URL the
+ * old site has and this one does not.
+ *
+ * THE DESTINATION IS BUILT BY `attorneyPath()`, not written out. `routePaths.ts`
+ * owns URLs on this site and 23 hand-typed paths are 23 chances to disagree
+ * with it about the trailing slash three layers already agree on.
+ *
+ * TWO FORMER STAFF ARE DELIBERATELY ABSENT and are an open question rather than
+ * an omission — see the note in HANDOFF. Alexandra Petroff and Dinorah
+ * Gutierrez still have live bio pages the roster no longer carries; Ella Nelson
+ * and Morgan Jewel's are already 404 on the live site, so there is nothing left
+ * to redirect for them.
+ */
+const ATTORNEY_ROOT_SLUGS: readonly string[] = [
+  "abby-houk",
+  "amy-rogers",
+  "ashley-reisman",
+  "brittany-freeman",
+  "brittany-lesmeister",
+  "cindy-waller",
+  "david-garber",
+  "greg-bentley",
+  "jessica-ayala",
+  "jessica-mauser",
+  "julie-altenhofen",
+  "k-c-harpring",
+  "kassandra-burival",
+  "laura-browne",
+  "leana-kim",
+  "livi-lesch",
+  "maddy-ricciardi",
+  "marcie-emch",
+  "marilyn-morales",
+  "michael-greer",
+  "rachel-pavelko",
+  "sean-dormer",
+  "tim-garvey",
+];
+
 export async function getRedirects(): Promise<Redirect[]> {
   const list: Redirect[] = [
     ...CATEGORY_ARCHIVES.map(([from, to]) => ({
@@ -199,6 +253,12 @@ export async function getRedirects(): Promise<Redirect[]> {
       _key: `community-${normalizePath(from).split("/").filter(Boolean).join("-")}`,
       from,
       to: ROUTES.community,
+      permanent: true,
+    })),
+    ...ATTORNEY_ROOT_SLUGS.map((slug) => ({
+      _key: `bio-root-${slug}`,
+      from: `/${slug}/`,
+      to: attorneyPath(slug),
       permanent: true,
     })),
   ];
