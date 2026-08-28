@@ -12,6 +12,7 @@
 import { defineField, defineType } from "sanity";
 // Subpath, not the barrel — see the note in sanity/structure/index.ts.
 import { UsersIcon } from "@sanity/icons/Users";
+import { SECTION } from "./section";
 
 export const teamPage = defineType({
   name: "teamPage",
@@ -20,23 +21,33 @@ export const teamPage = defineType({
   icon: UsersIcon,
   fields: [
     defineField({
-      name: "eyebrow",
-      type: "string",
-      description: "The small line above the page title.",
-      validation: (rule) => rule.required(),
-    }),
-    defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
-    defineField({
-      name: "lede",
-      type: "simpleText",
-      description: "The sentence under the title. Bold and links render; nothing else does.",
+      name: "header",
+      title: "Page header",
+      type: "object",
+      options: SECTION,
+      description: "The band at the top of the page.",
+      fields: [
+        defineField({
+          name: "eyebrow",
+          type: "string",
+          description: "The small line above the page title.",
+          validation: (rule) => rule.required(),
+        }),
+        defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
+        defineField({
+          name: "lede",
+          type: "simpleText",
+          description: "The sentence under the title. Bold and links render; nothing else does.",
+          validation: (rule) => rule.required(),
+        }),
+      ],
       validation: (rule) => rule.required(),
     }),
     defineField({
       name: "partners",
       title: "Founding partners band",
       type: "object",
-      options: { columns: 2 },
+      options: { ...SECTION, columns: 2 },
       description: "The heading above the two founding partners.",
       fields: [
         defineField({ name: "eyebrow", type: "string", validation: (rule) => rule.required() }),
@@ -48,7 +59,7 @@ export const teamPage = defineType({
       name: "team",
       title: "Everyone else band",
       type: "object",
-      options: { columns: 2 },
+      options: { ...SECTION, columns: 2 },
       description: "The heading above the rest of the roster — attorneys, staff and the dogs.",
       fields: [
         defineField({ name: "eyebrow", type: "string", validation: (rule) => rule.required() }),

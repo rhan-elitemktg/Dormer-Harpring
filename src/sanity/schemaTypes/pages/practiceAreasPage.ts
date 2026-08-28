@@ -17,6 +17,7 @@
 import { defineArrayMember, defineField, defineType } from "sanity";
 // Subpath, not the barrel — see the note in sanity/structure/index.ts.
 import { ThLargeIcon } from "@sanity/icons/ThLarge";
+import { SECTION } from "./section";
 import { validateHref } from "../objects/link";
 
 /**
@@ -156,72 +157,63 @@ export const practiceAreasPage = defineType({
   title: "Practice Areas",
   type: "document",
   icon: ThLargeIcon,
-  // THREE TABS, and the first one is new. The two lists below are long enough
-  // that the page's own header copy would otherwise sit above a 102-entry
-  // directory and be scrolled past — which is what happened to the copy on this
-  // document before Phase 4 put it here.
-  groups: [
-    { name: "page", title: "Page", default: true },
-    { name: "featured", title: "Featured grid" },
-    { name: "directory", title: "Browse all" },
-  ],
   fields: [
     defineField({
-      name: "eyebrow",
-      type: "string",
-      group: "page",
-      description: "The small line above the page title.",
-      validation: (rule) => rule.required(),
-    }),
-    defineField({
-      name: "title",
-      type: "string",
-      group: "page",
-      validation: (rule) => rule.required(),
-    }),
-    defineField({
-      name: "lede",
-      type: "simpleText",
-      group: "page",
-      description: "The sentence under the title.",
-      validation: (rule) => rule.required(),
-    }),
-    defineField({
-      name: "ctaLabel",
-      title: "Header button",
-      type: "string",
-      group: "page",
-      validation: (rule) => rule.required(),
-    }),
-    defineField({
-      name: "ctaNote",
-      title: "Note beside the button",
-      type: "string",
-      group: "page",
-      validation: (rule) => rule.required(),
-    }),
-    defineField({
-      name: "featuredHeading",
-      title: "Featured grid heading",
+      name: "header",
+      title: "Page header",
       type: "object",
-      group: "featured",
-      description: "Above the nine cards.",
+      options: SECTION,
+      description: "The band at the top of the page.",
       fields: [
-        defineField({ name: "eyebrow", type: "string", validation: (rule) => rule.required() }),
+        defineField({
+          name: "eyebrow",
+          type: "string",
+          description: "The small line above the page title.",
+          validation: (rule) => rule.required(),
+        }),
         defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
-        defineField({ name: "lede", type: "text", rows: 2, validation: (rule) => rule.required() }),
+        defineField({
+          name: "lede",
+          type: "simpleText",
+          description: "The sentence under the title.",
+          validation: (rule) => rule.required(),
+        }),
+        defineField({
+          name: "ctaLabel",
+          title: "Header button",
+          type: "string",
+          validation: (rule) => rule.required(),
+        }),
+        defineField({
+          name: "ctaNote",
+          title: "Note beside the button",
+          type: "string",
+          validation: (rule) => rule.required(),
+        }),
       ],
       validation: (rule) => rule.required(),
     }),
 
     defineField({
-      name: "featuredAreas",
-      title: "Featured practice areas",
-      type: "array",
-      group: "featured",
-      of: [areaCard],
-      description: "The grid above the directory. Drag to reorder.",
-      validation: (rule) => rule.required().min(1),
+      name: "featured",
+      title: "Featured grid",
+      type: "object",
+      options: SECTION,
+      description: "The nine cards above the directory, and the heading over them.",
+      fields: [
+        defineField({ name: "eyebrow", type: "string", validation: (rule) => rule.required() }),
+        defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
+        defineField({ name: "lede", type: "text", rows: 2, validation: (rule) => rule.required() }),
+        defineField({
+          name: "areas",
+          title: "Cards",
+          type: "array",
+          of: [areaCard],
+          description: "The grid above the directory. Drag to reorder.",
+          validation: (rule) => rule.required().min(1),
+        }),
+      ],
+      validation: (rule) => rule.required(),
     }),
 
     /*
@@ -232,59 +224,56 @@ export const practiceAreasPage = defineType({
      * pointed at a Denver page, so the heading is now true of the whole section.
      */
     defineField({
-      name: "directoryHeading",
-      title: "Directory heading",
+      name: "directory",
+      title: "Browse all",
       type: "object",
-      group: "directory",
-      options: { columns: 2 },
-      description: "Above the by-location list.",
+      options: SECTION,
+      description: "The by-location list at the foot of the page, and the heading over it.",
       fields: [
         defineField({ name: "eyebrow", type: "string", validation: (rule) => rule.required() }),
         defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
+        defineField({
+          name: "entries",
+          title: "Groups",
+          type: "array",
+          of: [
+            defineArrayMember({
+              type: "object",
+              name: "areaGroup",
+              fields: [
+                defineField({
+                  name: "title",
+                  type: "string",
+                  description: 'The column heading — "Denver Personal Injury".',
+                  validation: (rule) => rule.required(),
+                }),
+                defineField({
+                  name: "items",
+                  type: "array",
+                  of: [areaEntry, customEntry],
+                  description:
+                    "Drag to reorder. A page listed twice in one group is a duplicate the " +
+                    "built page will show twice — the diff script fails on that.",
+                  validation: (rule) => rule.required().min(1),
+                }),
+              ],
+              preview: {
+                select: { title: "title", items: "items" },
+                prepare({ title, items }) {
+                  const count = Array.isArray(items) ? items.length : 0;
+                  return { title, subtitle: `${count} ${count === 1 ? "entry" : "entries"}` };
+                },
+              },
+            }),
+          ],
+          validation: (rule) => rule.required().min(1),
+        }),
       ],
       validation: (rule) => rule.required(),
     }),
-
-    defineField({
-      name: "directory",
-      title: "Browse all practice areas",
-      type: "array",
-      group: "directory",
-      of: [
-        defineArrayMember({
-          type: "object",
-          name: "areaGroup",
-          fields: [
-            defineField({
-              name: "title",
-              type: "string",
-              description: 'The column heading — "Denver Personal Injury".',
-              validation: (rule) => rule.required(),
-            }),
-            defineField({
-              name: "items",
-              type: "array",
-              of: [areaEntry, customEntry],
-              description:
-                "Drag to reorder. A page listed twice in one group is a duplicate the built " +
-                "page will show twice — the diff script fails on that.",
-              validation: (rule) => rule.required().min(1),
-            }),
-          ],
-          preview: {
-            select: { title: "title", items: "items" },
-            prepare({ title, items }) {
-              const count = Array.isArray(items) ? items.length : 0;
-              return { title, subtitle: `${count} ${count === 1 ? "entry" : "entries"}` };
-            },
-          },
-        }),
-      ],
-      validation: (rule) => rule.required().min(1),
-    }),
   ],
   preview: {
-    select: { featured: "featuredAreas", directory: "directory" },
+    select: { featured: "featured.areas", directory: "directory.entries" },
     prepare({ featured, directory }) {
       const groups = Array.isArray(directory) ? directory.length : 0;
       const entries = Array.isArray(directory)

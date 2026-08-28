@@ -28,6 +28,7 @@
 import { defineField, defineType } from "sanity";
 // Subpath, not the barrel — see the note in sanity/structure/index.ts.
 import { InfoOutlineIcon } from "@sanity/icons/InfoOutline";
+import { SECTION } from "./section";
 import { validateHref } from "../objects/link";
 
 /**
@@ -75,28 +76,38 @@ export const aboutPage = defineType({
   // Fields in the order the page renders them, top to bottom.
   fields: [
     defineField({
-      name: "eyebrow",
-      type: "string",
-      description: "The small line above the page title.",
-      validation: (rule) => rule.required(),
-    }),
-    defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
-    defineField({
-      name: "lede",
-      type: "simpleText",
-      description: "The sentence under the title.",
-      validation: (rule) => rule.required(),
-    }),
-    defineField({
-      name: "ctaLabel",
-      title: "Header button",
-      type: "string",
-      validation: (rule) => rule.required(),
-    }),
-    defineField({
-      name: "ctaNote",
-      title: "Note beside the button",
-      type: "string",
+      name: "header",
+      title: "Page header",
+      type: "object",
+      options: SECTION,
+      description: "The band at the top of the page.",
+      fields: [
+        defineField({
+          name: "eyebrow",
+          type: "string",
+          description: "The small line above the page title.",
+          validation: (rule) => rule.required(),
+        }),
+        defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
+        defineField({
+          name: "lede",
+          type: "simpleText",
+          description: "The sentence under the title.",
+          validation: (rule) => rule.required(),
+        }),
+        defineField({
+          name: "ctaLabel",
+          title: "Header button",
+          type: "string",
+          validation: (rule) => rule.required(),
+        }),
+        defineField({
+          name: "ctaNote",
+          title: "Note beside the button",
+          type: "string",
+          validation: (rule) => rule.required(),
+        }),
+      ],
       validation: (rule) => rule.required(),
     }),
 
@@ -104,6 +115,7 @@ export const aboutPage = defineType({
       name: "whoWeAre",
       title: "Who we are band",
       type: "object",
+      options: SECTION,
       description: "The first two-column band, under the header.",
       fields: storyFields(true),
       validation: (rule) => rule.required(),
@@ -113,6 +125,7 @@ export const aboutPage = defineType({
       name: "quote",
       title: "Quote band",
       type: "object",
+      options: SECTION,
       description: "The full-width pull quote over a photograph.",
       fields: [
         /*
@@ -144,6 +157,7 @@ export const aboutPage = defineType({
       name: "team",
       title: "Attorneys band",
       type: "object",
+      options: SECTION,
       description:
         "The heading above the four attorney cards. WHO is on that grid, and in what order, " +
         "is set on the team members themselves — drag them in Collections → Team.",
@@ -165,7 +179,7 @@ export const aboutPage = defineType({
       name: "reviews",
       title: "Client reviews band",
       type: "object",
-      options: { columns: 2 },
+      options: { ...SECTION, columns: 2 },
       description:
         "The heading above the review cards. The SAME records render on the homepage under a " +
         "different heading — that is why this heading is here and not in Shared Sections.",
@@ -180,6 +194,7 @@ export const aboutPage = defineType({
       name: "oneShot",
       title: "One shot band",
       type: "object",
+      options: SECTION,
       description: "The second two-column band. No button in this one.",
       fields: storyFields(false),
       validation: (rule) => rule.required(),
@@ -189,6 +204,7 @@ export const aboutPage = defineType({
       name: "expect",
       title: "What to expect band",
       type: "object",
+      options: SECTION,
       description: "Three promise cards, then a four-up strip of milestones.",
       fields: [
         defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
@@ -254,6 +270,6 @@ export const aboutPage = defineType({
       ],
       validation: (rule) => rule.required(),
     }),
-  ],
+],
   preview: { prepare: () => ({ title: "About" }) },
 });

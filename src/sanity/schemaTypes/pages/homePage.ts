@@ -18,12 +18,14 @@
 // and editors drag instead. That is a real change for the mosaic — see the note
 // on `communityPhotos`.
 //
-// TODO(sanity): this document is sixteen fields now and the form is a long
-// scroll. Sanity's field `groups` would tab it — that is an editor-UX decision
-// and belongs to the Studio polish pass, which audits a filled-out schema.
+// SEVEN SECTIONS, NOT SIXTEEN FIELDS. This document was a long scroll and the
+// fix was not tabs: each band is a collapsible SECTION object, and the arrays
+// that used to sit beside their band — the cards, the FAQs, the mosaic — live
+// inside the one they belong to. See `section.ts`.
 import { defineField, defineType } from "sanity";
 // Subpath, not the barrel — see the note in sanity/structure/index.ts.
 import { HomeIcon } from "@sanity/icons/Home";
+import { SECTION } from "./section";
 import { validateHref } from "../objects/link";
 import { faqItemFields, faqItemPreview } from "./faqItemFields";
 
@@ -43,6 +45,7 @@ export const homePage = defineType({
       name: "hero",
       title: "Hero",
       type: "object",
+      options: SECTION,
       description: "The first screen — everything above the results strip.",
       fields: [
         defineField({
@@ -95,50 +98,50 @@ export const homePage = defineType({
           ],
           validation: (rule) => rule.required(),
         }),
+
+      /*
+       * THE HERO'S FOUR FIGURES, AND THEY ARE NOT THE "BY THE NUMBERS" BAND.
+       *
+       * Two of the four repeat a figure that also appears in Site Settings → Firm
+       * Stats ("$70M+" and "20 Years"). That is the one duplication in this schema
+       * that is deliberate rather than an oversight: the two bands carry different
+       * labels for those two, and one of these four ("We Come / To you") has no
+       * counterpart there at all. They are two lists, not one list read twice —
+       * the same call the practice-area cards make against the directory.
+       *
+       * The cost is real and is named here so nobody has to rediscover it:
+       * changing "$70M+" means changing it in BOTH places. README tracks whether
+       * the claim itself is one the firm can stand behind.
+       */
+        defineField({
+          name: "stats",
+          title: "Hero figures",
+          type: "array",
+          description:
+            "The four figures across the foot of the hero. NOT the dark by-the-numbers band — " +
+            "that is Site Settings → Firm Stats, and two of these figures also appear there. " +
+            "Change both.",
+          of: [
+            {
+              type: "object",
+              name: "heroStat",
+              options: { columns: 2 },
+              fields: [
+                defineField({
+                  name: "big",
+                  title: "Figure",
+                  type: "string",
+                  validation: (rule) => rule.required(),
+                }),
+                defineField({ name: "label", type: "string", validation: (rule) => rule.required() }),
+              ],
+              preview: { select: { title: "big", subtitle: "label" } },
+            },
+          ],
+          validation: (rule) => rule.required().min(1),
+        }),
       ],
       validation: (rule) => rule.required(),
-    }),
-
-    /*
-     * THE HERO'S FOUR FIGURES, AND THEY ARE NOT THE "BY THE NUMBERS" BAND.
-     *
-     * Two of the four repeat a figure that also appears in Site Settings → Firm
-     * Stats ("$70M+" and "20 Years"). That is the one duplication in this schema
-     * that is deliberate rather than an oversight: the two bands carry different
-     * labels for those two, and one of these four ("We Come / To you") has no
-     * counterpart there at all. They are two lists, not one list read twice —
-     * the same call the practice-area cards make against the directory.
-     *
-     * The cost is real and is named here so nobody has to rediscover it:
-     * changing "$70M+" means changing it in BOTH places. README tracks whether
-     * the claim itself is one the firm can stand behind.
-     */
-    defineField({
-      name: "heroStats",
-      title: "Hero figures",
-      type: "array",
-      description:
-        "The four figures across the foot of the hero. NOT the dark by-the-numbers band — " +
-        "that is Site Settings → Firm Stats, and two of these figures also appear there. " +
-        "Change both.",
-      of: [
-        {
-          type: "object",
-          name: "heroStat",
-          options: { columns: 2 },
-          fields: [
-            defineField({
-              name: "big",
-              title: "Figure",
-              type: "string",
-              validation: (rule) => rule.required(),
-            }),
-            defineField({ name: "label", type: "string", validation: (rule) => rule.required() }),
-          ],
-          preview: { select: { title: "big", subtitle: "label" } },
-        },
-      ],
-      validation: (rule) => rule.required().min(1),
     }),
 
     /*
@@ -153,6 +156,7 @@ export const homePage = defineType({
       name: "firmIntro",
       title: "Firm introduction",
       type: "object",
+      options: SECTION,
       fields: [
         defineField({
           name: "title",
@@ -243,6 +247,7 @@ export const homePage = defineType({
       name: "practiceSection",
       title: "Practice areas band",
       type: "object",
+      options: SECTION,
       fields: [
         defineField({ name: "eyebrow", type: "string", validation: (rule) => rule.required() }),
         defineField({
@@ -285,125 +290,124 @@ export const homePage = defineType({
           ],
           validation: (rule) => rule.required(),
         }),
+
+      /*
+       * THE SIX PRACTICE-AREA CARDS, and they are COPY rather than pointers.
+       *
+       * The obvious modelling — a reference to the `practiceArea` document, with
+       * the name and blurb read off it — is wrong here, and the data says so. This
+       * rail calls one card "Bicycle Accidents" where the page it links is filed
+       * as "Bike Accidents", and "Slip & Fall" where the page is "Slip and Fall
+       * Accidents". Its blurb is a one-line label where /practice-areas ships a
+       * two-sentence pitch for the same area. Four of the cards appear in both
+       * lists with the SAME href and DIFFERENT copy — so they are two lists of
+       * cards, not one list read twice.
+       *
+       * That also means the destination is a plain href rather than a reference:
+       * one of the six points at `/denver-car-accident-lawyer/`, which the heavy
+       * hand-authored template serves and which is therefore not a `practiceArea`
+       * document at all. `check:links` is what catches a dead one.
+       */
+        defineField({
+          name: "cards",
+          title: "Practice area cards",
+          type: "array",
+          description:
+            "The rail under the hero. Its wording is its own — this is not the same copy as the " +
+            "Practice Areas page's grid, and four of these areas appear on both with different " +
+            "blurbs. Drag to reorder.",
+          of: [
+            {
+              type: "object",
+              name: "areaCard",
+              fields: [
+                defineField({ name: "name", type: "string", validation: (rule) => rule.required() }),
+                defineField({
+                  name: "iconKey",
+                  title: "Icon",
+                  type: "string",
+                  description:
+                    "Must match an icon in components/icons/PracticeIcon.astro — car-accident, " +
+                    "truck-accident, slip-and-fall. An unknown key draws nothing.",
+                  validation: (rule) => rule.required(),
+                }),
+                defineField({
+                  name: "blurb",
+                  type: "text",
+                  rows: 2,
+                  description: "One line. The Practice Areas page's version of the same card is longer.",
+                  validation: (rule) => rule.required(),
+                }),
+                defineField({
+                  name: "href",
+                  title: "Destination",
+                  type: "string",
+                  validation: (rule) => rule.required().custom(validateHref),
+                }),
+                defineField({
+                  name: "image",
+                  type: "image",
+                  options: { hotspot: true },
+                  description: "Without one the card falls back to an icon plate.",
+                }),
+              ],
+              preview: { select: { title: "name", subtitle: "href", media: "image" } },
+            },
+          ],
+          validation: (rule) => rule.required().min(1),
+        }),
+        defineField({
+          name: "closing",
+          title: "Closing line",
+          type: "text",
+          rows: 3,
+          description: "The reassurance under the cards, above the panels.",
+          validation: (rule) => rule.required(),
+        }),
+
+      /*
+       * THE FOUR CATASTROPHIC-INJURY PANELS. Same shape one field short — these
+       * carry no photograph, and their one line of copy is an `insight` rather
+       * than a blurb, which is the field name the component reads.
+       */
+        defineField({
+          name: "catastrophic",
+          title: "Catastrophic injury panels",
+          type: "array",
+          description: "The four panels further down the page. No photographs — these draw an icon.",
+          of: [
+            {
+              type: "object",
+              name: "catastrophicArea",
+              fields: [
+                defineField({ name: "name", type: "string", validation: (rule) => rule.required() }),
+                defineField({
+                  name: "iconKey",
+                  title: "Icon",
+                  type: "string",
+                  description: "Must match an icon in components/icons/PracticeIcon.astro.",
+                  validation: (rule) => rule.required(),
+                }),
+                defineField({
+                  name: "insight",
+                  type: "text",
+                  rows: 2,
+                  validation: (rule) => rule.required(),
+                }),
+                defineField({
+                  name: "href",
+                  title: "Destination",
+                  type: "string",
+                  validation: (rule) => rule.required().custom(validateHref),
+                }),
+              ],
+              preview: { select: { title: "name", subtitle: "insight" } },
+            },
+          ],
+          validation: (rule) => rule.required().min(1),
+        }),
       ],
       validation: (rule) => rule.required(),
-    }),
-
-    /*
-     * THE SIX PRACTICE-AREA CARDS, and they are COPY rather than pointers.
-     *
-     * The obvious modelling — a reference to the `practiceArea` document, with
-     * the name and blurb read off it — is wrong here, and the data says so. This
-     * rail calls one card "Bicycle Accidents" where the page it links is filed
-     * as "Bike Accidents", and "Slip & Fall" where the page is "Slip and Fall
-     * Accidents". Its blurb is a one-line label where /practice-areas ships a
-     * two-sentence pitch for the same area. Four of the cards appear in both
-     * lists with the SAME href and DIFFERENT copy — so they are two lists of
-     * cards, not one list read twice.
-     *
-     * That also means the destination is a plain href rather than a reference:
-     * one of the six points at `/denver-car-accident-lawyer/`, which the heavy
-     * hand-authored template serves and which is therefore not a `practiceArea`
-     * document at all. `check:links` is what catches a dead one.
-     */
-    defineField({
-      name: "practiceAreaCards",
-      title: "Practice area cards",
-      type: "array",
-      description:
-        "The rail under the hero. Its wording is its own — this is not the same copy as the " +
-        "Practice Areas page's grid, and four of these areas appear on both with different " +
-        "blurbs. Drag to reorder.",
-      of: [
-        {
-          type: "object",
-          name: "areaCard",
-          fields: [
-            defineField({ name: "name", type: "string", validation: (rule) => rule.required() }),
-            defineField({
-              name: "iconKey",
-              title: "Icon",
-              type: "string",
-              description:
-                "Must match an icon in components/icons/PracticeIcon.astro — car-accident, " +
-                "truck-accident, slip-and-fall. An unknown key draws nothing.",
-              validation: (rule) => rule.required(),
-            }),
-            defineField({
-              name: "blurb",
-              type: "text",
-              rows: 2,
-              description: "One line. The Practice Areas page's version of the same card is longer.",
-              validation: (rule) => rule.required(),
-            }),
-            defineField({
-              name: "href",
-              title: "Destination",
-              type: "string",
-              validation: (rule) => rule.required().custom(validateHref),
-            }),
-            defineField({
-              name: "image",
-              type: "image",
-              options: { hotspot: true },
-              description: "Without one the card falls back to an icon plate.",
-            }),
-          ],
-          preview: { select: { title: "name", subtitle: "href", media: "image" } },
-        },
-      ],
-      validation: (rule) => rule.required().min(1),
-    }),
-
-    defineField({
-      name: "practicePromise",
-      title: "Practice areas closing line",
-      type: "text",
-      rows: 3,
-      description: "The reassurance under the cards, above the panels.",
-      validation: (rule) => rule.required(),
-    }),
-
-    /*
-     * THE FOUR CATASTROPHIC-INJURY PANELS. Same shape one field short — these
-     * carry no photograph, and their one line of copy is an `insight` rather
-     * than a blurb, which is the field name the component reads.
-     */
-    defineField({
-      name: "catastrophicAreas",
-      title: "Catastrophic injury panels",
-      type: "array",
-      description: "The four panels further down the page. No photographs — these draw an icon.",
-      of: [
-        {
-          type: "object",
-          name: "catastrophicArea",
-          fields: [
-            defineField({ name: "name", type: "string", validation: (rule) => rule.required() }),
-            defineField({
-              name: "iconKey",
-              title: "Icon",
-              type: "string",
-              description: "Must match an icon in components/icons/PracticeIcon.astro.",
-              validation: (rule) => rule.required(),
-            }),
-            defineField({
-              name: "insight",
-              type: "text",
-              rows: 2,
-              validation: (rule) => rule.required(),
-            }),
-            defineField({
-              name: "href",
-              title: "Destination",
-              type: "string",
-              validation: (rule) => rule.required().custom(validateHref),
-            }),
-          ],
-          preview: { select: { title: "name", subtitle: "insight" } },
-        },
-      ],
-      validation: (rule) => rule.required().min(1),
     }),
 
     /*
@@ -415,6 +419,7 @@ export const homePage = defineType({
       name: "promise",
       title: "Promise carousel",
       type: "object",
+      options: SECTION,
       fields: [
         defineField({ name: "eyebrow", type: "string", validation: (rule) => rule.required() }),
         defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
@@ -459,6 +464,7 @@ export const homePage = defineType({
       name: "faqSection",
       title: "FAQ band",
       type: "object",
+      options: SECTION,
       fields: [
         defineField({ name: "eyebrow", type: "string", validation: (rule) => rule.required() }),
         defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
@@ -505,17 +511,16 @@ export const homePage = defineType({
           ],
           validation: (rule) => rule.required(),
         }),
+        defineField({
+          name: "items",
+          title: "Questions",
+          type: "array",
+          description: "The accordion. Drag to reorder — the top question opens first.",
+          of: [{ type: "object", fields: faqItemFields, preview: faqItemPreview }],
+          validation: (rule) => rule.required().min(1),
+        }),
       ],
       validation: (rule) => rule.required(),
-    }),
-
-    defineField({
-      name: "faqs",
-      title: "FAQs",
-      type: "array",
-      description: "The accordion. Drag to reorder — the top question opens first.",
-      of: [{ type: "object", fields: faqItemFields, preview: faqItemPreview }],
-      validation: (rule) => rule.required().min(1),
     }),
 
     /*
@@ -527,6 +532,7 @@ export const homePage = defineType({
       name: "feedSection",
       title: "News & insights band",
       type: "object",
+      options: SECTION,
       fields: [
         defineField({
           name: "tabs",
@@ -563,110 +569,109 @@ export const homePage = defineType({
           ],
           validation: (rule) => rule.required(),
         }),
+        defineField({
+          name: "mentions",
+          title: "Press Mentions",
+          type: "array",
+          description: "The feed's first tab — the firm in someone else's publication.",
+          of: [
+            {
+              type: "object",
+              fields: [
+                defineField({ name: "outlet", type: "string", validation: (rule) => rule.required() }),
+                defineField({
+                  name: "logo",
+                  type: "image",
+                  description: "The outlet's mark, shown on the card.",
+                  validation: (rule) => rule.required(),
+                }),
+                defineField({
+                  name: "date",
+                  type: "string",
+                  description: 'Typed as shown — "Mar 2026". A display string, not a date.',
+                  validation: (rule) => rule.required(),
+                }),
+                defineField({
+                  name: "headline",
+                  type: "string",
+                  validation: (rule) => rule.required(),
+                }),
+                defineField({
+                  name: "href",
+                  title: "Link to the article",
+                  type: "string",
+                  // TODO(content): four of these point at "#". The articles are real
+                  // and published (FOX31, Denver7, OutThere Colorado, The Mountain
+                  // Mail) and their URLs are findable; nobody has found them.
+                  description:
+                    "The published article's URL. A bare # is a PLACEHOLDER and must not ship — " +
+                    "the link checker counts them and fails when the count changes without being " +
+                    "declared.",
+                  validation: (rule) => rule.required().custom(validateHref),
+                }),
+              ],
+              preview: { select: { title: "headline", subtitle: "outlet", media: "logo" } },
+            },
+          ],
+          validation: (rule) => rule.required().min(1),
+        }),
+        defineField({
+          name: "teasers",
+          title: "Insight Teasers",
+          type: "array",
+          description: "The feed's second tab.",
+          of: [
+            {
+              type: "object",
+              fields: [
+                defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
+                defineField({
+                  name: "category",
+                  type: "string",
+                  description: "Also picks the card's tint.",
+                  validation: (rule) => rule.required(),
+                }),
+                defineField({
+                  name: "iconKey",
+                  title: "Icon",
+                  type: "string",
+                  description:
+                    "Must match a glyph in components/icons/InsightIcon.astro. A key with no glyph " +
+                    "draws an empty plate — a new one needs a developer.",
+                  validation: (rule) => rule.required(),
+                }),
+                defineField({
+                  name: "readTime",
+                  type: "string",
+                  description: 'As shown — "4 min read".',
+                  validation: (rule) => rule.required(),
+                }),
+                defineField({
+                  name: "href",
+                  title: "Link to the article",
+                  type: "string",
+                  // TODO(content): all four point at "#" — they teaser articles
+                  // nobody has written. Unlike the press mentions there is no real
+                  // destination to find: either the articles get written or the
+                  // section comes out.
+                  description: "A bare # is a placeholder and must not ship.",
+                  validation: (rule) => rule.required().custom(validateHref),
+                }),
+              ],
+              preview: { select: { title: "title", subtitle: "category" } },
+            },
+          ],
+          validation: (rule) => rule.required().min(1),
+        }),
       ],
       validation: (rule) => rule.required(),
-    }),
-
-    defineField({
-      name: "pressMentions",
-      title: "Press Mentions",
-      type: "array",
-      description: "The feed's first tab — the firm in someone else's publication.",
-      of: [
-        {
-          type: "object",
-          fields: [
-            defineField({ name: "outlet", type: "string", validation: (rule) => rule.required() }),
-            defineField({
-              name: "logo",
-              type: "image",
-              description: "The outlet's mark, shown on the card.",
-              validation: (rule) => rule.required(),
-            }),
-            defineField({
-              name: "date",
-              type: "string",
-              description: 'Typed as shown — "Mar 2026". A display string, not a date.',
-              validation: (rule) => rule.required(),
-            }),
-            defineField({
-              name: "headline",
-              type: "string",
-              validation: (rule) => rule.required(),
-            }),
-            defineField({
-              name: "href",
-              title: "Link to the article",
-              type: "string",
-              // TODO(content): four of these point at "#". The articles are real
-              // and published (FOX31, Denver7, OutThere Colorado, The Mountain
-              // Mail) and their URLs are findable; nobody has found them.
-              description:
-                "The published article's URL. A bare # is a PLACEHOLDER and must not ship — " +
-                "the link checker counts them and fails when the count changes without being " +
-                "declared.",
-              validation: (rule) => rule.required().custom(validateHref),
-            }),
-          ],
-          preview: { select: { title: "headline", subtitle: "outlet", media: "logo" } },
-        },
-      ],
-      validation: (rule) => rule.required().min(1),
-    }),
-
-    defineField({
-      name: "insightTeasers",
-      title: "Insight Teasers",
-      type: "array",
-      description: "The feed's second tab.",
-      of: [
-        {
-          type: "object",
-          fields: [
-            defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
-            defineField({
-              name: "category",
-              type: "string",
-              description: "Also picks the card's tint.",
-              validation: (rule) => rule.required(),
-            }),
-            defineField({
-              name: "iconKey",
-              title: "Icon",
-              type: "string",
-              description:
-                "Must match a glyph in components/icons/InsightIcon.astro. A key with no glyph " +
-                "draws an empty plate — a new one needs a developer.",
-              validation: (rule) => rule.required(),
-            }),
-            defineField({
-              name: "readTime",
-              type: "string",
-              description: 'As shown — "4 min read".',
-              validation: (rule) => rule.required(),
-            }),
-            defineField({
-              name: "href",
-              title: "Link to the article",
-              type: "string",
-              // TODO(content): all four point at "#" — they teaser articles
-              // nobody has written. Unlike the press mentions there is no real
-              // destination to find: either the articles get written or the
-              // section comes out.
-              description: "A bare # is a placeholder and must not ship.",
-              validation: (rule) => rule.required().custom(validateHref),
-            }),
-          ],
-          preview: { select: { title: "title", subtitle: "category" } },
-        },
-      ],
-      validation: (rule) => rule.required().min(1),
     }),
 
     defineField({
       name: "communitySection",
       title: "Community band",
       type: "object",
+      options: SECTION,
       description:
         "The heading above the photo mosaic. The Community Involvement PAGE has its own " +
         "heading and its own partner cards — this is the homepage's summary of that work.",
@@ -675,94 +680,92 @@ export const homePage = defineType({
         defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
         defineField({ name: "lede", type: "text", rows: 3, validation: (rule) => rule.required() }),
         defineField({ name: "ctaLabel", type: "string", validation: (rule) => rule.required() }),
+        defineField({
+          name: "photos",
+          title: "Community Photos",
+          type: "array",
+          // THE ORDER IS A LAYOUT CONSTRAINT AND THIS IS THE ONLY PLACE IT IS NOW
+          // WRITTEN DOWN WHERE THE PERSON CHANGING IT WILL SEE IT. It used to live
+          // in a comment in src/data/community.ts, which was safe while an editor
+          // reordered by typing a number into a form; they drag now, and the person
+          // dragging never opens that file.
+          description:
+            "The mosaic is a 12-column grid and the widths have to add up ROW BY ROW: 5+3+4, " +
+            "then 4+5+3, then one full-width 12. Reordering without keeping each row at twelve " +
+            "leaves a gap on the page.",
+          of: [
+            {
+              type: "object",
+              fields: [
+                defineField({
+                  name: "image",
+                  type: "image",
+                  options: { hotspot: true },
+                  validation: (rule) => rule.required(),
+                }),
+                defineField({
+                  name: "org",
+                  title: "Organisation",
+                  type: "string",
+                  validation: (rule) => rule.required(),
+                }),
+                defineField({ name: "caption", type: "string", validation: (rule) => rule.required() }),
+                defineField({
+                  name: "span",
+                  title: "Width",
+                  type: "number",
+                  // `span` IS CONTENT HERE, NOT PRESENTATION, and that is a genuine
+                  // exception to the rule that layout stays in CSS. Each
+                  // photograph's width is a composition decision about THAT
+                  // photograph — a wide group shot and a tall portrait are not
+                  // interchangeable at the same width.
+                  description:
+                    "How many of the mosaic's twelve columns this photograph fills. Only these " +
+                    "four widths are drawn — anything else breaks the row.",
+                  options: {
+                    list: [
+                      { title: "Quarter (3)", value: 3 },
+                      { title: "Third (4)", value: 4 },
+                      { title: "Wide (5)", value: 5 },
+                      { title: "Full row (12)", value: 12 },
+                    ],
+                  },
+                  validation: (rule) => rule.required(),
+                }),
+              ],
+              preview: { select: { title: "org", subtitle: "caption", media: "image" } },
+            },
+          ],
+          validation: (rule) => rule.required().min(1),
+        }),
+        defineField({
+          name: "charities",
+          title: "Charity Partners",
+          type: "array",
+          // TODO(sanity): one asset per organisation. Several of these logos are
+          // also on the Community Involvement page's partner cards, and they are
+          // separate uploads today.
+          description: "The logo strip under the mosaic.",
+          of: [
+            {
+              type: "object",
+              fields: [
+                defineField({ name: "name", type: "string", validation: (rule) => rule.required() }),
+                defineField({
+                  name: "logo",
+                  type: "image",
+                  description: "Reads as the logo's alt text via the name above.",
+                  validation: (rule) => rule.required(),
+                }),
+              ],
+              preview: { select: { title: "name", media: "logo" } },
+            },
+          ],
+          validation: (rule) => rule.required().min(1),
+        }),
       ],
       validation: (rule) => rule.required(),
     }),
-
-    defineField({
-      name: "communityPhotos",
-      title: "Community Photos",
-      type: "array",
-      // THE ORDER IS A LAYOUT CONSTRAINT AND THIS IS THE ONLY PLACE IT IS NOW
-      // WRITTEN DOWN WHERE THE PERSON CHANGING IT WILL SEE IT. It used to live
-      // in a comment in src/data/community.ts, which was safe while an editor
-      // reordered by typing a number into a form; they drag now, and the person
-      // dragging never opens that file.
-      description:
-        "The mosaic is a 12-column grid and the widths have to add up ROW BY ROW: 5+3+4, " +
-        "then 4+5+3, then one full-width 12. Reordering without keeping each row at twelve " +
-        "leaves a gap on the page.",
-      of: [
-        {
-          type: "object",
-          fields: [
-            defineField({
-              name: "image",
-              type: "image",
-              options: { hotspot: true },
-              validation: (rule) => rule.required(),
-            }),
-            defineField({
-              name: "org",
-              title: "Organisation",
-              type: "string",
-              validation: (rule) => rule.required(),
-            }),
-            defineField({ name: "caption", type: "string", validation: (rule) => rule.required() }),
-            defineField({
-              name: "span",
-              title: "Width",
-              type: "number",
-              // `span` IS CONTENT HERE, NOT PRESENTATION, and that is a genuine
-              // exception to the rule that layout stays in CSS. Each
-              // photograph's width is a composition decision about THAT
-              // photograph — a wide group shot and a tall portrait are not
-              // interchangeable at the same width.
-              description:
-                "How many of the mosaic's twelve columns this photograph fills. Only these " +
-                "four widths are drawn — anything else breaks the row.",
-              options: {
-                list: [
-                  { title: "Quarter (3)", value: 3 },
-                  { title: "Third (4)", value: 4 },
-                  { title: "Wide (5)", value: 5 },
-                  { title: "Full row (12)", value: 12 },
-                ],
-              },
-              validation: (rule) => rule.required(),
-            }),
-          ],
-          preview: { select: { title: "org", subtitle: "caption", media: "image" } },
-        },
-      ],
-      validation: (rule) => rule.required().min(1),
-    }),
-
-    defineField({
-      name: "charityPartners",
-      title: "Charity Partners",
-      type: "array",
-      // TODO(sanity): one asset per organisation. Several of these logos are
-      // also on the Community Involvement page's partner cards, and they are
-      // separate uploads today.
-      description: "The logo strip under the mosaic.",
-      of: [
-        {
-          type: "object",
-          fields: [
-            defineField({ name: "name", type: "string", validation: (rule) => rule.required() }),
-            defineField({
-              name: "logo",
-              type: "image",
-              description: "Reads as the logo's alt text via the name above.",
-              validation: (rule) => rule.required(),
-            }),
-          ],
-          preview: { select: { title: "name", media: "logo" } },
-        },
-      ],
-      validation: (rule) => rule.required().min(1),
-    }),
-  ],
+],
   preview: { prepare: () => ({ title: "Homepage" }) },
 });

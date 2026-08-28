@@ -168,7 +168,7 @@ export const SHARED_SECTIONS_QUERY = defineQuery(
  * structured data, which takes a string.
  */
 export const HOME_FAQS_QUERY = defineQuery(
-  `*[_type == "homePage" && _id == "homePage"][0].faqs[]{
+  `*[_type == "homePage" && _id == "homePage"][0].faqSection.items[]{
   _key,
   question,
   answer,
@@ -179,7 +179,7 @@ export const HOME_FAQS_QUERY = defineQuery(
 
 /** The heavy Car Accidents page's twelve. Same shape, same components. */
 export const CAR_ACCIDENT_FAQS_QUERY = defineQuery(
-  `*[_type == "carAccidentsPage" && _id == "carAccidentsPage"][0].faqs[]{
+  `*[_type == "carAccidentsPage" && _id == "carAccidentsPage"][0].faqSection.items[]{
   _key,
   question,
   answer,
@@ -464,14 +464,14 @@ export const FEATURED_POST_QUERY = defineQuery(
 
 /** The homepage's six-card rail. */
 export const HOME_PRACTICE_AREAS_QUERY = defineQuery(
-  `*[_type == "homePage" && _id == "homePage"][0].practiceAreaCards[]{
+  `*[_type == "homePage" && _id == "homePage"][0].practiceSection.cards[]{
     _key, name, iconKey, blurb, href, image
   }`
 );
 
 /** The homepage's four catastrophic-injury panels. No photographs — an icon. */
 export const HOME_CATASTROPHIC_QUERY = defineQuery(
-  `*[_type == "homePage" && _id == "homePage"][0].catastrophicAreas[]{
+  `*[_type == "homePage" && _id == "homePage"][0].practiceSection.catastrophic[]{
     _key, name, iconKey, insight, href
   }`
 );
@@ -490,8 +490,8 @@ export const HOME_CATASTROPHIC_QUERY = defineQuery(
  */
 export const PRACTICE_AREAS_PAGE_QUERY = defineQuery(
   `*[_type == "practiceAreasPage" && _id == "practiceAreasPage"][0]{
-    "featuredAreas": coalesce(featuredAreas[]{ _key, name, iconKey, blurb, href, image }, []),
-    "directory": coalesce(directory[]{
+    "featuredAreas": coalesce(featured.areas[]{ _key, name, iconKey, blurb, href, image }, []),
+    "directory": coalesce(directory.entries[]{
       _key,
       title,
       "items": coalesce(items[]{
@@ -598,42 +598,42 @@ export const BLOG_ARTICLES_QUERY = defineQuery(
 
 /** Press mentions — the firm in someone else's publication. */
 export const PRESS_MENTIONS_QUERY = defineQuery(
-  `*[_type == "homePage" && _id == "homePage"][0].pressMentions[]{
+  `*[_type == "homePage" && _id == "homePage"][0].feedSection.mentions[]{
   _key, outlet, logo, date, headline, href
 }`
 );
 
 /** Insight teaser cards. */
 export const INSIGHT_TEASERS_QUERY = defineQuery(
-  `*[_type == "homePage" && _id == "homePage"][0].insightTeasers[]{
+  `*[_type == "homePage" && _id == "homePage"][0].feedSection.teasers[]{
   _key, category, iconKey, readTime, title, href
 }`
 );
 
 /** The homepage's community mosaic. */
 export const COMMUNITY_PHOTOS_QUERY = defineQuery(
-  `*[_type == "homePage" && _id == "homePage"][0].communityPhotos[]{
+  `*[_type == "homePage" && _id == "homePage"][0].communitySection.photos[]{
   _key, image, org, caption, span
 }`
 );
 
 /** Charity logos in the homepage strip. */
 export const CHARITY_PARTNERS_QUERY = defineQuery(
-  `*[_type == "homePage" && _id == "homePage"][0].charityPartners[]{
+  `*[_type == "homePage" && _id == "homePage"][0].communitySection.charities[]{
   _key, name, logo
 }`
 );
 
 /** The Community Involvement page's partner cards. */
 export const COMMUNITY_PARTNERS_QUERY = defineQuery(
-  `*[_type == "communityPage" && _id == "communityPage"][0].partners[]{
+  `*[_type == "communityPage" && _id == "communityPage"][0].partners.items[]{
   _key, org, logo, photo, body
 }`
 );
 
 /** Teams, events and causes the firm sponsors. */
 export const SPONSORSHIPS_QUERY = defineQuery(
-  `*[_type == "communityPage" && _id == "communityPage"][0].sponsorships[]{
+  `*[_type == "communityPage" && _id == "communityPage"][0].sponsorships.items[]{
   _key, name, body
 }`
 );
@@ -711,7 +711,7 @@ export const HOME_COPY_QUERY = defineQuery(
     primaryCta{ label, href },
     videoCta{ label, video{ provider, id } }
   },
-  "heroStats": coalesce(heroStats[]{ _key, big, label }, []),
+  "heroStats": coalesce(hero.stats[]{ _key, big, label }, []),
   firmIntro{
     title,
     tagline,
@@ -749,7 +749,7 @@ export const HOME_PRACTICE_SECTION_QUERY = defineQuery(
     catastrophicTitle,
     ask{ text, cta }
   },
-  practicePromise
+  "practicePromise": practiceSection.closing
 }`
 );
 
@@ -810,11 +810,7 @@ export const HOME_COMMUNITY_SECTION_QUERY = defineQuery(
 /** /about — nine bands' worth of copy, minus the six it borrows from elsewhere. */
 export const ABOUT_PAGE_QUERY = defineQuery(
   `*[_type == "aboutPage" && _id == "aboutPage"][0]{
-  eyebrow,
-  title,
-  lede,
-  ctaLabel,
-  ctaNote,
+  ...header{ eyebrow, title, lede, ctaLabel, ctaNote },
   whoWeAre{ eyebrow, title, body, ctaLabel, ctaHref },
   quote{ text, attribution },
   team{ eyebrow, title, ctaLabel, ctaHref },
@@ -831,9 +827,7 @@ export const ABOUT_PAGE_QUERY = defineQuery(
 /** /meet-our-attorneys — the page's copy. The roster is `TEAM_QUERY`. */
 export const TEAM_PAGE_QUERY = defineQuery(
   `*[_type == "teamPage" && _id == "teamPage"][0]{
-  eyebrow,
-  title,
-  lede,
+  ...header{ eyebrow, title, lede },
   partners{ eyebrow, title },
   team{ eyebrow, title }
 }`
@@ -848,9 +842,7 @@ export const TEAM_PAGE_QUERY = defineQuery(
  */
 export const CONTACT_PAGE_QUERY = defineQuery(
   `*[_type == "contactPage" && _id == "contactPage"][0]{
-  eyebrow,
-  title,
-  lede,
+  ...header{ eyebrow, title, lede },
   find{ eyebrow, title, lede }
 }`
 );
@@ -858,9 +850,7 @@ export const CONTACT_PAGE_QUERY = defineQuery(
 /** /thank-you. `noIndex`, and reachable only by submitting the form. */
 export const THANK_YOU_PAGE_QUERY = defineQuery(
   `*[_type == "thankYouPage" && _id == "thankYouPage"][0]{
-  eyebrow,
-  title,
-  lede,
+  ...header{ eyebrow, title, lede },
   panel{
     eyebrow,
     title,
@@ -874,11 +864,7 @@ export const THANK_YOU_PAGE_QUERY = defineQuery(
 /** /testimonials — two band headings over records the homepage also renders. */
 export const TESTIMONIALS_PAGE_QUERY = defineQuery(
   `*[_type == "testimonialsPage" && _id == "testimonialsPage"][0]{
-  eyebrow,
-  title,
-  lede,
-  ctaLabel,
-  ctaNote,
+  ...header{ eyebrow, title, lede, ctaLabel, ctaNote },
   videos{ eyebrow, title, lede },
   written{ eyebrow, title, lede, moreLabel }
 }`
@@ -894,11 +880,7 @@ export const RESULTS_PAGE_QUERY = defineQuery(
 /** /co-counsel — the pitch to other lawyers, and its own referral form's copy. */
 export const CO_COUNSEL_PAGE_QUERY = defineQuery(
   `*[_type == "coCounselPage" && _id == "coCounselPage"][0]{
-  eyebrow,
-  title,
-  lede,
-  ctaLabel,
-  ctaNote,
+  ...header{ eyebrow, title, lede, ctaLabel, ctaNote },
   partnership{ eyebrow, title, intro, callout, terms },
   results{ eyebrow, title, lede },
   areas{
@@ -914,15 +896,8 @@ export const CO_COUNSEL_PAGE_QUERY = defineQuery(
 /** /news — the blog index's copy. Six of the eight fields are button labels. */
 export const BLOG_INDEX_PAGE_QUERY = defineQuery(
   `*[_type == "blogIndexPage" && _id == "blogIndexPage"][0]{
-  eyebrow,
-  title,
-  lede,
-  categoryLabel,
-  allLabel,
-  featuredBadge,
-  readMoreLabel,
-  loadMoreLabel,
-  emptyLabel
+  ...header{ eyebrow, title, lede },
+  ...feed{ categoryLabel, allLabel, featuredBadge, readMoreLabel, loadMoreLabel, emptyLabel }
 }`
 );
 
@@ -983,9 +958,7 @@ export const PRACTICE_AREA_TEMPLATE_QUERY = defineQuery(
 /** The privacy policy. The only one of the three with a last-updated stamp. */
 export const PRIVACY_PAGE_QUERY = defineQuery(
   `*[_type == "sitePage" && _id == "privacy"][0]{
-  title,
-  lede,
-  "body": coalesce(body, []),
+  ...content{ title, lede, "body": coalesce(body, []) },
   updated{ at, label }
 }`
 );
@@ -995,20 +968,16 @@ export const PRIVACY_PAGE_QUERY = defineQuery(
  *  first time anything was added — so only the page's own copy is stored. */
 export const SITEMAP_PAGE_QUERY = defineQuery(
   `*[_type == "sitePage" && _id == "sitemap"][0]{
-  title,
-  lede,
-  "body": coalesce(body, [])
+  ...content{ title, lede, "body": coalesce(body, []) }
 }`
 );
 
 /** The 404, and the four routes it offers instead of a search box. */
 export const NOT_FOUND_PAGE_QUERY = defineQuery(
   `*[_type == "sitePage" && _id == "notFound"][0]{
-  title,
-  lede,
-  "body": coalesce(body, []),
-  linksTitle,
-  "links": coalesce(links[]{ _key, label, description, href }, [])
+  ...content{ title, lede, "body": coalesce(body, []) },
+  "linksTitle": links.title,
+  "links": coalesce(links.items[]{ _key, label, description, href }, [])
 }`
 );
 
@@ -1019,35 +988,36 @@ export const NOT_FOUND_PAGE_QUERY = defineQuery(
  * return the strings around them. Their page-header photographs are still local
  * imports, like every other page's.
  *
- * TWO PROJECTIONS ALIAS A FIELD. `featuredHeading` and `directoryHeading` are
- * named as a matched pair in the Studio, where an editor meets them beside the
- * lists they head; the interfaces have called them `featured` and `directory`
- * since before Sanity existed, and renaming a field an editor sees to match a
- * component's prop is the wrong way round. Same for `sponsorshipsHeading`.
+ * THE ALIASES THESE TWO NEEDED ARE GONE, AND PHASE 5 IS WHY. `featuredHeading`
+ * and `directoryHeading` were named as a matched pair in the Studio, beside the
+ * lists they headed, while the interfaces had called them `featured` and
+ * `directory` since before Sanity existed — so each projection renamed one. The
+ * accordion made the heading and its list ONE section, which could then take the
+ * interface's name without costing an editor anything: the field they meet is
+ * the band, not the heading. Same for `sponsorshipsHeading`.
+ *
+ * ONE ALIAS SURVIVES AND IT IS LOAD-BEARING. `"volunteer": partners{…}` — the
+ * community page renders the partner cards TWICE, as the volunteer grid and as
+ * the logo strip, so one section holds two headings and the getter still wants
+ * them under the two names its components read.
  */
 
 /** /practice-areas — its own copy. The two lists are `PRACTICE_AREAS_PAGE_QUERY`. */
 export const PRACTICE_AREAS_COPY_QUERY = defineQuery(
   `*[_type == "practiceAreasPage" && _id == "practiceAreasPage"][0]{
-  eyebrow,
-  title,
-  lede,
-  ctaLabel,
-  ctaNote,
-  "featured": featuredHeading{ eyebrow, title, lede },
-  "directory": directoryHeading{ eyebrow, title }
+  ...header{ eyebrow, title, lede, ctaLabel, ctaNote },
+  featured{ eyebrow, title, lede },
+  directory{ eyebrow, title }
 }`
 );
 
 /** /community-involvement — its own copy. The two lists are separate queries. */
 export const COMMUNITY_PAGE_COPY_QUERY = defineQuery(
   `*[_type == "communityPage" && _id == "communityPage"][0]{
-  eyebrow,
-  title,
-  lede,
-  volunteer{ eyebrow, title, ctaLabel },
-  "sponsorships": sponsorshipsHeading{ eyebrow, title },
-  "partners": { "label": partnersLabel }
+  ...header{ eyebrow, title, lede },
+  "volunteer": partners{ eyebrow, title, ctaLabel },
+  sponsorships{ eyebrow, title },
+  partners{ label }
 }`
 );
 

@@ -9,6 +9,7 @@
 import { defineField, defineType } from "sanity";
 // Subpath, not the barrel — see the note in sanity/structure/index.ts.
 import { CommentIcon } from "@sanity/icons/Comment";
+import { SECTION } from "./section";
 
 export const testimonialsPage = defineType({
   name: "testimonialsPage",
@@ -17,34 +18,45 @@ export const testimonialsPage = defineType({
   icon: CommentIcon,
   fields: [
     defineField({
-      name: "eyebrow",
-      type: "string",
-      description: "The small line above the page title.",
-      validation: (rule) => rule.required(),
-    }),
-    defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
-    defineField({
-      name: "lede",
-      type: "simpleText",
-      description: "The sentence under the title.",
-      validation: (rule) => rule.required(),
-    }),
-    defineField({
-      name: "ctaLabel",
-      title: "Header button",
-      type: "string",
-      validation: (rule) => rule.required(),
-    }),
-    defineField({
-      name: "ctaNote",
-      title: "Note beside the button",
-      type: "string",
+      name: "header",
+      title: "Page header",
+      type: "object",
+      options: SECTION,
+      description: "The band at the top of the page.",
+      fields: [
+        defineField({
+          name: "eyebrow",
+          type: "string",
+          description: "The small line above the page title.",
+          validation: (rule) => rule.required(),
+        }),
+        defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
+        defineField({
+          name: "lede",
+          type: "simpleText",
+          description: "The sentence under the title.",
+          validation: (rule) => rule.required(),
+        }),
+        defineField({
+          name: "ctaLabel",
+          title: "Header button",
+          type: "string",
+          validation: (rule) => rule.required(),
+        }),
+        defineField({
+          name: "ctaNote",
+          title: "Note beside the button",
+          type: "string",
+          validation: (rule) => rule.required(),
+        }),
+      ],
       validation: (rule) => rule.required(),
     }),
     defineField({
       name: "videos",
       title: "Video reviews band",
       type: "object",
+      options: SECTION,
       fields: [
         defineField({ name: "eyebrow", type: "string", validation: (rule) => rule.required() }),
         defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
@@ -56,6 +68,7 @@ export const testimonialsPage = defineType({
       name: "written",
       title: "Written reviews band",
       type: "object",
+      options: SECTION,
       fields: [
         defineField({ name: "eyebrow", type: "string", validation: (rule) => rule.required() }),
         defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
@@ -80,6 +93,6 @@ export const testimonialsPage = defineType({
       ],
       validation: (rule) => rule.required(),
     }),
-  ],
+],
   preview: { prepare: () => ({ title: "Testimonials" }) },
 });

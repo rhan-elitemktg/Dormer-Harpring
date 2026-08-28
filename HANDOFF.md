@@ -6,9 +6,9 @@ Architecture, conventions and the design source of truth live in `AGENTS.md` (sy
 `CLAUDE.md`, loaded automatically). Pre-launch decisions live in `README.md`. Don't restate
 either here, and don't record anything `git log` already knows.
 
-_Last updated: 2026-08-27._
+_Last updated: 2026-08-28._
 
-## The Sanity integration — Phases 0 through 4 are in
+## The Sanity integration — Phases 0 through 5 are in
 
 **499 content documents in Sanity, and `src/data/` no longer holds page copy.** Every route's
 strings are a field on a page singleton; the data layer is 5,724 lines down to 4,724, and
@@ -45,10 +45,89 @@ against the code, swept for dead literals, swapped, built and diffed on its own.
   off a URL, and omitting them shifts the layout as the image lands.
 - Field types: `richText`, `answerText`, `simpleText`, `inlineText`, `link`, `navLink`,
   `videoRef`, `seo`.
-- Nine collection types, **fifteen page documents** and five Site Settings singletons, in a
-  desk of Pages / Collections / Site Settings.
+- Nine collection types, **fifteen page types** (seventeen documents — `sitePage` is three) and
+  five Site Settings singletons, in a desk of Pages / Collections / Site Settings. Twelve of the
+  fifteen hold their fields in collapsible SECTIONS — see below.
 - `scripts/lib/sanity.py` — one GROQ reader for every Python check. `lib/firm.py` is one
   query on top of it.
+
+### EVERY PAGE DOCUMENT IS AN ACCORDION OF SECTIONS
+
+**Twelve of the fifteen page types now hold their fields in collapsible section objects**, one
+per rendered band, collapsed by default. A form opens as a list of band NAMES rather than a
+scroll of every field on the page. `SECTION` in `schemaTypes/pages/section.ts` is the one
+constant they all spread — whether these default to open or closed is one decision and it
+should be changeable in one place.
+
+Done in three slices, each seeded, verified, swapped, built and diffed on its own, and **all
+three were output-neutral: 329 of 329 pages byte-identical, three times.**
+
+| | Pages | What moved |
+|---|---|---|
+| 5a | about, team, testimonials, co-counsel, contact, thank-you, blog index | loose header strings into a `header` object |
+| 5b | community, practice areas, the three utility pages | each band's heading flattened into the band, its list joining as `items` |
+| 5c | homepage, car accidents | five arrays merged into the band that renders them |
+
+**THREE DOCUMENTS ARE DELIBERATELY STILL FLAT.** `resultsPage` is four fields drawing ONE band,
+and the two templates are label sets that no band owns — an accordion holding a document's only
+section is a click that buys nothing. It is the same reason Phase 4 gave those three no field
+groups either.
+
+**THE TABS CAME OFF PRACTICE AREAS AND CAR ACCIDENTS.** Phase 4 gave them Sanity field `groups`
+— three and six. `/studio-polish` records the call from the first build that tabs on top of
+accordions make an editor tab AND expand, so the two idioms do not go together. Car Accidents
+is one collapsed list of eighteen rows now. **Collections and Settings keep their tabs** — seven
+documents — and that is not an inconsistency to tidy: a team member is a person, not a page of
+bands.
+
+**A SANITY-TO-SANITY RESHAPE HAS NO CODE-SIDE SOURCE TO ASSERT AGAINST.** Every Phase 4
+migration read a literal out of `src/data/` and checked it was still there. There is no such
+anchor here, so `scripts/migrate-sections-5.ts` guards differently: it walks both documents to
+their LEAVES, sorts, and refuses to write unless the value multiset is identical. Only paths may
+change. `_key`s ride along as leaves, which is what would catch an array quietly losing a member.
+
+Three things that migration needed which the Phase 4 ones did not:
+
+- **A section is routinely NAMED AFTER the array it swallows** — `partners[]` became
+  `partners.items`, `directory[]` became `directory.entries`. So it collects, THEN deletes, THEN
+  assigns. Asserting the target name is free before starting would reject the commonest case in
+  the slice.
+- **A dotted source path**, so a heading object can be flattened INTO the section that now holds
+  its list, with the emptied parent pruned rather than left behind as `featuredHeading: {}`.
+- **An optional source, marked with a trailing `?`**, for the three utility pages alone: `links`
+  exists on the 404 and `lede` on two of three. Everywhere else a missing source throws, so
+  absence is opt-in rather than tolerated.
+
+### `--verify` REPORTED A PERFECT RESHAPE AS A FAILED IMPORT
+
+It asserted each old source path was gone. But a section named after the array it swallowed
+means `partners` legitimately still exists — as an object now — so the check went red on two of
+the three pages in 5b while the data was exactly right.
+
+**The check was measuring the wrong thing and its answer looked like a real finding**, which is
+the same shape as every wrong marker count in this file. It skips the assertion when the source
+IS the section or sits inside it. Worth remembering that a guard written for one slice does not
+automatically hold for the next one.
+
+### THE ALIASES TWO PROJECTIONS NEEDED ARE GONE
+
+`featuredHeading` / `directoryHeading` / `sponsorshipsHeading` were named as matched pairs in
+the Studio, beside the lists they headed, while the interfaces had called them `featured` and
+`directory` since before Sanity existed — so each projection renamed one. **Making the heading
+and its list one section let the field take the interface's name without costing an editor
+anything**, because the thing they now meet is the band rather than the heading.
+
+**One alias survives and it is load-bearing**: the community page renders its partner cards
+TWICE, as the volunteer grid and as the logo strip, so one section holds two headings and the
+projection still hands the getter both names.
+
+### `kind` STAYS OUTSIDE THE ACCORDION ON THE THREE UTILITY PAGES
+
+It is read-only and it is how an editor knows whether they opened the 404 or the privacy policy.
+The schema's own comment says hiding it would be tidier and wrong; folding it into a collapsed
+section is that same mistake one step softer. `links` became ONE conditional section rather than
+two conditional fields, so the two documents that never show it get no row at all — a collapsed
+row that opens onto nothing is worse than no row.
 
 ### THE DESK IS FIFTEEN PAGES NOW, IN NAV ORDER
 
@@ -123,9 +202,9 @@ in `diff-comp-blog-post.py` because no file in `src/` owns that sentence any mor
 `YOUTUBE_ORIGINS` in `lib/video.ts` holds eight ids recovered from git history.
 
 **Re-measure with `git grep` after every phase. Do not subtract.** Current inventory:
-**41 `TODO(launch)`, 8 `TODO(video)`, 10 `TODO(sanity)`, 3 `TODO(content)`.** Phase 4 closed
+**41 `TODO(launch)`, 8 `TODO(video)`, 9 `TODO(sanity)`, 3 `TODO(content)`.** Phase 4 closed
 two `TODO(sanity)` — the award and testimonial key references, below — and added one for the
-Homepage document's form.
+Homepage document's form, which **Phase 5 has now closed in its turn**.
 
 ### PAGE-HEADER ART DID NOT MOVE, AND NEITHER DID ITS ALT TEXT
 
@@ -734,10 +813,9 @@ assertion: an image that is already a reference means the getter has moved.
 - **`routePaths.ts` exports `locationPath` and nothing calls it.** One of five identical
   helpers that name the kinds of URL this site has; whether that set should shrink is a
   routing question, not a migration one.
-- **The Homepage document is sixteen fields and the form is a long scroll.** Practice Areas and
-  Car Accidents got Sanity field GROUPS in Phase 4 — three tabs and six — and the homepage
-  wants them too. An editor-UX decision, so it belongs to `/studio-polish ux`, which audits a
-  filled-out schema and now has one. `TODO(sanity)` on the type.
+- ~~**The Homepage document is sixteen fields and the form is a long scroll.**~~ **CLOSED.** It
+  is seven sections now, and Practice Areas and Car Accidents traded their Phase 4 tabs for the
+  same accordion. See the top of this file.
 - **The fact-check SENTENCE is still derived**, not editable. See the note at the top of this
   file for what making it editable would need.
 
@@ -842,7 +920,11 @@ last handoff and it moves the project's biggest dependency off the critical path
 **The blog archive is 186 posts, not 167.** WordPress has two post types and the article-shaped
 content is spread across both — see below.
 
-Marker inventory: **41 `TODO(launch)`, 8 `TODO(video)`, 10 `TODO(sanity)`, 3 `TODO(content)`.**
+Marker inventory: **41 `TODO(launch)`, 8 `TODO(video)`, 9 `TODO(sanity)`, 3 `TODO(content)`.**
+Phase 5 closed one — the Homepage document's "sixteen fields and a long scroll", which is what
+the accordion answered. **41 / 8 / 3 are unchanged and that was measured, not assumed**: the
+count was re-run before and after the three slices, because a reshape that moves a field is
+exactly the shape that has taken a comment with it three times.
 Re-measured with `git grep` after Phase 4, which briefly lost ELEVEN launch markers and
 duplicated two more — see "A comment beside a literal cannot survive that literal moving to a
 CMS" above for what happened and why 41 → 41 is a coincidence rather than a proof. Phase 4
@@ -1803,11 +1885,12 @@ entry and both files to fix.
    which the practice-area chrome maps onto almost exactly. **Deliberately NOT in Phases 3 or
    4**: nothing in the 290 imported documents uses them and no renderer exists, so adding them
    would ship four editor controls that draw nothing. They want a renderer first.
-6. **Sanity Phase 5 — NEXT.** The webhook (publishing changes nothing on the live site until
-   someone redeploys), the production URL as a CORS origin (the deployed `/admin` loads and
-   fails sign-in), then `/studio-polish ux`. That last one audits a filled-out schema and now
-   has one — start with the Homepage document's sixteen fields, which want Sanity's field
-   groups the way Practice Areas and Car Accidents got them in Phase 4.
+6. **Sanity Phase 5 — the webhook and CORS are what is left.** Publishing changes nothing on
+   the live site until someone redeploys, and the production URL is still not a CORS origin, so
+   the deployed `/admin` loads and fails sign-in. **The `/studio-polish ux` half is DONE**: every
+   page document with more than one band is an accordion of sections, which is what the
+   Homepage's sixteen loose fields wanted and what took the tabs off the other two. See the top
+   of this file.
 7. `/new-seo-setup` — per-page meta, a Global SEO Settings singleton, JSON-LD, `sitemap.xml`,
    `robots.txt`, editor-managed redirects. **The practice-area pages already carry real
    `metaTitle` / `metaDescription` from the live site's own meta** on all 104 `practiceArea`
@@ -2196,9 +2279,13 @@ Elite brand theme applied at scaffold time: light-locked palette, ELITE emblem a
 upgrades.
 
 **The desk is no longer empty.** `structureTool({ structure })` draws three groups — Pages,
-Collections, Site Settings — from `src/sanity/structure/index.ts`. Pages holds three
-singletons (Homepage, Community Involvement, Car Accidents), Collections holds six types, and
-Site Settings holds five singletons. A document type added to `schemaTypes`
+Collections, Site Settings — from `src/sanity/structure/index.ts`. Pages holds **fifteen rows**:
+twelve routes in NAV ORDER, then the two templates, then a "Utility pages" sub-list. **That is
+fifteen page TYPES and SEVENTEEN documents** — the fifteenth type, `sitePage`, is three pinned
+documents behind that one row, which is why the two counts differ and why this file's "fifteen
+page documents" elsewhere means types. See "THE DESK IS FIFTEEN PAGES NOW" at the top for why
+that order and why the three are one type. Collections holds **nine** types and Site Settings
+**five** singletons. A document type added to `schemaTypes`
 but not placed in one of the three arrays shows up under a divider at the bottom rather than
 becoming invisible, which is the same silent-failure shape the four linters exist to catch.
 

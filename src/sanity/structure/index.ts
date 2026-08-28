@@ -103,12 +103,16 @@ function fixedDocument(
  * reads across the header; alphabetical would put Thank You between Results and
  * Testimonials and Contact above everything.
  *
- * FOURTEEN OF AN EVENTUAL FIFTEEN. The two TEMPLATE singletons at the foot hold
- * the chrome every post and every service page renders — the contents box's
- * heading, the byline's labels, the fact-check tag — and they belong here rather
- * than in Settings for exactly that reason: it is copy on a page, which is what
- * the SEO team reaches for. Still to come: the three utility pages (privacy,
- * sitemap, 404), which arrive together as one `sitePage` group.
+ * FOURTEEN HERE, FIFTEEN ROWS IN THE DESK. The two TEMPLATE singletons at the
+ * foot hold the chrome every post and every service page renders — the contents
+ * box's heading, the byline's labels, the fact-check tag — and they belong here
+ * rather than in Settings for exactly that reason: it is copy on a page, which
+ * is what the SEO team reaches for.
+ *
+ * The fifteenth row is `UTILITY_PAGES` below — one `sitePage` type at three
+ * fixed ids, in a sub-list rather than in this array. So the Pages group is
+ * fifteen TYPES and seventeen DOCUMENTS; the two counts differ by exactly that
+ * one row.
  */
 const PAGES: [string, string, ComponentType?][] = [
   ["homePage", "Homepage", HomeIcon],
