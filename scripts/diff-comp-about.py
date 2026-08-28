@@ -113,9 +113,26 @@ comp_stat_label = re.findall(r"label: '([^']+)'", blk)
 built_stat_big = [unesc(x) for x in re.findall(r'<dd class="stats__big[^"]*"[^>]*>(.*?)</dd>', built, re.S)]
 built_stat_label = [unesc(x) for x in re.findall(r'<dt class="stats__label[^"]*"[^>]*>(.*?)</dt>', built, re.S)]
 
+# THE FOUR FIGURES ARE NOT COMPARED TO THE COMP ANY MORE, and the departure is
+# declared below rather than the assertion being dropped. The comp specifies the
+# long labels — "Recovered for clients", "Trying cases in Denver", "Small ·
+# Caseload by design" — and the band now renders the homepage hero's shorter
+# wording, because the two sets were collapsed into one record.
+#
+# WHAT IS ASSERTED INSTEAD IS THE INVARIANT THAT CHANGE CREATED: this band and
+# the homepage hero draw the SAME four figures. That stays true whatever an
+# editor types into them, and goes red the moment somebody re-splits them into
+# two records — which is the regression worth catching. Pinning the current
+# labels would instead go red every time an editor does their job, which is how
+# a check gets ignored.
+HOME = BUILT.replace("/about/", "/")
+home = open(HOME, encoding="utf-8", errors="replace").read()
+hero_big = [unesc(x) for x in re.findall(r'<span class="stats__big[^"]*"[^>]*>(.*?)</span>', home, re.S)]
+hero_label = [unesc(x) for x in re.findall(r'<span class="stats__label[^"]*"[^>]*>(.*?)</span>', home, re.S)]
+
 print("\nBY THE NUMBERS")
-cmp("figures / order", comp_stat_big, built_stat_big)
-cmp("labels / order", comp_stat_label, built_stat_label)
+cmp("figures match the homepage hero", hero_big, built_stat_big)
+cmp("labels match the homepage hero", hero_label, built_stat_label)
 
 
 # ---------------------------------------------------------------- team cards
@@ -240,6 +257,18 @@ cmp("reviewer names / order", comp_review_names, built_review_names)
 # Each of these IS a difference from the comp, made on purpose. Asserted so the
 # diff stays honest — if one is ever reverted, this script says so.
 EXPECTED = [
+    (
+        "the stats band uses the homepage hero's wording, not the comp's",
+        len(built_stat_label) == len(comp_stat_label) and built_stat_label != comp_stat_label,
+        "there were two near-identical sets of four — this band on seven pages and the "
+        "homepage hero's row — matching on three figures and differing only in label, with a "
+        "fourth that was a different claim entirely (the comp's 'Small · Caseload by design' "
+        "against the hero's 'We Come · To you'). Two records meant '$70M+' had two homes and "
+        "confirming it before launch meant editing both. They are one record on Shared "
+        "Sections now, in the hero's shorter wording by request, so the homepage did not move "
+        "and these seven pages did. The figures themselves are asserted above against the "
+        "homepage rather than against this comp",
+    ),
     (
         # The comps' own infoCardsData values are excluded from present("values")
         # above; both numbers are asserted here instead, against Sanity.

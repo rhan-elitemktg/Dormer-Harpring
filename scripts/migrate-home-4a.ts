@@ -9,15 +9,33 @@
 // the code still holds the literals. Run it between the import and the swap;
 // after the swap it is comparing the dataset with itself.
 //
+// THIS SCRIPT IS SPENT AND CANNOT BE RE-RUN. Its swap happened, so every getter
+// it reads now returns what it wrote. Phase 6a then removed one of them
+// outright — `getPracticePromise`, whose single band-level string became a
+// field on each of the six cards — and that reference was deleted here rather
+// than left dangling, because `check:types` is a gate the whole repo shares and
+// a spent migration must not be what turns it red.
+//
 // WHAT MOVES, AND WHERE FROM
 //
 //   data/home.ts            getHomeHero          → homePage.hero
 //                           getHomeStats         → homePage.heroStats
+//                                                (GONE — 6c made the hero read the
+//                                                one shared set of firm figures, so
+//                                                neither the getter nor the field
+//                                                exists)
 //                           getHomeFirmIntro     → homePage.firmIntro
 //                           getHomePromise       → homePage.promise
 //                           getHomeWhyUs         → sharedSections.whyUs
 //   data/practiceAreas.ts   getPracticeSection   → homePage.practiceSection
 //                           getPracticePromise   → homePage.practicePromise
+//                                                (GONE — Phase 6a moved that line
+//                                                onto each CARD, so this script can
+//                                                no longer read or assert it)
+//                           getFaqSection        → homePage.faqSection
+//                                                (its `answerCtaLabel` is GONE too —
+//                                                Phase 6a moved that onto each
+//                                                QUESTION, for the same reason)
 //   data/faqs.ts            getFaqSection        → homePage.faqSection
 //   data/news.ts            getFeedSection       → homePage.feedSection
 //   data/community.ts       getCommunitySection  → homePage.communitySection
@@ -241,15 +259,13 @@ async function build(): Promise<void> {
   const news = await import("../src/data/news.ts");
   const community = await import("../src/data/community.ts");
 
-  const [hero, heroStats, firmIntro, promise, whyUs, practiceSection, practicePromise, faqSection, feedSection, communitySection] =
+  const [hero, firmIntro, promise, whyUs, practiceSection, faqSection, feedSection, communitySection] =
     await Promise.all([
       home.getHomeHero(),
-      home.getHomeStats(),
       home.getHomeFirmIntro(),
       home.getHomePromise(),
       home.getHomeWhyUs(),
       areas.getPracticeSection(),
-      areas.getPracticePromise(),
       faqs.getFaqSection(),
       news.getFeedSection(),
       community.getCommunitySection(),
@@ -263,7 +279,6 @@ async function build(): Promise<void> {
       primaryCta: { label: hero.primaryCta.label, href: hero.primaryCta.href },
       videoCta: { label: hero.videoCta.label, video: video(hero.videoCta.video) },
     },
-    heroStats: heroStats.map((stat) => ({ _key: stat._key, big: stat.big, label: stat.label })),
     firmIntro: {
       title: firmIntro.title,
       tagline: firmIntro.tagline,
@@ -289,7 +304,6 @@ async function build(): Promise<void> {
       catastrophicTitle: practiceSection.catastrophicTitle,
       ask: { ...practiceSection.ask },
     },
-    practicePromise,
     promise: {
       eyebrow: promise.eyebrow,
       title: promise.title,
@@ -304,7 +318,6 @@ async function build(): Promise<void> {
       eyebrow: faqSection.eyebrow,
       title: faqSection.title,
       lede: faqSection.lede,
-      answerCtaLabel: faqSection.answerCtaLabel,
       ask: {
         title: faqSection.ask.title,
         body: faqSection.ask.body,
@@ -391,15 +404,13 @@ async function verify(): Promise<void> {
   const news = await import("../src/data/news.ts");
   const community = await import("../src/data/community.ts");
 
-  const [hero, heroStats, firmIntro, promise, whyUs, practiceSection, practicePromise, faqSection, feedSection, communitySection] =
+  const [hero, firmIntro, promise, whyUs, practiceSection, faqSection, feedSection, communitySection] =
     await Promise.all([
       home.getHomeHero(),
-      home.getHomeStats(),
       home.getHomeFirmIntro(),
       home.getHomePromise(),
       home.getHomeWhyUs(),
       areas.getPracticeSection(),
-      areas.getPracticePromise(),
       faqs.getFaqSection(),
       news.getFeedSection(),
       community.getCommunitySection(),
@@ -408,15 +419,13 @@ async function verify(): Promise<void> {
   const live = await query<Json | null>(`{
     "home": *[_type == "homePage" && _id == "homePage"][0]{
       hero{ eyebrow, headline, lede, primaryCta{ label, href }, videoCta{ label, video{ provider, id } } },
-      "heroStats": heroStats[]{ _key, big, label },
       firmIntro{
         title, tagline, body, helpTitle,
         "helpPoints": helpPoints[]{ _key, lead, text },
         videoLabel, video{ provider, id }, quote{ text, name, role }, aside{ title, text, ctaLabel }
       },
       practiceSection{ eyebrow, title, lede, tabsLabel, catastrophicTitle, ask{ text, cta } },
-      practicePromise,
-      promise{ eyebrow, title, "slides": slides[]{ _key, label, body }, ctaLabel },
+        promise{ eyebrow, title, "slides": slides[]{ _key, label, body }, ctaLabel },
       faqSection{ eyebrow, title, lede, answerCtaLabel, ask{ title, body, ctaLabel, ctaHref, portraitAlt, "portrait": portrait.asset->originalFilename } },
       feedSection{ tabs{ news, insights }, news{ eyebrow, title, lede, ctaLabel }, insights{ eyebrow, title, lede, ctaLabel } },
       communitySection{ eyebrow, title, lede, ctaLabel },
@@ -450,7 +459,6 @@ async function verify(): Promise<void> {
     primaryCta: hero.primaryCta,
     videoCta: { label: hero.videoCta.label, video: hero.videoCta.video },
   });
-  compare("heroStats", liveHome.heroStats, heroStats);
   compare("firmIntro", liveHome.firmIntro, {
     title: firmIntro.title,
     tagline: firmIntro.tagline,
@@ -463,7 +471,6 @@ async function verify(): Promise<void> {
     aside: firmIntro.aside,
   });
   compare("practiceSection", liveHome.practiceSection, practiceSection);
-  compare("practicePromise", liveHome.practicePromise, practicePromise);
   compare("promise", liveHome.promise, promise);
   compare("feedSection", liveHome.feedSection, feedSection);
   compare("communitySection", liveHome.communitySection, communitySection);
@@ -477,7 +484,6 @@ async function verify(): Promise<void> {
     eyebrow: faqSection.eyebrow,
     title: faqSection.title,
     lede: faqSection.lede,
-    answerCtaLabel: faqSection.answerCtaLabel,
     ask: {
       ...askRest,
       portrait: localImagePath(portrait, "The FAQ ask card's portrait").split("/").pop(),

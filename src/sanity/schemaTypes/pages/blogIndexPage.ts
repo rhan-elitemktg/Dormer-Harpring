@@ -19,6 +19,7 @@
 import { defineField, defineType } from "sanity";
 // Subpath, not the barrel — see the note in sanity/structure/index.ts.
 import { DocumentTextIcon } from "@sanity/icons/DocumentText";
+import { SECTION } from "./section";
 
 export const blogIndexPage = defineType({
   name: "blogIndexPage",
@@ -27,59 +28,79 @@ export const blogIndexPage = defineType({
   icon: DocumentTextIcon,
   fields: [
     defineField({
-      name: "eyebrow",
-      type: "string",
-      description: "The small line above the page title.",
-      validation: (rule) => rule.required(),
-    }),
-    defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
-    defineField({
-      name: "lede",
-      type: "simpleText",
-      description: "The sentence under the title.",
-      validation: (rule) => rule.required(),
-    }),
-    defineField({
-      name: "categoryLabel",
-      title: "Above the category tabs",
-      type: "string",
-      validation: (rule) => rule.required(),
-    }),
-    defineField({
-      name: "allLabel",
-      title: "First tab",
-      type: "string",
-      description: "The tab that clears the filter. It is not a category.",
+      name: "header",
+      title: "Page header",
+      type: "object",
+      options: SECTION,
+      description: "The band at the top of the page.",
+      fields: [
+        defineField({
+          name: "eyebrow",
+          type: "string",
+          description: "The small line above the page title.",
+          validation: (rule) => rule.required(),
+        }),
+        defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
+        defineField({
+          name: "lede",
+          type: "simpleText",
+          description: "The sentence under the title.",
+          validation: (rule) => rule.required(),
+        }),
+      ],
       validation: (rule) => rule.required(),
     }),
     defineField({
-      name: "featuredBadge",
-      type: "string",
-      description: "The tag on the panel at the top of the feed.",
+      name: "feed",
+      title: "Feed labels",
+      type: "object",
+      options: SECTION,
+      description: "The buttons and badges on the post list. Not the band at the top of the page.",
+      fields: [
+        defineField({
+          name: "categoryLabel",
+          title: "Above the category tabs",
+          type: "string",
+          validation: (rule) => rule.required(),
+        }),
+        defineField({
+          name: "allLabel",
+          title: "First tab",
+          type: "string",
+          description: "The tab that clears the filter. It is not a category.",
+          validation: (rule) => rule.required(),
+        }),
+        defineField({
+          name: "featuredBadge",
+          type: "string",
+          description: "The tag on the panel at the top of the feed.",
+          validation: (rule) => rule.required(),
+        }),
+        defineField({
+          name: "readMoreLabel",
+          title: "Link on each card",
+          type: "string",
+          validation: (rule) => rule.required(),
+        }),
+        defineField({
+          name: "loadMoreLabel",
+          title: "Load-more button",
+          type: "string",
+          validation: (rule) => rule.required(),
+        }),
+        defineField({
+          name: "emptyLabel",
+          title: "When a category has no posts",
+          type: "string",
+          description:
+            "Shown in place of the feed if a category tab matches nothing. Nothing can select an " +
+            "empty category today — every tab belongs to a post — so this is the fallback rather " +
+            "than something visitors see.",
+          validation: (rule) => rule.required(),
+        }),
+      ],
       validation: (rule) => rule.required(),
     }),
-    defineField({
-      name: "readMoreLabel",
-      title: "Link on each card",
-      type: "string",
-      validation: (rule) => rule.required(),
-    }),
-    defineField({
-      name: "loadMoreLabel",
-      title: "Load-more button",
-      type: "string",
-      validation: (rule) => rule.required(),
-    }),
-    defineField({
-      name: "emptyLabel",
-      title: "When a category has no posts",
-      type: "string",
-      description:
-        "Shown in place of the feed if a category tab matches nothing. Nothing can select an " +
-        "empty category today — every tab belongs to a post — so this is the fallback rather " +
-        "than something visitors see.",
-      validation: (rule) => rule.required(),
-    }),
-  ],
+],
   preview: { prepare: () => ({ title: "Blog index" }) },
 });

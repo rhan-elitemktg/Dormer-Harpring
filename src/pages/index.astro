@@ -9,11 +9,13 @@ import AwardsBar from "../components/AwardsBar.astro";
 import TestimonialRail from "../components/TestimonialRail.astro";
 import {
   getHomeHero,
-  getHomeStats,
   getRecentResults,
   getHomeFirmIntro,
   getHomeWhyUs,
   getHomePromise,
+  getResultsStrip,
+  getAwardsBar,
+  getTestimonialRail,
 } from "../data/home";
 import PracticeSelector from "../components/home/PracticeSelector.astro";
 import WhyUs from "../components/home/WhyUs.astro";
@@ -25,6 +27,7 @@ import ContactBand from "../components/contact/ContactBand.astro";
 import NewsInsights from "../components/home/NewsInsights.astro";
 import CommunityBand from "../components/home/CommunityBand.astro";
 import { getAwards } from "../data/awards";
+import { getFirmStats } from "../data/stats";
 import { getAttorneysSection, getHomeAttorneys } from "../data/attorneys";
 import { getCoreValues, getCoreValuesSection } from "../data/coreValues";
 import { getFaqSection, getHomeFaqs } from "../data/faqs";
@@ -39,7 +42,6 @@ import { getHomeTestimonials, getReviewSummary } from "../data/testimonials";
 import {
   getPracticeSection,
   getHomePracticeAreas,
-  getPracticePromise,
   getCatastrophicAreas,
 } from "../data/practiceAreas";
 
@@ -47,13 +49,15 @@ const [
   hero,
   stats,
   results,
+  resultsStrip,
   intro,
   awards,
+  awardsBar,
   testimonials,
   reviews,
+  railCopy,
   practiceSection,
   areas,
-  practicePromise,
   catastrophic,
   why,
   attorneysSection,
@@ -72,15 +76,17 @@ const [
   ngoPartners,
 ] = await Promise.all([
   getHomeHero(),
-  getHomeStats(),
+  getFirmStats(),
   getRecentResults(),
+  getResultsStrip(),
   getHomeFirmIntro(),
   getAwards(),
+  getAwardsBar(),
   getHomeTestimonials(),
   getReviewSummary(),
+  getTestimonialRail(),
   getPracticeSection(),
   getHomePracticeAreas(),
-  getPracticePromise(),
   getCatastrophicAreas(),
   getHomeWhyUs(),
   getAttorneysSection(),
@@ -106,14 +112,13 @@ const [
   headerVariant="transparent"
 >
   <Hero hero={hero} stats={stats} />
-  <RecentResults results={results} />
+  <RecentResults results={results} copy={resultsStrip} />
   <FirmIntro intro={intro} />
-  <AwardsBar awards={awards} />
-  <TestimonialRail testimonials={testimonials} reviews={reviews} />
+  <AwardsBar awards={awards} eyebrow={awardsBar.eyebrow} />
+  <TestimonialRail testimonials={testimonials} reviews={reviews} copy={railCopy} />
   <PracticeSelector
     section={practiceSection}
     areas={areas}
-    promise={practicePromise}
     catastrophic={catastrophic}
   />
   <WhyUs why={why} />

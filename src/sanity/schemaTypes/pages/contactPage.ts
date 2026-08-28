@@ -13,6 +13,7 @@
 import { defineField, defineType } from "sanity";
 // Subpath, not the barrel — see the note in sanity/structure/index.ts.
 import { EnvelopeIcon } from "@sanity/icons/Envelope";
+import { SECTION } from "./section";
 
 export const contactPage = defineType({
   name: "contactPage",
@@ -21,22 +22,33 @@ export const contactPage = defineType({
   icon: EnvelopeIcon,
   fields: [
     defineField({
-      name: "eyebrow",
-      type: "string",
-      description: "The small line above the page title.",
-      validation: (rule) => rule.required(),
-    }),
-    defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
-    defineField({
-      name: "lede",
-      type: "simpleText",
-      description: "The sentence under the title.",
+      name: "header",
+      title: "Page header",
+      type: "object",
+      options: SECTION,
+      description: "The band at the top of the page.",
+      fields: [
+        defineField({
+          name: "eyebrow",
+          type: "string",
+          description: "The small line above the page title.",
+          validation: (rule) => rule.required(),
+        }),
+        defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
+        defineField({
+          name: "lede",
+          type: "simpleText",
+          description: "The sentence under the title.",
+          validation: (rule) => rule.required(),
+        }),
+      ],
       validation: (rule) => rule.required(),
     }),
     defineField({
       name: "find",
       title: "Find us band",
       type: "object",
+      options: SECTION,
       description: "The heading above the map.",
       fields: [
         defineField({ name: "eyebrow", type: "string", validation: (rule) => rule.required() }),

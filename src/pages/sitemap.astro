@@ -31,6 +31,7 @@ import AwardsBar from "../components/AwardsBar.astro";
 import ContactDetails from "../components/contact/ContactDetails.astro";
 import { getSitemapPage } from "../data/sitePages";
 import { getAwards } from "../data/awards";
+import { getAwardsBar } from "../data/home";
 import { getContactBand, getContactDetails } from "../data/contact";
 import { getPracticeAreaGroups } from "../data/practiceAreas";
 import {
@@ -43,10 +44,11 @@ import { getBlogPosts, getFeaturedPost } from "../data/blog";
 import { getTeam } from "../data/team";
 import { ROUTES } from "../lib/routePaths";
 
-const [page, awards, details, band, areaGroups, areaPages, areaDetails, areaCopy, sidebarAreas, posts, featured, team] =
+const [page, awards, awardsBar, details, band, areaGroups, areaPages, areaDetails, areaCopy, sidebarAreas, posts, featured, team] =
   await Promise.all([
     getSitemapPage(),
     getAwards(),
+    getAwardsBar(),
     getContactDetails(),
     getContactBand(),
     getPracticeAreaGroups(),
@@ -255,7 +257,7 @@ const total = SITE_PAGES.length + bios.length + placed + allPosts.length;
     <AreaSidebar slot="sidebar" page={sidebarCopy} areas={sidebarAreas} related={latest} />
   </PageArticle>
 
-  <AwardsBar awards={awards} tone="sunk" />
+  <AwardsBar awards={awards} eyebrow={awardsBar.eyebrow} tone="sunk" />
   <ContactDetails details={details} form={band.form} />
 </Layout>
 

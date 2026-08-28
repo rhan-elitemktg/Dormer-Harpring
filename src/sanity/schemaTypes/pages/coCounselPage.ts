@@ -14,6 +14,7 @@
 import { defineField, defineType } from "sanity";
 // Subpath, not the barrel — see the note in sanity/structure/index.ts.
 import { UsersIcon } from "@sanity/icons/Users";
+import { SECTION } from "./section";
 import { validateHref } from "../objects/link";
 
 export const coCounselPage = defineType({
@@ -23,28 +24,38 @@ export const coCounselPage = defineType({
   icon: UsersIcon,
   fields: [
     defineField({
-      name: "eyebrow",
-      type: "string",
-      description: "The small line above the page title.",
-      validation: (rule) => rule.required(),
-    }),
-    defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
-    defineField({
-      name: "lede",
-      type: "simpleText",
-      description: "The sentence under the title.",
-      validation: (rule) => rule.required(),
-    }),
-    defineField({
-      name: "ctaLabel",
-      title: "Header button",
-      type: "string",
-      validation: (rule) => rule.required(),
-    }),
-    defineField({
-      name: "ctaNote",
-      title: "Note beside the button",
-      type: "string",
+      name: "header",
+      title: "Page header",
+      type: "object",
+      options: SECTION,
+      description: "The band at the top of the page.",
+      fields: [
+        defineField({
+          name: "eyebrow",
+          type: "string",
+          description: "The small line above the page title.",
+          validation: (rule) => rule.required(),
+        }),
+        defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
+        defineField({
+          name: "lede",
+          type: "simpleText",
+          description: "The sentence under the title.",
+          validation: (rule) => rule.required(),
+        }),
+        defineField({
+          name: "ctaLabel",
+          title: "Header button",
+          type: "string",
+          validation: (rule) => rule.required(),
+        }),
+        defineField({
+          name: "ctaNote",
+          title: "Note beside the button",
+          type: "string",
+          validation: (rule) => rule.required(),
+        }),
+      ],
       validation: (rule) => rule.required(),
     }),
 
@@ -52,6 +63,7 @@ export const coCounselPage = defineType({
       name: "partnership",
       title: "Why partner with us band",
       type: "object",
+      options: SECTION,
       description: "Three blocks of prose with a pull-out figure between the first two.",
       fields: [
         defineField({ name: "eyebrow", type: "string", validation: (rule) => rule.required() }),
@@ -95,6 +107,7 @@ export const coCounselPage = defineType({
       name: "results",
       title: "Results band",
       type: "object",
+      options: SECTION,
       description: "The heading above the co-counsel results.",
       fields: [
         defineField({ name: "eyebrow", type: "string", validation: (rule) => rule.required() }),
@@ -116,6 +129,7 @@ export const coCounselPage = defineType({
       name: "areas",
       title: "Practice areas band",
       type: "object",
+      options: SECTION,
       description: "The eleven links to the areas the firm takes referrals in.",
       fields: [
         defineField({ name: "eyebrow", type: "string", validation: (rule) => rule.required() }),
@@ -167,6 +181,7 @@ export const coCounselPage = defineType({
       name: "form",
       title: "Referral form",
       type: "object",
+      options: SECTION,
       description:
         "The case-referral form at the foot of the page. This is NOT the consultation form " +
         "every other page carries — that one's copy is in Site Settings → Contact.",
@@ -192,6 +207,6 @@ export const coCounselPage = defineType({
       ],
       validation: (rule) => rule.required(),
     }),
-  ],
+],
   preview: { prepare: () => ({ title: "Co-Counsel" }) },
 });

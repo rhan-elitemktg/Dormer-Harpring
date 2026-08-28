@@ -15,7 +15,6 @@ import { sanityClient } from "sanity:client";
 import {
   PRACTICE_AREA_ARTICLES_QUERY,
   PRACTICE_AREA_PAGES_QUERY,
-  PRACTICE_AREA_TEMPLATE_QUERY,
   SHARED_SECTIONS_QUERY,
 } from "../sanity/lib/queries";
 import { once, required } from "../sanity/lib/fetch";
@@ -324,29 +323,49 @@ export interface PracticeAreaPageCopy {
  * The hero and the meta line are this template's, not the post's: the post page
  * has no hero at all, and its byline names a reviewer these pages do not have.
  */
+/**
+ * THE TEMPLATE'S CHROME IS A CONSTANT AGAIN, BY REQUEST.
+ *
+ * It was a `practiceAreaTemplate` singleton under Pages for one phase. These
+ * are interface labels rather than editorial copy — "On this page", "Posted",
+ * "Written by" — and an editor was never going to open a document to change
+ * them, so the document was two clicks of desk noise per page in the list.
+ *
+ * THE EYEBROW IS THE EXCEPTION AND IT IS HERE ANYWAY, KNOWINGLY. "Tough lawyers
+ * for tough cases" is the firm's tagline on all 104 pages, and it has already
+ * been four different things by request — the city, "Practice Area", the city
+ * again, then this. Changing it is a code change and a deploy now. That was the
+ * call; if it is made a fifth time, it belongs on `sharedSections` beside the
+ * awards bar's label, for the same reason that one is there.
+ */
+const TEMPLATE = {
+  eyebrow: "Tough lawyers for tough cases",
+  meta: {
+    writtenByLabel: "Written by",
+    updatedLabel: "Updated",
+    postedLabel: "Posted",
+  },
+  contentsLabel: "On this page",
+  relatedSidebarLabel: "Related articles",
+  faqsTitle: "Frequently asked questions",
+  factCheckLabel: "Fact-checked",
+} as const;
+
 export async function getPracticeAreaPageCopy(): Promise<PracticeAreaPageCopy> {
-  const [copy, shared] = await Promise.all([
-    once("practiceAreaTemplate", async () =>
-      required(
-        await sanityClient.fetch(PRACTICE_AREA_TEMPLATE_QUERY),
-        "Practice area template",
-        "Pages"
-      )
-    ),
-    once("sharedSections", async () =>
-      required(await sanityClient.fetch(SHARED_SECTIONS_QUERY), "Shared Sections")
-    ),
-  ]);
+  const shared = await once("sharedSections", async () =>
+    required(await sanityClient.fetch(SHARED_SECTIONS_QUERY), "Shared Sections")
+  );
 
   return {
-    ...copy,
+    ...TEMPLATE,
     meta: {
       // The firm writes all 104, and its name and link come from `blog.ts`'s
       // one byline rather than being typed into a second place.
       author: FIRM,
-      ...copy.meta,
+      ...TEMPLATE.meta,
     },
-    // Shared with the blog post template — see the note there.
+    // Shared with the blog post template — see the note there. STILL EDITABLE:
+    // the form's copy is on `sharedSections` and is not part of this constant.
     form: required(shared.sidebarForm, "Shared Sections → Sidebar consultation form"),
   };
 }

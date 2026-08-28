@@ -35,6 +35,7 @@ import ClosingCta from "./ClosingCta.astro";
 import { CA_SECTION_IDS, type PracticeAreaDetail } from "../../../data/carAccidents";
 import type { TeamMember } from "../../../data/team";
 import type { VideoReview, Testimonial, ReviewSummary } from "../../../data/testimonials";
+import type { TestimonialRailCopy } from "../../../data/home";
 import type { Award } from "../../../data/awards";
 import type { Faq, FaqSection } from "../../../data/faqs";
 import type { ContactBand, ContactDetails } from "../../../data/contact";
@@ -48,6 +49,7 @@ interface Props {
   reviews: Record<string, VideoReview>;
   testimonials: Testimonial[];
   reviewSummary: ReviewSummary;
+  railCopy: TestimonialRailCopy;
   faqs: Faq[];
   faqSection: FaqSection;
   contact: ContactDetails;
@@ -63,6 +65,7 @@ const {
   reviews,
   testimonials,
   reviewSummary,
+  railCopy,
   faqs,
   faqSection,
   contact,
@@ -99,6 +102,7 @@ const contactAnchor = `#${CA_SECTION_IDS.contact}`;
 <TestimonialRail
   testimonials={testimonials}
   reviews={reviewSummary}
+  copy={railCopy}
   id={CA_SECTION_IDS.reviews}
 />
 

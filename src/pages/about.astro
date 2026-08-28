@@ -18,6 +18,7 @@ import { getAboutPage } from "../data/aboutPage";
 import { getAboutAttorneys } from "../data/attorneys";
 import { getFirmStats } from "../data/stats";
 import { getAwards } from "../data/awards";
+import { getAwardsBar } from "../data/home";
 import { getHomeTestimonials, getReviewSummary } from "../data/testimonials";
 import { getCoreValues, getCoreValuesSection } from "../data/coreValues";
 import { getContactBand, getContactDetails } from "../data/contact";
@@ -28,6 +29,7 @@ const [
   attorneys,
   stats,
   awards,
+  awardsBar,
   testimonials,
   summary,
   valuesSection,
@@ -39,6 +41,7 @@ const [
   getAboutAttorneys(),
   getFirmStats(),
   getAwards(),
+  getAwardsBar(),
   getHomeTestimonials(),
   getReviewSummary(),
   getCoreValuesSection(),
@@ -80,7 +83,7 @@ const quotes = testimonials.filter((item) => item.kind === "quote").slice(0, 3);
   <TeamPreview section={page.team} attorneys={attorneys} />
   {/* `sunk`: the team grid above is plain cream, so the comp's near-white
       leaves no visible boundary between the two. See AwardsBar's `tone`. */}
-  <AwardsBar awards={awards} tone="sunk" />
+  <AwardsBar awards={awards} eyebrow={awardsBar.eyebrow} tone="sunk" />
   <InTheirWords section={page.reviews} reviews={quotes} summary={summary} />
   <OneShot story={page.oneShot} />
   <WhatToExpect expect={page.expect} />

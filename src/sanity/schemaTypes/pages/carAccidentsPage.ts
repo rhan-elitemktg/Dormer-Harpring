@@ -54,6 +54,7 @@
 import { defineField, defineType } from "sanity";
 // Subpath, not the barrel — see the note in sanity/structure/index.ts.
 import { WarningOutlineIcon } from "@sanity/icons/WarningOutline";
+import { SECTION } from "./section";
 import { faqItemFields, faqItemPreview } from "./faqItemFields";
 import { validateHref } from "../objects/link";
 
@@ -172,27 +173,19 @@ export const carAccidentsPage = defineType({
   title: "Car Accidents",
   type: "document",
   icon: WarningOutlineIcon,
-  groups: [
-    { name: "top", title: "Top of page", default: true },
-    { name: "case", title: "Do I have a case?" },
-    { name: "firm", title: "Why us" },
-    { name: "process", title: "What happens next" },
-    { name: "more", title: "More & closing" },
-    { name: "faqs", title: "FAQs" },
-  ],
   fields: [
     // ── Top of page ──────────────────────────────────────────────────────────
     defineField({
       name: "seo",
       title: "Search listing",
       type: "seo",
-      group: "top",
+      options: SECTION,
       description: "What this page's entry in a search result says.",
     }),
     defineField({
       name: "hero",
       type: "object",
-      group: "top",
+      options: SECTION,
       description: "Everything above the section nav. Its photograph is not editable.",
       fields: [
         defineField({
@@ -332,7 +325,7 @@ export const carAccidentsPage = defineType({
       name: "nav",
       title: "Section nav",
       type: "object",
-      group: "top",
+      options: SECTION,
       description: "The sticky row of jump links. Which sections it lists is set in code.",
       fields: [
         defineField({
@@ -373,7 +366,7 @@ export const carAccidentsPage = defineType({
       name: "triage",
       title: "Recently injured band",
       type: "object",
-      group: "case",
+      options: SECTION,
       description: "The five coloured rows near the top of the page.",
       fields: [
         defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
@@ -452,7 +445,7 @@ export const carAccidentsPage = defineType({
       name: "takeaways",
       title: "Short version band",
       type: "object",
-      group: "case",
+      options: SECTION,
       fields: [
         defineField({ name: "eyebrow", type: "string", validation: (rule) => rule.required() }),
         defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
@@ -470,7 +463,7 @@ export const carAccidentsPage = defineType({
       name: "criteria",
       title: "Do I have a case band",
       type: "object",
-      group: "case",
+      options: SECTION,
       fields: [
         defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
         defineField({ name: "lede", type: "text", rows: 3, validation: (rule) => rule.required() }),
@@ -498,7 +491,7 @@ export const carAccidentsPage = defineType({
       name: "lawyers",
       title: "Our lawyers band",
       type: "object",
-      group: "firm",
+      options: SECTION,
       fields: [
         defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
         defineField({ name: "lede", type: "text", rows: 2, validation: (rule) => rule.required() }),
@@ -567,7 +560,7 @@ export const carAccidentsPage = defineType({
       name: "credentials",
       title: "Awards band",
       type: "object",
-      group: "firm",
+      options: SECTION,
       fields: [
         defineField({ name: "eyebrow", type: "string", validation: (rule) => rule.required() }),
         defineField({
@@ -594,7 +587,7 @@ export const carAccidentsPage = defineType({
       name: "whyFirm",
       title: "Why Dormer Harpring band",
       type: "object",
-      group: "firm",
+      options: SECTION,
       description: "Its two photographs are one image in two crops and are not editable.",
       fields: [
         defineField({ name: "eyebrow", type: "string", validation: (rule) => rule.required() }),
@@ -674,7 +667,7 @@ export const carAccidentsPage = defineType({
       name: "results",
       title: "Results band",
       type: "object",
-      group: "firm",
+      options: SECTION,
       fields: [
         defineField({ name: "eyebrow", type: "string", validation: (rule) => rule.required() }),
         defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
@@ -739,7 +732,7 @@ export const carAccidentsPage = defineType({
       name: "timeline",
       title: "What happens next band",
       type: "object",
-      group: "process",
+      options: SECTION,
       description: "Its photograph is a band backdrop and is not editable.",
       fields: [
         defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
@@ -824,7 +817,7 @@ export const carAccidentsPage = defineType({
       name: "crashTypes",
       title: "Crash types band",
       type: "object",
-      group: "process",
+      options: SECTION,
       fields: [
         defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
         defineField({ name: "lede", type: "text", rows: 3, validation: (rule) => rule.required() }),
@@ -870,7 +863,7 @@ export const carAccidentsPage = defineType({
       name: "denver",
       title: "Car accidents in Denver band",
       type: "object",
-      group: "process",
+      options: SECTION,
       fields: [
         defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
         defineField({ name: "lede", type: "text", rows: 3, validation: (rule) => rule.required() }),
@@ -943,7 +936,7 @@ export const carAccidentsPage = defineType({
       name: "checklistTeaser",
       title: "Checklist teaser",
       type: "object",
-      group: "more",
+      options: SECTION,
       fields: [
         defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
         defineField({ name: "body", type: "text", rows: 3, validation: (rule) => rule.required() }),
@@ -994,7 +987,7 @@ export const carAccidentsPage = defineType({
       name: "faultTeaser",
       title: "Comparative fault teaser",
       type: "object",
-      group: "more",
+      options: SECTION,
       fields: [
         defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
         defineField({ name: "body", type: "text", rows: 3, validation: (rule) => rule.required() }),
@@ -1030,7 +1023,7 @@ export const carAccidentsPage = defineType({
       name: "more",
       title: "More on claims band",
       type: "object",
-      group: "more",
+      options: SECTION,
       fields: [
         defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
         defineField({
@@ -1102,7 +1095,7 @@ export const carAccidentsPage = defineType({
       name: "closing",
       title: "Closing band",
       type: "object",
-      group: "more",
+      options: SECTION,
       description: "The map and the last call to action. The map's title is built from Firm Details.",
       fields: [
         defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
@@ -1124,15 +1117,6 @@ export const carAccidentsPage = defineType({
      * collection with the homepage's eight, split by a `shownOn` radio whose
      * only job was to undo the sharing; Phase 2f dropped both.
      */
-    defineField({
-      name: "faqs",
-      title: "FAQs",
-      type: "array",
-      group: "faqs",
-      description: "The accordion. Drag to reorder — the top question opens first.",
-      of: [{ type: "object", fields: faqItemFields, preview: faqItemPreview }],
-      validation: (rule) => rule.required().min(1),
-    }),
     /*
      * THE ACCORDION'S OWN HEADING, which is NOT the homepage's. The two
      * accordions render through one component and share four fields — the
@@ -1141,9 +1125,9 @@ export const carAccidentsPage = defineType({
      */
     defineField({
       name: "faqSection",
-      title: "FAQ band heading",
+      title: "FAQs",
       type: "object",
-      group: "faqs",
+      options: SECTION,
       description:
         "Only what differs from the homepage's accordion. The button inside an open answer " +
         "and the ask card at the foot are read from the Homepage document.",
@@ -1151,6 +1135,14 @@ export const carAccidentsPage = defineType({
         defineField({ name: "eyebrow", type: "string", validation: (rule) => rule.required() }),
         defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
         defineField({ name: "lede", type: "text", rows: 3, validation: (rule) => rule.required() }),
+        defineField({
+          name: "items",
+          title: "Questions",
+          type: "array",
+          description: "The accordion. Drag to reorder — the top question opens first.",
+          of: [{ type: "object", fields: faqItemFields, preview: faqItemPreview }],
+          validation: (rule) => rule.required().min(1),
+        }),
       ],
       validation: (rule) => rule.required(),
     }),

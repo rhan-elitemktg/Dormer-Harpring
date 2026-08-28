@@ -92,6 +92,15 @@ export interface PracticeAreaSummary {
    *  thing to hand a card, and narrowing here would push the widening onto the
    *  component instead. */
   image?: ImageMetadata | SanityImageSource;
+  /**
+   * The reassurance under this panel's copy.
+   *
+   * OPTIONAL BECAUSE THIS INTERFACE SERVES TWO LISTS. The homepage's six panels
+   * each carry one; the `/practice-areas` featured grid draws cards, not
+   * panels, and has no such line. `getHomePracticeAreas()` throws when one of
+   * ITS cards is missing it, which is where the requirement actually lives.
+   */
+  closing?: string;
 }
 
 /**
@@ -124,6 +133,7 @@ function toSummary(row: {
   blurb: string | null;
   href: string | null;
   image: unknown;
+  closing?: string | null;
 }): PracticeAreaSummary {
   if (!row.href) throw new Error(`practice areas: card "${row.name ?? row._key}" has no destination.`);
   return {
@@ -136,15 +146,32 @@ function toSummary(row: {
     // null where this interface says undefined, and the two are not the same to
     // a component doing `{card.image && …}`.
     ...(row.image ? { image: row.image as SanityImageSource } : {}),
+    ...(row.closing ? { closing: row.closing } : {}),
   };
 }
 
-/** The homepage's six-card rail. */
+/**
+ * The homepage's six-card rail.
+ *
+ * EVERY CARD MUST CARRY ITS CLOSING LINE, and a missing one throws by name. It
+ * used to be one string on the band handed to all six panels, so there was
+ * nothing to be missing; now that each panel has its own, an empty one would
+ * render a panel that just stops — a silent gap of exactly the kind the rest of
+ * this data layer throws on.
+ */
 export async function getHomePracticeAreas(): Promise<PracticeAreaSummary[]> {
   const rows = await once("homePracticeAreas", async () =>
     required(await sanityClient.fetch(HOME_PRACTICE_AREAS_QUERY), "Homepage", "Pages")
   );
-  return rows.map(toSummary);
+  const cards = rows.map(toSummary);
+  const bare = cards.filter((card) => !card.closing);
+  if (bare.length > 0) {
+    throw new Error(
+      `homepage practice areas: no closing line on ${bare.map((c) => `"${c.name}"`).join(", ")}. ` +
+        `Add one in Pages → Homepage → Practice areas band.`
+    );
+  }
+  return cards;
 }
 
 /**
@@ -171,16 +198,6 @@ export async function getHomePracticeAreas(): Promise<PracticeAreaSummary[]> {
  */
 export async function getFeaturedPracticeAreas(): Promise<PracticeAreaSummary[]> {
   return (await practiceAreasDocument()).featuredAreas.map(toSummary);
-}
-
-/**
- * The line that closes every panel. It reads as per-area copy in the comp but is
- * the same string for all six, so it is one field on the section rather than
- * six copies an editor could let drift apart.
- */
-export async function getPracticePromise(): Promise<string> {
-  const { practicePromise } = await homeSection();
-  return practicePromise;
 }
 
 export interface CatastrophicArea {

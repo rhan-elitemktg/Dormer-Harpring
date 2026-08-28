@@ -479,8 +479,25 @@ print("\nFAQ")
 blob = array("lawQuestionsData", "const faqLens")
 cmp("questions", strings(blob, "q"), grab("faq__q-text", "span"))
 cmp("answers", strings(blob, "a"), grab("faq__a", "p"))
-lens = [js(x) for x in re.findall(r"'([^']+)'", array("faqLens", "const lawQuestions"))]
-cmp("reading times", lens, [re.sub(r"^.*?Watch\s*·\s*", "", t) for t in grab("faq__watch", "span")])
+# READING TIMES ARE NO LONGER COMPARED TO THE COMP, and the departure is
+# declared below rather than the assertion being deleted. They used to be a
+# typed field; they are read from Wistia's oEmbed now, so each one describes the
+# film that question ACTUALLY points at rather than the runtime the designer
+# planned for a film that was never made. What is still asserted is the SHAPE —
+# every row carries a plausible duration — which stays true both today, when all
+# twelve point at one stand-in, and after real ids land and they diverge.
+built_lens = [re.sub(r"^.*?Watch\s*·\s*", "", t) for t in grab("faq__watch", "span")]
+comp_lens = [js(x) for x in re.findall(r"'([^']+)'", array("faqLens", "const lawQuestions"))]
+shaped = [t for t in built_lens if re.fullmatch(r"\d+ (?:min|sec)", t)]
+if len(shaped) == len(built_lens) and len(built_lens) == len(comp_lens):
+    print(f"  ✓ reading times ({len(built_lens)}, derived — see DELIBERATE DIFFERENCES)")
+else:
+    ok = False
+    print(f"  ✗ reading times — {len(shaped)}/{len(built_lens)} are a duration, "
+          f"against {len(comp_lens)} questions in the comp")
+    for t in built_lens:
+        if not re.fullmatch(r"\d+ (?:min|sec)", t):
+            print(f"      not a duration: {t!r}")
 present(
     "band copy",
     [
@@ -525,6 +542,18 @@ else:
 
 # ------------------------------------------------------- deliberate differences
 EXPECTED = [
+    (
+        "the FAQ reading times are read from Wistia, not typed",
+        len(built_lens) == len(comp_lens) and built_lens != comp_lens,
+        "the comp specifies a runtime per question — '2 min', '90 sec' — for films that "
+        "were never made. The field was hand-entered and nothing checked it against the "
+        "video it labelled, so the two could disagree and only a viewer would notice. It "
+        "comes off the same oEmbed call that already fetches the poster frame. Until the "
+        "firm re-hosts its films all twelve questions point at one stand-in and therefore "
+        "report the same length; this asserts they are a duration and that they are NOT "
+        "the comp's, never that any particular number is right — pinning one would "
+        "assert the placeholder is correct and go red on the change that fixes it",
+    ),
     (
         "the testimonials rail sits with the results, not four sections later",
         built.index('id="reviews"') < built.index('id="next"'),

@@ -12,13 +12,14 @@ import PlayButton from "../media/PlayButton.astro";
 import VideoPopover from "../media/VideoPopover.astro";
 import { videoWatchUrl } from "../../lib/video";
 import HeroStats from "./hero/HeroStats.astro";
-import type { HomeHero, HomeStat } from "../../data/home";
+import type { HomeHero } from "../../data/home";
+import type { FirmStat } from "../../data/stats";
 import heroPhoto from "../../assets/team/skyline.jpg";
 import heroTeam from "../../assets/team/skyline-crop.jpg";
 
 interface Props {
   hero: HomeHero;
-  stats: HomeStat[];
+  stats: FirmStat[];
 }
 
 const { hero, stats } = Astro.props;

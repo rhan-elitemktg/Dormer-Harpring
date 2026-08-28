@@ -30,7 +30,7 @@ npm run dev                  # site + Studio, both on :4321
 npm run build && npm run check
 ```
 
-`npm run check` is not optional. It runs four linters for four failure modes the build
+`npm run check` is not optional. It runs five linters for five failure modes the build
 cannot see, all of which fail **silently** — README.md has the full explanation:
 
 - `check:types` — `astro check`. The build strips types without checking them, so a type
@@ -46,13 +46,18 @@ cannot see, all of which fail **silently** — README.md has the full explanatio
 - `check:links` — an `<a>` pointing at a page that was never built. Astro renders whatever
   string it is handed, so this is a green build and a production 404. It caught 984 of them
   in the footer, on every page of the site.
+- `check:desk` — a document type the Studio desk draws TWICE, or not at all. The desk has its
+  own catch-all for the second case, and it is structurally blind to the first: to it a type
+  placed twice and a type placed nowhere are both "not in the set", and it answers both by
+  drawing another row. Five types were duplicated that way and only a human looking at the
+  Studio noticed.
 
 **TypeScript must stay on 6.x.** The 7.0 native compiler does not expose the programmatic API
 `astro check` needs, and the CLI fails outright — a routine `npm i -D typescript` installs 7
 and breaks `check:types`.
 
-`check:styles` and `check:links` read `dist/`, so build first. `check:types` does not, which is
-why it runs first in the chain: it gives a real signal without a build. Dev runs on 4321 and that exact origin is
+`check:styles` and `check:links` read `dist/`, so build first. `check:types` and `check:desk`
+do not, which is why they run first in the chain: they give a real signal without a build. Dev runs on 4321 and that exact origin is
 registered with Sanity CORS — don't move it.
 
 ## Architecture: the Sanity swap

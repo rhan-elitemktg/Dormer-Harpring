@@ -44,12 +44,6 @@ export interface HomeHero {
   videoCta: { label: string; video: VideoRef };
 }
 
-export interface HomeStat {
-  _key: string;
-  big: string;
-  label: string;
-}
-
 /** The `homePage` singleton's own copy, read once per build for three getters. */
 function homeCopy() {
   return once("homePage:copy", async () =>
@@ -64,14 +58,50 @@ function shared() {
   );
 }
 
+/** The awards bar's label — one line, on nearly every page of the site. */
+export interface AwardsBarCopy {
+  eyebrow: string;
+}
+
+/**
+ * A PROP DEFAULT UNTIL PHASE 6a. `AwardsBar.astro` declared
+ * `eyebrow = "Recognized & awarded"` in its own props and no caller ever
+ * overrode it, so the string was content living in a component — invisible to
+ * the readiness sweep, which looked for arrays.
+ *
+ * On `sharedSections` rather than the Homepage because the bar renders on the
+ * homepage, About, Thank You, the three utility pages and all 290 pages
+ * `[slug].astro` serves. One record, changed once.
+ */
+export async function getAwardsBar(): Promise<AwardsBarCopy> {
+  const { awardsBar } = await shared();
+  return awardsBar;
+}
+
+/** The testimonial rail's heading and button. */
+export interface TestimonialRailCopy {
+  eyebrow: string;
+  title: string;
+  ctaLabel: string;
+}
+
+/**
+ * Also markup until Phase 6a — `TestimonialRail.astro` carried its own eyebrow,
+ * heading and button label.
+ *
+ * Three callers render it under this heading: the homepage, all 26 attorney
+ * bios and the Car Accidents page. The About page renders the same records
+ * under its OWN heading, from `aboutPage`, which is exactly the case the
+ * shared-vs-page split exists to serve.
+ */
+export async function getTestimonialRail(): Promise<TestimonialRailCopy> {
+  const { testimonialRail } = await shared();
+  return testimonialRail;
+}
+
 export async function getHomeHero(): Promise<HomeHero> {
   const { hero } = await homeCopy();
   return hero;
-}
-
-export async function getHomeStats(): Promise<HomeStat[]> {
-  const { heroStats } = await homeCopy();
-  return heroStats;
 }
 
 /**
@@ -83,6 +113,27 @@ export async function getRecentResults(): Promise<CaseResult[]> {
   return once("caseResults:home", async () =>
     required(await sanityClient.fetch(HOME_RESULTS_QUERY), "Case Results (Homepage)")
   );
+}
+
+/** The results strip's own copy — the heading and the link out of it. */
+export interface HomeResultsStrip {
+  title: string;
+  ctaLabel: string;
+}
+
+/**
+ * The band's copy, which the COMPONENT used to own.
+ *
+ * "Outstanding results." and "See all results" were markup in
+ * `home/RecentResults.astro` — a component owning content, which this
+ * codebase's first rule forbids and which the Sanity readiness sweep missed
+ * because it looked for content ARRAYS in component frontmatter.
+ *
+ * The three figures stay a collection: they render on /results too.
+ */
+export async function getResultsStrip(): Promise<HomeResultsStrip> {
+  const { resultsStrip } = await homeCopy();
+  return resultsStrip;
 }
 
 export interface WhyPoint {

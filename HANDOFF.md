@@ -6,9 +6,9 @@ Architecture, conventions and the design source of truth live in `AGENTS.md` (sy
 `CLAUDE.md`, loaded automatically). Pre-launch decisions live in `README.md`. Don't restate
 either here, and don't record anything `git log` already knows.
 
-_Last updated: 2026-08-27._
+_Last updated: 2026-08-28._
 
-## The Sanity integration — Phases 0 through 4 are in
+## The Sanity integration — Phases 0 through 5 are in
 
 **499 content documents in Sanity, and `src/data/` no longer holds page copy.** Every route's
 strings are a field on a page singleton; the data layer is 5,724 lines down to 4,724, and
@@ -45,14 +45,313 @@ against the code, swept for dead literals, swapped, built and diffed on its own.
   off a URL, and omitting them shifts the layout as the image lands.
 - Field types: `richText`, `answerText`, `simpleText`, `inlineText`, `link`, `navLink`,
   `videoRef`, `seo`.
-- Nine collection types, **fifteen page documents** and five Site Settings singletons, in a
-  desk of Pages / Collections / Site Settings.
+- Nine collection types, **thirteen page types** (fifteen documents — `sitePage` is three) and
+  **three** Site Settings singletons, in a desk of five groups plus one loose document: Pages /
+  Practice Areas / Blog / Collections / Shared Sections / Site Settings. Every page type with more than one band holds its fields in
+  collapsible SECTIONS — see below.
 - `scripts/lib/sanity.py` — one GROQ reader for every Python check. `lib/firm.py` is one
   query on top of it.
 
-### THE DESK IS FIFTEEN PAGES NOW, IN NAV ORDER
+### A CATCH-ALL CANNOT SEE A TYPE PLACED TWICE
 
-Twelve routes, then the two TEMPLATES, then a "Utility pages" sub-list holding three.
+The desk renders anything not in a group under a divider at the foot, so a new document type is
+never invisible. It measured against `[...PAGES, ...COLLECTIONS, ...SETTINGS]`. Splitting
+Practice Areas and Blog out of Collections moved four types off that list while leaving them on
+screen — `practiceArea`, `blogPost`, `blogCategory`, `carAccidentsPage` — so the Studio drew
+**each of them twice**, once in its group and once under the divider.
+
+**`sitePage` had been doing it since the utility pages were built** and nobody noticed until
+four more joined it. Found by eye, in the Studio, not by any check.
+
+**THE GUARD COULD NOT HAVE CAUGHT THIS.** It exists so a type placed NOWHERE stays reachable,
+and to it a type placed TWICE is identical — both are simply "not in the set". So the fix is
+that the list cannot be forgotten rather than a second check that could be: `PLACED` derives
+from the group definitions and from `SINGLETON_TYPES`.
+
+**ANYTHING MOVED OUT OF `PAGES` OR `SETTINGS` NEEDS ADDING BACK BY HAND.** `SINGLETON_TYPES` is
+built from those two arrays, so a singleton placed anywhere else drops out of it silently —
+which shows the editor a generic list beside the pinned document, with edits to the second copy
+going nowhere. Two are hand-placed today: `carAccidentsPage` under Practice Areas and
+`sharedSections`, which is a top-level row of its own below Collections.
+
+### THERE WERE TWO SETS OF FIRM FIGURES AND THEY NEARLY AGREED
+
+`firmStats` drew the dark band on seven pages; `homePage.hero.stats` drew the homepage hero.
+Three of four matched on the number and differed only in label — "Recovered for clients"
+against "Recovered" — and the fourth was a different claim: "Small · Caseload by design"
+against "We Come · To you".
+
+**Two records meant "$70M+" had two homes, and it is one of README's unverified claims** — so
+confirming it before launch meant editing both, or editing one and shipping a contradiction.
+
+One record now, on `sharedSections`, **in the hero's shorter wording by request**. So the
+homepage did not move and the SEVEN BAND PAGES DID, which is the opposite of what the direction
+of the move suggests — worth knowing when reading that byte-diff. `getHomeStats()` and
+`HomeStat` are gone; both surfaces read `getFirmStats()`.
+
+**IT WENT TO SHARED SECTIONS RATHER THAN SITE SETTINGS, and the line is worth keeping.**
+`firmDetails` is data the site DERIVES from — the phone becomes a `tel:` href and JSON-LD, the
+address becomes the footer and the map pin. `firmStats` is a band the site DISPLAYS. Settings
+holds the first kind. That leaves Site Settings three documents.
+
+**The About comp diff went red on it and the departure is declared — but not by pinning the new
+labels.** Those are editable, so pinning them means the check goes red every time an editor does
+their job. It asserts the INVARIANT the change created instead: the About band and the homepage
+hero render the same four figures. True whatever anyone types; fails the moment someone
+re-splits them.
+
+### THE DESK IS FIVE GROUPS, AND TWO PAGE TYPES ARE GONE
+
+Pages / **Practice Areas** / **Blog** / Collections / Site Settings, by request.
+
+**The two biggest collections left Collections.** Practice Areas is 104 documents across nine
+cities and the blog is 186 posts plus 23 categories — between them the great majority of the
+site's content, and both sat two clicks down a list beside five-record lookup tables. They are
+top-level groups now. Collections is the six an editor reaches for occasionally: Team,
+Testimonials, Case Results, Awards, Core Values, Cities.
+
+**Blog Posts and Blog Categories are one group because they are one editorial job.** A post
+belongs to exactly one category and the category list exists to serve the posts.
+
+**CAR ACCIDENTS LEADS PRACTICE AREAS, ABOVE A DIVIDER.** It is a practice-area page that is not
+a `practiceArea` DOCUMENT — its content is eighteen typed sections on its own singleton, because
+it is the one page served by the heavy hand-authored template. The divider is load-bearing: what
+is above it is a page singleton and what is below is a collection, which are two different kinds
+of thing in one list.
+
+**It also had to stay in `SINGLETON_TYPES` by hand.** That list is built from `PAGES` and
+`SETTINGS`, and moving the type out of `PAGES` silently dropped it — which would show an editor
+"Car Accidents" twice, once pinned and once as a generic list, with edits to the second going
+nowhere. Anything moved OUT of those two arrays needs adding back explicitly.
+
+**`groupItems()` exists because the alternative was reaching into a built list item.** Practice
+Areas needs its nine city lists placed beside the Car Accidents singleton rather than nested a
+level deeper, and the first attempt got them by calling `collection()` and pulling
+`.serialize().child.items` back out — which depends on the shape Sanity's builder happens to
+serialise to. Both callers share the helper now.
+
+### THE TWO ARTICLE TEMPLATES ARE DELETED, REVERSING PHASE 4c
+
+`blogPostTemplate` and `practiceAreaTemplate` held twelve strings between them and are gone —
+schema types, documents and desk rows. Their chrome is a `TEMPLATE` constant in `blog.ts` and
+`practiceAreaPages.ts`.
+
+**Eleven of the twelve are interface labels** — "In this article", "Categories", "Read more",
+"Posted", "Updated", "Written by" — that no editor was ever going to open a document to change,
+against two permanent rows in the Pages list.
+
+**THE TWELFTH IS MARKETING COPY AND WENT INTO CODE ANYWAY, KNOWINGLY.** The practice-area
+eyebrow is "Tough lawyers for tough cases", on all 104 pages, and this file records that it has
+already been four different things by request — the city, then "Practice Area", then the city
+again, then this. Changing it is a code change and a deploy now. **If it is changed a fifth
+time, it belongs on `sharedSections`** beside the awards bar's label, for exactly the reason
+that one is there; the constant's own comment says so.
+
+**The sidebar form both templates borrow is still editable.** It is on `sharedSections`, was
+never part of either template document, and only the labels became constants. The fact-check
+SENTENCE is still derived from the roster.
+
+`scripts/migrate-templates-4c.ts` records the reversal in its header. It cannot run again — it
+would import documents of a type that no longer exists — but the third thing it did, seeding
+`sharedSections.sidebarForm`, still stands.
+
+### `videoRef` IS FULLY UNWOUND — NO NESTED VIDEO FIELD IS LEFT
+
+The hero, the firm intro and both FAQ accordions went in 6a; the six filmed testimonials were
+the last, in 6b. Every one is a bare `videoId` string and **every projection reassembles
+`{provider, id}`**, so `lib/video.ts` still sees the pair, the `youtube` branch still has
+somewhere to land, and the rule that nothing may store a video URL is untouched.
+
+**Only six of the eighteen testimonials carry a film**, because `video` is conditional on
+`format == "video"`. The migration emits those six alone — writing the written twelve would be
+twelve no-op rewrites, and any bug in the script would then reach every record rather than the
+six it means to.
+
+### THREE BANDS OWNED THEIR OWN COPY, AND THE READINESS SWEEP COULD NOT SEE THEM
+
+Found by eye, in a page-by-page Studio review — not by any check. `RecentResults`
+hardcoded "Outstanding results." and its link label in markup, `AwardsBar` declared
+`eyebrow = "Recognized & awarded"` as a PROP DEFAULT that no caller overrode, and
+`TestimonialRail` carried its eyebrow, heading and button the same way.
+
+**This file claimed the opposite and was not wrong so much as narrow**: "No component owns
+content. All 127 checked — not one declares a content array in its frontmatter." That sweep
+looked for content ARRAYS in FRONTMATTER. A bare string in markup, and a default in a props
+destructure, are neither — so three bands walked straight past the check whose whole job was
+this rule. **A sweep is only as good as the shape it looks for**, and the shape here was
+narrower than the rule it was testing.
+
+Where each landed follows the existing rule rather than where they were noticed:
+
+- **The results strip is on `homePage`.** It renders nowhere else.
+- **The awards bar and the testimonial rail are on `sharedSections`**, now five bands rather
+  than three. The bar renders on nearly every page of the site and the rail on thirty — the
+  homepage, all 26 attorney bios and Car Accidents. Putting either on the Homepage would mean
+  editing the homepage to change 330 pages. **About keeps its own heading** over the same
+  testimonials, from its own document, which is exactly the case this split exists to serve.
+
+### A FIELD MOVING FROM A BAND TO ITS ITEMS IS A CONTENT DECISION, NOT A TIDY-UP
+
+Three did in 6a, and each was one string doing a job that wanted many:
+
+| Was | Now | Why |
+|---|---|---|
+| `practiceSection.closing` | each card's `closing` | one reassurance was handed to all six panels |
+| `faqSection.answerCtaLabel` | each question's `ctaLabel` | twenty open answers offered the same words |
+| each FAQ's typed `videoLength` | derived from Wistia | nothing checked the typed value against the film |
+
+**The first two are seeded from the value they replaced**, so the page is byte-identical until
+someone edits one. **`getHomePracticeAreas()` now throws by name when a card has no closing
+line** — it used to be impossible to be missing, and an empty one would render a panel that
+just stops.
+
+**CAR ACCIDENTS FOLLOWED THE FAQ CHANGES WITHOUT BEING ASKED**, because `faqItemFields` is one
+array shared by both accordions. Its twelve questions had no button label of their own — they
+read the homepage's — so the migration seeded them from there. Worth knowing before editing
+that file: it is not homepage-only.
+
+### THE DURATION COMES OFF THE SAME oEMBED CALL AS THE POSTER
+
+`wistiaDuration()` in `lib/video.ts`, beside `wistiaPosterUrl()`. Both now read one memoised
+`wistiaOembed(id)` rather than fetching separately — one request per distinct id for the whole
+build, which today is ONE, because all twenty FAQs point at the same stand-in.
+
+**That is the only content change 6a made**: the rows read "3 min" where the typed value said
+"2 min", because the placeholder film is three minutes long. 327 of 329 pages byte-identical,
+2 changed, both explained.
+
+`diff-comp-car-accidents.py` went red on it, which is the check working. **The departure is
+declared and matched STRUCTURALLY** — every row carries a duration, and the set is NOT the
+comp's — never pinned to "3 min". Pinning it would assert the placeholder is correct and go
+red on the change that fixes it, which is the same reasoning that file already applies to
+`PLACEHOLDER_VIDEO`.
+
+### A CSS ONE-LINER MOVED 315 PAGES AND CHANGED NOTHING
+
+Adding `height: 100%` to `RailVideoCard` rehashed `TestimonialRail.*.css` — and **blog posts
+link that chunk**, because `[slug].astro` imports the component for its Car Accidents branch,
+so the bundle is shared across every page that route serves.
+
+**Both trees were built, the bundle hash normalised alongside the image URLs, and the pages
+re-classified: 329 of 329 identical.** That is the Phase 3b procedure and it is the only way
+through this class of result — a mechanical difference across 315 pages will bury a real one
+in the same bucket. **Do not read a large CHANGED count as a finding until the known
+mechanical difference is normalised out.**
+
+The fix itself is worth keeping: `.vcard` had `min-height` and no `height`, and **Wistia moves
+the card into a div of its own**, so the flex item that stretches is that div and the card
+inside stayed at 440px beside a taller quote. Fourth instance of the pattern this file already
+warns about under "the one thing to read before touching a popover".
+
+### HIDING A REQUIRED FIELD IS A TRAP
+
+`iconKey` came off the practice card's form by request, with the icons still drawing. A hidden
+`required()` field with no initial value would fail validation on a NEW card while showing an
+error for a field that is not on screen — unresolvable in the Studio.
+
+So it is a **closed list with an initial value** now rather than a free-text key. Same shape
+as `videoRef`'s hidden `provider`, and the same reason: hide a field only once it cannot be
+the thing blocking a save.
+
+### A COMMENT WITH A BACKTICK CANNOT GO INSIDE A GROQ TEMPLATE LITERAL
+
+It closes the string. `queries.ts` then failed to parse and `astro check` reported **192 errors
+across the repo**, none of them where the problem was. Comments about a projection go ABOVE
+`defineQuery(`, which is where every other one in that file already is.
+
+### A SPENT MIGRATION MUST NOT BE WHAT TURNS THE TYPE GATE RED
+
+`migrate-home-4a.ts` read `getPracticePromise()` and `faqSection.answerCtaLabel`, both of which
+6a removed. Its swap happened long ago and it refuses to re-run, but `check:types` is wired
+into `npm run check` for the whole repo — so a script that can no longer typecheck breaks a
+gate everyone shares. The dangling references were deleted and its header records why.
+
+**Every Phase 4 migration is in this position.** One that reads a getter a later phase removes
+will do the same thing again.
+
+### EVERY PAGE DOCUMENT IS AN ACCORDION OF SECTIONS
+
+**Every page type with more than one band holds its fields in collapsible section objects**, one
+per rendered band, collapsed by default. A form opens as a list of band NAMES rather than a
+scroll of every field on the page. `SECTION` in `schemaTypes/pages/section.ts` is the one
+constant they all spread — whether these default to open or closed is one decision and it
+should be changeable in one place.
+
+Done in three slices, each seeded, verified, swapped, built and diffed on its own, and **all
+three were output-neutral: 329 of 329 pages byte-identical, three times.**
+
+| | Pages | What moved |
+|---|---|---|
+| 5a | about, team, testimonials, co-counsel, contact, thank-you, blog index | loose header strings into a `header` object |
+| 5b | community, practice areas, the three utility pages | each band's heading flattened into the band, its list joining as `items` |
+| 5c | homepage, car accidents | five arrays merged into the band that renders them |
+
+**THREE DOCUMENTS ARE DELIBERATELY STILL FLAT.** `resultsPage` is four fields drawing ONE band,
+and the two templates are label sets that no band owns — an accordion holding a document's only
+section is a click that buys nothing. It is the same reason Phase 4 gave those three no field
+groups either.
+
+**THE TABS CAME OFF PRACTICE AREAS AND CAR ACCIDENTS.** Phase 4 gave them Sanity field `groups`
+— three and six. `/studio-polish` records the call from the first build that tabs on top of
+accordions make an editor tab AND expand, so the two idioms do not go together. Car Accidents
+is one collapsed list of eighteen rows now. **Collections and Settings keep their tabs** — seven
+documents — and that is not an inconsistency to tidy: a team member is a person, not a page of
+bands.
+
+**A SANITY-TO-SANITY RESHAPE HAS NO CODE-SIDE SOURCE TO ASSERT AGAINST.** Every Phase 4
+migration read a literal out of `src/data/` and checked it was still there. There is no such
+anchor here, so `scripts/migrate-sections-5.ts` guards differently: it walks both documents to
+their LEAVES, sorts, and refuses to write unless the value multiset is identical. Only paths may
+change. `_key`s ride along as leaves, which is what would catch an array quietly losing a member.
+
+Three things that migration needed which the Phase 4 ones did not:
+
+- **A section is routinely NAMED AFTER the array it swallows** — `partners[]` became
+  `partners.items`, `directory[]` became `directory.entries`. So it collects, THEN deletes, THEN
+  assigns. Asserting the target name is free before starting would reject the commonest case in
+  the slice.
+- **A dotted source path**, so a heading object can be flattened INTO the section that now holds
+  its list, with the emptied parent pruned rather than left behind as `featuredHeading: {}`.
+- **An optional source, marked with a trailing `?`**, for the three utility pages alone: `links`
+  exists on the 404 and `lede` on two of three. Everywhere else a missing source throws, so
+  absence is opt-in rather than tolerated.
+
+### `--verify` REPORTED A PERFECT RESHAPE AS A FAILED IMPORT
+
+It asserted each old source path was gone. But a section named after the array it swallowed
+means `partners` legitimately still exists — as an object now — so the check went red on two of
+the three pages in 5b while the data was exactly right.
+
+**The check was measuring the wrong thing and its answer looked like a real finding**, which is
+the same shape as every wrong marker count in this file. It skips the assertion when the source
+IS the section or sits inside it. Worth remembering that a guard written for one slice does not
+automatically hold for the next one.
+
+### THE ALIASES TWO PROJECTIONS NEEDED ARE GONE
+
+`featuredHeading` / `directoryHeading` / `sponsorshipsHeading` were named as matched pairs in
+the Studio, beside the lists they headed, while the interfaces had called them `featured` and
+`directory` since before Sanity existed — so each projection renamed one. **Making the heading
+and its list one section let the field take the interface's name without costing an editor
+anything**, because the thing they now meet is the band rather than the heading.
+
+**One alias survives and it is load-bearing**: the community page renders its partner cards
+TWICE, as the volunteer grid and as the logo strip, so one section holds two headings and the
+projection still hands the getter both names.
+
+### `kind` STAYS OUTSIDE THE ACCORDION ON THE THREE UTILITY PAGES
+
+It is read-only and it is how an editor knows whether they opened the 404 or the privacy policy.
+The schema's own comment says hiding it would be tidier and wrong; folding it into a collapsed
+section is that same mistake one step softer. `links` became ONE conditional section rather than
+two conditional fields, so the two documents that never show it get no row at all — a collapsed
+row that opens onto nothing is worse than no row.
+
+### THE PAGES GROUP IS ELEVEN ROUTES AND A UTILITY SUB-LIST
+
+**Superseded in part — read "THE DESK IS FIVE GROUPS" at the top of this file first.** The two
+TEMPLATES are deleted and Car Accidents leads the Practice Areas group; what follows is why the
+remaining rows are ordered as they are, which still holds.
 
 **In the order of the main nav, then the pages the nav does not reach** — an editor reads down
 the list the way a visitor reads across the header. Alphabetical would put Thank You between
@@ -123,9 +422,9 @@ in `diff-comp-blog-post.py` because no file in `src/` owns that sentence any mor
 `YOUTUBE_ORIGINS` in `lib/video.ts` holds eight ids recovered from git history.
 
 **Re-measure with `git grep` after every phase. Do not subtract.** Current inventory:
-**41 `TODO(launch)`, 8 `TODO(video)`, 10 `TODO(sanity)`, 3 `TODO(content)`.** Phase 4 closed
+**41 `TODO(launch)`, 8 `TODO(video)`, 9 `TODO(sanity)`, 3 `TODO(content)`.** Phase 4 closed
 two `TODO(sanity)` — the award and testimonial key references, below — and added one for the
-Homepage document's form.
+Homepage document's form, which **Phase 5 has now closed in its turn**.
 
 ### PAGE-HEADER ART DID NOT MOVE, AND NEITHER DID ITS ALT TEXT
 
@@ -729,15 +1028,14 @@ assertion: an image that is already a reference means the getter has moved.
 - **No webhook.** Publishing changes nothing on the live site until someone redeploys. Phase 5.
 - **Nothing is wired for Visual Editing**, so array projections omit `_key` where the interface
   has none.
-- **FAQs and testimonials still nest their video field** in a `videoRef` object showing one
-  input. The attorney film was flattened to a bare id; these were left alone.
+- ~~**Testimonials still nest their video field.**~~ **CLOSED in 6b.** Nothing nests a video
+  field any more — see the note at the top of this file.
 - **`routePaths.ts` exports `locationPath` and nothing calls it.** One of five identical
   helpers that name the kinds of URL this site has; whether that set should shrink is a
   routing question, not a migration one.
-- **The Homepage document is sixteen fields and the form is a long scroll.** Practice Areas and
-  Car Accidents got Sanity field GROUPS in Phase 4 — three tabs and six — and the homepage
-  wants them too. An editor-UX decision, so it belongs to `/studio-polish ux`, which audits a
-  filled-out schema and now has one. `TODO(sanity)` on the type.
+- ~~**The Homepage document is sixteen fields and the form is a long scroll.**~~ **CLOSED.** It
+  is seven sections now, and Practice Areas and Car Accidents traded their Phase 4 tabs for the
+  same accordion. See the top of this file.
 - **The fact-check SENTENCE is still derived**, not editable. See the note at the top of this
   file for what making it editable would need.
 
@@ -810,7 +1108,16 @@ and background it when you do. It reads its slugs from the DATASET now — see "
 audited zero pages reported success" above for what it did on the commit that deleted the
 directory it used to read.
 
-**`npm run check` is FOUR linters now, and one of them could never fail.**
+**`npm run check` is FIVE linters now, and one of them could never fail.**
+`scripts/check-desk.py` is the newest — a document type the Studio desk draws TWICE, or not at
+all. It was written after five duplicate rows were found BY EYE in the Studio, past everything
+else here; the note at the top of this file has what happened. **It reads source rather than
+`dist/`**, so it runs second, beside `check:types`, and needs no build. **Tested in seven
+directions before being trusted** — a type in no group, a type in two, a group the `PLACED` set
+does not reference, a typo'd type name, a renamed not-a-group, a lost hand-placed singleton, and
+a reformat that must NOT fail because it changes nothing. `npm run check` itself was run red and
+green to prove the chain carries the exit code.
+
 `scripts/check-links.py` is the new one — 33,754 internal links across 330 pages, every target
 resolved against what `dist/` actually serves plus `vercel.json`. (The count fell from 39,484
 when the eighteen footer city chips stopped being links — 5,904 of them — and Editorial
@@ -842,7 +1149,11 @@ last handoff and it moves the project's biggest dependency off the critical path
 **The blog archive is 186 posts, not 167.** WordPress has two post types and the article-shaped
 content is spread across both — see below.
 
-Marker inventory: **41 `TODO(launch)`, 8 `TODO(video)`, 10 `TODO(sanity)`, 3 `TODO(content)`.**
+Marker inventory: **41 `TODO(launch)`, 8 `TODO(video)`, 9 `TODO(sanity)`, 3 `TODO(content)`.**
+Phase 5 closed one — the Homepage document's "sixteen fields and a long scroll", which is what
+the accordion answered. **41 / 8 / 3 are unchanged and that was measured, not assumed**: the
+count was re-run before and after the three slices, because a reshape that moves a field is
+exactly the shape that has taken a comment with it three times.
 Re-measured with `git grep` after Phase 4, which briefly lost ELEVEN launch markers and
 duplicated two more — see "A comment beside a literal cannot survive that literal moving to a
 CMS" above for what happened and why 41 → 41 is a coincidence rather than a proof. Phase 4
@@ -1793,7 +2104,7 @@ entry and both files to fix.
 3. **One Wistia player per popover, initialised eagerly** — 15 on the homepage, 20 on
    `/denver-car-accident-lawyer/`. Inherent to the class-based embed; wants a pass before launch.
 4. ~~**Sanity Phases 2, 2f, 3 and 4.**~~ **ALL DONE.** 499 content documents across nine
-   collection types, fifteen page documents and five settings singletons, 279 image assets,
+   collection types, thirteen page types and three settings singletons, 279 image assets,
    and no page copy left in `src/data/`. Every slice ended byte-identical or with every changed
    page explained. The findings that will matter next are at the top of this file; the ones
    most likely to bite are `pt()`'s duplicate keys, GROQ's codepoint `order()`, and that a
@@ -1803,11 +2114,12 @@ entry and both files to fix.
    which the practice-area chrome maps onto almost exactly. **Deliberately NOT in Phases 3 or
    4**: nothing in the 290 imported documents uses them and no renderer exists, so adding them
    would ship four editor controls that draw nothing. They want a renderer first.
-6. **Sanity Phase 5 — NEXT.** The webhook (publishing changes nothing on the live site until
-   someone redeploys), the production URL as a CORS origin (the deployed `/admin` loads and
-   fails sign-in), then `/studio-polish ux`. That last one audits a filled-out schema and now
-   has one — start with the Homepage document's sixteen fields, which want Sanity's field
-   groups the way Practice Areas and Car Accidents got them in Phase 4.
+6. **Sanity Phase 5 — the webhook and CORS are what is left.** Publishing changes nothing on
+   the live site until someone redeploys, and the production URL is still not a CORS origin, so
+   the deployed `/admin` loads and fails sign-in. **The `/studio-polish ux` half is DONE**: every
+   page document with more than one band is an accordion of sections, which is what the
+   Homepage's sixteen loose fields wanted and what took the tabs off the other two. See the top
+   of this file.
 7. `/new-seo-setup` — per-page meta, a Global SEO Settings singleton, JSON-LD, `sitemap.xml`,
    `robots.txt`, editor-managed redirects. **The practice-area pages already carry real
    `metaTitle` / `metaDescription` from the live site's own meta** on all 104 `practiceArea`
@@ -1844,8 +2156,11 @@ light was re-checked at upload.**
   share `[slug].astro` at the root, so a collision is a page that cannot be served.
 - **80 async getters, and the data layer is clean**: no hex codes, no SVG markup, no style
   strings. The convention held.
-- **No component owns content.** All 127 checked — not one declares a content array in its
-  frontmatter.
+- **No component owns content** — but read the note at the top of this file before trusting
+  that line. All 127 were checked for a content ARRAY in their FRONTMATTER, and three bands
+  were owning bare strings in MARKUP and a prop DEFAULT, which that sweep could not see. Those
+  three are fields now; the sweep has still never been re-run in a shape that would find a
+  fourth.
 
 **The blockers, in the order they bite:**
 
@@ -2017,7 +2332,8 @@ none first. Already an open question below; now recorded where the code is.
   worth doing: two page documents now store the firm's number as CONTENT. See the note above.
 
 **Waiting on the firm** — content, not code. `README.md` has the full table. Unchanged: the seven
-attorney emails, the office address and hours, the `$70M+ / 20 Years` stat claims.
+attorney emails, the office address and hours, the `$70M+ / 20 Years` stat claims — **which are
+now one record rather than two**, at Shared Sections → Firm figures.
 
 **Settled this session, so stop asking**: both phone numbers (call `(303) 756-3812`, text
 `(720) 730-7997` — the comps were wrong about both), and the privacy policy, which is now built
@@ -2196,9 +2512,12 @@ Elite brand theme applied at scaffold time: light-locked palette, ELITE emblem a
 upgrades.
 
 **The desk is no longer empty.** `structureTool({ structure })` draws three groups — Pages,
-Collections, Site Settings — from `src/sanity/structure/index.ts`. Pages holds three
-singletons (Homepage, Community Involvement, Car Accidents), Collections holds six types, and
-Site Settings holds five singletons. A document type added to `schemaTypes`
+Practice Areas, Blog, Collections and Site Settings — from `src/sanity/structure/index.ts`.
+Pages holds **twelve rows**: eleven routes in NAV ORDER, then a "Utility pages" sub-list. **That
+is thirteen page TYPES and fifteen documents** — `sitePage` is three pinned documents behind that
+one row, and `carAccidentsPage` is a page type that sits under Practice Areas rather than here.
+See "THE DESK IS FIVE GROUPS" at the top for what moved and why. Collections holds **six** types,
+Practice Areas and Blog one and two, and Shared Sections is one pinned document on its own row. A document type added to `schemaTypes`
 but not placed in one of the three arrays shows up under a divider at the bottom rather than
 becoming invisible, which is the same silent-failure shape the four linters exist to catch.
 

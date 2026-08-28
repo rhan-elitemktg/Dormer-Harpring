@@ -15,11 +15,10 @@ import faqCover from "../../../assets/home/faq-video-cover.jpg";
 
 interface Props {
   faq: Faq;
-  ctaLabel: string;
   open: boolean;
 }
 
-const { faq, ctaLabel, open } = Astro.props;
+const { faq, open } = Astro.props;
 ---
 
 <details class="faq" name="faq" open={open}>
@@ -39,7 +38,9 @@ const { faq, ctaLabel, open } = Astro.props;
         class="faq__video-img"
       />
       <span class="faq__video-scrim" aria-hidden="true"></span>
-      <span class="faq__watch">&#9654; Watch &middot; {faq.videoLength}</span>
+      <span class="faq__watch">
+        &#9654; Watch{faq.videoLength && <> &middot; {faq.videoLength}</>}
+      </span>
       <PlayButton tone="light" size={62} class="faq__play" />
       <span class="faq__video-label">Attorney video</span>
       </a>
@@ -48,7 +49,7 @@ const { faq, ctaLabel, open } = Astro.props;
     <div>
       <p class="faq__a">{faq.answer}</p>
       <a class="faq__cta arrow-link" href={ROUTES.contact}>
-        {ctaLabel} <span class="arrow" aria-hidden="true">&rarr;</span>
+        {faq.ctaLabel} <span class="arrow" aria-hidden="true">&rarr;</span>
       </a>
     </div>
   </div>

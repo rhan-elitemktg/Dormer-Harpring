@@ -1,5 +1,16 @@
 // Phase 4c — the two article templates, and the sidebar form they share.
 //
+// REVERSED IN PART BY PHASE 6b, AND THIS SCRIPT CANNOT RUN AGAIN. The two
+// template documents it creates were deleted by request: their twelve strings
+// are interface labels no editor was going to open a document to change, so
+// they are `TEMPLATE` constants in `blog.ts` and `practiceAreaPages.ts` now and
+// both schema types are gone. Running this would import documents of a type
+// that no longer exists.
+//
+// THE THIRD THING IT DID STILL STANDS — `sharedSections.sidebarForm`, the one
+// piece of copy across the 290 pages the two templates serve. That is still a
+// field and still editable; only the labels went back into code.
+//
 //   npx tsx scripts/migrate-templates-4c.ts
 //   npx sanity dataset import scratch/templates-4c.ndjson --dataset production --replace
 //   npx tsx scripts/migrate-templates-4c.ts --verify   # BEFORE swapping the getters

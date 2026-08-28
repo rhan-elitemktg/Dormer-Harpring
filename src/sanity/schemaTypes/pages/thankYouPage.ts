@@ -12,6 +12,7 @@
 import { defineField, defineType } from "sanity";
 // Subpath, not the barrel — see the note in sanity/structure/index.ts.
 import { CheckmarkCircleIcon } from "@sanity/icons/CheckmarkCircle";
+import { SECTION } from "./section";
 import { validateHref } from "../objects/link";
 
 export const thankYouPage = defineType({
@@ -21,30 +22,41 @@ export const thankYouPage = defineType({
   icon: CheckmarkCircleIcon,
   fields: [
     defineField({
-      name: "eyebrow",
-      type: "string",
-      description: "The small line above the page title.",
-      validation: (rule) => rule.required(),
-    }),
-    defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
-    /*
-     * RICH TEXT SO THE PHONE NUMBER CAN BE A REAL `tel:` LINK MID-SENTENCE —
-     * which is what this field type is for. The NUMBER itself still comes from
-     * Firm Details: write the link, not the digits.
-     */
-    defineField({
-      name: "lede",
-      type: "simpleText",
-      description:
-        "The sentence under the title. It carries the firm's phone number as a link — write " +
-        "that link with the number from Site Settings → Firm Details, and change it there " +
-        "rather than here if the number ever moves.",
+      name: "header",
+      title: "Page header",
+      type: "object",
+      options: SECTION,
+      description: "The band at the top of the page.",
+      fields: [
+        defineField({
+          name: "eyebrow",
+          type: "string",
+          description: "The small line above the page title.",
+          validation: (rule) => rule.required(),
+        }),
+        defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
+        /*
+         * RICH TEXT SO THE PHONE NUMBER CAN BE A REAL `tel:` LINK MID-SENTENCE —
+         * which is what this field type is for. The NUMBER itself still comes from
+         * Firm Details: write the link, not the digits.
+         */
+        defineField({
+          name: "lede",
+          type: "simpleText",
+          description:
+            "The sentence under the title. It carries the firm's phone number as a link — write " +
+            "that link with the number from Site Settings → Firm Details, and change it there " +
+            "rather than here if the number ever moves.",
+          validation: (rule) => rule.required(),
+        }),
+      ],
       validation: (rule) => rule.required(),
     }),
     defineField({
       name: "panel",
       title: "While you wait panel",
       type: "object",
+      options: SECTION,
       description: "The band under the header. Its photograph is not editable — see below.",
       fields: [
         defineField({ name: "eyebrow", type: "string", validation: (rule) => rule.required() }),
@@ -93,6 +105,6 @@ export const thankYouPage = defineType({
       ],
       validation: (rule) => rule.required(),
     }),
-  ],
+],
   preview: { prepare: () => ({ title: "Thank You" }) },
 });

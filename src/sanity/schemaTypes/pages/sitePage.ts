@@ -30,6 +30,7 @@
 import { defineField, defineType } from "sanity";
 // Subpath, not the barrel — see the note in sanity/structure/index.ts.
 import { DocumentIcon } from "@sanity/icons/Document";
+import { SECTION } from "./section";
 import { validateHref } from "../objects/link";
 
 /** Which of the three a document is. Fixed at seed time; the desk pins each to
@@ -65,21 +66,31 @@ export const sitePage = defineType({
       description: "Fixed. Each of these three has its own hand-built route.",
       validation: (rule) => rule.required(),
     }),
-    defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
     defineField({
-      name: "lede",
-      type: "text",
-      rows: 3,
-      description:
-        "One sentence under the title. The privacy policy has none — its body opens straight " +
-        "into the first section.",
-    }),
-    defineField({
-      name: "body",
-      type: "richText",
-      description:
-        "Headings, lists, quotes and links. The sitemap and the 404 have no body: one is " +
-        "generated from every page the site serves, the other is four links.",
+      name: "content",
+      title: "Page content",
+      type: "object",
+      options: SECTION,
+      description: "The title, the sentence under it, and the body.",
+      fields: [
+        defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
+        defineField({
+          name: "lede",
+          type: "text",
+          rows: 3,
+          description:
+            "One sentence under the title. The privacy policy has none — its body opens " +
+            "straight into the first section.",
+        }),
+        defineField({
+          name: "body",
+          type: "richText",
+          description:
+            "Headings, lists, quotes and links. The sitemap and the 404 have no body: one is " +
+            "generated from every page the site serves, the other is four links.",
+        }),
+      ],
+      validation: (rule) => rule.required(),
     }),
 
     defineField({
@@ -88,7 +99,7 @@ export const sitePage = defineType({
       type: "object",
       hidden: isNot("privacy"),
       description: "Printed under the title, and as the page's machine-readable date.",
-      options: { columns: 2 },
+      options: { ...SECTION, columns: 2 },
       fields: [
         defineField({
           name: "at",
@@ -107,12 +118,6 @@ export const sitePage = defineType({
       ],
     }),
 
-    defineField({
-      name: "linksTitle",
-      title: "Heading above the links",
-      type: "string",
-      hidden: isNot("notFound"),
-    }),
     /*
      * FOUR ROUTES RATHER THAN A SEARCH BOX, and that is a decision rather than
      * a gap: this site has no search. The blog index filters client-side over a
@@ -122,41 +127,58 @@ export const sitePage = defineType({
      * The four are the destinations a dead URL most plausibly wanted — the ~300
      * legacy URLs that land here are practice-area pages and blog posts, in
      * that order.
+     *
+     * THE WHOLE SECTION IS CONDITIONAL, not each field. Two of the three
+     * documents of this type never show it, and a collapsed accordion row that
+     * opens onto nothing is worse than no row.
      */
     defineField({
       name: "links",
       title: "Where to go instead",
-      type: "array",
+      type: "object",
+      options: SECTION,
       hidden: isNot("notFound"),
       description:
         "Shown on the 404. There is no search box on this site, so these are the whole of " +
         "what the page offers.",
-      of: [
-        {
-          type: "object",
-          name: "notFoundLink",
-          fields: [
-            defineField({ name: "label", type: "string", validation: (rule) => rule.required() }),
-            defineField({
-              name: "description",
-              type: "string",
-              description: "One line under the label.",
-              validation: (rule) => rule.required(),
-            }),
-            defineField({
-              name: "href",
-              title: "Destination",
-              type: "string",
-              validation: (rule) => rule.required().custom(validateHref),
-            }),
+      fields: [
+        defineField({
+          name: "title",
+          title: "Heading above the links",
+          type: "string",
+        }),
+        defineField({
+          name: "items",
+          title: "Links",
+          type: "array",
+          of: [
+            {
+              type: "object",
+              name: "notFoundLink",
+              fields: [
+                defineField({ name: "label", type: "string", validation: (rule) => rule.required() }),
+                defineField({
+                  name: "description",
+                  type: "string",
+                  description: "One line under the label.",
+                  validation: (rule) => rule.required(),
+                }),
+                defineField({
+                  name: "href",
+                  title: "Destination",
+                  type: "string",
+                  validation: (rule) => rule.required().custom(validateHref),
+                }),
+              ],
+              preview: { select: { title: "label", subtitle: "href" } },
+            },
           ],
-          preview: { select: { title: "label", subtitle: "href" } },
-        },
+        }),
       ],
     }),
   ],
   preview: {
-    select: { title: "title", kind: "kind" },
+    select: { title: "content.title", kind: "kind" },
     prepare: ({ title, kind }) => ({
       title: title ?? "Untitled",
       subtitle: KINDS.find((k) => k.value === kind)?.title,

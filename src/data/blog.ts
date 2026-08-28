@@ -36,7 +36,6 @@ import {
   BLOG_CATEGORIES_QUERY,
   BLOG_INDEX_PAGE_QUERY,
   BLOG_POSTS_QUERY,
-  BLOG_POST_TEMPLATE_QUERY,
   FEATURED_POST_QUERY,
   SHARED_SECTIONS_QUERY,
 } from "../sanity/lib/queries";
@@ -571,21 +570,36 @@ export interface BlogPostPageCopy {
   form: ContactBand["form"];
 }
 
+/**
+ * THE TEMPLATE'S CHROME IS A CONSTANT AGAIN, BY REQUEST.
+ *
+ * It was a `blogPostTemplate` singleton under Pages for one phase. All six are
+ * interface labels — "In this article", "Categories", "Read more" — that no
+ * editor was ever going to open a document to change, so the document was desk
+ * noise. Same call as `practiceAreaPages.ts`'s `TEMPLATE`, and that one carries
+ * the caveat worth reading: its eyebrow is marketing copy and went into code
+ * with the rest.
+ */
+const TEMPLATE = {
+  contentsLabel: "In this article",
+  categoriesLabel: "Categories",
+  relatedSidebarLabel: "Related articles",
+  relatedTitle: "Related blog posts",
+  factCheckLabel: "Fact-checked",
+  readMoreLabel: "Read more",
+} as const;
+
 export async function getBlogPostPage(): Promise<BlogPostPageCopy> {
-  const [copy, shared] = await Promise.all([
-    once("blogPostTemplate", async () =>
-      required(await sanityClient.fetch(BLOG_POST_TEMPLATE_QUERY), "Blog post template", "Pages")
-    ),
-    once("sharedSections", async () =>
-      required(await sanityClient.fetch(SHARED_SECTIONS_QUERY), "Shared Sections")
-    ),
-  ]);
+  const shared = await once("sharedSections", async () =>
+    required(await sanityClient.fetch(SHARED_SECTIONS_QUERY), "Shared Sections")
+  );
 
   return {
-    ...copy,
+    ...TEMPLATE,
     // THE SIDEBAR FORM IS SHARED WITH THE PRACTICE-AREA TEMPLATE, on Shared
     // Sections — one piece of copy across the 290 pages the two templates
     // serve. Two copies would be two places to update and one to forget.
+    // STILL EDITABLE: only the labels above became constants.
     form: required(shared.sidebarForm, "Shared Sections → Sidebar consultation form"),
   };
 }
