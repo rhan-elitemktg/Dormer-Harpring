@@ -56,7 +56,7 @@
 import type { ImageMetadata } from "astro";
 import type { SanityImageSource } from "@sanity/image-url";
 import { sanityClient } from "sanity:client";
-import { CAR_ACCIDENTS_PAGE_QUERY } from "../sanity/lib/queries";
+import { FEATURED_PRACTICE_AREAS_QUERY } from "../sanity/lib/queries";
 import { once, required } from "../sanity/lib/fetch";
 import { attorneyPath } from "../lib/routePaths";
 import { getFirmDetails } from "./site";
@@ -396,37 +396,73 @@ export interface PracticeAreaDetail {
 const anchor = (id: string) => `#${id}`;
 
 /**
- * The one detail page there is.
+ * EVERY FEATURED PAGE'S URL, KEYED BY ITS DOCUMENT'S `key`.
  *
- * ITS SLUG AND ITS JOIN KEY ARE HERE, NOT IN SANITY. `[slug].astro` builds this
- * page's path from the slug and joins the two halves of the page on the key —
- * both are routing rather than content, and `routePaths.ts` owns URLs on this
- * site. A slug an editor could edit is ~300 legacy redirects pointing at
- * nothing, with a green build.
+ * THE SLUGS ARE HERE, NOT IN SANITY, and that did not change when these became
+ * a collection. `routePaths.ts` owns URLs on this site, and a slug an editor
+ * could edit is ~300 legacy redirects pointing at nothing with a green build.
+ *
+ * IT COSTS NOTHING EXTRA, WHICH IS WHY IT SURVIVED THE MOVE. A featured page is
+ * eighteen sections bound to specific components, so creating one is a code
+ * change whatever this file does; adding a line here is part of that same
+ * change, not a new obstacle.
+ *
+ * A DOCUMENT WHOSE KEY IS NOT HERE FAILS THE BUILD, by name. That is the point:
+ * a featured page an editor has created and nobody has routed would otherwise
+ * be a document with no page and nothing reporting it.
+ *
+ * `practiceAreaPath()` is `/${slug}` — see `routePaths.ts` on why the flat
+ * WordPress shape is preserved.
  */
-const PAGE = {
-  key: "car-accidents",
-  // The live URL. `practiceAreaPath()` is `/${slug}` — see `routePaths.ts` on
-  // why the flat WordPress shape is preserved.
-  slug: "denver-car-accident-lawyer",
-} as const;
+const FEATURED: Record<string, string> = {
+  "car-accidents": "denver-car-accident-lawyer",
+};
 
 export async function getPracticeAreaDetails(): Promise<PracticeAreaDetail[]> {
-  const [page, firm] = await Promise.all([
-    once("carAccidentsPage", async () =>
-      required(await sanityClient.fetch(CAR_ACCIDENTS_PAGE_QUERY), "Car Accidents", "Pages")
+  const [pages, firm] = await Promise.all([
+    once("featuredPracticeAreas", async () =>
+      required(
+        await sanityClient.fetch(FEATURED_PRACTICE_AREAS_QUERY),
+        "Featured practice areas",
+        "Practice Areas"
+      )
     ),
     getFirmDetails(),
   ]);
 
-  const seo = required(page.seo, "Car Accidents → Search listing");
-  const reviewer = page.hero.reviewer;
-  const reviewerKey = required(reviewer.memberKey, "the Car Accidents reviewer's team member");
+  /*
+   * A COLLECTION QUERY CANNOT BE `required()` INTO MEANING ANYTHING — GROQ
+   * returns `[]` for a type with no documents, never null. So the guard is
+   * here, and it is the one this data layer uses everywhere else: an empty
+   * result is a real failure, because a build with no featured pages silently
+   * stops serving one.
+   */
+  if (pages.length === 0) {
+    throw new Error(
+      "featured practice areas: none published. The heavy detail template serves " +
+        `${Object.keys(FEATURED).length} route(s) that would 404.`
+    );
+  }
 
-  return [
+  return pages.map((page) => {
+  const key = required(page.key, "a featured practice area's key");
+  const slug = FEATURED[key];
+  if (!slug) {
+    throw new Error(
+      `featured practice areas: "${key}" has no route. Add it to FEATURED in ` +
+        `src/data/carAccidents.ts — a featured page's URL is declared in code, ` +
+        `because its sections are bound to components and cannot be built without one.`
+    );
+  }
+
+  const seo = required(page.seo, `${key} → Search listing`);
+  const reviewer = page.hero.reviewer;
+  const reviewerKey = required(reviewer.memberKey, `the ${key} reviewer's team member`);
+
+  return (
     {
-      _key: PAGE.key,
-      slug: PAGE.slug,
+      _key: key,
+      slug,
       // The live page's own <title> is "Denver Car Accident Lawyer | Start Your
       // Claim | Available 24/7" — a WordPress SEO plugin string. `lib/seo.ts`
       // appends the firm name, so the suffix there would be a third clause.
@@ -550,8 +586,9 @@ export async function getPracticeAreaDetails(): Promise<PracticeAreaDetail[]> {
         // copy of it, which is how a site ends up publishing two.
         mapTitle: `${firm.name} — Denver office`,
       },
-    },
-  ];
+    }
+  );
+  });
 }
 
 /** Coalesce the optional halves of a citation on their own lines — a cast over

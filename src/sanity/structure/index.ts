@@ -44,7 +44,6 @@ import { UsersIcon } from "@sanity/icons/Users";
 import { PinIcon } from "@sanity/icons/Pin";
 import { HomeIcon } from "@sanity/icons/Home";
 import { HeartFilledIcon } from "@sanity/icons/HeartFilled";
-import { WarningOutlineIcon } from "@sanity/icons/WarningOutline";
 import { InfoOutlineIcon } from "@sanity/icons/InfoOutline";
 import { CheckmarkCircleIcon } from "@sanity/icons/CheckmarkCircle";
 import { TagIcon } from "@sanity/icons/Tag";
@@ -287,6 +286,49 @@ function groupItems(S: StructureBuilder, context: ConfigContext, type: string) {
   );
 }
 
+/**
+ * THE NINE CITIES, each opening into Default and Featured.
+ *
+ * ONE FILTERED LIST PER TYPE PER CITY, and each keeps its OWN initial-value
+ * template — "＋" inside Denver → Default must set `city: "denver"`, or the
+ * page it creates matches none of the nine filters and is invisible in the
+ * desk. That is the silent-failure this file's other comments keep naming, and
+ * it now applies twice per city rather than once.
+ *
+ * The city list is `GROUPED.practiceArea.groups`, so the nine are written down
+ * once even though two types file themselves by them.
+ */
+function cityItems(S: StructureBuilder, context: ConfigContext) {
+  const cities = GROUPED.practiceArea.groups;
+  return cities.map(([value, cityTitle, cityIcon]) =>
+    S.listItem()
+      .title(cityTitle)
+      .icon(cityIcon)
+      .id(`city-${value}`)
+      .child(
+        S.list()
+          .title(cityTitle)
+          .items(
+            PRACTICE_AREA_TYPES.map(([type, kindTitle, kindIcon]) =>
+              S.listItem()
+                .title(kindTitle)
+                .icon(kindIcon)
+                .id(`${type}-${value}`)
+                .child(
+                  S.documentTypeList(type)
+                    .title(`${cityTitle} — ${kindTitle}`)
+                    .filter(`_type == $type && city == $value`)
+                    .params({ type, value })
+                    .initialValueTemplates([
+                      S.initialValueTemplateItem(`${type}-by-city`, { value }),
+                    ])
+                )
+            )
+          )
+      )
+  );
+}
+
 function collection(
   S: StructureBuilder,
   context: ConfigContext,
@@ -342,7 +384,23 @@ const COLLECTIONS: [string, string, ComponentType?][] = [
  * template. An editor looking for the car accident page looks here, which is
  * the whole argument for the placement.
  */
-const PRACTICE_AREAS: [string, string, ComponentType?] = ["practiceArea", "Practice Areas", CaseIcon];
+/**
+ * THE TWO KINDS OF PRACTICE-AREA PAGE, in the order a city's list shows them.
+ *
+ * `practiceArea` is the imported, article-shaped default — 104 across nine
+ * cities, on the light template. `featuredPracticeArea` is the hand-built one:
+ * eighteen typed sections on the heavy kit, one today. They share a URL shape
+ * and nothing else, which is why they are two types rather than one with a flag.
+ *
+ * EACH CITY OPENS INTO BOTH, and eight of the nine show an empty Featured list
+ * today. That is deliberate: the structure states the model rather than the
+ * current contents, so commissioning a second featured page is a document, not
+ * a desk change.
+ */
+const PRACTICE_AREA_TYPES: [string, string, ComponentType?][] = [
+  ["practiceArea", "Default", ThLargeIcon],
+  ["featuredPracticeArea", "Featured", StarIcon],
+];
 
 /**
  * BLOG — the posts and the taxonomy above them, together.
@@ -382,13 +440,14 @@ const SETTINGS: [string, string, ComponentType?][] = [
  */
 export const SINGLETON_TYPES = [
   ...[...PAGES, ...SETTINGS].map(([type]) => type),
-  // TWO SINGLETONS ARE PLACED BY HAND AND SO MUST BE NAMED HERE. This list is
+  // ONE SINGLETON IS PLACED BY HAND AND SO MUST BE NAMED HERE. This list is
   // built from PAGES and SETTINGS, so a type moved OUT of either drops out of
   // it silently — which puts a generic list beside the pinned document, with
   // edits to the second copy going nowhere, AND makes the type read as
-  // unplaced to the catch-all below. Car Accidents leads Practice Areas;
-  // Shared Sections sits under Collections.
-  "carAccidentsPage",
+  // unplaced to the catch-all below.
+  //
+  // `carAccidentsPage` was here until 6d and is not a singleton any more: it is
+  // a `featuredPracticeArea` document, filed under its city like any other.
   "sharedSections",
   // `sitePage` is three fixed documents rather than one, but the reason it must
   // stay out of a generic list is identical: an editor seeing "all utility
@@ -416,11 +475,11 @@ export const SINGLETON_TYPES = [
  * guarded by a check that would have to be remembered too.
  */
 const PLACED = new Set<string>([
-  // Every Pages row and every Site Settings row, plus the two placed by hand:
-  // `carAccidentsPage`, which leads Practice Areas, and `sitePage`, which is
-  // the three utility documents.
+  // Every Pages row and every Site Settings row, plus the two named by hand in
+  // that list: `sharedSections`, a top-level row of its own, and `sitePage`,
+  // which is the three utility documents.
   ...SINGLETON_TYPES,
-  PRACTICE_AREAS[0],
+  ...PRACTICE_AREA_TYPES.map(([type]) => type),
   ...BLOG.map(([type]) => type),
   ...COLLECTIONS.map(([type]) => type),
 ]);
@@ -479,15 +538,7 @@ export const structure: StructureResolver = (S, context) => {
         .title("Practice Areas")
         .icon(CaseIcon)
         .id("practice-areas")
-        .child(
-          S.list()
-            .title("Practice Areas")
-            .items([
-              singleton(S, "carAccidentsPage", "Car Accidents", WarningOutlineIcon),
-              S.divider(),
-              ...groupItems(S, context, PRACTICE_AREAS[0]),
-            ])
-        ),
+        .child(S.list().title("Practice Areas").items(cityItems(S, context))),
 
       S.listItem()
         .title("Blog")

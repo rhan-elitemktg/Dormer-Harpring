@@ -166,6 +166,34 @@ for name in uncovered:
     )
 
 
+# ── every initial-value template the desk names must be registered ───────────
+# A LIST THAT NAMES A TEMPLATE NOBODY REGISTERED BREAKS THE WHOLE PANE, not just
+# that list's create button: the Studio refuses to read the structure at all,
+# with "template id (`templateId`) is required for initial value template item
+# nodes". Shipped exactly that by adding a second type to the city lists and
+# registering a template for only one of them — and `check:desk` was green while
+# Practice Areas would not open, because placement was right and the pane was
+# still broken.
+#
+# SCOPED TO THE ONE LOOP THAT BUILDS THEM PER TYPE, deliberately. `cityItems()`
+# names `${type}-by-city` for every type in the city lists, which is the case
+# that bit and the case that recurs when a third kind of page is added. A
+# cleverer version that tried to infer every template from every group produced
+# 22 false failures on its first run; this one answers a question it can
+# actually see.
+CONFIG = ROOT / "sanity.config.ts"
+registered = set(re.findall(r'^\s*id: "([\w-]+)",', CONFIG.read_text(encoding="utf-8"), re.M))
+
+if "`${type}-by-city`" in source:
+    for type_name in groups.get("PRACTICE_AREA_TYPES", []):
+        if f"{type_name}-by-city" not in registered:
+            fail(
+                f"  ✗ TEMPLATE   the city lists name `{type_name}-by-city` but sanity.config.ts\n"
+                f"                registers no such template id. The Studio then refuses to read\n"
+                f"                the whole structure, not just this one list."
+            )
+
+
 # ── every document type placed exactly once ──────────────────────────────────
 schema = json.loads(SCHEMA.read_text(encoding="utf-8"))
 # `sanity.*` are built-ins the structure builder already excludes from

@@ -15,6 +15,28 @@
 // unbranded. That fallback is NOT cosmetic here: it is the href behind every
 // popover trigger, and it is what a visitor with JS off actually follows.
 
+/*
+ * NO DOCUMENT STORES A PROVIDER ANY MORE, AND THIS TYPE IS WHY THAT IS SAFE.
+ *
+ * Sanity held a `videoRef` object — `{provider, id}` — on every video field,
+ * with `provider` hidden and always "wistia": a control with nothing to decide,
+ * wrapped in an accordion around a single input. Phases 6a, 6b and 6e flattened
+ * all of them to a bare `videoId` string, and each PROJECTION now emits
+ * `{"provider": "wistia", "id": videoId}` as a literal. So every getter and
+ * every component still receives the pair, and this module is still the only
+ * place a pair becomes a URL.
+ *
+ * THE `youtube` BRANCH BELOW IS DELIBERATELY KEPT, unused. It is the point of
+ * the shape: the next provider swap needs somewhere to land, and it becomes a
+ * change to these projections' one literal rather than a hunt through
+ * components. If a swap ever needs to be per-record again, the answer is a
+ * stored `provider` beside `videoId` — not a URL in a field.
+ *
+ * That reasoning lived on the `videoRef` schema type, which 6e deleted once
+ * nothing declared a field of it. A comment beside a thing does not survive the
+ * thing; this project has lost that argument three times, so it moved here
+ * rather than going with it.
+ */
 export type VideoProvider = "youtube" | "wistia";
 
 export interface VideoRef {
@@ -133,22 +155,39 @@ export function wistiaPopoverClass(id: string): string {
  * quietly when the content moved. Most slots are FIELDS in Sanity now, holding
  * the stand-in id as data. Today it is:
  *
- *   3   in code      carAccidents.ts (two panels), home.ts (the FAQ band)
- *   30  in Sanity    20 in faqs[].video.id — 8 on homePage, 12 on carAccidentsPage
- *                    6 testimonial.video.id, 4 teamMember.videoId
+ *   0   in code      every slot is a FIELD now. The constant below is the only
+ *                    mention left, and `data/attorneys.ts`, `data/faqs.ts` and
+ *                    `data/testimonials.ts` each carry a comment saying so
+ *   34  in Sanity    6 testimonial.videoId, 4 teamMember.videoId,
+ *                    8 homePage.faqSection.items[].videoId,
+ *                    12 featuredPracticeArea.faqSection.items[].videoId,
+ *                    2 featuredPracticeArea triage/criteria video.videoId,
+ *                    homePage.firmIntro.videoId, homePage.hero.videoCta.videoId
+ *
+ * 33 OF THOSE 34 ARE PLACEHOLDERS. The hero's is the finished "Dormer Harpring
+ * — Who We Are" film, which merely shares the id. Do not count it, and do not
+ * strike it.
  *
  * So the full sweep is a grep AND a query:
  *
  *   git grep -n PLACEHOLDER_VIDEO -- src
- *   *[video.id == "b4n3r4pchd" || videoId == "b4n3r4pchd"
- *     || count(faqs[video.id == "b4n3r4pchd"]) > 0]{
- *     _type, "name": coalesce(name, _id), "faqSlots": count(faqs[video.id == "b4n3r4pchd"])
+ *   *[videoId == "b4n3r4pchd"
+ *     || hero.videoCta.videoId == "b4n3r4pchd"
+ *     || firmIntro.videoId == "b4n3r4pchd"
+ *     || triage.video.videoId == "b4n3r4pchd"
+ *     || criteria.video.videoId == "b4n3r4pchd"
+ *     || count(faqSection.items[videoId == "b4n3r4pchd"]) > 0]{
+ *     _type, "name": coalesce(name, label, _id),
+ *     "faqSlots": count(faqSection.items[videoId == "b4n3r4pchd"])
  *   }
  *
- * THE `faqs[]` CLAUSE IS NOT OPTIONAL and was added in Phase 2f. The FAQs used
- * to be documents with their own `video.id`, which the first two clauses found;
- * they are array members on two page documents now, so a query without the third
- * clause returns 10 slots and looks complete. It should total 30.
+ * THIS QUERY HAS BEEN STALE TWICE, AND BOTH TIMES IT STILL RETURNED ROWS. Phase
+ * 2f moved the FAQs from documents into page arrays, and a version without the
+ * `faqSection.items` clause read 10 of 30 and looked complete. Phases 6a/6b/6e
+ * then flattened every `video{provider,id}` object to a bare `videoId`, and the
+ * version querying `video.id` matched NOTHING — which reads as "no placeholders
+ * left". **A sweep that returns nothing is the same shape as a sweep that
+ * passes.** Re-run the counts above before trusting a total.
  *
  * Do NOT grep the id in code to find them: `home.ts` writes it as a literal for
  * the hero, whose video is correct and finished, and that would wrongly include

@@ -34,6 +34,8 @@
 import { defineArrayMember, defineField, defineType } from "sanity";
 // Subpath, not the barrel — see the note in sanity/structure/index.ts.
 import { CaseIcon } from "@sanity/icons/Case";
+// SHARED WITH `featuredPracticeArea`, which files itself by the same nine.
+import { CITIES } from "./cities";
 
 /**
  * The nine cities, and the five topics.
@@ -49,18 +51,6 @@ import { CaseIcon } from "@sanity/icons/Case";
  * than inferred, because a slug cannot carry it: `nursing-home-abuse-lawyer`
  * names no city and no topic at all.
  */
-const CITIES = [
-  { title: "Denver", value: "denver" },
-  { title: "Aurora", value: "aurora" },
-  { title: "Boulder", value: "boulder" },
-  { title: "Highlands Ranch", value: "highlands-ranch" },
-  { title: "Lakewood", value: "lakewood" },
-  { title: "Thornton", value: "thornton" },
-  { title: "Greeley", value: "greeley" },
-  { title: "Fort Collins", value: "fort-collins" },
-  { title: "Grand Junction", value: "grand-junction" },
-];
-
 const TOPICS = [
   { title: "Motor vehicle", value: "motor-vehicle" },
   { title: "Premises", value: "premises" },

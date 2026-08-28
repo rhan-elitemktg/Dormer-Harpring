@@ -1,13 +1,23 @@
-// /denver-car-accident-lawyer/ — the heavy hand-authored detail page. A
-// singleton, and by some distance the largest document in this dataset.
+// A FEATURED practice-area page — the heavy hand-authored kit, filed by city
+// beside the imported ones. `/denver-car-accident-lawyer/` is the only member
+// today and by some distance the largest document in this dataset.
 //
-// THIS IS A PAGE, NOT A PRACTICE AREA, and the difference is why it gets its own
-// document rather than being one of the 104. `src/pages/[slug].astro` unions
-// three page kinds and this one is `area-detail` — a hand-authored one-off, the
-// only one there is, explicitly not a variant of the imported `area-page`s whose
-// FAQs and bodies arrive from WordPress.
+// TWO KINDS OF PRACTICE-AREA PAGE, AND THIS IS THE SECOND. `practiceArea` is
+// the imported, article-shaped default — a title, a body and an FAQ from
+// WordPress, 104 of them on the light template. This is the designed one: a
+// landing page that happens to sit at a practice-area URL. `[slug].astro`
+// unions them as `area-page` and `area-detail`; they share a URL SHAPE and
+// nothing else.
 //
-// FIFTEEN NAMED SECTIONS, NOT A PAGE BUILDER, and that is the whole modelling
+// IT WAS A SINGLETON (`carAccidentsPage`) UNTIL PHASE 6d. Nothing about the
+// page changed — it became a collection because the route was already plural
+// (`getPracticeAreaDetails()` returns an array, `[slug].astro` maps over it)
+// and `DetailPage` takes a plain `PracticeAreaDetail`, so the kit was already
+// generic over its data. Only the document was singular, which put the firm's
+// biggest page nowhere near its siblings in the desk and made it a permanent
+// special case in code.
+//
+// EIGHTEEN NAMED SECTIONS, NOT A PAGE BUILDER, and that is the whole modelling
 // call. Each section below is bound to a component that draws it one way: the
 // triage rows are a coloured-pill list, the timeline is a numbered rail over a
 // phase table, the results cards put an "offered" figure beside a "recovered"
@@ -15,16 +25,18 @@
 // the thing that made the design work, and this design is the second one this
 // page has had — the first was 31 sections and it was cut to 17.
 //
-// THE COST IS THAT ADDING A SECTION IS A CODE CHANGE. That cost is the
-// guarantee. It is the same trade the navigation singleton makes with its three
-// named menus.
-//
-// TABBED, because sixteen top-level fields in one form is a scroll nobody
-// finishes. The tabs follow the page top to bottom.
+// THE COST IS THAT ADDING A SECTION IS A CODE CHANGE, and so is adding a PAGE:
+// its slug lives in `FEATURED` in data/carAccidents.ts, not here. That is not
+// an extra constraint, it is the existing one — a page whose eighteen sections
+// are component-bound needs a developer regardless, and a slug an editor could
+// edit is ~300 legacy redirects pointing at nothing with a green build.
 //
 // WHAT IS NOT HERE
 //
-//   the page's URL and its join key   routing, and `routePaths.ts` owns URLs
+//   the page's URL                    routing. `FEATURED` maps this document's
+//                                     `key` to its slug and THROWS on a key it
+//                                     does not route, so a featured page a
+//                                     developer has not wired fails the build
 //   the section anchors               `CA_SECTION_IDS` in data/carAccidents.ts,
 //                                     read by BOTH the nav's hrefs and the
 //                                     sections' own ids — two things that must
@@ -46,16 +58,17 @@
 // that line (`consult.jpg` is the timeline's backdrop and a feature card's
 // poster) and that is fine: the asset store deduplicates on the file's hash.
 //
-// THREE CROSS-REFERENCES BECAME REAL REFERENCES HERE, which closes the
-// `TODO(sanity)` the `link` type and the `award`/`testimonial` schemas have been
-// carrying. This page used to name an award, a testimonial and five attorneys by
-// STRING key, and a renamed key would have silently rendered the wrong badge.
-// It cannot now: a reference does not dangle.
+// THREE CROSS-REFERENCES ARE REAL REFERENCES HERE, which closed the
+// `TODO(sanity)` the `link` type and the `award`/`testimonial` schemas carried.
+// This page used to name an award, a testimonial and five attorneys by STRING
+// key, and a renamed key would have silently rendered the wrong badge. It
+// cannot now: a reference does not dangle.
 import { defineField, defineType } from "sanity";
 // Subpath, not the barrel — see the note in sanity/structure/index.ts.
 import { WarningOutlineIcon } from "@sanity/icons/WarningOutline";
-import { SECTION } from "./section";
-import { faqItemFields, faqItemPreview } from "./faqItemFields";
+import { CITIES } from "./cities";
+import { SECTION } from "../pages/section";
+import { faqItemFields, faqItemPreview } from "../pages/faqItemFields";
 import { validateHref } from "../objects/link";
 
 /** A heading and a paragraph — four sections draw a list of these. */
@@ -152,7 +165,24 @@ const videoPanel = defineField({
       description: 'Runtime, as shown — "1:14".',
       validation: (rule) => rule.required(),
     }),
-    defineField({ name: "film", type: "videoRef", validation: (rule) => rule.required() }),
+    /*
+     * A BARE ID, NOT A `videoRef` OBJECT — the last one on the site.
+     *
+     * IT OUTLASTED TWO SWEEPS BECAUSE IT IS CALLED `film`. Every other was
+     * `video`, and this sits inside a panel object rather than at a document's
+     * top level, so neither the field-name sweep nor a read of this page's
+     * eighteen sections found it. The projection reassembles `{provider, id}`,
+     * so `lib/video.ts` is untouched and nothing stores a URL.
+     */
+    defineField({
+      name: "videoId",
+      title: "Video ID",
+      type: "string",
+      description:
+        "Wistia's hashed id — the id ONLY, not the whole URL. Still the stand-in film; see " +
+        "YOUTUBE_ORIGINS in src/lib/video.ts for the original this maps to.",
+      validation: (rule) => rule.required(),
+    }),
   ],
   validation: (rule) => rule.required(),
 });
@@ -168,12 +198,55 @@ const statFields = [
   defineField({ name: "label", type: "string", validation: (rule) => rule.required() }),
 ];
 
-export const carAccidentsPage = defineType({
-  name: "carAccidentsPage",
-  title: "Car Accidents",
+export const featuredPracticeArea = defineType({
+  name: "featuredPracticeArea",
+  title: "Featured practice area",
   type: "document",
   icon: WarningOutlineIcon,
+  // ONE TAB, holding the three fields that are not a band. Everything else is a
+  // collapsible SECTION; these three are how the page is filed and routed, and
+  // they have no place among the page's own copy.
+  groups: [{ name: "filing", title: "Filing" }],
   fields: [
+    /*
+     * THE JOIN KEY, AND IT IS CONTENT. `FEATURED` in data/carAccidents.ts maps
+     * it to this page's URL, so renaming it fails the build rather than quietly
+     * serving nothing — the same contract `award`, `testimonial` and
+     * `teamMember` keys carry.
+     */
+    defineField({
+      name: "key",
+      title: "Key",
+      type: "slug",
+      group: "filing",
+      description:
+        "Routing joins on this. It is not the URL — the URL is declared in code, because a " +
+        "page built from eighteen typed sections needs a developer anyway and an editable " +
+        "slug is ~300 legacy redirects pointing at nothing.",
+      options: { source: "label", maxLength: 60 },
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: "label",
+      title: "Short name",
+      type: "string",
+      group: "filing",
+      description: 'How this page is named in lists — "Car Accidents", not the full H1.',
+      validation: (rule) => rule.required(),
+    }),
+    /*
+     * THE SAME NINE AS `practiceArea`, from one shared list. The desk is split
+     * by this, so a page with the wrong one is filed under the wrong city — and
+     * a page whose city matches no group is invisible there entirely.
+     */
+    defineField({
+      name: "city",
+      title: "City",
+      type: "string",
+      group: "filing",
+      options: { list: CITIES, layout: "dropdown" },
+      validation: (rule) => rule.required(),
+    }),
     // ── Top of page ──────────────────────────────────────────────────────────
     defineField({
       name: "seo",
@@ -1147,5 +1220,11 @@ export const carAccidentsPage = defineType({
       validation: (rule) => rule.required(),
     }),
   ],
-  preview: { prepare: () => ({ title: "Car Accidents" }) },
+  preview: {
+    select: { title: "label", city: "city" },
+    prepare: ({ title, city }) => ({
+      title: title ?? "Untitled",
+      subtitle: `Featured · ${CITIES.find((c) => c.value === city)?.title ?? "no city"}`,
+    }),
+  },
 });

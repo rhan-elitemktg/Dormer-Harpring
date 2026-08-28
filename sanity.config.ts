@@ -89,6 +89,24 @@ export default defineConfig({
         parameters: [{ name: "value", type: "string" }],
         value: ({ value }: { value: string }) => ({ city: value }),
       },
+      /*
+       * THE SAME FOR FEATURED PAGES, and it is not optional: each city opens
+       * into TWO filtered lists now, so the hole this closes exists twice per
+       * city rather than once.
+       *
+       * A MISSING TEMPLATE IS NOT A MISSING FEATURE, IT IS A BROKEN DESK. The
+       * structure names a template per list; naming one that was never
+       * registered makes the whole Practice Areas pane fail to read with
+       * "template id (`templateId`) is required for initial value template item
+       * nodes" — not the list quietly lacking a create button.
+       */
+      {
+        id: "featuredPracticeArea-by-city",
+        title: "Featured practice area (in this city)",
+        schemaType: "featuredPracticeArea",
+        parameters: [{ name: "value", type: "string" }],
+        value: ({ value }: { value: string }) => ({ city: value }),
+      },
     ],
   },
 
@@ -96,10 +114,16 @@ export default defineConfig({
     /*
      * WHAT THE GLOBAL "CREATE NEW" MENU MUST NOT OFFER.
      *
-     * `teamMember` and `practiceArea`, because both open into sub-lists filtered
-     * on a field the global button does not set — `kind` for one, `city` for the
-     * other. Same failure either way: a document matching none of its groups is
-     * invisible in the desk.
+     * `teamMember`, `practiceArea` and `featuredPracticeArea`, because all three
+     * open into sub-lists filtered on a field the global button does not set —
+     * `kind` for the first, `city` for the other two. Same failure either way: a
+     * document matching none of its groups is invisible in the desk.
+     *
+     * `featuredPracticeArea` also cannot be created usefully by an editor at
+     * all: its URL is declared in `FEATURED` in data/carAccidents.ts, so a page
+     * nobody has routed fails the build by name. Keeping it out of this menu
+     * means the only way to make one is inside a city, which is also the only
+     * place the reminder to route it belongs.
      *
      * On `teamMember` specifically: `kind` is hidden in the form by request,
      * so the ONLY thing that sets it is creating a person inside one of those
@@ -123,6 +147,7 @@ export default defineConfig({
         (item) =>
           item.templateId !== "teamMember" &&
           item.templateId !== "practiceArea" &&
+          item.templateId !== "featuredPracticeArea" &&
           !SINGLETON_TYPES.includes(item.templateId)
       ),
   },

@@ -18,8 +18,8 @@ import type { ImageMetadata } from "astro";
 import type { SanityImageSource } from "@sanity/image-url";
 import { sanityClient } from "sanity:client";
 import {
-  CAR_ACCIDENT_FAQ_SECTION_QUERY,
-  CAR_ACCIDENT_FAQS_QUERY,
+  FEATURED_FAQ_SECTION_QUERY,
+  FEATURED_FAQS_QUERY,
   HOME_FAQ_SECTION_QUERY,
   HOME_FAQS_QUERY,
 } from "../sanity/lib/queries";
@@ -90,16 +90,21 @@ export async function getFaqSection(): Promise<FaqSection> {
  * `shownOn` radio holding the collection together existed only to take it apart
  * again. The next detail page gets a field on its own document.
  */
-export async function getCarAccidentFaqs(): Promise<Faq[]> {
-  return once("faqs:car-accidents", async () =>
+export async function getFeaturedFaqs(key: string): Promise<Faq[]> {
+  return once(`faqs:featured:${key}`, async () =>
     withDurations(
-      required(await sanityClient.fetch(CAR_ACCIDENT_FAQS_QUERY), "Car Accidents", "Pages")
+      required(
+        await sanityClient.fetch(FEATURED_FAQS_QUERY, { key }),
+        `Featured practice area "${key}"`,
+        "Practice Areas"
+      )
     )
   );
 }
 
 /**
- * The band's own copy on the Car Accidents page. Different eyebrow, heading and
+ * A featured page's own band copy — on Car Accidents, a different eyebrow,
+ * heading and
  * lede from the homepage's — the accordion sits after ten sections that have
  * already answered the big questions, and its heading says so ("OTHER questions
  * people ask us").
@@ -108,12 +113,20 @@ export async function getCarAccidentFaqs(): Promise<Faq[]> {
  * `getFaqSection()` rather than being retyped. Only `ctaHref` differs: this
  * page carries its own contact section, so the button scrolls rather than
  * navigating away mid-page.
+ *
+ * TAKES THE PAGE'S KEY, because featured pages are a collection. Both getters
+ * cache under it too — one `once()` key for all of them would serve the first
+ * page's accordion to the second.
  */
-export async function getCarAccidentFaqSection(anchor: string): Promise<FaqSection> {
+export async function getFeaturedFaqSection(key: string, anchor: string): Promise<FaqSection> {
   const [home, own] = await Promise.all([
     getFaqSection(),
-    once("carAccidentsPage:faqSection", async () =>
-      required(await sanityClient.fetch(CAR_ACCIDENT_FAQ_SECTION_QUERY), "Car Accidents", "Pages")
+    once(`featured:${key}:faqSection`, async () =>
+      required(
+        await sanityClient.fetch(FEATURED_FAQ_SECTION_QUERY, { key }),
+        `Featured practice area "${key}"`,
+        "Practice Areas"
+      )
     ),
   ]);
   return { ...home, ...own, ask: { ...home.ask, ctaHref: anchor } };

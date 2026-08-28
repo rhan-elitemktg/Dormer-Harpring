@@ -188,9 +188,16 @@ export const HOME_FAQS_QUERY = defineQuery(
 }`
 );
 
-/** The heavy Car Accidents page's twelve. Same shape, same components. */
-export const CAR_ACCIDENT_FAQS_QUERY = defineQuery(
-  `*[_type == "carAccidentsPage" && _id == "carAccidentsPage"][0].faqSection.items[]{
+/**
+ * A featured page's own accordion — twelve on Car Accidents.
+ *
+ * KEYED, NOT `[0]`. It was one document at a fixed id; it is a collection now,
+ * and a bare `[0]` would serve whichever featured page happened to sort first
+ * the moment a second one exists. That is a page quietly showing another page's
+ * questions, with a green build.
+ */
+export const FEATURED_FAQS_QUERY = defineQuery(
+  `*[_type == "featuredPracticeArea" && key.current == $key][0].faqSection.items[]{
   _key,
   question,
   answer,
@@ -1028,7 +1035,12 @@ export const COMMUNITY_PAGE_COPY_QUERY = defineQuery(
 );
 
 /*
- * THE HEAVY CAR ACCIDENTS PAGE — Phase 4f. Fifteen named sections.
+ * THE FEATURED PRACTICE-AREA PAGES — the heavy kit. Eighteen named sections.
+ *
+ * A LIST, NOT A SINGLETON, since 6d: one document today and the route has
+ * always mapped over an array. Every field below is the same as when this was
+ * `carAccidentsPage`, so the getter's shape and every component are untouched;
+ * only `key`, `label` and `city` are new, and only the first reaches the getter.
  *
  * THREE CROSS-REFERENCES RESOLVE TO KEYS HERE, and that is the point of making
  * them references: `data/carAccidents.ts`'s interfaces name an award, a
@@ -1046,8 +1058,9 @@ export const COMMUNITY_PAGE_COPY_QUERY = defineQuery(
  * Nor is the reviewer's `bioHref`: `attorneyPath()` builds it from the referenced
  * member's key, the way every other profile link on this site is built.
  */
-export const CAR_ACCIDENTS_PAGE_QUERY = defineQuery(
-  `*[_type == "carAccidentsPage" && _id == "carAccidentsPage"][0]{
+export const FEATURED_PRACTICE_AREAS_QUERY = defineQuery(
+  `*[_type == "featuredPracticeArea"] | order(label asc){
+  "key": key.current,
   seo{ metaTitle, metaDescription },
   hero{
     "trail": coalesce(trail[]{ _key, label, href }, []),
@@ -1072,7 +1085,7 @@ export const CAR_ACCIDENTS_PAGE_QUERY = defineQuery(
   triage{
     title,
     lede,
-    video{ poster, alt, title, length, "video": film{ provider, id } },
+    video{ poster, alt, title, length, "video": { "provider": "wistia", "id": videoId } },
     help{ text },
     "rows": coalesce(rows[]{ _key, tone, tag, question, body, ctaLabel, ctaHref, stat{ big, label } }, []),
     sources{ label, "items": coalesce(items[]{ _key, label, note, href }, []) }
@@ -1086,7 +1099,7 @@ export const CAR_ACCIDENTS_PAGE_QUERY = defineQuery(
   criteria{
     title,
     lede,
-    video{ poster, alt, title, length, "video": film{ provider, id } },
+    video{ poster, alt, title, length, "video": { "provider": "wistia", "id": videoId } },
     "items": coalesce(items[]{ _key, title, body }, []),
     note
   },
@@ -1168,8 +1181,8 @@ export const CAR_ACCIDENTS_PAGE_QUERY = defineQuery(
 
 /** The Car Accidents accordion's own heading. The rest of that band's copy —
  *  the button inside an answer, the ask card — is the homepage's. */
-export const CAR_ACCIDENT_FAQ_SECTION_QUERY = defineQuery(
-  `*[_type == "carAccidentsPage" && _id == "carAccidentsPage"][0].faqSection{
+export const FEATURED_FAQ_SECTION_QUERY = defineQuery(
+  `*[_type == "featuredPracticeArea" && key.current == $key][0].faqSection{
   eyebrow, title, lede
 }`
 );
