@@ -12,11 +12,19 @@ interface Props {
 
 const { section, partners } = Astro.props;
 
-// TODO(sanity): every card points at the news index. The comp links each to its
-// own write-up, and those become `communityPost` documents with their own
-// slugs; until they exist, the index is where those stories actually live. A
-// card that says "Learn more" has to go somewhere real.
-const storyHref = ROUTES.blog;
+// THE CARDS ARE NOT LINKS, and that closes the TODO this file carried.
+//
+// Each one pointed at the news index, because the comp links every card to its
+// own write-up and those write-ups were never imported — eleven cards, one
+// destination, none of it the story the card describes.
+//
+// The 24 write-ups are REDIRECTS to this page now (see COMMUNITY_WRITE_UPS in
+// data/redirects.ts), so linking a card would send a reader from this page to
+// this page. The card is the content: the organisation, the photograph and what
+// the firm does with them, which is what the write-up said.
+//
+// Same convention as the footer's service-area chips, which stopped being links
+// for the same reason: a linked card promises somewhere to go.
 ---
 
 <section class="vol">
@@ -33,9 +41,7 @@ const storyHref = ROUTES.blog;
       {
         partners.map((partner) => (
           <li>
-            {/* The whole card is the link, so the target is the card's area
-                rather than the six words at the bottom of it. */}
-            <a class="vol__card" href={storyHref}>
+            <div class="vol__card">
               <div class:list={["vol__media", !partner.photo && "vol__media--logo"]}>
                 <Picture
                   src={partner.photo ?? partner.logo}
@@ -49,11 +55,8 @@ const storyHref = ROUTES.blog;
               <div class="vol__body">
                 <h3 class="vol__org">{partner.org}</h3>
                 <p class="vol__desc">{partner.body}</p>
-                <span class="vol__more arrow-link">
-                  Learn more <span class="arrow" aria-hidden="true">&rarr;</span>
-                </span>
               </div>
-            </a>
+            </div>
           </li>
         ))
       }
@@ -102,13 +105,12 @@ const storyHref = ROUTES.blog;
     border-radius: var(--radius-4);
     overflow: hidden;
     background: var(--dh-white);
-    transition: transform var(--transition), box-shadow var(--transition);
   }
 
-  .vol__card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 24px 50px -22px rgba(45, 34, 22, 0.35);
-  }
+  /* NO :hover. The lift, the shadow and the heading's colour shift went with
+     the anchor — a hover state on something unclickable reads as a control
+     that has broken, which is the same call the footer's service-area chips
+     record. */
 
   .vol__media {
     flex: none;
@@ -155,31 +157,16 @@ const storyHref = ROUTES.blog;
     font-size: var(--display-6);
     line-height: 1.15;
     color: var(--dh-ink);
-    transition: color var(--transition);
-  }
-
-  .vol__card:hover .vol__org {
-    color: var(--accent);
   }
 
   .vol__desc {
     flex: 1;
-    margin-bottom: var(--space-5);
+    /* No bottom margin: the "Learn more" prompt this cleared space for went
+       with the link. The card's own padding closes it. */
     font-size: var(--text-lg);
     line-height: 1.68;
     color: var(--dh-ink-3);
     text-wrap: pretty;
-  }
-
-  /* On the floor of the card, so the prompts line up across a row whose
-     descriptions run to different lengths. */
-  .vol__more {
-    font-weight: 800;
-    font-size: var(--text-label);
-    line-height: 1;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--accent);
   }
 
   @media (max-width: 1080px) {

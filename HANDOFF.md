@@ -100,6 +100,50 @@ their job. It asserts the INVARIANT the change created instead: the About band a
 hero render the same four figures. True whatever anyone types; fails the moment someone
 re-splits them.
 
+### 24 LIVE COMMUNITY WRITE-UPS HAD NO HOME, AND WOULD HAVE 404'd
+
+The live `/community-involvement/` page links about eighteen articles — `/craig-hospital/`,
+`/we-dont-waste/`, `/project-angel-heart/` and the rest. **All 24 return 200 today, none was
+served or redirected here**, and nothing in the build could say so: `check:links` only sees
+links the built site EMITS, and our community page never linked them.
+
+**They are WordPress PAGES, not posts** — the third bucket of that shape this project has hit,
+after the fourteen article-pages that went into the blog and the five slip-and-fall ones. The
+importer's manifest excluded every one as a "community involvement write-up", which was right
+for THAT import and left them nowhere.
+
+**REDIRECTED TO `/community-involvement/`, NOT IMPORTED, and the lengths are why.** They run 32
+to 560 words — photo-led notes about a volunteering day. Craig Hospital's is a caption.
+Twenty-four of those in `/news` would be a quarter of the feed. The content is not lost: the
+page they land on carries the same eleven organisations as cards.
+
+**THE CARDS ARE NOT LINKS ANY MORE, and that closed a `TODO(sanity)`.** Every card pointed at
+`/news/` because the write-ups were never imported — eleven cards, one destination, none of it
+the story the card described. Now that those slugs redirect HERE, a linked card would send a
+reader from this page to this page. Same call the footer's service-area chips record, and the
+`:hover` lift went with the anchor for the same reason: a hover on something unclickable reads
+as a control that has broken.
+
+### A REASON IN THE MANIFEST IS DOCUMENTATION, AND 28 WERE WRONG
+
+`EXCLUDED_SLUGS` had "community involvement write-up" on 23 attorney and staff BIO pages, three
+former staff and two scratch pages. Every exclusion was correct and every explanation was not —
+on a map whose entire job is to say why a page was skipped. Relabelled.
+
+**Nothing checks a reason against reality**, and that is still true. This was found by auditing
+what the live community page links, not by the build.
+
+### THE ROOT-SLUG ATTORNEY BIOS ARE A SECOND CUTOVER 404, STILL OPEN
+
+The live site serves every bio at the ROOT as well — `/sean-dormer/`, `/k-c-harpring/`,
+`/tim-garvey/` and twenty more all return 200 — and this site serves them only under
+`/meet-our-attorneys/<slug>/`. **None is redirected.** Checked seven; all seven are live and
+unhandled.
+
+Same shape as the write-ups and higher value, since these are the pages with names attached.
+A one-to-one redirect to the `/meet-our-attorneys/` form is the obvious answer; it wants
+confirming that the root page is the same content and not a second, different bio.
+
 ### A CITY HAS TWO KINDS OF PRACTICE-AREA PAGE
 
 **`practiceArea` is the imported default and `featuredPracticeArea` is the hand-built one**, and

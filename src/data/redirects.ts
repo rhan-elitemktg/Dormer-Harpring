@@ -128,6 +128,59 @@ const LEGACY_PATH_FORMS: ReadonlyArray<readonly [from: string, to: string]> = [
   ["/why-hire-personal-injury-attorney/", ROUTES.about],
 ];
 
+/**
+ * THE 24 COMMUNITY WRITE-UPS, all to the page that covers what they are about.
+ *
+ * WordPress PAGES rather than posts — the third bucket of that shape this
+ * project has hit, after the fourteen article-pages that went into the blog and
+ * the five slip-and-fall ones. `scripts/practice-area-pages.mjs` excluded every
+ * one of them as a "community involvement write-up", which was right for THAT
+ * import and left them with no home at all: nothing here served them and
+ * nothing redirected them, so all 24 would have 404'd at cutover while still
+ * being live and linked from the firm's own community page.
+ *
+ * NOT IMPORTED AS POSTS, BY REQUEST, AND THE LENGTHS ARE WHY. They run 32 to
+ * 560 words — photo-led notes about a volunteering day, not articles. Craig
+ * Hospital's is a caption. Twenty-four of those in `/news` would be a quarter
+ * of the feed and would devalue the legal writing around them.
+ *
+ * THE CONTENT IS NOT LOST, WHICH IS WHAT MAKES THIS THE RIGHT DESTINATION.
+ * `/community-involvement/` carries the eleven partner cards and the
+ * sponsorships — the same organisations these write-ups are about. A reader
+ * arriving from a 2025 Google result lands on the firm's account of that work.
+ *
+ * ONE DESTINATION, WRITTEN OUT RATHER THAN WILDCARDED, for the same reason the
+ * legacy path forms above are: this list is going into a CMS where an editor
+ * has to read a rule and know what it does, and a pattern claiming 24 root
+ * slugs would also claim every future one.
+ */
+const COMMUNITY_WRITE_UPS: readonly string[] = [
+  "/2023-big-little-gala-hosted-by-big-brothers-big-sisters-of-colorado/",
+  "/a-great-success-at-the-2025-cca-convention/",
+  "/a-week-of-cinema-at-the-denver-film-festival-48/",
+  "/back-to-clothes-to-kids-denver/",
+  "/big-brothers-big-sisters-annual-big-little-gala/",
+  "/big-brothers-big-sisters-annual-big-little-gala-2025/",
+  "/cba-well-being-symposium-spring-summit/",
+  "/clothes-to-kids-denver/",
+  "/craig-hospital/",
+  "/dinner-at-the-ronald-mcdonald-house/",
+  "/dinner-at-the-ronald-mcdonald-house-2/",
+  "/dressed-for-success-dormer-harpring-volunteers-at-clothes-to-kids-denver/",
+  "/dumb-friends-league/",
+  "/giving-back-at-craig-hospital/",
+  "/giving-back-with-the-park-people/",
+  "/highlights-from-the-2025-dmar-inaugural/",
+  "/jassy-rendezvous-fundraising-gala/",
+  "/project-angel-heart/",
+  "/standing-together-for-access-and-expression-with-the-cwba/",
+  "/stepping-up-for-a-cause-our-2025-pikes-peak-challenge-experience/",
+  "/true-companions-animal-shelter-clinic/",
+  "/volunteer-day-project-cure/",
+  "/volunteering-at-metro-carings-fresh-foods-market/",
+  "/we-dont-waste/",
+];
+
 export async function getRedirects(): Promise<Redirect[]> {
   const list: Redirect[] = [
     ...CATEGORY_ARCHIVES.map(([from, to]) => ({
@@ -140,6 +193,12 @@ export async function getRedirects(): Promise<Redirect[]> {
       _key: `legacy-${normalizePath(from).split("/").filter(Boolean).join("-")}`,
       from,
       to,
+      permanent: true,
+    })),
+    ...COMMUNITY_WRITE_UPS.map((from) => ({
+      _key: `community-${normalizePath(from).split("/").filter(Boolean).join("-")}`,
+      from,
+      to: ROUTES.community,
       permanent: true,
     })),
   ];
