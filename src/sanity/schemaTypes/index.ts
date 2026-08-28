@@ -17,7 +17,6 @@ import { seo } from "./objects/seo";
 
 import { aboutPage } from "./pages/aboutPage";
 import { blogIndexPage } from "./pages/blogIndexPage";
-import { carAccidentsPage } from "./pages/carAccidentsPage";
 import { coCounselPage } from "./pages/coCounselPage";
 import { communityPage } from "./pages/communityPage";
 import { contactPage } from "./pages/contactPage";
@@ -35,6 +34,7 @@ import { blogPost } from "./collections/blogPost";
 import { city } from "./collections/city";
 import { caseResult } from "./collections/caseResult";
 import { coreValue } from "./collections/coreValue";
+import { featuredPracticeArea } from "./collections/featuredPracticeArea";
 import { practiceArea } from "./collections/practiceArea";
 import { teamMember } from "./collections/teamMember";
 import { testimonial } from "./collections/testimonial";
@@ -73,7 +73,6 @@ const pages: SchemaTypeDefinition[] = [
   aboutPage,
   teamPage,
   practiceAreasPage,
-  carAccidentsPage,
   resultsPage,
   testimonialsPage,
   coCounselPage,
@@ -100,6 +99,7 @@ const pages: SchemaTypeDefinition[] = [
  * type here, count the pages: one page means a field, not a collection.
  */
 const collections: SchemaTypeDefinition[] = [
+  featuredPracticeArea,
   practiceArea,
   blogPost,
   blogCategory,

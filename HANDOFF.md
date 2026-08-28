@@ -45,7 +45,7 @@ against the code, swept for dead literals, swapped, built and diffed on its own.
   off a URL, and omitting them shifts the layout as the image lands.
 - Field types: `richText`, `answerText`, `simpleText`, `inlineText`, `link`, `navLink`,
   `videoRef`, `seo`.
-- Nine collection types, **thirteen page types** (fifteen documents — `sitePage` is three) and
+- **Ten** collection types, **twelve page types** (fifteen documents — `sitePage` is three) and
   **three** Site Settings singletons, in a desk of five groups plus one loose document: Pages /
   Practice Areas / Blog / Collections / Shared Sections / Site Settings. Every page type with more than one band holds its fields in
   collapsible SECTIONS — see below.
@@ -100,6 +100,66 @@ their job. It asserts the INVARIANT the change created instead: the About band a
 hero render the same four figures. True whatever anyone types; fails the moment someone
 re-splits them.
 
+### A CITY HAS TWO KINDS OF PRACTICE-AREA PAGE
+
+**`practiceArea` is the imported default and `featuredPracticeArea` is the hand-built one**, and
+each of the nine cities opens into both:
+
+```
+Practice Areas → Denver → Default   (48)
+                          Featured   (1)
+```
+
+Car Accidents was `carAccidentsPage`, a singleton, which put the firm's biggest page nowhere
+near its siblings and made it a permanent special case. Nothing about the page changed —
+**329 of 329 byte-identical** — it just stopped being a one-off.
+
+**IT WAS SAFE TO DO WITH ONE MEMBER because the route was already plural.**
+`getPracticeAreaDetails()` returned an array, `[slug].astro` mapped over it, and `DetailPage`
+takes a plain `PracticeAreaDetail` — the heavy kit was already generic over its data. Only the
+document was singular. A second designed page is now a document plus one line of routing.
+
+**THE SLUG IS STILL IN CODE, and becoming a collection did not change that.** `FEATURED` in
+`data/carAccidents.ts` maps each document's `key` to its URL and **throws by name on a key it
+does not route**. That costs nothing: eighteen sections bound to specific components means a
+featured page needs a developer regardless, so a line in that map is part of a change that was
+already happening — where an editable slug is ~300 legacy redirects pointing at nothing.
+
+**Eight of the nine cities show an empty Featured list**, deliberately: the structure states the
+model rather than the current contents, so commissioning a second one is a document rather than
+a desk change.
+
+### AN UNREGISTERED TEMPLATE BREAKS THE WHOLE PANE, NOT ONE LIST
+
+Each city now names an initial-value template PER TYPE — `${type}-by-city` — and only
+`practiceArea`'s was registered in `sanity.config.ts`. The Studio then refused to read the
+structure at all:
+
+> template id (`templateId`) is required for initial value template item nodes
+
+**Not a missing create button. Practice Areas would not open.** And `check:desk` was green
+throughout, because placement was correct and the pane was still broken.
+
+`check:desk` now asserts it, scoped to that one loop. **A first attempt that tried to infer
+every template from every group produced 22 false failures** — a check that answers a question
+it cannot actually see is worse than no check. Tested by unregistering the template and watching
+it go red.
+
+`featuredPracticeArea` is out of the global "create new" menu for the same reason `practiceArea`
+and `teamMember` are: the global button sets no `city`, so a page created there matches none of
+the nine filters and is invisible.
+
+### `git grep` DOES NOT SEE UNTRACKED FILES, AND THE MARKER COUNT READ 32
+
+**A FIFTH REASON THIS LINE HAS BEEN WRONG.** Moving the Car Accidents schema to a new file
+dropped the count from 41 to 32 launch markers and 8 to 7 video — nine and one, exactly what the
+moved file carries. Nothing was lost: the new file was UNTRACKED, and `git grep` skips untracked
+files, so the markers were there and uncounted.
+
+**Measure with `git grep --untracked` when a phase adds a file**, or after staging. The plain
+form is right for a clean tree and silently low for a change in progress — which is exactly when
+this count gets taken.
+
 ### THE DESK IS FIVE GROUPS, AND TWO PAGE TYPES ARE GONE
 
 Pages / **Practice Areas** / **Blog** / Collections / Site Settings, by request.
@@ -113,16 +173,15 @@ Testimonials, Case Results, Awards, Core Values, Cities.
 **Blog Posts and Blog Categories are one group because they are one editorial job.** A post
 belongs to exactly one category and the category list exists to serve the posts.
 
-**CAR ACCIDENTS LEADS PRACTICE AREAS, ABOVE A DIVIDER.** It is a practice-area page that is not
-a `practiceArea` DOCUMENT — its content is eighteen typed sections on its own singleton, because
-it is the one page served by the heavy hand-authored template. The divider is load-bearing: what
-is above it is a page singleton and what is below is a collection, which are two different kinds
-of thing in one list.
+**CAR ACCIDENTS IS NOT A SINGLETON ANY MORE** — see the note at the top of this file. It is a
+`featuredPracticeArea` document, filed under Denver beside the imported pages, and it came out
+of `SINGLETON_TYPES` with the change.
 
-**It also had to stay in `SINGLETON_TYPES` by hand.** That list is built from `PAGES` and
-`SETTINGS`, and moving the type out of `PAGES` silently dropped it — which would show an editor
-"Car Accidents" twice, once pinned and once as a generic list, with edits to the second going
-nowhere. Anything moved OUT of those two arrays needs adding back explicitly.
+**Anything moved OUT of `PAGES` or `SETTINGS` still needs adding back to `SINGLETON_TYPES`
+explicitly.** That list is built from those two arrays, so a singleton placed anywhere else
+drops out of it silently — which shows an editor the document twice, once pinned and once as a
+generic list, with edits to the second going nowhere. `sharedSections` is the one that needs it
+today.
 
 **`groupItems()` exists because the alternative was reaching into a built list item.** Practice
 Areas needs its nine city lists placed beside the Car Accidents singleton rather than nested a

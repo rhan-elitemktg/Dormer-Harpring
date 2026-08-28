@@ -37,6 +37,18 @@
 // the section anchors (`CA_SECTION_IDS`, read by the nav AND the sections' own
 // ids), the reviewer's bio href (`attorneyPath()`), and the map's title (built
 // from the firm's name — the literal carried a second copy of it).
+//
+// SPENT, AND IT HAS BEEN EDITED TWICE SINCE. Its swap happened, so `--verify`
+// compares the dataset with itself; and Phase 6d deleted the `carAccidentsPage`
+// TYPE outright — this page is a `featuredPracticeArea` document now — so this
+// could not run even if the literals were back. The getter rename it calls was
+// followed here rather than left dangling, because `check:types` gates the
+// whole repo and a spent migration must not be what turns it red.
+//
+// THAT IS THE THIRD PHASE 4 SCRIPT THIS HAS HAPPENED TO. They read data-layer
+// getters, later phases change those getters, and the gate goes red on a file
+// nobody can run. Worth deciding whether they are documentation (delete them;
+// git has them, and the commits are the real record) or code.
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { registerDataModuleHooks } from "./lib/stub-vite-modules";
@@ -197,7 +209,7 @@ async function load() {
     ca.getPracticeAreaDetails(),
     // The anchor argument only sets `ask.ctaHref`, which is not stored — this
     // page renders the homepage's ask card with its own scroll target.
-    faqs.getCarAccidentFaqSection("#contact"),
+    faqs.getFeaturedFaqSection("car-accidents", "#contact"),
   ]);
   assert(details.length === 1, `Expected exactly one detail page, found ${details.length}.`);
   return { detail: details[0], faqSection };

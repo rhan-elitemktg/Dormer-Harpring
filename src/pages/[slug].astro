@@ -64,7 +64,7 @@ import {
 } from "../data/practiceAreaPages";
 import { CA_SECTION_IDS, getPracticeAreaDetails } from "../data/carAccidents";
 import { getContactBand, getContactDetails } from "../data/contact";
-import { getCarAccidentFaqSection, getCarAccidentFaqs } from "../data/faqs";
+import { getFeaturedFaqSection, getFeaturedFaqs } from "../data/faqs";
 import { getAwards } from "../data/awards";
 import { getAwardsBar, getTestimonialRail } from "../data/home";
 import { getFirmDetails } from "../data/site";
@@ -233,8 +233,11 @@ const area =
           getHomeTestimonials(),
           getReviewSummary(),
           getTestimonialRail(),
-          getCarAccidentFaqs(),
-          getCarAccidentFaqSection(`#${CA_SECTION_IDS.contact}`),
+          // KEYED BY THE PAGE, because featured practice areas are a collection:
+          // an unkeyed query would serve whichever sorted first the moment a
+          // second one exists.
+          getFeaturedFaqs(props.detail._key),
+          getFeaturedFaqSection(props.detail._key, `#${CA_SECTION_IDS.contact}`),
           getContactDetails(),
           getContactBand(),
         ]);
