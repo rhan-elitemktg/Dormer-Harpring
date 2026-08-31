@@ -6,7 +6,128 @@ Architecture, conventions and the design source of truth live in `AGENTS.md` (sy
 `CLAUDE.md`, loaded automatically). Pre-launch decisions live in `README.md`. Don't restate
 either here, and don't record anything `git log` already knows.
 
-_Last updated: 2026-08-28._
+_Last updated: 2026-08-31._
+
+**This file tripled by appending — 1,016 lines to 3,083 — before this pass caught it.** Four
+separate status lists had accumulated ("Next", "Open", "Not done and known", the to-do half of
+"Sanity readiness"), overlapping and contradicting each other: two still said the production URL
+was not a CORS origin and that there was no webhook, both configured. They are one section now,
+**Where this is**, immediately below.
+
+If you are about to add a section here, check whether you are replacing one instead. The numbers
+especially: "775 documents" and "the data layer down to 4,724 lines" were both wrong within two
+sessions, because both keep moving. Anything countable belongs in **Where this is**, re-counted,
+or nowhere.
+
+## Where this is
+
+**Everything below is merged to `master`** (PRs #48 and #49). The four `check:` linters and
+`check:types` are green: 329 built pages, 330 served paths, 33,711 internal links, **zero dead
+and zero placeholders**, 196 redirect rules, 28 document types.
+
+**Verified against the dataset, not remembered:** 510 content documents across 29 types (no
+drafts), plus 279 image assets. The data layer is **5,274 lines across 29 modules** — it grew
+back from the migration's low as the SEO layer landed, which is why the old "down to 4,724" line
+is gone rather than updated.
+
+### Closed
+
+| | |
+|---|---|
+| `/api/consult` | Built. Needs its Resend variables — see below |
+| `site:` www vs apex | **Settled: www.** Ten comments said it was open; all corrected |
+| Cutover URL audit | 18 would-be 404s → **zero** |
+| The editable SEO layer | `/new-seo-setup` steps 3–11 |
+| Nine `href="#"` | **Zero.** `KNOWN_PLACEHOLDER` is empty |
+| Sanity CORS + deploy webhook | Configured |
+
+### Open — code
+
+1. **The two dynamic routes pass `title`/`description`, not the whole `seo` object.** Titles and
+   descriptions already work — the 104 practice areas carry real imported meta — but
+   `canonicalUrl`, `noIndex` and `ogImage` cannot be set per practice area, post or attorney
+   bio. It is splicing the `seo{…}` projection into four document queries.
+2. **`bulkRedirectsPath` is off**, and re-enabling it is a deploy-only experiment. See its own
+   section below: try `"static/bulk-redirects.json"` on a PREVIEW, with one real redirect
+   document to verify against.
+3. **One Wistia player per popover, initialised eagerly** — 15 on the homepage, 20 on
+   `/denver-car-accident-lawyer/`. Inherent to the class-based embed; wants a pass before launch.
+4. **The four deferred Portable Text object types** — `callout`, `phoneBand`, `attorneyCard`,
+   `pullQuote`, whose intended home is commented in `prose/components.ts`. Nothing in the 290
+   imported documents uses them and no renderer exists, so adding them would ship four editor
+   controls that draw nothing. They want a renderer first.
+5. **Three spent Phase 4 migration scripts break the type gate** whenever a later phase removes a
+   getter they read. They cannot run — their documents no longer exist. Decide whether they are
+   documentation (delete them; the per-slice commits are the real record) or code.
+
+### Open — configuration, and nobody else can do these
+
+- **Resend is not provisioned.** `vercel link && vercel integration add resend/resend-email`,
+  then `RESEND_API_KEY`, `CONSULT_TO_EMAIL`, `CONSULT_FROM_EMAIL` and optionally
+  `COCOUNSEL_TO_EMAIL`. **Until they exist every form on 327 pages returns a 500.** The From
+  domain must be verified in Resend or the send is refused.
+- **No default social share image**, so 0 pages carry `og:image`. One upload at
+  Site Settings → Global SEO Settings → Defaults.
+- ⚠️ **The crawl switch is ON.** All 330 pages carry `noindex` and `robots.txt` serves
+  `Disallow: /`. Correct while the site is on its temporary address and **fatal if it ships**.
+  Turn it off at launch, then submit `https://www.denvertrial.com/sitemap.xml` in Search Console.
+- ⚠️ **Vercel must serve `www` as the PRIMARY domain**, apex redirecting to it. Reverse that
+  without moving `site:` and every canonical tag points at a redirect.
+- **Re-run the cutover URL audit immediately before launch.** The firm keeps publishing — that
+  is how the 2026 gala write-up was missed by the sweep that caught the other 24.
+
+### Waiting on the firm — content, not code
+
+**Start these now; they have the longest lead time.**
+
+- **Video. The whole layer is one film** — ~33 slots on a single stand-in, counted live as 4 team
+  films, 6 testimonials, 8 homepage FAQs and the rest. Blocked on the firm re-hosting to Wistia
+  and on `WISTIA_ACCOUNT` from their dashboard. **Five source videos are unlisted on YouTube and
+  nothing public can enumerate them** — somebody has to open YouTube Studio.
+- **The unsourced claims, which are the legal-exposure ones.** `$70M+` and `20 Years`; six
+  figures on Car Accidents, three of them the firm's own case data under a disclaimer whose
+  period renders as the literal `[date range]`, and three city figures dated the literal
+  `[year]`. Colorado's advertising rules care about the firm's-own-results set specifically.
+  Source them or cut the band — placeholder brackets must not ship either way.
+- **Contact facts.** All seven attorney emails are populated and none is verified; only Sean's
+  has a source. `info@dormerharpring.com` appears nowhere on the live site. Office hours conflict
+  between the JSON-LD and the comp. Each has a clean fallback: clear the field and the line
+  disappears on its own.
+- **The privacy policy** needs a legal review — no CCPA/GDPR, no cookie disclosure, no retention
+  period, no route for a data request, while the site embeds a Google Map that sets cookies on
+  load. Bundle it with the third-party tag decision.
+- **Nine articles that do not exist** — the eight "More on car accident claims" pieces, and the
+  checklist. The checklist teaser links a real article now, but its button still says
+  "See all 8 steps" and that article is not eight steps.
+- **Four rulings that are content, not code:** the four Denver practice areas in no directory
+  group; rear-end and head-on, which have tiles and no page; the Auto Insurance category that can
+  never get a tab; and which five articles belong on each of the 104 practice-area sidebars
+  (`AREA_TO_BLOG_CATEGORY` is inferred — in Sanity this wants a `relatedPosts` reference array,
+  and Phase 4f proved the pattern).
+- **Duplicate case results** — three of the 89 are the same cases the homepage leads with, in
+  different words. Which wording is right is the firm's call.
+
+### Waiting on the designer
+
+- **No comp exists for the light practice-area template**, which 104 pages ship on.
+- **Two comps arrived and are not built** — `DH - Attorney Bio v1.html` (and the built bio has no
+  diff script, so nothing checks it) and `DH - Blog - What to do after a car accident.html`,
+  which is the checklist article above.
+- **The Car Accidents comp moves almost every accent from gold to forest.** Built as drawn, that
+  page only. If it is site-wide it touches `Eyebrow`, `FaqItem`, `TestimonialRail`, `AwardsBar`
+  and the token layer.
+- **Eyebrow contrast fails WCAG AA** — 12px uppercase gold on cream, ≈2.5:1 and ≈3.1:1. Built to
+  match the comps.
+- The favicon's `#314641` is not on this site's forest ramp; `faq-video-cover.jpg` is square in a
+  16/10 box; and nobody has said whether `DH - Homepage approved.html` or `v2` is final.
+
+### Known and deliberately not fixed
+
+`MobileNav` has no current-page highlight where desktop does · `MoreOnClaims`' play glyph
+promises a video it cannot play · twelve images in `src/assets` are unreferenced but are git's
+only copy of the originals · `routePaths.locationPath` is exported and uncalled · nothing is
+wired for Visual Editing, so array projections omit `_key` where the interface has none.
+
 
 ## NINE `href="#"` ARE ZERO, AND `KNOWN_PLACEHOLDER` IS EMPTY
 
@@ -386,9 +507,11 @@ trusted), and a 500 whose log names exactly which variables are unset.
 
 ## The Sanity integration — Phases 0 through 6 are in
 
-**775 documents in Sanity, and `src/data/` no longer holds page copy.** Every route's strings
-are a field on a page document; the data layer is 5,724 lines down to 4,724, and
-`carAccidents.ts` alone went from 1,227 to 598. Only `portableText.ts` (an authoring shim) and
+**Every route's strings are a field on a page document, and `src/data/` no longer holds page
+copy.** `carAccidents.ts` alone went from 1,227 lines to 598. **The live counts are at the top
+of this file and were re-checked against the dataset** rather than carried forward — the figures
+that used to sit here (775 documents, a data layer "down to 4,724 lines") were both stale within
+two sessions, because both keep moving. Only `portableText.ts` (an authoring shim) and
 `redirects.ts` (the redirect table, which becomes editor-managed in `/new-seo-setup`) do not
 read Sanity.
 
@@ -783,7 +906,7 @@ three were output-neutral: 329 of 329 pages byte-identical, three times.**
 | | Pages | What moved |
 |---|---|---|
 | 5a | about, team, testimonials, co-counsel, contact, thank-you, blog index | loose header strings into a `header` object |
-| 5b | community, practice areas, the three utility pages | each band's heading flattened into the band, its list joining as `items` |
+| 5b | community, practice areas, the utility pages (three at the time; four now) | each band's heading flattened into the band, its list joining as `items` |
 | 5c | homepage, car accidents | five arrays merged into the band that renders them |
 
 **THREE DOCUMENTS ARE DELIBERATELY STILL FLAT.** `resultsPage` is four fields drawing ONE band,
@@ -812,7 +935,7 @@ Three things that migration needed which the Phase 4 ones did not:
   the slice.
 - **A dotted source path**, so a heading object can be flattened INTO the section that now holds
   its list, with the emptied parent pruned rather than left behind as `featuredHeading: {}`.
-- **An optional source, marked with a trailing `?`**, for the three utility pages alone: `links`
+- **An optional source, marked with a trailing `?`**, for the utility pages alone: `links`
   exists on the 404 and `lede` on two of three. Everywhere else a missing source throws, so
   absence is opt-in rather than tolerated.
 
@@ -861,7 +984,7 @@ Results and Testimonials and Contact above everything.
 `TEMPLATE` constants in `blog.ts` and `practiceAreaPages.ts` now. See the note at the top of
 this file for what that traded away.
 
-**The three utility pages are three documents of ONE type.** They are the same document in
+**The four utility pages are four documents of ONE type.** They are the same document in
 every way that matters — a title, an optional lede, a body, no taxonomy above and no collection
 beneath — so three near-identical schema files would be three places to keep in step. Each is
 still pinned to its own `_id`, because there is no route that would serve a fourth. `sitePage`
@@ -1522,24 +1645,6 @@ field only one member has (`"src" in image`), never with a type predicate — a 
 `SanityImageSource` narrows the false branch to `never`. The discrimination is also a real
 assertion: an image that is already a reference means the getter has moved.
 
-### Not done, and known
-
-- **The production URL is still not a Sanity CORS origin**, so the deployed `/admin` loads and
-  fails sign-in. `http://localhost:4321` is registered — don't move dev off 4321.
-- **No webhook.** Publishing changes nothing on the live site until someone redeploys. Phase 5.
-- **Nothing is wired for Visual Editing**, so array projections omit `_key` where the interface
-  has none.
-- ~~**Testimonials still nest their video field.**~~ **CLOSED in 6b.** Nothing nests a video
-  field any more — see the note at the top of this file.
-- **`routePaths.ts` exports `locationPath` and nothing calls it.** One of five identical
-  helpers that name the kinds of URL this site has; whether that set should shrink is a
-  routing question, not a migration one.
-- ~~**The Homepage document is sixteen fields and the form is a long scroll.**~~ **CLOSED.** It
-  is seven sections now, and Practice Areas and Car Accidents traded their Phase 4 tabs for the
-  same accordion. See the top of this file.
-- **The fact-check SENTENCE is still derived**, not editable. See the note at the top of this
-  file for what making it editable would need.
-
 ## State
 
 **The team is 26 people, not 30.** Alexandra Petroff, Dinorah Gutierrez, Ella Nelson and Morgan
@@ -1656,11 +1761,15 @@ cannot be re-checked cannot fail.
 build. Proven by feeding it a deliberately broken page. Fixed. If anything in `dist/` was
 relying on that, it surfaces on the next run; nothing did today.
 
-**`KNOWN_DEAD` IS EMPTY.** The footer's three — `/privacy-policy/`, `/editorial-guidelines/` and
-`/sitemap.xml`, 984 dead links across every page — are all closed. Each was closed by a change
-that made `check:links` FAIL on the now-stale declaration rather than pass quietly, which is why
-the table shrank instead of growing. **The only dead links left on the site are the nine
-`href="#"` placeholders**, declared by count in `KNOWN_PLACEHOLDER`. Item 1 under Next.
+**`KNOWN_DEAD` AND `KNOWN_PLACEHOLDER` ARE BOTH EMPTY.** The footer's three —
+`/privacy-policy/`, `/editorial-guidelines/` and `/sitemap.xml`, 984 dead links across every
+page — are all closed, and so are the nine `href="#"`. Every one was closed by a change that made
+`check:links` FAIL on the now-stale declaration rather than pass quietly, which is why the tables
+shrank instead of growing. **That contract earned its keep three more times since**: the
+placeholder count on `/` went 8 → 4 → 0 across two sessions and failed loudly at each step,
+including on a change nobody thought touched links. The entries are DELETED rather than set to
+zero, so a placeholder appearing again fails as an UNDECLARED one, which is louder than a count
+going stale.
 
 The relative href that was item 2 is fixed, and 49 malformed `tel:` hrefs with it — see below.
 
@@ -2464,7 +2573,7 @@ site-icon, `uploads/2020/10/cropped-favicon-1-1.jpg`. `favicon.ico` (16 + 32 as 
   lighter, greyer green than the header it sits above. Carried over as-is because it is the
   firm's asset. README has the row.
 
-## The three utility pages, on the light template's shell
+## The four utility pages, on the light template's shell
 
 `/privacy-policy/`, `/sitemap/` and `404` — built by request on the practice-area template's
 look. **`KNOWN_DEAD` in `check-links.py` is now EMPTY**: the footer's 984 dead links are gone,
@@ -2577,366 +2686,32 @@ It offers four routes rather than a search box: **this site has no search.** The
 filters client-side over a list it already has, which would find nothing outside `/news`, and a
 box that returns nothing is worse than no box.
 
-## What this closed
+## Traps that outlived the section they were written in
 
-- **Dead body links: 149 across 42 paths → ZERO.** 2,013 internal links across 236 paths, every
-  one either built or redirected. Three things got there: the practice-area import, the fourteen
-  article-pages, and nine `LEGACY_PATH_FORMS` redirects (below).
-- **Nine legacy URL shapes now redirect** rather than 404 — `/news/<slug>` from before the blog
-  moved to the root, `/practice-areas/<slug>` from the hub linking its children relatively without
-  a `../`, and `/why-hire-personal-injury-attorney` plus its testimonials child. Every destination
-  is a page this build serves; most are redirects WordPress already performs. `vercel.json` is 68
-  rules now, still generated — don't hand-edit it.
-  That hub-relative link bug is also **why three pages were recorded as having "no page
-  anywhere"**: the hub's own links 404, so live pages looked absent.
-- **The three Practice Areas entries "with no page anywhere"** — Legal Malpractice, Life Insurance
-  Bad Faith, Pet Insurance Bad Faith — **all three are live pages** and are now imported and
-  linked. They looked absent because the legacy hub links them relative without a `../`, so they
-  404 under `/practice-areas/` too.
-- **`AreaDirectory`'s header comment**, which claimed nine groups and a Grand Junction group that
-  does not exist.
+These were recorded under a "Sanity readiness" checklist whose to-do half is long closed. The
+checklist went; these did not, because each one costs an afternoon and **none has another home
+in the repo.**
 
-`assertDirectoryJoin()` runs on `/practice-areas` and **throws at build time** if a directory
-entry loses its page or a page loses its group. It was tested by breaking an href; it names the
-entry and both files to fix.
+**`getStaticPaths` DOES NOT SEE MODULE SCOPE.** Astro hoists it into its own module context, so a
+module-level `const QUERY = defineQuery(...)` throws `ReferenceError` at request time. Define
+queries used inside it there, or import them. **Both `[slug].astro` files are affected.**
 
-## Next
+**`tsconfig.json` NEEDS NO `types` ENTRY**, and an earlier note was wrong to say it did. The
+Sanity guide's Astro page says to add `"types": ["@sanity/astro/module"]` — that instruction is
+for a project without an ambient declaration. This one has had it all along: `src/env.d.ts`
+carries `/// <reference types="@sanity/astro/module" />` beside the `astro/client` one. Verified
+rather than reasoned. Adding it anyway would be worse than redundant: a `types` array REPLACES
+TypeScript's automatic `@types` inclusion, so it trades a working setup for a narrower one.
 
-1. **The 9 remaining dead links** — the ONLY dead links left on the site. `KNOWN_DEAD` in
-   `check-links.py` is empty. Eight are `homePage.pressMentions[]` and
-   `homePage.insightTeasers[]`, read through `data/news.ts`, every `href` a literal `"#"`,
-   marked `TODO(content)` rather than `TODO(launch)` — which is how they stayed off the launch
-   list. The ninth is the Car Accidents checklist teaser, which IS a `TODO(launch)`: unlike the
-   homepage's eight it promises "8 things to do after a car accident" to a reader who has just
-   been in one. **All nine are editable in the Studio now**, so filling one in is an editor's
-   job rather than a code change — lower the `KNOWN_PLACEHOLDER` count in the same change or
-   `check:links` fails. It is keyed **by count**, so removing one without lowering the number
-   fails. The four news mentions are real published articles (FOX31, Denver7, OutThere
-   Colorado, The Mountain Mail) and their URLs are findable; the four insight teasers and the
-   checklist point at articles nobody has written. `#` must not reach production.
-2. **Real Wistia ids.** 33 slots still point at one stand-in, which is the whole site's video
-   layer resting on a single film — and after Phase 4 **only ONE is still in code**
-   (`lib/video.ts`'s constant itself). The rest are FIELDS: 20 FAQs, 6 testimonials, 4 team
-   films, the homepage's firm intro, and the two Car Accidents video panels. **The YouTube ids
-   they map to are in `YOUTUBE_ORIGINS` in `src/lib/video.ts`** — no longer in comments beside
-   their records, because those records moved to Sanity and took the comments with them. Five
-   of the eight are unlisted and cannot be re-derived. Blocked on the firm re-hosting the
-   videos, and on someone checking YouTube Studio for unlisted ones beyond those five.
+**Duplication found and deliberately left alone.** `ContactForm` / `CoCounselForm` share their
+label, `:focus` and honeypot rules verbatim, and are headed for one endpoint anyway.
+`.spage__grid` / `.post__grid` / `.parea__grid` are identical, as are the three `__main` rules —
+**three callers against the documented four-caller threshold for extracting, so it stays.** The
+threshold is now one away. Repeated utilities: absolute-fill `object-fit: cover` in four files,
+visually-hidden in two, the awards rail in three.
 
-   **Grepping `PLACEHOLDER_VIDEO` no longer finds them** — the full sweep is a grep AND a
-   query, both written down at the top of `src/lib/video.ts`, and **the query half is stale**:
-   every record it reads has changed shape, from a `video{provider,id}` object to a bare
-   `videoId` string. Rewrite it before trusting it — a GROQ filter on a field that no longer
-   exists returns nothing and reads as "no placeholders left".
-3. **One Wistia player per popover, initialised eagerly** — 15 on the homepage, 20 on
-   `/denver-car-accident-lawyer/`. Inherent to the class-based embed; wants a pass before launch.
-4. ~~**Sanity Phases 2, 2f, 3 and 4.**~~ **ALL DONE.** 775 documents across **ten** collection
-   types, **twelve** page types and **four** settings singletons, 279 image assets,
-   and no page copy left in `src/data/`. Every slice ended byte-identical or with every changed
-   page explained. The findings that will matter next are at the top of this file; the ones
-   most likely to bite are `pt()`'s duplicate keys, GROQ's codepoint `order()`, and that a
-   comment beside a literal does not survive the literal.
-5. **The four Portable Text object types the post template deferred** — `callout`, `phoneBand`,
-   `attorneyCard`, `pullQuote`, whose intended home is commented in `prose/components.ts`, and
-   which the practice-area chrome maps onto almost exactly. **Deliberately NOT in Phases 3 or
-   4**: nothing in the 290 imported documents uses them and no renderer exists, so adding them
-   would ship four editor controls that draw nothing. They want a renderer first.
-6. **Sanity Phase 5 — the webhook and CORS are what is left.** Publishing changes nothing on
-   the live site until someone redeploys, and the production URL is still not a CORS origin, so
-   the deployed `/admin` loads and fails sign-in. **The `/studio-polish ux` half is DONE**: every
-   page document with more than one band is an accordion of sections, which is what the
-   Homepage's sixteen loose fields wanted and what took the tabs off the other two. See the top
-   of this file.
-7. **A CUTOVER URL AUDIT — every live path against what this site serves.** Two sessions have
-   each turned up a batch by hand: 24 community write-ups and 23 root-slug attorney bios, 47
-   would-be 404s, both found by reading denvertrial.com rather than by anything in this build.
-   **Nothing here can see a URL the old site has and this one does not** — `check:links` only
-   validates links this site EMITS. Enumerate the live site's paths (its REST API lists posts
-   and pages; the sitesucker scrape is the other half) and resolve each against `dist/` plus
-   `vercel.json`. Four are already known and unruled: Alexandra Petroff's and Dinorah
-   Gutierrez's bios, live in both URL forms, belonging to staff the roster no longer carries.
-8. `/new-seo-setup` — per-page meta, a Global SEO Settings singleton, JSON-LD, `sitemap.xml`,
-   `robots.txt`, editor-managed redirects. **The practice-area pages already carry real
-   `metaTitle` / `metaDescription` from the live site's own meta** on all 104 `practiceArea`
-   documents, and Phase 4f put the Car Accidents page's on a `seo` object too — so this layer
-   has something true to start from and the field type is already proven on two shapes.
-   `BlogPosting` JSON-LD belongs here, and so does `sitemap.xml` — **which nothing links any
-   more**: the footer points at the human `/sitemap/`. The XML file's every URL is absolute off
-   `site:` — settled on www, so it is unblocked work rather than a blocked decision.
-9. **`redirects.ts` is the last data module holding content**, and it is deliberate: the
-   redirect table becomes editor-managed in `/new-seo-setup`. It is **162 rules now**, up from
-    68, and two thirds of that growth is cutover work rather than legacy URL shapes.
-    `portableText.ts` is the only other non-Sanity module and it is an authoring shim rather
-    than content — **`blog.ts` is now the only file in `src/` that CALLS `pt()` at all**, for
-    the one fact-check sentence, so the shim is one caller away from being types only. Its
-    TYPES are still load-bearing everywhere.
-
-No comp exists for **privacy / disclaimer**, **sitemap** or **404**. All three are built on the
-light template's shell anyway — see below.
-
-## Sanity readiness
-
-Written before the integration started, and kept because most of it is still the record of how
-the checks were made rather than a to-do list. **What was a blocker is closed; what was a green
-light was re-checked at upload.**
-
-**The four green lights, all re-checkable:**
-
-- **35,179 `_key`s across both collections: zero duplicates, zero missing.** This is the one that
-  would have bitten during upload, because Sanity requires `_key` uniqueness WITHIN each array
-  and a collision surfaces as a silently dropped array item rather than an error. **It was
-  re-checked on the PAYLOAD, not just the source, and that is the version to copy** — 17,716
-  keys in the blog's NDJSON and 17,239 in the practice areas', zero duplicates in any array.
-  The source check would not have caught `pt()`'s 28 colliding keys, because those are
-  generated at build time and exist in no file.
-- **290 slugs, zero collisions** between the 186 blog posts and the 104 practice areas. They
-  share `[slug].astro` at the root, so a collision is a page that cannot be served.
-- **80 async getters, and the data layer is clean**: no hex codes, no SVG markup, no style
-  strings. The convention held.
-- **No component owns content** — but read the note at the top of this file before trusting
-  that line. All 127 were checked for a content ARRAY in their FRONTMATTER, and three bands
-  were owning bare strings in MARKUP and a prop DEFAULT, which that sweep could not see. Those
-  three are fields now; the sweep has still never been re-run in a shape that would find a
-  fourth.
-
-**The blockers, in the order they bite:**
-
-1. ~~**There is no Sanity client.**~~ **CLOSED in Phase 0.** `@sanity/astro`'s `sanity:client`
-   is imported by twenty data modules now, and by `src/sanity/lib/image.ts`. The client is configured entirely in `astro.config.mjs` —
-   `IntegrationOptions` is `ClientConfig` plus the studio keys, so there is no wrapper module
-   and one client serves everything. `perspective: "published"` so a draft cannot go live on
-   the next deploy; `apiVersion` pinned because GROQ's behaviour is versioned by date.
-2. **TypeScript is installed now, and the repo does NOT typecheck.** `typescript` and
-   `@astrojs/check` are devDependencies and `npm run check:types` runs `astro check`. First run:
-   **9 errors, 97 hints across 205 files.** Nothing had ever verified a type here, so this is
-   accumulated, not new.
-
-   **PIN TYPESCRIPT TO 6.x. TypeScript 7 does not work.** The 7.0 native compiler does not expose
-   the programmatic API `astro check` relies on, and the CLI fails outright with a message
-   pointing at withastro/roadmap#1321. `npm i -D typescript` installs 7 and breaks the check.
-
-   **`check:types` is deliberately NOT in `npm run check`.** That chain is `&&`-ed and currently
-   green; wiring a 9-error check into it turns the gate red for everything. Wire it in once the
-   nine are closed, and not before.
-
-   **Nine became SEVEN: the one genuinely broken reference is fixed.** `data/home.ts` annotated
-   `getRecentResults()` as returning `CaseResult[]` without importing the type — it lives in
-   `caseResults.ts` — while `home/RecentResults.astro` imported `CaseResult` FROM `data/home`,
-   which never exported it. Both sides now take it from `caseResults`, which is where the four
-   other callers and `coCounsel.ts` already took it and what `home.ts`'s own comment said all
-   along. **Type-only: all 332 pages hash identical before and after.** It had been broken the
-   whole time and the build never noticed, because Vite strips types without checking them —
-   which is the argument for item 2 in one line.
-
-   **`sanity.config.ts` is closed too — 7 down to 5.** `projectId` and `dataset` were
-   `string | undefined` going into `string` fields. They are read through a `required()` helper
-   that throws with the variable's name and where to set it, which narrows both.
-
-   **THAT DOES NOT IMPROVE `npm run build`, AND THE FIRST VERSION OF THE COMMENT CLAIMED IT DID.**
-   Building with `.env` moved aside still fails with "Configuration must contain `projectId`"
-   from `@sanity/client`'s `initConfig` — because the client the prerender constructs is
-   configured by the `sanity()` integration in `astro.config.mjs`, reading the same variables
-   through Vite's `loadEnv`, and it gets there first. `sanity.config.ts` covers the two entry
-   points that read it directly: the browser Studio bundle and the Sanity CLI. **Guarding
-   `astro.config.mjs` is the other half and is not done.**
-
-   Worth knowing either way: **the build already died without those variables**, so this changed
-   the message, never whether it fails. Only `dist/admin/index.html` changed, and only its studio
-   bundle hash — the other 331 pages are byte-identical.
-
-   **ZERO ERRORS NOW, AND `check:types` IS IN `npm run check`.** All nine are closed and the
-   gate is wired, so this stops being a list somebody has to remember. It runs FIRST in the
-   chain — it is the only one that does not read `dist/`, so it gives a real signal without a
-   build. **Tested in both directions**: a deliberate `const x: number = "s"` turns
-   `npm run check` red, removing it turns it green.
-
-   **It runs at `--minimumSeverity error`.** Warnings and hints are not the gate, and
-   `src/sanity/eliteTheme.js` — a vendored minified file whose single 56KB line is one line —
-   otherwise buries the output in ~700KB of noise. A gate nobody can read is a gate nobody runs.
-
-   That same 56KB line is why **`awk 'length < 400'` on `astro check` output silently drops real
-   errors**: a filtered count read 5 where the truth was 7. Count with `grep -c ' - error '` on
-   the raw text.
-
-   **The last two fixes, both type-only, both hash-verified against all 332 pages:**
-   - `lib/headings.ts`'s `BlockLike` gained a REQUIRED `_type`, which is what actually cleared
-     the three `ProseH*` errors — TypeScript's weak type detection rejects an all-optional target
-     that shares no property name with its source, and `ArbitraryTypedObject`'s `[key: string]:
-     any` index signature does not count as a shared name. `text` also became `unknown`, which is
-     a separate choice: it is true (inline objects carry no `text`), not required.
-   - `src/sanity/eliteTheme.d.ts` now declares both colour schemes present, which is a claim
-     about the GENERATED module rather than about `StudioTheme` in general — checked against the
-     built file. That is where the fix belongs; a non-null assertion at the use site would assert
-     the same thing with none of the explanation.
-3. ~~**No TypeGen path.**~~ **CLOSED in Phase 0**, but not the way the note assumed.
-   `sanity.cli.ts` exists and `npm run typegen` is `sanity schema extract && sanity typegen
-   generate`, writing `src/sanity/{schema.json,sanity.types.ts}` — both committed.
-
-   **`typegen.enabled` IS DELIBERATELY OMITTED.** It regenerates during `sanity dev` /
-   `sanity build`, and this Studio is EMBEDDED in Astro — neither command is ever run here, so
-   the hook would never fire and setting it true would be a claim that does not hold. Run
-   `npm run typegen` after any schema or query change; `check:types` is the gate that catches
-   a stale run.
-4. ~~**The asset surface is 112 distinct images** plus 203 in the content collections.~~
-   **DONE.** 277 image assets are in Sanity and `src/content`'s 39M has left the tree. The
-   split held: large decorative art (page-header photographs, band backgrounds, the two logos)
-   is still a local import through Astro's build pipeline; card, body and interactive images
-   are Sanity assets on its CDN. `Picture.astro` branches, so each move was a data change.
-   Eleven practice-area photographs and `consult.jpg` are now unreferenced by `src/` but stay
-   on disk — `npm run backup` is `--no-assets`, so git is the only copy of the originals.
-
-   The Sanity branch does NOT go through Astro's `<Image>`, on purpose: ~290 remote fetches
-   would add minutes to every build, and Astro re-crops from the original, throwing away the
-   hotspot an editor set. Dimensions are read out of the asset reference rather than fetched —
-   290 images is 290 round trips — and are omitted rather than guessed when the ref is not in
-   Sanity's documented shape, because a wrong width/height bakes the layout shift into the
-   markup.
-5. **`getStaticPaths` does not see module scope.** Astro hoists it into its own module context,
-   so a module-level `const QUERY = defineQuery(...)` throws `ReferenceError` at request time.
-   Define queries used inside it there, or import them. Both `[slug].astro` files are affected.
-6. **The production URL is still not a Sanity CORS origin**, so the deployed `/admin` loads and
-   fails sign-in. Unchanged, and still not a blocker for building. Phase 5.
-
-**`tsconfig.json` NEEDS NO `types` ENTRY, and an earlier version of this section was wrong to
-say it did.** The Sanity guide's Astro page says to add `"types": ["@sanity/astro/module"]` —
-that instruction is for a project without an ambient declaration. This one has had it all along:
-`src/env.d.ts` carries `/// <reference types="@sanity/astro/module" />` beside the `astro/client`
-one. Verified rather than reasoned — a throwaway page importing `sanityClient` from
-`sanity:client` and reading `.config().projectId` typechecked clean and added zero errors.
-
-Adding the entry anyway would be worse than redundant: a `types` array REPLACES TypeScript's
-automatic `@types` inclusion, so it trades a working setup for a narrower one. Leave it out.
-
-**Eight stale comments were corrected**, all numeric claims the imports had overtaken: the blog
-counts (167 → 186, and 107 → 125 without featured art), the fact-check sentence's audience
-(109/181 → 104/186), the FAQ estimate ("65 of the legacy site's 98" → the counted 28 of 104),
-and cities (109 → 104). **Verified inert by hashing all 332 built pages before and after —
-byte-identical.**
-
-The tab-row comment needed more than a number. It claimed the row renders every category; it
-renders **22 of 23**. `auto-insurance-accident-claims` is unreachable because a post belongs to
-exactly one category — the first its record lists — and thirteen posts carry that one second,
-none first. Already an open question below; now recorded where the code is.
-
-**Duplication found and deliberately left alone:**
-
-- `ContactForm` / `CoCounselForm` share their label, `:focus` and honeypot rules verbatim — and
-  are headed for one `/api/consult` endpoint anyway.
-- `.spage__grid` / `.post__grid` / `.parea__grid` are identical, as are the three `__main` rules.
-  That is **three** callers against the documented four-caller threshold for extracting, so it
-  stays. Note the threshold is now one away.
-- Repeated utilities: absolute-fill `object-fit: cover` in four files, visually-hidden in two,
-  the awards rail in three.
-
-## Open
-
-**Decide**
-
-- **Four built practice-area pages are in no directory group** — Defective Helmets, Autonomous
-  Vehicle Accidents, Drunk Driving Accidents, Taxi Accidents, all Denver. The directory is synced
-  to the firm's live hub and the hub does not list them. Not orphans (7–19 inbound links each
-  from sibling sidebars) and `/sitemap/` lists them, but `/practice-areas` does not. Add them, or
-  confirm hub-only. `assertDirectoryJoin()` cannot decide this for you — see its note.
-- **The favicon's green is not the site's.** `#314641` against `--dh-forest-100` `#2c3b31`.
-  Designer call.
-- **`MoreOnClaims`' play glyph promises a video it cannot play.** Same shape the attorney card
-  had before it was split: the card is already a link to an article, so the glyph needs its own
-  control or it should go.
-- **`faq-video-cover.jpg` is 607×609 — square — in a 16/10 box.** `object-fit: cover` with
-  `object-position: center top` crops roughly the bottom 40%. Not a layout bug; a 16:10 crop
-  would use the frame better.
-- **`MobileNav` has no current-page highlight**, where the desktop nav now does.
-- ~~**Three live Denver pages were excluded as duplicates** and want a ruling.~~ **RULED —
-  all three redirect.** `personal-injury-attorney` → home and the other two →
-  `denver-car-accident-lawyer`, in both URL forms each. See the audit section at the top.
-- **The `AREA_TO_BLOG_CATEGORY` map in `blog.ts` is inferred, not authored.** It decides which
-  posts a practice area's sidebar shows. Keyed on the area slug rather than its topic, because
-  topic is five buckets and would put car-accident posts on the motorcycle page — which is what
-  the live site does. In Sanity this wants to be a `relatedPosts` reference array on the
-  `practiceArea` document, and **Phase 4f proved the pattern on three cross-references at once**,
-  so the shape is settled. What is left is a content decision for the firm — which five articles
-  belong on each of 104 pages — not a migration step.
-- **Auto Insurance & Accident Claims has no tab** — 13 posts carry it second, none first.
-- ~~**`site:` in `astro.config.mjs`** — www vs apex.~~ **SETTLED: www**, and every comment
-  that called it open has been corrected — there were TEN, across `astro.config.mjs`,
-  `check-links.py` (twice), `Footer.astro`, `sitePages.ts`, `routePaths.ts`, `sitemap.astro`,
-  `AGENTS.md`, `README.md` and this file. The reason is cutover risk, not taste: www is the
-  shape the legacy site serves and therefore the shape Google holds for ~300 indexed URLs, so
-  keeping it changes no canonical that is already ranking. **Vercel must serve www as the
-  PRIMARY domain**, apex redirecting to it; reversing that without moving `site:` points every
-  canonical tag at a redirect.
-- **Two crash types on the heavy detail page** — rear-end and head-on.
-- **The three Denver crash figures are unsourced**, and `[year]` renders live in all three labels.
-- **`src/assets` holds twelve images nothing references.** Eleven practice-area photographs and
-  `consult.jpg`, all now Sanity assets. Kept because git is the only copy of the originals
-  outside Sanity; delete them only alongside a decision about asset backup.
-- ~~**Two former staff have live bio pages the roster no longer carries.**~~ **RULED — all four
-  URLs redirect to `/meet-our-attorneys/`.** See the audit section at the top.
-- **The two article templates' twelve labels are code now**, and one of them is marketing copy:
-  the practice-area eyebrow, "Tough lawyers for tough cases", on all 104 pages, already changed
-  four times by request. Changing it a fifth time is a deploy. If that happens, it belongs on
-  `sharedSections` beside the awards bar's label — the constant's own comment says so.
-- **Three Phase 4 migrations have broken the type gate**, each when a later phase removed a
-  getter they read: `migrate-home-4a.ts` twice and `migrate-car-accidents-4f.ts` once, the last
-  cascading one root error into 32. They are spent and cannot run — their documents no longer
-  exist — but `check:types` gates the whole repo. Decide whether they are documentation (delete
-  them; git and the per-slice commits are the real record) or code, rather than patching a
-  fourth time.
-- ~~**`check:links` validates a `tel:` href's FORMAT but not its VALUE.**~~ **CLOSED in Phase
-  4** — `scripts/check-phone.py`, and Phase 4 is what made it necessary rather than merely
-  worth doing: two page documents now store the firm's number as CONTENT. See the note above.
-
-**Waiting on the firm** — content, not code. `README.md` has the full table. Unchanged: the seven
-attorney emails, the office address and hours, the `$70M+ / 20 Years` stat claims — **which are
-now one record rather than two**, at Shared Sections → Firm figures.
-
-**Settled this session, so stop asking**: both phone numbers (call `(303) 756-3812`, text
-`(720) 730-7997` — the comps were wrong about both), and the privacy policy, which is now built
-from the live page's own text. The privacy policy is **thin** and wants a legal review before
-launch, not a content answer: no CCPA/GDPR section, no cookie disclosure, no retention period,
-no route for a data request, and no mention of the third-party tags or the cookie-setting map
-embed. That is README's row, not a blocker for building.
-
-**The phone number is SETTLED and no longer waiting on anyone**: `(303) 756-3812` site-wide,
-including the imported body copy, which carried six different firm numbers. See above. What is
-still open is only the display vs CallRail tracking split, if dynamic insertion returns.
-
-**Waiting on the designer**
-
-- **No comp exists for the light practice-area template.** It was specified in conversation as
-  "like the blog post, with a different sidebar and a different bottom band" and built that way.
-  Worth a look before 104 pages ship on it.
-- **Confirm the second Car Accidents design is final.** Less urgent than it was — that kit is now
-  explicitly the special-case template rather than the model for everything.
-- **Two comps arrived with that redesign and are not built**: `DH - Attorney Bio v1.html` — and
-  **the built bio has no diff script, so nothing is checking it** — and `DH - Blog - What to do
-  after a car accident.html`.
-- **The Car Accidents comp moves almost every accent from gold to forest.** Built as drawn, that
-  page only. If it is site-wide it touches `Eyebrow`'s tones, `FaqItem`, `TestimonialRail`,
-  `AwardsBar` and the token layer.
-- **The built pages depart from their comps in 71 recorded ways**, every one asserted so it fails
-  loudly if reverted. Re-run rather than trusting these:
-
-  | Page | Departures |
-  |---|---|
-  | Blog post | 28 |
-  | Blog index | 19 |
-  | Car Accidents | 19 |
-  | About | 5 |
-  | Practice Areas | 0 |
-
-- **No comp specifies a mobile layout for anything** except one Car Accidents hero block.
-- `DH - Homepage approved.html` and `DH - Homepage approved v2.html` are the same byte size with
-  different checksums. Nobody has said which is final.
-
-**Blockers for launch, not for building**
-
-- ~~`/api/consult` does not exist.~~ **BUILT — see the top of this file.** Two form components
-  from **six** call sites reach **327 of the 329 built pages** (counted from the build, not
-  estimated; the earlier 326 was one short). What remains is provisioning Resend and setting
-  four variables — configuration, not code.
-- The production URL is not yet a Sanity CORS origin, so the deployed `/admin` loads but fails
-  sign-in. `http://localhost:4321` is registered — don't move dev off 4321.
+**A green build can lie — delete `dist/` first.** Astro does not clear it, so a page that has
+stopped being generated keeps serving from the last build that made it.
 
 ## Two bugs worth not re-deriving
 
