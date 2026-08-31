@@ -209,6 +209,25 @@ had. That is the opposite of where anyone would look.
   measured for inlined CSS, dropped font preloads, dropped Newsreader and Caveat (197 KiB), and a
   smaller hero candidate. **Every one landed inside the noise band.** Only Wistia moved the number.
 
+### THE POSTER IS INSET BY A PIXEL, AND THAT IS NOT A ROUNDING TWEAK
+
+`.vlb__frame` is `border-radius` + `overflow: hidden`, and that rounded clip
+ANTIALIASES THE IFRAME'S EDGE AGAINST WHATEVER IS PAINTED BEHIND IT. With the frame's own
+`--dh-forest-600` behind, that blend is invisible. With a light poster behind it, it read as a
+one-pixel light halo around the player for the whole video.
+
+**It only showed on SOME videos, which is what made it look like a content problem.** The
+homepage hero's trigger is a text CTA with no thumbnail, so it had no poster and no halo; the
+`.intro` trigger renders a still, so it did. Same dialog, same video, different-looking frame.
+
+Measured at the outermost pixel column, DPR 2: `(213,178,143)` with a poster against
+`(21,30,25)` without. The poster is its own `.vlb__poster` layer at `inset: 1px` now, so that
+pixel always belongs to `background-color`. Asserted in the browser suite.
+
+**Sample pixels before theorising about a border.** Geometry said the iframe covered the frame
+exactly — inset 0 on all four sides — and it does. The halo is compositing, not layout, and no
+amount of reading `getBoundingClientRect()` would have found it.
+
 ### There is no arming, no held click and no deadline any more
 
 The facade needed all three: hover and focus armed well before a click, but a TAP did not, so a

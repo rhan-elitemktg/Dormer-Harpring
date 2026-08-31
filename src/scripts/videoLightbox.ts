@@ -28,6 +28,7 @@ const TRIGGER = "[data-video-lightbox]";
 
 let dialog: HTMLDialogElement | null = null;
 let frame: HTMLDivElement | null = null;
+let poster: HTMLDivElement | null = null;
 
 /*
  * Built on first open rather than rendered into the page.
@@ -63,6 +64,22 @@ function ensureDialog(): HTMLDialogElement {
   const box = document.createElement("div");
   box.className = "vlb__frame";
 
+  /*
+   * The poster is its own layer, and it is INSET BY A PIXEL. See `.vlb__poster`
+   * in global.css: the frame's rounded `overflow: hidden` antialiases the
+   * iframe's edge against whatever is painted behind it, so a light poster
+   * bled a one-pixel halo all the way round the player. Insetting it leaves
+   * that outermost pixel as the frame's own dark surface, which is what the
+   * triggers with no poster were already doing invisibly.
+   *
+   * A separate element rather than a background on the frame because the
+   * iframe is added and removed around it — `replaceChildren` on the frame
+   * would take the poster with it.
+   */
+  poster = document.createElement("div");
+  poster.className = "vlb__poster";
+
+  box.append(poster);
   el.append(close, box);
   document.body.appendChild(el);
 
@@ -72,12 +89,11 @@ function ensureDialog(): HTMLDialogElement {
   el.addEventListener("click", (event) => {
     if (event.target === el) el.close();
   });
-  // Covers Escape as well as the button, and it is the only place the iframe is
-  // torn down: leaving it in the DOM would keep the audio playing behind a
-  // closed dialog.
+  // Covers Escape as well as the button. The iframe is removed rather than the
+  // frame emptied — the poster layer is a permanent child and must survive.
   el.addEventListener("close", () => {
-    box.replaceChildren();
-    box.style.backgroundImage = "";
+    box.querySelector("iframe")?.remove();
+    if (poster) poster.style.backgroundImage = "";
   });
 
   dialog = el;
@@ -85,20 +101,22 @@ function ensureDialog(): HTMLDialogElement {
   return el;
 }
 
-function open(id: string, poster: string | null) {
+function open(id: string, posterUrl: string | null) {
   const el = ensureDialog();
   if (!frame) return;
 
-  // The trigger's own poster, painted behind the frame so the reader sees the
-  // still they just clicked rather than a black box while the player boots.
-  frame.style.backgroundImage = poster ? `url("${poster}")` : "";
+  // The trigger's own still, painted behind the player so the reader sees the
+  // frame they just clicked rather than a flat surface while it boots.
+  if (poster) poster.style.backgroundImage = posterUrl ? `url("${posterUrl}")` : "";
 
   const iframe = document.createElement("iframe");
   iframe.src = videoEmbedUrl({ provider: "wistia", id }, { autoplay: true });
   iframe.allow = "autoplay; fullscreen";
   iframe.allowFullscreen = true;
   iframe.title = "Video player";
-  frame.replaceChildren(iframe);
+  // Appended, not replacing: the poster layer sits behind it and stays.
+  frame.querySelector("iframe")?.remove();
+  frame.append(iframe);
 
   el.showModal();
 }

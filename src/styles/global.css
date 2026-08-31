@@ -1274,14 +1274,31 @@ body.drawer-open {
   position: relative;
   aspect-ratio: 16 / 9;
   width: 100%;
-  /* The trigger's own poster, set inline by the script, shows here while the
-     player boots — a black rectangle reads as a failure. */
   background-color: var(--dh-forest-600);
-  background-size: cover;
-  background-position: center;
   border-radius: var(--radius-4);
   overflow: hidden;
   box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+}
+
+/* The trigger's own still, painted behind the player while it boots — a flat
+   surface reads as a failure to load.
+
+   INSET BY ONE PIXEL, AND THAT IS THE WHOLE POINT OF THE ELEMENT. The rounded
+   `overflow: hidden` above antialiases the iframe's edge against whatever is
+   painted behind it, so a poster sitting flush bled a one-pixel light halo
+   around the player for the entire video. Measured: the outermost pixel column
+   read (213,178,143) with a poster and (21,30,25) — the frame's own surface —
+   without one, which is why only the triggers that render a thumbnail showed
+   it. The inset hands that pixel back to `background-color`.
+
+   `calc()` on the radius so the inset corner follows the frame's curve rather
+   than cutting across it. */
+.vlb__poster {
+  position: absolute;
+  inset: 1px;
+  border-radius: calc(var(--radius-4) - 1px);
+  background-size: cover;
+  background-position: center;
 }
 
 .vlb__frame iframe {
