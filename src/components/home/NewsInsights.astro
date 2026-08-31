@@ -58,7 +58,19 @@ const { section, news, insights } = Astro.props;
       </div>
 
       <div class="feed__foot">
-        <a class="btn feed__more arrow-link" href={ROUTES.blog}>
+        {
+          /* LEAVES THIS SITE, unlike the Insights button below it. The firm's
+             accident-news coverage lives on a separate WordPress install, so
+             this is an absolute URL from a field rather than a ROUTES entry,
+             and it carries the same `target`/`rel` pair and ↗ glyph the main
+             menu uses for the same destination. */
+        }
+        <a
+          class="btn feed__more arrow-link"
+          href={section.news.ctaHref}
+          target="_blank"
+          rel="noopener"
+        >
           {section.news.ctaLabel} <span class="arrow" aria-hidden="true">&rarr;</span>
         </a>
       </div>

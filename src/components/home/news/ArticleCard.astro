@@ -1,6 +1,18 @@
 ---
-// One blog teaser: a tinted icon plate, category, read time, title.
-import InsightIcon from "../../icons/InsightIcon.astro";
+// One blog teaser: the post's own card art, its category, its title.
+//
+// IT WAS A TINTED ICON PLATE, and the icon was a hand-typed `iconKey` matched
+// against a glyph set, with the tint chosen in CSS off the same key. That is
+// gone with the fields behind it — these cards reference real posts now, so the
+// art is the post's, chosen once on the post rather than a fifth thing to fill
+// in per card. `components/icons/InsightIcon.astro` had no other caller and was
+// deleted with it; the four `[data-icon]` tint rules went the same way.
+//
+// `PostThumb` rather than a `<Picture>` of its own: 125 of the 186 posts have
+// no card image, so the placeholder is the COMMON case here, and it is the same
+// branded placeholder every other post card on the site falls back to. Two
+// copies of that would drift the first time one was tweaked.
+import PostThumb from "../../blog/PostThumb.astro";
 import type { InsightTeaser } from "../../../data/news";
 
 interface Props {
@@ -14,12 +26,17 @@ const { post } = Astro.props;
   /* <div>, not <span>: a span is phrasing content and cannot legally contain
      the <h3>. An <a> may wrap flow content, so the divs are fine inside it. */
 }
-<a class="artcard" href={post.href} data-icon={post.iconKey}>
+<a class="artcard" href={post.href}>
   <div class="artcard__plate">
-    <InsightIcon name={post.iconKey} size={52} />
+    <PostThumb
+      image={post.image}
+      widths={[400, 600, 800]}
+      sizes="(max-width: 760px) 100vw, (max-width: 1180px) 50vw, 25vw"
+      class="artcard__img"
+    />
   </div>
   <div class="artcard__body">
-    <span class="artcard__meta">{post.category} &middot; {post.readTime}</span>
+    <span class="artcard__meta">{post.category}</span>
     <h3 class="artcard__title">{post.title}</h3>
     <span class="artcard__more arrow-link">
       Read article <span class="arrow" aria-hidden="true">&rarr;</span>
@@ -44,36 +61,22 @@ const { post } = Astro.props;
     box-shadow: 0 20px 48px rgba(60, 52, 32, 0.14);
   }
 
+  /* The 16/11 frame is kept from the icon plate it replaces, so the card's
+     proportions did not move when the art did. `overflow: hidden` is on
+     `.artcard`, which already has the radius. */
   .artcard__plate {
-    display: flex;
-    align-items: center;
-    justify-content: center;
     aspect-ratio: 16 / 11;
-    background: var(--plate-bg, var(--dh-cream-200));
-    color: var(--plate-ink, var(--dh-gold-deep));
+    background: var(--dh-cream-200);
   }
 
-  /* Tint and ink come from the category via a data attribute, not from a hex on
-     the record. A closed set, so CSS can enumerate it — and an editor picking a
-     category should not also be picking two colours. */
-  .artcard[data-icon="value"] {
-    --plate-bg: #f4ecd8;
-    --plate-ink: var(--dh-gold-deep);
-  }
-
-  .artcard[data-icon="clock"] {
-    --plate-bg: #e5ede4;
-    --plate-ink: #2e4034;
-  }
-
-  .artcard[data-icon="shield"] {
-    --plate-bg: #f7e1d9;
-    --plate-ink: var(--accent);
-  }
-
-  .artcard[data-icon="steps"] {
-    --plate-bg: #e7e5d6;
-    --plate-ink: var(--dh-gold-muted);
+  /* Bound by an element in THIS template, not by the class handed to PostThumb
+     — a passed-in class lands on the child's markup and never carries this
+     file's cid. See README's note; `check:styles` exists for exactly this. */
+  .artcard__plate :global(.artcard__img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
   .artcard__body {

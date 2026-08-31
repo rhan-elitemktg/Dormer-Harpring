@@ -115,13 +115,17 @@ KNOWN_DEAD: dict[str, str] = {}
 
 # page path -> how many href="#" that page is still allowed to carry
 KNOWN_PLACEHOLDER: dict[str, int] = {
-    # 4 press mentions + 4 insight teasers on homePage, read through data/news.ts.
-    # Both carry a TODO(content) marker in the schema — the press articles are
-    # real and findable, the teasers point at articles nobody has written. The
-    # marker is named WITHOUT its colon here on purpose: the pre-launch grep
-    # matches the colon form, and a comment that only mentions a marker would be
-    # counted as one.
-    "/": 8,
+    # THE HOMEPAGE'S EIGHT ARE GONE, and neither was closed by filling in a URL.
+    #
+    # The four press mentions now carry the real articles they always referred
+    # to. The four insight teasers stopped being a place a URL could be missing:
+    # they are REFERENCES to blog posts, so the card's link is derived from the
+    # post it points at and there is no href field to leave at "#". The shape
+    # was the bug — five hand-typed fields per card, of which the link is the
+    # one you finish later.
+    #
+    # The entry is deleted rather than set to 0 so that a placeholder appearing
+    # on `/` again fails as an UNDECLARED one, which is louder.
     "/denver-car-accident-lawyer": 1,  # carAccidents.ts ctaHref: the unbuilt checklist article
 }
 

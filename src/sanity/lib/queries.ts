@@ -637,9 +637,26 @@ export const PRESS_MENTIONS_QUERY = defineQuery(
 );
 
 /** Insight teaser cards. */
+/*
+ * The four cards on the feed's second tab, DEREFERENCED through to the posts.
+ *
+ * `teasers[]->` follows each reference, so everything the card shows is the
+ * post's own: its title, its card image, its category. Nothing about the
+ * article is stored twice on the homepage, which is what made the old shape
+ * ship four cards pointing at "#".
+ *
+ * `_key` is the slug rather than the array member's key: after the arrow this
+ * is the POST, and its slug is the stable identity — the same call POST_CARD
+ * makes. `href` is built by the getter through `blogPath()`, never projected;
+ * lib/routePaths owns URLs on this site.
+ */
 export const INSIGHT_TEASERS_QUERY = defineQuery(
-  `*[_type == "homePage" && _id == "homePage"][0].feedSection.teasers[]{
-  _key, category, iconKey, readTime, title, href
+  `*[_type == "homePage" && _id == "homePage"][0].feedSection.teasers[]->{
+  "_key": slug.current,
+  "slug": slug.current,
+  title,
+  image,
+  "category": categories[0]->title
 }`
 );
 
@@ -826,7 +843,7 @@ export const HOME_FAQ_SECTION_QUERY = defineQuery(
 export const HOME_FEED_SECTION_QUERY = defineQuery(
   `*[_type == "homePage" && _id == "homePage"][0].feedSection{
   tabs{ news, insights },
-  news{ eyebrow, title, lede, ctaLabel },
+  news{ eyebrow, title, lede, ctaLabel, ctaHref },
   insights{ eyebrow, title, lede, ctaLabel }
 }`
 );

@@ -8,6 +8,47 @@ either here, and don't record anything `git log` already knows.
 
 _Last updated: 2026-08-28._
 
+## NINE `href="#"` ARE ONE, AND THE SHAPE WAS THE BUG
+
+**Only the Car Accidents checklist teaser is left.** `KNOWN_PLACEHOLDER` no longer has an entry
+for `/` — deleted rather than set to 0, so a placeholder appearing there again fails as an
+UNDECLARED one, which is louder.
+
+**The four press mentions carry their real articles now** — FOX31, Denver7, the Denver Gazette,
+The Mountain Mail. They stay hand-typed on purpose: a press mention lives on somebody else's
+site, so there is nothing here to reference.
+
+**THE FOUR INSIGHT TEASERS ARE REFERENCES TO BLOG POSTS, and that is why their placeholders
+cannot come back.** Each card was five hand-written fields — title, category, icon key, read
+time and a URL — and all four shipped with `href: "#"`. That is what the shape produces: the
+card is easy to write and the link is the part you finish later. A reference has no href field
+to leave empty; the title, the art, the category and the link all come off the post, so a
+retitled article updates the homepage on its own.
+
+- `of: [{type: "reference", to: [{type: "blogPost"}]}]`, **filtered `defined(body)`** — a post
+  with no body is not built, so referencing one would put a 404 on the homepage.
+- **`.length(4)`, not `.min()`/`.max()`**, because `.feed__grid` is `repeat(4, …)`: three picks
+  would render as three cards and a hole rather than re-flowing.
+- The card draws **`PostThumb`**, the same component every other post card uses. That matters
+  more than it looks: **125 of the 186 posts have no card image**, so the branded placeholder is
+  the COMMON case, and a second copy of it would drift the first time one was tweaked. **The
+  four seeded posts were chosen partly because they HAVE art** — the topically-obvious picks
+  did not, and four identical placeholders would have looked worse than the icons did.
+- `iconKey`, `readTime`, `category` and `href` are gone as fields.
+  `components/icons/InsightIcon.astro` had no other caller and is **deleted**, along with the
+  four `[data-icon]` tint rules that coloured the plate off the same key.
+
+**The seeded four are a starting point, not a decision** — pain and suffering, seeing a doctor,
+accepting a settlement, and how long a claim takes. They track the four themes the hand-written
+cards had. Changing them is four clicks in the Studio, which is the point.
+
+**The In the News button leaves this site.** It pointed at `ROUTES.blog`, the same place as the
+Insights button beside it; the two tabs are different things — Insights is the firm's own
+writing, In the News is coverage OF the firm, which lives on a separate WordPress install at
+`accidentnews.denvertrial.com`. It is a `ctaHref` field rather than the nav's copy of that URL:
+reaching into `navigation` would couple this band to the shape of the menu, so an editor
+reordering the nav would break the homepage.
+
 ## THE FIRST DEPLOY FAILED, AND `bulkRedirectsPath` IS OFF UNTIL A PREVIEW PROVES IT
 
 **The build passed and the DEPLOY failed** — 329 pages, `sitemap.xml`, `robots.txt` and the
