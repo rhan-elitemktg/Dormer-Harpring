@@ -1256,6 +1256,13 @@ export type AboutPage = {
   seo?: Seo;
 };
 
+export type BlogPostReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "blogPost";
+};
+
 export type HomePage = {
   _id: string;
   _type: "homePage";
@@ -1394,6 +1401,7 @@ export type HomePage = {
       title: string;
       lede: string;
       ctaLabel: string;
+      ctaHref: string;
     };
     insights: {
       eyebrow: string;
@@ -1415,14 +1423,11 @@ export type HomePage = {
       href: string;
       _key: string;
     }>;
-    teasers: Array<{
-      title: string;
-      category: string;
-      iconKey: string;
-      readTime: string;
-      href: string;
-      _key: string;
-    }>;
+    teasers: Array<
+      {
+        _key: string;
+      } & BlogPostReference
+    >;
   };
   communitySection: {
     eyebrow: string;
@@ -1653,6 +1658,7 @@ export type AllSanitySchemaTypes =
   | AnswerText
   | TeamPage
   | AboutPage
+  | BlogPostReference
   | HomePage
   | TeamMember
   | NavLink
@@ -2303,14 +2309,20 @@ export type PRESS_MENTIONS_QUERY_RESULT = Array<{
 
 // Source: src/sanity/lib/queries.ts
 // Variable: INSIGHT_TEASERS_QUERY
-// Query: *[_type == "homePage" && _id == "homePage"][0].feedSection.teasers[]{  _key, category, iconKey, readTime, title, href}
+// Query: *[_type == "homePage" && _id == "homePage"][0].feedSection.teasers[]->{  "_key": slug.current,  "slug": slug.current,  title,  image,  "category": categories[0]->title}
 export type INSIGHT_TEASERS_QUERY_RESULT = Array<{
   _key: string;
-  category: string;
-  iconKey: string;
-  readTime: string;
+  slug: string;
   title: string;
-  href: string;
+  image: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: "image";
+  } | null;
+  category: string | null;
 }> | null;
 
 // Source: src/sanity/lib/queries.ts
@@ -2498,7 +2510,7 @@ export type HOME_FAQ_SECTION_QUERY_RESULT = {
 
 // Source: src/sanity/lib/queries.ts
 // Variable: HOME_FEED_SECTION_QUERY
-// Query: *[_type == "homePage" && _id == "homePage"][0].feedSection{  tabs{ news, insights },  news{ eyebrow, title, lede, ctaLabel },  insights{ eyebrow, title, lede, ctaLabel }}
+// Query: *[_type == "homePage" && _id == "homePage"][0].feedSection{  tabs{ news, insights },  news{ eyebrow, title, lede, ctaLabel, ctaHref },  insights{ eyebrow, title, lede, ctaLabel }}
 export type HOME_FEED_SECTION_QUERY_RESULT = {
   tabs: {
     news: string;
@@ -2509,6 +2521,7 @@ export type HOME_FEED_SECTION_QUERY_RESULT = {
     title: string;
     lede: string;
     ctaLabel: string;
+    ctaHref: string;
   };
   insights: {
     eyebrow: string;
@@ -3208,7 +3221,7 @@ declare module "@sanity/client" {
     '*[_type == "practiceArea"]{\n    "_key": slug.current,\n    "slug": slug.current,\n    title,\n    city,\n    body,\n    "faqs": coalesce(faqs[]{ _key, question, answer }, []),\n    publishedAt,\n    "updatedAt": modifiedAt,\n    "metaTitle": seo.metaTitle,\n    "metaDescription": seo.metaDescription\n  }': PRACTICE_AREA_ARTICLES_QUERY_RESULT;
     '*[_type == "blogPost"]{\n    "_key": slug.current,\n    "slug": slug.current,\n    body,\n    "factCheck": coalesce(factCheck, []),\n    "reviewerKey": reviewer->key.current\n  }': BLOG_ARTICLES_QUERY_RESULT;
     '*[_type == "homePage" && _id == "homePage"][0].feedSection.mentions[]{\n  _key, outlet, logo, date, headline, href\n}': PRESS_MENTIONS_QUERY_RESULT;
-    '*[_type == "homePage" && _id == "homePage"][0].feedSection.teasers[]{\n  _key, category, iconKey, readTime, title, href\n}': INSIGHT_TEASERS_QUERY_RESULT;
+    '*[_type == "homePage" && _id == "homePage"][0].feedSection.teasers[]->{\n  "_key": slug.current,\n  "slug": slug.current,\n  title,\n  image,\n  "category": categories[0]->title\n}': INSIGHT_TEASERS_QUERY_RESULT;
     '*[_type == "homePage" && _id == "homePage"][0].communitySection.photos[]{\n  _key, image, org, caption, span\n}': COMMUNITY_PHOTOS_QUERY_RESULT;
     '*[_type == "homePage" && _id == "homePage"][0].communitySection.charities[]{\n  _key, name, logo\n}': CHARITY_PARTNERS_QUERY_RESULT;
     '*[_type == "communityPage" && _id == "communityPage"][0].partners.items[]{\n  _key, org, logo, photo, body\n}': COMMUNITY_PARTNERS_QUERY_RESULT;
@@ -3217,7 +3230,7 @@ declare module "@sanity/client" {
     '*[_type == "homePage" && _id == "homePage"][0]{\n  hero{\n    eyebrow,\n    headline,\n    lede,\n    primaryCta{ label, href },\n    videoCta{ label, "video": { "provider": "wistia", "id": videoId } }\n  },\n  "resultsStrip": resultsStrip{ title, ctaLabel },\n  firmIntro{\n    title,\n    tagline,\n    body,\n    helpTitle,\n    "helpPoints": coalesce(helpPoints[]{ _key, lead, text }, []),\n    videoLabel,\n    "video": { "provider": "wistia", "id": videoId },\n    quote{ text, "name": attorney->name, "role": attorney->role },\n    aside{ title, text, ctaLabel }\n  },\n  promise{\n    eyebrow,\n    title,\n    "slides": coalesce(slides[]{ _key, label, body }, []),\n    ctaLabel\n  }\n}': HOME_COPY_QUERY_RESULT;
     '*[_type == "homePage" && _id == "homePage"][0]{\n  practiceSection{\n    eyebrow,\n    title,\n    lede,\n    tabsLabel,\n    catastrophicTitle,\n    ask{ text, cta }\n  }\n}': HOME_PRACTICE_SECTION_QUERY_RESULT;
     '*[_type == "homePage" && _id == "homePage"][0].faqSection{\n  eyebrow,\n  title,\n  lede,\n  ask{ title, body, ctaLabel, ctaHref, portrait, portraitAlt }\n}': HOME_FAQ_SECTION_QUERY_RESULT;
-    '*[_type == "homePage" && _id == "homePage"][0].feedSection{\n  tabs{ news, insights },\n  news{ eyebrow, title, lede, ctaLabel },\n  insights{ eyebrow, title, lede, ctaLabel }\n}': HOME_FEED_SECTION_QUERY_RESULT;
+    '*[_type == "homePage" && _id == "homePage"][0].feedSection{\n  tabs{ news, insights },\n  news{ eyebrow, title, lede, ctaLabel, ctaHref },\n  insights{ eyebrow, title, lede, ctaLabel }\n}': HOME_FEED_SECTION_QUERY_RESULT;
     '*[_type == "homePage" && _id == "homePage"][0].communitySection{\n  eyebrow, title, lede, ctaLabel\n}': HOME_COMMUNITY_SECTION_QUERY_RESULT;
     '*[_type == "aboutPage" && _id == "aboutPage"][0]{\n  ...header{ eyebrow, title, lede, ctaLabel, ctaNote },\n  whoWeAre{ eyebrow, title, body, ctaLabel, ctaHref },\n  quote{ text, attribution },\n  team{ eyebrow, title, ctaLabel, ctaHref },\n  reviews{ eyebrow, title },\n  oneShot{ eyebrow, title, body },\n  expect{\n    title,\n    "promises": coalesce(promises[]{ _key, title, body, iconKey }, []),\n    "milestones": coalesce(milestones[]{ _key, tag, title, body }, [])\n  }\n}': ABOUT_PAGE_QUERY_RESULT;
     '*[_type == "teamPage" && _id == "teamPage"][0]{\n  ...header{ eyebrow, title, lede },\n  partners{ eyebrow, title },\n  team{ eyebrow, title }\n}': TEAM_PAGE_QUERY_RESULT;

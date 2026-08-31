@@ -74,14 +74,23 @@ export const homePage = defineType({
             "entries draw two lines; one entry draws one.",
           validation: (rule) => rule.required().min(1),
         }),
-        defineField({ name: "lede", type: "text", rows: 3, validation: (rule) => rule.required() }),
+        defineField({
+          name: "lede",
+          type: "text",
+          rows: 3,
+          validation: (rule) => rule.required(),
+        }),
         defineField({
           name: "primaryCta",
           title: "Button",
           type: "object",
           options: { columns: 2 },
           fields: [
-            defineField({ name: "label", type: "string", validation: (rule) => rule.required() }),
+            defineField({
+              name: "label",
+              type: "string",
+              validation: (rule) => rule.required(),
+            }),
             defineField({
               name: "href",
               title: "Destination",
@@ -95,9 +104,14 @@ export const homePage = defineType({
           name: "videoCta",
           title: "Video link",
           type: "object",
-          description: "The play affordance beside the button. Opens the film in a popover.",
+          description:
+            "The play affordance beside the button. Opens the film in a popover.",
           fields: [
-            defineField({ name: "label", type: "string", validation: (rule) => rule.required() }),
+            defineField({
+              name: "label",
+              type: "string",
+              validation: (rule) => rule.required(),
+            }),
             /*
              * THE ONE VIDEO ON THIS PAGE THAT IS ALREADY REAL. Every other slot
              * on the site carries the same stand-in id, waiting for the firm to
@@ -128,20 +142,20 @@ export const homePage = defineType({
           validation: (rule) => rule.required(),
         }),
 
-      /*
-       * THE HERO'S FOUR FIGURES, AND THEY ARE NOT THE "BY THE NUMBERS" BAND.
-       *
-       * Two of the four repeat a figure that also appears in Site Settings → Firm
-       * Stats ("$70M+" and "20 Years"). That is the one duplication in this schema
-       * that is deliberate rather than an oversight: the two bands carry different
-       * labels for those two, and one of these four ("We Come / To you") has no
-       * counterpart there at all. They are two lists, not one list read twice —
-       * the same call the practice-area cards make against the directory.
-       *
-       * The cost is real and is named here so nobody has to rediscover it:
-       * changing "$70M+" means changing it in BOTH places. README tracks whether
-       * the claim itself is one the firm can stand behind.
-       */
+        /*
+         * THE HERO'S FOUR FIGURES, AND THEY ARE NOT THE "BY THE NUMBERS" BAND.
+         *
+         * Two of the four repeat a figure that also appears in Site Settings → Firm
+         * Stats ("$70M+" and "20 Years"). That is the one duplication in this schema
+         * that is deliberate rather than an oversight: the two bands carry different
+         * labels for those two, and one of these four ("We Come / To you") has no
+         * counterpart there at all. They are two lists, not one list read twice —
+         * the same call the practice-area cards make against the directory.
+         *
+         * The cost is real and is named here so nobody has to rediscover it:
+         * changing "$70M+" means changing it in BOTH places. README tracks whether
+         * the claim itself is one the firm can stand behind.
+         */
       ],
       validation: (rule) => rule.required(),
     }),
@@ -176,12 +190,17 @@ export const homePage = defineType({
         "The band under the hero. The three figures themselves are Case Results, in " +
         "Collections — they appear on the Results page too.",
       fields: [
-        defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
+        defineField({
+          name: "title",
+          type: "string",
+          validation: (rule) => rule.required(),
+        }),
         defineField({
           name: "ctaLabel",
           title: "Link to all results",
           type: "string",
-          description: "The destination is /results/ and is not editable — routing owns URLs.",
+          description:
+            "The destination is /results/ and is not editable — routing owns URLs.",
           validation: (rule) => rule.required(),
         }),
       ],
@@ -211,15 +230,21 @@ export const homePage = defineType({
         defineField({
           name: "body",
           type: "simpleText",
-          description: "Three paragraphs in the design. Bold and links render; nothing else does.",
+          description:
+            "Three paragraphs in the design. Bold and links render; nothing else does.",
           validation: (rule) => rule.required(),
         }),
-        defineField({ name: "helpTitle", type: "string", validation: (rule) => rule.required() }),
+        defineField({
+          name: "helpTitle",
+          type: "string",
+          validation: (rule) => rule.required(),
+        }),
         defineField({
           name: "helpPoints",
           title: "How we help",
           type: "array",
-          description: "Each row renders its lead in bold, then the detail after it.",
+          description:
+            "Each row renders its lead in bold, then the detail after it.",
           of: [
             {
               type: "object",
@@ -228,7 +253,8 @@ export const homePage = defineType({
                 defineField({
                   name: "lead",
                   type: "string",
-                  description: "The bold opening — a full sentence, with its full stop.",
+                  description:
+                    "The bold opening — a full sentence, with its full stop.",
                   validation: (rule) => rule.required(),
                 }),
                 defineField({
@@ -243,7 +269,11 @@ export const homePage = defineType({
           ],
           validation: (rule) => rule.required().min(1),
         }),
-        defineField({ name: "videoLabel", type: "string", validation: (rule) => rule.required() }),
+        defineField({
+          name: "videoLabel",
+          type: "string",
+          validation: (rule) => rule.required(),
+        }),
         // TODO(video): the firm film. One of the slots still carrying the
         // stand-in id — the YouTube original it maps to is in YOUTUBE_ORIGINS
         // in src/lib/video.ts, and five of those eight are unlisted.
@@ -261,7 +291,12 @@ export const homePage = defineType({
           title: "Attorney quote card",
           type: "object",
           fields: [
-            defineField({ name: "text", type: "text", rows: 4, validation: (rule) => rule.required() }),
+            defineField({
+              name: "text",
+              type: "text",
+              rows: 4,
+              validation: (rule) => rule.required(),
+            }),
             /*
              * THE PERSON IS A REFERENCE; THE NAME AND ROLE COME OFF THE ROSTER.
              *
@@ -295,9 +330,22 @@ export const homePage = defineType({
           title: "Consultation card",
           type: "object",
           fields: [
-            defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
-            defineField({ name: "text", type: "text", rows: 2, validation: (rule) => rule.required() }),
-            defineField({ name: "ctaLabel", type: "string", validation: (rule) => rule.required() }),
+            defineField({
+              name: "title",
+              type: "string",
+              validation: (rule) => rule.required(),
+            }),
+            defineField({
+              name: "text",
+              type: "text",
+              rows: 2,
+              validation: (rule) => rule.required(),
+            }),
+            defineField({
+              name: "ctaLabel",
+              type: "string",
+              validation: (rule) => rule.required(),
+            }),
           ],
           validation: (rule) => rule.required(),
         }),
@@ -313,7 +361,11 @@ export const homePage = defineType({
       group: "page",
       options: SECTION,
       fields: [
-        defineField({ name: "eyebrow", type: "string", validation: (rule) => rule.required() }),
+        defineField({
+          name: "eyebrow",
+          type: "string",
+          validation: (rule) => rule.required(),
+        }),
         defineField({
           name: "title",
           type: "array",
@@ -321,7 +373,12 @@ export const homePage = defineType({
           description: "One entry per rendered line.",
           validation: (rule) => rule.required().min(1),
         }),
-        defineField({ name: "lede", type: "text", rows: 3, validation: (rule) => rule.required() }),
+        defineField({
+          name: "lede",
+          type: "text",
+          rows: 3,
+          validation: (rule) => rule.required(),
+        }),
         defineField({
           name: "tabsLabel",
           title: "Tab row label",
@@ -332,23 +389,23 @@ export const homePage = defineType({
           validation: (rule) => rule.required(),
         }),
 
-      /*
-       * THE SIX PRACTICE-AREA CARDS, and they are COPY rather than pointers.
-       *
-       * The obvious modelling — a reference to the `practiceArea` document, with
-       * the name and blurb read off it — is wrong here, and the data says so. This
-       * rail calls one card "Bicycle Accidents" where the page it links is filed
-       * as "Bike Accidents", and "Slip & Fall" where the page is "Slip and Fall
-       * Accidents". Its blurb is a one-line label where /practice-areas ships a
-       * two-sentence pitch for the same area. Four of the cards appear in both
-       * lists with the SAME href and DIFFERENT copy — so they are two lists of
-       * cards, not one list read twice.
-       *
-       * That also means the destination is a plain href rather than a reference:
-       * one of the six points at `/denver-car-accident-lawyer/`, which the heavy
-       * hand-authored template serves and which is therefore not a `practiceArea`
-       * document at all. `check:links` is what catches a dead one.
-       */
+        /*
+         * THE SIX PRACTICE-AREA CARDS, and they are COPY rather than pointers.
+         *
+         * The obvious modelling — a reference to the `practiceArea` document, with
+         * the name and blurb read off it — is wrong here, and the data says so. This
+         * rail calls one card "Bicycle Accidents" where the page it links is filed
+         * as "Bike Accidents", and "Slip & Fall" where the page is "Slip and Fall
+         * Accidents". Its blurb is a one-line label where /practice-areas ships a
+         * two-sentence pitch for the same area. Four of the cards appear in both
+         * lists with the SAME href and DIFFERENT copy — so they are two lists of
+         * cards, not one list read twice.
+         *
+         * That also means the destination is a plain href rather than a reference:
+         * one of the six points at `/denver-car-accident-lawyer/`, which the heavy
+         * hand-authored template serves and which is therefore not a `practiceArea`
+         * document at all. `check:links` is what catches a dead one.
+         */
         defineField({
           name: "cards",
           title: "Practice area cards",
@@ -362,7 +419,11 @@ export const homePage = defineType({
               type: "object",
               name: "areaCard",
               fields: [
-                defineField({ name: "name", type: "string", validation: (rule) => rule.required() }),
+                defineField({
+                  name: "name",
+                  type: "string",
+                  validation: (rule) => rule.required(),
+                }),
                 /*
                  * HIDDEN, BY REQUEST — and the icon still draws. The tab keeps
                  * its glyph; what came off is a free-text developer key that an
@@ -404,7 +465,8 @@ export const homePage = defineType({
                   name: "blurb",
                   type: "text",
                   rows: 2,
-                  description: "One line. The Practice Areas page's version of the same card is longer.",
+                  description:
+                    "One line. The Practice Areas page's version of the same card is longer.",
                   validation: (rule) => rule.required(),
                 }),
                 /*
@@ -433,10 +495,13 @@ export const homePage = defineType({
                   name: "image",
                   type: "image",
                   options: { hotspot: true },
-                  description: "Without one the card falls back to an icon plate.",
+                  description:
+                    "Without one the card falls back to an icon plate.",
                 }),
               ],
-              preview: { select: { title: "name", subtitle: "href", media: "image" } },
+              preview: {
+                select: { title: "name", subtitle: "href", media: "image" },
+              },
             },
           ],
           validation: (rule) => rule.required().min(1),
@@ -449,27 +514,33 @@ export const homePage = defineType({
           validation: (rule) => rule.required(),
         }),
 
-      /*
-       * THE FOUR CATASTROPHIC-INJURY PANELS. Same shape one field short — these
-       * carry no photograph, and their one line of copy is an `insight` rather
-       * than a blurb, which is the field name the component reads.
-       */
+        /*
+         * THE FOUR CATASTROPHIC-INJURY PANELS. Same shape one field short — these
+         * carry no photograph, and their one line of copy is an `insight` rather
+         * than a blurb, which is the field name the component reads.
+         */
         defineField({
           name: "catastrophic",
           title: "Catastrophic injury panels",
           type: "array",
-          description: "The four panels further down the page. No photographs — these draw an icon.",
+          description:
+            "The four panels further down the page. No photographs — these draw an icon.",
           of: [
             {
               type: "object",
               name: "catastrophicArea",
               fields: [
-                defineField({ name: "name", type: "string", validation: (rule) => rule.required() }),
+                defineField({
+                  name: "name",
+                  type: "string",
+                  validation: (rule) => rule.required(),
+                }),
                 defineField({
                   name: "iconKey",
                   title: "Icon",
                   type: "string",
-                  description: "Must match an icon in components/icons/PracticeIcon.astro.",
+                  description:
+                    "Must match an icon in components/icons/PracticeIcon.astro.",
                   validation: (rule) => rule.required(),
                 }),
                 defineField({
@@ -496,7 +567,11 @@ export const homePage = defineType({
           type: "object",
           options: { columns: 2 },
           fields: [
-            defineField({ name: "text", type: "string", validation: (rule) => rule.required() }),
+            defineField({
+              name: "text",
+              type: "string",
+              validation: (rule) => rule.required(),
+            }),
             defineField({
               name: "cta",
               title: "Link text",
@@ -506,7 +581,7 @@ export const homePage = defineType({
           ],
           validation: (rule) => rule.required(),
         }),
-],
+      ],
       validation: (rule) => rule.required(),
     }),
 
@@ -522,12 +597,21 @@ export const homePage = defineType({
       group: "page",
       options: SECTION,
       fields: [
-        defineField({ name: "eyebrow", type: "string", validation: (rule) => rule.required() }),
-        defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
+        defineField({
+          name: "eyebrow",
+          type: "string",
+          validation: (rule) => rule.required(),
+        }),
+        defineField({
+          name: "title",
+          type: "string",
+          validation: (rule) => rule.required(),
+        }),
         defineField({
           name: "slides",
           type: "array",
-          description: "One slide per dot. Drag to reorder — the first one shows on load.",
+          description:
+            "One slide per dot. Drag to reorder — the first one shows on load.",
           of: [
             {
               type: "object",
@@ -551,7 +635,11 @@ export const homePage = defineType({
           ],
           validation: (rule) => rule.required().min(1),
         }),
-        defineField({ name: "ctaLabel", type: "string", validation: (rule) => rule.required() }),
+        defineField({
+          name: "ctaLabel",
+          type: "string",
+          validation: (rule) => rule.required(),
+        }),
       ],
       validation: (rule) => rule.required(),
     }),
@@ -568,26 +656,56 @@ export const homePage = defineType({
       group: "page",
       options: SECTION,
       fields: [
-        defineField({ name: "eyebrow", type: "string", validation: (rule) => rule.required() }),
-        defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
-        defineField({ name: "lede", type: "text", rows: 3, validation: (rule) => rule.required() }),
+        defineField({
+          name: "eyebrow",
+          type: "string",
+          validation: (rule) => rule.required(),
+        }),
+        defineField({
+          name: "title",
+          type: "string",
+          validation: (rule) => rule.required(),
+        }),
+        defineField({
+          name: "lede",
+          type: "text",
+          rows: 3,
+          validation: (rule) => rule.required(),
+        }),
         defineField({
           name: "items",
           title: "Questions",
           type: "array",
-          description: "The accordion. Drag to reorder — the top question opens first.",
-          of: [{ type: "object", fields: faqItemFields, preview: faqItemPreview }],
+          description:
+            "The accordion. Drag to reorder — the top question opens first.",
+          of: [
+            { type: "object", fields: faqItemFields, preview: faqItemPreview },
+          ],
           validation: (rule) => rule.required().min(1),
         }),
         defineField({
           name: "ask",
           title: "Ask card",
           type: "object",
-          description: "The card at the foot of the accordion, for a question that is not on it.",
+          description:
+            "The card at the foot of the accordion, for a question that is not on it.",
           fields: [
-            defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
-            defineField({ name: "body", type: "text", rows: 2, validation: (rule) => rule.required() }),
-            defineField({ name: "ctaLabel", type: "string", validation: (rule) => rule.required() }),
+            defineField({
+              name: "title",
+              type: "string",
+              validation: (rule) => rule.required(),
+            }),
+            defineField({
+              name: "body",
+              type: "text",
+              rows: 2,
+              validation: (rule) => rule.required(),
+            }),
+            defineField({
+              name: "ctaLabel",
+              type: "string",
+              validation: (rule) => rule.required(),
+            }),
             defineField({
               name: "ctaHref",
               title: "Destination",
@@ -608,13 +726,14 @@ export const homePage = defineType({
               name: "portraitAlt",
               title: "Portrait alt text",
               type: "string",
-              description: "Who is in the photograph — a screen reader reads this instead of it.",
+              description:
+                "Who is in the photograph — a screen reader reads this instead of it.",
               validation: (rule) => rule.required(),
             }),
           ],
           validation: (rule) => rule.required(),
         }),
-],
+      ],
       validation: (rule) => rule.required(),
     }),
 
@@ -636,8 +755,16 @@ export const homePage = defineType({
           type: "object",
           options: { columns: 2 },
           fields: [
-            defineField({ name: "news", type: "string", validation: (rule) => rule.required() }),
-            defineField({ name: "insights", type: "string", validation: (rule) => rule.required() }),
+            defineField({
+              name: "news",
+              type: "string",
+              validation: (rule) => rule.required(),
+            }),
+            defineField({
+              name: "insights",
+              type: "string",
+              validation: (rule) => rule.required(),
+            }),
           ],
           validation: (rule) => rule.required(),
         }),
@@ -646,10 +773,47 @@ export const homePage = defineType({
           title: "In the news tab",
           type: "object",
           fields: [
-            defineField({ name: "eyebrow", type: "string", validation: (rule) => rule.required() }),
-            defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
-            defineField({ name: "lede", type: "text", rows: 3, validation: (rule) => rule.required() }),
-            defineField({ name: "ctaLabel", type: "string", validation: (rule) => rule.required() }),
+            defineField({
+              name: "eyebrow",
+              type: "string",
+              validation: (rule) => rule.required(),
+            }),
+            defineField({
+              name: "title",
+              type: "string",
+              validation: (rule) => rule.required(),
+            }),
+            defineField({
+              name: "lede",
+              type: "text",
+              rows: 3,
+              validation: (rule) => rule.required(),
+            }),
+            defineField({
+              name: "ctaLabel",
+              type: "string",
+              validation: (rule) => rule.required(),
+            }),
+            defineField({
+              name: "ctaHref",
+              title: "Where the button goes",
+              type: "string",
+              description:
+                "The firm's accident-news site, which is a separate WordPress install rather " +
+                "than part of this one — so it is a full https:// address, and it opens in a " +
+                "new tab.",
+              /* NOT `ROUTES.blog`, which is where this button used to point. The
+                 two tabs are different things: Insights is this site's own
+                 writing and goes to /news/, In the news is coverage OF the firm
+                 and lives at accidentnews.denvertrial.com.
+
+                 A FIELD RATHER THAN THE NAV'S COPY OF THE SAME URL. The main
+                 menu links it too, but reaching into `navigation` for it would
+                 couple this band to the shape of the menu — an editor
+                 reordering the nav would break the homepage. Two editable
+                 fields holding one URL is the honest cost. */
+              validation: (rule) => rule.required().custom(validateHref),
+            }),
           ],
           validation: (rule) => rule.required(),
         }),
@@ -658,10 +822,27 @@ export const homePage = defineType({
           title: "Insights tab",
           type: "object",
           fields: [
-            defineField({ name: "eyebrow", type: "string", validation: (rule) => rule.required() }),
-            defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
-            defineField({ name: "lede", type: "text", rows: 3, validation: (rule) => rule.required() }),
-            defineField({ name: "ctaLabel", type: "string", validation: (rule) => rule.required() }),
+            defineField({
+              name: "eyebrow",
+              type: "string",
+              validation: (rule) => rule.required(),
+            }),
+            defineField({
+              name: "title",
+              type: "string",
+              validation: (rule) => rule.required(),
+            }),
+            defineField({
+              name: "lede",
+              type: "text",
+              rows: 3,
+              validation: (rule) => rule.required(),
+            }),
+            defineField({
+              name: "ctaLabel",
+              type: "string",
+              validation: (rule) => rule.required(),
+            }),
           ],
           validation: (rule) => rule.required(),
         }),
@@ -669,12 +850,17 @@ export const homePage = defineType({
           name: "mentions",
           title: "Press Mentions",
           type: "array",
-          description: "The feed's first tab — the firm in someone else's publication.",
+          description:
+            "The feed's first tab — the firm in someone else's publication.",
           of: [
             {
               type: "object",
               fields: [
-                defineField({ name: "outlet", type: "string", validation: (rule) => rule.required() }),
+                defineField({
+                  name: "outlet",
+                  type: "string",
+                  validation: (rule) => rule.required(),
+                }),
                 defineField({
                   name: "logo",
                   type: "image",
@@ -684,7 +870,8 @@ export const homePage = defineType({
                 defineField({
                   name: "date",
                   type: "string",
-                  description: 'Typed as shown — "Mar 2026". A display string, not a date.',
+                  description:
+                    'Typed as shown — "Mar 2026". A display string, not a date.',
                   validation: (rule) => rule.required(),
                 }),
                 defineField({
@@ -696,9 +883,11 @@ export const homePage = defineType({
                   name: "href",
                   title: "Link to the article",
                   type: "string",
-                  // TODO(content): four of these point at "#". The articles are real
-                  // and published (FOX31, Denver7, OutThere Colorado, The Mountain
-                  // Mail) and their URLs are findable; nobody has found them.
+                  // ~~TODO(content)~~ CLOSED. All four carried "#" and now carry the
+                  // real articles — FOX31, Denver7, the Denver Gazette and The
+                  // Mountain Mail. This field stays hand-typed on purpose: a press
+                  // mention is somebody ELSE'S page, so there is nothing on this
+                  // site to reference the way the Insight Teasers now do.
                   description:
                     "The published article's URL. A bare # is a PLACEHOLDER and must not ship — " +
                     "the link checker counts them and fails when the count changes without being " +
@@ -706,7 +895,13 @@ export const homePage = defineType({
                   validation: (rule) => rule.required().custom(validateHref),
                 }),
               ],
-              preview: { select: { title: "headline", subtitle: "outlet", media: "logo" } },
+              preview: {
+                select: {
+                  title: "headline",
+                  subtitle: "outlet",
+                  media: "logo",
+                },
+              },
             },
           ],
           validation: (rule) => rule.required().min(1),
@@ -715,49 +910,39 @@ export const homePage = defineType({
           name: "teasers",
           title: "Insight Teasers",
           type: "array",
-          description: "The feed's second tab.",
+          description:
+            "The feed's second tab — pick four published blog posts.",
+          /*
+           * REFERENCES, NOT TYPED-OUT CARDS. Until now each card was five hand
+           * written fields — title, category, icon, read time and a URL — which
+           * meant the homepage carried its own copy of an article's headline and
+           * a link somebody had to keep pointing at the right place. All four
+           * shipped with `href: "#"`, which is what that shape produces: the
+           * card is easy to write and the link is the part you finish later.
+           *
+           * A reference cannot be a dead link. The title, the art and the
+           * category all come off the post, so the card follows a retitled
+           * article on its own, and choosing one is picking from a list rather
+           * than retyping four fields.
+           *
+           * FILTERED TO POSTS THAT HAVE A PAGE. A post with no body is not
+           * built — see the note in `[slug].astro` — so referencing one would
+           * put a 404 on the homepage. `check:links` would catch it, but after
+           * the fact and in somebody else's build.
+           */
           of: [
             {
-              type: "object",
-              fields: [
-                defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
-                defineField({
-                  name: "category",
-                  type: "string",
-                  description: "Also picks the card's tint.",
-                  validation: (rule) => rule.required(),
-                }),
-                defineField({
-                  name: "iconKey",
-                  title: "Icon",
-                  type: "string",
-                  description:
-                    "Must match a glyph in components/icons/InsightIcon.astro. A key with no glyph " +
-                    "draws an empty plate — a new one needs a developer.",
-                  validation: (rule) => rule.required(),
-                }),
-                defineField({
-                  name: "readTime",
-                  type: "string",
-                  description: 'As shown — "4 min read".',
-                  validation: (rule) => rule.required(),
-                }),
-                defineField({
-                  name: "href",
-                  title: "Link to the article",
-                  type: "string",
-                  // TODO(content): all four point at "#" — they teaser articles
-                  // nobody has written. Unlike the press mentions there is no real
-                  // destination to find: either the articles get written or the
-                  // section comes out.
-                  description: "A bare # is a placeholder and must not ship.",
-                  validation: (rule) => rule.required().custom(validateHref),
-                }),
-              ],
-              preview: { select: { title: "title", subtitle: "category" } },
+              type: "reference",
+              to: [{ type: "blogPost" }],
+              options: {
+                filter: "defined(body)",
+                disableNew: true,
+              },
             },
           ],
-          validation: (rule) => rule.required().min(1),
+          /* EXACTLY FOUR, because `.feed__grid` is `repeat(4, …)`. Three would
+             render as three cards and a hole rather than re-flowing. */
+          validation: (rule) => rule.required().length(4),
         }),
       ],
       validation: (rule) => rule.required(),
@@ -773,10 +958,27 @@ export const homePage = defineType({
         "The heading above the photo mosaic. The Community Involvement PAGE has its own " +
         "heading and its own partner cards — this is the homepage's summary of that work.",
       fields: [
-        defineField({ name: "eyebrow", type: "string", validation: (rule) => rule.required() }),
-        defineField({ name: "title", type: "string", validation: (rule) => rule.required() }),
-        defineField({ name: "lede", type: "text", rows: 3, validation: (rule) => rule.required() }),
-        defineField({ name: "ctaLabel", type: "string", validation: (rule) => rule.required() }),
+        defineField({
+          name: "eyebrow",
+          type: "string",
+          validation: (rule) => rule.required(),
+        }),
+        defineField({
+          name: "title",
+          type: "string",
+          validation: (rule) => rule.required(),
+        }),
+        defineField({
+          name: "lede",
+          type: "text",
+          rows: 3,
+          validation: (rule) => rule.required(),
+        }),
+        defineField({
+          name: "ctaLabel",
+          type: "string",
+          validation: (rule) => rule.required(),
+        }),
         defineField({
           name: "photos",
           title: "Community Photos",
@@ -806,7 +1008,11 @@ export const homePage = defineType({
                   type: "string",
                   validation: (rule) => rule.required(),
                 }),
-                defineField({ name: "caption", type: "string", validation: (rule) => rule.required() }),
+                defineField({
+                  name: "caption",
+                  type: "string",
+                  validation: (rule) => rule.required(),
+                }),
                 defineField({
                   name: "span",
                   title: "Width",
@@ -830,7 +1036,9 @@ export const homePage = defineType({
                   validation: (rule) => rule.required(),
                 }),
               ],
-              preview: { select: { title: "org", subtitle: "caption", media: "image" } },
+              preview: {
+                select: { title: "org", subtitle: "caption", media: "image" },
+              },
             },
           ],
           validation: (rule) => rule.required().min(1),
@@ -847,11 +1055,16 @@ export const homePage = defineType({
             {
               type: "object",
               fields: [
-                defineField({ name: "name", type: "string", validation: (rule) => rule.required() }),
+                defineField({
+                  name: "name",
+                  type: "string",
+                  validation: (rule) => rule.required(),
+                }),
                 defineField({
                   name: "logo",
                   type: "image",
-                  description: "Reads as the logo's alt text via the name above.",
+                  description:
+                    "Reads as the logo's alt text via the name above.",
                   validation: (rule) => rule.required(),
                 }),
               ],
