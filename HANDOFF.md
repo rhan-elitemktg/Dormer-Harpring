@@ -6,7 +6,7 @@ Architecture, conventions and the design source of truth live in `AGENTS.md` (sy
 `CLAUDE.md`, loaded automatically). Pre-launch decisions live in `README.md`. Don't restate
 either here, and don't record anything `git log` already knows.
 
-_Last updated: 2026-08-31._
+_Last updated: 2026-08-31 (page-speed pass)._
 
 **This file tripled by appending — 1,016 lines to 3,083 — before this pass caught it.** Four
 separate status lists had accumulated ("Next", "Open", "Not done and known", the to-do half of
@@ -40,6 +40,7 @@ is gone rather than updated.
 | The editable SEO layer | `/new-seo-setup` steps 3–11 |
 | Nine `href="#"` | **Zero.** `KNOWN_PLACEHOLDER` is empty |
 | Sanity CORS + deploy webhook | Configured |
+| Eager Wistia init | **Closed** — popovers are facades now. Mobile Lighthouse 51 → 95. See below |
 
 ### Open — code
 
@@ -50,8 +51,13 @@ is gone rather than updated.
 2. **`bulkRedirectsPath` is off**, and re-enabling it is a deploy-only experiment. See its own
    section below: try `"static/bulk-redirects.json"` on a PREVIEW, with one real redirect
    document to verify against.
-3. **One Wistia player per popover, initialised eagerly** — 15 on the homepage, 20 on
-   `/denver-car-accident-lawyer/`. Inherent to the class-based embed; wants a pass before launch.
+3. **The homepage awards carousel reports one page and hides its dots at every width.**
+   `[data-rail="awards"]` measures `scrollWidth === clientWidth === 144` — one badge wide — from
+   375px to 1350px, so `pageCount()` returns 1 and the dots hide themselves. **Verified against
+   `git HEAD`: it predates the page-speed work and is not a regression from it.** Found while
+   testing the rail changes, not by any check. The six badges still render; only the paging
+   control is dead. Needs someone to look at the awards markup's flex/overflow, not at
+   `rail.ts` — the same file drives three other rails correctly on the same page.
 4. **The four deferred Portable Text object types** — `callout`, `phoneBand`, `attorneyCard`,
    `pullQuote`, whose intended home is commented in `prose/components.ts`. Nothing in the 290
    imported documents uses them and no renderer exists, so adding them would ship four editor
@@ -139,6 +145,104 @@ promises a video it cannot play · twelve images in `src/assets` are unreference
 only copy of the originals · `routePaths.locationPath` is exported and uncalled · nothing is
 wired for Visual Editing, so array projections omit `_key` where the interface has none.
 
+
+## PAGE SPEED: THE POPOVERS ARE FACADES NOW, AND THAT WAS THE WHOLE DEFICIT
+
+**Measure against the BUILT OUTPUT, never the dev server.** The Lighthouse reports that started
+this work were taken against `astro dev` and read 30 mobile / 68 desktop. On a clean build served
+like Vercel — HTTP/2, brotli, immutable `/_astro/*`, `trailingSlash: true` — the same commit read
+**51 mobile / 86 desktop**. Roughly half of what looked like a site problem was the Vite client,
+the Astro dev toolbar and unminified, uncompressed modules. Anything measured on `astro dev` is
+measuring Astro, not this site.
+
+### What changed
+
+`components/media/VideoPopover.astro` used to emit Wistia's config classes and a `<script async>`
+pair PER EMBED. It now ships a bare `data-wistia-popover="<id>"`, and
+**`src/scripts/wistiaPopovers.ts`** adds the classes and fetches `E-v1.js` on first hover, focus
+or tap. Read that file before touching anything near a video.
+
+| Homepage, mobile | before | after |
+|---|---|---|
+| Score | 51 | **95** |
+| Total Blocking Time | 1,010 ms | **0 ms** |
+| Main-thread work | 11.4 s | 0.7 s |
+| Live DOM elements | 4,067 | 1,366 |
+| Requests · transfer | 86 · 1,232 KiB | 23 · 381 KiB |
+
+Per template, median of repeated runs: `/` 51 → **95**, `/denver-car-accident-lawyer/` 43 → **89**,
+`/meet-our-attorneys/sean-dormer/` 28 → **89**, `/news/` 88 → **93**,
+`/denver-truck-accident-lawyer/` 92 → **97**. CLS is **0.000 everywhere** — the attorney bio was
+0.278 before, and Wistia was causing it.
+
+**THE ATTORNEY BIO WAS THE WORST PAGE ON THE SITE, WITH ONLY SIX POPOVERS.** Wistia's cost is
+mostly fixed per player, so the damage scaled with how SMALL the page was, not how many videos it
+had. That is the opposite of where anyone would look.
+
+### Three things measured that contradict what this file used to say
+
+- **Wistia CLONES the trigger; it does not move it.** After takeover
+  `document.contains(originalAnchor)` is `false` and `host.querySelector("a")` is a different
+  node. `VideoPopover.astro`'s header said "moves" for as long as it has existed. This is the root
+  cause of the listener losses that forced Layout's `.lazy-fade` handler to delegate with capture,
+  and it is why `wistiaPopovers.ts` remembers the WRAPPER and an href string, never an element.
+- **Deduping the script tags is not the fix, and would not have been.** The browser fetches
+  `E-v1.js` once however many tags reference it; re-evaluation costs ~8 ms each. The cost was
+  never the tags, it was mounting 19 players. A dedupe would have saved ~570 ms of the 11,400 ms.
+- **A page with popovers was never fixable by trimming anything else.** Variants were built and
+  measured for inlined CSS, dropped font preloads, dropped Newsreader and Caveat (197 KiB), and a
+  smaller hero candidate. **Every one landed inside the noise band.** Only Wistia moved the number.
+
+### The click path is the part that needed care
+
+Hover and focus arm well before a click. A TAP does not — `touchstart` leads `click` by ~100 ms
+and `E-v1.js` is 152 KiB. So a click that lands before the runtime is bound is HELD
+(`preventDefault`), the host is armed, and the click is replayed on Wistia's clone the moment a
+MutationObserver sees the takeover. If the runtime never arrives, a 6-second deadline follows the
+href to Wistia's hosted player — the same fallback a no-JS visitor already gets.
+
+**The old markup had this window too** (the scripts were `async`), so this closes a gap rather
+than opening one.
+
+### The images were the second finding, and it is a shape worth knowing
+
+**`srcFor()` falls back to the asset's own intrinsic width when a call site passes no `widths`,
+and `srcSetFor()` returns `undefined`.** That is documented and deliberate — it matches Astro's
+`<Image>` — but it means a `<Picture>` with no ladder ships the full upload and no `srcset`.
+Thirteen call sites did. Measured against the RENDERED box, not guessed: partner logos at 15×
+their display size, testimonial posters at 4.3×, the fact-check portrait at 8.8×.
+
+Homepage image weight went **1,415 KiB → 1,008 KiB**. Every remaining ratio is 1.0–1.3×.
+
+**Header and footer share ONE logo file, so they were given the SAME ladder on purpose.**
+Different widths would have turned one shared request into two and cost more than the resize
+saved. The change also fixes retina under-delivery, which is what it was really doing wrong.
+
+Three `<Picture>` calls still pass no `widths`, correctly: the Elite mark is an SVG, and two are
+on `/tokens/`, which is `noIndex`.
+
+### Verifying this class of change
+
+`compare-builds.py` cannot see any of it — the whole point is WHEN a third-party runtime attaches.
+There is a puppeteer suite in the scratchpad (21 checks: nothing loads at load, hover/focus/tap
+each arm, a cold click still opens the lightbox and does not navigate, the FAQ accordion case, and
+the rails). **It caught two real bugs the linters and the byte-diff both passed**, and one false
+alarm that turned out to be the test's own assumption.
+
+**A cached test server masked a whole run.** The harness cached compressed bodies by path, so it
+kept serving the pre-fix build after a rebuild and three "failures" were measuring old code. It is
+keyed on mtime now. If a fix appears not to work, check what the server is actually serving first.
+
+### What is left, and it needs a deploy
+
+**Desktop cannot be settled locally.** On this harness an EMPTY page scores 81 desktop and repeat
+runs of the same build spread 75–87 — the floor is larger than the deficit. Desktop TBT is 0 ms
+and CLS 0 after this work, so there is no blocking-time problem left; what remains is FCP and LCP,
+which are latency-bound and therefore host-bound. **Take the real number off a preview
+deployment**, which is also where `bulkRedirectsPath` has to be tested.
+
+`vercel.json` now carries a `headers` block — `immutable` on the content-hashed `/_astro/*`, one
+day on the three un-hashed root icons. It is GENERATED: edit `scripts/build-redirects.ts`.
 
 ## NINE `href="#"` ARE ZERO, AND `KNOWN_PLACEHOLDER` IS EMPTY
 
@@ -2556,7 +2660,10 @@ fresh directory, then diff it against the dataset before importing anything.
 | `AttorneyCard` | portrait opens the film, name/role go to the bio (see below) |
 | `MoreOnClaims` | still decorative — the card is already a link to an article |
 
-178 popover anchors across 30 pages, each with a working href as its no-JS fallback.
+**172 popover anchors across 28 pages**, each with a working href as its no-JS fallback. (This
+line read "178 across 30" and was not re-measured; the figure above is counted from `dist/client`
+— `<span class="vpop" data-wistia-popover=` — and matches the E-v1 tag count the old markup
+emitted.)
 
 ### THE ONE THING TO READ BEFORE TOUCHING A POPOVER
 
@@ -2599,10 +2706,12 @@ re-attempting: that needs an embed initialised WITH popover options and IN LAYOU
 E-v1.js also discovers embeds by POLLING, so a host created on click is not ready on that tick —
 asking once and giving up is why the hero opened nothing for a while and just followed its href.
 
-**KNOWN COST, not addressed: a page initialises one Wistia player per popover, eagerly.** Fifteen
-on the homepage, twenty on `/denver-car-accident-lawyer/`. That is inherent to the class-based
-embed and wants its own pass before launch. The duplicate `<script>` tags are the smaller half of
-it and resolve themselves once the ids diverge.
+**CLOSED — the runtime loads on intent now, not at parse.** This used to read "a page initialises
+one Wistia player per popover, eagerly… wants its own pass before launch", and that pass has
+happened: see "PAGE SPEED" at the top of this file. Nothing about the wiring below changed, only
+the moment it happens — `wistiaPopovers.ts` adds these classes on first hover, focus or tap.
+The duplicate `<script>` tags are gone with it, and they were the smaller half of the cost by a
+factor of twenty: the browser only ever fetched `E-v1.js` once.
 
 ### PLACEHOLDER_VIDEO — 33 slots, one stand-in, and only 3 are greppable
 

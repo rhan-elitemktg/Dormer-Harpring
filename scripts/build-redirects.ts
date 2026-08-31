@@ -63,6 +63,34 @@ const config = {
 
      bulkRedirectsPath: "static/bulk-redirects.json", */
 
+  /* CACHE LIFETIMES, and only for the files that cannot say it themselves.
+     Vercel's default for a static file is `public, max-age=0, must-revalidate`,
+     so every navigation re-asks for it.
+
+     `/_astro/*` is CONTENT-HASHED by the build — a changed byte is a changed
+     filename — so it can be cached permanently and immutably. That is safe
+     precisely because nothing at that path is ever edited in place.
+
+     The three root icons are the opposite case and the reason this block
+     exists: they are NOT hashed, they are requested on nearly every navigation,
+     and they change roughly never. A day is the compromise — long enough to
+     stop the revalidations, short enough that replacing the firm's mark does
+     not need a cache-busting rename. Do NOT extend this pattern to the HTML:
+     a page must revalidate, or a publish would not reach anyone.
+
+     NOTE the leading slash and the `(.*)` form — Vercel matches `source`
+     against the path, and a bare `_astro/(.*)` matches nothing. */
+  headers: [
+    {
+      source: "/_astro/(.*)",
+      headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
+    },
+    {
+      source: "/(favicon.ico|icon-192.png|apple-touch-icon.png)",
+      headers: [{ key: "Cache-Control", value: "public, max-age=86400" }],
+    },
+  ],
+
   /* BOTH SLASH FORMS FOR EVERY RULE. `trailingSlash: true` above already
      normalizes a bare request to the slashed shape, so `/category/x` would
      reach `/category/x/` and then match — but as TWO redirects, one to add the

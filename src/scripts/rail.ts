@@ -114,10 +114,34 @@ function initRail(rail: HTMLElement) {
     }
   };
 
+  /*
+   * ONE SYNC PER FRAME, however many things ask for one.
+   *
+   * `sync()` reads `scrollWidth`/`clientWidth`/`scrollLeft` and then WRITES —
+   * `disabled`, `hidden`, the dots — so each call is a forced reflow. It is
+   * asked for on scroll, on resize, from the ResizeObserver, and once per image
+   * below; on the homepage that is four rails' worth of images all landing
+   * around the same moment, and Lighthouse attributed the page's largest
+   * remaining forced-reflow block to this file.
+   *
+   * Coalescing changes nothing about the RESULT — the last call in a frame wins
+   * either way — only how many times the browser is made to lay out to get
+   * there. The initial call below stays synchronous, so the arrows are correct
+   * on the first paint rather than a frame later.
+   */
+  let frame = 0;
+  const scheduleSync = () => {
+    if (frame) return;
+    frame = requestAnimationFrame(() => {
+      frame = 0;
+      sync();
+    });
+  };
+
   prev?.addEventListener("click", () => rail.scrollBy({ left: -step() }));
   next?.addEventListener("click", () => rail.scrollBy({ left: step() }));
-  rail.addEventListener("scroll", sync, { passive: true });
-  window.addEventListener("resize", sync, { passive: true });
+  rail.addEventListener("scroll", scheduleSync, { passive: true });
+  window.addEventListener("resize", scheduleSync, { passive: true });
 
   // Re-sync when the track's own box changes, not just the window's.
   //
@@ -129,7 +153,7 @@ function initRail(rail: HTMLElement) {
   // `resize` fires when the images finally land, so without this the arrow
   // would stay dead on a rail that can perfectly well scroll.
   if (track && "ResizeObserver" in window) {
-    new ResizeObserver(sync).observe(track);
+    new ResizeObserver(scheduleSync).observe(track);
   }
 
   // …and once more per image, because the observer above is not enough on its
@@ -140,10 +164,10 @@ function initRail(rail: HTMLElement) {
   // sticks. Measured: without this the dots came back as one page, hiding
   // themselves, on a rail that pages into three.
   for (const img of rail.querySelectorAll("img")) {
-    if (!img.complete) img.addEventListener("load", sync, { once: true });
+    if (!img.complete) img.addEventListener("load", scheduleSync, { once: true });
   }
   // The backstop for anything the two above miss — fonts, a late stylesheet.
-  window.addEventListener("load", sync, { once: true });
+  window.addEventListener("load", scheduleSync, { once: true });
 
   sync();
 }

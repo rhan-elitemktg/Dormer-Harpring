@@ -22,7 +22,9 @@ const initial = testimonial.name.trim().charAt(0).toUpperCase();
     src={testimonial.poster}
     remoteSize={testimonial.posterSize}
     alt={`${testimonial.name}, client testimonial video`}
-    class="vcard__poster"
+    widths={[400, 800]}
+  sizes="400px"
+  class="vcard__poster"
   />
   <span class="vcard__scrim" aria-hidden="true"></span>
   <PlayButton tone="accent" size={60} class="vcard__play" />

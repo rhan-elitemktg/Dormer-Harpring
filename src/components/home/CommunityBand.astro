@@ -65,7 +65,9 @@ const { section, photos, partners } = Astro.props;
       {
         partners.map((partner) => (
           <li>
-            <Picture src={partner.logo} alt={partner.name} class="community__logo" />
+            <Picture src={partner.logo} alt={partner.name} widths={[160, 320]}
+            sizes="160px"
+            class="community__logo" />
           </li>
         ))
       }

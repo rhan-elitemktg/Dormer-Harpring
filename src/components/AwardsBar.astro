@@ -51,7 +51,9 @@ const { awards, eyebrow, tone = "lifted" } = Astro.props;
         {
           awards.map((award) => (
             <li class="awards__item" data-height={award.height}>
-              <Picture src={award.image} alt={award.alt} class="awards__badge" />
+              <Picture src={award.image} alt={award.alt} widths={[200, 400]}
+          sizes="200px"
+          class="awards__badge" />
             </li>
           ))
         }

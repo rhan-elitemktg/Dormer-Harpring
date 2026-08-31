@@ -18,7 +18,9 @@ const { quote } = Astro.props;
 ---
 
 <figure class="quote">
-  <Picture src={kcHarpring} alt={quote.name} class="quote__portrait" />
+  <Picture src={kcHarpring} alt={quote.name} widths={[56, 112]}
+    sizes="56px"
+    class="quote__portrait" />
   <div>
     <blockquote class="quote__text">{quote.text}</blockquote>
     <figcaption class="quote__by">

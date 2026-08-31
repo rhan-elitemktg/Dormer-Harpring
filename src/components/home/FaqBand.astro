@@ -41,7 +41,9 @@ const schema = faqSchema(faqs.map((f) => ({ question: f.question, answer: f.answ
       <Picture
         src={section.ask.portrait}
         alt={section.ask.portraitAlt}
-        class="faqs__ask-photo"
+        widths={[80, 160]}
+          sizes="80px"
+          class="faqs__ask-photo"
       />
       <div class="faqs__ask-copy">
         <p class="faqs__ask-title">{section.ask.title}</p>

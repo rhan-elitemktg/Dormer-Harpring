@@ -29,6 +29,8 @@ const { section, attorneys } = Astro.props;
         <Picture
           src={section.signature.portrait}
           alt={section.signature.name}
+          widths={[60, 120]}
+          sizes="60px"
           class="attys__sig-photo"
         />
         <div>
