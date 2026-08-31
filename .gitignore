@@ -32,3 +32,8 @@ scratch/
 # Build output from @astrojs/vercel — the deploy artifact, regenerated every
 # build. Sibling of `dist/`, ignored above.
 .vercel/
+
+# EVERY dotenv form, not just the `.env` / `.env.production` pair above — which
+# did NOT cover `.env.local`, the file `vercel env pull` writes. That one holds a
+# live VERCEL_OIDC_TOKEN and whatever else is pulled. Added by `vercel link`.
+.env*

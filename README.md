@@ -11,16 +11,32 @@ PUBLIC_SANITY_PROJECT_ID="74nyy5mh"
 PUBLIC_SANITY_DATASET="production"
 ```
 
-The form endpoint needs three more, and only on a **deployment** — the build and
+The form endpoint needs three more, and **only on a deployment** — the build and
 the dev server both run fine without them, and a submission returns a 500 naming
 whichever is missing rather than failing quietly:
 
 ```sh
-RESEND_API_KEY="…"                        # set by the Vercel/Resend integration
+RESEND_API_KEY="…"                        # a Resend API key, set as a Vercel Secret
 CONSULT_TO_EMAIL="…@dormerharpring.com"   # where consultation requests go
 COCOUNSEL_TO_EMAIL="…@dormerharpring.com" # optional; falls back to CONSULT_TO
-CONSULT_FROM_EMAIL="…@dormerharpring.com" # must be a Resend-verified domain
+CONSULT_FROM_EMAIL="…@dormerharpring.com" # must be on a Resend-VERIFIED domain
 ```
+
+**PUTTING THESE IN `.env` DOES NOTHING.** The route reads `process.env`, and Astro
+loads dotenv files into `import.meta.env` only — so locally it reports every one
+of them unset however carefully the file is filled in. That is not a broken
+configuration; it is the only way a secret stays out of the bundle. To exercise
+the form locally, export them into the shell first:
+
+```sh
+set -a; . ./.env.local; set +a
+```
+
+They are already set on the Vercel project. **Two things about that which cost an
+afternoon each:** a variable binds to a deployment when it is BUILT, so changing
+one changes nothing until a redeploy; and the CLI's default scope is the personal
+team, so every `vercel` command from this repo needs
+`--scope elite-legal-marketing`.
 
 ## Checks
 
@@ -75,7 +91,7 @@ Everything below is deliberately unfinished, not overlooked.
 
 | Item | State |
 |---|---|
-| **Forms** | **BUILT.** `src/pages/api/consult.ts` — one endpoint, both forms, hosted by `@astrojs/vercel` while the other 328 pages stay static (`prerender = false` on that route only). It re-validates every field the markup does, checks **both** honeypot names (`company` on the consultation form, `website` on the co-counsel one — they differ), answers a trapped bot with the same 303 a person gets, refuses an open redirect, and 303s to `/thank-you/`. Astro's `checkOrigin` gives it CSRF cover for free. **What is left is configuration, not code:** run `vercel link` and `vercel integration add resend/resend-email`, then set the four variables above. Until then a submission returns a plain-text 500 naming the firm's phone number — deliberately blunt, and still the right failure: visibly broken beats invisibly broken. **A designed error page is the one open piece** (`TODO(launch)` in the route). |
+| **Forms** | **BUILT.** `src/pages/api/consult.ts` — one endpoint, both forms, hosted by `@astrojs/vercel` while the other 328 pages stay static (`prerender = false` on that route only). It re-validates every field the markup does, checks **both** honeypot names (`company` on the consultation form, `website` on the co-counsel one — they differ), answers a trapped bot with the same 303 a person gets, refuses an open redirect, and 303s to `/thank-you/`. Astro's `checkOrigin` gives it CSRF cover for free. **Wired and proven on production** — both forms delivered real mail, submitted anonymously, and every failure path was exercised there too. It is **not** a Marketplace install: the agency already pays for Resend, so the key is set directly as a Vercel Secret. **One thing is left, and it is DNS, not code:** `dormerharpring.com` is not verified in Resend, so production answers `403 "domain is not verified"` and the visitor gets the plain-text 500 naming the firm's phone number — deliberately blunt, and still the right failure: visibly broken beats invisibly broken. `HANDOFF.md` carries the six-step runbook for the moment that domain verifies. **A designed error page is the one open piece of code** (`TODO(launch)` in the route). |
 | **Video** | **Solved structurally, blocked on content.** Every play affordance on the site is a Wistia popover — nine of them, 178 triggers across 30 pages — and no record says `youtube` any more. But **33 slots point at one stand-in** (`PLACEHOLDER_VIDEO` in `lib/video.ts`), so the whole video layer is currently one film. Only three are still in code; the other 30 are Sanity fields, so **grepping the constant no longer finds them all**. The YouTube ids they map to are in `YOUTUBE_ORIGINS` in `lib/video.ts` — no longer in comments beside the records, which moved to Sanity and took the comments with them. Needs the firm's re-hosted ids. |
 | **Wistia migration** | Done for the wiring. `lib/video.ts` still owns every URL. No document stores a provider any more — Phase 6 flattened every field to a bare `videoId` and each PROJECTION emits `{provider: "wistia", id: videoId}` as a literal — so swapping an id stays a data change and swapping the provider is one edit per projection. `WISTIA_ACCOUNT` is **still empty** — the media JSON exposes only account ids (154783 / yrknbv2cuk), never the vanity subdomain, so it has to come from the dashboard. Until then the no-JS fallback href is Wistia's own hosted player: works, unbranded. The `youtube` branch is unused but kept, since the provider swap is the point of the shape. |
 | **Video posters** | The cards use the design package's own client portraits, which is still the right call — a still lifted from each film would beat them. Re-hosting is the moment to do it, since the files are in hand. Separately, `faq-video-cover.jpg` is 607×609 — square — in a 16/10 box, so `object-fit: cover` crops roughly its bottom 40%. |

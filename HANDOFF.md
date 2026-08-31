@@ -34,7 +34,7 @@ is gone rather than updated.
 
 | | |
 |---|---|
-| `/api/consult` | Built. Needs its Resend variables — see below |
+| `/api/consult` | Wired and **proven on production**, both forms. Blocked only on Resend domain verification |
 | `site:` www vs apex | **Settled: www.** Ten comments said it was open; all corrected |
 | Cutover URL audit | 18 would-be 404s → **zero** |
 | The editable SEO layer | `/new-seo-setup` steps 3–11 |
@@ -62,10 +62,21 @@ is gone rather than updated.
 
 ### Open — configuration, and nobody else can do these
 
-- **Resend is not provisioned.** `vercel link && vercel integration add resend/resend-email`,
-  then `RESEND_API_KEY`, `CONSULT_TO_EMAIL`, `CONSULT_FROM_EMAIL` and optionally
-  `COCOUNSEL_TO_EMAIL`. **Until they exist every form on 327 pages returns a 500.** The From
-  domain must be verified in Resend or the send is refused.
+- ⚠️ **`dormerharpring.com` IS NOT VERIFIED IN RESEND, so every production form returns a 500.**
+  That is the ONLY thing left — the key and all three address variables are set on all three
+  environments, and both forms were proven end-to-end on a real production deploy. Production
+  fails with a named reason: `403 "The dormerharpring.com domain is not verified"`. **A 403 about
+  the DOMAIN, not a 401 about the key**, so the credential and the transport are both proven and
+  nothing else is suspect.
+  **VERIFYING IT DOES NOT REQUIRE POINTING THE SITE AT VERCEL.** Resend wants a DKIM `TXT` record
+  and a `send.` subdomain. Neither touches the `A`/`CNAME` records that decide where the website
+  resolves — the site can stay on WordPress throughout — nor the root `MX` that delivers
+  `@dormerharpring.com` mail. ⚠️ **Take the `send.` SUBDOMAIN option if offered.** A second SPF
+  record on the ROOT domain would break the firm's existing email: a domain may carry only one,
+  and they already have one for whatever runs their mailboxes.
+  **The step-by-step is "WHEN THE DOMAIN VERIFIES: THE WHOLE RUNBOOK" below** — six steps, every
+  command written out. The one that gets skipped is the REDEPLOY: env vars bind at build time, so
+  verifying the domain changes nothing until production is rebuilt.
 - **No default social share image**, so 0 pages carry `og:image`. One upload at
   Site Settings → Global SEO Settings → Defaults.
 - ⚠️ **The crawl switch is ON.** All 330 pages carry `noindex` and `robots.txt` serves
@@ -490,16 +501,161 @@ on each honeypot, 400 on a missing field / a bad phone format / an unknown `kind
 `/thank-you/` on an open-redirect attempt (`redirectTo` is validated against `ROUTES`, not
 trusted), and a 500 whose log names exactly which variables are unset.
 
+### RESEND IS NOT A MARKETPLACE INSTALL, AND THAT WAS A DELIBERATE REVERSAL
+
+This file used to say `vercel integration add resend/resend-email`, on the reasoning that Resend
+is the only `messaging` product in the Marketplace. **It is provisioned as a plain API key
+instead**, because the Marketplace route turned out to be the wrong one here:
+
+- **Elite Legal Marketing already pays for Resend.** `cogdell-law` and `elite-client-hub` both
+  carry a `RESEND_API_KEY` set directly, and `vercel integration list --all` returns no resources
+  for the team. A Marketplace install would have provisioned a SECOND, separately-billed Resend
+  account beside the one already in use.
+- **It also blocks on a legal step.** The install stops at `integration_terms_acceptance_required`
+  and cannot proceed without a human accepting marketplace terms in a browser.
+
+So the key is its own Resend API key from the existing account, set as a Vercel **Secret** on
+production, preview and development. **It is scoped to "All domains", which is a compromise, not
+the end state** — a domain-scoped key cannot send from `onboarding@resend.dev`, and
+`dormerharpring.com` was not in the account yet. `TODO(launch)`: once that domain verifies, cut a
+replacement key scoped to it and swap it in, so this site's key cannot send as Cogdell's domain.
+
+### THE CLI'S DEFAULT SCOPE IS THE PERSONAL TEAM, AND IT WILL SILENTLY USE IT
+
+The project lives at **`elite-legal-marketing/dormer-harpring`**, but `vercel`'s active scope is
+`rhan-1746s-projects`. The first install attempt reported `Installing … under
+rhan-1746s-projects` and would have provisioned into the wrong account entirely. **Pass
+`--scope elite-legal-marketing` to every `vercel` command from this repo.** `vercel link` fixes
+the project lookup but does NOT change the CLI's default scope.
+
+### `.env` NEVER REACHES `process.env`, SO THE FORM CANNOT BE TESTED LOCALLY FROM A FILE
+
+The route reads `process.env` at request time — correct, and what makes a missing variable one
+failed submission rather than a dead build. **But Astro loads `.env` and `.env.local` into
+`import.meta.env` only.** Vite does not mutate `process.env`.
+
+So locally the endpoint reports **every** variable unset no matter how carefully `.env.local` is
+filled in, which reads exactly like a broken configuration. Verified both directions: with the
+file alone it names all three address variables as missing; with the same values exported into
+the shell it names only the key.
+
+```sh
+set -a; . ./.env.local; set +a; npx astro dev --background   # then `npx astro dev logs`
+```
+
+**Nothing is wrong on Vercel** — the platform sets real process environment variables, which is
+why production behaves correctly while local dev cannot. Do not "fix" this by moving the route to
+`import.meta.env`: that would inline the key into the bundle at build time.
+
+**A `Secret` env var cannot be pulled back**, either, so `vercel env pull` will never give local
+dev the key. Testing sends means testing against a deployment.
+
+### AN ENV VAR CHANGE DOES NOTHING UNTIL THE NEXT DEPLOY
+
+Variables bind to a deployment when it is built. Changing one in the dashboard leaves every
+running deployment on the old value, so "I fixed the variable and it still fails" is the expected
+result until something redeploys. This is the trap that makes the production From address worth
+watching: the config and the running site can disagree indefinitely, with nothing reporting it.
+
+### WHAT WAS ACTUALLY PROVEN, AND WHERE
+
+Preview first, then production **anonymously with no protection-bypass token** — the preview run
+went through a bypass and so never proved an unauthenticated submission works. Both forms
+delivered real mail on both.
+
+| | |
+|---|---|
+| `GET` the endpoint | 405 with `Allow: POST` |
+| Consultation, co-counsel | 303 → `/thank-you/`, mail delivered and confirmed received |
+| Honeypot filled | 303, byte-identical to success, nothing sent |
+| Missing field · bad phone · unknown `kind` | 400 |
+| `redirectTo=https://evil.example.com/` | 303 to `/thank-you/`, not the attacker's URL |
+| `Origin: https://evil.example.com` | 403 before the module runs — `checkOrigin`, on production |
+
+**Preview and development send from `onboarding@resend.dev`; production sends from
+`noreply@dormerharpring.com`.** That split is deliberate. Resend's shared sender needs no DNS at
+all and delivers only to the account owner's own address, which is what made testing possible
+before verification — and keeping it OFF production means there is no state where real client
+mail ships from a `resend.dev` address because somebody forgot to change it back.
+
+**Both inboxes are `rhan@elitemktg.com` today, not the firm's.** Intended, for pre-launch
+testing. `TODO(launch)`: the firm has to name the real ones. Because these are environment
+variables rather than content, that change is not a deploy.
+
+### WHEN THE DOMAIN VERIFIES: THE WHOLE RUNBOOK
+
+**Everything below is the only work left to put client email live.** Nothing here is
+exploratory — each step was executed and proven once already, against the test sender.
+
+**Every `vercel` command needs `--scope elite-legal-marketing`.** The CLI's default scope is the
+personal team and it will silently use it.
+
+**1 — Verify the domain.** resend.com/domains → Add `dormerharpring.com` → publish the records it
+prints. **Take the `send.` subdomain option**; a second SPF record on the ROOT would break the
+firm's existing mailboxes. This does NOT move the website — see the ⚠️ entry at the top of this
+file. Wait for Resend to show **Verified**.
+
+**2 — REDEPLOY. Nothing changes without this.** Environment variables bind to a deployment when
+it is built, so the running site keeps the old values however the dashboard reads. Production is
+already set to `noreply@dormerharpring.com`; it just has never been deployed against a verified
+domain.
+
+```sh
+vercel deploy --prod --scope elite-legal-marketing
+```
+
+**3 — Prove it, from production, anonymously.** A 303 means Resend accepted it; a 500 means it
+did not, and step 4 says how to read why.
+
+```sh
+P=https://dormer-harpring.vercel.app; curl -s -o /dev/null -w "%{http_code} -> %{redirect_url}\n" \
+  -X POST "$P/api/consult/" -H "Origin: $P" \
+  --data-urlencode kind=consultation --data-urlencode "name=Launch check" \
+  --data-urlencode "phone=(303) 555-0100" --data-urlencode email=you@example.com
+```
+
+**The `Origin` header is not optional** — Astro's `checkOrigin` rejects a bare `curl` with a 403
+before the route runs. That is the CSRF cover working, not a broken endpoint.
+
+**4 — If it fails, the reason is in the log, never in the response.** The visitor sees a generic
+500 by design; the named cause is server-side.
+
+```sh
+vercel logs https://dormer-harpring.vercel.app --scope elite-legal-marketing
+```
+
+`Mail is not configured: X is unset` means a variable is missing or step 2 was skipped.
+`Resend refused the message: 403 …` means the domain still is not verified.
+
+**5 — Point the inboxes at the firm.** Both are `rhan@elitemktg.com` today, which is pre-launch
+testing, not a decision. **This is why they are environment variables and not content: naming the
+real inboxes must not be a deploy of the site's content.** It IS a redeploy of the function,
+though — repeat step 2 after.
+
+```sh
+vercel env add CONSULT_TO_EMAIL production --value "intake@dormerharpring.com" \
+  --no-sensitive --force --scope elite-legal-marketing
+```
+
+Repeat for `COCOUNSEL_TO_EMAIL` (omit it entirely and it falls back to `CONSULT_TO_EMAIL`), and
+for `preview` / `development` if those should follow. **Leave preview and development on
+`onboarding@resend.dev` as their FROM address** — that is what keeps a broken production sender
+from being masked by a working test one.
+
+**6 — Re-scope the API key.** It is "All domains" today, which means this site's key can send as
+Cogdell's domain. Once `dormerharpring.com` is verified, cut a replacement scoped to it in the
+Resend dashboard, add it as a **Secret** on all three environments, and redeploy. A Secret cannot
+be read back, so `vercel env pull` will never hand it to local dev — that is intended.
+
+**What CANNOT be verified before step 1:** nothing else. The credential, the transport, both
+form shapes, both inboxes, the honeypot, the validators, the open-redirect guard and the
+cross-origin refusal were all exercised on production against the test sender. See the table
+above.
+
 ### WHAT IS LEFT ON IT
 
-- **Provision Resend** — `vercel link`, then `vercel integration add resend/resend-email`. The
-  repo is not linked to a Vercel project yet, and this needs the account holder. Resend is the
-  only `messaging` product in the Marketplace, so it is the pick by default rather than by
-  preference.
-- **Four variables**: `RESEND_API_KEY`, `CONSULT_TO_EMAIL`, `CONSULT_FROM_EMAIL`, and optionally
-  `COCOUNSEL_TO_EMAIL` (falls back to `CONSULT_TO_EMAIL`). The From domain must be verified in
-  Resend or the send is refused. **The firm has to name the inboxes** — they are environment
-  variables and not content precisely so that naming them is not a deploy.
+- **Domain verification is the one open item** — see the ⚠️ entry at the top of this file. Every
+  other part is done and proven.
 - **A designed error page.** The failure is a plain-text 500 naming the firm's phone number.
   Deliberately blunt — visibly broken beats invisibly broken, the same argument that kept the
   comps' fake success panel out — but it wants the light template's shell like the other three
@@ -2674,9 +2830,10 @@ bug in the page.** `/dfgfgf/` renders it; bare `/dfgfgf` gets Astro's own built-
 `404: Not Found (trailingSlash is set to "always")` instead, because Astro rejects the
 slash-less form before routing reaches any page file. Both `astro dev` and `astro preview`
 behave this way. **Production should not**: `vercel.json` carries `"trailingSlash": true`, so
-Vercel 308s the bare form to the slashed one first and then serves `404.html`. That last step is
-reasoned from Vercel's documented behaviour, NOT measured — worth one check on the first preview
-deployment. Do not "fix" it by loosening `trailingSlash`; three layers agree on it and ~300
+Vercel 308s the bare form to the slashed one first and then serves `404.html`. **THAT IS NOW
+MEASURED, not reasoned** — on the production deployment `/dfgfgf` returns `308` to `/dfgfgf/`,
+which returns `404`, and `/api/consult` 308s to `/api/consult/` the same way, which is the same
+mechanism the form `action`'s trailing slash exists to avoid paying on every POST. Do not "fix" it by loosening `trailingSlash`; three layers agree on it and ~300
 indexed legacy URLs depend on it. **NOT in `RESERVED_PATHS`**: nothing may link
 it and no redirect may point at it, because a redirect to a 404 page returns 200 with not-found
 content, which is the soft-404 pattern search engines penalise. The status has to come from the
