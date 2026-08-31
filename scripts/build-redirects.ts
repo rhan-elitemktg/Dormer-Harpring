@@ -32,25 +32,36 @@ const config = {
      with ROUTES in lib/routePaths.ts. */
   trailingSlash: true,
 
-  /* THE SECOND TIER. Everything in `redirects` below is code-owned and comes
-     from `src/data/redirects.ts` — the cutover table, fixed at migration. This
-     line points Vercel at a file the BUILD writes, which is how a redirect
-     added in the Studio reaches the edge without a developer.
+  /* THE SECOND TIER, AND IT IS OFF UNTIL THE PATH IS PROVEN ON A DEPLOY.
+     Everything in `redirects` below is code-owned and comes from
+     `src/data/redirects.ts`. `bulkRedirectsPath` is how a redirect added in the
+     Studio reaches the edge without a developer — it points Vercel at a file
+     the BUILD writes, which is the one mechanism that works given Vercel reads
+     this very file before the build starts.
 
-     It has to be a separate mechanism because Vercel reads this very file
-     before the build starts, so nothing generated during a build can land in
-     it. Bulk redirects are the documented exception.
+     IT IS COMMENTED OUT BECAUSE A WRONG PATH FAILS THE WHOLE DEPLOY, not the
+     feature. The first attempt shipped `.vercel/output/static/bulk-redirects.json`
+     — repo-root relative, which is what the reference project uses — and the
+     build passed, then:
 
-     THE PATH IS THE ONE ASSUMPTION THAT CANNOT BE TESTED LOCALLY. Vercel's
-     reference confirms the file may be build-generated but not what the path
-     resolves against, and redirects do not fire under `astro dev` or
-     `vercel dev` at all — only on a deployed URL. This points at the actual
-     deploy artifact: `@astrojs/vercel` copies static output to
-     `.vercel/output/static/`. If the file is served but the redirects do not
-     fire, try `"bulk-redirects.json"` (output-directory relative) and then
-     `"dist/client/bulk-redirects.json"` BEFORE changing anything else — the
-     generator, the schema and the guard are all independent of this string. */
-  bulkRedirectsPath: ".vercel/output/static/bulk-redirects.json",
+       Build Completed in /vercel/output [18s]
+       Deploying outputs...
+       No files found at path .vercel/output/static/bulk-redirects.json.
+
+     The deploy step runs FROM `/vercel/output`, so a repo-root path resolves to
+     `/vercel/output/.vercel/output/...` and misses. The file really sits at
+     `/vercel/output/static/bulk-redirects.json`, so the next value to try is
+     `"static/bulk-redirects.json"`, and `"bulk-redirects.json"` after that.
+
+     Nothing else depends on this line: the `redirect` document type, its
+     validators, `bulk-redirects.json.ts` and the live-page guard are all built
+     and tested. Only DELIVERY is off, and there are zero redirect documents
+     today, so nothing is currently un-delivered. Re-enable it on a PREVIEW
+     deployment with one real redirect document to verify against — it cannot be
+     tested locally, because redirects fire under neither `astro dev` nor
+     `vercel dev`.
+
+     bulkRedirectsPath: "static/bulk-redirects.json", */
 
   /* BOTH SLASH FORMS FOR EVERY RULE. `trailingSlash: true` above already
      normalizes a bare request to the slashed shape, so `/category/x` would

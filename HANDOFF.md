@@ -8,6 +8,40 @@ either here, and don't record anything `git log` already knows.
 
 _Last updated: 2026-08-28._
 
+## THE FIRST DEPLOY FAILED, AND `bulkRedirectsPath` IS OFF UNTIL A PREVIEW PROVES IT
+
+**The build passed and the DEPLOY failed** — 329 pages, `sitemap.xml`, `robots.txt` and the
+function all built, then:
+
+```
+Build Completed in /vercel/output [18s]
+Deploying outputs...
+No files found at path .vercel/output/static/bulk-redirects.json.
+```
+
+**The deploy step runs FROM `/vercel/output`.** A repo-root-relative path therefore resolves to
+`/vercel/output/.vercel/output/…` and misses; the file really sits at
+`/vercel/output/static/bulk-redirects.json`. So the next value to try is
+**`"static/bulk-redirects.json"`**, then `"bulk-redirects.json"`.
+
+The reference project's `dist/bulk-redirects.json` is repo-root relative and works there because
+that project has no adapter and its output directory IS `dist`. **The Build Output API moves the
+goalposts**, and that is the difference nothing local could show.
+
+**THE KEY IS COMMENTED OUT IN `scripts/build-redirects.ts` RATHER THAN CORRECTED**, because a
+wrong path fails the ENTIRE deploy rather than just the feature — and there are **zero redirect
+documents**, so nothing is currently un-delivered. Everything else is built and tested: the
+`redirect` type, its validators, `bulk-redirects.json.ts`, and the live-page guard. Only delivery
+is off, and re-enabling is one line.
+
+**Re-enable on a PREVIEW deployment, with one real redirect document to verify against.** It
+cannot be tested any other way: redirects fire under neither `astro dev` nor `vercel dev`, which
+is why this reached production to begin with.
+
+**Worth knowing either way: the generated file lands in the static output, so it is publicly
+fetchable at `/bulk-redirects.json`.** Nothing secret is in it — a redirect table is public
+behaviour by definition — but it is not private, and an Astro page endpoint has no way to be.
+
 ## "LAST UPDATED" STAMPS ITSELF NOW, AND `_updatedAt` COULD NOT DO IT
 
 **`modifiedAt` is read-only on both `practiceArea` and `blogPost`, and the Studio sets it** —
