@@ -9,6 +9,7 @@ import Font from "astro/components/Font.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import { getFirmDetails } from "../data/site";
+import { getGlobalSeo } from "../data/seo";
 import { resolveSeo, SITE_NAME, type SeoInput } from "../lib/seo";
 import { legalServiceSchema } from "../lib/schema";
 import "../styles/global.css";
@@ -32,13 +33,26 @@ const {
   bodyClass,
 } = Astro.props;
 
-const firm = await getFirmDetails();
+const [firm, globalSeo] = await Promise.all([getFirmDetails(), getGlobalSeo()]);
 
 const meta = resolveSeo(seo, {
   fallbackTitle: title,
   fallbackDescription: description,
   pageUrl: Astro.url,
+  defaultOgImage: globalSeo?.defaultOgImage,
 });
+
+/*
+ * THE CRAWL SWITCH BEATS THE PAGE, which is the one place in this layer where
+ * a global setting overrides a per-page one rather than falling back to it.
+ * That asymmetry is the point of a master switch: while the site is on its
+ * temporary address, a page that says it wants to be indexed must not be.
+ *
+ * `globalSeo` may be null — the document need not exist for the site to build,
+ * see `data/seo.ts` — so this reads as "not discouraged" until someone creates
+ * it and turns it on.
+ */
+const noIndex = meta.noIndex || globalSeo?.discourageCrawling === true;
 
 // `Astro.site` is set in astro.config.mjs; the fallback keeps a bare `astro dev`
 // (which can run without it) from throwing inside the template literal below.
@@ -56,7 +70,7 @@ const organization = legalServiceSchema(firm, siteUrl);
     <title>{meta.title}</title>
     {meta.description && <meta name="description" content={meta.description} />}
     <link rel="canonical" href={meta.canonical} />
-    {meta.noIndex && <meta name="robots" content="noindex, nofollow" />}
+    {noIndex && <meta name="robots" content="noindex, nofollow" />}
 
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content={SITE_NAME} />

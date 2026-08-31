@@ -8,6 +8,332 @@ either here, and don't record anything `git log` already knows.
 
 _Last updated: 2026-08-28._
 
+## THE FIRST DEPLOY FAILED, AND `bulkRedirectsPath` IS OFF UNTIL A PREVIEW PROVES IT
+
+**The build passed and the DEPLOY failed** — 329 pages, `sitemap.xml`, `robots.txt` and the
+function all built, then:
+
+```
+Build Completed in /vercel/output [18s]
+Deploying outputs...
+No files found at path .vercel/output/static/bulk-redirects.json.
+```
+
+**The deploy step runs FROM `/vercel/output`.** A repo-root-relative path therefore resolves to
+`/vercel/output/.vercel/output/…` and misses; the file really sits at
+`/vercel/output/static/bulk-redirects.json`. So the next value to try is
+**`"static/bulk-redirects.json"`**, then `"bulk-redirects.json"`.
+
+The reference project's `dist/bulk-redirects.json` is repo-root relative and works there because
+that project has no adapter and its output directory IS `dist`. **The Build Output API moves the
+goalposts**, and that is the difference nothing local could show.
+
+**THE KEY IS COMMENTED OUT IN `scripts/build-redirects.ts` RATHER THAN CORRECTED**, because a
+wrong path fails the ENTIRE deploy rather than just the feature — and there are **zero redirect
+documents**, so nothing is currently un-delivered. Everything else is built and tested: the
+`redirect` type, its validators, `bulk-redirects.json.ts`, and the live-page guard. Only delivery
+is off, and re-enabling is one line.
+
+**Re-enable on a PREVIEW deployment, with one real redirect document to verify against.** It
+cannot be tested any other way: redirects fire under neither `astro dev` nor `vercel dev`, which
+is why this reached production to begin with.
+
+**Worth knowing either way: the generated file lands in the static output, so it is publicly
+fetchable at `/bulk-redirects.json`.** Nothing secret is in it — a redirect table is public
+behaviour by definition — but it is not private, and an Astro page endpoint has no way to be.
+
+## "LAST UPDATED" STAMPS ITSELF NOW, AND `_updatedAt` COULD NOT DO IT
+
+**`modifiedAt` is read-only on both `practiceArea` and `blogPost`, and the Studio sets it** —
+`src/sanity/actions/stampModified.ts`, wired in `sanity.config.ts` as a wrapper around Sanity's
+own publish action. It was a field somebody had to remember, which is a field that goes stale,
+and a stale "Updated" date on a legal page is worse than none because it is asserted rather than
+absent.
+
+**`_updatedAt` IS THE OBVIOUS ANSWER AND IT IS WRONG HERE. Check before reaching for it:** the
+186 blog posts share **two** distinct `_updatedAt` values and the 104 practice areas share
+**four**. Those are the migration batches that imported them. Anything reading `_updatedAt`
+today announces that the whole site changed at four instants, and throws away the real WordPress
+history — **162 of the 186 posts carry a modified date that differs from their publish date**.
+So `modifiedAt` keeps the imported history as its baseline and maintains itself from here.
+
+**IT ONLY FIRES WHEN THE ARTICLE CHANGED**, not on every publish. `SUBSTANCE` in that file lists
+the fields that ARE the article — `body` and `faqs` on a practice area, `body` on a post — and
+they are written out rather than inferred as "everything except metadata", because the inferred
+rule silently opts new fields in. Editing a title, an excerpt or the SEO tab deliberately leaves
+the date alone: it should mean REVIEWED, not TOUCHED.
+
+**WHAT DOES NOT TRIGGER IT IS THE REASON IT IS A STUDIO ACTION rather than a Sanity Function.**
+It runs on a human pressing Publish, so import and migration scripts — which write through the
+API — cannot re-date all 290 documents to the day they ran. That is precisely the failure
+`_updatedAt` already has.
+
+`blogPost.modifiedAt` was titled **"Last edited on the legacy site"** and read by nothing. It is
+"Last updated" now and feeds `sitemap.xml` as the post's last-modified date, falling back to
+`publishedAt` — which closes the orphan: it was a field all 186 documents carried and no query
+projected. **The sitemap went from 4 migration stamps to 304 URLs carrying `lastmod` across 77
+distinct dates.**
+
+### GROQ HAS NO BLOCK COMMENTS, AND THE FAILURE IS SILENT
+
+A `/* … */` inside a `defineQuery` template literal makes **TypeGen skip the whole query**. It
+does not error: the query simply vanishes from `sanity.types.ts`, `sanityClient.fetch()` falls
+back to `any`, and the damage surfaces as `implicitly has an 'any' type` in whichever data
+module maps the rows. **One comment cost 165 type errors, in files that had nothing to do with
+the edit** — `data/aboutPage.ts` was the loudest, and it was never touched.
+
+**This is a DIFFERENT trap from the backtick one already recorded here.** That one is about a
+comment ending the literal. This one is about GROQ's grammar: it has `//` line comments and no
+block comments. No query in `lib/queries.ts` carries an in-literal comment, and that is now
+written above `POST_CARD` where the next person will reach for one.
+
+Caught by `check:types`. Nothing else would have — the build stays green, because Vite strips
+types without checking them.
+
+## THE SEO LAYER IS IN — steps 3 to 11 of `/new-seo-setup`
+
+**The site was already ~60% through this skill before it ran**, which is why it went quickly:
+the `seo` object type, `resolveSeo`/`resolveTitle`/`canonicalize`, Layout's `seo` prop, the
+`LegalService` JSON-LD and `FAQPage` at both FAQ components all existed. **No `BreadcrumbList`:
+there is no breadcrumb component, and the skill says skip rather than invent one.**
+
+**THE ACCEPTANCE TEST PASSED AT EVERY STEP: 0 of 330 pages changed their `<title>` or
+`<meta name="description">`.** The layer is a no-op until an editor fills something in, which is
+the whole design. 330 canonical tags and 330 `og:*` sets are the only additions.
+
+### What is new
+
+- **`globalSeo` singleton**, hand-placed as a FOLDER under Site Settings — `Defaults` and
+  `Redirects`. A folder up front because foldering it later moves the singleton's URL out from
+  under anyone who bookmarked it.
+- **`seo` on all 16 routed types**, up from 2. `teamMember` gained a `meta` group; `blogPost`'s
+  was titled "Dates & provenance" and is now "SEO, dates & provenance" — an editor would never
+  have looked there.
+- **`data/seo.ts`** — the getters. **Nothing here uses `required()`, which is the opposite of
+  every other getter in `src/data/`** and is deliberate: this layer is all fallbacks, and the
+  Global SEO document may genuinely not exist yet. Throwing would make the optional mandatory.
+- **`sanity/lib/routes.ts`** — `getSiteEntries()` and `getLivePaths()`, the one answer to "what
+  URLs exist". Composed from the COLLECTION getters, not the directory, for the reason
+  `sitemap.astro` documents: the directory is synced to the firm's hub and the hub omits four
+  built pages.
+- **`sitemap.xml.ts`** (328 URLs) and **`robots.txt.ts`**, both endpoints. Hand-rolled rather
+  than `@astrojs/sitemap`, whose `filter` hook is synchronous and so cannot await the read that
+  says whether a page is `noIndex`.
+- **The crawl switch works end-to-end and was verified against real data**, not a stub — the
+  switch is ON in the dataset right now, and all 330 pages carry `noindex` while `robots.txt`
+  serves `Disallow: /`. **TURN IT OFF AT LAUNCH.**
+
+### THE SITEMAP COVERAGE CHECK FOUND A LIVE PAGE MISSING FROM ITSELF
+
+Diffing the built pages against `sitemap.xml` turned up `/can-you-sue-a-trampoline-park-if-you-signed-a-waiver/`:
+**the featured post is its own getter and is NOT in `getBlogPosts()`.** `sitemap.astro` already
+unions the two (`[featured, ...posts]`); `routes.ts` did not, and silently omitted one live,
+linked article. That is exactly the drift two copies of "what exists" produce, found within an
+hour of writing the second copy. `/tokens/` was the other page missing — correctly, and it is
+`noIndex` now rather than an internal proof sheet Google can index.
+
+### REDIRECTS ARE TWO-TIER, BY DECISION
+
+**The 196 cutover rules STAY IN `data/redirects.ts`.** They are migration facts from a dated
+audit, not editorial decisions; 45% of that file is the reasoning for them, and this project has
+lost the "a comment beside a literal cannot survive the literal" argument three times. Moving
+them would also put 196 deletable rules — currently holding ~46 live URLs' rankings — in front
+of an editor. The `redirect` document type holds what the SEO team adds FROM NOW ON.
+
+Both reach the edge, by different mechanisms and for a reason: **Vercel reads `vercel.json`
+before the build runs**, so nothing a build generates can land in it. `data/redirects.ts`
+generates that file in a pre-build step and commits it; `bulk-redirects.json.ts` writes the file
+`bulkRedirectsPath` points at. Bulk redirects are the documented exception.
+
+**THE GUARD IS THE POINT.** Vercel evaluates bulk redirects BEFORE the filesystem, so a rule
+whose source is a live page does not lose to that page — it takes the page off the site.
+`getLivePaths()` is checked at generation and a colliding rule is dropped and logged. **Proved
+with four test documents, since created and deleted**: a rule at `/about/` and a self-loop were
+both dropped with named reasons, `/about/` still built, and the two valid rules emitted in
+**both slash forms** — bulk redirects match exactly and run before slash normalization, so the
+slash-less form alone misses most legacy WordPress traffic.
+
+The schema validator is written for non-developers and blocks duplicates, self-loops, live
+reserved paths and collisions with the code table; it warns on chains and on a CMS page that
+still exists. **It imports `data/redirects.ts` and `lib/routePaths.ts`, both verified free of
+`sanity:client`** — the Sanity CLI parses schema files during `npm run typegen`, where that Vite
+virtual module does not resolve. The editor getter therefore lives in `data/seo.ts`, NOT beside
+the other redirects.
+
+### `check:desk` GAINED A THIRD LIST, AND THE FIRST VERSION OF IT WAS BLIND
+
+`redirect` is placed by hand but is NOT a singleton — editors must be able to create them, and
+`SINGLETON_TYPES` is exactly what `sanity.config.ts` uses to forbid creation. So `HAND_PLACED`
+exists, and `check-desk.py` reads it.
+
+**Teaching the check to read it introduced the hole it exists to catch.** With `HAND_PLACED`
+read directly, deleting `...HAND_PLACED` from the `PLACED` set left the Studio drawing
+`redirect` twice — its folder AND the catch-all divider — while the check stayed green. Found by
+testing the guard in both directions rather than only the passing one. There is now an UNCOVERED
+assertion for it, and removing the spread fails as it should.
+
+### Still open on this layer
+
+- **The two dynamic routes pass `title`/`description`, not the whole `seo` object.** The 104
+  practice areas already feed real `metaTitle`/`metaDescription` from the live site's own meta,
+  so titles and descriptions work — but `canonicalUrl`, `noIndex` and `ogImage` cannot be set
+  per practice-area page, per blog post or per attorney bio yet. That is splicing the `seo{…}`
+  projection into four document queries.
+- **No default OG image**, so 0 pages carry `og:image`. One upload in the Studio.
+- **`bulkRedirectsPath` is the one thing that cannot be tested locally.** Redirects fire under
+  neither `astro dev` nor `vercel dev` — only a deployed URL. It points at
+  `.vercel/output/static/bulk-redirects.json`; if the file serves but rules do not fire, try
+  `"bulk-redirects.json"` then `"dist/client/bulk-redirects.json"` before changing anything
+  else. The generator, schema and guard are all independent of that string.
+
+## THE CUTOVER URL AUDIT IS DONE: 18 WOULD-BE 404s, NOW ZERO
+
+**369 live URLs checked against what this build serves. 323 served directly, 46 redirected,
+0 that would 404, 0 redirects pointing at an unbuilt page.** The audit that two earlier
+sessions did by hand is now a repeatable method, and the method is the part worth keeping.
+
+### THREE SOURCES, AND THE THIRD IS THE ONE THAT MATTERS
+
+- **Yoast's `sitemap_index.xml`** → `post-sitemap.xml` (168) + `page-sitemap.xml` (186).
+- **The WordPress REST API** → 362 paths. **It lists nine pages the sitemap does not**, because
+  Yoast omits noindexed ones. `/reviews/`, `/demo/` and `/landing-page/` are all in this gap.
+- **The sitesucker scrape** → 317, after dropping `/wp-content`, `/wp-includes`, `/wp-json` and
+  `/category/` (which is 404 on the live site — a scrape artifact, not a URL).
+
+**NONE OF THE THREE LISTS A REDIRECT SOURCE, AND THAT IS A HOLE THE SIZE OF THE PROBLEM.** A
+sitemap and a REST index both enumerate canonical DESTINATIONS. A URL that 301s appears in
+neither — so an audit built on those two looks complete while being blind to exactly the class
+of URL that most needs a rule. Six were found only by **deriving candidates and probing**: for
+every path the other sources DO list, take its root-slug form and each of its parent forms, drop
+anything already served or redirected, and request the rest. That returned
+`/personal-injury-attorney/`, `/car-accident/`, `/traffic-collision-lawyer/`,
+`/client-review-testimonial/` and both former attorneys' root slugs — every one a live 301.
+
+It is the same method that found the 23 attorney bios, run as a sweep instead of by hand.
+**Re-run it before launch**: the live site is still being published to, which is how the 2026
+Big Little Gala write-up was missed by the sweep that found the other 24.
+
+### WHAT THE 18 WERE, AND HOW EACH WAS CLOSED
+
+**Replicated — WordPress already answers these, and the chain was followed to its END** rather
+than copied a hop at a time, so `/car-accident/` goes straight to `/denver-car-accident-lawyer/`
+instead of through two 301s: `/announcements/`, `/new-homepage/`, `/client-review-testimonial/`,
+`/personal-injury-attorney/`, `/practice-areas/personal-injury-attorney/`, `/car-accident/`,
+`/practice-areas/traffic-collision-lawyer/car-accident/`. Plus the 2026 gala, into
+`COMMUNITY_WRITE_UPS` beside the 2025 one.
+
+**Ruled on — the live site serves a 200 and this build chooses not to.** Each carries its reason
+in `redirects.ts`:
+
+| URL(s) | Ruling |
+|---|---|
+| Petroff and Gutierrez, both forms each | → `/meet-our-attorneys/`. The "no redirect, by request" call on record was about Nelson and Jewel, whose pages WordPress has since REMOVED — it never covered these two, whose pages are live and indexed. |
+| `/reviews/` | → `/testimonials/`, **not rebuilt**. The live page carries `AggregateRating` and `ratingValue` — the exact Product-with-stars violation this rebuild exists to fix. Rebuilding it is the one path that risks recreating it. |
+| `/traffic-collision-lawyer/` + `/practice-areas/` form | → `/denver-car-accident-lawyer/`. Its CHILD already 301s there on WordPress, so the parent matching it makes the branch coherent instead of half-redirected. |
+| `/demo/`, `/landing-page/` | → home. Theme scaffolding titled "Millions+ Recovered", in no sitemap, never linked. |
+
+**Built — `/editorial-guidelines/`**, the only one of the 18 that became a page. See below.
+
+`redirects.ts` is **196 rules** now, up from 162.
+
+### `/editorial-guidelines/` IS BUILT, AND IT COST ONE LINE IN `KINDS`
+
+Live, indexed, and **`ROUTES.editorialGuidelines` plus `RESERVED_PATHS` had reserved its path
+from the beginning** — something always intended it to exist and nothing built it. It was the
+last would-be 404 on the list.
+
+**It is a FOURTH `sitePage` document, not a fourth page type.** Adding it cost one entry in
+`KINDS`, one in `UTILITY_PAGES`, one query, one getter and one route — no schema file, no
+projection shape, no desk group. That is the argument for that type's one-type-many-singletons
+shape, made after the fact rather than in the abstract.
+
+`updated{}` used to be `hidden: isNot("privacy")` and is now `isNotOneOf("privacy",
+"editorial")`: the two WRITTEN documents stamp a date, the two GENERATED ones do not. Its label
+is **"Last reviewed"**, not the policy's "Last updated" — a set of standards is re-affirmed
+rather than edited.
+
+**Converted through `scripts/lib/wp-portable-text.mjs`, the same path both imports used**: 106
+blocks, zero converter warnings, zero duplicate `_key`s, and **66 bullets that stayed list items
+instead of flattening to paragraphs**. No links and no phone number in the source, so unlike the
+privacy policy there are **no departures** — nothing needed correcting.
+
+**NOT IN THE FOOTER, and that is deliberate: the live site does not link it either.** `/sitemap/`
+is the only page that links it, which makes that list load-bearing rather than a courtesy —
+drop the entry and the page is an orphan only a crawler with the old URL can reach. The comment
+in `sitemap.astro` that called it "reserved, never built" is corrected, and `consult` takes its
+place in the excluded-by-name pair.
+
+## `/api/consult` IS BUILT, AND THE SITE IS STILL STATIC
+
+**The first launch blocker is closed in code.** `src/pages/api/consult.ts` serves both forms —
+326 call sites across 327 of the 329 pages — and what is left is configuration, not work.
+
+**`@astrojs/vercel` is installed and `output` is UNTOUCHED.** The endpoint sets
+`export const prerender = false`; every other page still prerenders. That was the reason for
+choosing an Astro route over a root `api/consult.ts` Vercel function: a root function lands
+outside `src/`, where **`astro check` would never see it** — a hole in the type gate at exactly
+the one place the site runs server code. `check:types` now reads 264 files, up from 263.
+
+**PROVEN OUTPUT-NEUTRAL, and the number that matters is not the one `compare-builds.py`
+prints.** Adding the adapter moves every page from `dist/<path>` to `dist/client/<path>`, so a
+naive compare reports 329 removed and 330 added. Re-rooted and re-hashed, the truth is:
+
+  2 byte-identical · 327 identical once one string is undone · 0 changed · 0 added · 0 missing
+
+That one string is the form `action` gaining a trailing slash. Which is the second finding:
+
+### THE FORM ACTION NEEDED THE TRAILING SLASH, AND IT IS NOT COSMETIC
+
+`vercel.json` sets `trailingSlash: true`, so a POST to a bare `/api/consult` earns a **308 that
+re-sends the entire body**. The action is `ROUTES.consult` — `/api/consult/` — so the form posts
+straight to the function. It is in `ROUTES` rather than a literal because the convention says no
+internal URL is ever a literal in a component; it is deliberately NOT in `RESERVED_PATHS`, which
+guards the ROOT slug namespace, and this path is nested.
+
+### THE ADAPTER MOVED `dist/`, AND FOUR SCRIPTS READ IT
+
+`check-links.py`, `compare-builds.py`, `check-scoped-styles.py` and the `check:styles` npm script
+all pointed at `dist/`. Left alone, `check:links` derives every served path with a `/client`
+prefix and `check:styles` loses its `dist/admin/*` exclusion — so it would start scanning the
+Studio's 56KB minified bundle. All four now point at `dist/client`. **The full gate is green with
+identical numbers**: 33,619 links, 328 pages, 329 served paths, 162 redirects.
+
+### THE TWO FORMS' HONEYPOTS HAVE DIFFERENT NAMES
+
+`company` on the consultation form, `website` on the co-counsel one. **Nothing in either file
+says so**, and checking only one would accept every bot on the other. The endpoint checks both
+for both kinds — a real submission fills neither, so there is no reason to be precise. A trapped
+bot gets the **same 303 a person gets**: telling it apart is how a spammer learns.
+
+### `curl -X POST` GETS A 403, AND IT IS NOT A BUG IN THE ROUTE
+
+Astro's `security.checkOrigin` defaults ON and rejects a POST whose `Origin` does not match,
+**before the module is reached** — so a bare curl gets `403 Cross-site POST form submissions are
+forbidden` and none of the handler runs. Browsers always send `Origin` on a form submit, so real
+traffic is unaffected and this is free CSRF cover. Test with
+`-H "Origin: http://localhost:4321"`. This is recorded in the route's own header comment too,
+because it will otherwise read as a broken endpoint.
+
+**Every branch was exercised against a running dev server**, not reasoned about: 405 on GET, 303
+on each honeypot, 400 on a missing field / a bad phone format / an unknown `kind`, 303 to
+`/thank-you/` on an open-redirect attempt (`redirectTo` is validated against `ROUTES`, not
+trusted), and a 500 whose log names exactly which variables are unset.
+
+### WHAT IS LEFT ON IT
+
+- **Provision Resend** — `vercel link`, then `vercel integration add resend/resend-email`. The
+  repo is not linked to a Vercel project yet, and this needs the account holder. Resend is the
+  only `messaging` product in the Marketplace, so it is the pick by default rather than by
+  preference.
+- **Four variables**: `RESEND_API_KEY`, `CONSULT_TO_EMAIL`, `CONSULT_FROM_EMAIL`, and optionally
+  `COCOUNSEL_TO_EMAIL` (falls back to `CONSULT_TO_EMAIL`). The From domain must be verified in
+  Resend or the send is refused. **The firm has to name the inboxes** — they are environment
+  variables and not content precisely so that naming them is not a deploy.
+- **A designed error page.** The failure is a plain-text 500 naming the firm's phone number.
+  Deliberately blunt — visibly broken beats invisibly broken, the same argument that kept the
+  comps' fake success panel out — but it wants the light template's shell like the other three
+  utility pages. `TODO(launch)` in the route.
+
 ## The Sanity integration — Phases 0 through 6 are in
 
 **775 documents in Sanity, and `src/data/` no longer holds page copy.** Every route's strings
@@ -2155,8 +2481,8 @@ law firm's privacy policy is the firm's call. README has the row.
 
 The footer linked `/sitemap.xml` and nothing built it. An XML sitemap is a crawler file
 referenced from `robots.txt`, not from a footer, and every URL in it is absolute off `site:` —
-the open www-vs-apex `TODO(launch)`. Writing it now bakes that guess into ~330 URLs, so it stays
-with `/new-seo-setup`. The footer points at the human page instead.
+now SETTLED on www, so those ~330 URLs are no longer a guess and this is unblocked work. It
+stays with `/new-seo-setup` because that is where robots.txt and the canonical layer land. The footer points at the human page instead.
 
 **328 links, every built page except `/thank-you/` (noIndex) and `/tokens/` (the throwaway).
 Zero duplicates.** Verified by differencing the rendered hrefs against `dist/`.
@@ -2286,7 +2612,7 @@ entry and both files to fix.
    has something true to start from and the field type is already proven on two shapes.
    `BlogPosting` JSON-LD belongs here, and so does `sitemap.xml` — **which nothing links any
    more**: the footer points at the human `/sitemap/`. The XML file's every URL is absolute off
-   `site:`, so it cannot be written before the www-vs-apex call.
+   `site:` — settled on www, so it is unblocked work rather than a blocked decision.
 9. **`redirects.ts` is the last data module holding content**, and it is deliberate: the
    redirect table becomes editor-managed in `/new-seo-setup`. It is **162 rules now**, up from
     68, and two thirds of that growth is cutover work rather than legacy URL shapes.
@@ -2470,10 +2796,9 @@ none first. Already an open question below; now recorded where the code is.
   `object-position: center top` crops roughly the bottom 40%. Not a layout bug; a 16:10 crop
   would use the frame better.
 - **`MobileNav` has no current-page highlight**, where the desktop nav now does.
-- **Three live Denver pages were excluded as duplicates** and want a ruling:
-  `personal-injury-attorney` (duplicates the homepage), `car-accident` and
-  `traffic-collision-lawyer` (both overlap `denver-car-accident-lawyer`, which the heavy template
-  serves).
+- ~~**Three live Denver pages were excluded as duplicates** and want a ruling.~~ **RULED —
+  all three redirect.** `personal-injury-attorney` → home and the other two →
+  `denver-car-accident-lawyer`, in both URL forms each. See the audit section at the top.
 - **The `AREA_TO_BLOG_CATEGORY` map in `blog.ts` is inferred, not authored.** It decides which
   posts a practice area's sidebar shows. Keyed on the area slug rather than its topic, because
   topic is five buckets and would put car-accident posts on the motorcycle page — which is what
@@ -2482,17 +2807,21 @@ none first. Already an open question below; now recorded where the code is.
   so the shape is settled. What is left is a content decision for the firm — which five articles
   belong on each of 104 pages — not a migration step.
 - **Auto Insurance & Accident Claims has no tab** — 13 posts carry it second, none first.
-- **`site:` in `astro.config.mjs`** — www vs apex, still unsettled.
+- ~~**`site:` in `astro.config.mjs`** — www vs apex.~~ **SETTLED: www**, and every comment
+  that called it open has been corrected — there were TEN, across `astro.config.mjs`,
+  `check-links.py` (twice), `Footer.astro`, `sitePages.ts`, `routePaths.ts`, `sitemap.astro`,
+  `AGENTS.md`, `README.md` and this file. The reason is cutover risk, not taste: www is the
+  shape the legacy site serves and therefore the shape Google holds for ~300 indexed URLs, so
+  keeping it changes no canonical that is already ranking. **Vercel must serve www as the
+  PRIMARY domain**, apex redirecting to it; reversing that without moving `site:` points every
+  canonical tag at a redirect.
 - **Two crash types on the heavy detail page** — rear-end and head-on.
 - **The three Denver crash figures are unsourced**, and `[year]` renders live in all three labels.
 - **`src/assets` holds twelve images nothing references.** Eleven practice-area photographs and
   `consult.jpg`, all now Sanity assets. Kept because git is the only copy of the originals
   outside Sanity; delete them only alongside a decision about asset backup.
-- **Two former staff have live bio pages the roster no longer carries** — Alexandra Petroff and
-  Dinorah Gutierrez, 200 at both `/<slug>/` and `/meet-our-attorneys/<slug>/`. The "no redirect,
-  by request" decision on record was taken about Ella Nelson and Morgan Jewel, whose pages
-  WordPress has since removed, so it cannot be read as covering these two. Redirect them to
-  `/meet-our-attorneys/`, or let them 404 the way the other pair was meant to.
+- ~~**Two former staff have live bio pages the roster no longer carries.**~~ **RULED — all four
+  URLs redirect to `/meet-our-attorneys/`.** See the audit section at the top.
 - **The two article templates' twelve labels are code now**, and one of them is marketing copy:
   the practice-area eyebrow, "Tough lawyers for tough cases", on all 104 pages, already changed
   four times by request. Changing it a fifth time is a deploy. If that happens, it belongs on
@@ -2552,10 +2881,10 @@ still open is only the display vs CallRail tracking split, if dynamic insertion 
 
 **Blockers for launch, not for building**
 
-- `/api/consult` does not exist. Two form components are rendered from **six** call sites and
-  reach **326 of the 329 built pages** — the light template put one on 104 more through
-  `AreaSidebar` — and every one of them 404s on submit. One endpoint, not two: a hidden `kind`
-  field tells the payloads apart.
+- ~~`/api/consult` does not exist.~~ **BUILT — see the top of this file.** Two form components
+  from **six** call sites reach **327 of the 329 built pages** (counted from the build, not
+  estimated; the earlier 326 was one short). What remains is provisioning Resend and setting
+  four variables — configuration, not code.
 - The production URL is not yet a Sanity CORS origin, so the deployed `/admin` loads but fails
   sign-in. `http://localhost:4321` is registered — don't move dev off 4321.
 

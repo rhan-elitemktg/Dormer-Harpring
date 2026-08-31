@@ -31,14 +31,20 @@ import pathlib
 import re
 import sys
 
-DIST = pathlib.Path("dist")
+# THE ADAPTER MOVED THIS. `@astrojs/vercel` splits `outDir` into `client/` and
+# `server/`, so every built page is at `dist/client/<path>/index.html` — one
+# level deeper than before. The pages themselves did not change; only where they
+# land did. Pointing at plain `dist/` here finds the HTML anyway (the walk
+# recurses) but derives every served path with a `/client` prefix, which reads
+# as 329 moved pages rather than a directory rename.
+DIST = pathlib.Path("dist/client")
 
 # The Studio's own shell, not site content. Its bundle hash moves whenever the
 # schema or the desk changes, which is every slice of the migration — so leaving
 # it in makes the exit code mean "you changed a schema" rather than "you changed
 # the site". Excluded by path, not by hashing it differently, so it cannot mask
 # anything: nothing else is served from dist/admin/.
-EXCLUDED = ("dist/admin/",)
+EXCLUDED = ("dist/client/admin/",)
 
 # `src` / `srcset` on an image-bearing element only. Deliberately NOT a blanket
 # strip of every src on the page: a <script src> or an <iframe src> changing is
@@ -58,7 +64,7 @@ def digest(text: str) -> str:
 
 def scan() -> dict:
     if not DIST.is_dir():
-        sys.exit("dist/ does not exist — run `npm run build` first.")
+        sys.exit(f"{DIST}/ does not exist — run `npm run build` first.")
     pages = {}
     for path in sorted(DIST.rglob("*.html")):
         if str(path).startswith(EXCLUDED):
@@ -66,7 +72,7 @@ def scan() -> dict:
         html = path.read_text(encoding="utf-8", errors="replace")
         pages[str(path)] = {"raw": digest(html), "norm": digest(normalise(html))}
     if not pages:
-        sys.exit("dist/ holds no pages — run `npm run build` first.")
+        sys.exit(f"{DIST}/ holds no pages — run `npm run build` first.")
     return pages
 
 

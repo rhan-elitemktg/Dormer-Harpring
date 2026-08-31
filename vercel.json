@@ -343,6 +343,166 @@
       "permanent": true
     },
     {
+      "source": "/announcements",
+      "destination": "/meet-our-attorneys/",
+      "permanent": true
+    },
+    {
+      "source": "/announcements/",
+      "destination": "/meet-our-attorneys/",
+      "permanent": true
+    },
+    {
+      "source": "/new-homepage",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/new-homepage/",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/client-review-testimonial",
+      "destination": "/testimonials/",
+      "permanent": true
+    },
+    {
+      "source": "/client-review-testimonial/",
+      "destination": "/testimonials/",
+      "permanent": true
+    },
+    {
+      "source": "/personal-injury-attorney",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/personal-injury-attorney/",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/practice-areas/personal-injury-attorney",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/practice-areas/personal-injury-attorney/",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/car-accident",
+      "destination": "/denver-car-accident-lawyer/",
+      "permanent": true
+    },
+    {
+      "source": "/car-accident/",
+      "destination": "/denver-car-accident-lawyer/",
+      "permanent": true
+    },
+    {
+      "source": "/practice-areas/traffic-collision-lawyer/car-accident",
+      "destination": "/denver-car-accident-lawyer/",
+      "permanent": true
+    },
+    {
+      "source": "/practice-areas/traffic-collision-lawyer/car-accident/",
+      "destination": "/denver-car-accident-lawyer/",
+      "permanent": true
+    },
+    {
+      "source": "/alexandra-petroff",
+      "destination": "/meet-our-attorneys/",
+      "permanent": true
+    },
+    {
+      "source": "/alexandra-petroff/",
+      "destination": "/meet-our-attorneys/",
+      "permanent": true
+    },
+    {
+      "source": "/meet-our-attorneys/alexandra-petroff",
+      "destination": "/meet-our-attorneys/",
+      "permanent": true
+    },
+    {
+      "source": "/meet-our-attorneys/alexandra-petroff/",
+      "destination": "/meet-our-attorneys/",
+      "permanent": true
+    },
+    {
+      "source": "/dinorah-gutierrez",
+      "destination": "/meet-our-attorneys/",
+      "permanent": true
+    },
+    {
+      "source": "/dinorah-gutierrez/",
+      "destination": "/meet-our-attorneys/",
+      "permanent": true
+    },
+    {
+      "source": "/meet-our-attorneys/dinorah-gutierrez",
+      "destination": "/meet-our-attorneys/",
+      "permanent": true
+    },
+    {
+      "source": "/meet-our-attorneys/dinorah-gutierrez/",
+      "destination": "/meet-our-attorneys/",
+      "permanent": true
+    },
+    {
+      "source": "/reviews",
+      "destination": "/testimonials/",
+      "permanent": true
+    },
+    {
+      "source": "/reviews/",
+      "destination": "/testimonials/",
+      "permanent": true
+    },
+    {
+      "source": "/traffic-collision-lawyer",
+      "destination": "/denver-car-accident-lawyer/",
+      "permanent": true
+    },
+    {
+      "source": "/traffic-collision-lawyer/",
+      "destination": "/denver-car-accident-lawyer/",
+      "permanent": true
+    },
+    {
+      "source": "/practice-areas/traffic-collision-lawyer",
+      "destination": "/denver-car-accident-lawyer/",
+      "permanent": true
+    },
+    {
+      "source": "/practice-areas/traffic-collision-lawyer/",
+      "destination": "/denver-car-accident-lawyer/",
+      "permanent": true
+    },
+    {
+      "source": "/demo",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/demo/",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/landing-page",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/landing-page/",
+      "destination": "/",
+      "permanent": true
+    },
+    {
       "source": "/2023-big-little-gala-hosted-by-big-brothers-big-sisters-of-colorado",
       "destination": "/community-involvement/",
       "permanent": true
@@ -399,6 +559,16 @@
     },
     {
       "source": "/big-brothers-big-sisters-annual-big-little-gala-2025/",
+      "destination": "/community-involvement/",
+      "permanent": true
+    },
+    {
+      "source": "/big-brothers-big-sisters-annual-big-little-gala-2026",
+      "destination": "/community-involvement/",
+      "permanent": true
+    },
+    {
+      "source": "/big-brothers-big-sisters-annual-big-little-gala-2026/",
       "destination": "/community-involvement/",
       "permanent": true
     },

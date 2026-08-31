@@ -123,6 +123,22 @@ export type SanityImageHotspot = {
   width: number;
 };
 
+export type GlobalSeo = {
+  _id: string;
+  _type: "globalSeo";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  discourageCrawling?: boolean;
+  defaultOgImage?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+  };
+};
+
 export type ContactSettings = {
   _id: string;
   _type: "contactSettings";
@@ -366,6 +382,22 @@ export type BlogPost = {
   publishedAt: string;
   modifiedAt?: string;
   legacyId?: number;
+  seo?: Seo;
+};
+
+export type Seo = {
+  _type: "seo";
+  metaTitle?: string;
+  metaDescription?: string;
+  canonicalUrl?: string;
+  noIndex?: boolean;
+  ogImage?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+  };
 };
 
 export type RichText = Array<
@@ -397,6 +429,17 @@ export type RichText = Array<
       _key: string;
     }
 >;
+
+export type Redirect = {
+  _id: string;
+  _type: "redirect";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  source: string;
+  destination: string;
+  permanent?: boolean;
+};
 
 export type AwardReference = {
   _ref: string;
@@ -743,28 +786,13 @@ export type Testimonial = {
   railBody?: string;
 };
 
-export type Seo = {
-  _type: "seo";
-  metaTitle?: string;
-  metaDescription?: string;
-  canonicalUrl?: string;
-  noIndex?: boolean;
-  ogImage?: {
-    asset?: SanityImageAssetReference;
-    media?: unknown;
-    hotspot?: SanityImageHotspot;
-    crop?: SanityImageCrop;
-    _type: "image";
-  };
-};
-
 export type SitePage = {
   _id: string;
   _type: "sitePage";
   _createdAt: string;
   _updatedAt: string;
   _rev: string;
-  kind: "privacy" | "sitemap" | "notFound";
+  kind: "privacy" | "editorial" | "sitemap" | "notFound";
   content: {
     title: string;
     lede?: string;
@@ -784,6 +812,7 @@ export type SitePage = {
       _key: string;
     }>;
   };
+  seo?: Seo;
 };
 
 export type ThankYouPage = {
@@ -809,6 +838,7 @@ export type ThankYouPage = {
       _key: string;
     }>;
   };
+  seo?: Seo;
 };
 
 export type SimpleText = Array<{
@@ -846,6 +876,7 @@ export type ContactPage = {
     title: string;
     lede: string;
   };
+  seo?: Seo;
 };
 
 export type BlogIndexPage = {
@@ -867,6 +898,7 @@ export type BlogIndexPage = {
     loadMoreLabel: string;
     emptyLabel: string;
   };
+  seo?: Seo;
 };
 
 export type CommunityPage = {
@@ -914,6 +946,7 @@ export type CommunityPage = {
       _key: string;
     }>;
   };
+  seo?: Seo;
 };
 
 export type CoCounselPage = {
@@ -959,6 +992,7 @@ export type CoCounselPage = {
     submitLabel: string;
     disclaimer: string;
   };
+  seo?: Seo;
 };
 
 export type InlineText = Array<{
@@ -1004,6 +1038,7 @@ export type TestimonialsPage = {
     lede: string;
     moreLabel: string;
   };
+  seo?: Seo;
 };
 
 export type ResultsPage = {
@@ -1016,6 +1051,7 @@ export type ResultsPage = {
   title: string;
   lede: SimpleText;
   moreLabel: string;
+  seo?: Seo;
 };
 
 export type PracticeAreaReference = {
@@ -1081,6 +1117,7 @@ export type PracticeAreasPage = {
       _key: string;
     }>;
   };
+  seo?: Seo;
 };
 
 export type PracticeArea = {
@@ -1157,6 +1194,7 @@ export type TeamPage = {
     eyebrow: string;
     title: string;
   };
+  seo?: Seo;
 };
 
 export type AboutPage = {
@@ -1215,6 +1253,7 @@ export type AboutPage = {
       _key: string;
     }>;
   };
+  seo?: Seo;
 };
 
 export type HomePage = {
@@ -1415,6 +1454,7 @@ export type HomePage = {
       _key: string;
     }>;
   };
+  seo?: Seo;
 };
 
 export type TeamMember = {
@@ -1466,6 +1506,7 @@ export type TeamMember = {
     } & NavLink
   >;
   videoId?: string;
+  seo?: Seo;
 };
 
 export type NavLink = {
@@ -1575,6 +1616,7 @@ export type AllSanitySchemaTypes =
   | SharedSections
   | SanityImageCrop
   | SanityImageHotspot
+  | GlobalSeo
   | ContactSettings
   | Navigation
   | FirmDetails
@@ -1588,12 +1630,13 @@ export type AllSanitySchemaTypes =
   | BlogCategoryReference
   | TeamMemberReference
   | BlogPost
+  | Seo
   | RichText
+  | Redirect
   | AwardReference
   | TestimonialReference
   | FeaturedPracticeArea
   | Testimonial
-  | Seo
   | SitePage
   | ThankYouPage
   | SimpleText
@@ -2046,13 +2089,14 @@ export type BLOG_CATEGORIES_QUERY_RESULT = Array<{
 
 // Source: src/sanity/lib/queries.ts
 // Variable: BLOG_POSTS_QUERY
-// Query: *[_type == "blogPost" && featured != true] | order(publishedAt desc){  "_key": slug.current,  "slug": slug.current,  title,  excerpt,  publishedAt,  "category": categories[0]->{ "_key": slug.current, title, "slug": slug.current },  image,  "reviewerKey": reviewer->key.current}
+// Query: *[_type == "blogPost" && featured != true] | order(publishedAt desc){  "_key": slug.current,  "slug": slug.current,  title,  excerpt,  publishedAt,  "updatedAt": modifiedAt,  "category": categories[0]->{ "_key": slug.current, title, "slug": slug.current },  image,  "reviewerKey": reviewer->key.current}
 export type BLOG_POSTS_QUERY_RESULT = Array<{
   _key: string;
   slug: string;
   title: string;
   excerpt: string;
   publishedAt: string;
+  updatedAt: string | null;
   category: {
     _key: string;
     title: string;
@@ -2071,13 +2115,14 @@ export type BLOG_POSTS_QUERY_RESULT = Array<{
 
 // Source: src/sanity/lib/queries.ts
 // Variable: FEATURED_POST_QUERY
-// Query: *[_type == "blogPost" && featured == true]{  "_key": slug.current,  "slug": slug.current,  title,  excerpt,  publishedAt,  "category": categories[0]->{ "_key": slug.current, title, "slug": slug.current },  image,  "reviewerKey": reviewer->key.current, "imageAlt": image.alt}
+// Query: *[_type == "blogPost" && featured == true]{  "_key": slug.current,  "slug": slug.current,  title,  excerpt,  publishedAt,  "updatedAt": modifiedAt,  "category": categories[0]->{ "_key": slug.current, title, "slug": slug.current },  image,  "reviewerKey": reviewer->key.current, "imageAlt": image.alt}
 export type FEATURED_POST_QUERY_RESULT = Array<{
   _key: string;
   slug: string;
   title: string;
   excerpt: string;
   publishedAt: string;
+  updatedAt: string | null;
   category: {
     _key: string;
     title: string;
@@ -2687,6 +2732,19 @@ export type PRIVACY_PAGE_QUERY_RESULT = {
 } | null;
 
 // Source: src/sanity/lib/queries.ts
+// Variable: EDITORIAL_PAGE_QUERY
+// Query: *[_type == "sitePage" && _id == "editorial"][0]{  ...content{ title, lede, "body": coalesce(body, []) },  updated{ at, label }}
+export type EDITORIAL_PAGE_QUERY_RESULT = {
+  title: string;
+  lede: string | null;
+  body: Array<never> | RichText;
+  updated: {
+    at: string | null;
+    label: string | null;
+  } | null;
+} | null;
+
+// Source: src/sanity/lib/queries.ts
 // Variable: SITEMAP_PAGE_QUERY
 // Query: *[_type == "sitePage" && _id == "sitemap"][0]{  ...content{ title, lede, "body": coalesce(body, []) }}
 export type SITEMAP_PAGE_QUERY_RESULT = {
@@ -3056,6 +3114,68 @@ export type FEATURED_FAQ_SECTION_QUERY_RESULT = {
   lede: string;
 } | null;
 
+// Source: src/sanity/lib/queries.ts
+// Variable: PAGE_SEO_QUERY
+// Query: *[_id == $pageId][0].seo{  metaTitle,  metaDescription,  canonicalUrl,  noIndex,  ogImage}
+export type PAGE_SEO_QUERY_RESULT = {
+  metaTitle: string | null;
+  metaDescription: string | null;
+  canonicalUrl: string | null;
+  noIndex: boolean | null;
+  ogImage: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+  } | null;
+} | null;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: STATIC_PAGE_SEO_QUERY
+// Query: *[_id in $ids]{  _id,  _updatedAt,  "noIndex": seo.noIndex}
+export type STATIC_PAGE_SEO_QUERY_RESULT = Array<
+  | {
+      _id: string;
+      _updatedAt: string;
+      noIndex: null;
+    }
+  | {
+      _id: string;
+      _updatedAt: string;
+      noIndex: boolean | null;
+    }
+>;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: GLOBAL_SEO_QUERY
+// Query: *[_id == "globalSeo"][0]{  discourageCrawling,  defaultOgImage}
+export type GLOBAL_SEO_QUERY_RESULT =
+  | {
+      discourageCrawling: null;
+      defaultOgImage: null;
+    }
+  | {
+      discourageCrawling: boolean | null;
+      defaultOgImage: {
+        asset?: SanityImageAssetReference;
+        media?: unknown;
+        hotspot?: SanityImageHotspot;
+        crop?: SanityImageCrop;
+        _type: "image";
+      } | null;
+    }
+  | null;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: EDITOR_REDIRECTS_QUERY
+// Query: *[_type == "redirect" && defined(source) && defined(destination)]|order(source asc){  source,  destination,  "permanent": coalesce(permanent, true)}
+export type EDITOR_REDIRECTS_QUERY_RESULT = Array<{
+  source: string;
+  destination: string;
+  permanent: boolean | true;
+}>;
+
 // Query TypeMap
 import "@sanity/client";
 declare module "@sanity/client" {
@@ -3079,8 +3199,8 @@ declare module "@sanity/client" {
     '*[_type == "teamMember" && hasProfile == true] | order(\n  select(\n    kind == "partner" => 1,\n    kind == "attorney" => 2,\n    kind == "staff" => 3,\n    kind == "dog" => 4,\n    5\n  ) asc,\n  orderRank asc\n){\n  "slug": key.current,\n  category,\n  lede,\n  email,\n  "facts": facts[]{ _key, value, label },\n  body,\n  education,\n  "links": links[]{ _key, label, href },\n  videoId\n}': TEAM_PROFILES_QUERY_RESULT;
     '*[_type == "city"] | order(order asc){\n  "_key": key.current, name\n}': CITIES_QUERY_RESULT;
     '*[_type == "blogCategory"] | order(slug.current asc){\n    "_key": slug.current, title, "slug": slug.current,\n    "posts": count(*[_type == "blogPost" && categories[0]._ref == ^._id])\n  }': BLOG_CATEGORIES_QUERY_RESULT;
-    '*[_type == "blogPost" && featured != true] | order(publishedAt desc){\n  "_key": slug.current,\n  "slug": slug.current,\n  title,\n  excerpt,\n  publishedAt,\n  "category": categories[0]->{ "_key": slug.current, title, "slug": slug.current },\n  image,\n  "reviewerKey": reviewer->key.current\n}': BLOG_POSTS_QUERY_RESULT;
-    '*[_type == "blogPost" && featured == true]{\n  "_key": slug.current,\n  "slug": slug.current,\n  title,\n  excerpt,\n  publishedAt,\n  "category": categories[0]->{ "_key": slug.current, title, "slug": slug.current },\n  image,\n  "reviewerKey": reviewer->key.current\n, "imageAlt": image.alt}': FEATURED_POST_QUERY_RESULT;
+    '*[_type == "blogPost" && featured != true] | order(publishedAt desc){\n  "_key": slug.current,\n  "slug": slug.current,\n  title,\n  excerpt,\n  publishedAt,\n  "updatedAt": modifiedAt,\n  "category": categories[0]->{ "_key": slug.current, title, "slug": slug.current },\n  image,\n  "reviewerKey": reviewer->key.current\n}': BLOG_POSTS_QUERY_RESULT;
+    '*[_type == "blogPost" && featured == true]{\n  "_key": slug.current,\n  "slug": slug.current,\n  title,\n  excerpt,\n  publishedAt,\n  "updatedAt": modifiedAt,\n  "category": categories[0]->{ "_key": slug.current, title, "slug": slug.current },\n  image,\n  "reviewerKey": reviewer->key.current\n, "imageAlt": image.alt}': FEATURED_POST_QUERY_RESULT;
     '*[_type == "homePage" && _id == "homePage"][0].practiceSection.cards[]{\n    _key, name, iconKey, blurb, closing, href, image\n  }': HOME_PRACTICE_AREAS_QUERY_RESULT;
     '*[_type == "homePage" && _id == "homePage"][0].practiceSection.catastrophic[]{\n    _key, name, iconKey, insight, href\n  }': HOME_CATASTROPHIC_QUERY_RESULT;
     '*[_type == "practiceAreasPage" && _id == "practiceAreasPage"][0]{\n    "featuredAreas": coalesce(featured.areas[]{ _key, name, iconKey, blurb, href, image }, []),\n    "directory": coalesce(directory.entries[]{\n      _key,\n      title,\n      "items": coalesce(items[]{\n        _key,\n        "label": coalesce(label, page->label),\n        "slug": page->slug.current,\n        href\n      }, [])\n    }, [])\n  }': PRACTICE_AREAS_PAGE_QUERY_RESULT;
@@ -3108,11 +3228,16 @@ declare module "@sanity/client" {
     '*[_type == "coCounselPage" && _id == "coCounselPage"][0]{\n  ...header{ eyebrow, title, lede, ctaLabel, ctaNote },\n  partnership{ eyebrow, title, intro, callout, terms },\n  results{ eyebrow, title, lede },\n  areas{\n    eyebrow,\n    title,\n    ctaLabel,\n    "items": coalesce(items[]{ _key, label, href }, [])\n  },\n  form{ title, lede, requiredNote, submitLabel, disclaimer }\n}': CO_COUNSEL_PAGE_QUERY_RESULT;
     '*[_type == "blogIndexPage" && _id == "blogIndexPage"][0]{\n  ...header{ eyebrow, title, lede },\n  ...feed{ categoryLabel, allLabel, featuredBadge, readMoreLabel, loadMoreLabel, emptyLabel }\n}': BLOG_INDEX_PAGE_QUERY_RESULT;
     '*[_type == "sitePage" && _id == "privacy"][0]{\n  ...content{ title, lede, "body": coalesce(body, []) },\n  updated{ at, label }\n}': PRIVACY_PAGE_QUERY_RESULT;
+    '*[_type == "sitePage" && _id == "editorial"][0]{\n  ...content{ title, lede, "body": coalesce(body, []) },\n  updated{ at, label }\n}': EDITORIAL_PAGE_QUERY_RESULT;
     '*[_type == "sitePage" && _id == "sitemap"][0]{\n  ...content{ title, lede, "body": coalesce(body, []) }\n}': SITEMAP_PAGE_QUERY_RESULT;
     '*[_type == "sitePage" && _id == "notFound"][0]{\n  ...content{ title, lede, "body": coalesce(body, []) },\n  "linksTitle": links.title,\n  "links": coalesce(links.items[]{ _key, label, description, href }, [])\n}': NOT_FOUND_PAGE_QUERY_RESULT;
     '*[_type == "practiceAreasPage" && _id == "practiceAreasPage"][0]{\n  ...header{ eyebrow, title, lede, ctaLabel, ctaNote },\n  featured{ eyebrow, title, lede },\n  directory{ eyebrow, title }\n}': PRACTICE_AREAS_COPY_QUERY_RESULT;
     '*[_type == "communityPage" && _id == "communityPage"][0]{\n  ...header{ eyebrow, title, lede },\n  "volunteer": partners{ eyebrow, title, ctaLabel },\n  sponsorships{ eyebrow, title },\n  partners{ label }\n}': COMMUNITY_PAGE_COPY_QUERY_RESULT;
     '*[_type == "featuredPracticeArea"] | order(label asc){\n  "key": key.current,\n  seo{ metaTitle, metaDescription },\n  hero{\n    "trail": coalesce(trail[]{ _key, label, href }, []),\n    title,\n    lede,\n    "proof": coalesce(proof[]{ _key, big, label, href, google }, []),\n    ctaLabel,\n    telLabel,\n    photoAlt,\n    reviewer{\n      "name": member->name,\n      "role": member->role,\n      "memberKey": member->key.current,\n      portrait,\n      updated\n    }\n  },\n  nav{\n    "items": coalesce(items[]{ _key, section, label }, []),\n    ctaLabel\n  },\n  triage{\n    title,\n    lede,\n    video{ poster, alt, title, length, "video": { "provider": "wistia", "id": videoId } },\n    help{ text },\n    "rows": coalesce(rows[]{ _key, tone, tag, question, body, ctaLabel, ctaHref, stat{ big, label } }, []),\n    sources{ label, "items": coalesce(items[]{ _key, label, note, href }, []) }\n  },\n  takeaways{\n    eyebrow,\n    title,\n    lede,\n    "items": coalesce(items[]{ _key, title, body }, [])\n  },\n  criteria{\n    title,\n    lede,\n    video{ poster, alt, title, length, "video": { "provider": "wistia", "id": videoId } },\n    "items": coalesce(items[]{ _key, title, body }, []),\n    note\n  },\n  lawyers{\n    title,\n    lede,\n    "attorneys": coalesce(attorneys[]{ _key, "key": member->key.current, cred }, []),\n    moreLabel,\n    moreHref\n  },\n  credentials{\n    "badges": coalesce(badges[]{ "_key": _key, "awardKey": @->key.current }, []),\n    eyebrow,\n    disclaimer\n  },\n  whyFirm{\n    eyebrow,\n    title,\n    "stats": coalesce(stats[]{ _key, big, label }, []),\n    disclaimer,\n    "columns": coalesce(columns[]{ _key, n, title, body }, []),\n    ctaLabel,\n    ctaHref,\n    photoAlt\n  },\n  results{\n    eyebrow,\n    title,\n    offeredLabel,\n    recoveredLabel,\n    "stories": coalesce(stories[]{\n      _key, offered, recovered, title, story, changed,\n      "reviewKey": review->key.current\n    }, []),\n    disclaimer\n  },\n  timeline{\n    title,\n    lede,\n    "steps": coalesce(steps[]{ _key, n, title, body }, []),\n    "phases": coalesce(phases[]{ _key, title, when, body }, []),\n    photoAlt,\n    "points": coalesce(points, [])\n  },\n  crashTypes{\n    title,\n    lede,\n    "tiles": coalesce(tiles[]{ _key, name, body, linkLabel, href }, [])\n  },\n  denver{\n    title,\n    lede,\n    "stats": coalesce(stats[]{ _key, big, label, body }, []),\n    "corridors": coalesce(corridors[]{ _key, name, body }, [])\n  },\n  checklistTeaser{\n    title,\n    body,\n    ctaLabel,\n    ctaHref,\n    "steps": coalesce(steps[]{ _key, iconKey, label }, [])\n  },\n  faultTeaser{\n    title,\n    body,\n    ctaLabel,\n    ctaHref,\n    scale{ start, middle, end },\n    source{ label, "items": coalesce(items[]{ _key, label, note, href }, []) }\n  },\n  more{\n    title,\n    "features": coalesce(features[]{ _key, title, body, length, poster, ctaLabel, href }, []),\n    "cards": coalesce(cards[]{ _key, title, body, ctaLabel, href }, [])\n  },\n  closing{ title, lede, officeLabel }\n}': FEATURED_PRACTICE_AREAS_QUERY_RESULT;
     '*[_type == "featuredPracticeArea" && key.current == $key][0].faqSection{\n  eyebrow, title, lede\n}': FEATURED_FAQ_SECTION_QUERY_RESULT;
+    "*[_id == $pageId][0].seo{\n  metaTitle,\n  metaDescription,\n  canonicalUrl,\n  noIndex,\n  ogImage\n}": PAGE_SEO_QUERY_RESULT;
+    '*[_id in $ids]{\n  _id,\n  _updatedAt,\n  "noIndex": seo.noIndex\n}': STATIC_PAGE_SEO_QUERY_RESULT;
+    '*[_id == "globalSeo"][0]{\n  discourageCrawling,\n  defaultOgImage\n}': GLOBAL_SEO_QUERY_RESULT;
+    '*[_type == "redirect" && defined(source) && defined(destination)]|order(source asc){\n  source,\n  destination,\n  "permanent": coalesce(permanent, true)\n}': EDITOR_REDIRECTS_QUERY_RESULT;
   }
 }

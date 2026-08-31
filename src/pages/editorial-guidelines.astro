@@ -1,0 +1,81 @@
+---
+// The editorial guidelines, transcribed from the live page. See
+// `getEditorialGuidelinesPage()` for where it came from and why it has no
+// departures from its source, unlike the privacy policy's three.
+//
+// THIS PAGE EXISTS BECAUSE OF THE CUTOVER URL AUDIT, not because anything in
+// this build asked for it. `ROUTES.editorialGuidelines` and `RESERVED_PATHS`
+// reserved the path from the start and nothing ever served it, so the live,
+// indexed page would have 404'd on cutover. Nothing here could see
+// that: `check:links` validates the links this site EMITS, and no page emitted
+// one.
+//
+// SURFACE ORDER, which nothing in the build checks (see HANDOFF):
+//   cream `.spage` → sunk `.awards` → cream `.ct`
+// Copied from privacy-policy.astro deliberately, not re-derived: these two are
+// the same kind of page on the same shell, and the trap that makes the order
+// matter is the same one. `lifted` is `--dh-cream-50` at 1.009:1 against
+// cream-100 — the invisible-surface trap — so the awards bar takes `sunk`.
+import Layout from "../layouts/Layout.astro";
+import PageArticle from "../components/page/PageArticle.astro";
+import AreaSidebar from "../components/practice/area/AreaSidebar.astro";
+import AwardsBar from "../components/AwardsBar.astro";
+import ContactDetails from "../components/contact/ContactDetails.astro";
+import { getEditorialGuidelinesPage } from "../data/sitePages";
+import { getSeo } from "../data/seo";
+import { getAwards } from "../data/awards";
+import { getAwardsBar } from "../data/home";
+import { getContactBand, getContactDetails } from "../data/contact";
+import {
+  getPracticeAreaPageCopy,
+  getPracticeAreaSidebarLinks,
+} from "../data/practiceAreaPages";
+import { getBlogPosts } from "../data/blog";
+
+const [pageSeo, page, awards, awardsBar, details, band, areaCopy, sidebarAreas, posts] = await Promise.all([
+  getSeo("editorial"),
+  getEditorialGuidelinesPage(),
+  getAwards(),
+  getAwardsBar(),
+  getContactDetails(),
+  getContactBand(),
+  getPracticeAreaPageCopy(),
+  getPracticeAreaSidebarLinks("denver", ""),
+  getBlogPosts(),
+]);
+
+/* THE PRACTICE-AREA SIDEBAR, on the same terms privacy-policy.astro takes it —
+   see that file for why `"denver"` and an empty current-slug are the right
+   arguments on a page that is not a practice area, and why the related-posts
+   label is overridden rather than inherited.
+
+   The label matters slightly more here than there: this page is ABOUT how the
+   firm's articles are written, so a card headed "Related articles" beside it
+   would read as a claim that these five demonstrate the standards above. They
+   are simply the five most recent. */
+const sidebarCopy = { ...areaCopy, relatedSidebarLabel: "Latest articles" };
+const latest = posts.filter((post) => post.href).slice(0, 5);
+---
+
+<Layout
+  seo={pageSeo}
+  title={page.title}
+  description="The standards Dormer Harpring's writers and editors follow — who our content is for, how it is researched, and how it is reviewed."
+>
+  <PageArticle
+    title={page.title}
+    body={page.body}
+    stamp={page.updatedAt}
+    metaLabel={page.updatedLabel}
+  >
+    <AreaSidebar
+      slot="sidebar"
+      page={sidebarCopy}
+      areas={sidebarAreas}
+      related={latest}
+    />
+  </PageArticle>
+
+  <AwardsBar awards={awards} eyebrow={awardsBar.eyebrow} tone="sunk" />
+  <ContactDetails details={details} form={band.form} />
+</Layout>

@@ -32,7 +32,7 @@ const { form } = Astro.props;
         <p class="ccform__required">{form.requiredNote}</p>
       </header>
 
-      <form method="post" action="/api/consult" aria-describedby="ccform-disclaimer">
+      <form method="post" action={ROUTES.consult} aria-describedby="ccform-disclaimer">
         <input type="hidden" name="kind" value="co-counsel" />
         <input type="hidden" name="redirectTo" value={ROUTES.thankYou} />
         <input type="hidden" name="source" value={Astro.url.pathname} />

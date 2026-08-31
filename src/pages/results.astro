@@ -5,10 +5,12 @@ import ResultsGrid from "../components/results/ResultsGrid.astro";
 import StatsBand from "../components/StatsBand.astro";
 import ContactDetails from "../components/contact/ContactDetails.astro";
 import { getCaseResults, getCaseResultsPage } from "../data/caseResults";
+import { getSeo } from "../data/seo";
 import { getFirmStats } from "../data/stats";
 import { getContactBand, getContactDetails } from "../data/contact";
 
-const [page, results, stats, band, details] = await Promise.all([
+const [pageSeo, page, results, stats, band, details] = await Promise.all([
+  getSeo("resultsPage"),
   getCaseResultsPage(),
   getCaseResults(),
   getFirmStats(),
@@ -18,6 +20,7 @@ const [page, results, stats, band, details] = await Promise.all([
 ---
 
 <Layout
+  seo={pageSeo}
   title="Case Results"
   description="Verdicts and settlements Dormer Harpring has obtained for injured Coloradans, including cases other firms turned down."
 >

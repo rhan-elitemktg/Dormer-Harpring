@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Lint: scoped Astro styles that can never match their target.
 
-    npm run build && python3 scripts/check-scoped-styles.py dist/**/index.html
+    npm run build && python3 scripts/check-scoped-styles.py dist/client/**/index.html
 
 Astro scopes a component's <style> by adding data-astro-cid-XXXX to the elements
 in *that component's own template*. Move markup into a child component (e.g. a
@@ -16,7 +16,7 @@ import re, glob, sys, collections
 # Astro inlines small stylesheets into the HTML and emits larger ones as separate
 # files — so read BOTH. Reading only dist/_astro/*.css silently skips every
 # inlined component, which makes the check pass when it shouldn't.
-css = "".join(open(f).read() for f in glob.glob('dist/_astro/*.css'))
+css = "".join(open(f).read() for f in glob.glob('dist/client/_astro/*.css'))
 for page in sys.argv[1:]:
     css += "".join(re.findall(r'<style[^>]*>(.*?)</style>', open(page).read(), re.S))
 

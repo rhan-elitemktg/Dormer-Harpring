@@ -11,10 +11,12 @@ import {
   getWrittenReviews,
 } from "../data/testimonials";
 import { getFirmStats } from "../data/stats";
+import { getSeo } from "../data/seo";
 import { getContactBand, getContactDetails } from "../data/contact";
 import { ROUTES } from "../lib/routePaths";
 
-const [page, videos, written, stats, band, details] = await Promise.all([
+const [pageSeo, page, videos, written, stats, band, details] = await Promise.all([
+  getSeo("testimonialsPage"),
   getTestimonialsPage(),
   getVideoReviews(),
   getWrittenReviews(),
@@ -25,6 +27,7 @@ const [page, videos, written, stats, band, details] = await Promise.all([
 ---
 
 <Layout
+  seo={pageSeo}
   title="Client Testimonials"
   description="Read and watch what Dormer Harpring clients say about working with our Denver personal injury attorneys."
 >

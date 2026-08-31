@@ -52,6 +52,11 @@ export const teamMember = defineType({
   groups: [
     { name: "card", title: "Card", default: true },
     { name: "profile", title: "Bio page" },
+    /* Added with the SEO layer. A third tab rather than the SEO block sitting
+       under "Bio page": that tab is the bio's CONTENT, and search metadata is
+       the thing an editor comes back for separately. Same shape practiceArea
+       already uses. */
+    { name: "meta", title: "SEO" },
   ],
   fields: [
     /*
@@ -345,6 +350,16 @@ export const teamMember = defineType({
         "media's address in Wistia, like b4n3r4pchd. Leave it empty and the portrait is just " +
         "a portrait; fill it in and the portrait gains a play button.",
       hidden: only("partner", "attorney"),
+    }),
+
+    /* IN THE `meta` TAB, not at the foot of the form. Optional, and every one
+       of its five values falls back to what the page already renders — see the
+       note on the `seo` object type. */
+    defineField({
+      name: "seo",
+      title: "SEO",
+      type: "seo",
+      group: "meta",
     }),
   ],
   preview: {

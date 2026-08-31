@@ -12,11 +12,13 @@ import PostGrid from "../components/blog/PostGrid.astro";
 import CoreValues from "../components/CoreValues.astro";
 import ContactDetails from "../components/contact/ContactDetails.astro";
 import { getBlogCategories, getBlogPage, getBlogPosts, getFeaturedPost } from "../data/blog";
+import { getSeo } from "../data/seo";
 import { getCoreValues, getCoreValuesSection } from "../data/coreValues";
 import { getContactBand, getContactDetails } from "../data/contact";
 
-const [page, categories, featured, posts, valuesSection, values, band, details] =
+const [pageSeo, page, categories, featured, posts, valuesSection, values, band, details] =
   await Promise.all([
+  getSeo("blogIndexPage"),
     getBlogPage(),
     getBlogCategories(),
     getFeaturedPost(),
@@ -29,6 +31,7 @@ const [page, categories, featured, posts, valuesSection, values, band, details] 
 ---
 
 <Layout
+  seo={pageSeo}
   title="Blog"
   description="Plain-English answers on insurance, injuries, and what happens after a crash in Colorado, written by the Denver trial lawyers who handle these cases."
 >

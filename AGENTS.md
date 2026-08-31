@@ -196,10 +196,11 @@ scripts/        three of the four check:* linters · prep-assets.mjs (comp extra
 - Don't ship an href to a page that doesn't exist. `RESERVED_PATHS` in `routePaths.ts` tracks
   what's promised but unbuilt.
 - Don't port the comps' fake form success panels. They told every visitor their case had been
-  received while discarding it. `/api/consult` does not exist yet.
-- `site:` in `astro.config.mjs` is `https://www.denvertrial.com` and is **unconfirmed** — www
-  vs apex is an open `TODO(launch)`, and every canonical tag, `og:url`, and sitemap entry
-  derives from it.
+  received while discarding it. `/api/consult` **exists now** — it answers with a real 303, and
+  a failure is a 500 that says so, never a success it did not achieve.
+- `site:` in `astro.config.mjs` is `https://www.denvertrial.com` and is **SETTLED — www, not
+  the apex**, because that is the shape ~300 indexed URLs already have. Every canonical tag,
+  `og:url` and sitemap entry derives from it, and Vercel must serve www as the primary domain.
 
 ## Working agreements
 

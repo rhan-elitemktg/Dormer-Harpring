@@ -93,7 +93,11 @@ const radii = [
 ];
 ---
 
-<Layout title="Design tokens" description="Token proof sheet — not a site page.">
+{/* Never indexable. It is an internal proof sheet, not content, and it is
+   crawlable for as long as it exists — which the comment above says should
+   not be long. Hardcoded rather than a Sanity field: there is no document
+   behind this page and there should not be one. */}
+<Layout title="Design tokens" description="Token proof sheet — not a site page." seo={{ noIndex: true }}>
   <section class="section section--cream">
     <div class="container">
       <SectionHead

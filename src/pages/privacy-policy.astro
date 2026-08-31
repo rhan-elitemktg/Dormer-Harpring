@@ -19,6 +19,7 @@ import AreaSidebar from "../components/practice/area/AreaSidebar.astro";
 import AwardsBar from "../components/AwardsBar.astro";
 import ContactDetails from "../components/contact/ContactDetails.astro";
 import { getPrivacyPolicyPage } from "../data/sitePages";
+import { getSeo } from "../data/seo";
 import { getAwards } from "../data/awards";
 import { getAwardsBar } from "../data/home";
 import { getContactBand, getContactDetails } from "../data/contact";
@@ -28,7 +29,8 @@ import {
 } from "../data/practiceAreaPages";
 import { getBlogPosts } from "../data/blog";
 
-const [page, awards, awardsBar, details, band, areaCopy, sidebarAreas, posts] = await Promise.all([
+const [pageSeo, page, awards, awardsBar, details, band, areaCopy, sidebarAreas, posts] = await Promise.all([
+  getSeo("privacy"),
   getPrivacyPolicyPage(),
   getAwards(),
   getAwardsBar(),
@@ -59,6 +61,7 @@ const latest = posts.filter((post) => post.href).slice(0, 5);
 ---
 
 <Layout
+  seo={pageSeo}
   title={page.title}
   description="How Dormer Harpring collects, uses and protects the information you share through this website."
 >

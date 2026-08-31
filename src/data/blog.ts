@@ -99,6 +99,9 @@ export interface BlogPost {
    * it machine-readable. Formatted for display by `formatPostDate`.
    */
   publishedAt: string;
+  /** Stamped on publish when the body changes. Absent on a post never edited
+   *  here, which is why the sitemap falls back to `publishedAt`. */
+  updatedAt?: string;
   /**
    * THE post's category — one, not a list.
    *
@@ -316,6 +319,7 @@ function toPost(
     title: string | null;
     excerpt: string | null;
     publishedAt: string | null;
+    updatedAt?: string | null;
     category: BlogCategory | null;
     image: unknown;
     reviewerKey: string | null;
@@ -339,6 +343,7 @@ function toPost(
     title: row.title ?? "",
     excerpt: row.excerpt ?? "",
     publishedAt: row.publishedAt ?? "",
+    updatedAt: row.updatedAt ?? undefined,
     category: row.category,
     // A post with no card art gets the branded placeholder, drawn by
     // PostThumb.astro — 125 of the 186 land here, so it is the common case.

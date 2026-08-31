@@ -133,6 +133,71 @@ const LEGACY_PATH_FORMS: ReadonlyArray<readonly [from: string, to: string]> = [
   ],
   ["/why-hire-personal-injury-attorney/client-review-testimonial/", ROUTES.testimonials],
   ["/why-hire-personal-injury-attorney/", ROUTES.about],
+
+  /* ---- FOUND BY PROBING, NOT BY LISTING -------------------------------
+   * A URL that 301s on WordPress appears in NO sitemap and NO REST listing —
+   * both enumerate canonical destinations, never the paths that point at them.
+   * So a cutover audit built on those two sources is blind to exactly the class
+   * of URL that most needs a redirect, and it looks complete while being blind.
+   *
+   * These were found by deriving candidates from the paths that DO appear —
+   * every nested path's root-slug form, and every parent form of a deep path —
+   * and probing each against the live site. The same method that turned up the
+   * 23 attorney bios, run as a sweep rather than by hand.
+   *
+   * EVERY DESTINATION BELOW IS WHERE WORDPRESS ALREADY SENDS THE VISITOR, with
+   * the chain followed to its end rather than copied one hop at a time: the
+   * live site answers `/car-accident/` with a 301 to a path that itself 301s to
+   * `/denver-car-accident-lawyer/`. Preserving the endpoint preserves what a
+   * visitor and a crawler actually experience, and drops a hop. Nothing here is
+   * a new decision about where a page should go. */
+  ["/announcements/", ROUTES.attorneys],
+  ["/new-homepage/", ROUTES.home],
+  ["/client-review-testimonial/", ROUTES.testimonials],
+  ["/personal-injury-attorney/", ROUTES.home],
+  ["/practice-areas/personal-injury-attorney/", ROUTES.home],
+  ["/car-accident/", "/denver-car-accident-lawyer/"],
+  ["/practice-areas/traffic-collision-lawyer/car-accident/", "/denver-car-accident-lawyer/"],
+
+  /* ---- RULED ON, rather than replicated ------------------------------
+   * Unlike everything above, WordPress serves each of these a 200 and this
+   * build chooses not to. Each one is a decision that was taken, not a
+   * behaviour that was copied — so each says why.
+   *
+   * THE TWO FORMER ATTORNEYS, both forms each. Live 200s carrying the firm's
+   * own attorneys' names, in the live sitemap, so they hold inbound links a
+   * 404 would discard. The "no redirect, by request" ruling on record was taken
+   * about Ella Nelson and Morgan Jewel, whose pages WordPress has since removed
+   * — there is nothing left to redirect for those two, and that ruling never
+   * covered these. They land on the roster rather than a bio that no longer
+   * exists. */
+  ["/alexandra-petroff/", ROUTES.attorneys],
+  ["/meet-our-attorneys/alexandra-petroff/", ROUTES.attorneys],
+  ["/dinorah-gutierrez/", ROUTES.attorneys],
+  ["/meet-our-attorneys/dinorah-gutierrez/", ROUTES.attorneys],
+
+  /* `/reviews/` GOES TO TESTIMONIALS AND IS NOT REBUILT. The live page carries
+     `AggregateRating` and `ratingValue` markup — the Product-with-review-stars
+     pattern that is a Google policy violation and one of the things this
+     rebuild exists to fix (see the hard rule in AGENTS.md). Rebuilding the page
+     is the one path that risks recreating it; `/testimonials/` already does
+     this job without the markup. */
+  ["/reviews/", ROUTES.testimonials],
+
+  /* THE TRAFFIC-COLLISION DUPLICATE, both forms. 5,878 live words that overlap
+     `/denver-car-accident-lawyer/`, which the heavy template serves. The child
+     of this path already 301s there on WordPress and is replicated above, so
+     sending the parent to the same place makes the branch coherent instead of
+     half-redirected. */
+  ["/traffic-collision-lawyer/", "/denver-car-accident-lawyer/"],
+  ["/practice-areas/traffic-collision-lawyer/", "/denver-car-accident-lawyer/"],
+
+  /* WORDPRESS SCAFFOLDING. "Demo | Millions+ Recovered" and "Landing page |
+     Millions+ Recovered" — theme demo pages, in no sitemap, never linked from
+     the site's own navigation. They resolve today, so they get a destination
+     rather than a 404, but nothing here is content the firm authored. */
+  ["/demo/", ROUTES.home],
+  ["/landing-page/", ROUTES.home],
 ];
 
 /**
@@ -168,6 +233,11 @@ const COMMUNITY_WRITE_UPS: readonly string[] = [
   "/back-to-clothes-to-kids-denver/",
   "/big-brothers-big-sisters-annual-big-little-gala/",
   "/big-brothers-big-sisters-annual-big-little-gala-2025/",
+  /* The 2026 gala. NOT a twenty-fifth kind of thing — the same annual series as
+     the two above, published after the sweep that found the other 24 and so
+     missed by it. The lesson is the sweep's shape, not this entry: a hand-read
+     of the live site is a snapshot, and the firm keeps publishing. */
+  "/big-brothers-big-sisters-annual-big-little-gala-2026/",
   "/cba-well-being-symposium-spring-summit/",
   "/clothes-to-kids-denver/",
   "/craig-hospital/",
@@ -203,11 +273,12 @@ const COMMUNITY_WRITE_UPS: readonly string[] = [
  * owns URLs on this site and 23 hand-typed paths are 23 chances to disagree
  * with it about the trailing slash three layers already agree on.
  *
- * TWO FORMER STAFF ARE DELIBERATELY ABSENT and are an open question rather than
- * an omission — see the note in HANDOFF. Alexandra Petroff and Dinorah
- * Gutierrez still have live bio pages the roster no longer carries; Ella Nelson
- * and Morgan Jewel's are already 404 on the live site, so there is nothing left
- * to redirect for them.
+ * TWO FORMER STAFF ARE ABSENT FROM THIS LIST ON PURPOSE, AND THE QUESTION IS
+ * NOW CLOSED. Alexandra Petroff and Dinorah Gutierrez have live bio pages the
+ * roster no longer carries, so `attorneyPath()` has no destination to send them
+ * to — they are ruled on separately above, both forms each, landing on the
+ * roster itself. Ella Nelson and Morgan Jewel's pages are already 404 on the
+ * live site, so there is nothing left to redirect for them.
  */
 const ATTORNEY_ROOT_SLUGS: readonly string[] = [
   "abby-houk",

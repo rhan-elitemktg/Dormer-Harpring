@@ -2,12 +2,12 @@
 // The HTML sitemap the footer links.
 //
 // NOT `sitemap.xml`. An XML sitemap is a crawler file, referenced from
-// robots.txt rather than from a footer, and every URL in it is absolute —
-// built from `site:` in astro.config.mjs, which is still an open www-vs-apex
-// TODO(launch). Generating one now would bake that guess into ~330 URLs. It
-// belongs to `/new-seo-setup` alongside robots.txt and the canonical layer,
-// which is where HANDOFF.md files it. The footer now points here instead of at
-// the `/sitemap.xml` that was never built.
+// robots.txt rather than from a footer, and every URL in it is absolute — built
+// from `site:` in astro.config.mjs, now settled on www. So the ~330 URLs it
+// would generate are no longer a guess, and it is unblocked work rather than a
+// pending decision. It still belongs to `/new-seo-setup` alongside robots.txt
+// and the canonical layer, which is where HANDOFF.md files it. The footer
+// points HERE regardless — a footer link is for people.
 //
 // THE GROUPS ARE COMPOSED, NOT STORED. Every list on this page comes from the
 // getter that already owns that collection — the practice-area directory, the
@@ -18,9 +18,16 @@
 // The one hand-written list is `SITE_PAGES`, because there is no getter that
 // returns "the fixed routes a visitor should see". `ROUTES` is close but is not
 // it: it also holds `thankYou` (noIndex, and arriving there directly tells a
-// stranger their case was received) and `editorialGuidelines` (reserved, never
-// built). Both are excluded below by name rather than by filter, so adding a
-// route does not silently add it here.
+// stranger their case was received) and `consult` (an endpoint, not a page).
+// Both are excluded below by name rather than by filter, so adding a route does
+// not silently add it here.
+//
+// `editorialGuidelines` USED TO BE EXCLUDED TOO, as "reserved, never built".
+// The cutover URL audit found the live page and it is built now, and this is
+// the only page that links it — the live site's own footer does not, so ours
+// does not either. Which makes this list load-bearing rather than a courtesy:
+// drop the entry and the page becomes an orphan that only a crawler with the
+// old URL can reach.
 //
 // SURFACE ORDER: cream `.spage` → sunk `.awards` → cream `.ct`. See
 // privacy-policy.astro.
@@ -30,6 +37,7 @@ import AreaSidebar from "../components/practice/area/AreaSidebar.astro";
 import AwardsBar from "../components/AwardsBar.astro";
 import ContactDetails from "../components/contact/ContactDetails.astro";
 import { getSitemapPage } from "../data/sitePages";
+import { getSeo } from "../data/seo";
 import { getAwards } from "../data/awards";
 import { getAwardsBar } from "../data/home";
 import { getContactBand, getContactDetails } from "../data/contact";
@@ -44,8 +52,9 @@ import { getBlogPosts, getFeaturedPost } from "../data/blog";
 import { getTeam } from "../data/team";
 import { ROUTES } from "../lib/routePaths";
 
-const [page, awards, awardsBar, details, band, areaGroups, areaPages, areaDetails, areaCopy, sidebarAreas, posts, featured, team] =
+const [pageSeo, page, awards, awardsBar, details, band, areaGroups, areaPages, areaDetails, areaCopy, sidebarAreas, posts, featured, team] =
   await Promise.all([
+  getSeo("sitemap"),
     getSitemapPage(),
     getAwards(),
     getAwardsBar(),
@@ -62,7 +71,7 @@ const [page, awards, awardsBar, details, band, areaGroups, areaPages, areaDetail
   ]);
 
 /* The fixed routes, in the order the nav presents them. `thankYou` and
-   `editorialGuidelines` are deliberately absent — see the note above. */
+   `consult` are deliberately absent — see the note above. */
 const SITE_PAGES: { label: string; href: string }[] = [
   { label: "Home", href: ROUTES.home },
   { label: "About", href: ROUTES.about },
@@ -75,6 +84,7 @@ const SITE_PAGES: { label: string; href: string }[] = [
   { label: "Articles & Insights", href: ROUTES.blog },
   { label: "Contact", href: ROUTES.contact },
   { label: "Privacy Policy", href: ROUTES.privacy },
+  { label: "Editorial Guidelines", href: ROUTES.editorialGuidelines },
   { label: "Sitemap", href: ROUTES.sitemap },
 ];
 
@@ -178,6 +188,7 @@ const total = SITE_PAGES.length + bios.length + placed + allPosts.length;
 ---
 
 <Layout
+  seo={pageSeo}
   title={page.title}
   description="Every page on the Dormer Harpring site, grouped and linked in one place."
 >

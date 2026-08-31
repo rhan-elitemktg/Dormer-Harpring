@@ -12,9 +12,11 @@ import {
   getSponsorships,
 } from "../data/communityPage";
 import { getFirmStats } from "../data/stats";
+import { getSeo } from "../data/seo";
 import { getContactBand, getContactDetails } from "../data/contact";
 
-const [page, partners, sponsorships, stats, band, details] = await Promise.all([
+const [pageSeo, page, partners, sponsorships, stats, band, details] = await Promise.all([
+  getSeo("communityPage"),
   getCommunityPage(),
   getCommunityPartners(),
   getSponsorships(),
@@ -25,6 +27,7 @@ const [page, partners, sponsorships, stats, band, details] = await Promise.all([
 ---
 
 <Layout
+  seo={pageSeo}
   title="Community Involvement"
   description="Where the Dormer Harpring team spends its time outside the courtroom — the Colorado organizations we volunteer with and the events we sponsor."
 >

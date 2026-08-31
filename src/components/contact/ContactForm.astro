@@ -11,14 +11,18 @@
 // discarding it. So the success panel is not ported, and the page it would have
 // faked is a real route.
 //
-// TODO(launch): /api/consult does not exist yet — it needs a server adapter and
-// a mail provider (see the README's launch list). Until then this form will
-// 404 on submit, which is the correct failure: visibly broken beats
-// invisibly broken.
+// The endpoint EXISTS now — `src/pages/api/consult.ts`, hosted by the Vercel
+// adapter while the rest of the site stays static. It re-validates name, phone
+// and email server-side, drops anything with the honeypot filled, and answers
+// with a 303 to /thank-you/.
 //
-// The constraints below are a convenience, not a guarantee: any client can post
-// straight past them. The endpoint MUST re-validate name, phone and email
-// server-side and drop anything with the honeypot filled.
+// TODO(launch): it still needs its Resend variables set on the deployment
+// (RESEND_API_KEY, CONSULT_TO_EMAIL, CONSULT_FROM_EMAIL). Until they are, a
+// submission returns a plain-text 500 naming the firm's phone number rather
+// than reporting a success it did not achieve.
+//
+// The constraints below remain a convenience, not a guarantee: any client can
+// post straight past them, which is why the endpoint repeats every one.
 import type { ContactBand } from "../../data/contact";
 import { ROUTES } from "../../lib/routePaths";
 
@@ -75,7 +79,7 @@ const disclaimerId = `cform-disclaimer-${variant}`;
   <form
     class="cform__form"
     method="post"
-    action="/api/consult"
+    action={ROUTES.consult}
     aria-describedby={disclaimerId}
   >
     {/* Which form, where to send them, and which page asked — all read

@@ -1,5 +1,6 @@
 import { defineConfig } from "sanity";
 import { structureTool } from "sanity/structure";
+import { withModifiedStamp } from "./src/sanity/actions/stampModified";
 import { SINGLETON_TYPES, structure } from "./src/sanity/structure";
 import { schemaTypes } from "./src/sanity/schemaTypes/index";
 import { eliteTheme } from "./src/sanity/theme";
@@ -111,6 +112,19 @@ export default defineConfig({
   },
 
   document: {
+    /*
+     * "LAST UPDATED" STAMPS ITSELF ON PUBLISH — see the note in
+     * `src/sanity/actions/stampModified.ts` for why this is a Studio action and
+     * not `_updatedAt`, and why it only fires when the article's own fields
+     * changed rather than on every publish.
+     *
+     * Wrapped, not replaced: every disabled state and the keyboard shortcut
+     * still come from Sanity's own publish action. Types with no `modifiedAt`
+     * are unaffected — the wrapper checks the type and does nothing for them.
+     */
+    actions: (prev) =>
+      prev.map((action) => (action.action === "publish" ? withModifiedStamp(action) : action)),
+
     /*
      * WHAT THE GLOBAL "CREATE NEW" MENU MUST NOT OFFER.
      *

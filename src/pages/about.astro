@@ -15,6 +15,7 @@ import AwardsBar from "../components/AwardsBar.astro";
 import CoreValues from "../components/CoreValues.astro";
 import ContactDetails from "../components/contact/ContactDetails.astro";
 import { getAboutPage } from "../data/aboutPage";
+import { getSeo } from "../data/seo";
 import { getAboutAttorneys } from "../data/attorneys";
 import { getFirmStats } from "../data/stats";
 import { getAwards } from "../data/awards";
@@ -25,6 +26,7 @@ import { getContactBand, getContactDetails } from "../data/contact";
 import { ROUTES } from "../lib/routePaths";
 
 const [
+  pageSeo,
   page,
   attorneys,
   stats,
@@ -37,6 +39,7 @@ const [
   band,
   details,
 ] = await Promise.all([
+  getSeo("aboutPage"),
   getAboutPage(),
   getAboutAttorneys(),
   getFirmStats(),
@@ -58,6 +61,7 @@ const quotes = testimonials.filter((item) => item.kind === "quote").slice(0, 3);
 ---
 
 <Layout
+  seo={pageSeo}
   title="About Us"
   description="Dormer Harpring is a small Denver personal injury firm by design — a deliberately small caseload, tried cases, and the results other firms turned down."
 >

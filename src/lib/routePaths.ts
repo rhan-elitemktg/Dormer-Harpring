@@ -55,9 +55,22 @@ export const ROUTES = {
   editorialGuidelines: "/editorial-guidelines/",
   /* The HUMAN sitemap, not `/sitemap.xml`. The footer used to link the XML file
      and nothing built it — 328 dead links. The XML one is a crawler file whose
-     every URL is absolute off `site:`, still an open www-vs-apex decision, and
-     it belongs to /new-seo-setup with robots.txt. */
+     every URL is absolute off `site:` — settled on www — and it belongs to
+     /new-seo-setup with robots.txt. */
   sitemap: "/sitemap/",
+
+  /* THE ONE ENDPOINT, not a page — no HTML is served here and nothing links to
+     it; it is the `action` of both forms. It lives in ROUTES anyway because the
+     convention is that no internal URL is ever a literal in a component, and
+     because the trailing slash below is load-bearing rather than cosmetic:
+     `vercel.json` sets `trailingSlash: true`, so a POST to the bare
+     `/api/consult` earns a 308 that re-sends the entire body. Matching the
+     site's own slash rule here means the form posts straight to the function.
+
+     It is deliberately NOT in RESERVED_PATHS: that list guards the ROOT slug
+     namespace the blog and practice areas share, and this path is nested, so no
+     slug can collide with it. */
+  consult: "/api/consult/",
 } as const;
 
 /** Declared after ROUTES so the shared prefix is read from one place. */

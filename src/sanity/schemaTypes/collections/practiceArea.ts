@@ -259,10 +259,28 @@ export const practiceArea = defineType({
       title: "Last updated",
       type: "datetime",
       group: "meta",
-      description: 'Printed under the title as "Updated <date>".',
+      /* SET AUTOMATICALLY, WHICH IS WHY IT IS READ-ONLY. The Studio stamps it
+         when this page is published with a change to its body or its FAQs —
+         see `src/sanity/actions/stampModified.ts`. It was an editable field
+         nobody would have remembered to set, and a stale "Updated" date on a
+         legal page is worse than no date, because it is asserted rather than
+         absent. The value it starts from is WordPress's own modified date. */
+      readOnly: true,
+      description:
+        'Printed under the title as "Updated <date>", and given to Google as this page\'s ' +
+        "last-modified date. Set for you when you publish a change to the body or the FAQs — " +
+        "editing the title or the SEO tab deliberately does not touch it.",
     }),
     defineField({
       name: "legacyId",
+      /* HIDDEN. It is read by no query and by nothing in src/ — only the
+         import and migration scripts, which reach it through the API, where
+         `hidden` has no effect. Its own description told editors to leave it
+         alone, which is a field whose whole purpose is to be ignored.
+         Safe to hide because it is not required on either type: the trap
+         HANDOFF records is hiding a REQUIRED field, which makes a document
+         impossible to publish with no visible reason why. */
+      hidden: true,
       title: "WordPress page ID",
       type: "number",
       group: "meta",

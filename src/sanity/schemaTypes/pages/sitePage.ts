@@ -1,25 +1,34 @@
-// The three utility pages — privacy policy, sitemap, 404. THREE SINGLETONS OF
-// ONE TYPE, not three types.
+// The four utility pages — privacy policy, editorial guidelines, sitemap, 404.
+// FOUR SINGLETONS OF ONE TYPE, not four types.
 //
 // WHY ONE TYPE. They are the same document in every way that matters: a title,
 // an optional lede, a body, no taxonomy above them and no collection beneath.
-// Three near-identical schema files beside each other would be three places to
-// keep in step. What differs between them is two optional fields, and each of
-// the two is used by exactly one of the three — see below.
+// Four near-identical schema files beside each other would be four places to
+// keep in step. What differs between them is two optional fields — see below.
+//
+// EDITORIAL GUIDELINES WAS THE FOURTH, AND ADDING IT COST ONE LINE IN `KINDS`
+// PLUS ONE IN THE DESK. That is the argument for this shape, made after the
+// fact: the page is live on the site being replaced, was found by the cutover
+// URL audit as the only would-be 404 left, and slotted in without a schema
+// file, a route pattern or a projection of its own.
 //
 // WHY NOT ONE TYPE WITH MANY DOCUMENTS, EITHER. Each is pinned to a fixed `_id`
 // in the desk, the same way every other singleton is, so an editor cannot create
-// a fourth and wonder why it does not appear anywhere. There is no route that
-// would serve it: these three are `src/pages/privacy-policy.astro`,
-// `sitemap.astro` and `404.astro`, hand-built files, not a dynamic route over a
-// collection.
+// a fifth and wonder why it does not appear anywhere. There is no route that
+// would serve it: these four are `src/pages/privacy-policy.astro`,
+// `editorial-guidelines.astro`, `sitemap.astro` and `404.astro`, hand-built
+// files, not a dynamic route over a collection.
 //
-// TWO CONDITIONAL FIELDS, EACH ON ONE DOCUMENT. `hidden` rather than absent,
-// because a schema is one shape and the alternative is three types again:
+// TWO CONDITIONAL FIELDS. `hidden` rather than absent, because a schema is one
+// shape and the alternative is four types again:
 //
-//   updated{}   only the privacy policy stamps when it last changed. A sitemap
-//               and a 404 have no such date, and printing one would be a claim
-//               about content that is generated rather than written.
+//   updated{}   the two WRITTEN documents stamp when they last changed — the
+//               privacy policy and the editorial guidelines. Both are prose
+//               somebody revises, and on both the date is the point: a policy
+//               and a set of standards are read partly for how current they
+//               are. The sitemap and the 404 have no such date, and printing
+//               one would be a claim about content that is generated rather
+//               than written.
 //   links{}     only the 404 offers routes. A privacy policy that ended in four
 //               suggestions would read as a page that had lost its way.
 //
@@ -37,9 +46,16 @@ import { validateHref } from "../objects/link";
  *  its own `_id`, so this is what the FORM keys its conditional fields on. */
 const KINDS = [
   { title: "Privacy policy", value: "privacy" },
+  { title: "Editorial guidelines", value: "editorial" },
   { title: "Sitemap", value: "sitemap" },
   { title: "404", value: "notFound" },
 ] as const;
+
+/** Hidden unless the document is one of `kinds`. The plural form exists because
+ *  `updated{}` is shared by the two written documents; `isNot` remains for
+ *  `links{}`, which really is one document's field. */
+const isNotOneOf = (...kinds: string[]) => (context: { parent?: unknown; document?: unknown }) =>
+  !kinds.includes((context.document as { kind?: string } | undefined)?.kind ?? "");
 
 const isNot = (kind: string) => (context: { parent?: unknown; document?: unknown }) =>
   ((context.document as { kind?: string } | undefined)?.kind ?? "") !== kind;
@@ -49,6 +65,16 @@ export const sitePage = defineType({
   title: "Utility page",
   type: "document",
   icon: DocumentIcon,
+  /* TWO TABS, NOT AN ACCORDION AT THE FOOT. The SEO block used to be the last
+     field on this document, collapsed — which is a good way to make sure it is
+     never filled in. A tab is one click from the top of the form and reads as a
+     part of the document rather than an appendix to it.
+     `default: true` on the content tab so opening the document still lands on
+     the page itself. */
+  groups: [
+    { name: "page", title: "The page", default: true },
+    { name: "seo", title: "SEO" },
+  ],
   fields: [
     /*
      * READ-ONLY, AND IT IS NOT BOOKKEEPING. Three routes are hand-built files
@@ -61,6 +87,7 @@ export const sitePage = defineType({
       name: "kind",
       title: "Which page",
       type: "string",
+      group: "page",
       readOnly: true,
       options: { list: [...KINDS] },
       description: "Fixed. Each of these three has its own hand-built route.",
@@ -70,6 +97,7 @@ export const sitePage = defineType({
       name: "content",
       title: "Page content",
       type: "object",
+      group: "page",
       options: SECTION,
       description: "The title, the sentence under it, and the body.",
       fields: [
@@ -97,7 +125,8 @@ export const sitePage = defineType({
       name: "updated",
       title: "Last-updated stamp",
       type: "object",
-      hidden: isNot("privacy"),
+      group: "page",
+      hidden: isNotOneOf("privacy", "editorial"),
       description: "Printed under the title, and as the page's machine-readable date.",
       options: { ...SECTION, columns: 2 },
       fields: [
@@ -136,6 +165,7 @@ export const sitePage = defineType({
       name: "links",
       title: "Where to go instead",
       type: "object",
+      group: "page",
       options: SECTION,
       hidden: isNot("notFound"),
       description:
@@ -175,6 +205,17 @@ export const sitePage = defineType({
           ],
         }),
       ],
+    }),
+
+    /* ITS OWN TAB. Optional, and every one of its five values falls back to
+       what the page already renders — see the note on the `seo` object type.
+       It was the last field on the form and collapsed, which is a reliable way
+       to make sure nobody fills it in. */
+    defineField({
+      name: "seo",
+      title: "SEO",
+      type: "seo",
+      group: "seo",
     }),
   ],
   preview: {

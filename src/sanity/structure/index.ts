@@ -30,6 +30,7 @@ import type { ComponentType } from "react";
 // `check:types` has gone green. The package's types lie about its own runtime.
 // Import each icon from its own file (@sanity/icons 5.2.1).
 import { CogIcon } from "@sanity/icons/Cog";
+import { SearchIcon } from "@sanity/icons/Search";
 import { DocumentIcon } from "@sanity/icons/Document";
 import { DocumentsIcon } from "@sanity/icons/Documents";
 import { EarthGlobeIcon } from "@sanity/icons/EarthGlobe";
@@ -115,7 +116,7 @@ function fixedDocument(
  *                         one — so it leads the Practice Areas group rather than
  *                         sitting among the routes.
  *
- * The three utility pages are a sub-list at the foot; see `UTILITY_PAGES`.
+ * The four utility pages are a sub-list at the foot; see `UTILITY_PAGES`.
  */
 const PAGES: [string, string, ComponentType?][] = [
   ["homePage", "Homepage", HomeIcon],
@@ -145,6 +146,7 @@ const PAGES: [string, string, ComponentType?][] = [
  */
 const UTILITY_PAGES: [string, string][] = [
   ["privacy", "Privacy Policy"],
+  ["editorial", "Editorial Guidelines"],
   ["sitemap", "Sitemap"],
   ["notFound", "404"],
 ];
@@ -449,11 +451,17 @@ export const SINGLETON_TYPES = [
   // `carAccidentsPage` was here until 6d and is not a singleton any more: it is
   // a `featuredPracticeArea` document, filed under its city like any other.
   "sharedSections",
-  // `sitePage` is three fixed documents rather than one, but the reason it must
+  // `sitePage` is four fixed documents rather than one, but the reason it must
   // stay out of a generic list is identical: an editor seeing "all utility
-  // pages" alongside the three pinned ones would edit a fourth copy that no
+  // pages" alongside the four pinned ones would edit a fifth copy that no
   // route reads.
   "sitePage",
+  // `globalSeo` is hand-placed for the same reason `sharedSections` is: it is a
+  // FOLDER inside Site Settings rather than a row, because Redirects lives
+  // beside it. Putting it in SETTINGS would render it as a plain row and there
+  // would be nowhere for that sibling to go — and moving it into a folder later
+  // changes the singleton's URL, which is a bookmark an editor has saved.
+  "globalSeo",
 ];
 
 /**
@@ -474,11 +482,26 @@ export const SINGLETON_TYPES = [
  * simply "not in the set". So this is written to be un-forgettable rather than
  * guarded by a check that would have to be remembered too.
  */
+/**
+ * PLACED BY HAND, AND NOT SINGLETONS. The one list `SINGLETON_TYPES` cannot
+ * carry: `redirect` is placed in the desk by hand (inside the Global SEO
+ * Settings folder) but editors must be able to CREATE redirects, and
+ * `SINGLETON_TYPES` is exactly what `sanity.config.ts` uses to forbid creation.
+ * Putting it there would place it correctly and then hide the New button.
+ *
+ * `scripts/check-desk.py` reads this list by name, the same way it reads
+ * SINGLETON_TYPES — without that, a type placed only here reads as UNPLACED and
+ * the check fails on a type that is actually on screen.
+ */
+const HAND_PLACED = ["redirect"];
+
 const PLACED = new Set<string>([
-  // Every Pages row and every Site Settings row, plus the two named by hand in
-  // that list: `sharedSections`, a top-level row of its own, and `sitePage`,
-  // which is the three utility documents.
+  // Every Pages row and every Site Settings row, plus the three named by hand
+  // in that list: `sharedSections`, a top-level row of its own; `sitePage`,
+  // which is the four utility documents; and `globalSeo`, a folder rather than
+  // a row.
   ...SINGLETON_TYPES,
+  ...HAND_PLACED,
   ...PRACTICE_AREA_TYPES.map(([type]) => type),
   ...BLOG.map(([type]) => type),
   ...COLLECTIONS.map(([type]) => type),
@@ -585,7 +608,48 @@ export const structure: StructureResolver = (S, context) => {
         .child(
           S.list()
             .title("Site Settings")
-            .items(SETTINGS.map(([type, title, icon]) => singleton(S, type, title, icon)))
+            .items([
+              ...SETTINGS.map(([type, title, icon]) => singleton(S, type, title, icon)),
+
+              /*
+               * A FOLDER, NOT A ROW, and that is a decision about URLs rather
+               * than about tidiness. Redirects belongs beside the SEO defaults
+               * — both are the SEO team's, neither is firm identity — and a
+               * folder is the only shape that holds two things. Building it as
+               * a row now and foldering it when Redirects lands would move
+               * `globalSeo`'s URL out from under anyone who bookmarked it.
+               */
+              S.listItem()
+                .title("Global SEO Settings")
+                .icon(SearchIcon)
+                .id("global-seo")
+                .child(
+                  S.list()
+                    .title("Global SEO Settings")
+                    .items([
+                      singleton(S, "globalSeo", "Defaults", SearchIcon),
+
+                      /*
+                       * `.title("Redirect")` on the CHILD, not the list. Without
+                       * it the open document shouts the same URL three times —
+                       * breadcrumb, heading and the Old URL field — because
+                       * Sanity titles a document node from its preview.
+                       */
+                      S.listItem()
+                        .title("Redirects")
+                        .icon(EarthGlobeIcon)
+                        .id("redirects")
+                        .child(
+                          S.documentTypeList("redirect")
+                            .title("Redirects")
+                            .defaultOrdering([{ field: "source", direction: "asc" }])
+                            .child((id) =>
+                              S.document().documentId(id).schemaType("redirect").title("Redirect")
+                            )
+                        ),
+                    ])
+                ),
+            ])
         ),
 
       // Guarded rather than unconditional: a divider with nothing after it

@@ -8,10 +8,12 @@ import StatsBand from "../components/StatsBand.astro";
 import CoreValues from "../components/CoreValues.astro";
 import CoCounselForm from "../components/cocounsel/CoCounselForm.astro";
 import { getCoCounselPage, getCoCounselResults } from "../data/coCounsel";
+import { getSeo } from "../data/seo";
 import { getFirmStats } from "../data/stats";
 import { getCoreValues, getCoreValuesSection } from "../data/coreValues";
 
-const [page, results, stats, valuesSection, values] = await Promise.all([
+const [pageSeo, page, results, stats, valuesSection, values] = await Promise.all([
+  getSeo("coCounselPage"),
   getCoCounselPage(),
   getCoCounselResults(),
   getFirmStats(),
@@ -21,6 +23,7 @@ const [page, results, stats, valuesSection, values] = await Promise.all([
 ---
 
 <Layout
+  seo={pageSeo}
   title="Co-Counsel Opportunities"
   description="Dormer Harpring partners with firms across Colorado and the country as co-counsel and trial counsel. We shoulder the case costs."
 >

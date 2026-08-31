@@ -5,10 +5,12 @@ import PageHeader from "../components/PageHeader.astro";
 import WhileYouWait from "../components/thankyou/WhileYouWait.astro";
 import AwardsBar from "../components/AwardsBar.astro";
 import { getThankYouPage } from "../data/thankYou";
+import { getSeo } from "../data/seo";
 import { getAwards } from "../data/awards";
 import { getAwardsBar } from "../data/home";
 
-const [page, awards, awardsBar] = await Promise.all([
+const [pageSeo, page, awards, awardsBar] = await Promise.all([
+  getSeo("thankYouPage"),
   getThankYouPage(),
   getAwards(),
   getAwardsBar(),
@@ -18,7 +20,7 @@ const [page, awards, awardsBar] = await Promise.all([
 <Layout
   title="Thank you"
   description="We've received your request. An attorney will reach out within one business day."
-  seo={{ noIndex: true }}
+  seo={{ ...pageSeo, noIndex: true }}
 >
   {
     /* noIndex, and not merely for tidiness: a thank-you page that ranks gets
