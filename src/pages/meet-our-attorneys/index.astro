@@ -7,12 +7,14 @@ import StatsBand from "../../components/StatsBand.astro";
 import CoreValues from "../../components/CoreValues.astro";
 import ContactDetails from "../../components/contact/ContactDetails.astro";
 import { getTeam } from "../../data/team";
+import { getSeo } from "../../data/seo";
 import { getTeamPage } from "../../data/teamPage";
 import { getFirmStats } from "../../data/stats";
 import { getCoreValues, getCoreValuesSection } from "../../data/coreValues";
 import { getContactBand, getContactDetails } from "../../data/contact";
 
-const [page, team, stats, valuesSection, values, band, details] = await Promise.all([
+const [pageSeo, page, team, stats, valuesSection, values, band, details] = await Promise.all([
+  getSeo("teamPage"),
   getTeamPage(),
   getTeam(),
   getFirmStats(),
@@ -29,6 +31,7 @@ const rest = team.filter((m) => m.kind !== "partner");
 ---
 
 <Layout
+  seo={pageSeo}
   title="Meet Our Attorneys"
   description="The Dormer Harpring team — trial lawyers and the staff behind every case, in Denver's RiNo district."
 >

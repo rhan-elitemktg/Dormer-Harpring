@@ -34,6 +34,16 @@ export const homePage = defineType({
   title: "Homepage",
   type: "document",
   icon: HomeIcon,
+  /* TWO TABS, NOT AN ACCORDION AT THE FOOT. The SEO block used to be the last
+     field on this document, collapsed — which is a good way to make sure it is
+     never filled in. A tab is one click from the top of the form and reads as a
+     part of the document rather than an appendix to it.
+     `default: true` on the content tab so opening the document still lands on
+     the page itself. */
+  groups: [
+    { name: "page", title: "The page", default: true },
+    { name: "seo", title: "SEO" },
+  ],
   fields: [
     /*
      * THE HERO. `headline` is an ARRAY OF LINES, not one string with breaks in
@@ -45,6 +55,7 @@ export const homePage = defineType({
       name: "hero",
       title: "Hero",
       type: "object",
+      group: "page",
       options: SECTION,
       description: "The first screen — everything above the results strip.",
       fields: [
@@ -159,6 +170,7 @@ export const homePage = defineType({
       name: "resultsStrip",
       title: "Results strip",
       type: "object",
+      group: "page",
       options: SECTION,
       description:
         "The band under the hero. The three figures themselves are Case Results, in " +
@@ -180,6 +192,7 @@ export const homePage = defineType({
       name: "firmIntro",
       title: "Firm introduction",
       type: "object",
+      group: "page",
       options: SECTION,
       fields: [
         defineField({
@@ -297,6 +310,7 @@ export const homePage = defineType({
       name: "practiceSection",
       title: "Practice areas band",
       type: "object",
+      group: "page",
       options: SECTION,
       fields: [
         defineField({ name: "eyebrow", type: "string", validation: (rule) => rule.required() }),
@@ -505,6 +519,7 @@ export const homePage = defineType({
       name: "promise",
       title: "Promise carousel",
       type: "object",
+      group: "page",
       options: SECTION,
       fields: [
         defineField({ name: "eyebrow", type: "string", validation: (rule) => rule.required() }),
@@ -550,6 +565,7 @@ export const homePage = defineType({
       name: "faqSection",
       title: "FAQ band",
       type: "object",
+      group: "page",
       options: SECTION,
       fields: [
         defineField({ name: "eyebrow", type: "string", validation: (rule) => rule.required() }),
@@ -611,6 +627,7 @@ export const homePage = defineType({
       name: "feedSection",
       title: "News & insights band",
       type: "object",
+      group: "page",
       options: SECTION,
       fields: [
         defineField({
@@ -750,6 +767,7 @@ export const homePage = defineType({
       name: "communitySection",
       title: "Community band",
       type: "object",
+      group: "page",
       options: SECTION,
       description:
         "The heading above the photo mosaic. The Community Involvement PAGE has its own " +
@@ -845,6 +863,17 @@ export const homePage = defineType({
       ],
       validation: (rule) => rule.required(),
     }),
-],
+
+    /* ITS OWN TAB. Optional, and every one of its five values falls back to
+       what the page already renders — see the note on the `seo` object type.
+       It was the last field on the form and collapsed, which is a reliable way
+       to make sure nobody fills it in. */
+    defineField({
+      name: "seo",
+      title: "SEO",
+      type: "seo",
+      group: "seo",
+    }),
+  ],
   preview: { prepare: () => ({ title: "Homepage" }) },
 });

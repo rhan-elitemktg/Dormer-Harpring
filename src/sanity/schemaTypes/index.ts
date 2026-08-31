@@ -35,10 +35,12 @@ import { caseResult } from "./collections/caseResult";
 import { coreValue } from "./collections/coreValue";
 import { featuredPracticeArea } from "./collections/featuredPracticeArea";
 import { practiceArea } from "./collections/practiceArea";
+import { redirect } from "./collections/redirect";
 import { teamMember } from "./collections/teamMember";
 import { testimonial } from "./collections/testimonial";
 
 import { contactSettings } from "./settings/contactSettings";
+import { globalSeo } from "./settings/globalSeo";
 import { firmDetails } from "./settings/firmDetails";
 import { navigation } from "./settings/navigation";
 import { sharedSections } from "./settings/sharedSections";
@@ -99,6 +101,7 @@ const pages: SchemaTypeDefinition[] = [
 const collections: SchemaTypeDefinition[] = [
   featuredPracticeArea,
   practiceArea,
+  redirect,
   blogPost,
   blogCategory,
   teamMember,
@@ -114,6 +117,7 @@ const settings: SchemaTypeDefinition[] = [
   firmDetails,
   navigation,
   contactSettings,
+  globalSeo,
   sharedSections,
 ];
 

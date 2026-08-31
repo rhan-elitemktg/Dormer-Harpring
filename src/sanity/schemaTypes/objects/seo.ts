@@ -22,7 +22,12 @@ export const seo = defineType({
   title: "SEO",
   type: "object",
   icon: SearchIcon,
-  options: { collapsible: true, collapsed: true },
+  /* NOT COLLAPSIBLE ANY MORE. It was a collapsed accordion at the foot of every
+     page document; it is a TAB on all of them now, and on the four collections
+     it shares a tab with dates and provenance. In both places a collapsed
+     wrapper meant a second click to reach five fields that are already behind
+     one — and the tab is titled "SEO", so the accordion labelled "SEO" inside
+     it was saying the same word twice. */
   fields: [
     defineField({
       name: "metaTitle",

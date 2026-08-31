@@ -15,6 +15,7 @@ import {
   getPracticeAreaGroups,
 } from "../data/practiceAreas";
 import { getFirmStats } from "../data/stats";
+import { getSeo } from "../data/seo";
 import { getHomeWhyUs } from "../data/home";
 import { getAttorneysSection, getHomeAttorneys } from "../data/attorneys";
 import { getContactBand, getContactDetails } from "../data/contact";
@@ -24,8 +25,9 @@ import { assertDirectoryJoin } from "../data/practiceAreaPages";
 // modules rather than copied: the comp carries both sections here WORD FOR WORD,
 // so they are shared singletons, not this page's content. If they ever diverge
 // the fix is a second document in the CMS, not a second copy of the strings.
-const [page, featured, groups, stats, why, attorneysSection, attorneys, band, details] =
+const [pageSeo, page, featured, groups, stats, why, attorneysSection, attorneys, band, details] =
   await Promise.all([
+  getSeo("practiceAreasPage"),
     getPracticeAreasPage(),
     getFeaturedPracticeAreas(),
     getPracticeAreaGroups(),
@@ -47,6 +49,7 @@ await assertDirectoryJoin(groups);
 ---
 
 <Layout
+  seo={pageSeo}
   title="Practice Areas"
   description="The injury cases Dormer Harpring takes on across Colorado — car and truck crashes, premises liability, catastrophic injury and wrongful death."
 >

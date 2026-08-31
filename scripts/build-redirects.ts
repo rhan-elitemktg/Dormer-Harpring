@@ -31,6 +31,27 @@ const config = {
      Must stay in step with `trailingSlash: "always"` in astro.config.mjs and
      with ROUTES in lib/routePaths.ts. */
   trailingSlash: true,
+
+  /* THE SECOND TIER. Everything in `redirects` below is code-owned and comes
+     from `src/data/redirects.ts` — the cutover table, fixed at migration. This
+     line points Vercel at a file the BUILD writes, which is how a redirect
+     added in the Studio reaches the edge without a developer.
+
+     It has to be a separate mechanism because Vercel reads this very file
+     before the build starts, so nothing generated during a build can land in
+     it. Bulk redirects are the documented exception.
+
+     THE PATH IS THE ONE ASSUMPTION THAT CANNOT BE TESTED LOCALLY. Vercel's
+     reference confirms the file may be build-generated but not what the path
+     resolves against, and redirects do not fire under `astro dev` or
+     `vercel dev` at all — only on a deployed URL. This points at the actual
+     deploy artifact: `@astrojs/vercel` copies static output to
+     `.vercel/output/static/`. If the file is served but the redirects do not
+     fire, try `"bulk-redirects.json"` (output-directory relative) and then
+     `"dist/client/bulk-redirects.json"` BEFORE changing anything else — the
+     generator, the schema and the guard are all independent of this string. */
+  bulkRedirectsPath: ".vercel/output/static/bulk-redirects.json",
+
   /* BOTH SLASH FORMS FOR EVERY RULE. `trailingSlash: true` above already
      normalizes a bare request to the slashed shape, so `/category/x` would
      reach `/category/x/` and then match — but as TWO redirects, one to add the

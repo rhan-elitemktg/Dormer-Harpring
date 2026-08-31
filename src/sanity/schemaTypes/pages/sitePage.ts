@@ -65,6 +65,16 @@ export const sitePage = defineType({
   title: "Utility page",
   type: "document",
   icon: DocumentIcon,
+  /* TWO TABS, NOT AN ACCORDION AT THE FOOT. The SEO block used to be the last
+     field on this document, collapsed — which is a good way to make sure it is
+     never filled in. A tab is one click from the top of the form and reads as a
+     part of the document rather than an appendix to it.
+     `default: true` on the content tab so opening the document still lands on
+     the page itself. */
+  groups: [
+    { name: "page", title: "The page", default: true },
+    { name: "seo", title: "SEO" },
+  ],
   fields: [
     /*
      * READ-ONLY, AND IT IS NOT BOOKKEEPING. Three routes are hand-built files
@@ -77,6 +87,7 @@ export const sitePage = defineType({
       name: "kind",
       title: "Which page",
       type: "string",
+      group: "page",
       readOnly: true,
       options: { list: [...KINDS] },
       description: "Fixed. Each of these three has its own hand-built route.",
@@ -86,6 +97,7 @@ export const sitePage = defineType({
       name: "content",
       title: "Page content",
       type: "object",
+      group: "page",
       options: SECTION,
       description: "The title, the sentence under it, and the body.",
       fields: [
@@ -113,6 +125,7 @@ export const sitePage = defineType({
       name: "updated",
       title: "Last-updated stamp",
       type: "object",
+      group: "page",
       hidden: isNotOneOf("privacy", "editorial"),
       description: "Printed under the title, and as the page's machine-readable date.",
       options: { ...SECTION, columns: 2 },
@@ -152,6 +165,7 @@ export const sitePage = defineType({
       name: "links",
       title: "Where to go instead",
       type: "object",
+      group: "page",
       options: SECTION,
       hidden: isNot("notFound"),
       description:
@@ -191,6 +205,17 @@ export const sitePage = defineType({
           ],
         }),
       ],
+    }),
+
+    /* ITS OWN TAB. Optional, and every one of its five values falls back to
+       what the page already renders — see the note on the `seo` object type.
+       It was the last field on the form and collapsed, which is a reliable way
+       to make sure nobody fills it in. */
+    defineField({
+      name: "seo",
+      title: "SEO",
+      type: "seo",
+      group: "seo",
     }),
   ],
   preview: {

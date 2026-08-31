@@ -424,12 +424,27 @@ export const BLOG_CATEGORIES_QUERY = defineQuery(
  */
 
 /** One post as a card. Spread into the three below so they cannot drift. */
+/*
+ * NO COMMENT MAY GO INSIDE THE LITERAL BELOW, and the failure is silent. GROQ
+ * has line comments but not block comments, so a `/* … *\/` inside the query
+ * makes TypeGen skip it entirely — the query simply vanishes from
+ * `sanity.types.ts`, `sanityClient.fetch()` falls back to `any`, and the errors
+ * surface as "implicitly has an 'any' type" in whichever data module maps the
+ * rows. It cost 165 type errors in files that had nothing to do with the edit.
+ * That is a different trap from the backtick one HANDOFF already records.
+ *
+ * `"updatedAt": modifiedAt` is the post's last-modified date for `sitemap.xml`,
+ * falling back to `publishedAt`. It is stamped automatically on publish when
+ * the body changes — see `src/sanity/actions/stampModified.ts`. It rides on the
+ * CARD rather than the article because the sitemap reads the feed, not bodies.
+ */
 const POST_CARD = `
   "_key": slug.current,
   "slug": slug.current,
   title,
   excerpt,
   publishedAt,
+  "updatedAt": modifiedAt,
   "category": categories[0]->{ "_key": slug.current, title, "slug": slug.current },
   image,
   "reviewerKey": reviewer->key.current
@@ -1196,5 +1211,65 @@ export const FEATURED_PRACTICE_AREAS_QUERY = defineQuery(
 export const FEATURED_FAQ_SECTION_QUERY = defineQuery(
   `*[_type == "featuredPracticeArea" && key.current == $key][0].faqSection{
   eyebrow, title, lede
+}`
+);
+
+/* ---------------------------------------------------------------------------
+ * SEO
+ * ------------------------------------------------------------------------ */
+
+/**
+ * A page singleton's `seo` block, one document at a time.
+ *
+ * THE PROJECTION IS SPELLED OUT HERE AND AGAIN IN EVERY ROUTED DOCUMENT'S OWN
+ * QUERY, and that duplication is forced rather than chosen: TypeGen parses
+ * `defineQuery()` STATICALLY, so a shared `const SEO_PROJECTION` interpolated
+ * into a template literal is invisible to it and the generated types come back
+ * as `any`. Change one, change them all — grep `metaTitle`.
+ */
+export const PAGE_SEO_QUERY = defineQuery(
+  `*[_id == $pageId][0].seo{
+  metaTitle,
+  metaDescription,
+  canonicalUrl,
+  noIndex,
+  ogImage
+}`
+);
+
+/**
+ * Just what `sitemap.xml` needs from the page singletons — one round trip for
+ * all of them rather than one per page.
+ */
+export const STATIC_PAGE_SEO_QUERY = defineQuery(
+  `*[_id in $ids]{
+  _id,
+  _updatedAt,
+  "noIndex": seo.noIndex
+}`
+);
+
+/**
+ * The site-wide fallbacks. Deliberately NOT part of `firmDetails`: that
+ * singleton is firm identity and feeds the `LegalService` JSON-LD, where this
+ * is search configuration. See the note on the schema type.
+ */
+export const GLOBAL_SEO_QUERY = defineQuery(
+  `*[_id == "globalSeo"][0]{
+  discourageCrawling,
+  defaultOgImage
+}`
+);
+
+/**
+ * The editor-managed redirects. Published only — the build queries Sanity
+ * unauthenticated and anonymous reads return no drafts, so "nothing happens
+ * until you Publish" is literally true rather than a convention.
+ */
+export const EDITOR_REDIRECTS_QUERY = defineQuery(
+  `*[_type == "redirect" && defined(source) && defined(destination)]|order(source asc){
+  source,
+  destination,
+  "permanent": coalesce(permanent, true)
 }`
 );

@@ -37,6 +37,7 @@ import AreaSidebar from "../components/practice/area/AreaSidebar.astro";
 import AwardsBar from "../components/AwardsBar.astro";
 import ContactDetails from "../components/contact/ContactDetails.astro";
 import { getSitemapPage } from "../data/sitePages";
+import { getSeo } from "../data/seo";
 import { getAwards } from "../data/awards";
 import { getAwardsBar } from "../data/home";
 import { getContactBand, getContactDetails } from "../data/contact";
@@ -51,8 +52,9 @@ import { getBlogPosts, getFeaturedPost } from "../data/blog";
 import { getTeam } from "../data/team";
 import { ROUTES } from "../lib/routePaths";
 
-const [page, awards, awardsBar, details, band, areaGroups, areaPages, areaDetails, areaCopy, sidebarAreas, posts, featured, team] =
+const [pageSeo, page, awards, awardsBar, details, band, areaGroups, areaPages, areaDetails, areaCopy, sidebarAreas, posts, featured, team] =
   await Promise.all([
+  getSeo("sitemap"),
     getSitemapPage(),
     getAwards(),
     getAwardsBar(),
@@ -186,6 +188,7 @@ const total = SITE_PAGES.length + bios.length + placed + allPosts.length;
 ---
 
 <Layout
+  seo={pageSeo}
   title={page.title}
   description="Every page on the Dormer Harpring site, grouped and linked in one place."
 >

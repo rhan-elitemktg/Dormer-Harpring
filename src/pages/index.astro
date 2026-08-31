@@ -27,6 +27,7 @@ import ContactBand from "../components/contact/ContactBand.astro";
 import NewsInsights from "../components/home/NewsInsights.astro";
 import CommunityBand from "../components/home/CommunityBand.astro";
 import { getAwards } from "../data/awards";
+import { getSeo } from "../data/seo";
 import { getFirmStats } from "../data/stats";
 import { getAttorneysSection, getHomeAttorneys } from "../data/attorneys";
 import { getCoreValues, getCoreValuesSection } from "../data/coreValues";
@@ -46,6 +47,7 @@ import {
 } from "../data/practiceAreas";
 
 const [
+  pageSeo,
   hero,
   stats,
   results,
@@ -75,6 +77,7 @@ const [
   communityPhotos,
   ngoPartners,
 ] = await Promise.all([
+  getSeo("homePage"),
   getHomeHero(),
   getFirmStats(),
   getRecentResults(),
@@ -107,6 +110,7 @@ const [
 ---
 
 <Layout
+  seo={pageSeo}
   title="Denver Personal Injury Lawyers"
   description="Dormer Harpring is a boutique Denver personal injury law firm. We take on fewer cases — so yours gets our full attention, and our full fight."
   headerVariant="transparent"

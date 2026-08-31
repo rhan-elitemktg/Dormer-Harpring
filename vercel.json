@@ -1,6 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "trailingSlash": true,
+  "bulkRedirectsPath": ".vercel/output/static/bulk-redirects.json",
   "redirects": [
     {
       "source": "/category/auto-accident",

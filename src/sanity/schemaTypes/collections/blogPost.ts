@@ -30,7 +30,7 @@ export const blogPost = defineType({
   groups: [
     { name: "article", title: "The article", default: true },
     { name: "card", title: "How it appears in the feed" },
-    { name: "meta", title: "Dates & provenance" },
+    { name: "meta", title: "SEO, dates & provenance" },
   ],
   fields: [
     defineField({
@@ -232,16 +232,34 @@ export const blogPost = defineType({
     }),
     defineField({
       name: "modifiedAt",
-      title: "Last edited on the legacy site",
+      title: "Last updated",
       type: "datetime",
       group: "meta",
-      description:
-        "Not rendered anywhere. It is how a re-import tells a changed post from an untouched " +
-        "one. Leave it alone.",
+      /* IT MEANS SOMETHING DIFFERENT NOW, and the title changed with it. This
+         was "Last edited on the legacy site" — an import artifact that nothing
+         read. The Studio stamps it on publish whenever the body changed (see
+         `src/sanity/actions/stampModified.ts`), so it is a live editorial date,
+         and `sitemap.xml` uses it as the post's last-modified date.
+
+         The imported WordPress values are the baseline rather than noise: 162
+         of the 186 posts carry a modified date that differs from their publish
+         date, which is real history `_updatedAt` cannot recover. */
       readOnly: true,
+      description:
+        "Given to Google as this post's last-modified date. Set for you when you publish a " +
+        "change to the body — editing the title, the excerpt or the SEO tab deliberately does " +
+        "not touch it.",
     }),
     defineField({
       name: "legacyId",
+      /* HIDDEN. It is read by no query and by nothing in src/ — only the
+         import and migration scripts, which reach it through the API, where
+         `hidden` has no effect. Its own description told editors to leave it
+         alone, which is a field whose whole purpose is to be ignored.
+         Safe to hide because it is not required on either type: the trap
+         HANDOFF records is hiding a REQUIRED field, which makes a document
+         impossible to publish with no visible reason why. */
+      hidden: true,
       title: "WordPress post ID",
       type: "number",
       group: "meta",
@@ -249,6 +267,16 @@ export const blogPost = defineType({
         "Identity on the legacy site, so a re-import can match this post after its title or " +
         "slug changes. Not shown anywhere. Leave it alone.",
       readOnly: true,
+    }),
+
+    /* IN THE `meta` TAB, not at the foot of the form. Optional, and every one
+       of its five values falls back to what the page already renders — see the
+       note on the `seo` object type. */
+    defineField({
+      name: "seo",
+      title: "SEO",
+      type: "seo",
+      group: "meta",
     }),
   ],
 

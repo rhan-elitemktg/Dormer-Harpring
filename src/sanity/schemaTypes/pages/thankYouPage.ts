@@ -20,11 +20,22 @@ export const thankYouPage = defineType({
   title: "Thank You",
   type: "document",
   icon: CheckmarkCircleIcon,
+  /* TWO TABS, NOT AN ACCORDION AT THE FOOT. The SEO block used to be the last
+     field on this document, collapsed — which is a good way to make sure it is
+     never filled in. A tab is one click from the top of the form and reads as a
+     part of the document rather than an appendix to it.
+     `default: true` on the content tab so opening the document still lands on
+     the page itself. */
+  groups: [
+    { name: "page", title: "The page", default: true },
+    { name: "seo", title: "SEO" },
+  ],
   fields: [
     defineField({
       name: "header",
       title: "Page header",
       type: "object",
+      group: "page",
       options: SECTION,
       description: "The band at the top of the page.",
       fields: [
@@ -56,6 +67,7 @@ export const thankYouPage = defineType({
       name: "panel",
       title: "While you wait panel",
       type: "object",
+      group: "page",
       options: SECTION,
       description: "The band under the header. Its photograph is not editable — see below.",
       fields: [
@@ -105,6 +117,17 @@ export const thankYouPage = defineType({
       ],
       validation: (rule) => rule.required(),
     }),
-],
+
+    /* ITS OWN TAB. Optional, and every one of its five values falls back to
+       what the page already renders — see the note on the `seo` object type.
+       It was the last field on the form and collapsed, which is a reliable way
+       to make sure nobody fills it in. */
+    defineField({
+      name: "seo",
+      title: "SEO",
+      type: "seo",
+      group: "seo",
+    }),
+  ],
   preview: { prepare: () => ({ title: "Thank You" }) },
 });

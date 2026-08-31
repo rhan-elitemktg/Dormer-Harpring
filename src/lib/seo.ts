@@ -5,9 +5,13 @@
 // have rendered without this module. That is what lets the editable-SEO layer
 // be attached later with zero edits to any page.
 //
-// SANITY SWAP POINT: `ogImage` is a plain URL string today. When the Sanity
-// phase lands, widen it to `string | SanityImageSource` and run the Sanity case
-// through `urlFor(...).width(1200).height(630)`. Nothing else here changes.
+// ~~SANITY SWAP POINT~~ DONE. `ogImage` was a plain URL string; it is
+// `SanityImageSource | string` now, and the Sanity case goes through
+// `urlFor(...).width(1200).height(630)` — the one crop every platform agrees
+// on, baked in here so no editor has to know it. A plain string still passes
+// through untouched, which is what keeps the local-asset case working.
+import { isSanityImage, urlFor } from "../sanity/lib/image";
+import type { SanityImageSource } from "@sanity/image-url";
 
 export const SITE_NAME = "Dormer Harpring";
 
@@ -17,7 +21,7 @@ export interface SeoInput {
   metaDescription?: string | null;
   canonicalUrl?: string | null;
   noIndex?: boolean | null;
-  ogImage?: string | null;
+  ogImage?: SanityImageSource | string | null;
 }
 
 export interface ResolvedSeo {
@@ -32,6 +36,20 @@ export interface ResolvedSeo {
 const clean = (value?: string | null) => {
   const trimmed = value?.trim();
   return trimmed ? trimmed : undefined;
+};
+
+/**
+ * A share image as an absolute URL, from either shape.
+ *
+ * 1200×630 rather than the asset's own dimensions: og:image has no responsive
+ * story — one file is fetched by every scraper — so the crop is decided here
+ * once. `urlFor` applies the editor's hotspot, which is the whole reason the
+ * Sanity branch does not just take the asset URL.
+ */
+const shareImage = (source?: SanityImageSource | string | null) => {
+  if (!source) return undefined;
+  if (typeof source === "string") return clean(source);
+  return isSanityImage(source) ? urlFor(source).width(1200).height(630).url() : undefined;
 };
 
 /**
@@ -74,7 +92,7 @@ export function resolveSeo(
     fallbackTitle: string;
     fallbackDescription?: string;
     pageUrl: URL;
-    defaultOgImage?: string | null;
+    defaultOgImage?: SanityImageSource | string | null;
   }
 ): ResolvedSeo {
   return {
@@ -82,6 +100,6 @@ export function resolveSeo(
     description: clean(seo?.metaDescription) ?? clean(fallbackDescription),
     canonical: clean(seo?.canonicalUrl) ?? canonicalize(pageUrl),
     noIndex: seo?.noIndex === true,
-    ogImage: clean(seo?.ogImage) ?? clean(defaultOgImage),
+    ogImage: shareImage(seo?.ogImage) ?? shareImage(defaultOgImage),
   };
 }

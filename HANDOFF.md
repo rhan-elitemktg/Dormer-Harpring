@@ -8,6 +8,150 @@ either here, and don't record anything `git log` already knows.
 
 _Last updated: 2026-08-28._
 
+## "LAST UPDATED" STAMPS ITSELF NOW, AND `_updatedAt` COULD NOT DO IT
+
+**`modifiedAt` is read-only on both `practiceArea` and `blogPost`, and the Studio sets it** —
+`src/sanity/actions/stampModified.ts`, wired in `sanity.config.ts` as a wrapper around Sanity's
+own publish action. It was a field somebody had to remember, which is a field that goes stale,
+and a stale "Updated" date on a legal page is worse than none because it is asserted rather than
+absent.
+
+**`_updatedAt` IS THE OBVIOUS ANSWER AND IT IS WRONG HERE. Check before reaching for it:** the
+186 blog posts share **two** distinct `_updatedAt` values and the 104 practice areas share
+**four**. Those are the migration batches that imported them. Anything reading `_updatedAt`
+today announces that the whole site changed at four instants, and throws away the real WordPress
+history — **162 of the 186 posts carry a modified date that differs from their publish date**.
+So `modifiedAt` keeps the imported history as its baseline and maintains itself from here.
+
+**IT ONLY FIRES WHEN THE ARTICLE CHANGED**, not on every publish. `SUBSTANCE` in that file lists
+the fields that ARE the article — `body` and `faqs` on a practice area, `body` on a post — and
+they are written out rather than inferred as "everything except metadata", because the inferred
+rule silently opts new fields in. Editing a title, an excerpt or the SEO tab deliberately leaves
+the date alone: it should mean REVIEWED, not TOUCHED.
+
+**WHAT DOES NOT TRIGGER IT IS THE REASON IT IS A STUDIO ACTION rather than a Sanity Function.**
+It runs on a human pressing Publish, so import and migration scripts — which write through the
+API — cannot re-date all 290 documents to the day they ran. That is precisely the failure
+`_updatedAt` already has.
+
+`blogPost.modifiedAt` was titled **"Last edited on the legacy site"** and read by nothing. It is
+"Last updated" now and feeds `sitemap.xml` as the post's last-modified date, falling back to
+`publishedAt` — which closes the orphan: it was a field all 186 documents carried and no query
+projected. **The sitemap went from 4 migration stamps to 304 URLs carrying `lastmod` across 77
+distinct dates.**
+
+### GROQ HAS NO BLOCK COMMENTS, AND THE FAILURE IS SILENT
+
+A `/* … */` inside a `defineQuery` template literal makes **TypeGen skip the whole query**. It
+does not error: the query simply vanishes from `sanity.types.ts`, `sanityClient.fetch()` falls
+back to `any`, and the damage surfaces as `implicitly has an 'any' type` in whichever data
+module maps the rows. **One comment cost 165 type errors, in files that had nothing to do with
+the edit** — `data/aboutPage.ts` was the loudest, and it was never touched.
+
+**This is a DIFFERENT trap from the backtick one already recorded here.** That one is about a
+comment ending the literal. This one is about GROQ's grammar: it has `//` line comments and no
+block comments. No query in `lib/queries.ts` carries an in-literal comment, and that is now
+written above `POST_CARD` where the next person will reach for one.
+
+Caught by `check:types`. Nothing else would have — the build stays green, because Vite strips
+types without checking them.
+
+## THE SEO LAYER IS IN — steps 3 to 11 of `/new-seo-setup`
+
+**The site was already ~60% through this skill before it ran**, which is why it went quickly:
+the `seo` object type, `resolveSeo`/`resolveTitle`/`canonicalize`, Layout's `seo` prop, the
+`LegalService` JSON-LD and `FAQPage` at both FAQ components all existed. **No `BreadcrumbList`:
+there is no breadcrumb component, and the skill says skip rather than invent one.**
+
+**THE ACCEPTANCE TEST PASSED AT EVERY STEP: 0 of 330 pages changed their `<title>` or
+`<meta name="description">`.** The layer is a no-op until an editor fills something in, which is
+the whole design. 330 canonical tags and 330 `og:*` sets are the only additions.
+
+### What is new
+
+- **`globalSeo` singleton**, hand-placed as a FOLDER under Site Settings — `Defaults` and
+  `Redirects`. A folder up front because foldering it later moves the singleton's URL out from
+  under anyone who bookmarked it.
+- **`seo` on all 16 routed types**, up from 2. `teamMember` gained a `meta` group; `blogPost`'s
+  was titled "Dates & provenance" and is now "SEO, dates & provenance" — an editor would never
+  have looked there.
+- **`data/seo.ts`** — the getters. **Nothing here uses `required()`, which is the opposite of
+  every other getter in `src/data/`** and is deliberate: this layer is all fallbacks, and the
+  Global SEO document may genuinely not exist yet. Throwing would make the optional mandatory.
+- **`sanity/lib/routes.ts`** — `getSiteEntries()` and `getLivePaths()`, the one answer to "what
+  URLs exist". Composed from the COLLECTION getters, not the directory, for the reason
+  `sitemap.astro` documents: the directory is synced to the firm's hub and the hub omits four
+  built pages.
+- **`sitemap.xml.ts`** (328 URLs) and **`robots.txt.ts`**, both endpoints. Hand-rolled rather
+  than `@astrojs/sitemap`, whose `filter` hook is synchronous and so cannot await the read that
+  says whether a page is `noIndex`.
+- **The crawl switch works end-to-end and was verified against real data**, not a stub — the
+  switch is ON in the dataset right now, and all 330 pages carry `noindex` while `robots.txt`
+  serves `Disallow: /`. **TURN IT OFF AT LAUNCH.**
+
+### THE SITEMAP COVERAGE CHECK FOUND A LIVE PAGE MISSING FROM ITSELF
+
+Diffing the built pages against `sitemap.xml` turned up `/can-you-sue-a-trampoline-park-if-you-signed-a-waiver/`:
+**the featured post is its own getter and is NOT in `getBlogPosts()`.** `sitemap.astro` already
+unions the two (`[featured, ...posts]`); `routes.ts` did not, and silently omitted one live,
+linked article. That is exactly the drift two copies of "what exists" produce, found within an
+hour of writing the second copy. `/tokens/` was the other page missing — correctly, and it is
+`noIndex` now rather than an internal proof sheet Google can index.
+
+### REDIRECTS ARE TWO-TIER, BY DECISION
+
+**The 196 cutover rules STAY IN `data/redirects.ts`.** They are migration facts from a dated
+audit, not editorial decisions; 45% of that file is the reasoning for them, and this project has
+lost the "a comment beside a literal cannot survive the literal" argument three times. Moving
+them would also put 196 deletable rules — currently holding ~46 live URLs' rankings — in front
+of an editor. The `redirect` document type holds what the SEO team adds FROM NOW ON.
+
+Both reach the edge, by different mechanisms and for a reason: **Vercel reads `vercel.json`
+before the build runs**, so nothing a build generates can land in it. `data/redirects.ts`
+generates that file in a pre-build step and commits it; `bulk-redirects.json.ts` writes the file
+`bulkRedirectsPath` points at. Bulk redirects are the documented exception.
+
+**THE GUARD IS THE POINT.** Vercel evaluates bulk redirects BEFORE the filesystem, so a rule
+whose source is a live page does not lose to that page — it takes the page off the site.
+`getLivePaths()` is checked at generation and a colliding rule is dropped and logged. **Proved
+with four test documents, since created and deleted**: a rule at `/about/` and a self-loop were
+both dropped with named reasons, `/about/` still built, and the two valid rules emitted in
+**both slash forms** — bulk redirects match exactly and run before slash normalization, so the
+slash-less form alone misses most legacy WordPress traffic.
+
+The schema validator is written for non-developers and blocks duplicates, self-loops, live
+reserved paths and collisions with the code table; it warns on chains and on a CMS page that
+still exists. **It imports `data/redirects.ts` and `lib/routePaths.ts`, both verified free of
+`sanity:client`** — the Sanity CLI parses schema files during `npm run typegen`, where that Vite
+virtual module does not resolve. The editor getter therefore lives in `data/seo.ts`, NOT beside
+the other redirects.
+
+### `check:desk` GAINED A THIRD LIST, AND THE FIRST VERSION OF IT WAS BLIND
+
+`redirect` is placed by hand but is NOT a singleton — editors must be able to create them, and
+`SINGLETON_TYPES` is exactly what `sanity.config.ts` uses to forbid creation. So `HAND_PLACED`
+exists, and `check-desk.py` reads it.
+
+**Teaching the check to read it introduced the hole it exists to catch.** With `HAND_PLACED`
+read directly, deleting `...HAND_PLACED` from the `PLACED` set left the Studio drawing
+`redirect` twice — its folder AND the catch-all divider — while the check stayed green. Found by
+testing the guard in both directions rather than only the passing one. There is now an UNCOVERED
+assertion for it, and removing the spread fails as it should.
+
+### Still open on this layer
+
+- **The two dynamic routes pass `title`/`description`, not the whole `seo` object.** The 104
+  practice areas already feed real `metaTitle`/`metaDescription` from the live site's own meta,
+  so titles and descriptions work — but `canonicalUrl`, `noIndex` and `ogImage` cannot be set
+  per practice-area page, per blog post or per attorney bio yet. That is splicing the `seo{…}`
+  projection into four document queries.
+- **No default OG image**, so 0 pages carry `og:image`. One upload in the Studio.
+- **`bulkRedirectsPath` is the one thing that cannot be tested locally.** Redirects fire under
+  neither `astro dev` nor `vercel dev` — only a deployed URL. It points at
+  `.vercel/output/static/bulk-redirects.json`; if the file serves but rules do not fire, try
+  `"bulk-redirects.json"` then `"dist/client/bulk-redirects.json"` before changing anything
+  else. The generator, schema and guard are all independent of that string.
+
 ## THE CUTOVER URL AUDIT IS DONE: 18 WOULD-BE 404s, NOW ZERO
 
 **369 live URLs checked against what this build serves. 323 served directly, 46 redirected,

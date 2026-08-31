@@ -110,9 +110,12 @@ def declaration(name):
 #
 #   UTILITY_PAGES     `[id, title]` pairs. Its ids are DOCUMENT IDS, not types
 #   SINGLETON_TYPES   bare strings, read separately below
+#   HAND_PLACED       bare strings, read separately below — types placed by hand
+#                     that are NOT singletons, so they cannot ride in the list
+#                     above without also losing their "New" button
 #   PLACED            the set this checks the groups against
 #   GROUPED           per-type sub-list config; its tuples are FIELD VALUES
-NOT_A_GROUP = ("UTILITY_PAGES", "SINGLETON_TYPES", "PLACED", "GROUPED")
+NOT_A_GROUP = ("UTILITY_PAGES", "SINGLETON_TYPES", "HAND_PLACED", "PLACED", "GROUPED")
 for name in NOT_A_GROUP:
     if not re.search(rf"^(?:export )?const {name}\b", source, re.M):
         fail(f"  ✗ PARSE — `{name}` is named here as not-a-group but no longer exists.")
@@ -141,6 +144,15 @@ if singletons is None:
 # Only its bare string literals: the spreads name other arrays, already counted.
 hand_placed = re.findall(r'^\s*"(\w+)",', singletons, re.M)
 
+# The non-singleton hand-placed types. Read the same way and folded into the
+# same map, so a type placed only there is not reported as UNPLACED — it IS on
+# screen, just not through a group array or SINGLETON_TYPES.
+non_singleton = declaration("HAND_PLACED")
+if non_singleton is None:
+    fail("  ✗ PARSE — HAND_PLACED could not be read.")
+    sys.exit(1)
+hand_placed += re.findall(r'"(\w+)"', non_singleton)
+
 if not ok:
     sys.exit(1)
 
@@ -157,6 +169,19 @@ uncovered = [g for g in groups if g not in referenced and g != "PAGES" and g != 
 # them; anything else has to be named directly.
 if "SINGLETON_TYPES" not in referenced:
     uncovered += ["PAGES", "SETTINGS"]
+
+# HAND_PLACED HAS TO BE NAMED IN `PLACED` TOO, and this check exists because
+# removing it is invisible to everything above. The desk's runtime catch-all
+# filters on PLACED, so a type reachable only through HAND_PLACED would render
+# in its folder AND under the divider — the DOUBLE case — while `where` above
+# still counts it as placed exactly once and reports OK. Tested by deleting the
+# spread: without this the check stayed green.
+if "HAND_PLACED" not in referenced:
+    fail(
+        "  ✗ UNCOVERED  `HAND_PLACED` is not referenced by the PLACED set.\n"
+        "                Every type in it renders in its own place AND under the\n"
+        "                catch-all divider at the foot — drawn twice."
+    )
 
 for name in uncovered:
     fail(
