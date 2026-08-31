@@ -80,7 +80,9 @@ const { intro } = Astro.props;
         <Picture
           src={firmVideoCover}
           alt="The Dormer Harpring team"
-          class="intro__video-img"
+          widths={[400, 800, 1100]}
+        sizes="(max-width: 980px) 100vw, 520px"
+        class="intro__video-img"
         />
         <span class="intro__video-scrim" aria-hidden="true"></span>
         <PlayButton tone="light" size={88} class="intro__video-play" />

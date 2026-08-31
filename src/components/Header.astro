@@ -36,7 +36,9 @@ const current = normalizePath(Astro.url.pathname);
 <header class:list={["header", `header--${variant}`]}>
   <div class="header__inner container">
     <a href={ROUTES.home} class="header__logo" aria-label="Dormer Harpring — home">
-      <Picture src={logoWhite} alt="Dormer Harpring" eager class="header__logo-img" />
+      <Picture src={logoWhite} alt="Dormer Harpring" eager widths={[170, 340]}
+        sizes="170px"
+        class="header__logo-img" />
     </a>
 
     <nav class="header__nav" aria-label="Main">

@@ -7,25 +7,51 @@
 // Those classes are PARSED BY WISTIA, not matched by CSS — nothing anywhere may
 // target `.wistia_embed` or `wistia_async_*`.
 //
-// DRIVING IT FROM THE JS API INSTEAD DOES NOT WORK, and the reason is worth
-// keeping. `Wistia.api(id).popover.show()` needs an embed that was initialised
-// WITH popover options and IS IN LAYOUT. A `display: none` host initialises
-// without them and then throws `Cannot read properties of undefined (reading
-// 'popoverborderradius')` when shown; flipping its display afterwards does not
-// re-initialise it. Measured, not assumed.
+// THE CLASSES AND THE RUNTIME ARRIVE ON INTENT, NOT ON LOAD. This wrapper ships
+// as a bare `data-wistia-popover="<id>"` and `src/scripts/wistiaPopovers.ts`
+// adds Wistia's classes and fetches E-v1.js when the reader first hovers,
+// focuses or taps the trigger. Read that file before changing anything here —
+// it carries the measurement and the click-replay that keeps a tap during the
+// download from following the href instead of opening the lightbox.
+//
+// WHY: emitting them at load mounted one player per popover — 19 on the
+// homepage, 20 on Car Accidents — inside the load window. Measured on the built
+// output, that was 1,010ms of Total Blocking Time, 10.7s of the page's 11.4s of
+// main-thread work, 2,702 injected DOM elements and 788 KiB, for players that
+// cannot be played until a click. Mobile Lighthouse: 51 → 95.
+//
+// DRIVING IT FROM THE JS API INSTEAD DOES NOT WORK, and it is worth not
+// re-attempting even now that arming is deliberate. `Wistia.api(id).popover
+// .show()` needs an embed that was initialised WITH popover options and IS IN
+// LAYOUT. A `display: none` host initialises without them and then throws
+// `Cannot read properties of undefined (reading 'popoverborderradius')` when
+// shown; flipping its display afterwards does not re-initialise it. Measured,
+// not assumed. The class-based contract is what satisfies both conditions, and
+// deferring WHEN the classes land does not change that.
 //
 // THE TRIGGER IS THE CALLER'S <a> WITH A REAL href. Wistia binds the click; if
 // its runtime is blocked or JS is off, the href still reaches the film. An
 // inert control is the shape `TeamCard.astro` and `ProseLink.astro` argue
 // against.
 //
-// WISTIA REWRITES WHAT IS INSIDE THIS WRAPPER — it moves the <a> into a
-// `div.wistia_click_to_play` of its own. Two consequences the callers have to
-// live with, both fixed rather than worked around:
+// WISTIA REWRITES WHAT IS INSIDE THIS WRAPPER — it puts a
+// `div.wistia_click_to_play` of its own here and REPLACES the caller's <a> WITH
+// A CLONE inside it. This file used to say it "moves" the anchor; it does not,
+// and the difference is the whole reason listeners keep going missing.
+// Measured: after takeover `document.contains(originalAnchor)` is false and
+// `host.querySelector("a")` is a different node. Anything holding a reference
+// to the trigger across takeover is holding a detached node — which is why
+// `scripts/wistiaPopovers.ts` remembers this wrapper and an href string rather
+// than an element, and why Layout's `.lazy-fade` handler had to become a
+// delegated capture listener.
+//
+// That is still what happens, only later now; every consequence below is
+// unchanged, because the END STATE is unchanged. Two the callers have to live
+// with, both fixed rather than worked around:
 //   1. That div becomes the grid/flex item, not the caller's <a>. Any root that
 //      relied on a tag default for `display` collapses to 0x0 — which is what
 //      emptied `.faq__video` and `.vcard`. Both declare `display: block` now.
-//   2. Re-creating the nodes drops any per-node load listener. That is fixed in
+//   2. Cloning the nodes drops any per-node load listener. That is fixed in
 //      Layout, where `.lazy-fade` lives: it delegates from the document with
 //      capture now, so replacing a node cannot detach it. Timed re-runs used to
 //      paper over it here and could not — a lazy image decodes when the reader
@@ -35,12 +61,7 @@
 // media; adding YouTube's iframe API would mean a second video runtime plus the
 // cookie conversation `videoEmbedUrl` documents. A `youtube` record renders its
 // link with nothing around it.
-import {
-  WISTIA_RUNTIME,
-  wistiaMediaScript,
-  wistiaPopoverClass,
-  type VideoRef,
-} from "../../lib/video";
+import type { VideoRef } from "../../lib/video";
 
 interface Props {
   video: VideoRef;
@@ -52,7 +73,7 @@ const isWistia = video.provider === "wistia";
 
 {
   isWistia ? (
-    <span class:list={["vpop", wistiaPopoverClass(video.id)]}>
+    <span class="vpop" data-wistia-popover={video.id}>
       <slot />
     </span>
   ) : (
@@ -60,24 +81,18 @@ const isWistia = video.provider === "wistia";
   )
 }
 
-{
-  /* `is:inline`, so Astro leaves a third-party runtime it cannot see alone.
-     Both are `async`; neither blocks paint. Loaded per embed rather than from
-     Layout, so the ~300 pages with no video never fetch a video player.
-
-     KNOWN COST: a page with N popovers emits N identical pairs. Markup waste
-     rather than a bug — same URL, so the browser fetches each once, and
-     E-v1.js is idempotent. TODO(video): dedupe via a `hasVideo` prop on Layout
-     if it matters. NOT a module-level flag here: Astro renders every page in
-     one process, so that state leaks and every page after the first loses its
-     player. */
-  isWistia && (
-    <>
-      <script is:inline async src={wistiaMediaScript(video.id)} />
-      <script is:inline async src={WISTIA_RUNTIME} />
-    </>
-  )
-}
+{/* NOT conditional, and that is deliberate rather than sloppy: Astro hoists
+    `<script>` at COMPILE time, so it ships on any page that renders this
+    component whatever the expression around it says — a `{isWistia && …}`
+    guard here would read as a saving it cannot make. Hoisting is also what
+    gives a page with nineteen popovers ONE copy, which is the other half of
+    what the old `is:inline` pair got wrong. On a `youtube` record the module
+    finds no hosts and does nothing. It is a module import rather than inline
+    source so the Wistia URLs stay in `lib/video.ts`, where every video URL on
+    this site lives. */}
+<script>
+  import "../../scripts/wistiaPopovers";
+</script>
 
 
 <style>

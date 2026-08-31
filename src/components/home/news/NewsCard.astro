@@ -19,7 +19,9 @@ const external = /^https?:\/\//i.test(item.href);
   rel={external ? "noopener" : undefined}
 >
   <span class="ncard__logo">
-    <Picture src={item.logo} alt={item.outlet} class="ncard__logo-img" />
+    <Picture src={item.logo} alt={item.outlet} widths={[150, 300]}
+      sizes="150px"
+      class="ncard__logo-img" />
   </span>
   <span class="ncard__date">{item.date}</span>
   <h3 class="ncard__headline">{item.headline}</h3>
