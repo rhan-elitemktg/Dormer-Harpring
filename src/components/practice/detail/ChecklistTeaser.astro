@@ -7,12 +7,18 @@
 // labels the article would carry, so it is `aria-hidden` and the copy beside it
 // does the work.
 //
-// TODO(launch): the comp links this at `DH - Blog - What to do after a car
-// accident.html`, a post comp that arrived with this revision and that this
-// build does not serve. It shipped unlinked for that reason; Rhan's call is now
-// to draw the affordance against a `#` placeholder and fill in the real URL
-// once the article exists. `#` MUST NOT REACH PRODUCTION — see `ctaHref` in
-// `data/carAccidents.ts`. The inert branch below is kept for the CMS phase.
+// THE `#` IS GONE. It points at `/what-to-do-after-a-car-accident-in-colorado/`,
+// which covers this ground — its two main sections are "Immediately After a Car
+// Crash" and "In the Days After" — so nobody lands on a dead control.
+//
+// TODO(launch): the LABEL still says "See all 8 steps" and that article is not
+// structured as eight. The comp links this at `DH - Blog - What to do after a
+// car accident.html`, a post comp that arrived with this revision and that this
+// build does not serve; it carries the eight steps and the glove-box card, both
+// cut from this page. Deliberately parked rather than papered over — by Rhan's
+// call this is not a launch blocker, and the honest fixes are to write that
+// article or reword the button, both of which are the firm's. The inert branch
+// below is kept for the CMS phase.
 import type { TeaserSection } from "../../../data/carAccidents";
 
 interface Props {

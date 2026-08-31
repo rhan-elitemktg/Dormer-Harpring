@@ -8,11 +8,20 @@ either here, and don't record anything `git log` already knows.
 
 _Last updated: 2026-08-28._
 
-## NINE `href="#"` ARE ONE, AND THE SHAPE WAS THE BUG
+## NINE `href="#"` ARE ZERO, AND `KNOWN_PLACEHOLDER` IS EMPTY
 
-**Only the Car Accidents checklist teaser is left.** `KNOWN_PLACEHOLDER` no longer has an entry
-for `/` — deleted rather than set to 0, so a placeholder appearing there again fails as an
-UNDECLARED one, which is louder.
+**No page on this site carries a `#` any more**, and the two groups were closed differently.
+The dict is empty rather than holding zeros, so any placeholder that appears now fails as an
+UNDECLARED one, which is louder than a count going stale.
+
+**The Car Accidents checklist teaser points at `/what-to-do-after-a-car-accident-in-colorado/`**,
+which covers its ground — that article's two main sections are "Immediately After a Car Crash"
+and "In the Days After". **What is left there is a LABEL, not a link:** the button still says
+"See all 8 steps" and the article is not structured as eight. Parked deliberately, by Rhan's
+call, as not a launch blocker — the honest fixes are to write the comp's own article (it carries
+the eight steps and the glove-box card, both cut from this page) or reword the button, and both
+are the firm's. **No linter can see this**: the link resolves, so `check:links` is satisfied and
+the over-promise is invisible to the build.
 
 **The four press mentions carry their real articles now** — FOX31, Denver7, the Denver Gazette,
 The Mountain Mail. They stay hand-typed on purpose: a press mention lives on somebody else's

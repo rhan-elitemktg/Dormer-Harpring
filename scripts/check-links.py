@@ -126,7 +126,12 @@ KNOWN_PLACEHOLDER: dict[str, int] = {
     #
     # The entry is deleted rather than set to 0 so that a placeholder appearing
     # on `/` again fails as an UNDECLARED one, which is louder.
-    "/denver-car-accident-lawyer": 1,  # carAccidents.ts ctaHref: the unbuilt checklist article
+    # EMPTY, and both entries were closed differently. The homepage's eight went
+    # by changing the SHAPE — the teasers are references now and have no href
+    # field to leave at "#". The Car Accidents checklist teaser went by pointing
+    # at the article that covers its ground. What is left there is a LABEL that
+    # over-promises ("See all 8 steps"), which no linter can see and which is a
+    # content decision rather than a dead link.
 }
 
 # (page path, href) -> why this relative href is still here
