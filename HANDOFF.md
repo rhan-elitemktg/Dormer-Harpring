@@ -158,9 +158,22 @@ measuring Astro, not this site.
 ### What changed
 
 `components/media/VideoPopover.astro` used to emit Wistia's config classes and a `<script async>`
-pair PER EMBED. It now ships a bare `data-wistia-popover="<id>"`, and
-**`src/scripts/wistiaPopovers.ts`** adds the classes and fetches `E-v1.js` on first hover, focus
-or tap. Read that file before touching anything near a video.
+pair PER EMBED, so the runtime mounted a player per popover during load. **Wistia's runtime is
+gone from this site entirely.** The component now marks its trigger
+`data-video-lightbox="<id>"` and **`src/scripts/videoLightbox.ts`** opens a `<dialog>` with one
+`<iframe>` on click. Same approach as the Cogdell Law site, which is where it came from.
+
+**A DEFERRED-LOADING FACADE WAS TRIED FIRST AND IS THE WRONG ANSWER — do not go back to it.**
+It kept Wistia's runtime and only moved WHEN it loaded, to first hover. The speed numbers below
+are the same either way, but it shipped two visible bugs, both reported within a day:
+
+- **a flash**, because the runtime replaced the trigger with a clone the moment it armed; and
+- **video cards that grew under the cursor** on `.tmv`, because `.vcard`'s `height: 100%` only
+  resolved once Wistia's `div` arrived to resolve it against.
+
+Deferring the load did not cause either — it made an existing rewrite VISIBLE by moving it out of
+the load window and under the reader's cursor. The lightbox removes the rewrite instead of
+rescheduling it. Read `scripts/videoLightbox.ts` before touching anything near a video.
 
 | Homepage, mobile | before | after |
 |---|---|---|
@@ -181,11 +194,14 @@ had. That is the opposite of where anyone would look.
 
 ### Three things measured that contradict what this file used to say
 
-- **Wistia CLONES the trigger; it does not move it.** After takeover
-  `document.contains(originalAnchor)` is `false` and `host.querySelector("a")` is a different
-  node. `VideoPopover.astro`'s header said "moves" for as long as it has existed. This is the root
-  cause of the listener losses that forced Layout's `.lazy-fade` handler to delegate with capture,
-  and it is why `wistiaPopovers.ts` remembers the WRAPPER and an href string, never an element.
+- **Wistia CLONED the trigger; it did not move it.** After takeover
+  `document.contains(originalAnchor)` was `false` and `host.querySelector("a")` was a different
+  node. `VideoPopover.astro`'s header said "moves" for as long as it existed. **That one behaviour
+  is behind every video bug this project has had** — the listener losses that forced Layout's
+  `.lazy-fade` handler to delegate with capture, the `display: block` on `.faq__video` and
+  `.vcard`, the `display: grid` on `/testimonials`' `<li>`, the flash, and the growing cards.
+  Nothing clones anything now. **If a fourth compensation for "the card is not the element you
+  think it is" ever seems necessary, something has reintroduced a third-party runtime.**
 - **Deduping the script tags is not the fix, and would not have been.** The browser fetches
   `E-v1.js` once however many tags reference it; re-evaluation costs ~8 ms each. The cost was
   never the tags, it was mounting 19 players. A dedupe would have saved ~570 ms of the 11,400 ms.
@@ -193,16 +209,16 @@ had. That is the opposite of where anyone would look.
   measured for inlined CSS, dropped font preloads, dropped Newsreader and Caveat (197 KiB), and a
   smaller hero candidate. **Every one landed inside the noise band.** Only Wistia moved the number.
 
-### The click path is the part that needed care
+### There is no arming, no held click and no deadline any more
 
-Hover and focus arm well before a click. A TAP does not — `touchstart` leads `click` by ~100 ms
-and `E-v1.js` is 152 KiB. So a click that lands before the runtime is bound is HELD
-(`preventDefault`), the host is armed, and the click is replayed on Wistia's clone the moment a
-MutationObserver sees the takeover. If the runtime never arrives, a 6-second deadline follows the
-href to Wistia's hosted player — the same fallback a no-JS visitor already gets.
+The facade needed all three: hover and focus armed well before a click, but a TAP did not, so a
+click landing before the runtime was bound had to be held, armed and replayed. **The lightbox
+needs none of it.** The click builds a `<dialog>`, drops in an `<iframe>` and calls `showModal()`
+— there is nothing to wait for, so there is no window to cover.
 
-**The old markup had this window too** (the scripts were `async`), so this closes a gap rather
-than opening one.
+`videoEmbedUrl()` in `lib/video.ts` owns the URL and takes `{ autoplay: true }` for this one
+caller. The trigger keeps its real `href` to Wistia's hosted player, so JS off still reaches the
+video, and a modified click (⌘, ctrl, shift, middle) is left alone to open it in a new tab.
 
 ### The images were the second finding, and it is a shape worth knowing
 
@@ -2660,16 +2676,21 @@ fresh directory, then diff it against the dataset before importing anything.
 | `AttorneyCard` | portrait opens the film, name/role go to the bio (see below) |
 | `MoreOnClaims` | still decorative — the card is already a link to an article |
 
-**172 popover anchors across 28 pages**, each with a working href as its no-JS fallback. (This
-line read "178 across 30" and was not re-measured; the figure above is counted from `dist/client`
-— `<span class="vpop" data-wistia-popover=` — and matches the E-v1 tag count the old markup
-emitted.)
+**172 lightbox triggers across 28 pages**, each with a working href as its no-JS fallback.
+Counted from `dist/client` as `<span class="vpop" data-video-lightbox=`. (This line read "178
+across 30" for a long time and had never been re-measured.)
 
-### THE ONE THING TO READ BEFORE TOUCHING A POPOVER
+### THE ONE THING TO READ BEFORE TOUCHING A POPOVER — now history, and keep it
 
-**Wistia moves the trigger into a `div.wistia_click_to_play` of its own.** That single fact broke
-three unrelated things, each of which looked like a different bug and cost a round trip to
-diagnose:
+**None of this happens any more**: the lightbox never touches the trigger. It is kept because it
+is the complete account of what a third-party runtime rewriting your markup costs, and because
+three of the CSS rules it produced are still in the codebase (`display: block` on `.faq__video`
+and `.vcard`, `display: grid` on `/testimonials`' `<li>`). Those are fine on their own merits now
+— but if you ever wonder why they are there, this is why.
+
+**Wistia REPLACED the trigger with a clone inside a `div.wistia_click_to_play` of its own** — the
+old wording here said "moves", which is wrong and cost a diagnosis. That single fact broke three
+unrelated things, each of which looked like a different bug and cost a round trip to diagnose:
 
 1. **Layout collapse.** `VideoPopover`'s wrapper is `display: contents` so the caller's `<a>`
    keeps its parent's grid/flex place. Wistia's div takes that role instead, leaving the `<a>` a
@@ -2706,12 +2727,15 @@ re-attempting: that needs an embed initialised WITH popover options and IN LAYOU
 E-v1.js also discovers embeds by POLLING, so a host created on click is not ready on that tick —
 asking once and giving up is why the hero opened nothing for a while and just followed its href.
 
-**CLOSED — the runtime loads on intent now, not at parse.** This used to read "a page initialises
-one Wistia player per popover, eagerly… wants its own pass before launch", and that pass has
-happened: see "PAGE SPEED" at the top of this file. Nothing about the wiring below changed, only
-the moment it happens — `wistiaPopovers.ts` adds these classes on first hover, focus or tap.
-The duplicate `<script>` tags are gone with it, and they were the smaller half of the cost by a
-factor of twenty: the browser only ever fetched `E-v1.js` once.
+**CLOSED, AND THE WIRING BELOW IS HISTORY — read it as a record of what this site no longer
+does.** Wistia's runtime is not loaded anywhere any more: no `E-v1.js`, no `wistia_embed`
+classes, no `popover=true`. `scripts/videoLightbox.ts` opens a `<dialog>` with a plain `<iframe>`
+instead, and `lib/video.ts` says why the three helpers that configured the old embed were deleted
+rather than left unused. See "PAGE SPEED" at the top of this file.
+
+**The class-based contract described below is still accurate about WISTIA** — it is just no
+longer something this site relies on. Keep it: anyone who reaches for the popover embed again
+needs to know both how it works and why it was dropped.
 
 ### PLACEHOLDER_VIDEO — 33 slots, one stand-in, and only 3 are greppable
 
@@ -3018,10 +3042,12 @@ rather than creating one.
 - **`lib/portableText.ts`'s `toPlainText()`** — Portable Text to a string, for JSON-LD.
 - **`scripts/lib/wp-portable-text.mjs`** — WordPress HTML to Portable Text, both importers.
 - **`PostThumb.astro`** — every post card's art, both branches.
-- **`media/VideoPopover.astro`** — the ONE place a video opens in a popover. It renders the
-  Wistia wrapper; the CALLER supplies its own `<a href={videoWatchUrl(...)}>` as the slotted
-  trigger, so the caller keeps its element and its scoped styles. Read its header before
-  changing it — the alternatives were tried and are recorded there.
+- **`media/VideoPopover.astro`** — the ONE place a video opens. It marks the trigger
+  `data-video-lightbox` and hoists **`scripts/videoLightbox.ts`**, which builds a `<dialog>` and
+  one `<iframe>` on click. The CALLER supplies its own `<a href={videoWatchUrl(...)}>` as the
+  slotted trigger and keeps its element, its scoped styles and its node identity — nothing
+  rewrites it. Read its header before changing it: the alternatives were tried, measured and are
+  recorded there and in `lib/video.ts`.
 - **`media/PlayButton.astro`** owns the pulse. **Three components still hand-roll a play circle**
   and so do not pulse: `testimonials/VideoReviewCard`, `team/AttorneyBio`,
   `practice/detail/MoreOnClaims`.

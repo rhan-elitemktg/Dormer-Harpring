@@ -89,52 +89,61 @@ export function videoWatchUrl(ref: VideoRef): string {
 }
 
 /**
- * The `src` for an <iframe>, once the lightbox on the launch list exists.
+ * The `src` for the lightbox <iframe>. THE LIGHTBOX EXISTS NOW — this used to
+ * say "once the lightbox on the launch list exists", and `scripts/videoLightbox.ts`
+ * is it.
  *
  * YouTube gets the `-nocookie` host: the normal one drops tracking cookies the
  * moment the iframe loads, which would put every page carrying a video into the
  * consent conversation. Wistia does not set cookies until playback begins.
+ *
+ * `autoplay` is for the lightbox alone, where the frame only ever exists
+ * because somebody just clicked play — a video that then waits for a second
+ * click reads as broken. It is off by default so no other caller can embed an
+ * autoplaying video by forgetting an argument.
  */
-export function videoEmbedUrl(ref: VideoRef): string {
+export function videoEmbedUrl(ref: VideoRef, { autoplay = false } = {}): string {
   const { provider, id } = assertVideo(ref);
   if (provider === "wistia") {
-    return `https://fast.wistia.net/embed/iframe/${id}`;
+    // `playsinline` keeps iOS from taking the video fullscreen out of the
+    // dialog, which would throw away the close button with it.
+    return autoplay
+      ? `https://fast.wistia.net/embed/iframe/${id}?autoPlay=true&playsinline=true`
+      : `https://fast.wistia.net/embed/iframe/${id}`;
   }
-  return `https://www.youtube-nocookie.com/embed/${id}`;
+  return autoplay
+    ? `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&playsinline=1`
+    : `https://www.youtube-nocookie.com/embed/${id}`;
 }
 
 
 /* -------------------------------------------------------------------------
- * Wistia popover embeds
+ * WISTIA'S PLAYER RUNTIME IS GONE, AND NOTHING SHOULD BRING IT BACK.
  *
- * Wistia's runtime reads its configuration out of the CLASS NAME — the media
- * id and every option ride on the element as `wistia_async_<id>`,
- * `popover=true` and so on. That is Wistia's own contract, not an invention
- * here, and it is why these look like classes doing a job classes should not
- * do. They are parsed, not matched: no stylesheet may target them.
+ * `WISTIA_RUNTIME` (E-v1.js), `wistiaMediaScript()` and `wistiaPopoverClass()`
+ * lived here. They configured Wistia's class-based popover, which the runtime
+ * drove by PARSING class names off the wrapper — `wistia_embed`,
+ * `wistia_async_<id>`, `popover=true`.
+ *
+ * Deleted rather than left unused, because a registered helper that draws
+ * nothing is the dead-literal shape this codebase warns about everywhere else.
+ * Two reasons they are not coming back, both measured:
+ *
+ *   1. COST. The runtime mounted one player per popover during page load —
+ *      1,010ms of blocking time and 10.7s of the homepage's 11.4s of
+ *      main-thread work, for players nobody could play until a click.
+ *   2. IT REWROTE THE CARDS. The runtime replaced each trigger with a clone
+ *      inside a `div.wistia_click_to_play` of its own, which is what forced
+ *      `display: block` onto `.faq__video` and `.vcard`, `display: grid` onto
+ *      the `<li>` on /testimonials, and Layout's `.lazy-fade` handler to
+ *      delegate with capture. Deferring the load did not fix that — it made it
+ *      VISIBLE, as a flash and a card that changed height under the cursor.
+ *
+ * `scripts/videoLightbox.ts` replaces all of it: a `<dialog>` and one
+ * `<iframe>` built from `videoEmbedUrl()` above, injected on click. No
+ * third-party JS, and the trigger's own markup is never touched. Same approach
+ * as the Cogdell Law site.
  * ---------------------------------------------------------------------- */
-
-/** Wistia's player runtime. Idempotent — including it more than once per page
- *  is safe, which is what lets each embed carry its own copy rather than
- *  Layout loading it on all 330 pages for the handful that have a video. */
-export const WISTIA_RUNTIME = "https://fast.wistia.net/assets/external/E-v1.js";
-
-/** Per-media config, fetched ahead of the click so the popover opens without a
- *  round trip. Optional to Wistia; the difference is visible on first click. */
-export function wistiaMediaScript(id: string): string {
-  return `https://fast.wistia.net/embed/medias/${id}.jsonp`;
-}
-
-/**
- * The class string that configures a popover whose TRIGGER IS THE LINK INSIDE
- * IT — `popoverContent=link`. The alternative Wistia offers is a thumbnail it
- * renders itself, which would replace the hero's designed CTA with a video
- * still. This way the button stays exactly as drawn and Wistia only binds the
- * click.
- */
-export function wistiaPopoverClass(id: string): string {
-  return `wistia_embed wistia_async_${id} popover=true popoverContent=link`;
-}
 
 
 /**
