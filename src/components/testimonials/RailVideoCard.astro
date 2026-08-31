@@ -46,16 +46,23 @@ const initial = testimonial.name.trim().charAt(0).toUpperCase();
     flex: none;
     width: 320px;
     min-height: 440px;
-    /* FULL HEIGHT SO THE RAIL'S CARDS AGREE, and `min-height` alone could not
-       do it. Wistia moves this <a> into a div of its own, so the flex item in
-       `.tmv__track` is that div rather than this card: the div stretches to the
-       tallest card in the row and this stayed at 440, leaving a video card
-       visibly short beside a long quote. The div's height is definite because
-       stretching resolved it, so this percentage resolves against it.
+    /* NO `height: 100%` HERE. It was added for Wistia's runtime, which used to
+       put a `div.wistia_click_to_play` between this card and `.tmv__track` —
+       the div became the flex item, stretched, and gave the percentage a
+       definite height to resolve against.
 
-       Harmless before Wistia initialises, when this IS the flex item and
-       `align-items: stretch` has already done the same job. */
-    height: 100%;
+       ITS COMMENT CLAIMED THE RULE WAS "harmless before Wistia initialises".
+       It was not, and that is worth keeping: `.tmv__track` is a flex row with
+       an INDEFINITE height, so `height: 100%` had nothing to resolve against —
+       and setting a cross-size other than `auto` also opts the item OUT of
+       `align-items: stretch`. The card therefore sat at `min-height` while
+       every quote card beside it stretched.
+
+       Invisible while Wistia loaded during page load. The moment the runtime
+       moved to first hover it became a card that grew under the cursor.
+
+       `align-items: stretch` on `.tmv__track` does the whole job now that this
+       <a> is the flex item and stays the flex item. */
     padding: 0;
     border: 0;
     border-radius: var(--radius-media);

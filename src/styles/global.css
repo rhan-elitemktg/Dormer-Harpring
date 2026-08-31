@@ -1241,3 +1241,118 @@ body.drawer-open {
     scroll-behavior: auto !important;
   }
 }
+
+/* ---- Video lightbox ---------------------------------------
+   The <dialog> `scripts/videoLightbox.ts` builds on first play.
+
+   GLOBAL BY NECESSITY, not by preference: the element is created in JS, so it
+   can never carry the `data-astro-cid` a scoped block would match on. The
+   markup and these rules are the two halves of one thing — change either and
+   read the other. Same reason `.rail-dots` above is global: the script builds
+   those buttons too.
+
+   One dialog per page, appended to <body>, so nothing here sits inside a
+   stacking or transform context that could trap it. */
+.vlb {
+  width: min(1040px, 92vw);
+  max-width: 92vw;
+  /* Restores the UA centring that this file's own reset removes. */
+  margin: auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  /* The close button sits ABOVE the frame, outside the dialog's own box. */
+  overflow: visible;
+  color: var(--dh-white);
+}
+
+.vlb::backdrop {
+  background-color: rgba(21, 30, 25, 0.92);
+}
+
+.vlb__frame {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  background-color: var(--dh-forest-600);
+  border-radius: var(--radius-4);
+  overflow: hidden;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+}
+
+/* The trigger's own still, painted behind the player while it boots — a flat
+   surface reads as a failure to load.
+
+   INSET BY ONE PIXEL, AND THAT IS THE WHOLE POINT OF THE ELEMENT. The rounded
+   `overflow: hidden` above antialiases the iframe's edge against whatever is
+   painted behind it, so a poster sitting flush bled a one-pixel light halo
+   around the player for the entire video. Measured: the outermost pixel column
+   read (213,178,143) with a poster and (21,30,25) — the frame's own surface —
+   without one, which is why only the triggers that render a thumbnail showed
+   it. The inset hands that pixel back to `background-color`.
+
+   `calc()` on the radius so the inset corner follows the frame's curve rather
+   than cutting across it. */
+.vlb__poster {
+  position: absolute;
+  inset: 1px;
+  border-radius: calc(var(--radius-4) - 1px);
+  background-size: cover;
+  background-position: center;
+}
+
+.vlb__frame iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.vlb__close {
+  position: absolute;
+  /* Above the iframe, which covers the frame and comes later in the DOM. */
+  z-index: 2;
+  top: calc(-1 * (44px + var(--space-3)));
+  right: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  color: var(--dh-white);
+  background-color: var(--accent);
+  border: 0;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  transition: background-color var(--transition), transform var(--transition);
+}
+
+.vlb__close:hover {
+  background-color: var(--accent-hover);
+  transform: scale(1.06);
+}
+
+.vlb__close:focus-visible {
+  outline: 2px solid var(--dh-white);
+  outline-offset: 2px;
+}
+
+/* Below the smallest phones the 44px button has nowhere to go above the frame,
+   so it moves inside the video's top-right corner. */
+@media (max-width: 420px) {
+  .vlb__close {
+    top: var(--space-3);
+    right: var(--space-3);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vlb__close {
+    transition: background-color var(--transition);
+  }
+  .vlb__close:hover {
+    transform: none;
+  }
+}
